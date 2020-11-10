@@ -45,6 +45,7 @@
 <script>
 import config from './sidebar/config.js'
 import { mapGetters } from 'vuex'
+import { validatenull } from '@/util/validate'
 
 export default {
   data() {
@@ -89,7 +90,7 @@ export default {
       const findMenu = (list) => {
         for (let i = 0; i < list.length; i++) {
           const ele = Object.assign({}, list[i])
-          if (this.validatenull(ele[this.childrenKey]) && ele.isShow === 1) {
+          if (validatenull(ele[this.childrenKey]) && ele.isShow === 1) {
             this.menuList.push(ele)
           } else {
             findMenu(ele[this.childrenKey])
