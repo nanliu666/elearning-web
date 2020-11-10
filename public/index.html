@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+  <script>
+    // favicon是需要在此处声明
+    const tenantContent = sessionStorage.getItem('saber-tenantContent')
+    let favicon = document.createElement('link')
+    const header = document.querySelector('head')
+    favicon.setAttribute('rel', 'icon')
+    favicon.href = tenantContent ? JSON.parse(JSON.parse(tenantContent).content).favicon : `<%= BASE_URL %>favicon.ico`
+    header.appendChild(favicon)
+  </script>
+  <link rel="stylesheet" href="<%= BASE_URL %>cdn/iconfont/1.0.0/index.css" />
+  <title></title>
+  <style>
+    html,
+    body,
+    #app {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .avue-home {
+      background-color: #303133;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .avue-home__main {
+      user-select: none;
+      width: 100%;
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .avue-home__footer {
+      width: 100%;
+      flex-grow: 0;
+      text-align: center;
+      padding: 1em 0;
+    }
+
+    .avue-home__footer>a {
+      font-size: 12px;
+      color: #ababab;
+      text-decoration: none;
+    }
+
+    .avue-home__loading {
+      height: 32px;
+      width: 32px;
+      margin-bottom: 20px;
+    }
+
+    .avue-home__title {
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .avue-home__sub-title {
+      color: #ababab;
+      font-size: 12px;
+    }
+  </style>
+  <!--开发环境使用本地npm依赖-->
+  <% if (htmlWebpackPlugin.options.isProduction) { %>
+  <script src=https://oa-file.bestgrand.com.cn/vue@2.6.11.min.js></script>
+  <script src="https://oa-file.bestgrand.com.cn/vuex@3.4.0.js" charset="utf-8"></script>
+  <script src="https://oa-file.bestgrand.com.cn/vue-router@3.2.0.js" charset="utf-8"></script>
+  <script src="https://oa-file.bestgrand.com.cn/element-ui@2.13.2.js"></script>
+  <link rel="stylesheet" href="https://oa-file.bestgrand.com.cn/element-ui@2.13.2.css" />
+  <script src="<%= BASE_URL %>cdn/html2canvas.min.js" charset="utf-8"></script>
+  <% } %>
+  <script src="https://oa-file.bestgrand.com.cn/axios@0.19.2.min.js"></script>
+
+</head>
+
+<body>
+  <noscript>
+    <strong>
+      很抱歉，如果没有 JavaScript 支持，网站将不能正常工作。请启用浏览器的 JavaScript 然后继续。
+    </strong>
+  </noscript>
+  <div id="app">
+    <div class="avue-home">
+      <div class="avue-home__main">
+        <img class="avue-home__loading" src="./svg/loading-spin.svg" alt="loading" />
+        <div class="avue-home__title">
+          正在加载资源
+        </div>
+        <div class="avue-home__sub-title d">
+          初次加载资源可能需要较多时间 请耐心等待
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- built files will be auto injected -->
+  <script src="<%= BASE_URL %>util/aes.js" charset="utf-8"></script>
+</body>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css"
+/>
+<script src="https://at.alicdn.com/t/font_1857563_sw5dkyhhh1o.js" charset="utf-8"></script>
+<script src="https://at.alicdn.com/t/font_2014998_33uv92vn9gt.js"></script>
+<script src="https://oa-file.bestgrand.com.cn/go.js" charset="utf-8"></script>
+<!--
+<script src="<%= BASE_URL %>cdn/xlsx/FileSaver.min.js"></script>
+<script src="<%= BASE_URL %>cdn/xlsx/xlsx.full.min.js"></script>
+-->
+</html>
