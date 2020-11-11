@@ -22,105 +22,92 @@
     </page-header>
 
     <basic-container block>
-      <div class="transitionBox">
-        <transition name="el-zoom-in-center">
-          <div
-            v-show="multipleSelection.length === 0"
-            class="searchBox"
-          >
-            <div>
-              <search-popover
-                ref="searchPopover"
-                :require-options="searchConfig.requireOptions"
-                :popover-options="searchConfig.popoverOptions"
-                @submit="handleSubmit"
-              />
-              <el-button
-                icon="el-icon-sort"
-                size="medium"
-                @click="toSort"
-              >
-                调整排序
-              </el-button>
-              <!-- <el-button
-                icon="el-icon-upload2"
-                size="medium"
-              >
-                导出
-              </el-button>-->
-              <el-popover
-                placement="bottom"
-                width="40"
-                trigger="click"
-                style="margin-left:10px"
-              >
-                <el-checkbox-group
-                  v-model="checkColumn"
-                  style="display: flex;
-    flex-direction: column;"
-                  @change="columnChange"
-                >
-                  <el-checkbox
-                    v-for="item in originColumn"
-                    :key="item.prop"
-                    :label="item.prop"
-                    :disabled="item.prop === 'orgName'"
-                    class="originColumn"
-                  >
-                    {{ item.label }}
-                  </el-checkbox>
-                </el-checkbox-group>
-                <el-button
-                  slot="reference"
-                  icon="el-icon-setting"
-                  size="medium"
-                />
-              </el-popover>
-            </div>
-          </div>
-        </transition>
-        <transition name="el-zoom-in-center">
-          <div
-            v-show="multipleSelection.length > 0"
-            class="multipleBox"
-          >
-            <div class="multipleLeft">
-              <div class="multipleLength">
-                已选中 {{ multipleSelection.length }} 项
-              </div>
-              <el-button
-                type="text"
-                size="medium"
-                icon="el-icon-delete"
-                @click="multipleDeleteClick"
-              >
-                批量删除
-              </el-button>
-              <!--              <el-button-->
-              <!--                size="medium"-->
-              <!--                type="text"-->
-              <!--                icon="el-icon-upload2"-->
-              <!--              >-->
-              <!--                批量导出-->
-              <!--              </el-button>-->
-            </div>
-            <el-button
-              size="medium"
-              type="text"
-              icon="el-icon-close"
-              @click="clearMultipleSelection"
-            />
-          </div>
-        </transition>
-      </div>
-      <avue-crud
-        ref="avueCrud"
-        :option="option"
-        :data="data"
-        :table-loading="tableLoading"
-        @select="rowSelect"
-        @select-all="selectAll"
+      <common-table
+        id="demo"
+        ref="table"
+        :columns="tableColumns | columnsFilter(columnsVisible)"
+        :config="tableConfig"
+        :data="tableData"
+        :loading="tableLoading"
       >
+        <template #topMenu>
+          <div class="transitionBox">
+            <transition name="el-zoom-in-center">
+              <div
+                v-show="multipleSelection.length === 0"
+                class="searchBox"
+              >
+                <div>
+                  <search-popover
+                    ref="searchPopover"
+                    :require-options="searchConfig.requireOptions"
+                    :popover-options="searchConfig.popoverOptions"
+                  />
+                  <el-button
+                    icon="el-icon-sort"
+                    size="medium"
+                    @click="toSort"
+                  >
+                    调整排序
+                  </el-button>
+                  <el-popover
+                    placement="bottom"
+                    width="40"
+                    trigger="click"
+                    style="margin-left:10px"
+                  >
+                    <el-checkbox-group
+                      v-model="checkColumn"
+                      style="display: flex;flex-direction: column;"
+                      @change="columnChange"
+                    >
+                      <el-checkbox
+                        v-for="item in originColumn"
+                        :key="item.prop"
+                        :label="item.prop"
+                        :disabled="item.prop === 'orgName'"
+                        class="originColumn"
+                      >
+                        {{ item.label }}
+                      </el-checkbox>
+                    </el-checkbox-group>
+                    <el-button
+                      slot="reference"
+                      icon="el-icon-setting"
+                      size="medium"
+                    />
+                  </el-popover>
+                </div>
+              </div>
+            </transition>
+            <transition name="el-zoom-in-center">
+              <div
+                v-show="multipleSelection.length > 0"
+                class="multipleBox"
+              >
+                <div class="multipleLeft">
+                  <div class="multipleLength">
+                    已选中 {{ multipleSelection.length }} 项
+                  </div>
+                  <el-button
+                    type="text"
+                    size="medium"
+                    icon="el-icon-delete"
+                    @click="multipleDeleteClick"
+                  >
+                    批量删除
+                  </el-button>
+                </div>
+                <el-button
+                  size="medium"
+                  type="text"
+                  icon="el-icon-close"
+                  @click="clearMultipleSelection"
+                />
+              </div>
+            </transition>
+          </div>
+        </template>
         <template
           slot="orgName"
           slot-scope="{ row }"
@@ -132,16 +119,14 @@
             <el-button type="text">{{ row.orgName }}</el-button>
           </span>
         </template>
-        <template
-          slot="orgType"
-          slot-scope="{ row }"
-        >
+        <template #orgType="{row}">
           {{ orgTypeObj[row.orgType] }}
         </template>
-        <template
-          slot="menu"
-          slot-scope="{ row }"
-        >
+        <template #leaders="{row}">
+          {{ leaderFilter(row) }}
+        </template>
+
+        <template #handler="{row}">
           <div class="menuClass">
             <el-button
               type="text"
@@ -170,11 +155,11 @@
             </el-dropdown>
           </div>
         </template>
-      </avue-crud>
+      </common-table>
       <org-edit
         ref="orgEdit"
         :visible="createOrgDailog"
-        @refresh="getOrgTree"
+        @refresh="loadTableData"
         @changevisible="changevisible"
       />
     </basic-container>
@@ -186,95 +171,61 @@ import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader } from '@/api/org
 import { tableOptions } from '@/util/constant'
 import SearchPopover from '@/components/searchPopOver/index'
 import OrgEdit from './components/orgEdit'
-
-const column = [
+const TABLE_COLUMNS = [
   {
     label: '组织名称',
     prop: 'orgName',
-    align: 'left',
     slot: true,
-    minWidth: '180px'
+    minWidth: 150
   },
   {
     label: '组织类型',
     prop: 'orgType',
-    slot: true
+    slot: true,
+    minWidth: 120
   },
   {
     label: '组织编码',
     prop: 'orgCode',
-    align: 'right',
-    minWidth: '150px'
+    minWidth: 120
   },
   {
     label: '组织负责人',
+    slot: true,
     prop: 'leaders',
-    minWidth: '180px',
-    overHidden: true,
-    formatter(row) {
-      if (row.leaders.length > 0) {
-        let leadersList = []
-        for (var i = 0; i < row.leaders.length; i++) {
-          leadersList = turnToLevelArray(row.leaders)
-        }
-        let leadersString = ''
-        for (var j = 0; j < leadersList.length; j++) {
-          for (var k = 0; k < leadersList[j].userNameArr.length; k++) {
-            if (leadersList[j].userNameArr[k] === '' || leadersList[j].userNameArr[k] === null) {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + '空缺'
-              } else {
-                leadersString = leadersString + '空缺，'
-              }
-            } else {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + leadersList[j].userNameArr[k]
-              } else {
-                leadersString = leadersString + leadersList[j].userNameArr[k] + '，'
-              }
-            }
-          }
-          leadersString = leadersString + '；'
-        }
-        return leadersString
-      } else {
-        return ''
-      }
-    }
+    minWidth: 120
   },
   {
     label: '描述',
     prop: 'remark',
-    overHidden: true
+    minWidth: 120
   }
 ]
-
-//单个uesr数据转换成按级别分的数组
-function turnToLevelArray(data = []) {
-  let responsibleList = []
-  const maxLevel = Math.max.apply(
-    Math,
-    data.map((item) => item.level)
-  )
-  for (var j = 0; j < maxLevel; j++) {
-    responsibleList.push({
-      level: j + 1,
-      userNameArr: []
-    })
+const TABLE_CONFIG = {
+  rowKey: 'orgId',
+  showHandler: true,
+  showIndexColumn: false,
+  enablePagination: true,
+  enableMultiSelect: true,
+  handlerColumn: {
+    minWidth: 100
   }
-  data.map((item) => {
-    responsibleList[item.level - 1]['userNameArr'].push(item.userName)
-  })
-  return responsibleList
 }
-
 export default {
   name: 'OrgManagement',
   components: { SearchPopover, OrgEdit },
+  filters: {
+    // 过滤不可见的列
+    columnsFilter: (columns, visibleColProps) =>
+      _.filter(columns, ({ prop }) => _.includes(visibleColProps, prop))
+  },
   data() {
     return {
+      tableLoading: false,
+      tableData: [],
+      tableConfig: TABLE_CONFIG,
+      tableColumns: TABLE_COLUMNS,
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: [
         'orgName',
         'orgType',
@@ -285,7 +236,7 @@ export default {
         'workNum',
         'remark'
       ],
-      originColumn: column,
+      originColumn: TABLE_COLUMNS,
       searchConfig: {
         requireOptions: [
           {
@@ -371,7 +322,6 @@ export default {
         ]
       },
       data: [],
-      tableLoading: false,
       multipleSelection: [],
       option: {
         ...tableOptions,
@@ -384,7 +334,7 @@ export default {
         selection: true,
         formHeight: 20,
         rowKey: 'orgId',
-        column: column
+        column: TABLE_COLUMNS
       },
       newOrg: {},
       rules: {
@@ -418,33 +368,90 @@ export default {
     })
   },
   activated() {
-    this.getOrgTree()
+    this.loadTableData()
   },
   methods: {
+    leaderFilter(row) {
+      if (row.leaders.length > 0) {
+        let leadersList = []
+        for (var i = 0; i < row.leaders.length; i++) {
+          leadersList = this.turnToLevelArray(row.leaders)
+        }
+        let leadersString = ''
+        for (var j = 0; j < leadersList.length; j++) {
+          for (var k = 0; k < leadersList[j].userNameArr.length; k++) {
+            if (leadersList[j].userNameArr[k] === '' || leadersList[j].userNameArr[k] === null) {
+              if (k === leadersList[j].userNameArr.length - 1) {
+                //最后一个不要逗号
+                leadersString = leadersString + '空缺'
+              } else {
+                leadersString = leadersString + '空缺，'
+              }
+            } else {
+              if (k === leadersList[j].userNameArr.length - 1) {
+                //最后一个不要逗号
+                leadersString = leadersString + leadersList[j].userNameArr[k]
+              } else {
+                leadersString = leadersString + leadersList[j].userNameArr[k] + '，'
+              }
+            }
+          }
+          leadersString = leadersString + '；'
+        }
+        return leadersString
+      } else {
+        return ''
+      }
+    },
+    turnToLevelArray(data = []) {
+      let responsibleList = []
+      const maxLevel = Math.max.apply(
+        Math,
+        data.map((item) => item.level)
+      )
+      for (var j = 0; j < maxLevel; j++) {
+        responsibleList.push({
+          level: j + 1,
+          userNameArr: []
+        })
+      }
+      data.map((item) => {
+        responsibleList[item.level - 1]['userNameArr'].push(item.userName)
+      })
+      return responsibleList
+    },
+    async loadTableData() {
+      if (this.tableLoading) {
+        return
+      }
+      try {
+        const params = this.searchParams
+        this.tableLoading = true
+        if (Array.isArray(params.parentOrgId)) params.parentOrgId = params.parentOrgId[0]['']
+        getOrgTree(params).then((res) => {
+          this.tableData = res
+          this.multipleSelection = []
+          this.tableLoading = false
+
+          if (this.searchParams.orgName) {
+            // this.data =[]
+            let newData = []
+            this.recursion(this.data, newData)
+            this.data = newData
+          }
+        })
+      } catch (error) {
+        this.$message.error(error.message)
+      } finally {
+        this.tableLoading = false
+      }
+    },
     changevisible(data) {
       this.createOrgDailog = data
     },
     clearMultipleSelection() {
       this.$refs.avueCrud.selectClear()
       this.multipleSelection = []
-    },
-    //组织机构列表
-    getOrgTree() {
-      const params = this.searchParams
-      this.tableLoading = true
-      if (Array.isArray(params.parentOrgId)) params.parentOrgId = params.parentOrgId[0]['']
-      getOrgTree(params).then((res) => {
-        this.data = res
-        this.multipleSelection = []
-        this.tableLoading = false
-
-        if (this.searchParams.orgName) {
-          // this.data =[]
-          let newData = []
-          this.recursion(this.data, newData)
-          this.data = newData
-        }
-      })
     },
     /**
      *  @author guanfenda
@@ -461,10 +468,9 @@ export default {
     toOrgDetail(row) {
       this.$router.push({ path: '/orgs/orgDetail?orgId=' + row.orgId })
     },
-    handleSubmit(params) {
+    handleSearch(params) {
       this.searchParams = params
-      this.getOrgTree()
-      // this.getOrgTree(this.data)
+      this.loadTableData()
     },
     handleCommand(command, row) {
       if (command === 'add') {
@@ -494,7 +500,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
-              this.getOrgTree()
+              this.loadTableData()
             })
           })
           .catch(() => {
@@ -529,7 +535,7 @@ export default {
       if (isError) return
       deleteOrg(params).then(() => {
         this.$message.success('删除成功')
-        this.getOrgTree()
+        this.loadTableData()
       })
     },
     handleOrgEdit(row) {
@@ -539,7 +545,7 @@ export default {
       this.$refs.orgEdit.createChild(row)
     },
     columnChange() {
-      this.option.column = column.filter((item) => {
+      this.option.column = TABLE_COLUMNS.filter((item) => {
         return this.checkColumn.indexOf(item.prop) > -1
       })
     },
