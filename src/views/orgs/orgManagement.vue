@@ -204,6 +204,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'orgId',
   showHandler: true,
+  defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
   enableMultiSelect: true,
