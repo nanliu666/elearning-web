@@ -45,6 +45,7 @@
 <script>
 import config from './sidebar/config.js'
 import { mapGetters } from 'vuex'
+import { validatenull } from '@/util/validate'
 
 export default {
   data() {
@@ -82,6 +83,9 @@ export default {
     this.getMenuList()
   },
   methods: {
+    validatenull(...args) {
+      return validatenull(...args)
+    },
     handleEsc() {
       this.$parent.isSearch = false
     },

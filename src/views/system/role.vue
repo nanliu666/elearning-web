@@ -324,7 +324,7 @@ export default {
       return new Promise((resolve) => {
         const params = {
           categoryName: '',
-          pageSize: 50,
+          pageSize: 2000,
           page: 1
         }
         getCate(params).then((res) => {
