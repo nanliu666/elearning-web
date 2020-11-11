@@ -9,11 +9,10 @@
     @opened="onOpened"
   >
     <div v-loading="loading">
-      <avue-form
+      <commonForm
         ref="form"
-        v-model="form"
-        :option="option"
-        @submit="handleSubmit"
+        :model="form"
+        :columns="columns"
       >
         <template
           slot="jobs"
@@ -23,10 +22,18 @@
             v-model="form.jobs"
             :option="scope.column"
             :dic-data="jobDicData"
-            @fiter="fiter"
           />
         </template>
-      </avue-form>
+        <template slot="remark">
+          <el-input
+            v-model="form.remark"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入描述"
+          >
+          </el-input>
+        </template>
+      </commonForm>
       <div
         slot="footer"
         class="dialog-footer"
@@ -58,7 +65,7 @@
 </template>
 
 <script>
-import treeSelect from '../../../components/treeSelect/treeSelect'
+import treeSelect from '@/components/treeSelect/treeSelect'
 import { createRole, getRelativeJobs, updateRole } from '../../../api/system/role'
 
 export default {
@@ -105,25 +112,48 @@ export default {
     }
   },
   data() {
-    const validateTree = (rule, value, callback) => {
-      if (!value.length) {
-        callback(new Error('请选择关联职位'))
-      } else {
-        callback()
+    const JOBS_COLUMN = {
+      prop: 'jobs',
+      itemType: 'slot',
+      placeholder: '请选择关联职位',
+      span: 24,
+      label: '关联职位',
+      required: true
+    }
+    const BASE_COLUMNS = [
+      {
+        prop: 'roleName',
+        itemType: 'input',
+        label: '角色名称',
+        required: true
+      },
+      {
+        prop: 'type',
+        itemType: 'radio',
+        label: '关联类型',
+        span: 24,
+        required: true,
+        options: [
+          {
+            label: '关联职位',
+            value: 'Job'
+          },
+          {
+            label: '无关联',
+            value: 'No'
+          }
+        ]
+      },
+      {
+        prop: 'remark',
+        itemType: 'slot',
+        label: '描述',
+        span: 24
       }
-    }
-    const change = (rule, value, callback) => {
-      setTimeout(() => {
-        if (!this.form.type) {
-          callback(new Error('请选择关联职位'))
-        } else {
-          callback()
-        }
-      }, 0)
-    }
+    ]
     return {
-      jobTree: [],
-      noJobRTree: [],
+      jobColumn: JOBS_COLUMN,
+      columns: BASE_COLUMNS,
       loading: false,
       roleVisible: true,
       form: {
@@ -134,106 +164,13 @@ export default {
         positions: '',
         jobs: []
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '角色名称',
-            prop: 'roleName',
-            row: true,
-            span: 24,
-            placeholder: '请输入名称',
-            rules: [
-              {
-                required: true,
-                message: '请输入角色名称',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '关联类型',
-            prop: 'type',
-            type: 'radio',
-            row: true,
-            span: 24,
-            rules: [
-              {
-                required: true,
-                // message: '请选择关联类型',
-                validator: change,
-                trigger: 'change'
-              }
-            ],
-            dicData: [
-              {
-                label: '关联职位',
-                value: 'Job'
-              },
-              {
-                label: '无关联',
-                value: 'No'
-              }
-            ]
-          },
-          {
-            label: '关联职位',
-            prop: 'jobs',
-            props: {
-              label: this.jobProps.label,
-              value: this.jobProps.id
-            },
-            formslot: true,
-            labelslot: true,
-            errorslot: true,
-            span: 24,
-            limitCheck: treeSelect,
-            display: true,
-            noDataText: '您还未维护任何职位信息，请前往“职位管理”处添加',
-            placeholder: '请选择关联职位',
-            rules: [
-              {
-                required: true,
-                message: '请选择关联职位',
-                trigger: 'blur'
-              },
-              {
-                validator: validateTree,
-                trigger: 'blur'
-              }
-            ],
-            dicData: []
-          },
-          {
-            label: '描述',
-            prop: 'remark',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            placeholder: '请输入描述'
-          }
-        ]
-      },
       jobDicData: []
     }
-  },
-  computed: {
-    // roleVisible: {
-    //   get: function() {
-    //     return this.visible
-    //   },
-    //   set: function(val) {
-    //     this.$emit('update:visible', val)
-    //   }
-    // }
   },
   watch: {
     row: {
       handler: function(newVal) {
         let { roleId, roleName, type, remark, positions, jobs } = { ...newVal }
-        //
         let newpositions = []
         if (positions) {
           positions.map((it) => {
@@ -270,39 +207,20 @@ export default {
     'form.type': {
       handler(val) {
         this.form.type = val
-        // const positionColumn = this.findObject(this.option.column, 'positions')
-        const jobColumn = this.findObject(this.option.column, 'jobs')
         if (val === 'Job') {
-          // positionColumn.display = false
-          jobColumn.display = true
+          this.columns.splice(2, 0, this.jobColumn)
         } else if (val === 'No') {
-          jobColumn.display = false
-          // positionColumn.display = false
+          let index = _.findIndex(this.columns, (item) => {
+            return item.prop === 'jobs'
+          })
+          if (index > -1) {
+            this.columns.splice(index, 1)
+          }
         }
       },
       immediate: true,
       deep: true
     },
-    jobs: {
-      handler(val) {
-        const jobColumn = this.findObject(this.option.column, 'jobs')
-        if (this.row.roleId) {
-          this.recursion(val, this.row.roleId)
-        }
-        jobColumn.dicData = val
-      },
-      immediate: true,
-      deep: true
-    },
-    // positions: {
-    //   handler(val) {
-    //     if (val[0]) {
-    //       const positionColumn = this.findObject(this.option.column, 'positions')
-    //       positionColumn.dicData = val
-    //     }
-    //   },
-    //   immediate: true
-    // },
     'form.jobs': {
       // 清空关联职位的校验
       handler() {
@@ -322,14 +240,14 @@ export default {
         pageSize: 100
       }
       getRelativeJobs(params).then((res) => {
-        const jobColumn = this.findObject(this.option.column, 'jobs')
-        this.jobDicData = jobColumn.dicData = res.data.map((item) => {
+        let targetData = res.data.map((item) => {
           return {
             label: item.jobName,
             id: item.jobId,
             roles: item.roleId
           }
         })
+        this.jobDicData = targetData
       })
     },
     filterTree(data) {
@@ -341,15 +259,6 @@ export default {
           this.filterTree(it.children)
         }
       })
-    },
-    fiter(check) {
-      const jobColumn = this.findObject(this.option.column, 'jobs')
-      if (check) {
-        jobColumn.dicData = this.noJobRTree
-      } else {
-        jobColumn.dicData = this.jobTree
-      }
-      // this.$emit('fiter', check,this.row.roleId)
     },
     jobFilter(arr, data, data2) {
       arr.filter((item) => {
