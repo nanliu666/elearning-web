@@ -60,6 +60,14 @@ export default [
           fullscreen: true
         },
         component: () => import('@/views/todo/leaveList/leaveListUser')
+      },
+      {
+        path: '/gradeTree/grade',
+        name: '组织架构图',
+        meta: {
+          fullscreen: true
+        },
+        component: () => import('@/views/gradeTree/grade')
       }
     ]
   }

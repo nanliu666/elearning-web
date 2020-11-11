@@ -9,83 +9,120 @@
     >
       <div v-loading="loading">
         <div>
-          <avue-form
+          <commonForm
             ref="form"
-            v-model="form"
-            :option="option"
+            :model="form"
+            :columns="columns"
           >
             <template slot="userId">
-              <div>
+              <el-select
+                v-model="form.userId"
+                v-loadmore="loadMoreLeader"
+                :class="isrules ? 'isrules' : ''"
+                multiple
+                filterable
+                :multiple-limit="10"
+                placeholder="请选择组织负责人"
+              >
+                <el-option
+                  v-for="(item, k) in leaderList"
+                  :key="k"
+                  :label="item.name !== '空缺' ? item.name + '（' + item.workNo + '）' : item.name"
+                  :value="item.userId"
+                />
                 <div
-                  v-for="(item, index) in allUserIdArr"
-                  :key="index"
+                  v-show="loadLeader"
+                  class="addressLoading"
                 >
-                  <el-form-item
-                    :label="labelTxt[index]"
-                    :required="true"
-                  >
-                    <el-col :span="18">
-                      <el-select
-                        v-model="item.userIdArr"
-                        v-loadmore="loadMoreLeader"
-                        :class="isrules ? 'isrules' : ''"
-                        multiple
-                        filterable
-                        :multiple-limit="10"
-                        placeholder="请选择组织负责人"
-                      >
-                        <el-option
-                          v-for="(item1, k) in leaderList"
-                          :key="k"
-                          :label="
-                            item1.name !== '空缺'
-                              ? item1.name + '（' + item1.workNo + '）'
-                              : item1.name
-                          "
-                          :value="item1.userId"
-                        />
-                        <div
-                          v-show="loadLeader"
-                          class="addressLoading"
-                        >
-                          <i class="el-icon-loading" />
-                        </div>
-                        <div
-                          v-show="noMoreLeader"
-                          style="text-align: center; font-size:14px;color: #606266;"
-                        >
-                          没有更多了
-                        </div>
-                      </el-select>
-                    </el-col>
-                    <el-col
-                      :span="3"
-                      style="text-align: center"
-                    >
-                      <el-button
-                        class="el-button el-button--text"
-                        @click="addSubLevel(index)"
-                      >
-                        添加下级
-                      </el-button>
-                    </el-col>
-                    <el-col
-                      v-if="index !== 0"
-                      :span="3"
-                      style="text-align: center"
-                    >
-                      <el-button
-                        class="el-button el-button--text"
-                        @click="deleteSubLevel(index)"
-                      >
-                        删除
-                      </el-button>
-                    </el-col>
-                  </el-form-item>
+                  <i class="el-icon-loading" />
                 </div>
-              </div>
+                <div
+                  v-show="noMoreLeader"
+                  style="text-align: center; font-size:14px;color: #606266;"
+                >
+                  没有更多了
+                </div>
+              </el-select>
             </template>
-          </avue-form>
+          </commonForm>
+
+          <!--          <avue-form-->
+          <!--            ref="form"-->
+          <!--            v-model="form"-->
+          <!--            :option="option"-->
+          <!--          >-->
+          <!--            <template slot="userId">-->
+          <!--              <div>-->
+          <!--                <div-->
+          <!--                  v-for="(item, index) in allUserIdArr"-->
+          <!--                  :key="index"-->
+          <!--                >-->
+          <!--                  <el-form-item-->
+          <!--                    :label="labelTxt[index]"-->
+          <!--                    :required="true"-->
+          <!--                  >-->
+          <!--                    <el-col :span="18">-->
+          <!--                      <el-select-->
+          <!--                        v-model="item.userIdArr"-->
+          <!--                        v-loadmore="loadMoreLeader"-->
+          <!--                        :class="isrules ? 'isrules' : ''"-->
+          <!--                        multiple-->
+          <!--                        filterable-->
+          <!--                        :multiple-limit="10"-->
+          <!--                        placeholder="请选择组织负责人"-->
+          <!--                      >-->
+          <!--                        <el-option-->
+          <!--                          v-for="(item1, k) in leaderList"-->
+          <!--                          :key="k"-->
+          <!--                          :label="-->
+          <!--                            item1.name !== '空缺'-->
+          <!--                              ? item1.name + '（' + item1.workNo + '）'-->
+          <!--                              : item1.name-->
+          <!--                          "-->
+          <!--                          :value="item1.userId"-->
+          <!--                        />-->
+          <!--                        <div-->
+          <!--                          v-show="loadLeader"-->
+          <!--                          class="addressLoading"-->
+          <!--                        >-->
+          <!--                          <i class="el-icon-loading" />-->
+          <!--                        </div>-->
+          <!--                        <div-->
+          <!--                          v-show="noMoreLeader"-->
+          <!--                          style="text-align: center; font-size:14px;color: #606266;"-->
+          <!--                        >-->
+          <!--                          没有更多了-->
+          <!--                        </div>-->
+          <!--                      </el-select>-->
+          <!--                    </el-col>-->
+          <!--                    <el-col-->
+          <!--                      :span="3"-->
+          <!--                      style="text-align: center"-->
+          <!--                    >-->
+          <!--                      <el-button-->
+          <!--                        class="el-button el-button&#45;&#45;text"-->
+          <!--                        @click="addSubLevel(index)"-->
+          <!--                      >-->
+          <!--                        添加下级-->
+          <!--                      </el-button>-->
+          <!--                    </el-col>-->
+          <!--                    <el-col-->
+          <!--                      v-if="index !== 0"-->
+          <!--                      :span="3"-->
+          <!--                      style="text-align: center"-->
+          <!--                    >-->
+          <!--                      <el-button-->
+          <!--                        class="el-button el-button&#45;&#45;text"-->
+          <!--                        @click="deleteSubLevel(index)"-->
+          <!--                      >-->
+          <!--                        删除-->
+          <!--                      </el-button>-->
+          <!--                    </el-col>-->
+          <!--                  </el-form-item>-->
+          <!--                </div>-->
+          <!--              </div>-->
+          <!--            </template>-->
+          <!--          </avue-form>-->
         </div>
         <div
           v-if="!isEdit"
@@ -134,6 +171,26 @@
 // import treeSelect from '../../../components/treeSelect/treeSelect'
 const options = []
 let orgList = []
+let orgType = [
+  {
+    label: '公司',
+    value: 0,
+    list: ['Enterprise', 'Company'],
+    disabled: false
+  },
+  {
+    label: '部门',
+    value: 1,
+    list: ['Enterprise', 'Company', 'Department'],
+    disabled: false
+  },
+  {
+    label: '小组',
+    value: 2,
+    list: ['Enterprise', 'Company', 'Department', 'Group'],
+    disabled: false
+  }
+]
 import { getOrganization, postOrganization, putOrganization } from '@/api/organize/grade'
 import { getUserWorkList } from '@/api/org/org'
 const consc = []
@@ -210,10 +267,94 @@ export default {
         orgName: '',
         remark: '',
         orgType: '',
-        userId: '',
+        userId: [],
         parentOrgId: '',
         code: ''
       },
+      columns: [
+        {
+          span: 20,
+          offset: 2,
+          prop: 'orgName',
+          itemType: 'input',
+          type: 'input',
+          label: '组织名称',
+          props: {},
+          required: true
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'code',
+          itemType: 'input',
+          options: [],
+          disabled: true,
+          type: 'input',
+          label: '组织编码',
+          props: {}
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'parentOrgId',
+          itemType: 'treeSelect',
+          type: 'input',
+          label: '上级组织',
+          required: true,
+          props: {
+            selectParams: {
+              placeholder: '请选择用人部门',
+              multiple: false
+            },
+            treeParams: {
+              data: [],
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'orgName',
+                disabled: 'disabled',
+                value: 'orgId'
+              }
+            }
+          }
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'orgType',
+          itemType: 'radio',
+          options: orgType,
+          type: 'radio',
+          label: '组织类型',
+          required: true,
+          props: {}
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'userId',
+          itemType: 'slot',
+          options: [],
+          type: 'select',
+          label: '组织负责人',
+          props: {}
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'remark',
+          itemType: 'input',
+          type: 'textarea',
+          label: '描述',
+          rows: 3,
+          props: {},
+          maxlength: '1000'
+        }
+      ],
       option: {
         menuBtn: false,
         labelPosition: 'top',
@@ -369,11 +510,6 @@ export default {
     }
   },
   watch: {
-    'form.parentOrgId': {
-      handler: function() {},
-      deep: true //对象内部的属性监听，也叫深度监听
-    },
-
     dialogVisible: {
       handler: function(val) {
         this.dialog = val
@@ -382,30 +518,18 @@ export default {
     },
     isEdit: {
       handler(val) {
-        if (val) {
-          let i = this.find_index(this.option.column, 'code')
-          this.option.column[i].display = true
-          if (this.orgData.type === 'Enterprise' && val) {
-            // key:['orgName','code','parentOrgId','orgType','userId','remark'],
-            let i = this.find_index(this.option.column, 'parentOrgId')
-            let index = this.find_index(this.option.column, 'orgType')
-            this.option.column[i].display = false
-            // this.option.column[3].display =false
-            this.option.column[index].dicData = [
-              {
-                label: '企业',
-                value: 3,
-                list: ['Enterprise', 'Company'],
-                disabled: false
-              }
-            ]
-          }
+        if (!val) {
+          this.columns = this.columns.filter((it) => it.prop !== 'code')
+          this.columns.find((it) => it.prop === 'parentOrgId').disabled = true
+        } else {
+          this.orgData.parentId === '0' &&
+            (this.columns = this.columns.filter((it) => it.prop !== 'parentOrgId'))
         }
       },
       immediate: true
     },
     orgData: {
-      handler: async function(val) {
+      handler: async function() {
         this.loading = true
         await this.getorgData()
 
@@ -416,21 +540,15 @@ export default {
           this.form.parentOrgId = this.orgData.parentId
           this.form.remark = this.orgData.remark
           this.form.userId = this.orgData.userId
-          this.edit(this.orgData)
-          if (val.parentId === '0') {
-            // key:['orgName','code','parentOrgId','orgType','userId','remark'],
-            // setTimeout(()=>{
-            let i = this.find_index(this.option.column, 'code')
-            let index = this.find_index(this.option.column, 'parentOrgId')
-            this.option.column[i].disabled = true
-            this.option.column[index].disabled = true
-            // },500)
-          }
+          this.form.userId = this.orgData.leaders.reduce((pre, cur) => {
+            if (cur) {
+              pre.push(cur.userId)
+            }
+            return pre
+          }, [])
         } else {
           setTimeout(() => {
-            let i = this.find_index(this.option.column, 'parentOrgId')
             this.form.parentOrgId = this.orgData.id
-            this.option.column[i].disabled = true
           }, 500)
         }
         let types = {
@@ -439,20 +557,7 @@ export default {
           Department: 1,
           Group: 2
         }
-        let i = this.find_index(this.option.column, 'orgType')
         this.form.orgType = types[this.orgData.type]
-        this.option.column[i].dicData.map((it) => {
-          if (it.list.includes(val.type)) {
-            it.disabled = false
-          } else {
-            it.disabled = true
-          }
-        })
-        if (this.orgData.type === 'Enterprise' && this.isEdit) {
-          let i = this.find_index(this.option.column, 'parentOrgId')
-          this.option.column[i].display = false
-          this.form.orgType = 3
-        }
       },
       immediate: true,
       deep: true
@@ -554,8 +659,10 @@ export default {
           }
 
           maps(orgList)
-          let i = this.find_index(this.option.column, 'parentOrgId')
-          this.option.column[i].dicData = orgList
+          // let i = this.find_index(this.option.column, 'parentOrgId')
+          // this.option.column[i].dicData = orgList
+          this.columns.find((item) => item.prop === 'parentOrgId').props.treeParams.data = orgList
+
           resolve()
         })
       })

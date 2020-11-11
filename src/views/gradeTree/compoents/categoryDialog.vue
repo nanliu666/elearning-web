@@ -147,47 +147,48 @@ export default {
       // this.dialog = false
     },
     modity() {
-      let data = {
-        ...this.data,
-        ...this.form
-      }
-      this.loading = true
-      putCategoryDefine(data)
-        .then(() => {
-          this.$message.success('修改成功')
-          this.loading = false
-          this.$emit('onSubmit', data)
-          this.dialog = false
-        })
-        .catch(() => {
-          this.loading = false
-        })
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
+        let data = {
+          ...this.data,
+          ...this.form
+        }
+        this.loading = true
+        putCategoryDefine(data)
+          .then(() => {
+            this.$message.success('修改成功')
+            this.loading = false
+            this.$emit('onSubmit', data)
+            this.dialog = false
+          })
+          .catch(() => {
+            this.loading = false
+          })
+      })
     },
     onClickSave({ again = false }, reset) {
-      this.$refs.form.validate((vaild) => {
-        if (vaild) {
-          this.$emit('onsubmit')
-          let params = {
-            name: this.form.name.replace(/(^\s*)|(\s*$)/g, ''),
-            remark: this.form.remark
-          }
-          this.loading = true
-          postCategoryDefine(params)
-            .then(() => {
-              this.loading = false
-              this.$message.success('新增成功')
-              this.$emit('onSubmit', params)
-              if (!again) {
-                this.dialog = false
-              } else {
-                reset()
-              }
-            })
-            .catch(() => {
-              this.loading = false
-              // this.dialog = false
-            })
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
+        this.$emit('onsubmit')
+        let params = {
+          name: this.form.name.replace(/(^\s*)|(\s*$)/g, ''),
+          remark: this.form.remark
         }
+        this.loading = true
+        postCategoryDefine(params)
+          .then(() => {
+            this.loading = false
+            this.$message.success('新增成功')
+            this.$emit('onSubmit', params)
+            if (!again) {
+              this.dialog = false
+            } else {
+              reset()
+            }
+          })
+          .catch(() => {
+            this.loading = false
+          })
       })
     },
     handleClose() {
