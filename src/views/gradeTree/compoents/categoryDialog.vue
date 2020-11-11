@@ -8,11 +8,23 @@
       :before-close="handleClose"
     >
       <div v-loading="loading">
-        <avue-form
+        <commonForm
           ref="form"
-          v-model="form"
-          :option="option"
-        />
+          :model="form"
+          :columns="columns"
+        >
+          <template slot="remark">
+            <el-input
+              v-model="form.remark"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入"
+              maxlength="150"
+              :show-word-limit="true"
+            >
+            </el-input>
+          </template>
+        </commonForm>
       </div>
       <span
         slot="footer"
@@ -85,44 +97,29 @@ export default {
     }
   },
   data() {
+    const BASE_COLUMNS = [
+      {
+        prop: 'name',
+        itemType: 'input',
+        placeholder: '请输入岗位类别名称',
+        label: '岗位类别名称',
+        span: 24,
+        required: true
+      },
+      {
+        prop: 'remark',
+        itemType: 'slot',
+        label: '描述',
+        span: 24
+      }
+    ]
     return {
       loading: false,
       form: {
         name: '',
         remark: ''
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '岗位类别名称',
-            prop: 'name',
-            type: 'input',
-            row: true,
-            span: 24,
-            placeholder: '请输入岗位类别名称',
-            rules: [
-              {
-                required: true,
-                message: '请输入岗位类别名称',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '描述',
-            prop: 'remark',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            placeholder: '请输入描述',
-            maxlength: 1000,
-            showWordLimit: true
-          }
-        ]
-      },
+      columns: BASE_COLUMNS,
       dialog: true
     }
   },
