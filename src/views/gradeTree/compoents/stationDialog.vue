@@ -8,10 +8,10 @@
       :before-close="handleClose"
     >
       <div v-loading="loading">
-        <avue-form
+        <commonForm
           ref="form"
-          v-model="form"
-          :option="option"
+          :model="form"
+          :columns="columns"
         />
       </div>
       <span
@@ -93,36 +93,29 @@ export default {
         name: '',
         remark: ''
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '职务名称',
-            prop: 'name',
-            type: 'input',
-            row: true,
-            span: 24,
-            placeholder: '请输入职务名称',
-            rules: [
-              {
-                required: true,
-                message: '请输入职务名称',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '描述',
-            prop: 'remark',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            placeholder: '请输入描述'
-          }
-        ]
-      },
+      columns: [
+        {
+          span: 20,
+          offset: 2,
+          prop: 'name',
+          itemType: 'input',
+          type: 'input',
+          label: '职务名称',
+          props: {},
+          required: true
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'remark',
+          itemType: 'input',
+          type: 'textarea',
+          label: '描述',
+          rows: 3,
+          props: {},
+          maxlength: '1000'
+        }
+      ],
       dialog: true
     }
   },
@@ -150,8 +143,8 @@ export default {
       this.onClickSave({ again: true }, this.reset)
     },
     modity() {
-      this.$refs.form.validate((vaild) => {
-        if (!vaild) return
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
         let data = {
           ...this.row,
           ...this.form
@@ -170,31 +163,29 @@ export default {
       })
     },
     onClickSave({ again = false }, reset) {
-      this.$refs.form.validate((vaild) => {
-        if (vaild) {
-          this.$emit('onsubmit')
-          let params = {
-            name: '',
-            remark: '',
-            ...this.form
-          }
-          this.loading = true
-          postV1Position(params)
-            .then(() => {
-              this.$message.success('新增成功')
-              this.$emit('onSubmit', params)
-              this.loading = false
-              if (!again) {
-                this.dialog = false
-              } else {
-                reset()
-              }
-            })
-            .catch(() => {
-              this.loading = false
-              // this.dialog = false
-            })
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
+        this.$emit('onsubmit')
+        let params = {
+          name: '',
+          remark: '',
+          ...this.form
         }
+        this.loading = true
+        postV1Position(params)
+          .then(() => {
+            this.$message.success('新增成功')
+            this.$emit('onSubmit', params)
+            this.loading = false
+            if (!again) {
+              this.dialog = false
+            } else {
+              reset()
+            }
+          })
+          .catch(() => {
+            this.loading = false
+          })
       })
     },
     handleClose() {

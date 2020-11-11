@@ -9,10 +9,10 @@
     >
       <div v-loading="loading">
         <div>
-          <avue-form
+          <commonForm
             ref="form"
-            v-model="form"
-            :option="option"
+            :model="form"
+            :columns="columns"
           />
         </div>
         <div
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { postV1Job, putV1Job, getCategoryList, getJobList } from '@/api/organize/position'
+import { postV1Job, putV1Job, getCategoryList } from '@/api/organize/position'
 
 export default {
   name: 'PositionDialog',
@@ -110,13 +110,6 @@ export default {
     }
   },
   data() {
-    // const validateTree = (rule, value, callback) => {
-    //   if (!value.length) {
-    //     callback(new Error('请选择关联岗位'))
-    //   } else {
-    //     callback()
-    //   }
-    // }
     return {
       orgId: '',
       firstLoad: true,
@@ -131,119 +124,68 @@ export default {
         duty: '', //岗位职责
         jobId: '' //岗位编码
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '岗位名称',
-            prop: 'jobName',
-            type: 'input',
-            row: true,
-            span: 24,
-            placeholder: '请输入',
-            rules: [
-              {
-                required: true,
-                message: '请输入',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '岗位类别',
-            prop: 'categoryId',
-            type: 'select',
-            row: true,
-            span: 24,
-            rules: [
-              {
-                required: true,
-                message: '请选择',
-                trigger: 'blur'
-              }
-            ],
-            dicData: ''
-          },
-          {
-            label: '岗位编码',
-            prop: 'jobId',
-            type: 'input',
-            row: true,
-            display: false,
-            span: 24,
-            disabled: true,
-            placeholder: '请输入'
-          },
-          {
-            label: '岗位职责',
-            prop: 'duty',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            maxlength: '1000',
-            showWordLimit: true,
-            placeholder: '请输入'
-          },
-          {
-            label: '岗位要求',
-            prop: 'requirement',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            maxlength: '1000',
-            showWordLimit: true,
-            placeholder: '请输入'
-          }
-        ]
-      },
+      columns: [
+        {
+          span: 20,
+          offset: 2,
+          prop: 'jobName',
+          itemType: 'input',
+          type: 'input',
+          label: '岗位名称',
+          props: {},
+          required: true
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'categoryId',
+          itemType: 'select',
+          options: [],
+          type: 'select',
+          label: '岗位类别',
+          props: {},
+          required: true
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'jobId',
+          itemType: 'input',
+          options: [],
+          disabled: true,
+          display: false,
+          type: 'input',
+          label: '岗位编码',
+          props: {}
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'duty',
+          itemType: 'input',
+          type: 'textarea',
+          label: '岗位职责',
+          props: {},
+          rows: 3,
+          maxlength: '1000'
+        },
+        {
+          span: 20,
+          offset: 2,
+          prop: 'requirement',
+          itemType: 'input',
+          type: 'textarea',
+          label: '岗位要求',
+          rows: 3,
+          props: {},
+          maxlength: '1000'
+        }
+      ],
       dialog: true
     }
   },
   computed: {},
   watch: {
-    'form.orgId': {
-      handler: async function(val, old) {
-        if (val == old) return
-        if (val.length > 0) {
-          this.option.column[3].placeholder = '请选择'
-          if (!this.firstLoad) {
-            this.loading = true
-            let jod = await this.getJod(val)
-            if (this.form.orgId !== this.initOrgId) {
-              this.form.parentId = ''
-              this.initOrgId = ''
-            }
-            jod = jod.filter((it) => {
-              if (this.row.id !== it.jobId && this.isEdit) {
-                return it
-              } else {
-                return it
-              }
-            })
-            jod = jod.filter((it) => {
-              if (this.orgData.id !== it.jobId && this.isEdit) {
-                return it
-              } else {
-                return it
-              }
-            })
-
-            jod.map((it) => {
-              it.label = it.jobName
-              it.value = it.jobId
-            })
-            this.option.column[3].dicData = jod
-            this.loading = false
-          }
-        } else {
-          this.option.column[3].dicData = []
-          this.form.parentId = ''
-        }
-      },
-      deep: true //对象内部的属性监听，也叫深度监听
-    },
     dialog: {
       handler: function() {
         this.$emit('update:dialogVisible', this.dialog)
@@ -260,8 +202,8 @@ export default {
     },
     isEdit: {
       handler(val) {
-        if (val) {
-          this.option.column[2].display = true
+        if (!val) {
+          this.columns = this.columns.filter((it) => it.prop !== 'jobId')
         }
       },
       immediate: true
@@ -282,20 +224,14 @@ export default {
             requirement,
             jobId
           }
-          // setTimeout(() => {
           this.form = Object.assign(this.form, form)
-          // }, 500)
         } else if (val.jobId && !this.isEdit) {
           let { orgId, jobId } = { ...val }
           let form = {
             parentId: jobId,
             orgId
           }
-          // setTimeout(() => {
-          this.option.column[3].disabled = true
-          this.option.column[2].disabled = true
           this.form = Object.assign(this.form, form)
-          // }, 500)
         }
       },
       immediate: true
@@ -312,13 +248,7 @@ export default {
           let requirement = val.requirement
           let duty = val.duty
           let jobId = val.jobId
-          // this.orgId = orgId
           let parentId = val.parentJobId
-          // parentId = val.parentJobId
-          // jobName: '', 岗位名称   categoryId: '',岗位类别id   remark: '', 描述  parentId: '', 所属岗位   orgId: [] 所属组织
-          // if (orgId) {
-          //   this.form.orgId = orgId
-          // }
           let form = {
             jobName,
             categoryId,
@@ -335,7 +265,7 @@ export default {
           if (orgId) {
             setTimeout(() => {
               this.form.orgId = orgId
-              this.option.column[2].disabled = true
+              this.columns = this.columns.filter((it) => it.prop !== 'jobId')
             }, 500)
           }
           if (val.type === 'Job') {
@@ -346,7 +276,6 @@ export default {
               parentId = val.parentJobId
             }
             this.form.parentId = parentId
-            this.option.column[3].disabled = true
           }
         }
       },
@@ -362,35 +291,8 @@ export default {
       this.loading = true
       await this.getCategory()
       await this.getTree()
-      let jod = await this.getJod(this.form.orgId)
-      jod.map((it) => {
-        it.label = it.jobName
-        it.value = it.jobId
-      })
-      this.option.column[3].dicData = jod
       this.loading = false
       this.firstLoad = false
-    },
-    /**
-     * @author guanfenda
-     * @desc 获取上级岗位数据
-     *
-     */
-
-    getJod(orgId = '0') {
-      let params = {
-        jobName: '',
-        orgId: orgId
-      }
-      return new Promise((resolve, reject) => {
-        getJobList(params)
-          .then((res) => {
-            return resolve(res)
-          })
-          .catch(() => {
-            return reject()
-          })
-      })
     },
     /***
      *@ author guanfenda
@@ -398,12 +300,7 @@ export default {
      *
      */
     getTree() {
-      // let { parentId } = { ...this.orgData }
-      // let params = {
-      //   parentOrgId: parentId
-      // }
       return new Promise((resolve) => {
-        this.option.column[2].dicData = []
         resolve()
       })
     },
@@ -425,7 +322,7 @@ export default {
               it.label = it.categoryName
               it.value = it.categoryId
             })
-            this.option.column[1].dicData = res
+            this.columns.find((it) => it.prop === 'categoryId').options = res
             resolve()
           })
           .catch(() => {
@@ -434,15 +331,7 @@ export default {
       })
     },
     reset() {
-      if (this.orgData.orgId || this.row.orgId) {
-        let form = JSON.parse(JSON.stringify(this.form))
-        let { orgId, parentId } = { ...form }
-        this.$refs.form.resetFields()
-        let params = { orgId, parentId }
-        this.form = Object.assign(this.form, params)
-      } else {
-        this.$refs.form.resetFields()
-      }
+      this.$refs.form.resetFields()
     },
     onContinue() {
       this.onClickSave({ again: true }, this.reset)
@@ -454,31 +343,29 @@ export default {
      */
 
     handleModity() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          let { jobName, categoryId, requirement, parentId, duty } = { ...this.form }
-
-          let params = {
-            jobId: this.row.jobId || this.orgData.id,
-            jobName,
-            categoryId,
-            requirement,
-            parentId,
-            duty
-          }
-          params.parentId = params.parentId ? params.parentId : '0'
-          this.loading = true
-          putV1Job(params)
-            .then(() => {
-              this.loading = false
-              this.$message.success('修改成功')
-              this.$emit('onsubmit', params)
-              this.$emit('update:dialogVisible', false)
-            })
-            .catch(() => {
-              this.loading = false
-            })
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
+        let { jobName, categoryId, requirement, duty, parentId, jobId } = this.form
+        let params = {
+          jobId: jobId || this.orgData.id,
+          jobName,
+          categoryId,
+          requirement,
+          parentId,
+          duty
         }
+        params.parentId = params.parentId ? params.parentId : '0'
+        this.loading = true
+        putV1Job(params)
+          .then(() => {
+            this.loading = false
+            this.$message.success('修改成功')
+            this.$emit('onsubmit', params)
+            this.$emit('update:dialogVisible', false)
+          })
+          .catch(() => {
+            this.loading = false
+          })
       })
     },
     /***
@@ -487,35 +374,33 @@ export default {
      *
      */
     onClickSave({ again = false }, reset) {
-      this.$refs.form.validate((vaild) => {
-        if (vaild) {
-          // this.$message.success(JSON.stringify(this.obj0))
-          let { jobName, categoryId, requirement, parentId, duty } = { ...this.form }
-          let params = {
-            jobName,
-            categoryId,
-            requirement,
-            parentId,
-            duty
-          }
-          params.parentId = params.parentId ? params.parentId : '0'
-          this.loading = true
-          postV1Job(params)
-            .then(() => {
-              this.loading = false
-              this.$message.success('保存成功')
-              this.$emit('onsubmit', params)
-
-              if (!again) {
-                this.$emit('update:dialogVisible', false)
-              } else {
-                reset()
-              }
-            })
-            .catch(() => {
-              this.loading = false
-            })
+      this.$refs.form.validate().then((res) => {
+        if (!res) return
+        let { jobName, categoryId, requirement, parentId, duty } = this.form
+        let params = {
+          jobName,
+          categoryId,
+          requirement,
+          parentId,
+          duty
         }
+        params.parentId = params.parentId ? params.parentId : '0'
+        this.loading = true
+        postV1Job(params)
+          .then(() => {
+            this.loading = false
+            this.$message.success('保存成功')
+            this.$emit('onsubmit', params)
+
+            if (!again) {
+              this.$emit('update:dialogVisible', false)
+            } else {
+              reset()
+            }
+          })
+          .catch(() => {
+            this.loading = false
+          })
       })
     },
     /***

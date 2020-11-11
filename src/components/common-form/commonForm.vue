@@ -226,8 +226,8 @@ export default {
     clearValidate() {
       return this.$refs['form'].clearValidate(...arguments)
     },
-    resetField() {
-      return this.$refs['form'].resetField(...arguments)
+    resetFields() {
+      return this.$refs['form'].resetFields(...arguments)
     },
     validateField() {
       return this.$refs['form'].validateField(...arguments)

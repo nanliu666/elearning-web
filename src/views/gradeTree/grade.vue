@@ -28,7 +28,7 @@
               effect="dark"
             >
               <div slot="content">
-                1.架构图是将企业组织、岗位和员工以结构层级图呈现。<br>2.对架构图的编辑将同步更新到【组织管理】和【岗位管理】。
+                1.架构图是将企业组织、岗位和员工以结构层级图呈现。<br />2.对架构图的编辑将同步更新到【组织管理】和【岗位管理】。
               </div>
               <i class="el-icon-question" /> </el-tooltip></span>
         </div>
@@ -53,10 +53,15 @@
         </div>
         <div style="width:100%;flex:1;">
           <div :style="{ display: 'inline-table', marginTop: editStatus ? '0px' : '-7px' }">
-            <avue-form
-              v-model="orgForm"
-              :option="option"
-              @submit="submit"
+            <!--            <avue-form-->
+            <!--              v-model="orgForm"-->
+            <!--              :option="option"-->
+            <!--              @submit="submit"-->
+            <!--            />-->
+            <commonForm
+              ref="form"
+              :model="orgForm"
+              :columns="columns"
             />
           </div>
         </div>
@@ -291,8 +296,6 @@ import {
 } from '@/api/organize/grade'
 import { deleteV1Job } from '@/api/organize/position'
 
-let org = []
-
 export default {
   name: 'Grade',
   components: {
@@ -341,21 +344,52 @@ export default {
       value: '选项1',
       selData: {},
       orgForm: { orgId: '' },
-      option: {
-        menuBtn: false,
-        labelWidth: 0,
-        column: [
-          {
-            label: '',
-            size: 'medium',
-            prop: 'orgId',
-            clearable: false,
-            span: 24,
-            type: 'tree',
-            dicData: org
+      columns: [
+        {
+          span: 20,
+          offset: 2,
+          labelPosition: 'right',
+          prop: 'orgId',
+          itemType: 'treeSelect',
+          type: 'input',
+          label: '业务架构图',
+          props: {
+            selectParams: {
+              placeholder: '请选择用人部门',
+              multiple: false
+            },
+            treeParams: {
+              data: [],
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'orgName',
+                disabled: 'disabled',
+                value: 'orgId'
+              }
+            }
           }
-        ]
-      },
+        }
+      ],
+      // option: {
+      //   menuBtn: false,
+      //   labelWidth: 0,
+      //   column: [
+      //     {
+      //       label: '',
+      //       size: 'medium',
+      //       prop: 'orgId',
+      //       clearable: false,
+      //       span: 24,
+      //       type: 'tree',
+      //       dicData: org
+      //     }
+      //   ]
+      // },
       myDiagram: '',
       dialogVisible: false,
       data: '',
@@ -522,7 +556,8 @@ export default {
           }
         }, 500)
 
-        this.option.column[0].dicData = res
+        // this.option.column[0].dicData = res
+        this.columns.find((item) => item.prop === 'orgId').props.treeParams.data = res
       })
     },
     submit() {},
@@ -1696,12 +1731,10 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss" scoped>
 .icon-question .el-message-box__status {
   color: #ffbf01;
 }
-</style>
-<style lang="scss" scoped>
 .avue-view {
   height: auto;
 }
@@ -1871,5 +1904,8 @@ export default {
   display: none;
   position: absolute;
   z-index: 1000;
+}
+.headers /deep/.el-form--label-top .el-form-item--medium .el-form-item__label {
+  display: none;
 }
 </style>
