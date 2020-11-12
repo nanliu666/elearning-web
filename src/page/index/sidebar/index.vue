@@ -8,12 +8,12 @@
       >
         没有发现菜单
       </div>
-      <div class="side-img">
+      <!-- <div class="side-img">
         <img
           src="../../../assets/images/sidebar.png"
           alt="sidebar"
         />
-      </div>
+      </div> -->
       <el-menu
         unique-opened
         :default-active="nowTagValue"
@@ -22,7 +22,7 @@
         :collapse="keyCollapse"
       >
         <sidebar-item
-          v-for="item in menu.children"
+          v-for="item in menu"
           :key="item.menuId"
           :item="item"
           :props="website.menu.props"

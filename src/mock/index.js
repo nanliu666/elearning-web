@@ -1,38 +1,33 @@
 /* eslint-disable no-unused-vars */
 import Mock from 'mockjs'
-import apprProcess from './apprProcess'
-import candidate from './candidate'
-import contact from './contact'
-import dict from './dict'
-import entry from './entry'
-import grade from './grade'
-import interview from './interview'
-import leave from './leave'
-import mailList from './mailList'
-import menu from './menu'
-import menus from './menus'
-import msg from './msg'
-import newsCenter from './newsCenter'
-import noticeCenter from './noticeCenter'
-import oauth from './oauth'
-import org from './org'
-import person from './person'
-import personalInfo from './personalInfo'
-import personnel from './personnel/'
-import personnelDataboard from './personnel/databoard'
-import personnelSettings from './personnel/settings'
-import position from './position'
-import process from './process'
-import remind from './remind'
-import role from './role'
-import schedule from './schedule'
-import selectPerson from './selectPerson'
-import system from './system'
-import taskcenter from './taskcenter'
-import todo from './todo'
-import transction from './transction'
-import user from './user'
-import tenant from './tenant'
+import apprProcess from './modules/apprProcess'
+import dict from './modules/dict'
+import entry from './modules/entry'
+import grade from './modules/grade'
+import interview from './modules/interview'
+import leave from './modules/leave'
+import mailList from './modules/mailList'
+import menu from './modules/menu'
+import menus from './modules/menus'
+import msg from './modules/msg'
+import newsCenter from './modules/newsCenter'
+import noticeCenter from './modules/noticeCenter'
+import oauth from './modules/oauth'
+import org from './modules/org'
+import person from './modules/person'
+import personalInfo from './modules/personalInfo'
+
+import position from './modules/position'
+import process from './modules/process'
+import remind from './modules/remind'
+import role from './modules/role'
+import schedule from './modules/schedule'
+import selectPerson from './modules/selectPerson'
+import system from './modules/system'
+import taskcenter from './modules/taskcenter'
+import todo from './modules/todo'
+import transction from './modules/transction'
+import user from './modules/user'
 /**
  * @param {boolean} enable 全局启用mock
  * @returns {void}
@@ -50,17 +45,16 @@ export default (enable) => {
   Mock.setup({
     timeout: 500
   })
+  menu({ mock: true })
   newsCenter(options)
   noticeCenter(options)
   user(options)
 
   apprProcess(options)
-  menu(options)
   apprProcess(options)
 
   interview(options)
 
-  candidate(options)
   selectPerson(options)
   position(options)
   grade(options)
@@ -69,8 +63,6 @@ export default (enable) => {
   system(options)
 
   oauth(options)
-
-  personnel(options)
 
   dict(options)
 
@@ -82,11 +74,8 @@ export default (enable) => {
   transction(options)
 
   person(options.mock)
-  contact(options)
   leave(options)
 
-  personnelSettings(options.mock)
-  personnelDataboard(options)
   todo(options)
   msg(options)
   todo(options)
@@ -98,5 +87,4 @@ export default (enable) => {
   process(options)
 
   mailList(options)
-  tenant({ mock: false })
 }

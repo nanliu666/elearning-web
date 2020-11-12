@@ -1,13 +1,13 @@
 <template>
   <div class="avue-top">
-    <div class="top-bar__title">
+    <!-- <div class="top-bar__title">
       <div
         v-if="showMenu"
         class="top-bar__item top-bar__item--show"
       >
         <top-menu ref="topMenu" />
       </div>
-    </div>
+    </div> -->
     <div class="top-bar__right">
       <el-tooltip
         v-if="showLock"
@@ -39,7 +39,7 @@
             v-if="userInfo.avatar_url"
             class="top-bar__img"
             :src="userInfo.avatar_url"
-          >
+          />
           <i
             v-else
             class="icon-usercircle top-bar__usericon"
@@ -67,12 +67,10 @@ import { resetRouter } from '@/router/router'
 import { mapGetters, mapState } from 'vuex'
 import { fullscreenToggel, listenfullscreen } from '@/util/util'
 import topLock from './top-lock'
-import topMenu from './top-menu'
 export default {
   name: 'Top',
   components: {
-    topLock,
-    topMenu
+    topLock
   },
   filters: {},
   data() {

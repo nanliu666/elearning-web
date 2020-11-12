@@ -73,7 +73,7 @@
               :src="loginForm.image"
               class="login-code-img"
               @click="refreshCode"
-            >
+            />
           </div>
         </el-col>
       </el-row>
@@ -191,8 +191,8 @@ export default {
                 ? decodeURI(this.$route.query.previewUrl)
                 : this.tagWel.value
               this.$router.push({ path })
-              this.$store.dispatch('GetUserPrivilege', res.user_id).then((menuAll) => {
-                this.$router.$avueRouter.formatRoutes(menuAll, true)
+              this.$store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
+                this.$router.$avueRouter.formatRoutes(menu, true)
               })
               loading.close()
             })

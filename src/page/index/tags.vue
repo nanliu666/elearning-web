@@ -43,7 +43,7 @@
         <el-tab-pane
           v-for="item in tagList"
           :key="item.value"
-          :label="item.menuName"
+          :label="item.label"
           :name="item.value"
         />
       </el-tabs>

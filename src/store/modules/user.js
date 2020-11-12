@@ -15,7 +15,6 @@ const user = {
     info: getStore({ name: 'info' }) || [],
     roles: [],
     menu: getStore({ name: 'menu' }) || [],
-    menuAll: getStore({ name: 'menuAll' }) || [],
     token: getStore({ name: 'token' }) || '',
     refreshToken: getStore({ name: 'refreshToken' }) || '',
     menuLoading: false
@@ -68,20 +67,19 @@ const user = {
               'SET_ORGS',
               data.orgPrivileges.filter((org) => org.isOwn === 1)
             )
-            const menuAll = filterTree(
+            const menu = filterTree(
               data.menuPrivileges,
               (node) => node.isOwn === 1 && node.menuType !== 'Button'
             )
-            sortTree(menuAll, (a, b) => a.sort - b.sort)
-            commit('SET_MENU', menuAll[0].children)
-            commit('SET_MENU_ALL', menuAll)
+            sortTree(menu, (a, b) => a.sort - b.sort)
+            commit('SET_MENU', menu)
             commit(
               'SET_PRIVILEGES',
               flatTree(data.menuPrivileges)
                 .filter((node) => node.isOwn === 1 && node.menuType === 'Button')
                 .map((item) => item.path)
             )
-            resolve(menuAll)
+            resolve(menu)
           })
           .catch((err) => {
             commit('SET_MENU_LOADING', false)
@@ -134,7 +132,6 @@ const user = {
           .then(() => {
             commit('SET_TOKEN', '')
             commit('SET_MENU', [])
-            commit('SET_MENU_ALL', [])
             commit('SET_ROLES', [])
             commit('DEL_ALL_TAG')
             commit('CLEAR_LOCK')
@@ -151,7 +148,6 @@ const user = {
     FedLogOut({ commit }) {
       return new Promise((resolve) => {
         commit('SET_TOKEN', '')
-        commit('SET_MENU_ALL', [])
         commit('SET_MENU', [])
         commit('SET_ROLES', [])
         commit('DEL_ALL_TAG')
@@ -178,10 +174,6 @@ const user = {
       setToken(token)
       state.token = token
       setStore({ name: 'token', content: state.token })
-    },
-    SET_MENU_ALL: (state, menuAll) => {
-      state.menuAll = menuAll
-      setStore({ name: 'menuAll', content: menuAll })
     },
     SET_REFRESH_TOKEN: (state, refreshToken) => {
       setRefreshToken(refreshToken)

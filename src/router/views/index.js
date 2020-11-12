@@ -25,8 +25,7 @@ export default [
         path: 'index',
         name: '工作台',
         meta: {
-          i18n: 'dashboard',
-          fullscreen: true
+          i18n: 'dashboard'
         },
         component: () => import('@/views/wel/index')
       },

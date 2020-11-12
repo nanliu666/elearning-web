@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 import Mock from 'mockjs'
-import mockData from '../views/processDesign/mockData'
+import mockData from '@/views/processDesign/mockData'
 import { Base64 } from 'js-base64'
 
 const normalData = {

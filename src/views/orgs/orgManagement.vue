@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="组织机构管理">
+    <page-header title="组织管理">
       <el-dropdown
         slot="rightMenu"
         @command="handleCommand"
