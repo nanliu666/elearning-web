@@ -83,6 +83,9 @@ export default {
     this.getMenuList()
   },
   methods: {
+    validatenull(...args) {
+      return validatenull(...args)
+    },
     handleEsc() {
       this.$parent.isSearch = false
     },

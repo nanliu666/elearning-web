@@ -8,11 +8,23 @@
       :before-close="handleClose"
     >
       <div v-loading="loading">
-        <avue-form
+        <commonForm
           ref="form"
-          v-model="form"
-          :option="option"
-        />
+          :model="form"
+          :columns="columns"
+        >
+          <template slot="remark">
+            <el-input
+              v-model="form.remark"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入"
+              maxlength="150"
+              :show-word-limit="true"
+            >
+            </el-input>
+          </template>
+        </commonForm>
       </div>
       <span
         slot="footer"
@@ -97,6 +109,40 @@ export default {
     }
   },
   data() {
+    const JOB_LEVEL_ID = {
+      prop: 'jobLevelId',
+      itemType: 'input',
+      placeholder: '请输入',
+      disabled: true,
+      label: '职级编码',
+      span: 24,
+      required: true
+    }
+    const BASE_COLUMNS = [
+      {
+        prop: 'jobLevelName',
+        itemType: 'input',
+        placeholder: '请输入',
+        label: '职级名称',
+        span: 24,
+        required: true
+      },
+      {
+        prop: 'categoryId',
+        itemType: 'select',
+        placeholder: '请选择',
+        label: '分类',
+        span: 24,
+        required: true,
+        options: []
+      },
+      {
+        prop: 'remark',
+        itemType: 'slot',
+        label: '描述',
+        span: 24
+      }
+    ]
     return {
       loading: false,
       form: {
@@ -105,63 +151,8 @@ export default {
         categoryId: '',
         jobLevelId: ''
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '职级名称',
-            prop: 'jobLevelName',
-            type: 'input',
-            row: true,
-            span: 24,
-            placeholder: '请输入',
-            rules: [
-              {
-                required: true,
-                message: '请输入',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '职级编码',
-            prop: 'jobLevelId',
-            type: 'input',
-            row: true,
-            display: false,
-            span: 24,
-            disabled: true,
-            placeholder: '请输入'
-          },
-          {
-            label: '分类',
-            prop: 'categoryId',
-            type: 'select',
-            row: true,
-            span: 24,
-            rules: [
-              {
-                required: true,
-                message: '请选择',
-                trigger: 'blur'
-              }
-            ],
-            dicData: ''
-          },
-          {
-            label: '描述',
-            prop: 'remark',
-            maxlength: 200,
-            type: 'textarea',
-            row: true,
-            showWordLimit: true,
-            span: 24,
-            placeholder: '请输入 '
-          }
-        ]
-      },
+      JobLevelId: JOB_LEVEL_ID,
+      columns: BASE_COLUMNS,
       dialog: true
     }
   },
@@ -190,19 +181,11 @@ export default {
     },
     isEdit: {
       handler: function(val) {
-        val && (this.option.column[1].display = true)
+        val && this.columns.splice(1, 0, this.JobLevelId)
       },
       deep: true,
       immediate: true
     },
-    // data: {
-    //   handler: function(val) {
-    //     this.form.name = val.name
-    //     this.form.remark = val.remark
-    //   },
-    //   immediate: true,
-    //   deep: true
-    // },
     dialog: {
       handler: function() {
         this.$emit('update:dialogVisible', false)
@@ -217,8 +200,11 @@ export default {
       it.value = it.categoryId
       it.disabled = false
     })
-
-    this.option.column[2].dicData = catList
+    _.each(this.columns, (item) => {
+      if (item.prop === 'categoryId') {
+        item.options = catList
+      }
+    })
   },
   methods: {
     reset() {

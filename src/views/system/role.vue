@@ -109,12 +109,6 @@
           @reload="reload"
           @fiter="fiter"
         />
-        <userList
-          v-if="userVisible"
-          :visible.sync="userVisible"
-          :role-id="roleId"
-          @upDate="onLoad"
-        />
       </el-container>
     </basic-container>
   </div>
@@ -123,16 +117,13 @@
 <script>
 import roleEdit from './components/roleEdit'
 import roleAside from './components/roleAside'
-// import roleLimits from './components/rolePermission'
-import userList from './components/roleUserList'
 import { getRoleList, getCate, getPositions, delRole } from '../../api/system/role'
 
 export default {
   name: 'Role',
   components: {
     roleEdit,
-    roleAside,
-    userList
+    roleAside
   },
   data() {
     return {
@@ -276,16 +267,7 @@ export default {
     },
     sizeChange() {},
     currentChange() {},
-    fiter() {
-      // let data = []
-      //    let data2= []
-      // this.jobFilter(this.JodOrg, data, data2,roleId)
-      // if(checked){
-      //   this.options.jobs =  data2
-      // }else{
-      //   this.options.jobs =  data
-      // }
-    },
+    fiter() {},
     // 加载页面全部数据（左侧分组树，右侧角色列表）
     async onLoad() {
       await this.getTreeCate()
@@ -324,27 +306,12 @@ export default {
       return new Promise((resolve) => {
         const params = {
           categoryName: '',
-          pageSize: 50,
+          pageSize: 2000,
           page: 1
         }
         getCate(params).then((res) => {
           let result = res.data || []
           this.options.treeList = result.map((item) => {
-            // let children = []
-            // if (item.categories && item.categories.length > 0) {
-            // if (item.categories && item.categories.length > 0) {
-            // children = item.categories.map((it) => {
-            // if (!this.options.currentId && it.roleNum > 0) {
-            //   this.options.currentId = it.categoryId // 没有设置默认的激活分类时，设置默认激活分类
-            // }
-            //   return {
-            //     groupId: item.groupId,
-            //     cateId: it.categoryId,
-            //     label: it.categoryName,
-            //     roleNum: it.roleNum
-            //   }
-            // })
-            // }
             if (!this.options.currentId && item.roleNum) this.options.currentId = item.id
             return {
               cateId: item.id,

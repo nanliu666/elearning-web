@@ -9,11 +9,34 @@
     >
       <div v-loading="loading">
         <div>
-          <avue-form
+          <commonForm
             ref="form"
-            v-model="form"
-            :option="option"
-          />
+            :model="form"
+            :columns="columns"
+          >
+            <template slot="duty">
+              <el-input
+                v-model="form.duty"
+                type="textarea"
+                :rows="4"
+                placeholder="请输入技能职责"
+                maxlength="150"
+                :show-word-limit="true"
+              >
+              </el-input>
+            </template>
+            <template slot="requirement">
+              <el-input
+                v-model="form.requirement"
+                type="textarea"
+                :rows="4"
+                maxlength="150"
+                :show-word-limit="true"
+                placeholder="请输入技能要求"
+              >
+              </el-input>
+            </template>
+          </commonForm>
         </div>
         <div
           v-if="!isEdit"
@@ -104,6 +127,46 @@ export default {
     }
   },
   data() {
+    const SKILL_ID = {
+      prop: 'skillId',
+      itemType: 'input',
+      placeholder: '请输入',
+      disabled: true,
+      label: '技能编码',
+      span: 24,
+      required: true
+    }
+    const BASE_COLUMNS = [
+      {
+        prop: 'skillName',
+        itemType: 'input',
+        placeholder: '请输入',
+        label: '技能名称',
+        span: 24,
+        required: true
+      },
+      {
+        prop: 'jobId',
+        itemType: 'select',
+        placeholder: '请选择',
+        label: '岗位',
+        span: 24,
+        required: true,
+        options: []
+      },
+      {
+        prop: 'duty',
+        itemType: 'slot',
+        label: '技能职责',
+        span: 24
+      },
+      {
+        prop: 'requirement',
+        itemType: 'slot',
+        label: '技能要求',
+        span: 24
+      }
+    ]
     return {
       orgId: '',
       firstLoad: true,
@@ -117,91 +180,16 @@ export default {
         duty: '', // 技能职责
         requirement: '' //技能要求
       },
-      option: {
-        menuBtn: false,
-        labelPosition: 'top',
-        size: 'medium',
-        column: [
-          {
-            label: '技能名称',
-            prop: 'skillName',
-            type: 'input',
-            row: true,
-            span: 24,
-            placeholder: '请输入',
-            rules: [
-              {
-                required: true,
-                message: '请输入',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '技能编码',
-            prop: 'skillId',
-            type: 'input',
-            row: true,
-            display: false,
-            span: 24,
-            disabled: true,
-            placeholder: '请输入',
-            rules: [
-              {
-                required: true,
-                message: '请输入',
-                trigger: 'blur'
-              }
-            ]
-          },
-          {
-            label: '岗位',
-            prop: 'jobId',
-            type: 'select',
-            row: true,
-            placeholder: '请选择',
-            span: 24,
-            rules: [
-              {
-                required: true,
-                message: '请选择',
-                trigger: 'blur'
-              }
-            ],
-            dicData: ''
-          },
-          {
-            label: '技能职责',
-            prop: 'duty',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            placeholder: '请输入',
-            maxlength: 1000,
-            showWordLimit: true
-          },
-          {
-            label: '技能要求',
-            prop: 'requirement',
-            type: 'textarea',
-            row: true,
-            span: 24,
-            placeholder: '请输入',
-            maxlength: 1000,
-            showWordLimit: true
-          }
-        ]
-      },
+      skillId: SKILL_ID,
+      columns: BASE_COLUMNS,
       dialog: true
     }
   },
-  computed: {},
   watch: {
     'form.jobId': {
       handler: async function(val, old) {
         if (val == old) return
         if (val.length > 0) {
-          this.option.column[2].placeholder = '请选择'
           if (!this.firstLoad) {
             this.loading = true
             let jod = await this.getJod(val)
@@ -227,11 +215,19 @@ export default {
               it.label = it.jobName
               it.value = it.jobId
             })
-            this.option.column[1].dicData = jod
+            _.each(this.columns, (it) => {
+              if (it.prop === 'jobId') {
+                it.options = jod
+              }
+            })
             this.loading = false
           }
         } else {
-          this.option.column[1].dicData = []
+          _.each(this.columns, (it) => {
+            if (it.prop === 'jobId') {
+              it.options = []
+            }
+          })
         }
       },
       deep: true //对象内部的属性监听，也叫深度监听
@@ -253,7 +249,7 @@ export default {
     isEdit: {
       handler(val) {
         if (val) {
-          this.option.column[1].display = true
+          this.columns.splice(1, 0, this.skillId)
         }
       },
       immediate: true
@@ -273,9 +269,7 @@ export default {
             duty: duty, // 技能职责
             requirement: requirement //技能要求
           }
-          // setTimeout(() => {
           this.form = Object.assign(this.form, form)
-          // }, 500)
         } else if (val.jobId && !this.isEdit) {
           let { skillName, jobId, duty, requirement } = { ...val }
           let form = {
@@ -284,17 +278,12 @@ export default {
             duty,
             requirement
           }
-          // setTimeout(() => {
           this.form = Object.assign(this.form, form)
-          // }, 500)
         }
       },
       immediate: true
     }
   },
-  async created() {},
-  async mounted() {},
-
   methods: {
     async init() {
       this.loading = true
@@ -303,7 +292,11 @@ export default {
         it.label = it.jobName
         it.value = it.jobId
       })
-      this.option.column[2].dicData = jod
+      _.each(this.columns, (it) => {
+        if (it.prop === 'jobId') {
+          it.options = jod
+        }
+      })
       this.loading = false
       this.firstLoad = false
     },
