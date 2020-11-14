@@ -23,6 +23,7 @@ const getters = {
   roles: (state) => state.user.roles,
   privileges: (state) => state.user.privileges,
   menu: (state) => state.user.menu,
+  menuAll: (state) => state.user.menuAll,
   tenantContent: (state) => state.user.tenantContent,
   menuLoading: (state) => state.user.menuLoading,
   logsList: (state) => state.logs.logsList,
