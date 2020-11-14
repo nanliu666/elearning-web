@@ -15,6 +15,7 @@ const user = {
     info: getStore({ name: 'info' }) || [],
     roles: [],
     menu: getStore({ name: 'menu' }) || [],
+    menuAll: getStore({ name: 'menuAll' }) || [],
     token: getStore({ name: 'token' }) || '',
     refreshToken: getStore({ name: 'refreshToken' }) || '',
     menuLoading: false
@@ -73,6 +74,7 @@ const user = {
             )
             sortTree(menu, (a, b) => a.sort - b.sort)
             commit('SET_MENU', menu)
+            commit('SET_MENU_ALL', menu)
             commit(
               'SET_PRIVILEGES',
               flatTree(data.menuPrivileges)
@@ -195,6 +197,10 @@ const user = {
     SET_MENU: (state, menu) => {
       state.menu = menu
       setStore({ name: 'menu', content: state.menu })
+    },
+    SET_MENU_ALL: (state, menuAll) => {
+      state.menuAll = menuAll
+      setStore({ name: 'menuAll', content: menuAll })
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles

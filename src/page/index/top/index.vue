@@ -104,7 +104,7 @@ export default {
   },
   methods: {
     showUserCenter() {
-      this.$router.push('/info/index')
+      this.$router.push('/info/securitySetting')
     },
     handleScreen() {
       fullscreenToggel()
