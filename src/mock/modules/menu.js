@@ -108,15 +108,41 @@ const res = {
           {
             menuId: '1259073456778285058',
             menuName: '用户管理',
-            menuType: 'Menu',
+            menuType: 'Dir',
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/system/user',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuId: '12590356778285058',
+                menuName: '用户管理',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 1,
+                code: 'org_user',
+                alias: 'user',
+                path: '/system/user',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              },
+              {
+                menuId: '125903456778285058',
+                menuName: '添加用户',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 0,
+                code: 'add_user',
+                alias: 'addUser',
+                path: '/system/addUser',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              }
+            ]
           },
           {
             menuId: '1260401852546387969',

@@ -29,7 +29,7 @@
         <div class="flex flex-flow flex-justify-between flex-items">
           <el-input
             v-model="query.name"
-            placeholder="姓名/工号"
+            placeholder="姓名/手机号码"
             clearable
             style="width:200px;margin-right:12px;"
             @input="searchLoadData"
@@ -249,7 +249,7 @@ export default {
         Array.isArray(data) ? (data.length = 0) : ''
         this.loadData()
       })
-    },  
+    },
     handleCommand(command, row) {
       let status = null
       switch (command) {

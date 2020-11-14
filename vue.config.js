@@ -96,14 +96,14 @@ module.exports = {
         // 深圳
         // target: 'http://192.168.40.229/',
         // 广州
-        target: 'http://192.168.1.100/',
+        // target: 'http://192.168.1.100/',
         // 本地环境
         // 开发环境
         // target: 'http://122.112.183.186/',
         // target: 'http://apidev.epro.com.cn/',
 
         // 测试环境
-        // target: 'http://122.112.190.144/',
+        target: 'http://122.112.190.144/',
 
         // saber远程演示服务地址
         // target: 'https://saber.bladex.vip/',
