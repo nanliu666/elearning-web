@@ -192,7 +192,7 @@ export default {
       this.$router.push(pathData[0].path)
     },
     showUserCenter() {
-      this.$router.push('/info/index')
+      this.$router.push('/info/securitySetting')
     },
     refreshEntry() {
       this.getQuickEntryList()

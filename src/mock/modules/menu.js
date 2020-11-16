@@ -130,14 +130,27 @@ const res = {
                 children: []
               },
               {
+                menuId: '1259034522778285058',
+                menuName: '用户详情',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 0,
+                code: 'user_detail',
+                alias: 'userDetail',
+                path: '/system/userDetail',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              },
+              {
                 menuId: '125903456778285058',
                 menuName: '添加用户',
                 menuType: 'Menu',
                 isOwn: 1,
                 isShow: 0,
-                code: 'add_user',
-                alias: 'addUser',
-                path: '/system/addUser',
+                code: 'editUser',
+                alias: 'editUser',
+                path: '/system/editUser',
                 icon: 'iconfont iconicon_boss',
                 dataPrivileges: [],
                 children: []

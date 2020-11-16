@@ -1,7 +1,7 @@
 <template>
   <div style="height">
     <page-header
-      title="添加用户"
+      :title="`${id ? '编辑' : '添加'}用户`"
       show-back
       :back="goBack"
     />
@@ -76,6 +76,7 @@
 
 <script>
 import { checkUserInfo, createUser } from '@/api/personnel/roster'
+import { getStaffBasicInfo } from '@/api/personalInfo'
 import { getRoleList } from '@/api/system/role'
 import { getUserWorkList, getOrgTreeSimple } from '@/api/org/org'
 import { mapGetters } from 'vuex'
@@ -277,16 +278,29 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userId'])
+    ...mapGetters(['userId']),
+    id() {
+      return this.$route.query.userId
+    }
   },
 
-  activated() {},
+  activated() {
+    this.loadUserData()
+  },
   created() {
     this.loadOrgData()
     this.loadRoleData()
   },
 
   methods: {
+    loadUserData() {
+      if (!this.id) {
+        return
+      }
+      getStaffBasicInfo({ userId: this.id }).then((res) => {
+        this.form = res
+      })
+    },
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: '0' }).then((res) => {
         this.columns.find((item) => item.prop === 'orgId').props.treeParams.data = res
