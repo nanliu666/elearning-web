@@ -36,6 +36,14 @@
           />
         </div>
       </template>
+      <template #name="{row}">
+        <el-button
+          type="text"
+          @click="handleUserClick(row)"
+        >
+          {{ row.name }}
+        </el-button>
+      </template>
       <template
         slot="handler"
         slot-scope="{ row }"
@@ -130,7 +138,8 @@ export default {
       columns: [
         {
           label: '姓名',
-          prop: 'name'
+          prop: 'name',
+          slot: true
         },
         {
           label: '工号',
@@ -221,6 +230,9 @@ export default {
     sizeChange(pageSize) {
       this.page.size = pageSize
       this.loadData()
+    },
+    handleUserClick(row) {
+      this.$router.push({ path: '/system/userDetail', query: { userId: row.userId } })
     },
     handleReset(data) {
       let ids
