@@ -106,6 +106,58 @@ const res = {
             ]
           },
           {
+            menuId: '12590734561231235058',
+            menuName: '目录管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/directory',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125907389076789',
+            menuName: '调整排序',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/adjustSort',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590734561231235058',
+            menuName: '课程管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseDraft',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259056772564535058',
+            menuName: '创建课程',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/establishCourse',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
             menuId: '1259073456778285058',
             menuName: '用户管理',
             menuType: 'Dir',
