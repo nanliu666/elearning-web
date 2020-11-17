@@ -1,17 +1,23 @@
 <template>
   <div class="Menu fill">
-    <page-header title="菜单管理">
-      <el-button
-        slot="rightMenu"
-        size="medium"
-        type="primary"
-        @click="handleMenuAddBtnClick"
-      >
-        添加菜单
-      </el-button>
-    </page-header>
-
+    <page-header title="菜单管理" />
     <basic-container block>
+      <el-menu
+        :default-active="activeIndex"
+        class="el-menu"
+        mode="horizontal"
+        @select="handleSelect"
+      >
+        <el-menu-item index="1">
+          Web端菜单
+        </el-menu-item>
+        <el-menu-item index="2">
+          Mobile菜单
+        </el-menu-item>
+        <el-menu-item index="3">
+          后台系统菜单
+        </el-menu-item>
+      </el-menu>
       <common-table
         ref="table"
         :columns="columnsVisible | columnsFilter"
@@ -20,16 +26,29 @@
         :loading="tableLoading"
         :page-config="tablePageConfig"
         :page="page"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="operations">
-            <seach-popover
-              :popover-options="searchPopoverConfig.popoverOptions"
-              :require-options="searchPopoverConfig.requireOptions"
-              @submit="handleSearch"
-            />
+            <div class="operations__left">
+              <el-select
+                v-model="statusValue"
+                style="width: 100px; margin-right: 20px"
+                placeholder="请选择"
+                @change="statusChange"
+              >
+                <el-option
+                  v-for="item in statusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                </el-option>
+              </el-select>
+              <seach-popover
+                :require-options="searchPopoverConfig.requireOptions"
+                @submit="handleSearch"
+              />
+            </div>
             <div class="operations__btns">
               <el-tooltip
                 class="operations__btns--tooltip"
@@ -86,64 +105,54 @@
           </div>
         </template>
 
-        <template #multiSelectMenu="{ selection }">
-          <el-button
-            style="margin-bottom:0;"
-            type="text"
-            @click="() => handleRemoveItems(selection)"
-          >
-            批量删除
-          </el-button>
-        </template>
-
         <template #icon="{row}">
           <i :class="_.get(row, 'icon', '')" />
+        </template>
+        <template #isEnabled="{row}">
+          {{ row.isEnabled === 1 ? '已启用' : '已停用' }}
         </template>
 
         <template #handler="{row}">
           <div class="table__handler">
             <el-button
+              v-if="row.isEnabled === 1"
               size="medium"
               type="text"
-              @click.stop="() => handleMenuEditBtnClick(row)"
+              @click.stop="() => handleMenuEnable(row)"
             >
-              编辑
+              停用
             </el-button>
             <el-button
+              v-else
               size="medium"
               type="text"
-              @click.stop="() => handleRemoveItems([row])"
+              @click.stop="() => handleMenuUnable(row)"
             >
-              删除
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleMenuItemAddBtnClick(row)"
-            >
-              新增子项
+              启用
             </el-button>
           </div>
         </template>
       </common-table>
     </basic-container>
-
-    <!-- 添加/编辑 菜单弹窗 -->
-    <menu-edit
-      ref="menuEdit"
-      :visible.sync="menuEditVisible"
-      v-on="{
-        submitAdd: (query) => handleMenuEditSubmit({ query, type: 'add' }),
-        submitAddItem: (query) => handleMenuEditSubmit({ query, type: 'addItem' }),
-        submitEdit: (query) => handleMenuEditSubmit({ query, type: 'edit' })
-      }"
-    />
   </div>
 </template>
 
 <script>
-import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
-
+import { getMenuInfo, putMenuInfo } from '@/api/system/menu'
+const CLIENT_TYPE = [
+  {
+    type: 'Admin',
+    text: '后台系统菜单'
+  },
+  {
+    type: 'OAMobile',
+    text: 'Web端菜单'
+  },
+  {
+    type: 'Mobile',
+    text: 'Mobile菜单'
+  }
+]
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -152,25 +161,10 @@ const TABLE_COLUMNS = [
     prop: 'name'
   },
   {
-    label: '请求地址',
-    minWidth: 150,
-    prop: 'path'
-  },
-  // {
-  //   label: '上级菜单',
-  //   prop: 'parentId',
-  //   width: 150
-  // },
-  {
     label: '菜单图标',
     prop: 'icon',
     slot: true,
-    width: 150
-  },
-  {
-    label: '菜单编号',
-    prop: 'code',
-    width: 150
+    minWidth: 150
   },
   {
     // 格式化菜单类型
@@ -191,67 +185,23 @@ const TABLE_COLUMNS = [
     },
     label: '菜单类型',
     prop: 'menuType',
-    width: 150
+    minWidth: 150
   },
   {
-    label: '菜单别名',
-    prop: 'alias',
-    width: 150
-  },
-  {
-    formatter: (row, column, text = '') => {
-      switch (text) {
-        case 0:
-          text = '隐藏'
-          break
-        case 1:
-          text = '显示'
-          break
-        default:
-      }
-      return text
-    },
-    label: '是否展示',
-    prop: 'isShow',
-    width: 150
-  },
-  {
-    label: '菜单排序',
-    prop: 'sort',
-    width: 80
-  },
-  {
-    label: '菜单备注',
-    prop: 'remark',
-    width: 150
+    label: '状态',
+    prop: 'isEnabled',
+    slot: true,
+    minWidth: 150
   }
-  // {
-  //   formatter: (row, column, text = '') => {
-  //     switch (text) {
-  //       case 'VALID':
-  //         text = '有效'
-  //         break
-  //       case 'INVALID':
-  //         text = '失效'
-  //         break
-  //       default:
-  //     }
-  //     return text
-  //   },
-  //   label: '状态',
-  //   prop: 'status',
-  //   width: 150
-  // }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 60
   },
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false,
-
+  showIndexColumn: true,
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
@@ -277,31 +227,14 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
     type: 'input'
   }
 ]
-const SEARCH_POPOVER_POPOVER_OPTIONS = [
-  {
-    config: { placeholder: '请输入菜单编号' },
-    data: '',
-    field: 'code',
-    label: '菜单编号',
-    type: 'input'
-  },
-  {
-    config: { placeholder: '请输入菜单别名' },
-    data: '',
-    field: 'alias',
-    label: '菜单别名',
-    type: 'input'
-  }
-]
+
 const SEARCH_POPOVER_CONFIG = {
-  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
 
 export default {
   name: 'Menu',
   components: {
-    MenuEdit: () => import('./components/menuEdit'),
     SeachPopover: () => import('@/components/searchPopOver')
   },
   filters: {
@@ -311,6 +244,24 @@ export default {
   },
   data() {
     return {
+      copyTableData: [],
+      clientTypeList: CLIENT_TYPE,
+      statusOptions: [
+        {
+          value: '',
+          label: '全部'
+        },
+        {
+          value: 1,
+          label: '启用'
+        },
+        {
+          value: 0,
+          label: '禁用'
+        }
+      ],
+      statusValue: '',
+      activeIndex: '1',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -333,67 +284,38 @@ export default {
     this.refreshTableData()
   },
   methods: {
-    //  处理页码改变
-    handleCurrentPageChange() {},
-    handlePageSizeChange() {},
-
+    statusChange() {
+      let searchParams = { isEnabled: this.statusValue }
+      this.loadTableData(searchParams)
+    },
+    handleSelect(key) {
+      this.statusValue = ''
+      let searchParams = { clientId: this.clientTypeList[key - 1].type }
+      this.handleSearch(searchParams)
+    },
+    handleMenuEnable(row) {
+      let type = row.menuType === 'Button' ? '按钮' : '菜单'
+      this.$confirm(`您确定要停用该${type}吗停用后，该${type}将不能出现在系统中`, {
+        type: 'warning'
+      }).then(() => {
+        putMenuInfo({ isEnabled: 0, menuId: row.menuId }).then(() => {
+          this.refreshTableData()
+        })
+      })
+    },
+    handleMenuUnable(row) {
+      let type = row.menuType === 'Button' ? '按钮' : '菜单'
+      this.$confirm(`您确定要启用该${type}吗`, {
+        type: 'warning'
+      }).then(() => {
+        putMenuInfo({ isEnabled: 1, menuId: row.menuId }).then(() => {
+          this.refreshTableData()
+        })
+      })
+    },
     handleSearch(searchParams) {
       this.loadTableData(_.pickBy(searchParams))
     },
-
-    handleRemoveItems(selection) {
-      this.$confirm('确定将选择数据删除?', {
-        type: 'warning'
-      })
-        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
-        .then(() => {
-          // 删除完成后更新视图
-          this.$refs.table.clearSelection()
-          this.refreshTableData()
-        })
-    },
-    // 点击添加菜单按钮
-    handleMenuAddBtnClick() {
-      this.$refs.menuEdit.init()
-    },
-    // 添加子菜单
-    handleMenuItemAddBtnClick({ menuId }) {
-      this.$refs.menuEdit.init({ parentId: menuId })
-    },
-
-    // 点击菜单编辑按钮
-    handleMenuEditBtnClick(row) {
-      this.$refs.menuEdit.init(row)
-    },
-
-    // 表单弹窗提交
-    handleMenuEditSubmit({ query, type }) {
-      const menuEdit = this.$refs.menuEdit
-      let api = null
-      switch (type) {
-        case 'add': // 与case "addItem": 处理相同
-        case 'addItem':
-          api = postMenuInfo
-          break
-        case 'edit':
-          api = putMenuInfo
-          break
-        default:
-          return
-      }
-      menuEdit.loading = true
-      api(_.set(query, 'status', true))
-        .then(() => {
-          this.$message.success('操作成功!')
-          this.refreshTableData()
-          this.$refs.menuEdit.close()
-        })
-        .catch((err) => {
-          window.console.log(err)
-        })
-        .finally(() => (menuEdit.loading = false))
-    },
-
     // 刷新列表数据
     refreshTableData() {
       //  因为只加载了最外层的数据，children仍然是旧的，清空数据
@@ -416,6 +338,7 @@ export default {
           hasChildren: true,
           ...t
         }))
+        this.copyTableData = _.clone(this.tableData)
         // 更新分页器数据
         this.page.total = _.size(tableData)
       } catch (error) {
@@ -427,7 +350,17 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.basic-container--block {
+  .el-menu {
+    margin-bottom: 20px;
+    margin-top: -10px;
+  }
+  /deep/ .el-menu--horizontal {
+    border-bottom: 1px solid #cccccc !important;
+  }
+}
+</style>
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
 
@@ -438,6 +371,9 @@ $color_icon: #A0A8AE
   align-items: center
   display: flex
   justify-content: space-between
+  &__left
+    display: flex
+    align-items: center
   &__column--item
     height: 25px
   &__column--visible
