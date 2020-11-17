@@ -1,13 +1,13 @@
 <template>
   <div class="course">
     <!-- 头部 -->
-    <page-header title="目录管理">
+    <page-header title="课程管理">
       <el-dropdown slot="rightMenu">
         <el-button
           type="primary"
           size="medium"
         >
-          新建目录
+          新建课程
         </el-button>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item>
@@ -52,7 +52,7 @@
               style="margin-bottom:0;"
               @click="handleReset(selection)"
             >
-              批量重置密码
+              批量做点什么
             </el-button>
           </template>
           <template slot="topMenu">
@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import { getOrgUserList, modifyUserStatus, resetPwd } from '@/api/system/user'
+import { getOrgUserList, resetPwd } from '@/api/system/user'
 export default {
   props: {
     activeOrg: {
@@ -191,32 +191,7 @@ export default {
           label: '讲师',
           prop: 'workNo'
         },
-        //状态，1-正常，2-禁用
-        // {
-        //   label: '状态',
-        //   prop: 'userStatus',
-        //   filters: [
-        //     {
-        //       text: '正常',
-        //       value: '1'
-        //     },
-        //     {
-        //       text: '禁用',
-        //       value: '2'
-        //     }
-        //   ],
-        //   filterMethod: (value, row) => {
-        //     return row.userStatus == value
-        //   },
-        //   formatter (record) {
-        //     return (
-        //       {
-        //         '1': '正常',
-        //         '2': '禁用'
-        //       }[record.userStatus] || ''
-        //     )
-        //   }
-        // },
+
         {
           label: '所在目录',
           prop: 'orgName'
@@ -225,25 +200,17 @@ export default {
           label: '课程类型',
           prop: 'jobName'
         },
-        // {
-        //   label: '角色',
-        //   prop: 'roles',
-        //   width: 100,
-        //   formatter (record) {
-        //     return record.roles.map((role) => role.roleName).join(';')
-        //   }
-        // },
         {
           label: '通过条件',
           prop: 'phonenum'
         },
         {
           label: '选修类型',
-          prop: 'phonenum'
+          prop: '1'
         },
         {
           label: '创建人',
-          prop: 'phonenum'
+          prop: '2'
         }
       ],
       data: [],
@@ -287,9 +254,7 @@ export default {
     searchLoadData: _.debounce(function() {
       this.loadData()
     }, 500),
-    handleAfterSubmit() {
-      this.loadData()
-    },
+    // 编辑
     handleEditRole(user) {
       this.$refs['userRoleEdit'].init(user)
     },
@@ -328,39 +293,6 @@ export default {
         Array.isArray(data) ? (data.length = 0) : ''
         this.loadData()
       })
-    },
-    handleCommand(command, row) {
-      let status = null
-      switch (command) {
-        case 'suspend':
-          status = '2'
-          break
-        case 'unsuspend':
-          status = '1'
-          break
-      }
-      this.modifyUserStatus(row.userId, status)
-    },
-    modifyUserStatus(userId, status) {
-      let msg = ''
-      if (status === '2') {
-        msg = '您确定要冻结该用户吗？\n冻结后，该用户将不能登录系统'
-      } else {
-        msg = '您确定要解冻该用户吗？'
-      }
-      this.$confirm(msg, {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => modifyUserStatus(userId, status))
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
-          this.loadData()
-        })
     },
     loadData() {
       this.loading = true

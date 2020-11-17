@@ -7,7 +7,7 @@
         type="primary"
         @click="handleMenuAddBtnClick"
       >
-        添加目录
+        新建目录
       </el-button>
     </page-header>
 
@@ -19,8 +19,6 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="operations">
@@ -150,13 +148,6 @@ const TABLE_COLUMNS = [
     minWidth: 450,
     prop: 'name'
   },
-  //   {
-  //     label: '菜单图标',
-  //     prop: 'icon',
-  //     slot: true,
-  //     width: 150
-  //   },
-
   {
     formatter: (row, column, text = '') => {
       switch (text) {
@@ -184,23 +175,6 @@ const TABLE_COLUMNS = [
     prop: 'alias',
     width: 300
   }
-  // {
-  //   formatter: (row, column, text = '') => {
-  //     switch (text) {
-  //       case 'VALID':
-  //         text = '有效'
-  //         break
-  //       case 'INVALID':
-  //         text = '失效'
-  //         break
-  //       default:
-  //     }
-  //     return text
-  //   },
-  //   label: '状态',
-  //   prop: 'status',
-  //   width: 150
-  // }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
@@ -292,10 +266,6 @@ export default {
     this.refreshTableData()
   },
   methods: {
-    //  处理页码改变
-    handleCurrentPageChange() {},
-    handlePageSizeChange() {},
-
     handleSearch(searchParams) {
       this.loadTableData(_.pickBy(searchParams))
     },
@@ -311,16 +281,16 @@ export default {
           this.refreshTableData()
         })
     },
-    // 点击添加菜单按钮
+    // 新建按钮
     handleMenuAddBtnClick() {
       this.$refs.menuEdit.init()
     },
-    // 添加子菜单
+    // 停用按钮
     handleMenuItemAddBtnClick({ menuId }) {
       this.$refs.menuEdit.init({ parentId: menuId })
     },
 
-    // 点击菜单编辑按钮
+    // 编辑按钮
     handleMenuEditBtnClick(row) {
       this.$refs.menuEdit.init(row)
     },
@@ -361,22 +331,19 @@ export default {
     },
 
     // 加载表格数据
-    // TODO: 分页还未实现
-    async loadTableData(param = {}, page) {
+    async loadTableData(param = {}) {
       if (this.tableLoading) {
         return
       }
       this.tableLoading = true
       try {
-        const query = _.assign(null, _.omit(param, 'parentId'), page)
+        const query = _.assign(null, _.omit(param, 'parentId'))
         const tableData = await getMenuInfo(param.parentId || '0', query)
         this.tableData = _.map(tableData, (t) => ({
           children: [],
           hasChildren: true,
           ...t
         }))
-        // 更新分页器数据
-        this.page.total = _.size(tableData)
       } catch (error) {
         window.console.log(error)
       } finally {

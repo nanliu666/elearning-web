@@ -2,7 +2,6 @@
   <basic-container
     block
     style="padding-top:0;"
-    title="123123"
   >
     <common-table
       ref="crud"
