@@ -33,16 +33,19 @@
                 content="刷新"
                 effect="dark"
                 placement="top"
+                style="color:#acb3b8;"
               >
                 <el-button
                   class="operations__btns--item"
                   size="mini"
+                  icon="el-icon-refresh-right"
                   type="text"
                   @click="refreshTableData"
                 >
                   <i class="iconfont iconicon_refresh" />
                 </el-button>
               </el-tooltip>
+              <span class="text_refresh">刷新</span>
               <el-popover
                 placement="bottom"
                 width="40"
@@ -59,6 +62,8 @@
                     class="operations__btns--item"
                     size="mini"
                     type="text"
+                    icon="el-icon-setting"
+                    style="color:#acb3b8;"
                   >
                     <i class="iconfont iconicon_setting" />
                   </el-button>
@@ -355,6 +360,12 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.operations__btns
+    color: #acb3b8
+    display: flex;
+.text_refresh
+    color: #acb3b8
+    margin-right: 20px
 $color_icon: #A0A8AE
 
 .basic-container--block
