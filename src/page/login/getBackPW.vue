@@ -97,7 +97,7 @@
                       :src="identity.image"
                       class="login-code-img"
                       @click="refreshCode"
-                    >
+                    />
                   </div>
                 </el-form-item>
                 <el-form-item
@@ -115,6 +115,7 @@
                   <el-button
                     v-show="!identity.msgKey"
                     class="get-test-code"
+                    size="medium"
                     @click="handleSend"
                   >
                     <span>获取验证码</span>
@@ -123,6 +124,7 @@
                     v-show="identity.msgKey"
                     type="primary"
                     class="count-down-time"
+                    size="medium"
                   >
                     {{ identity.msgText }}
                   </el-button>
@@ -246,6 +248,7 @@
               <el-button
                 type="primary"
                 :disabled="btnDisabled"
+                size="medium"
                 @click="next"
               >
                 {{ step === 2 ? '确认修改' : '下一步' }}
@@ -258,6 +261,7 @@
               <el-button
                 type="primary"
                 class="goback-login"
+                size="medium"
                 @click="gobackLogin"
               >
                 <span>返回登录页面</span>
