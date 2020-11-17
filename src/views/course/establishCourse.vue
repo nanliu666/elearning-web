@@ -350,8 +350,10 @@
             <el-table-column
               prop="address"
               label="操作"
+              fixed="right"
+              width="170"
             >
-              <template>
+              <template slot-scope="scope">
                 <el-button
                   type="text"
                   size="small"
@@ -367,12 +369,14 @@
                 <el-button
                   type="text"
                   size="small"
+                  @click="upward(scope)"
                 >
                   上移
                 </el-button>
                 <el-button
                   type="text"
                   size="small"
+                  @click="downward(scope)"
                 >
                   下移
                 </el-button>
@@ -467,6 +471,14 @@ export default {
     }
   },
   methods: {
+    // 向上移动
+    upward(index) {
+      alert(index)
+    },
+    // 向下移动
+    downward(index) {
+      alert(index)
+    },
     // 图片
     handleAvatarSuccess(res, file) {
       this.ruleForm.imageUrl = URL.createObjectURL(file.raw)

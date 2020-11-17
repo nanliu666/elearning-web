@@ -27,14 +27,67 @@
           class="search_bar_input"
         >
         </el-input>
-        <el-button size="medium">
-          默认按钮
+        <el-button
+          size="medium"
+          icon="el-icon-s-fold"
+          @click="openFiltrate = !openFiltrate"
+        >
+          筛选
         </el-button>
         <div class="adjustment">
           <i class="el-icon-sort icon"></i>
           <span>调整排序</span>
           <span class="wire"></span>
           <i class="el-icon-s-tools icon"></i>
+        </div>
+      </div>
+      <!-- 筛选面版 -->
+      <div
+        v-show="openFiltrate"
+        class="filtrate"
+      >
+        <div class="selects">
+          <div class="selects_box">
+            <span>状态</span>
+            <el-select
+              v-model="value"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </div>
+          <div class="selects_box">
+            <span>创建人</span>
+            <el-select
+              v-model="value"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </div>
+        </div>
+        <div class="btn">
+          <el-button
+            type="primary"
+            size="small"
+          >
+            &nbsp; &nbsp;搜索 &nbsp; &nbsp;
+          </el-button>
+          <el-button size="small">
+            &nbsp; &nbsp; 重置 &nbsp; &nbsp;
+          </el-button>
         </div>
       </div>
 
@@ -115,6 +168,31 @@
 export default {
   data() {
     return {
+      options: [
+        {
+          value: '选项1',
+          label: '黄金糕'
+        },
+        {
+          value: '选项2',
+          label: '双皮奶'
+        },
+        {
+          value: '选项3',
+          label: '蚵仔煎'
+        },
+        {
+          value: '选项4',
+          label: '龙须面'
+        },
+        {
+          value: '选项5',
+          label: '北京烤鸭'
+        }
+      ],
+      value: '',
+
+      openFiltrate: false,
       tableData: [
         {
           id: 1,
@@ -123,7 +201,7 @@ export default {
           state: '正常',
           creator: '大小小',
           date: '2016-05-02',
-          operation: ['信用', '编辑', '删除']
+          operation: ['停用', '编辑', '删除']
         },
         {
           id: 2,
@@ -132,7 +210,7 @@ export default {
           state: '正常',
           creator: '大小小',
           date: '2016-05-02',
-          operation: ['信用', '编辑', '删除']
+          operation: ['停用', '编辑', '删除']
         },
         {
           id: 3,
@@ -141,7 +219,7 @@ export default {
           state: '正常',
           creator: '大小小',
           date: '2016-05-02',
-          operation: ['信用', '编辑', '删除'],
+          operation: ['停用', '编辑', '删除'],
           children: [
             {
               id: 4,
@@ -150,7 +228,7 @@ export default {
               state: '正常',
               creator: '大小小',
               date: '2016-05-02',
-              operation: ['信用', '编辑', '删除']
+              operation: ['停用', '编辑', '删除']
             },
             {
               id: 5,
@@ -159,7 +237,7 @@ export default {
               state: '正常',
               creator: '大小小',
               date: '2016-05-02',
-              operation: ['信用', '编辑', '删除'],
+              operation: ['停用', '编辑', '删除'],
               children: [
                 {
                   id: 6,
@@ -168,7 +246,7 @@ export default {
                   state: '正常',
                   creator: '大小小',
                   date: '2016-05-02',
-                  operation: ['信用', '编辑', '删除']
+                  operation: ['停用', '编辑', '删除']
                 },
                 {
                   id: 7,
@@ -177,7 +255,7 @@ export default {
                   state: '正常',
                   creator: '大小小',
                   date: '2016-05-02',
-                  operation: ['信用', '编辑', '删除']
+                  operation: ['停用', '编辑', '删除']
                 }
               ]
             }
@@ -190,7 +268,7 @@ export default {
           state: '正常',
           creator: '大小小',
           date: '2016-05-02',
-          operation: ['信用', '编辑', '删除']
+          operation: ['停用', '编辑', '删除']
         }
       ]
     }
@@ -268,6 +346,29 @@ export default {
           margin: 0 12px;
         }
       }
+    }
+  }
+  .filtrate {
+    box-sizing: border-box;
+    width: 100%;
+    height: 120px;
+    border: 1px solid #207efa;
+    padding: 25px 45px;
+    margin-bottom: 25px;
+    .selects {
+      display: flex;
+      .selects_box {
+        display: flex;
+        margin-right: 100px;
+        span {
+          line-height: 35px;
+          padding-right: 10px;
+        }
+      }
+    }
+    .btn {
+      margin-top: 25px;
+      text-align: right;
     }
   }
 }
