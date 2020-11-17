@@ -239,7 +239,7 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   name: 'Menu',
   components: {
-    MenuEdit: () => import('./components/menuEdit'),
+    MenuEdit: () => import('./components/courseEdit'),
     SeachPopover: () => import('@/components/searchPopOver')
   },
   filters: {
