@@ -113,7 +113,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/course/directory',
+            path: '/course/catalog',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
@@ -126,7 +126,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/course/adjustSort',
+            path: '/course/courseSort',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []

@@ -2,7 +2,6 @@
   <basic-container
     block
     style="padding-top:0;"
-    title="123123"
   >
     <common-table
       ref="crud"
@@ -30,7 +29,7 @@
         <div class="flex flex-flow flex-justify-between flex-items">
           <el-input
             v-model="query.name"
-            placeholder="姓名/手机号码"
+            placeholder="请输入目录名称搜索"
             clearable
             style="width:200px;margin-right:12px;"
             @input="searchLoadData"
@@ -99,7 +98,7 @@ export default {
   name: 'User',
   components: {
     // 员工角色编辑
-    userRoleEdit: () => import('./userRoleEdit')
+    // userRoleEdit: () => import('./userRoleEdit')
   },
   props: {
     activeOrg: {
@@ -130,7 +129,7 @@ export default {
       },
       columns: [
         {
-          label: '姓名',
+          label: '课程名称',
           prop: 'name'
         },
         {

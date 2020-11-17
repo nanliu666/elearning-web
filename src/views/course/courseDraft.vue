@@ -32,133 +32,61 @@
 
       <!-- 内容 -->
       <div class="draft">
-        <!-- 搜索 -->
-        <div class="search_bar">
-          <el-input
-            placeholder="请输入目录名称搜索"
-            suffix-icon="el-icon-search"
-            class="search_bar_input"
-          >
-          </el-input>
-
-          <div class="adjustment">
-            <i class="el-icon-refresh-right icon"></i>
-            <span>刷新</span>
-            <span class="wire"></span>
-            <i
-              class="el-icon-s-tools icon"
-              @click="toStudySituation"
-            ></i>
-          </div>
-        </div>
-
         <!-- 表格内容 -->
-
-        <el-table
-          ref="multipleTable"
-          :data="tableData"
-          tooltip-effect="dark"
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
+        <common-table
+          ref="crud"
+          :config="tableConfig"
+          :columns="columns"
+          :loading="loading"
+          :data="data"
+          :page="page"
+          @current-page-change="currentChange"
+          @page-size-change="sizeChange"
         >
-          <el-table-column
-            type="selection"
-            width="55"
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
           >
-          </el-table-column>
-          <el-table-column
-            label="序号"
-            width="50"
-            fixed
+            <el-button
+              type="text"
+              style="margin-bottom:0;"
+              @click="handleReset(selection)"
+            >
+              批量重置密码
+            </el-button>
+          </template>
+          <template slot="topMenu">
+            <div class="flex flex-flow flex-justify-between flex-items">
+              <el-input
+                v-model="query.name"
+                placeholder="请输入目录名称搜索"
+                clearable
+                style="width:280px;margin-right:12px;"
+                suffix-icon="el-icon-search"
+                @input="searchLoadData"
+              />
+            </div>
+          </template>
+          <template
+            slot="handler"
+            slot-scope="{ row }"
           >
-            <template slot-scope="id">
-              {{ id.row.id }}
-            </template>
-          </el-table-column>
-
-          <el-table-column
-            label="课程名称"
-            width="300"
-            fixed
-          >
-            <template slot-scope="nameCourse">
-              <el-button
-                type="text"
-                size="small"
-              >
-                {{ nameCourse.row.nameCourse }}
-              </el-button>
-            </template>
-          </el-table-column>
-
-          <el-table-column
-            prop="directory"
-            label="所在目录"
-            width="260"
-            show-overflow-tooltip
-          >
-          </el-table-column>
-
-          <el-table-column
-            prop="type"
-            label="课程类型"
-            width="200"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="condition"
-            label="通过条件"
-            width="200"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="select"
-            label="选修类型"
-            width="200"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="creator"
-            label="创建人"
-            width="200"
-          >
-          </el-table-column>
-
-          <el-table-column
-            label="操作"
-            width="200"
-            fixed="right"
-          >
-            <template slot-scope="operation">
-              <el-button
-                type="text"
-                size="small"
-              >
-                {{ operation.row.operation[0] }}
-              </el-button>
-              <el-button
-                type="text"
-                size="small"
-              >
-                {{ operation.row.operation[1] }}
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <!-- 分页器 -->
-        <div class="block">
-          <el-pagination
-            :current-page="currentPage4"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="400"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          >
-          </el-pagination>
-        </div>
+            <el-button
+              size="medium"
+              type="text"
+              @click="handleEditRole(row)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              size="medium"
+              type="text"
+              @click="handleReset(row)"
+            >
+              删除
+            </el-button>
+          </template>
+        </common-table>
       </div>
     </div>
 
@@ -214,7 +142,14 @@
 </template>
 
 <script>
+import { getOrgUserList, modifyUserStatus, resetPwd } from '@/api/system/user'
 export default {
+  props: {
+    activeOrg: {
+      type: Object,
+      default: () => null
+    }
+  },
   data() {
     return {
       // Dialog无数据
@@ -222,48 +157,98 @@ export default {
       // 导航
       isSelect: 2,
       // 表格
-      tableData: [
+      query: {
+        name: ''
+      },
+      loading: false,
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
+      tableConfig: {
+        showHandler: true,
+        enableMultiSelect: true,
+        enablePagination: true,
+        showIndexColumn: false,
+        rowKey: 'userId',
+        handlerColumn: {
+          width: '180'
+        }
+      },
+      columns: [
         {
-          id: 1,
-          nameCourse: '产品产品产品产',
-          teacher: '王小虎',
-          directory: 'javajavajavajavajavajava',
-          type: '在线课程',
-          condition: '老师评定',
-          select: '开放选修',
-          creator: '李白',
-          operation: ['编辑', '删除']
+          label: '序号',
+          prop: 'index',
+          width: '70'
         },
         {
-          id: 1,
-          nameCourse: '产品产品产品产',
-          teacher: '王小虎',
-          directory: 'javajavajavajavajavajava',
-          type: '在线课程',
-          condition: '老师评定',
-          select: '开放选修',
-          creator: '李白',
-          operation: ['编辑', '删除']
+          label: '课程名称',
+          prop: 'name',
+          width: '300'
         },
         {
-          id: 1,
-          nameCourse: '产品产品产品产',
-          teacher: '王小虎',
-          directory: 'javajavajavajavajavajava',
-          type: '在线课程',
-          condition: '老师评定',
-          select: '开放选修',
-          creator: '李白',
-          operation: ['编辑', '删除']
+          label: '讲师',
+          prop: 'workNo'
+        },
+        //状态，1-正常，2-禁用
+        // {
+        //   label: '状态',
+        //   prop: 'userStatus',
+        //   filters: [
+        //     {
+        //       text: '正常',
+        //       value: '1'
+        //     },
+        //     {
+        //       text: '禁用',
+        //       value: '2'
+        //     }
+        //   ],
+        //   filterMethod: (value, row) => {
+        //     return row.userStatus == value
+        //   },
+        //   formatter (record) {
+        //     return (
+        //       {
+        //         '1': '正常',
+        //         '2': '禁用'
+        //       }[record.userStatus] || ''
+        //     )
+        //   }
+        // },
+        {
+          label: '所在目录',
+          prop: 'orgName'
+        },
+        {
+          label: '课程类型',
+          prop: 'jobName'
+        },
+        // {
+        //   label: '角色',
+        //   prop: 'roles',
+        //   width: 100,
+        //   formatter (record) {
+        //     return record.roles.map((role) => role.roleName).join(';')
+        //   }
+        // },
+        {
+          label: '通过条件',
+          prop: 'phonenum'
+        },
+        {
+          label: '选修类型',
+          prop: 'phonenum'
+        },
+        {
+          label: '创建人',
+          prop: 'phonenum'
         }
       ],
-      // 选择框
-      multipleSelection: [],
-      // 分页
-      currentPage1: 5,
-      currentPage2: 5,
-      currentPage3: 5,
-      currentPage4: 4
+      data: [],
+      editVisible: false,
+      editingUser: {}
     }
   },
   watch: {
@@ -273,14 +258,23 @@ export default {
       } else {
         this.dialogVisible = false
       }
+    },
+    activeOrg: function() {
+      this.page = {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      }
+      this.loadData()
     }
   },
+  created() {
+    this.loadData()
+  },
+  activated() {
+    this.loadData()
+  },
   methods: {
-    //   去学习情况
-    toStudySituation() {
-      // 目前不用做
-      // this.$router.push('/course/studySituation')
-    },
     // Dialog无数据
     handleClose() {},
 
@@ -288,22 +282,123 @@ export default {
     showSelect(index) {
       this.isSelect = index
     },
-    // 分页
-    handleSizeChange() {
-      // (`每页 ${val} 条`)这有个(val)
+
+    // 以下都是表格
+    searchLoadData: _.debounce(function() {
+      this.loadData()
+    }, 500),
+    handleAfterSubmit() {
+      this.loadData()
     },
-    handleCurrentChange() {
-      // (`当前页: ${val}`)这有个(val)
+    handleEditRole(user) {
+      this.$refs['userRoleEdit'].init(user)
     },
-    // 选择框
-    handleSelectionChange(val) {
-      this.multipleSelection = val
+    currentChange(currentPage) {
+      this.page.currentPage = currentPage
+      this.loadData()
+    },
+    sizeChange(pageSize) {
+      this.page.size = pageSize
+      this.loadData()
+    },
+    handleReset(data) {
+      let ids
+      if (Array.isArray(data)) {
+        ids = data.map((item) => item.userId).join(',')
+      } else {
+        ids = data.userId
+      }
+      this.$confirm('确定将选择账号密码重置为123456?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.resetPwd(ids, data)
+        })
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+        })
+    },
+    resetPwd(ids, data) {
+      resetPwd(ids).then(() => {
+        Array.isArray(data) ? (data.length = 0) : ''
+        this.loadData()
+      })
+    },
+    handleCommand(command, row) {
+      let status = null
+      switch (command) {
+        case 'suspend':
+          status = '2'
+          break
+        case 'unsuspend':
+          status = '1'
+          break
+      }
+      this.modifyUserStatus(row.userId, status)
+    },
+    modifyUserStatus(userId, status) {
+      let msg = ''
+      if (status === '2') {
+        msg = '您确定要冻结该用户吗？\n冻结后，该用户将不能登录系统'
+      } else {
+        msg = '您确定要解冻该用户吗？'
+      }
+      this.$confirm(msg, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => modifyUserStatus(userId, status))
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+          this.loadData()
+        })
+    },
+    loadData() {
+      this.loading = true
+      getOrgUserList({
+        pageNo: this.page.currentPage,
+        pageSize: this.page.size,
+        orgId: this.activeOrg ? this.activeOrg.orgId : '0',
+        search: this.query.name
+      })
+        .then((res) => {
+          this.page.total = res.totalNum
+          this.data = res.data
+          // this.selectionClear()
+        })
+        .finally(() => {
+          this.loading = false
+        })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.addUser {
+  font-size: 14px;
+  display: inline-block;
+  color: #757c85;
+  line-height: 14px;
+  cursor: pointer;
+  padding-right: 12px;
+  border-right: 0.5px solid #e9e9e9;
+}
+.icon {
+  margin-left: 12px;
+  font-size: 18px;
+  color: #a0a8ae;
+  cursor: pointer;
+}
 .course_in {
   position: relative;
   background-color: #fff;
@@ -321,34 +416,7 @@ export default {
     }
   }
   .draft {
-    .search_bar {
-      padding: 15px;
-      .search_bar_input {
-        width: 250px;
-        margin-right: 25px;
-      }
-      .adjustment {
-        float: right;
-        display: flex;
-        padding: 6px;
-        .icon {
-          margin-top: 3px;
-          margin-right: 12px;
-        }
-        .wire {
-          width: 1px;
-          height: 20px;
-          background-color: #ccc;
-          margin: 0 12px;
-        }
-      }
-    }
-    .block {
-      box-sizing: border-box;
-      padding-top: 10px;
-      height: 50px;
-      text-align: right;
-    }
+    padding: 25px;
   }
 }
 .dialog {
