@@ -216,6 +216,19 @@ const res = {
             children: []
           },
           {
+            menuId: '125907843471874',
+            menuName: '原始菜单管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'system_menu_all',
+            alias: 'menuAll ',
+            path: '/system/menuAll',
+            icon: 'iconfont iconicon_compile',
+            dataPrivileges: [],
+            children: []
+          },
+          {
             menuId: '1259071409534308354',
             menuName: '操作日志',
             menuType: 'Menu',
@@ -333,7 +346,144 @@ const res = {
           }
         ]
       },
-
+      {
+        menuId: '1259073456778285158',
+        menuName: '知识库',
+        menuType: 'Dir',
+        isOwn: 1,
+        isShow: 1,
+        code: 'repository',
+        alias: 'repository',
+        icon: 'iconfont iconicon_group',
+        dataPrivileges: [],
+        children: [
+          {
+            menuId: '1260401852546387969',
+            menuName: '目录管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'role',
+            alias: '目录管理',
+            path: '/repository/catalogManagement',
+            icon: 'iconfont iconicon_group',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '知识管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'role',
+            alias: '知识管理',
+            path: '/repository/knowledgeManagement'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '创建资源',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '知识管理',
+            path: '/repository/knowledgeEdit'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '学习情况',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '学习情况',
+            path: '/repository/knowledgeDetail'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '调整排序',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '调整排序',
+            path: '/repository/catalogSort'
+          }
+        ]
+      },
+      {
+        menuId: '12594674567452456787938',
+        menuName: '课程中心',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'system',
+        alias: 'system',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        dataPrivileges: [
+          {
+            dataId: '1',
+            scopeName: '个人可见',
+            isOwn: 1
+          }
+        ],
+        children: [
+          {
+            menuId: '12590734567456735058',
+            menuName: '目录管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/catalog',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073456754674589',
+            menuName: '调整排序',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseSort',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259074567456731235058',
+            menuName: '课程管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseDraft',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590567456745635058',
+            menuName: '创建课程',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/establishCourse',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          }
+        ]
+      },
       {
         menuId: '1590112075691',
         menuName: '审批管理',
