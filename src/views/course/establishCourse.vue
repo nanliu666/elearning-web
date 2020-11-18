@@ -256,7 +256,7 @@
             label="课程介绍"
             prop="editorTitle"
           >
-            <quillEditor v-model="ruleForm.editorTitle"></quillEditor>
+            <tinymce v-model="ruleForm.editorTitle" />
           </el-form-item>
         </div>
       </el-form>
@@ -267,7 +267,7 @@
           <div class="reflectTitle">
             课前思考
           </div>
-          <quillEditor v-model="reflect"></quillEditor>
+          <tinymce v-model="reflect" />
         </div>
       </div>
 
@@ -390,12 +390,7 @@
 </template>
 
 <script>
-import { quillEditor } from 'vue-quill-editor'
-import 'quill/dist/quill.core.css'
-import 'quill/dist/quill.snow.css'
-import 'quill/dist/quill.bubble.css'
 export default {
-  components: { quillEditor },
   data() {
     return {
       // 页面切换
@@ -603,11 +598,12 @@ export default {
     }
   }
   .editorTitle {
-    height: 500px;
+    width: 100%;
+    padding-bottom: 20px;
     /deep/.el-form-item__label {
       float: none;
     }
-    /deep/ .ql-container.ql-snow {
+    /deep/ .tox-edit-area {
       height: 350px;
     }
   }
@@ -632,6 +628,12 @@ export default {
     .upContent_option {
       border: 1px solid #dcdfe6;
     }
+  }
+  .tox-edit-area {
+    height: 450px;
+  }
+  /deep/.el-upload__tip {
+    line-height: 0;
   }
 }
 </style>
