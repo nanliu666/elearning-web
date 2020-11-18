@@ -27,19 +27,19 @@
                 v-show="multipleSelection.length === 0"
                 class="searchBox"
               >
-                <div>
+                <div class="search-box">
                   <search-popover
                     ref="searchPopover"
                     :require-options="searchConfig.requireOptions"
                     :popover-options="searchConfig.popoverOptions"
                   />
-                  <el-button
-                    icon="el-icon-sort"
-                    size="medium"
+                  <div
+                    class="search-sort-box"
                     @click="toSort"
                   >
-                    调整排序
-                  </el-button>
+                    <i class="el-icon-sort" />
+                    <span class="sort-text">调整排序</span>
+                  </div>
                   <el-popover
                     placement="bottom"
                     width="40"
@@ -61,10 +61,10 @@
                         {{ item.label }}
                       </el-checkbox>
                     </el-checkbox-group>
-                    <el-button
+                    <i
                       slot="reference"
-                      icon="el-icon-setting"
-                      size="medium"
+                      class="el-icon-setting"
+                      style="cursor: pointer;"
                     />
                   </el-popover>
                 </div>
@@ -578,6 +578,35 @@ export default {
 .searchBox {
   position: absolute;
   width: 100%;
+  i {
+    color: #a0a8ae;
+    font-size: 18px;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    .search-sort-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      cursor: pointer;
+      .sort-text {
+        color: #a0a8ae;
+        margin-left: 6px;
+        font-size: 14px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
   > div {
     display: flex;
     :first-child {

@@ -34,42 +34,24 @@
             @submit="handleSubmitSearch"
             @reset="handleResetSearch"
           />
-          <div>
-            <el-tooltip
-              class="operations__btns--tooltip"
-              content="刷新"
-              effect="dark"
-              placement="top"
+          <div class="operations-right">
+            <div
+              class="refresh-container"
+              @click="loadData"
             >
-              <el-button
-                class="operations__btns--item"
-                size="mini"
-                type="text"
-                @click="loadData"
-              >
-                <i class="el-icon-refresh-right" />
-              </el-button>
-            </el-tooltip>
+              <i class="el-icon-refresh-right" />
+              <span>刷新</span>
+            </div>
             <el-popover
               placement="bottom"
               width="40"
               trigger="click"
             >
-              <el-tooltip
+              <i
                 slot="reference"
-                class="operations__btns--tooltip"
-                content="显隐"
-                effect="dark"
-                placement="top"
-              >
-                <el-button
-                  class="operations__btns--item"
-                  size="mini"
-                  type="text"
-                >
-                  <i class="el-icon-setting" />
-                </el-button>
-              </el-tooltip>
+                style="padding-left: 10px;cursor: pointer;"
+                class="el-icon-setting"
+              />
               <!-- 设置表格列可见性 -->
               <div class="operations__column--visible">
                 <el-checkbox-group v-model="columnsVisible">
@@ -476,6 +458,30 @@ $color_icon: #a0a8ae;
   align-items: center;
   display: flex;
   justify-content: space-between;
+  &-right {
+    display: flex;
+    align-items: center;
+    .refresh-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      color: #a0a8ae;
+      padding: 0 10px;
+      cursor: pointer;
+      span {
+        padding-left: 6px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
   &__column--item {
     height: 25px;
   }
@@ -504,7 +510,6 @@ $color_icon: #a0a8ae;
   }
   i {
     color: $color_icon;
-    font-weight: bold;
     font-size: 18px;
   }
 }

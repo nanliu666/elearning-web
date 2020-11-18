@@ -1,6 +1,16 @@
 <template>
   <div class="role-wrap fill">
-    <page-header title="角色管理" />
+    <page-header title="角色管理">
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        type="primary"
+        :disabled="!options.currentId"
+        @click="onHandleEdit('add')"
+      >
+        新建角色
+      </el-button>
+    </page-header>
     <basic-container block>
       <el-container style="height:100%">
         <roleAside
@@ -37,16 +47,12 @@
                     clearable
                     style="width:200px;margin-right:12px;"
                   />
-                  <div>
-                    <span
-                      class="addUser"
-                      :disabled="!options.currentId"
-                      @click="onHandleEdit('add')"
-                    >新建角色</span>
+                  <div class="refresh-container">
                     <span
                       class="icon  el-icon-refresh-right"
                       @click="loadRoleData"
                     />
+                    <span class="refresh-text">刷新</span>
                   </div>
                 </div>
               </template>
@@ -446,6 +452,17 @@ export default {
     > .el-card__body {
       height: 100%;
     }
+  }
+}
+.refresh-container {
+  cursor: pointer;
+  color: #a0a8ae;
+  display: flex;
+  align-items: center;
+  .refresh-text {
+    padding-left: 6px;
+    display: inline-block;
+    height: 18px;
   }
 }
 .role-wrap {

@@ -37,10 +37,10 @@
                 {{ item.label }}
               </el-checkbox>
             </el-checkbox-group>
-            <el-button
+            <!-- <el-button slot="reference" icon="el-icon-setting" size="medium" /> -->
+            <i
               slot="reference"
-              icon="el-icon-setting"
-              size="medium"
+              class="el-icon-setting setting-box"
             />
           </el-popover>
         </template>
@@ -212,6 +212,12 @@ export default {
 /deep/ .top-menu {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  .setting-box {
+    font-size: 18px;
+    color: #a0a8ae;
+    cursor: pointer;
+  }
 }
 .basic-container--block {
   height: calc(100% - 92px);

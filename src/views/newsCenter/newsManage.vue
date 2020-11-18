@@ -57,69 +57,43 @@
                   @submit="(params) => handleSearch(params)"
                 />
                 <div class="operations__btns">
-                  <el-tooltip
-                    class="operations__btns--tooltip"
-                    content="刷新"
-                    effect="dark"
-                    placement="top"
-                  >
-                    <el-button
-                      class="operations__btns--item"
-                      size="mini"
-                      type="text"
-                      @click="() => refresh()"
+                  <div class="operations-right">
+                    <div
+                      class="refresh-container"
+                      @click="refresh"
                     >
-                      <i class="iconfont iconicon_refresh" />
-                    </el-button>
-                  </el-tooltip>
-                  <el-popover
-                    placement="bottom"
-                    width="40"
-                    trigger="click"
-                  >
-                    <el-tooltip
-                      slot="reference"
-                      class="operations__btns--tooltip"
-                      content="显隐"
-                      effect="dark"
-                      placement="top"
-                    >
-                      <el-button
-                        class="operations__btns--item"
-                        size="mini"
-                        type="text"
-                      >
-                        <i class="iconfont iconicon_setting" />
-                      </el-button>
-                    </el-tooltip>
-
-                    <!-- 设置表格列可见性 -->
-                    <div class="operations__column--visible">
-                      <el-checkbox-group v-model="columnsVisible">
-                        <el-checkbox
-                          v-for="item of tableColumns"
-                          :key="item.prop"
-                          :label="item.prop"
-                          class="operations__column--item"
-                        >
-                          {{ item.label }}
-                        </el-checkbox>
-                      </el-checkbox-group>
+                      <i class="el-icon-refresh-right" />
+                      <span>刷新</span>
                     </div>
-                  </el-popover>
+                    <el-popover
+                      placement="bottom"
+                      width="40"
+                      trigger="click"
+                    >
+                      <i
+                        slot="reference"
+                        style="cursor: pointer;"
+                        class="el-icon-setting"
+                      />
+                      <!-- 设置表格列可见性 -->
+                      <div class="operations__column--visible">
+                        <el-checkbox-group v-model="columnsVisible">
+                          <el-checkbox
+                            v-for="item of tableColumns"
+                            :key="item.prop"
+                            :disabled="item.prop === 'name'"
+                            :label="item.prop"
+                            class="operations__column--item"
+                          >
+                            {{ item.label }}
+                          </el-checkbox>
+                        </el-checkbox-group>
+                      </div>
+                    </el-popover>
+                  </div>
                 </div>
               </div>
             </template>
-
-            <!-- <template #multiSelectMenu="{ selection }">
-              <el-button
-                style="margin-bottom:0;"
-                type="text"
-                @click="() => handleRemoveItems(selection)"
-              >
-                批量删除
-              </el-button>
-            </template> -->
             <!-- 编号列 -->
             <template #title="{ row }">
               <span
@@ -139,12 +113,10 @@
                   <el-button
                     type="text"
                     size="medium"
+                    :class="{ 'font__color--active': row.isTop }"
                     @click="() => handleTopItemBtnClick(row)"
                   >
-                    <i
-                      class="icon-topping-outlined"
-                      :class="{ 'font__color--active': row.isTop }"
-                    />
+                    {{ row.isTop }}{{ row.isTop ? '取消置顶' : '置顶' }}
                   </el-button>
                 </el-tooltip>
 
@@ -173,7 +145,7 @@
                     size="medium"
                     @click="() => handleRemoveItemBtnClick(row)"
                   >
-                    <i class="icon-basics-delete-outlined" />
+                    删除
                   </el-button>
                 </el-tooltip>
               </div>
@@ -448,7 +420,40 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.operations {
+  i {
+    margin-left: 12px;
+    font-size: 18px;
+    color: #a0a8ae;
+    cursor: pointer;
+  }
+  &-right {
+    display: flex;
+    align-items: center;
+    .refresh-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      color: #a0a8ae;
+      padding: 0 10px;
+      cursor: pointer;
+      span {
+        padding-left: 6px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
+}
+</style>
 <style lang="sass" scoped>
 $color_active: #368AFA
 $color_danger: #ff6464
