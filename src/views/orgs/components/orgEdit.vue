@@ -116,7 +116,7 @@
               multiple
               filterable
               :multiple-limit="10"
-              placeholder="请选择或输入员工姓名/工号搜索"
+              placeholder="请选择或输入员工姓名/手机号搜索"
             >
               <el-option
                 v-for="(item1, k) in leaderList"
