@@ -95,7 +95,7 @@ export const checkUserInfo = (params) => {
   })
 }
 
-// 添加员工列表
+// 添加员工
 export const createUser = (params) => {
   return request({
     url: '/api/user/v1/user/info',
@@ -103,7 +103,14 @@ export const createUser = (params) => {
     params: params
   })
 }
-
+//编辑员工信息
+export const editUser = (params) => {
+  return request({
+    url: '/api/user/v1/user/info',
+    method: 'put',
+    params
+  })
+}
 // 人员操作记录
 export const getUserActionLog = (params) => {
   return request({

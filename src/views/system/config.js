@@ -1,4 +1,5 @@
-export const COLUMNS = [{
+export const COLUMNS = [
+  {
     label: '姓名',
     prop: 'name'
   },
@@ -10,7 +11,8 @@ export const COLUMNS = [{
   {
     label: '状态',
     prop: 'userStatus',
-    filters: [{
+    filters: [
+      {
         text: '正常',
         value: '1'
       },
@@ -23,10 +25,12 @@ export const COLUMNS = [{
       return row.userStatus == value
     },
     formatter(record) {
-      return ({
-        '1': '正常',
-        '2': '禁用'
-      } [record.userStatus] || '')
+      return (
+        {
+          '1': '正常',
+          '2': '禁用'
+        }[record.userStatus] || ''
+      )
     }
   },
   {

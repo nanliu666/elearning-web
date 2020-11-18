@@ -108,17 +108,55 @@ const res = {
           {
             menuId: '1259073456778285058',
             menuName: '用户管理',
-            menuType: 'Menu',
+            menuType: 'Dir',
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/system/user',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuId: '12590356778285058',
+                menuName: '用户管理',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 1,
+                code: 'org_user',
+                alias: 'user',
+                path: '/system/user',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              },
+              {
+                menuId: '1259034522778285058',
+                menuName: '用户详情',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 0,
+                code: 'user_detail',
+                alias: 'userDetail',
+                path: '/system/userDetail',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              },
+              {
+                menuId: '125903456778285058',
+                menuName: '添加用户',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 0,
+                code: 'editUser',
+                alias: 'editUser',
+                path: '/system/editUser',
+                icon: 'iconfont iconicon_boss',
+                dataPrivileges: [],
+                children: []
+              }
+            ]
           },
-
           {
             menuId: '1260401852546387969',
             menuName: '角色管理',
@@ -371,6 +409,78 @@ const res = {
             code: 'role',
             alias: '调整排序',
             path: '/repository/catalogSort'
+          }
+        ]
+      },
+      {
+        menuId: '12594674567452456787938',
+        menuName: '课程中心',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'system',
+        alias: 'system',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        dataPrivileges: [
+          {
+            dataId: '1',
+            scopeName: '个人可见',
+            isOwn: 1
+          }
+        ],
+        children: [
+          {
+            menuId: '12590734567456735058',
+            menuName: '目录管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/catalog',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073456754674589',
+            menuName: '调整排序',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseSort',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259074567456731235058',
+            menuName: '课程管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseDraft',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590567456745635058',
+            menuName: '创建课程',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/establishCourse',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },

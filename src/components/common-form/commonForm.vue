@@ -12,7 +12,8 @@
         :offset="column.offset ? column.offset : 0"
       >
         <el-form-item
-          :label="`${column.label}${column.props && column.props.hideColon ? '' : '：'}`"
+          v-if="column.itemType !== 'slotout'"
+          :label="`${column.label}${column.props && column.props.showColon ? ':' : ''}`"
           v-bind="elFormItemAttrs(column)"
           :rules="getRules(column)"
         >
@@ -109,6 +110,12 @@
             v-bind="itemAttrs(column)"
             :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
           />
+          <lazy-select
+            v-if="column.itemType === 'lazySelect'"
+            v-model="model[column.prop]"
+            v-bind="itemAttrs(column)"
+            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+          />
           <slot
             v-if="column.itemType == 'slot'"
             v-bind="itemAttrs(column)"
@@ -121,6 +128,12 @@
             {{ column.desc }}
           </div>
         </el-form-item>
+        <slot
+          v-if="column.itemType == 'slotout'"
+          v-bind="itemAttrs(column)"
+          :name="column.prop"
+        >
+        </slot>
       </el-col>
     </el-row>
   </el-form>
@@ -128,11 +141,12 @@
 
 <script>
 import { elFormAttrs, elFormItemAttrs, noneItemAttrs, defaultAttrs } from './config'
-
+import LazySelect from '@/components/lazy-select/lazySelect'
 export default {
   name: 'CommonForm',
   components: {
-    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect')
+    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'),
+    LazySelect
   },
   props: {
     model: {

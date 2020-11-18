@@ -1,171 +1,186 @@
 <template>
-  <div>
+  <div class="user">
     <page-header
-      title="查看用户"
+      title="用户详情"
       show-back
     >
-      <template slot="rightMenu">
+    </page-header>
+    <div class="user-header">
+      <div class="user-info">
+        <div class="user-info__avatar">
+          <img
+            v-if="userData.avatarUrl"
+            :src="userData.avatarUrl"
+          />
+          <i
+            v-else
+            class="icon-usercircle avatar"
+          />
+        </div>
+        <div class="user-info__content">
+          <div class="user-info__row">
+            <span class="user-info__name">
+              {{ userData.name }}
+            </span>
+            {{ userData.workNo ? `(${userData.workNo})` : '' }}
+          </div>
+          <div class="user-info__row">
+            {{ userData.sex === 0 ? '女' : '男' }} <span class="user-info__divider">|</span>
+            {{ userData.birthday }} <span class="user-info__divider">|</span>
+          </div>
+          <div class="user-info__row">
+            <span
+              class="user-info__column"
+            ><i class="el-icon-mobile" />{{ userData.phonenum || '暂无' }}</span>
+            <span
+              class="user-info__column"
+            ><i class="el-icon-message" />{{ userData.email || '暂无' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="user-control">
         <el-button
           type="primary"
           size="medium"
-          @click="handlerAdd"
         >
-          添加用户
+          角色设置
         </el-button>
-      </template>
-    </page-header>
-    <div class="category">
-      <div>
-        <div style="margin-top: 20px">
-          <common-table
-            style="width: 100%"
-            :data="data"
-            :config="tableConfig"
-            :columns="columns"
-            :loading="loading"
-            :page="page"
-            @page-size-change="sizeChange"
-            @current-page-change="pageChange"
-          >
-            <template slot="topMenu">
-              <div class="flex-flow flex justify-content align-items ">
-                <div>
-                  <el-input
-                    v-model="form.name"
-                    placeholder="输入工号或者姓名搜索"
-                    clearable
-                    style="width:200px;margin-right:12px;"
-                    @input="search"
-                  />
-                </div>
-                <div>
-                  <i
-                    class="icon  el-icon-refresh-right"
-                    @click="getData"
-                  />
-                </div>
-              </div>
-            </template>
-            <template
-              slot="multiSelectMenu"
-              slot-scope="{ selection }"
-            >
-              <span class="all">
-                <span
-                  @click="handlerDeleteAll(selection)"
-                ><i class="el-icon-delete" /> 批量删除</span>
-                <!--                <span><i class="el-icon-folder" /> 批量导出</span>-->
-              </span>
-            </template>
-            <template
-              slot="handler"
-              slot-scope="scope"
-              style="width:80px"
-            >
-              <!-- <el-button
-                type="text"
-                size="medium"
-                @click.stop="handleEdit(scope.row, scope.index)"
-              >
-                编辑
-              </el-button> -->
-              <el-button
-                type="text"
-                size="medium"
-                @click.stop="handleDelete(scope.row, scope.index)"
-              >
-                删除
-              </el-button>
-            </template>
-          </common-table>
-        </div>
       </div>
     </div>
-    <addUserDialog
-      :visible.sync="editVisible"
-      @after-submit="handleAfterSubmit"
+    <basic-container block>
+      <el-tabs>
+        <el-tab-pane
+          class="user-detail"
+          label="详细信息"
+        >
+          <div
+            v-for="item in columns"
+            :key="item.prop"
+            class="user-detail__item"
+          >
+            <div class="user-detail__label">
+              {{ item.label }}
+            </div>
+            <div class="user-detail__value">
+              <span>{{
+                (item.formatter ? item.formatter(userData) : userData[item.prop]) || '--'
+              }}</span>
+            </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane
+          label="附件"
+          class="user-attachment"
+        >
+          <div
+            v-for="(item, index) in userData.attachment"
+            :key="index"
+            class="user-attachment__item"
+          >
+            <div class="user-attachment__img">
+              <img :src="item.url" />
+              <div class="user-attachment__cover">
+                <div class="user-attachment__cover--column">
+                  <span @click="viewPicture(item)">
+                    <i class="el-icon-view"></i>
+                    预览
+                  </span>
+                </div>
+                <div class="user-attachment__cover--column">
+                  <span>
+                    <a
+                      :href="item.url"
+                      :download="item.name"
+                      target="_blank"
+                    >
+                      <i class="el-icon-download"></i>
+                      下载
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="user-attachment__text">
+              {{ item.name }}
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </basic-container>
+    <image-viewer
+      :visible.sync="viewing"
+      :url-list="viewingUrls"
     />
   </div>
 </template>
 
 <script>
-// import { deleteV1Job } from '@/api/organize/position'
-import { getToken } from '@/util/auth'
-import addUserDialog from './components/addUserDialog'
-// import { getV1Position, deleteV1Position } from '@/api/organize/position'
-import { getUserList, deleteUser } from '@/api/system/role'
-
+import { getStaffBasicInfo } from '@/api/personalInfo'
+import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
   name: 'UserDetail',
   components: {
-    addUserDialog
+    ImageViewer
   },
   data() {
     return {
-      form: {
-        name: ''
-      },
-      selectionList: [],
       loading: false,
-      isEdit: false,
-      title: '新建用户',
-      stationDialog: false,
-      dialogVisible: false,
-      isBatch: false,
-      show: true,
-      number: 0,
-      row: {},
-      data: [],
-      tableConfig: {
-        showHandler: true,
-        showIndexColumn: false,
-        rowKey: 'id',
-        enableMultiSelect: true,
-        handlerColumn: {
-          width: 80
-        }
+      viewing: false,
+      viewingUrls: [],
+      userData: {
+        attachment: [
+          {
+            url: 'https://oa-file-dev.bestgrand.com.cn/07ced38eb4784dbb8fa3cc44f4ef8a09.jpg',
+            name: '猫.jpg'
+          }
+        ]
       },
       columns: [
         {
-          label: '工号',
-          prop: 'workNo'
-        },
-        {
-          label: '姓名',
-          prop: 'name'
-        },
-        {
-          label: '状态',
-          prop: 'userStatus',
-          formatter(row) {
-            let arr = { '1': '正常', '2': '禁用' }
-            return arr[row.userStatus]
-          }
-        },
-        {
-          label: '部门',
+          label: '所在部门',
           prop: 'orgName'
         },
         {
-          label: '职位',
-          prop: 'jobName'
+          label: '直接领导',
+          prop: 'leaderName'
+        },
+        {
+          label: '岗位',
+          prop: 'position'
+        },
+        {
+          label: '职级',
+          prop: 'job'
+        },
+        {
+          label: '职务',
+          prop: 'job1'
+        },
+        {
+          label: '职称',
+          prop: 'job2'
+        },
+        {
+          label: '入职日期',
+          prop: 'entryDate'
+        },
+        {
+          label: '允许IP范围',
+          prop: 'IP'
+        },
+        {
+          label: '备注',
+          prop: 'remark'
         }
-      ],
-      page: {
-        size: 10,
-        currentPage: 1,
-        total: 0
-      },
-      params: {
-        pageNo: 0,
-        pageSize: 0,
-        search: '',
-        roleId: ''
-      },
-      editVisible: false
+      ]
     }
   },
 
+  computed: {
+    userId() {
+      return this.$route.query.userId
+    }
+  },
   watch: {},
   created() {
     this.getData()
@@ -175,279 +190,149 @@ export default {
     this.getData()
   },
   methods: {
-    handlerDeleteAll(list) {
-      let row = { userId: [] }
-      let userIdArr = list.map((item) => {
-        return item.userId
-      })
-      row.userId = userIdArr.join(',')
-      this.handleDelete(row)
-    },
     getData() {
-      this.loading = true
-      this.params.pageNo = this.page.currentPage
-      this.params.pageSize = this.page.size
-      this.params.roleId = this.$route.query.roleId
-      this.params.search = this.form.name
-      getUserList(this.params).then((res) => {
-        this.data = res.data
-        this.page.total = res.totalNum
-        this.loading = false
+      getStaffBasicInfo({ userId: this.userId }).then((res) => {
+        this.userData = res
       })
     },
-    handleAfterSubmit() {
-      this.page.currentPage = 1
-      this.getData()
-    },
-    handleDelete(row) {
-      this.$confirm('您确定要删除该用户吗?', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let params = {
-          userId: row.userId,
-          roleId: this.$route.query.roleId
-        }
-        deleteUser(params).then(() => {
-          this.getData()
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        })
-      })
-    },
-    search: _.debounce(function() {
-      this.page.currentPage = 1
-      this.getData()
-    }, 500),
-    getJobData() {},
-    closeBatch() {
-      this.isBatch = false
-    },
-    handlerAdd() {
-      this.editVisible = true
-      //   this.isEdit = false
-      //   this.title = '新建岗位'
-      //   this.row = {}
-    },
-    close() {
-      this.show = false
-    },
-    sizeChange(val) {
-      this.page.size = val
-      this.page.currentPage = 1
-      this.getData()
-    },
-    pageChange(val) {
-      this.page.currentPage = val
-      this.getData()
-    },
-    handleEdit(row) {
-      this.row = JSON.parse(JSON.stringify(row))
-      this.isEdit = true
-      this.title = '编辑岗位'
-      this.stationDialog = true
-    },
-    handleExport() {
-      this.$confirm('是否导出数据?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        const searchForm = this.form
-        window.open(
-          `/api/blade-user/export-user?Blade-Auth=${getToken()}&account=${
-            searchForm.account
-          }&realName=${searchForm.realName}`
-        )
-      })
-    },
-    onLoad() {},
-    handleConfig() {
-      // this.configVisible = !this.configVisible
-      this.isEdit = false
-      this.title = '新建子组织'
-      this.positionDialog = true
-    },
-    handleAside(item, index) {
-      this.active = index
-      this.params.categoryId = item.categoryId
-      this.getJobData()
-    },
-    handleCheck() {
-      this.isEdit = true
-      this.title = '编辑子组织'
-      this.positionDialog = true
-    },
-    toggleSelection(val) {
-      this.$refs.crud.toggleSelection(val)
+    viewPicture(item) {
+      this.viewingUrls = [item.url]
+      this.viewing = true
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.category {
-  margin-top: 16px;
-  background: #ffffff;
-  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  padding: 24px !important;
-  min-height: calc(100% - 204px);
-  .form_ {
-    padding-top: 40px;
-    width: 400px;
-    margin: 0 auto;
-    font-size: 14px;
-    .label_ {
-      /*display: inline-block;*/
-      /*margin-top:24px;*/
-      /*margin-bottom:8px;*/
-    }
-    .tip {
-      font-size: 12px;
-      line-height: 14px;
-      color: #a0a8ae;
-    }
-    .bt {
-      /*margin-top: 40px;*/
-    }
-  }
-}
-.aside {
-  width: 200px;
-  border-right: 1px solid #efefef;
+.user {
   height: 100%;
-  box-sizing: border-box;
-  margin-right: 20px;
-  margin-top: 20px;
-  ul {
-    list-style: none;
-    padding: 0 10px;
-    margin-top: 10px;
-    line-height: 34px;
-    li {
-      cursor: pointer;
-    }
-    li:not(.selection) {
-      line-height: 34px;
-      font-size: 14px;
-      padding-left: 30px;
-    }
-    .selection {
-      .icon {
-        display: inline-block;
-        margin: 0 6px 0 6px;
-        font-size: 18px;
+}
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  margin-bottom: 20px;
+  padding: 24px;
+  .user-info {
+    width: 50%;
+    padding-top: 0;
+    display: flex;
+    &__avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin-right: 20px;
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+      }
+      i {
+        font-size: 62px;
+        color: #e3e7e9;
       }
     }
-    .actives {
-      border-right: 4px solid #1e9fff;
-      background: #efefef;
+    &__content {
+    }
+    &__row {
+      line-height: 34px;
+      i {
+        font-size: 16px;
+        margin-right: 6px;
+      }
+    }
+    &__column {
+      margin-right: 12px;
+    }
+    &__name {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    &__divider {
+      margin: 0 12px;
+      color: #e3e7e9;
     }
   }
 }
-/*.header {*/
-/*  display: flex;*/
-/*  display: -ms-flex;*/
-/*  display: -moz-box;*/
-/*  display: -webkit-flex;*/
-/*  flex-flow: row nowrap;*/
-/*  justify-content: space-between;*/
-/*  align-items: center;*/
-/*  font-size: 18px;*/
-/*  color: #202940;*/
-/*  line-height: 28px;*/
-/*  font-weight: bold;*/
-/*  padding-top: 14px;*/
-/*}*/
-.nav {
-  /*height: 36px;*/
+.basic-container--block {
+  height: calc(100% - 171px - 92px);
+  min-height: calc(100% - 171px - 92px);
+}
+.user-detail {
   display: flex;
-  display: -ms-flex;
-  display: -moz-box;
-  display: -webkit-flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  align-items: center;
-  line-height: 16px;
-  padding: 0px 20px;
-  margin-top: -6px;
-  background: #edf8ff;
-  border: 1px solid #73b9ff;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
-  /*span {*/
-  /*  line-height: 20px;*/
-  /*}*/
-}
-.aside_header {
-  display: flex;
-  display: -ms-flex;
-  display: -moz-box;
-  display: -webkit-flex;
-  align-items: center;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  margin: 0 10px 0px 10px;
-  padding-bottom: 10px;
-  font-size: 18px;
-  border-bottom: 1px solid #efefef;
-  /*line-height: 40px;*/
-}
-.flex {
-  display: flex;
-  display: -ms-flex;
-  display: -moz-box;
-  display: -webkit-flex;
-}
-.flex-flow {
-  flex-flow: row nowrap;
-}
-.flex-flow-column {
-  flex-flow: column nowrap;
-}
-
-.justify-content {
-  justify-content: space-between;
-}
-.align-items {
-  align-items: center;
-}
-
-.input-with-select {
-  width: 250px;
-}
-.condition {
-  margin: 20px 0 10px 0;
-}
-
-.all {
-  /*border: 1px solid #efefef;*/
-  cursor: pointer;
-  padding: 10px;
-  span:first-child {
-    /*border-right: 1px solid #999;*/
-    padding-right: 15px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  &__item {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
   }
-  span {
-    margin-right: 20px;
+  &__label {
+    width: 50%;
+    text-align: right;
+    padding-right: 10px;
+  }
+  &__value {
+    width: 50%;
+    text-align: left;
+    padding-left: 10px;
   }
 }
+.user-attachment {
+  &__cover {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #0006;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__cover--column {
+    flex: 1;
+    color: #fff;
+    text-align: center;
+    span {
+      cursor: pointer;
+      a {
+        color: #fff;
+      }
+    }
+  }
 
-/deep/ .el-card__body {
-  padding-bottom: 0 !important;
-}
+  &__item {
+    margin: 20px;
+    border-radius: 4px;
+    width: 190px;
+    height: 124px;
+    &:hover {
+      .user-attachment__cover {
+        display: flex;
+      }
+    }
+  }
+  &__img {
+    width: 190px;
+    height: 88px;
+    overflow: hidden;
+    position: relative;
+    img {
+      width: 100%;
+    }
+  }
 
-/deep/ .avue-crud__menu {
-  min-height: 0;
-}
-.icon {
-  font-size: 18px;
-  color: #a0a8ae;
-  cursor: pointer;
+  &__text {
+    border: 1px solid #e3e7e9;
+    border-top: none;
+    height: 36px;
+    line-height: 34px;
+    padding-left: 6px;
+    background-color: #fbfdff;
+    border-radius: 0px 0px 6px 6px;
+  }
 }
 </style>

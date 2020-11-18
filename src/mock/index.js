@@ -2,10 +2,8 @@
 import Mock from 'mockjs'
 import apprProcess from './modules/apprProcess'
 import dict from './modules/dict'
-import entry from './modules/entry'
 import grade from './modules/grade'
 import interview from './modules/interview'
-import leave from './modules/leave'
 import mailList from './modules/mailList'
 import menu from './modules/menu'
 import menus from './modules/menus'
@@ -22,7 +20,6 @@ import process from './modules/process'
 import remind from './modules/remind'
 import role from './modules/role'
 import schedule from './modules/schedule'
-import selectPerson from './modules/selectPerson'
 import system from './modules/system'
 import taskcenter from './modules/taskcenter'
 import todo from './modules/todo'
@@ -55,7 +52,6 @@ export default (enable) => {
 
   interview(options)
 
-  selectPerson(options)
   position(options)
   grade(options)
   menus(options)
@@ -74,12 +70,10 @@ export default (enable) => {
   transction(options)
 
   person(options.mock)
-  leave(options)
 
   todo(options)
   msg(options)
   todo(options)
-  entry(options)
   taskcenter(options)
   schedule(options)
   remind(options)
