@@ -31,44 +31,24 @@
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
             />
-            <div class="operations__btns">
-              <el-tooltip
-                class="operations__btns--tooltip"
-                content="刷新"
-                effect="dark"
-                width="40"
-                placement="top"
+            <div class="operations-right">
+              <div
+                class="refresh-container"
+                @click="loadTableData"
               >
-                <el-button
-                  class="operations__btns--item"
-                  size="mini"
-                  type="text"
-                  @click="loadTableData"
-                >
-                  <i class="iconfont iconicon_refresh" />
-                </el-button>
-              </el-tooltip>
+                <i class="el-icon-refresh-right" />
+                <span>刷新</span>
+              </div>
               <el-popover
                 placement="bottom"
                 width="40"
                 trigger="click"
               >
-                <el-tooltip
+                <i
                   slot="reference"
-                  class="operations__btns--tooltip"
-                  content="显隐"
-                  effect="dark"
-                  placement="top"
-                >
-                  <el-button
-                    class="operations__btns--item"
-                    size="mini"
-                    type="text"
-                  >
-                    <i class="iconfont iconicon_setting" />
-                  </el-button>
-                </el-tooltip>
-
+                  style="cursor: pointer;"
+                  class="el-icon-setting"
+                />
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
@@ -380,7 +360,38 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.operations-right {
+  i {
+    margin-left: 12px;
+    font-size: 18px;
+    color: #a0a8ae;
+    cursor: pointer;
+  }
+  display: flex;
+  align-items: center;
+  .refresh-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: #a0a8ae;
+    padding: 0 10px;
+    cursor: pointer;
+    span {
+      padding-left: 6px;
+    }
+    &::before {
+      position: absolute;
+      content: '';
+      top: 3px;
+      right: 0px;
+      width: 0.5px;
+      height: 80%;
+      background-color: #a0a8ae;
+    }
+  }
+}
+</style>
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
 .status-span
