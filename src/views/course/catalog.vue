@@ -28,61 +28,39 @@
               @submit="handleSearch"
             />
             <div class="operations__btns">
-              <el-tooltip
-                class="operations__btns--tooltip"
-                content="刷新"
-                effect="dark"
-                placement="top"
-                style="color:#acb3b8;"
+              <div
+                class="search-sort-box"
+                @click="toSort"
               >
-                <el-button
-                  class="operations__btns--item"
-                  size="mini"
-                  icon="el-icon-refresh-right"
-                  type="text"
-                  @click="refreshTableData"
-                >
-                  <i class="iconfont iconicon_refresh" />
-                </el-button>
-              </el-tooltip>
-              <span class="text_refresh">刷新</span>
+                <i class="el-icon-sort" />
+                <span class="sort-text">调整排序</span>
+              </div>
               <el-popover
                 placement="bottom"
                 width="40"
                 trigger="click"
+                style="margin-left:10px"
               >
-                <el-tooltip
-                  slot="reference"
-                  class="operations__btns--tooltip"
-                  content="显隐"
-                  effect="dark"
-                  placement="top"
+                <el-checkbox-group
+                  v-model="checkColumn"
+                  style="display: flex;flex-direction: column;"
+                  @change="columnChange"
                 >
-                  <el-button
-                    class="operations__btns--item"
-                    size="mini"
-                    type="text"
-                    icon="el-icon-setting"
-                    style="color:#acb3b8;"
+                  <el-checkbox
+                    v-for="item of tableColumns"
+                    :key="item.prop"
+                    :disabled="item.prop === 'name'"
+                    :label="item.prop"
+                    class="operations__column--item"
                   >
-                    <i class="iconfont iconicon_setting" />
-                  </el-button>
-                </el-tooltip>
-
-                <!-- 设置表格列可见性 -->
-                <div class="operations__column--visible">
-                  <el-checkbox-group v-model="columnsVisible">
-                    <el-checkbox
-                      v-for="item of tableColumns"
-                      :key="item.prop"
-                      :disabled="item.prop === 'name'"
-                      :label="item.prop"
-                      class="operations__column--item"
-                    >
-                      {{ item.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </div>
+                    {{ item.label }}
+                  </el-checkbox>
+                </el-checkbox-group>
+                <i
+                  slot="reference"
+                  class="el-icon-setting"
+                  style="cursor: pointer;"
+                />
               </el-popover>
             </div>
           </div>
@@ -249,6 +227,16 @@ export default {
   },
   data() {
     return {
+      checkColumn: [
+        'orgName',
+        'orgType',
+        'orgCode',
+        'leaders',
+        'jobNum',
+        'userNum',
+        'workNum',
+        'remark'
+      ],
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -271,6 +259,12 @@ export default {
     this.refreshTableData()
   },
   methods: {
+    columnChange() {
+      this.option.column = TABLE_COLUMNS.filter((item) => {
+        return this.checkColumn.indexOf(item.prop) > -1
+      })
+    },
+    toSort() {},
     handleSearch(searchParams) {
       this.loadTableData(_.pickBy(searchParams))
     },
@@ -358,7 +352,37 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.operations__btns {
+  i {
+    color: #a0a8ae;
+    font-size: 18px;
+  }
+  display: flex;
+  align-items: center;
+  .search-sort-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+    .sort-text {
+      color: #a0a8ae;
+      margin-left: 6px;
+      font-size: 14px;
+    }
+    &::before {
+      position: absolute;
+      content: '';
+      top: 3px;
+      right: 0px;
+      width: 0.5px;
+      height: 80%;
+      background-color: #a0a8ae;
+    }
+  }
+}
+</style>
 <style lang="sass" scoped>
 .operations__btns
     color: #acb3b8
