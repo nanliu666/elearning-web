@@ -7,6 +7,9 @@ export const getOrganization = (params) => {
   return get('/org/v1/organization', params)
 }
 
+export const delUser = (params) => {
+  return del('/api/user/v1/user/info', params)
+}
 /**
  * 组织架构员工查询接口
  * @deprecated 使用 /org/v1/org/user/child 代替

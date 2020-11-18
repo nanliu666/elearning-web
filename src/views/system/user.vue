@@ -46,7 +46,7 @@
               slot-scope="{ node, data }"
               class="custom-tree-node"
             >
-              <span>{{ data.orgName }}{{ '  ' }} ({{ data.workNum }})</span>
+              <span>{{ data.orgName }}{{ '  ' }} ({{ data.userNum }})</span>
             </span>
           </el-tree>
         </basic-container>

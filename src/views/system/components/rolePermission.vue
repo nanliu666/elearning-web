@@ -76,78 +76,26 @@
           <div class="limit-title">
             数据规则权限
           </div>
-          <el-tabs
-            v-model="activeTabName"
-            class="fill"
-            @tab-click="selectedTab"
+
+          <el-tree
+            ref="orgTree"
+            :filter-node-method="filterNode"
+            :data="treeData"
+            node-key="orgId"
+            :props="treeProps"
+            :disabled="disabled"
+            :show-checkbox="true"
+            :expand-on-click-node="false"
+            default-expand-all
+            :default-checked-keys="orgCheckedKeys"
           >
-            <el-tab-pane
-              v-loading="treeLoading"
-              element-loading-text="正在加载中"
-              label="组织架构"
-              name="orgTree"
-              class="fill"
+            <span
+              slot-scope="{ node, data }"
+              class="custom-tree-node"
             >
-              <el-input
-                v-model="treeSearch"
-                clearable
-                placeholder="组织名称"
-                style="margin-bottom:10px;"
-              />
-              <el-tree
-                ref="orgTree"
-                :filter-node-method="filterNode"
-                :data="treeData"
-                node-key="orgId"
-                :props="treeProps"
-                :disabled="disabled"
-                :show-checkbox="true"
-                :expand-on-click-node="false"
-                default-expand-all
-                :default-checked-keys="orgCheckedKeys"
-              >
-                <span
-                  slot-scope="{ node, data }"
-                  class="custom-tree-node"
-                >
-                  <span>{{ data.orgName }}</span>
-                </span>
-              </el-tree>
-            </el-tab-pane>
-            <el-tab-pane
-              v-loading="treeLoading"
-              element-loading-text="正在加载中"
-              label="业务架构"
-              name="businessTree"
-              class="fill"
-            >
-              <el-input
-                v-model="businessSearch"
-                clearable
-                placeholder="业务部门名称"
-                style="margin-bottom:10px;"
-              />
-              <el-tree
-                ref="businessTree"
-                :filter-node-method="filterBusNode"
-                :data="businessTreeData"
-                node-key="bizId"
-                :props="businessTreeProps"
-                :show-checkbox="true"
-                :expand-on-click-node="false"
-                :disabled="disabled"
-                :default-checked-keys="busCheckedKeys"
-                default-expand-all
-              >
-                <span
-                  slot-scope="{ node, data }"
-                  class="custom-tree-node"
-                >
-                  <span>{{ data.name }}</span>
-                </span>
-              </el-tree>
-            </el-tab-pane>
-          </el-tabs>
+              <span>{{ data.orgName }}</span>
+            </span>
+          </el-tree>
         </div>
       </el-scrollbar>
     </div>
@@ -177,7 +125,7 @@
 <script>
 import treeLimits from './roleTreePermission'
 import { updatePrivilege } from '../../../api/system/role'
-import { getMenuPrivilege, getOrgPrivilege, getBizPrivilege } from '@/api/system/user'
+import { getMenuPrivilege, getOrgPrivilege } from '@/api/system/user'
 
 // 用于递归遍历节点，并执行回调处理
 const R = (f, s) => s.map((i) => (f(i), i.children && i.children.length ? R(f, i.children) : 0, i))
@@ -272,16 +220,14 @@ export default {
   },
   mounted() {
     this.getRolePrivilege()
+    this.getOrgPrivilege()
   },
   methods: {
     filterNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1
     },
-    filterBusNode(value, data) {
-      if (!value) return true
-      return data.name.indexOf(value) !== -1
-    },
+
     // 查询用户权限
     getRolePrivilege(parentId = 0) {
       const params = {
@@ -340,26 +286,6 @@ export default {
           this.treeData = R((i) => {
             i.disabled = true
           }, res)
-          this.treeLoading = false
-        })
-        .finally(() => {
-          this.treeLoading = false
-        })
-    },
-
-    getBizPrivilege() {
-      const params = {
-        roleId: this.roleId,
-        menuId: this.buttonMenuId
-      }
-      this.treeLoading = true
-      getBizPrivilege(params)
-        .then((res) => {
-          this.findBusValue(res, this.busCheckedKeys)
-          this.businessTreeData = R((i) => {
-            i.disabled = true
-          }, res)
-
           this.treeLoading = false
         })
         .finally(() => {
@@ -500,11 +426,7 @@ export default {
       this.buttonMenuId = data.menuId
       this.dataPrivileges = data.dataPrivileges || []
       this.getPageContorls(data.menuId)
-      if (this.activeTabName === 'orgTree') {
-        this.getOrgPrivilege()
-      } else if (this.activeTabName === 'businessTree') {
-        this.getBizPrivilege()
-      }
+      this.getOrgPrivilege()
     },
     getPageContorls(menuId) {
       this.pageControls = []
@@ -533,46 +455,6 @@ export default {
       this.treeData = []
       this.treeSearch = ''
       this.businessSearch = ''
-    },
-    selectedTab(tab) {
-      this.treeSearch = ''
-      this.businessSearch = ''
-      if (!this.buttonMenuId) {
-        return
-      }
-      const params = {
-        roleId: this.roleId,
-        menuId: this.buttonMenuId
-      }
-      let apiMap = {
-        orgTree: getOrgPrivilege,
-        businessTree: getBizPrivilege
-      }
-      let findValueMap = {
-        orgTree: this.findOrgValue,
-        businessTree: this.findBusValue
-      }
-      let defualtKeysMap = {
-        orgTree: this.orgCheckedKeys,
-        businessTree: this.busCheckedKeys
-      }
-      apiMap[tab.name](params)
-        .then((res) => {
-          if (tab.name === 'businessTree') {
-            this.businessTreeData = R((i) => {
-              i.disabled = true
-            }, res)
-          } else if (tab.name === 'orgTree') {
-            this.treeData = R((i) => {
-              i.disabled = true
-            }, res)
-          }
-          findValueMap[tab.name](res, defualtKeysMap[tab.name])
-          this.$forceUpdate()
-        })
-        .catch((error) => {
-          this.$message.warning(error.resMsg)
-        })
     }
   }
 }

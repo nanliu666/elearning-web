@@ -213,7 +213,7 @@ export default {
       if (REG_VALID_NUMBER.test(value)) {
         value = _.replace(value, '+', '') // 省略正号
         value = _.replace(value, /\.$/, '') // 省略结束的小数点
-        this.model[column.prop] = _.toNumber(value)
+        this.model[column.prop] = value
       }
     },
 

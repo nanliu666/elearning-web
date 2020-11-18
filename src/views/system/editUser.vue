@@ -90,6 +90,10 @@ export default {
   },
   data() {
     var checkPhonenum = (rule, value, callback) => {
+      if (this.id) {
+        callback()
+        return
+      }
       checkUserInfo({ phonenum: value })
         .then(() => {
           callback()
@@ -99,6 +103,10 @@ export default {
         })
     }
     var checkEmail = (rule, value, callback) => {
+      if (this.id) {
+        callback()
+        return
+      }
       checkUserInfo({ email: value })
         .then(() => {
           callback()
@@ -117,8 +125,14 @@ export default {
         email: '',
         roleIds: [],
         orgId: '',
-        birthday: '',
+        birthDate: '',
         leaderId: '',
+        position: '',
+        postLevel: '',
+        post: '',
+        positionTitle: '',
+        entryDate: null,
+        ipScope: '',
         attachment: []
       },
       uploadFileList: [],
@@ -142,7 +156,7 @@ export default {
           prop: 'phonenum',
           itemType: 'input',
           label: '手机号码',
-          maxLength: 11,
+          maxlength: 11,
           offset: 4,
           props: {
             onlyNumber: true
@@ -223,10 +237,11 @@ export default {
           load: this.loadUser,
           offset: 4,
           optionProps: {
-            formatter: (item) => `${item.name}(${item.workNo})`,
+            formatter: (item) => `${item.name}`,
             key: 'userId',
             value: 'userId'
           },
+          // firstOption: null,
           prop: 'leaderId',
           label: '直接领导'
         },
@@ -307,6 +322,7 @@ export default {
 
   activated() {
     this.loadUserData()
+    this.resetForm()
   },
   created() {
     this.loadOrgData()
@@ -314,16 +330,28 @@ export default {
   },
 
   methods: {
+    resetForm() {
+      this.$refs['form'].resetFields()
+    },
     loadUserData() {
       if (!this.id) {
         return
       }
       getStaffBasicInfo({ userId: this.id }).then((res) => {
-        this.form = res
         this.uploadFileList = _.map(res.attachments, (item) => ({
           url: item.url,
           localName: item.name
         }))
+        // this.columns.find((item) => item.prop === 'leaderId').firstOption = {
+        //   userId: res.leaderId + '',
+        //   name: res.leaderName
+        // }
+        this.form.leaderId = this.form = {
+          roleIds: _.map(res.roles, 'roleId'),
+          leaderId: res.leaderId + '',
+          ...res
+        }
+        delete this.form.roles
       })
     },
     loadOrgData() {

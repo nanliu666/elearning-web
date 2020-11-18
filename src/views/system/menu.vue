@@ -43,7 +43,7 @@
                   type="text"
                   @click="refreshTableData"
                 >
-                  <i class="iconfont iconicon_refresh" />
+                  <i class="el-icon-refresh-right" />
                 </el-button>
               </el-tooltip>
               <el-popover
@@ -63,7 +63,7 @@
                     size="mini"
                     type="text"
                   >
-                    <i class="iconfont iconicon_setting" />
+                    <i class="el-icon-setting" />
                   </el-button>
                 </el-tooltip>
 
@@ -459,7 +459,7 @@ $color_icon: #A0A8AE
       margin: 0
     // margin-bottom: 8px
     // margin-right: 8px
-  .iconfont
+    i
     color: $color_icon
     font-weight: bold
     font-size: 16px

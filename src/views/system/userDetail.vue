@@ -23,10 +23,18 @@
               {{ userData.name }}
             </span>
             {{ userData.workNo ? `(${userData.workNo})` : '' }}
+            <el-tag
+              class="user-info__tag"
+              :type="userData.userStatus === '1' ? '' : 'danger'"
+            >
+              {{ userData.userStatus === '1' ? '正常' : '冻结' }}
+            </el-tag>
           </div>
           <div class="user-info__row">
-            {{ userData.sex === 0 ? '女' : '男' }} <span class="user-info__divider">|</span>
-            {{ userData.birthday }} <span class="user-info__divider">|</span>
+            {{ (userData.sex === 0 ? '女' : '男') || '--' }}
+            <span class="user-info__divider">|</span> {{ userData.birthDate || '--' }}
+            <span class="user-info__divider">|</span>
+            {{ _.map(userData.roles, 'roleName').join('/') }}
           </div>
           <div class="user-info__row">
             <span
@@ -42,9 +50,46 @@
         <el-button
           type="primary"
           size="medium"
+          @click="handleEditRole()"
         >
           角色设置
         </el-button>
+        <el-button
+          style="margin-right:8px;"
+          size="medium"
+          @click="handleReset()"
+        >
+          密码重置
+        </el-button>
+        <el-dropdown @command="(command) => handleCommand(command)">
+          <el-button
+            size="medium"
+            style="margin-left: 10px"
+            class="el-dropdown-link"
+          >
+            更多<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="edit">
+              编辑
+            </el-dropdown-item>
+            <el-dropdown-item
+              v-if="userData.userStatus === '1'"
+              command="suspend"
+            >
+              冻结
+            </el-dropdown-item>
+            <el-dropdown-item
+              v-if="userData.userStatus === '2'"
+              command="unsuspend"
+            >
+              解冻
+            </el-dropdown-item>
+            <el-dropdown-item command="delete">
+              删除
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </div>
     </div>
     <basic-container block>
@@ -111,15 +156,24 @@
       :visible.sync="viewing"
       :url-list="viewingUrls"
     />
+    <user-role-edit
+      ref="userRoleEdit"
+      :visible.sync="editVisible"
+      :user="userData"
+      @after-submit="getData"
+    />
   </div>
 </template>
 
 <script>
 import { getStaffBasicInfo } from '@/api/personalInfo'
+import { modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
 import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
   name: 'UserDetail',
   components: {
+    // 员工角色编辑
+    userRoleEdit: () => import('./components/userRoleEdit'),
     ImageViewer
   },
   data() {
@@ -127,13 +181,9 @@ export default {
       loading: false,
       viewing: false,
       viewingUrls: [],
+      editVisible: false,
       userData: {
-        attachment: [
-          {
-            url: 'https://oa-file-dev.bestgrand.com.cn/07ced38eb4784dbb8fa3cc44f4ef8a09.jpg',
-            name: '猫.jpg'
-          }
-        ]
+        attachment: []
       },
       columns: [
         {
@@ -182,15 +232,15 @@ export default {
     }
   },
   watch: {},
-  created() {
-    this.getData()
-  },
   mounted() {},
   activated() {
     this.getData()
   },
   methods: {
     getData() {
+      if (!this.userId) {
+        return
+      }
       getStaffBasicInfo({ userId: this.userId }).then((res) => {
         this.userData = res
       })
@@ -198,6 +248,86 @@ export default {
     viewPicture(item) {
       this.viewingUrls = [item.url]
       this.viewing = true
+    },
+    handleEditRole() {
+      this.$refs['userRoleEdit'].init(this.userData)
+    },
+    handleReset() {
+      this.$confirm('确定将选择账号密码重置为123456?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.resetPwd(this.userData.userId)
+        })
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+        })
+    },
+    resetPwd(ids) {
+      resetPwd(ids).then(() => {
+        this.getData()
+      })
+    },
+    handleCommand(command) {
+      switch (command) {
+        case 'suspend':
+          this.modifyUserStatus(this.userData.userId, '2')
+          break
+        case 'unsuspend':
+          this.modifyUserStatus(this.userData.userId, '1')
+          break
+        case 'edit':
+          this.$router.push({ path: '/system/editUser', query: { userId: this.userData.userId } })
+          break
+        case 'delete':
+          this.handleDeleteUser()
+          break
+      }
+    },
+    modifyUserStatus(userId, status) {
+      let msg = ''
+      if (status === '2') {
+        msg = '您确定要冻结该用户吗？\n冻结后，该用户将不能登录系统'
+      } else {
+        msg = '您确定要解冻该用户吗？'
+      }
+      this.$confirm(msg, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => modifyUserStatus(userId, status))
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+          this.getData()
+        })
+    },
+    handleDeleteUser() {
+      this.$confirm('您确定要删除该用户吗？\n删除后将不能恢复', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => delUser({ userId: this.userData.userId }))
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+          this.goBack()
+        })
+    },
+    goBack() {
+      this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+      this.$router.go(-1)
     }
   }
 }
@@ -217,6 +347,12 @@ export default {
     width: 50%;
     padding-top: 0;
     display: flex;
+    &__tag {
+      height: 24px;
+      line-height: 24px;
+      margin-top: 5px;
+      margin-left: 30px;
+    }
     &__avatar {
       width: 64px;
       height: 64px;
@@ -236,6 +372,7 @@ export default {
     }
     &__row {
       line-height: 34px;
+
       i {
         font-size: 16px;
         margin-right: 6px;

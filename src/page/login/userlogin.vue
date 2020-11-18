@@ -13,6 +13,7 @@
       <el-input
         v-model="loginForm.account"
         auto-complete="off"
+        :maxlength="11"
         placeholder="请输入手机号码"
         @keyup.enter.native="handleLogin"
       />
