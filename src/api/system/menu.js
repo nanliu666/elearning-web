@@ -1,4 +1,4 @@
-import request from '@/router/axios'
+import request, { put } from '@/router/axios'
 
 export const getMenuList = (current, size, params) => {
   return request({
@@ -34,24 +34,15 @@ export const getMenuInfo = (parentId, query = {}) => {
     }
   })
 }
-
+export const putMenuInfo = (params) => {
+  return put('/api/sys/v1/menu/info', params)
+}
 export const postMenuInfo = (data) => {
   if (!data.clientId) data.clientId = 'Admin'
   return request({
     url: '/api/sys/v1/menu/info',
     method: 'post',
     data
-  })
-}
-
-export const putMenuInfo = (params) => {
-  if (!params.clientId) params.clientId = 'Admin'
-  return request({
-    url: '/api/sys/v1/menu/info',
-    method: 'put',
-    data: {
-      ...params
-    }
   })
 }
 

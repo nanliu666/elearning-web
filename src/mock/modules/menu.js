@@ -106,58 +106,6 @@ const res = {
             ]
           },
           {
-            menuId: '12590734561231235058',
-            menuName: '目录管理',
-            menuType: 'Menu',
-            isOwn: 1,
-            isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            path: '/course/catalog',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: []
-          },
-          {
-            menuId: '125907389076789',
-            menuName: '调整排序',
-            menuType: 'Menu',
-            isOwn: 1,
-            isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            path: '/course/courseSort',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: []
-          },
-          {
-            menuId: '12590734561231235058',
-            menuName: '课程管理',
-            menuType: 'Menu',
-            isOwn: 1,
-            isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            path: '/course/courseDraft',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: []
-          },
-          {
-            menuId: '1259056772564535058',
-            menuName: '创建课程',
-            menuType: 'Menu',
-            isOwn: 1,
-            isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            path: '/course/establishCourse',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: []
-          },
-          {
             menuId: '1259073456778285058',
             menuName: '用户管理',
             menuType: 'Dir',
@@ -263,6 +211,19 @@ const res = {
             code: 'system_menu',
             alias: 'menu',
             path: '/system/menu',
+            icon: 'iconfont iconicon_compile',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125907843471874',
+            menuName: '原始菜单管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'system_menu_all',
+            alias: 'menuAll ',
+            path: '/system/menuAll',
             icon: 'iconfont iconicon_compile',
             dataPrivileges: [],
             children: []
@@ -382,6 +343,72 @@ const res = {
                 children: []
               }
             ]
+          }
+        ]
+      },
+      {
+        menuId: '1259073456778285158',
+        menuName: '知识库',
+        menuType: 'Dir',
+        isOwn: 1,
+        isShow: 1,
+        code: 'repository',
+        alias: 'repository',
+        icon: 'iconfont iconicon_group',
+        dataPrivileges: [],
+        children: [
+          {
+            menuId: '1260401852546387969',
+            menuName: '目录管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'role',
+            alias: '目录管理',
+            path: '/repository/catalogManagement',
+            icon: 'iconfont iconicon_group',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '知识管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'role',
+            alias: '知识管理',
+            path: '/repository/knowledgeManagement'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '创建资源',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '知识管理',
+            path: '/repository/knowledgeEdit'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '学习情况',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '学习情况',
+            path: '/repository/knowledgeDetail'
+          },
+          {
+            menuId: '12604101852546387969',
+            menuName: '调整排序',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'role',
+            alias: '调整排序',
+            path: '/repository/catalogSort'
           }
         ]
       },
