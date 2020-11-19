@@ -50,7 +50,12 @@
             v-for="enclosure in _.get(paneData, 'attachment')"
             :key="enclosure.id"
             style="margin-right: 15px"
-          ><a :href="enclosure.url">{{ enclosure.localName }}</a></span>
+          ><a
+            class="link"
+            target="_blank"
+            :download="enclosure.localName"
+            :href="enclosure.url"
+          >{{ enclosure.localName }}</a></span>
         </div>
         <section
           class="article__content"
@@ -149,4 +154,10 @@ $color_info: #757c85
 .enclosure
   color: #757c85
   font-size: 14px
+.link
+
+  color: #757c85
+  text-decoration: underline
+  &:hover
+   color: #409eff
 </style>
