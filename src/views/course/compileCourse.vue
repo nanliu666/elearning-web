@@ -325,18 +325,13 @@
               width="185"
             >
               <template slot-scope="scope">
-                <el-select
-                  v-model="scope.row.type"
-                  placeholder="请选择"
-                >
-                  <el-option
-                    v-for="item in typeOption"
-                    :key="item.value"
-                    :label="item.name"
-                    :value="item.value"
-                  >
-                  </el-option>
-                </el-select>
+                <div v-if="typeOption[scope.row.type - 1]">
+                  <span v-if="typeOption[scope.row.type - 1].value === 1">文章</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 2">课件</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 3">知识点</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 4">考试</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 5">视频</span>
+                </div>
               </template>
             </el-table-column>
 
@@ -347,22 +342,7 @@
               width="250"
             >
               <template slot-scope="scope">
-                <el-button
-                  v-if="typeOption[scope.row.type - 1]"
-                  size="medium"
-                >
-                  <span v-if="typeOption[scope.row.type - 1].value === 1">添加文章</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 2">上传课件</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 3">关联知识点</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 4">关联考试</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 5">上传视频</span>
-                </el-button>
-                <el-button
-                  v-else
-                  size="medium"
-                >
-                  请选择章节类型
-                </el-button>
+                <span>{{ scope.row.articleContent }}</span>
               </template>
             </el-table-column>
 
@@ -378,7 +358,7 @@
                   type="text"
                   size="small"
                 >
-                  保存
+                  编辑
                 </el-button>
                 <el-button
                   type="text"
@@ -509,12 +489,12 @@ export default {
     // 向上移动
     upward(scope) {
       this.swapArray(this.ruleForm.contents, scope - 1, scope)
-      // console.log(scope)
+      //   console.log(scope)
     },
     // 向下移动
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
-      // console.log(scope)
+      //   console.log(scope)
     },
     // 图片
     handleAvatarSuccess(res, file) {

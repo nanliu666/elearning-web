@@ -441,6 +441,19 @@ const res = {
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
+          },
+          {
+            menuId: '1259056745476834562058',
+            menuName: '编辑课程',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/compileCourse',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },

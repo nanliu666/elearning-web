@@ -103,7 +103,10 @@ module.exports = {
         // target: 'http://apidev.epro.com.cn/',
 
         // 测试环境
-        target: 'http://122.112.190.144/',
+        // target: 'http://122.112.190.144/',
+
+        // 辛桃发IP
+        target: 'http://192.168.40.134/',
 
         // saber远程演示服务地址
         // target: 'https://saber.bladex.vip/',

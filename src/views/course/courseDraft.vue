@@ -38,7 +38,7 @@
           :config="tableConfig"
           :columns="columns"
           :loading="loading"
-          :data="data"
+          :data="draftData"
           :page="page"
           @current-page-change="currentChange"
           @page-size-change="sizeChange"
@@ -67,6 +67,63 @@
               />
             </div>
           </template>
+          <!-- 序号 -->
+          <template
+            slot="index"
+            slot-scope="{ row }"
+          >
+            <span>{{ draftData.indexOf(row) + 1 }}</span>
+          </template>
+          <!-- 课程名称 -->
+          <template
+            slot="name"
+            slot-scope="{ row }"
+          >
+            <div id="recommend">
+              <span
+                v-if="row.isTop === 1"
+                id="triangle_topleft"
+              ></span>
+              <span
+                v-if="row.isTop === 1"
+                class="icon_rec"
+              >推荐</span>
+              <el-button
+                id="recommend_info"
+                type="text"
+              >
+                {{ row.name }}
+              </el-button>
+            </div>
+          </template>
+          <!-- 课程类型 -->
+          <template
+            slot="type"
+            slot-scope="{ row }"
+          >
+            <span v-if="row.type === 1">在线课程</span>
+            <span v-if="row.type === 2">面授课程</span>
+            <span v-if="row.type === 3">直播课程</span>
+          </template>
+          <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
+          <template
+            slot="passCondition"
+            slot-scope="{ row }"
+          >
+            <span v-if="row.passCondition === 'a'">教师评定</span>
+            <span v-if="row.passCondition === 'b'">考试通过</span>
+            <span v-if="row.passCondition === 'c'">达到课程学时</span>
+          </template>
+          <!-- electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修) -->
+          <template
+            slot="electiveType"
+            slot-scope="{ row }"
+          >
+            <span v-if="row.electiveType === 1">开发选修</span>
+            <span v-if="row.electiveType === 2">通过审批</span>
+            <span v-if="row.electiveType === 3">禁止选修</span>
+          </template>
+
           <template
             slot="handler"
             slot-scope="{ row }"
@@ -93,6 +150,7 @@
     <!-- Dialog无数据 -->
     <div
       v-show="dialogVisible"
+      v-if="draftData"
       class="dialog"
     >
       <i
@@ -143,6 +201,7 @@
 
 <script>
 import { getOrgUserList, resetPwd } from '@/api/system/user'
+import { getCourseList } from '@/api/course/course'
 export default {
   props: {
     activeOrg: {
@@ -180,40 +239,72 @@ export default {
         {
           label: '序号',
           prop: 'index',
-          width: '70'
-        },
-        {
-          label: '课程名称',
-          prop: 'name',
-          width: '300'
-        },
-        {
-          label: '讲师',
-          prop: 'workNo'
+          width: '70',
+          slot: true
         },
 
         {
+          label: '课程名称',
+          prop: 'name',
+          slot: true
+        },
+        {
+          label: '讲师',
+          prop: 'teacherId'
+        },
+        {
           label: '所在目录',
-          prop: 'orgName'
+          prop: 'catalogId'
         },
         {
           label: '课程类型',
-          prop: 'jobName'
+          prop: 'type',
+          slot: true
         },
         {
           label: '通过条件',
-          prop: 'phonenum'
+          prop: 'passCondition',
+          slot: true
         },
         {
           label: '选修类型',
-          prop: '1'
+          prop: 'electiveType',
+          slot: true
         },
         {
           label: '创建人',
-          prop: '2'
+          prop: 'createName'
         }
       ],
-      data: [],
+      // 表格数据
+      draftData: [
+        {
+          isRecommend: 1, //是否推荐课程
+          passCondition: 'c', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
+          catalogId: 4, //课程目录id
+          teacherId: 4, //	课程讲师id
+          isTop: 1, //是否置顶
+          createId: 4, //创建人账号
+          name: 'dd', //课程名称
+          electiveType: 2, //选修类型
+          id: 4, //主键id
+          type: 2, //	课程类型(1:在线 2:面授 3:直播)
+          createName: '小红' //创建人
+        },
+        {
+          isRecommend: 1, //是否推荐课程
+          passCondition: 'c', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
+          catalogId: 4, //课程目录id
+          teacherId: 4, //	课程讲师id
+          isTop: 1, //是否置顶
+          createId: 4, //创建人账号
+          name: 'dd', //课程名称
+          electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修)
+          id: 4, //主键id
+          type: 2, //	课程类型(1:在线 2:面授 3:直播)
+          createName: '小红' //创建人
+        }
+      ],
       editVisible: false,
       editingUser: {}
     }
@@ -237,11 +328,21 @@ export default {
   },
   created() {
     this.loadData()
+    // this.getInfo()
+    // console.log(this.draftData)
   },
   activated() {
     this.loadData()
   },
   methods: {
+    // 拿数据
+    getInfo() {
+      getCourseList(1).then((res) => {
+        // this.data= res
+        window.console.log('1--------------', res)
+      })
+      // console.log('2--------------',this.data);
+    },
     // Dialog无数据
     handleClose() {},
 
@@ -446,6 +547,30 @@ export default {
       margin-top: 45px;
       text-align: center;
     }
+  }
+}
+/deep/ #recommend {
+  position: relative;
+  /deep/ .icon_rec {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-45deg);
+    font-size: 10px !important;
+    text-align: center;
+    line-height: 24px;
+  }
+  /deep/ #triangle_topleft {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-top: 30px solid #d6dcfd;
+    border-right: 30px solid transparent;
+  }
+  /deep/ #recommend_info {
+    padding-left: 15px;
   }
 }
 </style>
