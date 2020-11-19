@@ -2,7 +2,7 @@
   <!-- 数据规则 -->
   <div
     v-loading="loading"
-    style="width;350px;"
+    style="width:350px;"
   >
     <div>
       <el-tabs
@@ -37,66 +37,66 @@
             />
           </div>
         </el-tab-pane>
-        <el-tab-pane
-          label="业务部门"
-          name="business"
-        >
-          <div>
-            <el-tree
-              ref="bizTree"
-              :show-checkbox="showCheckbox"
-              :check-on-click-node="showCheckbox"
-              :data="bizPermissionData"
-              :draggable="false"
-              :default-expand-all="true"
-              :default-checked-keys="defualtBizId"
-              node-key="bizId"
-              highlight-current
-              :props="bizTreeProps"
-              :filter-node-method="bizFilterNode"
-              @check="check('bizTree')"
-            />
-          </div>
-        </el-tab-pane>
-        <el-tab-pane
-          label="自定义"
-          name="custom"
-        >
-          <el-form
-            v-if="activeName == 'custom'"
-            ref="costumeForm"
-            :model="form"
-            :disabled="!showCheckbox"
-            label-width="100px"
-            label-position="top"
-            class="newOrgDailog"
-          >
-            <el-form-item
-              label="权限类名"
-              prop="scopeClass"
-            >
-              <el-input
-                v-model="form.scopeClass"
-                placeholder="请输入权限类名"
-                @input="getCheckList('custom')"
-              />
-            </el-form-item>
-            <el-form-item
-              label="规则值"
-              prop="scopeValue"
-            >
-              <el-input
-                v-model="form.scopeValue"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入规则值"
-                maxlength="200"
-                show-word-limit
-                @input="getCheckList('custom')"
-              />
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
+        <!--        <el-tab-pane-->
+        <!--          label="业务部门"-->
+        <!--          name="business"-->
+        <!--        >-->
+        <!--          <div>-->
+        <!--            <el-tree-->
+        <!--              ref="bizTree"-->
+        <!--              :show-checkbox="showCheckbox"-->
+        <!--              :check-on-click-node="showCheckbox"-->
+        <!--              :data="bizPermissionData"-->
+        <!--              :draggable="false"-->
+        <!--              :default-expand-all="true"-->
+        <!--              :default-checked-keys="defualtBizId"-->
+        <!--              node-key="bizId"-->
+        <!--              highlight-current-->
+        <!--              :props="bizTreeProps"-->
+        <!--              :filter-node-method="bizFilterNode"-->
+        <!--              @check="check('bizTree')"-->
+        <!--            />-->
+        <!--          </div>-->
+        <!--        </el-tab-pane>-->
+        <!--        <el-tab-pane-->
+        <!--          label="自定义"-->
+        <!--          name="custom"-->
+        <!--        >-->
+        <!--          <el-form-->
+        <!--            v-if="activeName == 'custom'"-->
+        <!--            ref="costumeForm"-->
+        <!--            :model="form"-->
+        <!--            :disabled="!showCheckbox"-->
+        <!--            label-width="100px"-->
+        <!--            label-position="top"-->
+        <!--            class="newOrgDailog"-->
+        <!--          >-->
+        <!--            <el-form-item-->
+        <!--              label="权限类名"-->
+        <!--              prop="scopeClass"-->
+        <!--            >-->
+        <!--              <el-input-->
+        <!--                v-model="form.scopeClass"-->
+        <!--                placeholder="请输入权限类名"-->
+        <!--                @input="getCheckList('custom')"-->
+        <!--              />-->
+        <!--            </el-form-item>-->
+        <!--            <el-form-item-->
+        <!--              label="规则值"-->
+        <!--              prop="scopeValue"-->
+        <!--            >-->
+        <!--              <el-input-->
+        <!--                v-model="form.scopeValue"-->
+        <!--                type="textarea"-->
+        <!--                :rows="2"-->
+        <!--                placeholder="请输入规则值"-->
+        <!--                maxlength="200"-->
+        <!--                show-word-limit-->
+        <!--                @input="getCheckList('custom')"-->
+        <!--              />-->
+        <!--            </el-form-item>-->
+        <!--          </el-form>-->
+        <!--        </el-tab-pane>-->
       </el-tabs>
     </div>
   </div>
