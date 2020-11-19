@@ -4,7 +4,7 @@
     class="NewsEdit wrapper"
   >
     <page-header
-      title="新闻发布"
+      title="新建公告"
       :back="() => handleBack()"
       show-back
     />
@@ -13,65 +13,131 @@
       v-loading="loading"
       block
     >
-      <common-form
-        ref="form"
-        :columns="formColumns"
-        :model="formData"
-        :config="{
-          labelPosition: 'left',
-          labelWidth: '120px'
-        }"
-      >
-        <template #picUrl>
-          <common-upload
-            v-model="uploader.fileList"
-            :limit="uploader.limit"
-            class="uploader"
+      <div class="flex">
+        <div>
+          <common-form
+            ref="form"
+            :columns="formColumns"
+            :model="formData"
+            :config="{
+              labelPosition: 'left',
+              labelWidth: '95px'
+            }"
           >
-            <template #default>
-              <div
-                v-if="_.size(uploader.fileList) < uploader.limit && _.isNil(formData.picUrl)"
-                class="uploader__btn"
+            <template #attachment>
+              <common-upload
+                v-model="formData.attachment"
+                multiple
+                :before-upload="beforeUpload"
               >
-                <i class="icon-tips-plus-outlined" />
-                <span class="uplader__btn--text">点击上传</span>
-              </div>
+                <div
+                  slot="tip"
+                  class="upload__tip"
+                >
+                  单个文件大小＜5MB，最多5个文件
+                </div>
+                <template>
+                  <el-button size="medium">
+                    上传
+                  </el-button>
+                  <div>
+                    <ul class="upload__files">
+                      <li
+                        v-for="(item, index) in formData.attachment"
+                        :key="index"
+                      >
+                        {{ item.localName }}
+                        <i
+                          class="el-icon-close"
+                          @click.stop="handleRemoveAttachment(index)"
+                        ></i>
+                      </li>
+                    </ul>
+                  </div>
+                </template>
+              </common-upload>
+            </template>
+            <template #picUrl>
+              <common-upload
+                v-model="uploader.fileList"
+                :limit="uploader.limit"
+                class="uploader"
+              >
+                <template #default>
+                  <div
+                    v-if="_.size(uploader.fileList) < uploader.limit && _.isNil(formData.picUrl)"
+                    class="uploader__btn"
+                  >
+                    <i class="icon-tips-plus-outlined" />
+                    <span class="uplader__btn--text">点击上传</span>
+                  </div>
 
-              <div
-                v-else
-                class="uploader__previewer"
-                @click.stop="() => void 0"
-              >
-                <el-image
-                  style="width: 100px; height: 100px"
-                  :src="formData.picUrl"
-                  :preview-src-list="_.map(uploader.fileList, ({ fileUrl }) => fileUrl)"
-                />
+                  <div
+                    v-else
+                    class="uploader__previewer"
+                    @click.stop="() => void 0"
+                  >
+                    <el-image
+                      style="width: 100px; height: 100px"
+                      :src="formData.picUrl"
+                      :preview-src-list="_.map(uploader.fileList, ({ fileUrl }) => fileUrl)"
+                    />
+                  </div>
+                </template>
+
+                <template slot="tip">
+                  <span
+                    v-if="_.size(uploader.fileList) < uploader.limit && _.isNil(formData.picUrl)"
+                    class="uploader__description"
+                  >
+                    图片大小不超过5M
+                  </span>
+                  <el-button
+                    v-else
+                    type="text"
+                    @click="() => handleUploaderRemove()"
+                  >
+                    删除封面
+                  </el-button>
+                </template>
+              </common-upload>
+            </template>
+            <template #content>
+              <div class="container__editor">
+                <tinymce v-model="formData.content" />
               </div>
             </template>
-
-            <template slot="tip">
-              <span
-                v-if="_.size(uploader.fileList) < uploader.limit && _.isNil(formData.picUrl)"
-                class="uploader__description"
-              >
-                图片大小不超过5M
-              </span>
-              <el-button
-                v-else
-                type="text"
-                @click="() => handleUploaderRemove()"
-              >
-                删除封面
-              </el-button>
+          </common-form>
+        </div>
+        <div class="flexrow">
+          <common-form
+            ref="form2"
+            :columns="columns"
+            :model="formData"
+            :config="{
+              labelPosition: 'left',
+              labelWidth: '95px'
+            }"
+          >
+            <template slot="isVisibles">
+              <fc-org-select
+                ref="org-select"
+                v-model="formData.visibles"
+                title="发布范围"
+                class="select"
+                :all="all"
+                :is-range="isRange"
+                :org="isOrg"
+                :empty-text="emptyText"
+              />
             </template>
-          </common-upload>
-        </template>
-      </common-form>
-
-      <div class="container__editor">
-        <tinymce v-model="formData.content" />
+          </common-form>
+        </div>
       </div>
+
+      <!--      <div class="container__editor">-->
+      <!--        <tinymce v-model="formData.content" />-->
+      <!--      </div>-->
 
       <div class="container__buttons">
         <el-button
@@ -101,18 +167,22 @@
 
 <script>
 import Vue from 'vue'
-import {
-  getNewsCategory,
-  postV1News,
-  postNewsPublish,
-  getNewsDetail,
-  putV1News
-} from '@/api/newsCenter/newCenter'
+import { postV1News, postNewsPublish, getNewsDetail, putV1News } from '@/api/newsCenter/newCenter'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
 
 // 接口需要的参数
-const API_PARAMS = ['id', 'title', 'categoryId', 'picUrl', 'content', 'brief', 'userId']
+const API_PARAMS = [
+  'id',
+  'title',
+  'attachment',
+  'content',
+  'picUrl',
+  'publishColumn',
+  'visibles',
+  'brief',
+  'userId'
+]
 // vue 深度监听
 const vmSetDeep = (target, key, value) => {
   const set = Vue.set
@@ -142,14 +212,16 @@ export default {
         span: 24
       },
       {
-        itemType: 'select',
-        label: '新闻栏目',
-        options: [],
-        prop: 'categoryId',
-        props: {
-          label: 'name',
-          value: 'id'
-        },
+        itemType: 'slot',
+        label: '附件',
+        prop: 'attachment',
+        required: false,
+        span: 24
+      },
+      {
+        itemType: 'slot',
+        label: '正文',
+        prop: 'content',
         required: true,
         span: 24
       },
@@ -161,15 +233,44 @@ export default {
           label: 'jobName',
           value: 'id'
         },
-        required: true,
+        required: false,
         span: 24
       }
     ]
     return {
+      isRange: true,
+      isOrg: true,
+      all: true,
+      emptyText: '所有人',
+
       formColumns: FORM_COLUMNS,
       loading: false,
-      formData: {},
-
+      formData: {
+        isVisibles: true,
+        visibles: [],
+        attachment: []
+      },
+      columns: [
+        {
+          itemType: 'select',
+          label: '发布栏目',
+          prop: 'publishColumn',
+          required: true,
+          options: [],
+          props: {
+            label: 'dictValue',
+            value: 'id'
+          },
+          span: 24
+        },
+        {
+          itemType: 'slot',
+          label: '发布范围',
+          prop: 'isVisibles',
+          required: true,
+          span: 24
+        }
+      ],
       uploader: {
         fileList: [],
         limit: 1,
@@ -199,6 +300,17 @@ export default {
       const { userId, brief } = this
       const formData = _.cloneDeep(this.formData)
       formData.content = _.escape(formData.content)
+      if (formData.visibles.length === 0) {
+        formData.visibles = [{ type: 'All' }]
+      } else {
+        let vues = ['bizId', 'bizName', 'type']
+        let visibles = []
+        formData.visibles = formData.visibles.filter((it) => {
+          let newIt = _.pick(it, vues)
+          visibles.push(newIt)
+        })
+        formData.visibles = visibles
+      }
       return _(null)
         .assign(formData, { userId, brief })
         .pick(API_PARAMS)
@@ -249,8 +361,28 @@ export default {
   created() {
     this.refresh()
   },
+  mounted() {
+    this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
+      this.columns.find((item) => item.prop === 'publishColumn').options = res
+    })
+  },
 
   methods: {
+    handleRemoveAttachment(index) {
+      this.formData.attachment.splice(index, 1)
+    },
+    beforeUpload(file) {
+      // const TYPE_LIST = ['image/jpeg', 'image/jpg', 'image/png']
+      // const isJPG = _.some(TYPE_LIST, (item) => file.type === item)
+      const isLt5M = file.size / 1024 / 1024 < 5
+      // if (!isJPG) {
+      //   this.$message.error('上传图片只能是jpeg/jpg/png格式之一!')
+      // }
+      if (!isLt5M) {
+        this.$message.error('上传文件大小不能超过 5MB!')
+      }
+      return isLt5M
+    },
     handlePublishBtnClick() {
       this.validate()
         .then(async () => {
@@ -261,10 +393,11 @@ export default {
             try {
               this.submitting = true
               // 需要先存为草稿再发布新闻
-              const { id } = _.isNull(this.id)
-                ? await this.postNews(_.pickBy(this._formData))
+              // const { id } =
+              _.isNull(this.id)
+                ? await this.postNews(_.pickBy(this._formData), { status: 'Published' })
                 : await this.updateNews(_.pickBy(this._formData))
-              await this.publishNews(id)
+              // await this.publishNews(id)
               this.$message.success('发布成功')
               this.hasEdit = false
               this.handleBack()
@@ -303,7 +436,7 @@ export default {
               type: 'info'
             })
             _.isNull(this.id)
-              ? await this.postNews(_.pickBy(this._formData))
+              ? await this.postNews(_.pickBy(this._formData), { status: 'Draft' })
               : await this.updateNews(_.pickBy(this._formData))
             this.$message.success('保存成功')
             this.hasEdit = false
@@ -377,21 +510,35 @@ export default {
       return data
     },
 
-    validate(...args) {
+    validate() {
       // const BRIEF_MIN_LEN = 10 // 限制最小输入长度
-      return new Promise((resolve, reject) => {
-        this.$refs.form
-          .validate(...args)
-          .then((data) => {
-            resolve(data)
-            // if (_.size(this.brief) < BRIEF_MIN_LEN) {
-            //   reject('内容太少，请重新输入')
-            // } else {
-            //   resolve(data)
-            // }
+      // return new Promise((resolve, reject) => {
+      //   this.$refs.form
+      //     .validate(...args)
+      //     .then((data) => {
+      //       resolve(data)
+      //       // if (_.size(this.brief) < BRIEF_MIN_LEN) {
+      //       //   reject('内容太少，请重新输入')
+      //       // } else {
+      //       //   resolve(data)
+      //       // }
+      //     })
+      //     .catch((error) => reject(error))
+      // })
+      return Promise.all(
+        ['form', 'form2'].map((it) => {
+          return new Promise((resolve) => {
+            this.$refs[it]
+              .validate()
+              .then(() => {
+                resolve()
+              })
+              .catch(() => {
+                this.scrollTop()
+              })
           })
-          .catch((error) => reject(error))
-      })
+        })
+      )
     },
     clearValidate(...args) {
       return this.$refs.form.clearValidate(...args)
@@ -406,20 +553,28 @@ export default {
     },
 
     refresh() {
-      // 表单栏目选择
-      getNewsCategory().then(
-        (res) =>
-          (_.find(this.formColumns, {
-            prop: 'categoryId'
-          }).options = res)
-      )
+      // this.id = this.$route.query.id
       if (this.id) {
         this.loadDetail()
       }
+      // 表单栏目选择
+      // getNewsCategory().then(
+      //   (res) =>
+      //     (_.find(this.columns, {
+      //       prop: 'categoryId'
+      //     }).options = res)
+      // )
+      // if (this.id) {
+      //   this.loadDetail()
+      // }
     },
 
     // 存储草稿
-    async postNews(params) {
+    async postNews(params, { status = 'Draft' }) {
+      params = {
+        ...params,
+        status
+      }
       this.loading = true
       const data = await postV1News(params)
       this.loading = false
@@ -480,7 +635,22 @@ $color_font_uploader: #A0A8AE
   /deep/.el-form-item
     // margin-bottom: 11px // 减少底边距会造成错误提示的文本显示样式问题
   /deep/.el-col
-    border-bottom: 1px solid $color_border
   /deep/.el-select
     max-width: 228px
+.flexrow
+  width: 300px
+  margin-left: 15px
+  border-left: 1px solid $color_border
+  padding-left: 10px
+.upload__files
+  margin-top: 4px
+  li
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 4px
+    &:hover
+      color: #207efa
+.select
+  width: 194px
 </style>
