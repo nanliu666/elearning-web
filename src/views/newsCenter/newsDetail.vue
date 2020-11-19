@@ -41,6 +41,17 @@
             </li>
           </ul>
         </header>
+        <div
+          v-if="_.get(paneData, 'attachment') && _.get(paneData, 'attachment').length > 0"
+          class="enclosure"
+        >
+          附件：
+          <span
+            v-for="enclosure in _.get(paneData, 'attachment')"
+            :key="enclosure.id"
+            style="margin-right: 15px"
+          ><a :href="enclosure.url">{{ enclosure.localName }}</a></span>
+        </div>
         <section
           class="article__content"
           v-html="(content = _.get(paneData, 'content', null)) && _.unescape(content)"
@@ -135,4 +146,7 @@ $color_info: #757c85
         margin-right: 1rem
     .article__content
       margin-top: 2rem
+.enclosure
+  color: #757c85
+  font-size: 14px
 </style>
