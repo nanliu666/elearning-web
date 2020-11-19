@@ -1,5 +1,9 @@
 import request from '@/router/axios'
-
+import { del, get, put, post } from '@/router/axios'
+export const delPrivilege = (params) => del('/api/sys/v1/role/menu/privilege', params)
+export const getPrivilege = (params) => get('/api/sys/v1/role/menu/privilege', params)
+export const putPrivilege = (params) => put('/api/sys/v1/role/menu/privilege', params)
+export const postOrgPrivilege = (params) => post('/api/sys/v1/role/privilege', params)
 export const getMenuList = (current, size, params) => {
   return request({
     url: '/api/blade-system/menu/menu-list',

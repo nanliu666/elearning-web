@@ -185,7 +185,7 @@ const res = {
                 isShow: 0,
                 code: 'role',
                 alias: '查看用户',
-                path: '/system/userDetail'
+                path: '/system/roleUsers'
               }
             ]
           },
