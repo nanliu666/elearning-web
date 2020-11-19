@@ -76,8 +76,8 @@ const TABLE_CONFIG = {
 const TABLE_COLUMNS = [
   {
     label: '编号',
-    type: 'index',
-    width: 100
+    prop: 'noticeNumber',
+    width: 180
   },
   {
     label: '新闻标题',
@@ -204,12 +204,12 @@ export default {
   watch: {
     search: {
       handler: function(data) {
-        let name = Number(data.name)
-        if (name) {
-          data.noticeNumber = data.name
-        } else {
-          data.title = data.name
-        }
+        // let name = Number(data.name)
+        // if (name) {
+        //   data.noticeNumber = data.name
+        // } else {
+        //   data.title = data.name
+        // }
         this.searchParams = _.cloneDeep(data)
       },
       deep: true
