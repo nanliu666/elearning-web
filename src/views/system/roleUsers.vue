@@ -96,7 +96,7 @@ import addUserDialog from './components/addUserDialog'
 import { getUserList, deleteUser } from '@/api/system/role'
 
 export default {
-  name: 'UserDetail',
+  name: 'RoleUsers',
   components: {
     addUserDialog
   },
@@ -269,7 +269,7 @@ export default {
       // this.configVisible = !this.configVisible
       this.isEdit = false
       this.title = '新建子组织'
-      this.positionDialog = true
+      // this.positionDialog = true
     },
     handleAside(item, index) {
       this.active = index
@@ -279,7 +279,7 @@ export default {
     handleCheck() {
       this.isEdit = true
       this.title = '编辑子组织'
-      this.positionDialog = true
+      // this.positionDialog = true
     },
     toggleSelection(val) {
       this.$refs.crud.toggleSelection(val)
