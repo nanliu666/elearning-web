@@ -66,7 +66,7 @@
 
 <script>
 import treeSelect from '@/components/treeSelect/treeSelect'
-import { createRole, getRelativeJobs, updateRole } from '../../../api/system/role'
+import { createRole, updateRole } from '../../../api/system/role'
 
 export default {
   name: 'RoleEdit',
@@ -125,24 +125,8 @@ export default {
         prop: 'roleName',
         itemType: 'input',
         label: '角色名称',
-        required: true
-      },
-      {
-        prop: 'type',
-        itemType: 'radio',
-        label: '关联类型',
         span: 24,
-        required: true,
-        options: [
-          {
-            label: '关联职位',
-            value: 'Job'
-          },
-          {
-            label: '无关联',
-            value: 'No'
-          }
-        ]
+        required: true
       },
       {
         prop: 'remark',
@@ -159,10 +143,7 @@ export default {
       form: {
         roleId: '',
         roleName: '',
-        type: '',
-        remark: '',
-        positions: '',
-        jobs: []
+        remark: ''
       },
       jobDicData: []
     }
@@ -170,30 +151,11 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { roleId, roleName, type, remark, positions, jobs } = { ...newVal }
-        let newpositions = []
-        if (positions) {
-          positions.map((it) => {
-            newpositions.push(it.positionId)
-          })
-        }
-
-        positions = newpositions[0]
-        let newjobs = []
-        if (jobs) {
-          jobs.map((it) => {
-            newjobs.push(it.jobId)
-          })
-        }
-
-        jobs = newjobs
+        let { roleId, roleName, remark } = { ...newVal }
         this.form = {
           roleId,
           roleName,
-          type,
-          remark,
-          positions,
-          jobs
+          remark
         }
       },
       immediate: true,
@@ -203,136 +165,18 @@ export default {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
       }
-    },
-    'form.type': {
-      handler(val) {
-        this.form.type = val
-        if (val === 'Job') {
-          this.columns.splice(2, 0, this.jobColumn)
-        } else if (val === 'No') {
-          let index = _.findIndex(this.columns, (item) => {
-            return item.prop === 'jobs'
-          })
-          if (index > -1) {
-            this.columns.splice(index, 1)
-          }
-        }
-      },
-      immediate: true,
-      deep: true
-    },
-    'form.jobs': {
-      // 清空关联职位的校验
-      handler() {
-        this.$refs['form'].validateField('jobs', () => {})
-      },
-      deep: true
     }
   },
-  mounted() {
-    this.getJobsFunc()
-  },
+  mounted() {},
   methods: {
-    getJobsFunc() {
-      let params = {
-        jobName: '',
-        pageNo: 1,
-        pageSize: 100
-      }
-      getRelativeJobs(params).then((res) => {
-        let targetData = res.data.map((item) => {
-          return {
-            label: item.jobName,
-            id: item.jobId,
-            roles: item.roleId
-          }
-        })
-        this.jobDicData = targetData
-      })
-    },
-    filterTree(data) {
-      data.map((it) => {
-        if (!(it.children && it.children.length > 0) && it.orgType) {
-          it.disabled = true
-        }
-        if (it.children && it.children.length > 0) {
-          this.filterTree(it.children)
-        }
-      })
-    },
-    jobFilter(arr, data, data2) {
-      arr.filter((item) => {
-        const obj = {
-          children: []
-        }
-        const obj2 = {
-          children: []
-        }
-        if (item.jobs && item.jobs.length > 0) {
-          item.jobs.forEach((item) => {
-            const job = {
-              label: item.jobName,
-              id: item.jobId,
-              roles: item.roles
-            }
-            obj.children.push(job)
-            if (!(item.roles && item.roles.length > 0)) {
-              obj2.children.push(job)
-            } else {
-              job.disabled = true
-            }
-            if (item.roles && item.roles.length > 0 && item.roles[0].roleId === this.row.roleId) {
-              job.disabled = false
-              obj2.children.push(job)
-            }
-          })
-        }
-        if (item.orgType) {
-          obj.label = item.orgName
-          obj.id = item.orgId
-          obj2.label = item.orgName
-          obj2.id = item.orgId
-          obj2.orgType = item.orgType
-          if (item.children && item.children.length > 0) {
-            this.jobFilter(item.children, obj.children, obj2.children)
-          } else {
-            obj.disabled = true
-          }
-        }
-        data.push(obj)
-        data2.push(obj2)
-      })
-    },
-    recursion(data, roleId) {
-      data.map((it) => {
-        if (it.roles && it.roles.length > 0 && it.roles[0].roleId === roleId) {
-          it.disabled = false
-        }
-        if (it.children && it.children.length > 0) {
-          this.recursion(it.children, roleId)
-        }
-      })
-    },
-
-    findObject(column, key) {
-      return column.find((item) => item.prop === key)
-    },
-
     onOpened() {
       if (this.row.roleId) {
         this.$nextTick(() => {
-          const { roleId, roleName, type, remark, jobs, positions } = this.row
+          const { roleId, roleName, remark } = this.row
           const form = this.form
           form.roleId = roleId
           form.roleName = roleName
-          form.type = type
           form.remark = remark
-          if (jobs && jobs.length > 0) {
-            form.jobs = jobs.map((it) => it.jobId)
-          }
-          if (positions && positions.length > 0) {
-            form.positions = positions[0].positionId
-          }
         })
       }
     },
@@ -351,13 +195,8 @@ export default {
     },
     //新建角色
     createFunc(callback) {
-      let positions = []
-
-      this.form.positions && positions.push(this.form.positions)
       const params = {
         ...this.form,
-        positions,
-        jobs: this.form.jobs,
         categoryId: this.categoryId
       }
       this.loading = true
@@ -403,8 +242,6 @@ export default {
     clearForm() {
       this.$refs.form.resetForm()
       this.form.roleId = ''
-      this.form.positions = []
-      this.form.jobs = []
     },
 
     // 清除avue表单组件防重提交
