@@ -2,7 +2,7 @@
   <!-- 数据规则 -->
   <el-dialog
     v-loading="loading"
-    title="页面空间权限"
+    title="页面a权限"
     :visible="visible"
     width="550px"
     :modal-append-to-body="false"
@@ -12,6 +12,18 @@
       v-model="filterText"
       placeholder="输入关键字进行过滤"
     /> -->
+    <div>
+      <el-tree
+        ref="orgTree"
+        :data="data"
+        show-checkbox
+        node-key="menuId"
+        :props="props"
+        :default-expanded-keys="[2, 3]"
+        :default-checked-keys="[5]"
+      >
+      </el-tree>
+    </div>
     <span
       slot="footer"
       class="dialog-footer"
@@ -42,6 +54,12 @@ export default {
       type: String,
       default: ''
     },
+    data: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
     clientId: {
       type: String,
       default: ''
@@ -49,6 +67,10 @@ export default {
   },
   data() {
     return {
+      props: {
+        label: 'name',
+        children: 'children'
+      },
       roleId: 0,
       $parentId: '',
       filterText: '',
@@ -136,6 +158,7 @@ export default {
       this.handleClose()
     },
     handleClose() {
+      this.$refs['orgTree'].setCheckedKeys()
       this.$emit('closeDialog', false)
     }
   }
