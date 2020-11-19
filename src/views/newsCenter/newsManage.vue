@@ -3,457 +3,158 @@
     <page-header title="新闻管理">
       <template #rightMenu>
         <el-button
-          size="medium"
-          @click="() => handlePublishedBtnClick()"
-        >
-          已发布的
-        </el-button>
-        <el-button
-          size="medium"
-          @click="() => handleDraftBtnClick()"
-        >
-          草稿箱
-        </el-button>
-        <el-button
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
         >
-          发布新闻
+          新建公告
         </el-button>
       </template>
     </page-header>
-
+    <div class="tabsNav flex flex-flow flex-justify-between flexcenter">
+      <div class="tabsNav-tabs flex flex-flow flex-justify-between">
+        <div
+          :class="[activeName === 'Published' ? 'tabsNav-tabs-active' : '']"
+          @click="activeName = 'Published'"
+        >
+          已发布（{{ Published_number }}）
+        </div>
+        <div
+          :class="[activeName === 'Draft' ? 'tabsNav-tabs-active' : '']"
+          @click="activeName = 'Draft'"
+        >
+          草稿箱（{{ Draft_number }}）
+        </div>
+      </div>
+      <div class="flex-flow flex">
+        <div>
+          <el-select
+            v-model="form.ENUMS_STATUS[activeName].publishColumn"
+            class="tabsNav-select"
+            placeholder="请选择"
+            @change="handleChange"
+          >
+            <el-option
+              v-for="item in typeList"
+              :key="item.id"
+              :label="item.dictValue"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </div>
+        <div>
+          <el-input
+            v-model="form.ENUMS_STATUS[activeName].name"
+            placeholder="输入公告编号或标题搜索"
+          >
+            <i
+              slot="suffix"
+              class="el-input__icon el-icon-search"
+              @click="changeInput"
+            ></i>
+          </el-input>
+        </div>
+      </div>
+    </div>
     <el-row
       class="container__grid"
       :gutter="8"
     >
-      <el-col class="container__grid--aside">
-        <NewsManageSidebar
-          ref="sidebar"
-          v-model="searchParams.categoryId"
-          @hook:mounted="refresh"
-        />
-      </el-col>
       <el-col class="container__grid--main">
-        <basic-container block>
-          <common-table
-            ref="table"
-            :columns="columnsVisible | columnsFilter"
-            :config="tableConfig"
-            :data="tableData"
-            :loading="tableLoading"
-            :page-config="tablePageConfig"
-            :page="page"
-            @current-page-change="handleCurrentPageChange"
-            @page-size-change="handlePageSizeChange"
-          >
-            <template #topMenu>
-              <div class="operations">
-                <SearchPopover
-                  ref="searchPopover"
-                  :popover-options="searchConfig.popoverOptions"
-                  :require-options="searchConfig.requireOptions"
-                  @submit="(params) => handleSearch(params)"
-                />
-                <div class="operations__btns">
-                  <div class="operations-right">
-                    <div
-                      class="refresh-container"
-                      @click="refresh"
-                    >
-                      <i class="el-icon-refresh-right" />
-                      <span>刷新</span>
-                    </div>
-                    <el-popover
-                      placement="bottom"
-                      width="40"
-                      trigger="click"
-                    >
-                      <i
-                        slot="reference"
-                        style="cursor: pointer;"
-                        class="el-icon-setting"
-                      />
-                      <!-- 设置表格列可见性 -->
-                      <div class="operations__column--visible">
-                        <el-checkbox-group v-model="columnsVisible">
-                          <el-checkbox
-                            v-for="item of tableColumns"
-                            :key="item.prop"
-                            :disabled="item.prop === 'name'"
-                            :label="item.prop"
-                            class="operations__column--item"
-                          >
-                            {{ item.label }}
-                          </el-checkbox>
-                        </el-checkbox-group>
-                      </div>
-                    </el-popover>
-                  </div>
-                </div>
-              </div>
-            </template>
-            <!-- 编号列 -->
-            <template #title="{ row }">
-              <span
-                class="table__link"
-                @click="() => handleItemLinkClick(row)"
-              >
-                {{ row.title }}
-              </span>
-            </template>
-            <template #handler="{row}">
-              <div class="table__handler">
-                <el-tooltip
-                  :content="`${row.isTop ? '已' : ''}置顶`"
-                  effect="dark"
-                  placement="top"
-                >
-                  <el-button
-                    type="text"
-                    size="medium"
-                    :class="{ 'font__color--active': row.isTop }"
-                    @click="() => handleTopItemBtnClick(row)"
-                  >
-                    {{ row.isTop }}{{ row.isTop ? '取消置顶' : '置顶' }}
-                  </el-button>
-                </el-tooltip>
-
-                <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真) -->
-                <!-- <el-tooltip
-                  content="编辑"
-                  effect="dark"
-                  placement="top"
-                >
-                  <el-button
-                    type="text"
-                    size="medium"
-                    @click="() => handleEditItemBtnClick(row)"
-                  >
-                    <i class="icon-basics-edit-outlined" />
-                  </el-button>
-                </el-tooltip> -->
-
-                <el-tooltip
-                  content="删除"
-                  effect="dark"
-                  placement="top"
-                >
-                  <el-button
-                    type="text"
-                    size="medium"
-                    @click="() => handleRemoveItemBtnClick(row)"
-                  >
-                    删除
-                  </el-button>
-                </el-tooltip>
-              </div>
-            </template>
-          </common-table>
-        </basic-container>
+        <new-table
+          v-show="activeName === ENUMS_STATUS.Published"
+          ref="Published"
+          :status="ENUMS_STATUS.Published"
+          :number.sync="Published_number"
+          :search="form.ENUMS_STATUS.Published"
+          :type-list="typeList"
+        ></new-table>
+        <new-table
+          v-show="activeName === ENUMS_STATUS.Draft"
+          ref="Draft"
+          :type-list="typeList"
+          :status="ENUMS_STATUS.Draft"
+          :number.sync="Draft_number"
+          :search="form.ENUMS_STATUS.Draft"
+        ></new-table>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import { getV1News, delV1News, postNewsTop, getPublishUser } from '@/api/newsCenter/newCenter'
-// 2020-09-18: 使用新闻发布人查询接口代替在职员工接口
-// import { getWorklist } from '@/api/personnel/selectedPerson'
-import NewsManageSidebar from './components/NewsManageSidebar'
-import SearchPopover from '@/components/searchPopOver/index'
-import { mapGetters } from 'vuex'
+import newTable from './components/newTable'
 
 const ENUMS_STATUS = {
   Published: 'Published',
   Draft: 'Draft'
 }
 
-// 表格属性
-const TABLE_COLUMNS = [
-  {
-    label: '编号',
-    type: 'index',
-    width: 100
-  },
-  {
-    label: '新闻标题',
-    minWidth: 150,
-    slot: true,
-    prop: 'title'
-  },
-  {
-    label: '发表人',
-    prop: 'publishUserName',
-    maxWidth: 100
-  },
-  {
-    label: '发布时间',
-    prop: 'publishTime',
-    minWidth: 100
-  },
-  {
-    label: '阅读量',
-    prop: 'readNum',
-    minWidth: 100
-  }
-]
-const TABLE_CONFIG = {
-  enablePagination: true,
-  showHandler: true,
-  handlerColumn: {
-    width: 150
-  },
-  enableMultiSelect: false,
-  rowKey: 'id',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
-}
-const TABLE_PAGE_CONFIG = {}
-
-// 搜索配置
-const SEARCH_POPOVER_REQUIRE_OPTIONS = [
-  {
-    config: { placeholder: '新闻标题', 'suffix-icon': 'el-icon-search' },
-    data: '',
-    field: 'title',
-    label: '',
-    type: 'input'
-  }
-]
-const SEARCH_POPOVER_POPOVER_OPTIONS = [
-  {
-    data: '',
-    field: 'publishUserId',
-    label: '发布人',
-    type: 'lazySelect',
-    optionList: [],
-    placeholder: '请选择发布人',
-    optionProps: {
-      formatter: (item) => `${item.name}(${item.workNo})`,
-      key: 'userId',
-      value: 'userId'
-    },
-    load: (params) => {
-      return getPublishUser(params)
-    },
-    config: { optionLabel: 'name', optionValue: 'id' }
-  },
-  {
-    data: '',
-    label: '发布日期',
-    type: 'dataPicker',
-    field: 'beginPublishTime,endPublishTime',
-    config: { type: 'daterange', 'range-separator': '至' }
-  }
-]
-const SEARCH_CONFIG = {
-  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
-}
+// 全部/新闻中心/系统消息
 export default {
   name: 'NewsManage',
   components: {
-    SearchPopover,
-    NewsManageSidebar
+    newTable
   },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
+
   data() {
     return {
-      // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
-      sidebarLoading: false,
-      searchConfig: SEARCH_CONFIG,
-      searchParams: {},
-      tableColumns: TABLE_COLUMNS,
-      tableData: [],
-      tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG
+      ENUMS_STATUS,
+      activeName: 'Published',
+      typeList: [],
+      newsType: '',
+      Published_number: 0,
+      Draft_number: 0,
+      form: {
+        ENUMS_STATUS: {
+          Published: {
+            name: '',
+            publishColumn: ''
+          },
+          Draft: {
+            name: '',
+            publishColumn: ''
+          }
+        }
+      }
     }
   },
-  computed: {
-    tableConfig: () => TABLE_CONFIG,
 
-    ...mapGetters(['userId'])
-  },
   watch: {
     'searchParams.categoryId'() {
       this.handleSearch(this.searchParams)
     }
   },
-  // created() {
-  //   this.refresh().then(() => {
-  //     // 在数据加载可以完成之后设置searchParams.categoryId的默认值
-  //     // this.$set(this.searchParams, 'categoryId', null)
-  //   })
-  // },
+  mounted() {
+    this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
+      this.typeList = [{ dictValue: '全部', id: '' }, ...res]
+    })
+  },
   methods: {
+    changeInput() {
+      this.handleChange()
+    },
+    handleChange() {
+      if (this.activeName === this.ENUMS_STATUS['Published']) {
+        this.$nextTick(() => {
+          this.$refs[this.ENUMS_STATUS['Published']].handleSearch()
+        })
+      } else {
+        this.$nextTick(() => {
+          this.$refs[this.ENUMS_STATUS['Draft']].handleSearch()
+        })
+      }
+    },
     handlePublishBtnClick() {
       this.$router.push({
         path: '/newsCenter/newsEdit'
       })
-    },
-    handlePublishedBtnClick() {
-      this.$router.push({
-        path: '/newsCenter/newsPublished'
-      })
-    },
-    handleDraftBtnClick() {
-      this.$router.push({
-        path: '/newsCenter/newsDrafts'
-      })
-    },
-    // toggle isTop handler
-    handleTopItemBtnClick({ id, isTop, title }) {
-      const ACTION_NAME = isTop ? '取消置顶' : '置顶'
-      this.$confirm(`确认${ACTION_NAME}标题为《${title}》的新闻吗？`, {
-        title: `是否${ACTION_NAME}新闻`,
-        type: 'info'
-      }).then(async () => {
-        try {
-          this.tableLoading = true
-          await postNewsTop({ id, isTop: isTop ^ 1 })
-          this.$message.success(ACTION_NAME + '成功')
-        } catch (error) {
-          this.$message.error(error.message)
-        } finally {
-          this.tableLoading = false
-          this.refresh()
-        }
-      })
-    },
-
-    handleEditItemBtnClick({ id }) {
-      this.$router.push({
-        path: '/newsCenter/newsEdit',
-        query: { id }
-      })
-    },
-
-    handleRemoveItemBtnClick({ id, title }) {
-      this.$confirm(`确认删除标题为《${title}》的新闻吗？`, {
-        title: '是否删除新闻',
-        type: 'warning'
-      }).then(async () => {
-        try {
-          this.tableLoading = true
-          await delV1News({ id })
-          this.$message.success('删除成功')
-        } catch (error) {
-          this.$message.error(error.message)
-        } finally {
-          this.tableLoading = false
-          this.refresh()
-        }
-      })
-    },
-    // handleRemoveItems(selection) {
-    //   // TODO: 暂时不支持批量删除
-    // },
-    handleCurrentPageChange(param) {
-      this.page.currentPage = param
-      this.loadTableData()
-    },
-    handlePageSizeChange(param) {
-      this.page.pageSize = param
-      this.loadTableData()
-    },
-    handleSearch(searchParams) {
-      // 查询的时候重置页码为1
-      this.page.currentPage = 1
-      // FIXED: 修复查询时候失去categoryId
-      this.searchParams = _.pickBy({ ...searchParams, categoryId: this.searchParams.categoryId })
-      this.loadTableData()
-    },
-    // 跳转新闻详情
-    handleItemLinkClick({ id }) {
-      this.$router.push({
-        path: '/newsCenter/newsDetail',
-        query: {
-          id,
-          userId: this.userId
-        }
-      })
-      // this.$router.push({
-      //   path: '/noticeCenter/noticeDetail',
-      //   query: { id }
-      // })
-    },
-    // 刷新列表数据
-    refresh() {
-      this.$refs.sidebar.refresh().then(() => {
-        // 被watch.heandler执行了 (但是会被loading return 无所谓,可以写也可以不写)
-        this.loadTableData()
-      })
-    },
-
-    // 加载表格数据
-    async loadTableData(params) {
-      if (this.tableLoading) {
-        return
-      }
-      try {
-        this.tableLoading = true
-        const page = {
-          pageNo: this.page.currentPage,
-          pageSize: this.page.size
-        }
-        const searchParams = { status: ENUMS_STATUS.Published, ...this.searchParams }
-        const { data, totalNum } = await getV1News(_.assign(null, searchParams, page, params))
-        this.tableData = data
-        this.page.total = totalNum
-      } catch (error) {
-        this.$message.error(error.message)
-      } finally {
-        this.tableLoading = false
-      }
     }
   }
 }
 </script>
-<style lang="scss" scoped>
-.operations {
-  i {
-    margin-left: 12px;
-    font-size: 18px;
-    color: #a0a8ae;
-    cursor: pointer;
-  }
-  &-right {
-    display: flex;
-    align-items: center;
-    .refresh-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      color: #a0a8ae;
-      padding: 0 10px;
-      cursor: pointer;
-      span {
-        padding-left: 6px;
-      }
-      &::before {
-        position: absolute;
-        content: '';
-        top: 3px;
-        right: 0px;
-        width: 0.5px;
-        height: 80%;
-        background-color: #a0a8ae;
-      }
-    }
-  }
-}
-</style>
+
 <style lang="sass" scoped>
 $color_active: #368AFA
 $color_danger: #ff6464
@@ -468,8 +169,8 @@ $color_hover: #207EFA
       cursor: pointer
       color: $color_hover
   .status-span
-      padding: 4px;
-      border-radius: 2px;
+      padding: 4px
+      /*border-radius: 2px*/
   .basic-container--block
   .operations
     align-items: center
@@ -508,7 +209,7 @@ $color_hover: #207EFA
     &--aside
       width: 250px
     &--main
-      width: calc(100% - 250px)
+      width: calc(100%)
   .table__handler
     i
       color: $color_icon
@@ -530,4 +231,29 @@ $color_hover: #207EFA
         top: 50%
         transform: translateY(-50%)
         width: 1px
+
+
+
+
+.tabsNav
+  min-height: 50px
+  width: calc(100% - 2px)
+  background: #fff
+  padding: 0px 20px
+  border-bottom: 1px solid #DCDFE6
+  margin: 0 1px
+  box-sizing: border-box
+  &-tabs
+   line-height: 50px
+   font-size: 14px
+   div
+    margin: 0px 10px
+    cursor: pointer
+   &-active
+     border-bottom: 2px solid $color_active
+  &-select
+   width: 140px
+   margin-right: 20px
+.icon
+  line-height: 34px
 </style>

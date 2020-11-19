@@ -13,7 +13,10 @@
     >
       <div class="left">
         <div v-if="!isPreviewSelect || initData.length === 0">
-          <el-tabs v-model="tab">
+          <el-tabs
+            v-if="!isRange"
+            v-model="tab"
+          >
             <el-tab-pane
               label="组织架构"
               name="Org"
@@ -104,7 +107,14 @@
       </div>
       <div class="right">
         <div>
-          <span class="title">已选：</span>
+          <span
+            v-if="!isRange"
+            class="title"
+          >已选：</span>
+          <span
+            v-else
+            class="title"
+          >发布范围： <span class="company">企业内部</span> </span>
           <span style="float:right;" />
         </div>
 
@@ -119,7 +129,7 @@
           <div class="flex flex-justify-between flex-items">
             <!-- 用户图标 -->
             <i
-              v-if="!item.type"
+              v-if="item.type == 'Org'"
               class="iconfont icon-usercircle2 imgss"
             />
             <i
@@ -257,12 +267,24 @@ export default {
     },
 
     // 是否只显示部门,会在数据中过滤用户类型
-    isDepartmentOnly: Boolean
+    isDepartmentOnly: Boolean,
+    title: {
+      type: String,
+      default: () => {
+        return '请选择审批人'
+      }
+    },
+    //新闻公告的新建公告的发布范围要用到的
+    isRange: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
+    }
   },
   data() {
     return {
       tab: 'Org',
-      title: '请选择审批人',
       loading: false,
       orgSearch: '',
       orgSearchData: [],
@@ -322,7 +344,7 @@ export default {
     }, SEARCH_DELAY)
   },
   created() {
-    this.title = this.isPreviewSelect ? '请选择发起人' : '请选择审批人'
+    // this.title =
   },
   methods: {
     /**
@@ -517,4 +539,7 @@ export default {
   background: #fff;
   color: #207efa;
 }
+  .company{
+    color: #207efa;
+  }
 </style>

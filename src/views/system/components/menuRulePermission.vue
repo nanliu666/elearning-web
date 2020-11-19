@@ -6,11 +6,11 @@
     <el-tree
       ref="tree"
       :data="treeList || []"
-      :default-expanded-keys="[1]"
+      :default-expanded-keys="[]"
       :default-checked-keys="defaultValue"
       :highlight-current="true"
       show-checkbox
-      :check-strictly="true"
+      :check-strictly="false"
       :node-key="defaultProps.id"
       :props="{ label: defaultProps.label, disabled: genDisabled }"
       :expand-on-click-node="false"
@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { flatTree } from '@/util/util'
 export default {
   name: 'MenuRulePermission',
   props: {
@@ -61,6 +62,14 @@ export default {
       handler(val) {
         if (val.length > 0) {
           this.defaultValue = []
+          let filterVal = []
+          this.filterData(val, filterVal)
+          let fiterTree = flatTree(filterVal)
+          fiterTree.map((it) => {
+            if (it.isOwn && !(it.childrenList && it.childrenList.length > 0)) {
+              this.defaultValue.push(it.menuId)
+            }
+          })
           this.findValue(val, this.defaultValue)
         }
       },
@@ -70,6 +79,17 @@ export default {
   },
   created() {},
   methods: {
+    filterData(data, table) {
+      data.map((it) => {
+        if (it.isOwn) {
+          table.push(_.cloneDeep(it))
+        }
+        if (it.isOwn && it.children && it.children.length > 0) {
+          table[table.length - 1].children = []
+          this.filterData(it.children, table[table.length - 1].children)
+        }
+      })
+    },
     genDisabled() {
       return this.disabled
     },
@@ -110,17 +130,6 @@ export default {
         item.isOwn = treeKeys.indexOf(item[this.defaultProps.id]) > -1
         if (item.children && item.children.length > 0) {
           this.setOwn(item.children, treeKeys)
-        }
-      })
-    },
-
-    findValue(arr, data) {
-      arr.forEach((item) => {
-        if (item.isOwn) {
-          data.push(item[this.defaultProps.id])
-        }
-        if (item.children && item.children.length > 0) {
-          this.findValue(item.children, data)
         }
       })
     }

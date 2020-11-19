@@ -170,7 +170,7 @@ import { getStaffBasicInfo } from '@/api/personalInfo'
 import { modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
 import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
-  name: 'UserDetail',
+  name: 'RoleUsers',
   components: {
     // 员工角色编辑
     userRoleEdit: () => import('./components/userRoleEdit'),

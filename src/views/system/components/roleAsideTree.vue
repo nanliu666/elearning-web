@@ -18,46 +18,48 @@
         :data="treeList || []"
         :node-key="props.id"
         class="tree_"
+        highlight-current
         :default-expanded-keys="[currentId]"
         :default-checked-keys="[currentId]"
-        :highlight-current="true"
         :filter-node-method="filterNode"
         @node-click="handleNodeClick"
       >
-        <div
-          slot-scope="{ node, data }"
-          class="custom-tree-node"
-          @click.prevent="onClickNode(node, data)"
-        >
-          <span><i
-                  v-if="node.level === 1 && showFolder"
-                  class="el-icon-folder"
-                  style="margin-right: 5px;"
-                />{{ data[props.label] }}
-            <span>{{ `(${data.roleNum})` }}</span>
-          </span>
-          <el-dropdown
-            v-if="showMore"
-            class="right-content"
-            trigger="hover"
-            @command="handleCommand($event, node, data)"
+        <template slot-scope="{ node, data }">
+          <div
+            class="custom-tree-node"
+            @click.prevent="onClickNode(node, data)"
           >
-            <span
-              class="el-dropdown-link more-column"
-              @click.stop=""
-            >
-              <i class="el-icon-more" />
+            <span>
+              <i
+                v-if="node.level === 1 && showFolder"
+                class="el-icon-folder"
+                style="margin-right: 5px;"
+              />{{ data[props.label] }}
+              <span>{{ `(${data.roleNum})` }}</span>
             </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="edit">
-                编辑
-              </el-dropdown-item>
-              <el-dropdown-item command="del">
-                删除
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
+            <el-dropdown
+              v-if="showMore && !data.isDefault"
+              class="right-content"
+              trigger="hover"
+              @command="handleCommand($event, node, data)"
+            >
+              <span
+                class="el-dropdown-link more-column"
+                @click.stop=""
+              >
+                <i class="el-icon-more" />
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="edit">
+                  编辑
+                </el-dropdown-item>
+                <el-dropdown-item command="del">
+                  删除
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
+        </template>
       </el-tree>
     </el-scrollbar>
   </div>
@@ -138,7 +140,7 @@ export default {
       return data[this.props.label].indexOf(value) !== -1
     },
     onClickNode(node, data) {
-      // if (node.level > 1) {
+      // if (node.level > 1)
       this.$emit('reload', data)
       // }
     },
@@ -155,16 +157,20 @@ export default {
 
   /*min-height: 100px;*/
 }
+
 .search-input {
   margin-bottom: 10px;
 }
+
 .scroll-item {
   height: 500px;
   overflow: hidden;
   overflow-y: auto;
 }
+
 .tree_ {
 }
+
 .custom-tree-node {
   flex: 1;
   display: flex;
@@ -191,5 +197,12 @@ export default {
     -webkit-transform: rotate(90deg); /* Safari 和 Chrome */
     -o-transform: rotate(90deg);
   }
+}
+
+.active {
+  background-color: #f0f7ff !important;
+}
+/deep/.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+  background-color: #edf5ff;
 }
 </style>
