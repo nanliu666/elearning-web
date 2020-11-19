@@ -1,79 +1,57 @@
 <template>
-  <basic-container block>
-    <common-table
-      ref="table"
-      :columns="columnsVisible | columnsFilter"
-      :config="tableConfig"
-      :data="tableData"
-      :loading="tableLoading"
-      :page-config="tablePageConfig"
-      :page="page"
-      @current-page-change="handleCurrentPageChange"
-      @page-size-change="handlePageSizeChange"
-    >
-      <template #title="{ row }">
-        <span
-          class="table__link"
-          @click="() => handleItemLinkClick(row)"
+  <common-table
+    ref="table"
+    :columns="columnsVisible | columnsFilter"
+    :config="tableConfig"
+    :data="tableData"
+    :loading="tableLoading"
+    :page-config="tablePageConfig"
+    :page="page"
+    @current-page-change="handleCurrentPageChange"
+    @page-size-change="handlePageSizeChange"
+  >
+    <template #title="{ row }">
+      <span
+        class="table__link"
+        @click="() => handleItemLinkClick(row)"
+      >
+        {{ row.title }}
+      </span>
+    </template>
+    <template #publishColumn="{row}">
+      {{ format(row) }}
+    </template>
+    <template #handler="{row}">
+      <div class="table__handler">
+        <el-button
+          type="text"
+          size="medium"
+          @click="() => handleTopItemBtnClick(row)"
         >
-          {{ row.title }}
-        </span>
-      </template>
-      <template #publishColumn="{row}">
-        {{ format(row) }}
-      </template>
-      <template #handler="{row}">
-        <div class="table__handler">
-          <el-tooltip
-            :content="`${row.isTop ? '已' : ''}置顶`"
-            effect="dark"
-            placement="top"
-          >
-            <el-button
-              type="text"
-              size="medium"
-              @click="() => handleTopItemBtnClick(row)"
-            >
-              <i
-                class="icon-topping-outlined"
-                :class="{ 'font__color--active': row.isTop }"
-              />
-            </el-button>
-          </el-tooltip>
+          置顶
+        </el-button>
 
-          <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真) -->
-          <el-tooltip
-            v-if="status === STATUS['Draft']"
-            content="编辑"
-            effect="dark"
-            placement="top"
-          >
-            <el-button
-              type="text"
-              size="medium"
-              @click="() => handleEditItemBtnClick(row)"
-            >
-              <i class="icon-basics-edit-outlined" />
-            </el-button>
-          </el-tooltip>
+        <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真) -->
 
-          <el-tooltip
-            content="删除"
-            effect="dark"
-            placement="top"
-          >
-            <el-button
-              type="text"
-              size="medium"
-              @click="() => handleRemoveItemBtnClick(row)"
-            >
-              <i class="icon-basics-delete-outlined" />
-            </el-button>
-          </el-tooltip>
-        </div>
-      </template>
-    </common-table>
-  </basic-container>
+        <el-button
+          v-if="status === STATUS['Draft']"
+          type="text"
+          size="medium"
+          @click="() => handleEditItemBtnClick(row)"
+        >
+          编辑
+        </el-button>
+
+        <el-button
+          type="text"
+          size="medium"
+          @click="() => handleRemoveItemBtnClick(row)"
+        >
+          删除
+        </el-button>
+      </div>
+    </template>
+  </common-table>
 </template>
 
 <script>
@@ -387,7 +365,6 @@ $color_hover: #207EFA
   /*border-radius: 2px*/
 
 
-  .basic-container--block
 
   .operations
     align-items: center

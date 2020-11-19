@@ -57,29 +57,25 @@
         </div>
       </div>
     </div>
-    <el-row
-      class="container__grid"
-      :gutter="8"
-    >
-      <el-col class="container__grid--main">
-        <new-table
-          v-show="activeName === ENUMS_STATUS.Published"
-          ref="Published"
-          :status="ENUMS_STATUS.Published"
-          :number.sync="Published_number"
-          :search="form.ENUMS_STATUS.Published"
-          :type-list="typeList"
-        ></new-table>
-        <new-table
-          v-show="activeName === ENUMS_STATUS.Draft"
-          ref="Draft"
-          :type-list="typeList"
-          :status="ENUMS_STATUS.Draft"
-          :number.sync="Draft_number"
-          :search="form.ENUMS_STATUS.Draft"
-        ></new-table>
-      </el-col>
-    </el-row>
+
+    <basic-container block>
+      <new-table
+        v-show="activeName === ENUMS_STATUS.Published"
+        ref="Published"
+        :status="ENUMS_STATUS.Published"
+        :number.sync="Published_number"
+        :search="form.ENUMS_STATUS.Published"
+        :type-list="typeList"
+      ></new-table>
+      <new-table
+        v-show="activeName === ENUMS_STATUS.Draft"
+        ref="Draft"
+        :type-list="typeList"
+        :status="ENUMS_STATUS.Draft"
+        :number.sync="Draft_number"
+        :search="form.ENUMS_STATUS.Draft"
+      ></new-table>
+    </basic-container>
   </div>
 </template>
 
@@ -160,9 +156,9 @@ $color_active: #368AFA
 $color_danger: #ff6464
 $color_icon: #757C85
 $color_hover: #207EFA
-
+$header-height: 60px
 .NewsManage
-  height: 100%
+  height: 100%;
   .table__link
     color: $color_active
     &:hover
@@ -172,6 +168,9 @@ $color_hover: #207EFA
       padding: 4px
       /*border-radius: 2px*/
   .basic-container--block
+    min-height: calc( 100% - 92px - #{$header-height} - 3px)
+    height: calc( 100% - 92px - #{$header-height} - 3px)
+
   .operations
     align-items: center
     display: flex
@@ -202,8 +201,6 @@ $color_hover: #207EFA
       font-weight: bold
       font-size: 16px
   .container__grid
-    height: 0
-    min-height: calc(100% - 92px)
     &--aside,&--main
       height: 100%
     &--aside
@@ -236,7 +233,7 @@ $color_hover: #207EFA
 
 
 .tabsNav
-  min-height: 50px
+  min-height: $header-height
   width: calc(100% - 2px)
   background: #fff
   padding: 0px 20px
@@ -244,7 +241,7 @@ $color_hover: #207EFA
   margin: 0 1px
   box-sizing: border-box
   &-tabs
-   line-height: 50px
+   line-height: $header-height
    font-size: 14px
    div
     margin: 0px 10px
