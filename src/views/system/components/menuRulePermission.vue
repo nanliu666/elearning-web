@@ -66,11 +66,11 @@ export default {
           this.filterData(val, filterVal)
           let fiterTree = flatTree(filterVal)
           fiterTree.map((it) => {
-            if (it.isOwn && !(it.childrenList && it.childrenList.length > 0)) {
+            if (it.isOwn && it.menuType === 'Menu') {
               this.defaultValue.push(it.menuId)
             }
           })
-          this.findValue(val, this.defaultValue)
+          // this.findValue(val, this.defaultValue)
         }
       },
       immediate: true,
