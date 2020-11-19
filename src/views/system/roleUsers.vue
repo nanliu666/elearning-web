@@ -1,475 +1,453 @@
 <template>
-  <div class="user">
+  <div>
     <page-header
-      title="用户详情"
+      title="查看用户"
       show-back
     >
-    </page-header>
-    <div class="user-header">
-      <div class="user-info">
-        <div class="user-info__avatar">
-          <img
-            v-if="userData.avatarUrl"
-            :src="userData.avatarUrl"
-          />
-          <i
-            v-else
-            class="icon-usercircle avatar"
-          />
-        </div>
-        <div class="user-info__content">
-          <div class="user-info__row">
-            <span class="user-info__name">
-              {{ userData.name }}
-            </span>
-            {{ userData.workNo ? `(${userData.workNo})` : '' }}
-            <el-tag
-              class="user-info__tag"
-              :type="userData.userStatus === '1' ? '' : 'danger'"
-            >
-              {{ userData.userStatus === '1' ? '正常' : '冻结' }}
-            </el-tag>
-          </div>
-          <div class="user-info__row">
-            {{ (userData.sex === 0 ? '女' : '男') || '--' }}
-            <span class="user-info__divider">|</span> {{ userData.birthDate || '--' }}
-            <span class="user-info__divider">|</span>
-            {{ _.map(userData.roles, 'roleName').join('/') }}
-          </div>
-          <div class="user-info__row">
-            <span
-              class="user-info__column"
-            ><i class="el-icon-mobile" />{{ userData.phonenum || '暂无' }}</span>
-            <span
-              class="user-info__column"
-            ><i class="el-icon-message" />{{ userData.email || '暂无' }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="user-control">
+      <template slot="rightMenu">
         <el-button
           type="primary"
           size="medium"
-          @click="handleEditRole()"
+          @click="handlerAdd"
         >
-          角色设置
+          添加用户
         </el-button>
-        <el-button
-          style="margin-right:8px;"
-          size="medium"
-          @click="handleReset()"
-        >
-          密码重置
-        </el-button>
-        <el-dropdown @command="(command) => handleCommand(command)">
-          <el-button
-            size="medium"
-            style="margin-left: 10px"
-            class="el-dropdown-link"
+      </template>
+    </page-header>
+    <div class="category">
+      <div>
+        <div style="margin-top: 20px">
+          <common-table
+            style="width: 100%"
+            :data="data"
+            :config="tableConfig"
+            :columns="columns"
+            :loading="loading"
+            :page="page"
+            @page-size-change="sizeChange"
+            @current-page-change="pageChange"
           >
-            更多<i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="edit">
-              编辑
-            </el-dropdown-item>
-            <el-dropdown-item
-              v-if="userData.userStatus === '1'"
-              command="suspend"
-            >
-              冻结
-            </el-dropdown-item>
-            <el-dropdown-item
-              v-if="userData.userStatus === '2'"
-              command="unsuspend"
-            >
-              解冻
-            </el-dropdown-item>
-            <el-dropdown-item command="delete">
-              删除
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-    </div>
-    <basic-container block>
-      <el-tabs>
-        <el-tab-pane
-          class="user-detail"
-          label="详细信息"
-        >
-          <div
-            v-for="item in columns"
-            :key="item.prop"
-            class="user-detail__item"
-          >
-            <div class="user-detail__label">
-              {{ item.label }}
-            </div>
-            <div class="user-detail__value">
-              <span>{{
-                (item.formatter ? item.formatter(userData) : userData[item.prop]) || '--'
-              }}</span>
-            </div>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane
-          label="附件"
-          class="user-attachment"
-        >
-          <div
-            v-for="(item, index) in userData.attachment"
-            :key="index"
-            class="user-attachment__item"
-          >
-            <div class="user-attachment__img">
-              <img :src="item.url" />
-              <div class="user-attachment__cover">
-                <div class="user-attachment__cover--column">
-                  <span @click="viewPicture(item)">
-                    <i class="el-icon-view"></i>
-                    预览
-                  </span>
+            <template slot="topMenu">
+              <div class="flex-flow flex justify-content align-items ">
+                <div>
+                  <el-input
+                    v-model="form.name"
+                    placeholder="输入工号或者姓名搜索"
+                    clearable
+                    style="width:200px;margin-right:12px;"
+                    @input="search"
+                  />
                 </div>
-                <div class="user-attachment__cover--column">
-                  <span>
-                    <a
-                      :href="item.url"
-                      :download="item.name"
-                      target="_blank"
-                    >
-                      <i class="el-icon-download"></i>
-                      下载
-                    </a>
-                  </span>
+                <div>
+                  <i
+                    class="icon  el-icon-refresh-right"
+                    @click="getData"
+                  />
                 </div>
               </div>
-            </div>
-            <div class="user-attachment__text">
-              {{ item.name }}
-            </div>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </basic-container>
-    <image-viewer
-      :visible.sync="viewing"
-      :url-list="viewingUrls"
-    />
-    <user-role-edit
-      ref="userRoleEdit"
+            </template>
+            <template
+              slot="multiSelectMenu"
+              slot-scope="{ selection }"
+            >
+              <span class="all">
+                <span
+                  @click="handlerDeleteAll(selection)"
+                ><i class="el-icon-delete" /> 批量删除</span>
+                <!--                <span><i class="el-icon-folder" /> 批量导出</span>-->
+              </span>
+            </template>
+            <template
+              slot="handler"
+              slot-scope="scope"
+              style="width:80px"
+            >
+              <!-- <el-button
+                type="text"
+                size="medium"
+                @click.stop="handleEdit(scope.row, scope.index)"
+              >
+                编辑
+              </el-button> -->
+              <el-button
+                type="text"
+                size="medium"
+                @click.stop="handleDelete(scope.row, scope.index)"
+              >
+                删除
+              </el-button>
+            </template>
+          </common-table>
+        </div>
+      </div>
+    </div>
+    <addUserDialog
       :visible.sync="editVisible"
-      :user="userData"
-      @after-submit="getData"
+      @after-submit="handleAfterSubmit"
     />
   </div>
 </template>
 
 <script>
-import { getStaffBasicInfo } from '@/api/personalInfo'
-import { modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
-import ImageViewer from '@/components/image-viewer/ImageViewer'
+// import { deleteV1Job } from '@/api/organize/position'
+import { getToken } from '@/util/auth'
+import addUserDialog from './components/addUserDialog'
+// import { getV1Position, deleteV1Position } from '@/api/organize/position'
+import { getUserList, deleteUser } from '@/api/system/role'
+
 export default {
   name: 'RoleUsers',
   components: {
-    // 员工角色编辑
-    userRoleEdit: () => import('./components/userRoleEdit'),
-    ImageViewer
+    addUserDialog
   },
   data() {
     return {
+      form: {
+        name: ''
+      },
+      selectionList: [],
       loading: false,
-      viewing: false,
-      viewingUrls: [],
-      editVisible: false,
-      userData: {
-        attachment: []
+      isEdit: false,
+      title: '新建用户',
+      stationDialog: false,
+      dialogVisible: false,
+      isBatch: false,
+      show: true,
+      number: 0,
+      row: {},
+      data: [],
+      tableConfig: {
+        showHandler: true,
+        showIndexColumn: false,
+        rowKey: 'id',
+        enableMultiSelect: true,
+        handlerColumn: {
+          width: 80
+        }
       },
       columns: [
         {
-          label: '所在部门',
+          label: '工号',
+          prop: 'workNo'
+        },
+        {
+          label: '姓名',
+          prop: 'name'
+        },
+        {
+          label: '状态',
+          prop: 'userStatus',
+          formatter(row) {
+            let arr = { '1': '正常', '2': '禁用' }
+            return arr[row.userStatus]
+          }
+        },
+        {
+          label: '部门',
           prop: 'orgName'
         },
         {
-          label: '直接领导',
-          prop: 'leaderName'
-        },
-        {
-          label: '岗位',
-          prop: 'position'
-        },
-        {
-          label: '职级',
-          prop: 'job'
-        },
-        {
-          label: '职务',
-          prop: 'job1'
-        },
-        {
-          label: '职称',
-          prop: 'job2'
-        },
-        {
-          label: '入职日期',
-          prop: 'entryDate'
-        },
-        {
-          label: '允许IP范围',
-          prop: 'IP'
-        },
-        {
-          label: '备注',
-          prop: 'remark'
+          label: '职位',
+          prop: 'jobName'
         }
-      ]
+      ],
+      page: {
+        size: 10,
+        currentPage: 1,
+        total: 0
+      },
+      params: {
+        pageNo: 0,
+        pageSize: 0,
+        search: '',
+        roleId: ''
+      },
+      editVisible: false
     }
   },
 
-  computed: {
-    userId() {
-      return this.$route.query.userId
-    }
-  },
   watch: {},
+  created() {
+    this.getData()
+  },
   mounted() {},
   activated() {
     this.getData()
   },
   methods: {
+    handlerDeleteAll(list) {
+      let row = { userId: [] }
+      let userIdArr = list.map((item) => {
+        return item.userId
+      })
+      row.userId = userIdArr.join(',')
+      this.handleDelete(row)
+    },
     getData() {
-      if (!this.userId) {
-        return
-      }
-      getStaffBasicInfo({ userId: this.userId }).then((res) => {
-        this.userData = res
+      this.loading = true
+      this.params.pageNo = this.page.currentPage
+      this.params.pageSize = this.page.size
+      this.params.roleId = this.$route.query.roleId
+      this.params.search = this.form.name
+      getUserList(this.params).then((res) => {
+        this.data = res.data
+        this.page.total = res.totalNum
+        this.loading = false
       })
     },
-    viewPicture(item) {
-      this.viewingUrls = [item.url]
-      this.viewing = true
+    handleAfterSubmit() {
+      this.page.currentPage = 1
+      this.getData()
     },
-    handleEditRole() {
-      this.$refs['userRoleEdit'].init(this.userData)
-    },
-    handleReset() {
-      this.$confirm('确定将选择账号密码重置为123456?', {
+    handleDelete(row) {
+      this.$confirm('您确定要删除该用户吗?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      })
-        .then(() => {
-          this.resetPwd(this.userData.userId)
-        })
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
-        })
-    },
-    resetPwd(ids) {
-      resetPwd(ids).then(() => {
-        this.getData()
-      })
-    },
-    handleCommand(command) {
-      switch (command) {
-        case 'suspend':
-          this.modifyUserStatus(this.userData.userId, '2')
-          break
-        case 'unsuspend':
-          this.modifyUserStatus(this.userData.userId, '1')
-          break
-        case 'edit':
-          this.$router.push({ path: '/system/editUser', query: { userId: this.userData.userId } })
-          break
-        case 'delete':
-          this.handleDeleteUser()
-          break
-      }
-    },
-    modifyUserStatus(userId, status) {
-      let msg = ''
-      if (status === '2') {
-        msg = '您确定要冻结该用户吗？\n冻结后，该用户将不能登录系统'
-      } else {
-        msg = '您确定要解冻该用户吗？'
-      }
-      this.$confirm(msg, {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => modifyUserStatus(userId, status))
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
+      }).then(() => {
+        let params = {
+          userId: row.userId,
+          roleId: this.$route.query.roleId
+        }
+        deleteUser(params).then(() => {
           this.getData()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
         })
+      })
     },
-    handleDeleteUser() {
-      this.$confirm('您确定要删除该用户吗？\n删除后将不能恢复', {
+    search: _.debounce(function() {
+      this.page.currentPage = 1
+      this.getData()
+    }, 500),
+    getJobData() {},
+    closeBatch() {
+      this.isBatch = false
+    },
+    handlerAdd() {
+      this.editVisible = true
+      //   this.isEdit = false
+      //   this.title = '新建岗位'
+      //   this.row = {}
+    },
+    close() {
+      this.show = false
+    },
+    sizeChange(val) {
+      this.page.size = val
+      this.page.currentPage = 1
+      this.getData()
+    },
+    pageChange(val) {
+      this.page.currentPage = val
+      this.getData()
+    },
+    handleEdit(row) {
+      this.row = JSON.parse(JSON.stringify(row))
+      this.isEdit = true
+      this.title = '编辑岗位'
+      this.stationDialog = true
+    },
+    handleExport() {
+      this.$confirm('是否导出数据?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
+      }).then(() => {
+        const searchForm = this.form
+        window.open(
+          `/api/blade-user/export-user?Blade-Auth=${getToken()}&account=${
+            searchForm.account
+          }&realName=${searchForm.realName}`
+        )
       })
-        .then(() => delUser({ userId: this.userData.userId }))
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
-          this.goBack()
-        })
     },
-    goBack() {
-      this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
-      this.$router.go(-1)
+    onLoad() {},
+    handleConfig() {
+      // this.configVisible = !this.configVisible
+      this.isEdit = false
+      this.title = '新建子组织'
+      // this.positionDialog = true
+    },
+    handleAside(item, index) {
+      this.active = index
+      this.params.categoryId = item.categoryId
+      this.getJobData()
+    },
+    handleCheck() {
+      this.isEdit = true
+      this.title = '编辑子组织'
+      // this.positionDialog = true
+    },
+    toggleSelection(val) {
+      this.$refs.crud.toggleSelection(val)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.user {
+.category {
+  margin-top: 16px;
+  background: #ffffff;
+  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 24px !important;
+  min-height: calc(100% - 204px);
+  .form_ {
+    padding-top: 40px;
+    width: 400px;
+    margin: 0 auto;
+    font-size: 14px;
+    .label_ {
+      /*display: inline-block;*/
+      /*margin-top:24px;*/
+      /*margin-bottom:8px;*/
+    }
+    .tip {
+      font-size: 12px;
+      line-height: 14px;
+      color: #a0a8ae;
+    }
+    .bt {
+      /*margin-top: 40px;*/
+    }
+  }
+}
+.aside {
+  width: 200px;
+  border-right: 1px solid #efefef;
   height: 100%;
-}
-.user-header {
-  display: flex;
-  justify-content: space-between;
-  background: #fff;
-  margin-bottom: 20px;
-  padding: 24px;
-  .user-info {
-    width: 50%;
-    padding-top: 0;
-    display: flex;
-    &__tag {
-      height: 24px;
-      line-height: 24px;
-      margin-top: 5px;
-      margin-left: 30px;
-    }
-    &__avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      margin-right: 20px;
-      img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-      }
-      i {
-        font-size: 62px;
-        color: #e3e7e9;
-      }
-    }
-    &__content {
-    }
-    &__row {
-      line-height: 34px;
-
-      i {
-        font-size: 16px;
-        margin-right: 6px;
-      }
-    }
-    &__column {
-      margin-right: 12px;
-    }
-    &__name {
-      font-weight: bold;
-      font-size: 18px;
-    }
-    &__divider {
-      margin: 0 12px;
-      color: #e3e7e9;
-    }
-  }
-}
-.basic-container--block {
-  height: calc(100% - 171px - 92px);
-  min-height: calc(100% - 171px - 92px);
-}
-.user-detail {
-  display: flex;
-  flex-wrap: wrap;
-  padding-top: 20px;
-  &__item {
-    width: 50%;
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-  }
-  &__label {
-    width: 50%;
-    text-align: right;
-    padding-right: 10px;
-  }
-  &__value {
-    width: 50%;
-    text-align: left;
-    padding-left: 10px;
-  }
-}
-.user-attachment {
-  &__cover {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    background-color: #0006;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  &__cover--column {
-    flex: 1;
-    color: #fff;
-    text-align: center;
-    span {
-      cursor: pointer;
-      a {
-        color: #fff;
-      }
-    }
-  }
-
-  &__item {
-    margin: 20px;
-    border-radius: 4px;
-    width: 190px;
-    height: 124px;
-    &:hover {
-      .user-attachment__cover {
-        display: flex;
-      }
-    }
-  }
-  &__img {
-    width: 190px;
-    height: 88px;
-    overflow: hidden;
-    position: relative;
-    img {
-      width: 100%;
-    }
-  }
-
-  &__text {
-    border: 1px solid #e3e7e9;
-    border-top: none;
-    height: 36px;
+  box-sizing: border-box;
+  margin-right: 20px;
+  margin-top: 20px;
+  ul {
+    list-style: none;
+    padding: 0 10px;
+    margin-top: 10px;
     line-height: 34px;
-    padding-left: 6px;
-    background-color: #fbfdff;
-    border-radius: 0px 0px 6px 6px;
+    li {
+      cursor: pointer;
+    }
+    li:not(.selection) {
+      line-height: 34px;
+      font-size: 14px;
+      padding-left: 30px;
+    }
+    .selection {
+      .icon {
+        display: inline-block;
+        margin: 0 6px 0 6px;
+        font-size: 18px;
+      }
+    }
+    .actives {
+      border-right: 4px solid #1e9fff;
+      background: #efefef;
+    }
   }
+}
+/*.header {*/
+/*  display: flex;*/
+/*  display: -ms-flex;*/
+/*  display: -moz-box;*/
+/*  display: -webkit-flex;*/
+/*  flex-flow: row nowrap;*/
+/*  justify-content: space-between;*/
+/*  align-items: center;*/
+/*  font-size: 18px;*/
+/*  color: #202940;*/
+/*  line-height: 28px;*/
+/*  font-weight: bold;*/
+/*  padding-top: 14px;*/
+/*}*/
+.nav {
+  /*height: 36px;*/
+  display: flex;
+  display: -ms-flex;
+  display: -moz-box;
+  display: -webkit-flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  line-height: 16px;
+  padding: 0px 20px;
+  margin-top: -6px;
+  background: #edf8ff;
+  border: 1px solid #73b9ff;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  /*span {*/
+  /*  line-height: 20px;*/
+  /*}*/
+}
+.aside_header {
+  display: flex;
+  display: -ms-flex;
+  display: -moz-box;
+  display: -webkit-flex;
+  align-items: center;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  margin: 0 10px 0px 10px;
+  padding-bottom: 10px;
+  font-size: 18px;
+  border-bottom: 1px solid #efefef;
+  /*line-height: 40px;*/
+}
+.flex {
+  display: flex;
+  display: -ms-flex;
+  display: -moz-box;
+  display: -webkit-flex;
+}
+.flex-flow {
+  flex-flow: row nowrap;
+}
+.flex-flow-column {
+  flex-flow: column nowrap;
+}
+
+.justify-content {
+  justify-content: space-between;
+}
+.align-items {
+  align-items: center;
+}
+
+.input-with-select {
+  width: 250px;
+}
+.condition {
+  margin: 20px 0 10px 0;
+}
+
+.all {
+  /*border: 1px solid #efefef;*/
+  cursor: pointer;
+  padding: 10px;
+  span:first-child {
+    /*border-right: 1px solid #999;*/
+    padding-right: 15px;
+  }
+  span {
+    margin-right: 20px;
+  }
+}
+
+/deep/ .el-card__body {
+  padding-bottom: 0 !important;
+}
+
+/deep/ .avue-crud__menu {
+  min-height: 0;
+}
+.icon {
+  font-size: 18px;
+  color: #a0a8ae;
+  cursor: pointer;
 }
 </style>
