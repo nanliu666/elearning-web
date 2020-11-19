@@ -6,7 +6,7 @@
     <common-table
       ref="crud"
       :config="tableConfig"
-      :columns="columns"
+      :columns="columnsVisible | columnsFilter"
       :loading="loading"
       :data="data"
       :page="page"
@@ -26,15 +26,57 @@
         </el-button>
       </template>
       <template slot="topMenu">
-        <div class="flex flex-flow flex-justify-between flex-items">
-          <el-input
-            v-model="query.name"
-            placeholder="姓名/手机号码"
-            clearable
-            style="width:200px;margin-right:12px;"
-            @input="searchLoadData"
+        <div class="operations">
+          <search-popover
+            ref="searchPopover"
+            :require-options="searchConfig.requireOptions"
+            :popover-options="searchConfig.popoverOptions"
+            @submit="handleSubmitSearch"
+            @reset="handleResetSearch"
           />
+          <div class="operations-right">
+            <div
+              class="refresh-container"
+              @click="loadData"
+            >
+              <i class="el-icon-refresh-right" />
+              <span>刷新</span>
+            </div>
+            <el-popover
+              placement="bottom"
+              width="40"
+              trigger="click"
+            >
+              <i
+                slot="reference"
+                style="padding-left: 10px;cursor: pointer;"
+                class="el-icon-setting"
+              />
+              <!-- 设置表格列可见性 -->
+              <div class="operations__column--visible">
+                <el-checkbox-group v-model="columnsVisible">
+                  <el-checkbox
+                    v-for="item of columns"
+                    :key="item.prop"
+                    :disabled="item.prop === 'name'"
+                    :label="item.prop"
+                    class="operations__column--item"
+                  >
+                    {{ item.label }}
+                  </el-checkbox>
+                </el-checkbox-group>
+              </div>
+            </el-popover>
+          </div>
         </div>
+      </template>
+      <template #name="{row}">
+        <el-button
+          type="text"
+          @click="handleUserClick(row)"
+        >
+          {{ row.name }}
+        </el-button>
       </template>
       <template
         slot="handler"
@@ -66,6 +108,9 @@
             <i class="el-icon-more" />
           </el-button>
           <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="edit">
+              编辑
+            </el-dropdown-item>
             <el-dropdown-item
               v-if="row.userStatus === '1'"
               command="suspend"
@@ -77,6 +122,9 @@
               command="unsuspend"
             >
               解冻
+            </el-dropdown-item>
+            <el-dropdown-item command="delete">
+              删除
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -92,13 +140,80 @@
 </template>
 
 <script>
-import { getOrgUserList, modifyUserStatus, resetPwd } from '@/api/system/user'
+import { getOrgUserList, modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
+import { getRoleList } from '@/api/system/role'
 
+const COLUMNS = [
+  {
+    label: '姓名',
+    prop: 'name',
+    slot: true
+  },
+  {
+    label: '用户编号',
+    prop: 'workNo'
+  },
+  //状态，1-正常，2-禁用
+  {
+    label: '状态',
+    prop: 'userStatus',
+    formatter(record) {
+      return (
+        {
+          '1': '正常',
+          '2': '禁用'
+        }[record.userStatus] || ''
+      )
+    }
+  },
+  {
+    label: '性别',
+    prop: 'sex',
+    formatter(record) {
+      return { '1': '男', '0': '女' }[record.sex] || ''
+    }
+  },
+  {
+    label: '部门',
+    prop: 'orgName'
+  },
+  {
+    label: '电话',
+    prop: 'phonenum'
+  },
+  {
+    label: '邮箱',
+    prop: 'email'
+  },
+
+  {
+    label: '角色',
+    prop: 'roles',
+    width: 100,
+    formatter(record) {
+      return record.roles.map((role) => role.roleName).join(';')
+    }
+  },
+  {
+    label: '创建人',
+    prop: 'creatorName'
+  },
+  {
+    label: '创建时间',
+    prop: 'createTime'
+  }
+]
 export default {
   name: 'User',
   components: {
     // 员工角色编辑
-    userRoleEdit: () => import('./userRoleEdit')
+    userRoleEdit: () => import('./userRoleEdit'),
+    SearchPopover: () => import('@/components/searchPopOver/index')
+  },
+  filters: {
+    // 过滤不可见的列
+    columnsFilter: (visibleColProps) =>
+      _.filter(COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   props: {
     activeOrg: {
@@ -108,14 +223,50 @@ export default {
   },
   data() {
     return {
-      query: {
-        name: ''
-      },
+      query: {},
       loading: false,
       page: {
         currentPage: 1,
         size: 10,
         total: 0
+      },
+      searchConfig: {
+        requireOptions: [
+          {
+            type: 'input',
+            field: 'search',
+            label: '',
+            data: '',
+            options: [],
+            config: { placeholder: '姓名/手机号码', 'suffix-icon': 'el-icon-search' }
+          }
+        ],
+        popoverOptions: [
+          {
+            type: 'select',
+            field: 'userStatus',
+            label: '状态',
+            data: '',
+            options: [
+              { value: '', label: '全部' },
+              { value: '1', label: '正常' },
+              { value: '2', label: '冻结' }
+            ]
+          },
+          {
+            type: 'select',
+            field: 'roleId',
+            label: '角色',
+            data: '',
+            options: [],
+            config: { optionLabel: 'roleName', optionValue: 'roleId' }
+          },
+
+          { type: 'input', field: 'position', label: '岗位', config: {} },
+          { type: 'input', field: 'postLevel', label: '职级', config: {} },
+          { type: 'input', field: 'post', label: '职务', config: {} },
+          { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
+        ]
       },
       tableConfig: {
         showHandler: true,
@@ -127,62 +278,8 @@ export default {
           width: '180'
         }
       },
-      columns: [
-        {
-          label: '姓名',
-          prop: 'name'
-        },
-        {
-          label: '工号',
-          prop: 'workNo'
-        },
-        //状态，1-正常，2-禁用
-        {
-          label: '状态',
-          prop: 'userStatus',
-          filters: [
-            {
-              text: '正常',
-              value: '1'
-            },
-            {
-              text: '禁用',
-              value: '2'
-            }
-          ],
-          filterMethod: (value, row) => {
-            return row.userStatus == value
-          },
-          formatter(record) {
-            return (
-              {
-                '1': '正常',
-                '2': '禁用'
-              }[record.userStatus] || ''
-            )
-          }
-        },
-        {
-          label: '部门',
-          prop: 'orgName'
-        },
-        {
-          label: '职位',
-          prop: 'jobName'
-        },
-        {
-          label: '角色',
-          prop: 'roles',
-          width: 100,
-          formatter(record) {
-            return record.roles.map((role) => role.roleName).join(';')
-          }
-        },
-        {
-          label: '电话',
-          prop: 'phonenum'
-        }
-      ],
+      columns: COLUMNS,
+      columnsVisible: _.map(COLUMNS, 'prop'),
       data: [],
       editVisible: false,
       editingUser: {}
@@ -200,6 +297,7 @@ export default {
   },
   created() {
     this.loadData()
+    this.loadRoleData()
   },
   activated() {
     this.loadData()
@@ -218,9 +316,25 @@ export default {
       this.page.currentPage = currentPage
       this.loadData()
     },
+    loadRoleData() {
+      getRoleList({ categoryId: '' }).then((res) => {
+        this.searchConfig.popoverOptions.find((item) => item.field === 'roleId').options = res
+      })
+    },
+    handleSubmitSearch(params) {
+      this.query = { ...this.query, ...params }
+      this.loadData()
+    },
+    handleResetSearch() {
+      this.query = {}
+      this.loadData()
+    },
     sizeChange(pageSize) {
       this.page.size = pageSize
       this.loadData()
+    },
+    handleUserClick(row) {
+      this.$router.push({ path: '/system/userDetail', query: { userId: row.userId } })
     },
     handleReset(data) {
       let ids
@@ -251,16 +365,20 @@ export default {
       })
     },
     handleCommand(command, row) {
-      let status = null
       switch (command) {
         case 'suspend':
-          status = '2'
+          this.modifyUserStatus(row.userId, '2')
           break
         case 'unsuspend':
-          status = '1'
+          this.modifyUserStatus(row.userId, '1')
+          break
+        case 'edit':
+          this.$router.push({ path: '/system/editUser', query: { userId: row.userId } })
+          break
+        case 'delete':
+          this.handleDeleteUser(row)
           break
       }
-      this.modifyUserStatus(row.userId, status)
     },
     modifyUserStatus(userId, status) {
       let msg = ''
@@ -283,13 +401,28 @@ export default {
           this.loadData()
         })
     },
+    handleDeleteUser(row) {
+      this.$confirm('您确定要删除该用户吗？\n删除后将不能恢复', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => delUser({ userId: row.userId }))
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+          this.loadData()
+        })
+    },
     loadData() {
       this.loading = true
       getOrgUserList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
         orgId: this.activeOrg ? this.activeOrg.orgId : '0',
-        search: this.query.name
+        ...this.query
       })
         .then((res) => {
           this.page.total = res.totalNum
@@ -305,6 +438,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$color_icon: #a0a8ae;
 .addUser {
   font-size: 14px;
   display: inline-block;
@@ -319,5 +453,64 @@ export default {
   font-size: 18px;
   color: #a0a8ae;
   cursor: pointer;
+}
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &-right {
+    display: flex;
+    align-items: center;
+    .refresh-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      color: #a0a8ae;
+      padding: 0 10px;
+      cursor: pointer;
+      span {
+        padding-left: 6px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
+  &__column--item {
+    height: 25px;
+  }
+  &__column--visible {
+    height: 200px;
+    overflow: scroll;
+  }
+  &__btns {
+    align-items: center;
+    display: flex;
+    height: 24px;
+    justify-content: flex-start;
+  }
+  &__btns--item {
+    margin: 0;
+    margin-right: 4px;
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+  }
+  &:last-child {
+    margin: 0;
+    // margin-bottom: 8px
+    // margin-right: 8px
+  }
+  i {
+    color: $color_icon;
+    font-size: 18px;
+  }
 }
 </style>

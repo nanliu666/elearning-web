@@ -1,5 +1,5 @@
-import request from '@/router/axios'
-import { del, get, put, post } from '@/router/axios'
+import request, { del, get, put, post } from '@/router/axios'
+
 export const delPrivilege = (params) => del('/api/sys/v1/role/menu/privilege', params)
 export const getPrivilege = (params) => get('/api/sys/v1/role/menu/privilege', params)
 export const putPrivilege = (params) => put('/api/sys/v1/role/menu/privilege', params)
@@ -38,24 +38,15 @@ export const getMenuInfo = (parentId, query = {}) => {
     }
   })
 }
-
+export const putMenuInfo = (params) => {
+  return put('/api/sys/v1/menu/info', params)
+}
 export const postMenuInfo = (data) => {
   if (!data.clientId) data.clientId = 'Admin'
   return request({
     url: '/api/sys/v1/menu/info',
     method: 'post',
     data
-  })
-}
-
-export const putMenuInfo = (params) => {
-  if (!params.clientId) params.clientId = 'Admin'
-  return request({
-    url: '/api/sys/v1/menu/info',
-    method: 'put',
-    data: {
-      ...params
-    }
   })
 }
 

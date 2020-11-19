@@ -7,10 +7,11 @@
       <div class="login-border">
         <div class="login-main">
           <h4 class="login-title">
-            {{ website.title }}
+            <!-- {{ website.title }} -->
+            欢迎您登录e-learning系统
           </h4>
           <p class="login-welcome">
-            欢迎您登录OA系统
+            <!-- 欢迎您登录OA系统 -->
           </p>
           <userLogin v-if="activeName === 'user'" />
           <codeLogin v-else-if="activeName === 'code'" />

@@ -11,6 +11,33 @@ import 'nprogress/nprogress.css' // progress bar style
 NProgress.configure({ showSpinner: false })
 const lockPage = store.getters.website.lockPage //锁屏页
 
+const userPaths = ['/info/securitySetting']
+const userCenterMenu = [
+  {
+    menuId: '312123',
+    menuName: '安全设置',
+    isOwn: 1,
+    isShow: 1,
+    code: 'user_securitySetting',
+    alias: 'securitySetting',
+    path: '/info/securitySetting',
+    children: []
+  }
+]
+
+/**
+ * 更新左侧菜单和顶部菜单
+ **/
+function updateMenu(currentPath) {
+  let currentMenu = null
+  if (userPaths.includes(currentPath)) {
+    currentMenu = userCenterMenu
+  } else {
+    currentMenu = store.getters.menuAll
+  }
+  // 找不到对应根菜单，将顶部菜单置为工作台
+  store.commit('SET_MENU', currentMenu)
+}
 router.beforeEach((to, from, next) => {
   const meta = to.meta || {}
   const isMenu = meta.menu === undefined ? to.query.menu : meta.menu
@@ -30,6 +57,7 @@ router.beforeEach((to, from, next) => {
         })
       } else {
         const value = to.path
+        updateMenu(value)
         const label = to.query.tagName || to.name
         // 每次路由跳转时找到目标路径对应的根菜单数据
         const meta = to.meta || router.$avueRouter.meta || {}

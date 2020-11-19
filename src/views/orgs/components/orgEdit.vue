@@ -108,7 +108,7 @@
           :label="labelTxt[index]"
           :required="true"
         >
-          <el-col :span="18">
+          <el-col>
             <el-select
               v-model="item.userIdArr"
               v-loadmore="loadMoreLeader"
@@ -116,7 +116,7 @@
               multiple
               filterable
               :multiple-limit="10"
-              placeholder="请选择或输入员工姓名/工号搜索"
+              placeholder="请选择或输入员工姓名/手机号搜索"
             >
               <el-option
                 v-for="(item1, k) in leaderList"
@@ -140,7 +140,7 @@
               </div>
             </el-select>
           </el-col>
-          <el-col
+          <!-- <el-col
             :span="3"
             style="text-align: center"
           >
@@ -150,7 +150,7 @@
             >
               添加下级
             </el-button>
-          </el-col>
+          </el-col> -->
           <el-col
             v-if="index !== 0"
             :span="3"

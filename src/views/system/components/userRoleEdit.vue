@@ -17,13 +17,17 @@
         </el-tag>
       </div>
       <div class="content-wr">
-        <div class="left">
+        <div
+          v-loading="loading"
+          class="left"
+        >
           <div class="title">
             角色列表
           </div>
           <el-input
             v-model="filterText"
             placeholder="角色名称"
+            style="margin-bottom: 10px"
           />
           <el-tree
             ref="tree"
@@ -55,8 +59,6 @@
             v-for="item in selectList"
             :key="item.roleId"
             size="small"
-            :type="genClosable(item) ? null : 'info'"
-            :closable="genClosable(item)"
             @close="handleUnselect(item)"
           >
             {{ item.roleName }}
@@ -109,7 +111,7 @@ export default {
       submitting: false,
       filterText: '',
       props: {
-        disabled: (data) => !data.roleName || !this.genClosable(data),
+        disabled: (data) => !data.roleName,
         label: (item) => item.groupName || item.categoryName || item.roleName
       },
       selectList: [],
@@ -117,7 +119,8 @@ export default {
       roleEdit: false,
       allRoleTree: [],
       user: {},
-      previewVisible: false
+      previewVisible: false,
+      loading: false
     }
   },
   computed: {
@@ -130,25 +133,26 @@ export default {
       this.$refs.tree.filter(val)
     }
   },
-  created() {
-    this.getRoleList()
-  },
+  created() {},
   methods: {
-    // 只有用户角色接口没返回的角色，或者返回了的但是角色type是User的才可以删
-    genClosable(item) {
-      return (
-        this.oldSelectList.findIndex((i) => i.roleId === item.roleId) < 0 ||
-        this.oldSelectList.find((i) => i.roleId === item.roleId).type === 'User'
-      )
-    },
     /**
      * 初始化
      * @param {String} user
      */
     init(user) {
       this.user = user
-      this.getUserRole()
+      this.loadData()
       this.$emit('update:visible', true)
+    },
+    loadData() {
+      this.loading = true
+      Promise.all([this.getUserRole(), this.getRoleList()])
+        .then(() => {
+          this.loading = false
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     showPreview() {
       if (this.roleIds.length > 0) {
@@ -188,14 +192,21 @@ export default {
       this.$refs.tree.setCheckedKeys([])
     },
     getUserRole() {
-      getUserRole(this.user.userId).then((res) => {
-        const list = res
-        this.selectList = list.slice()
-        this.oldSelectList = list.slice()
+      return new Promise((resolve, reject) => {
+        getUserRole(this.user.userId)
+          .then((res) => {
+            const list = res
+            this.selectList = list.slice()
+            this.oldSelectList = list.slice()
 
-        this.$nextTick(() => {
-          this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.roleId))
-        })
+            this.$nextTick(() => {
+              this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.roleId))
+            })
+            resolve()
+          })
+          .catch((err) => {
+            reject(err)
+          })
       })
     },
     /**
@@ -245,12 +256,19 @@ export default {
         })
     },
     getRoleList() {
-      let params = {
-        categoryId: ''
-      }
-      getRoleList(params).then((data) => {
-        this.resolveTree(data)
-        this.allRoleTree = data
+      return new Promise((resolve, reject) => {
+        let params = {
+          categoryId: ''
+        }
+        getRoleList(params)
+          .then((data) => {
+            this.resolveTree(data)
+            this.allRoleTree = data
+            resolve()
+          })
+          .catch(() => {
+            reject()
+          })
       })
     },
     resolveTree(tree) {
@@ -296,6 +314,7 @@ export default {
     }
   }
   .content-wr {
+    min-height: 400px;
     display: flex;
     border: 1px solid #f2f2f2;
 

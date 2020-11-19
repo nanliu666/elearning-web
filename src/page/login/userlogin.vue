@@ -8,27 +8,13 @@
     label-width="0"
     size="medium"
   >
-    <!-- username是工号--历史遗留问题，极度不语义化。 -->
-    <el-form-item
-      v-if="loginMode !== 'account'"
-      prop="username"
-    >
-      <el-input
-        v-model="loginForm.username"
-        auto-complete="off"
-        placeholder="请输入工号"
-        @keyup.enter.native="handleLogin"
-      />
-    </el-form-item>
     <!-- account是用户名 -->
-    <el-form-item
-      v-if="loginMode === 'account'"
-      prop="account"
-    >
+    <el-form-item prop="account">
       <el-input
         v-model="loginForm.account"
         auto-complete="off"
-        placeholder="请输入用户名"
+        :maxlength="11"
+        placeholder="请输入手机号码"
         @keyup.enter.native="handleLogin"
       />
     </el-form-item>
@@ -91,12 +77,6 @@
     <el-form-item>
       <div class="form-bottom">
         <div
-          class="change-mode"
-          @click="changeMode"
-        >
-          {{ loginMode === 'username' ? '用户名登录' : '工号登录' }}
-        </div>
-        <div
           class="forget-password"
           @click="forgetPW"
         >
@@ -123,8 +103,7 @@ export default {
         account: '',
         //租户ID
         tenantId: '',
-        //用户名登录
-        username: '',
+
         //密码
         password: '',
         //账户类型
@@ -137,8 +116,10 @@ export default {
         image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
       },
       loginRules: {
-        account: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        username: [{ required: true, message: '请输入工号', trigger: 'blur' }],
+        account: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { pattern: /^[0-9]{11}$/, message: '请输入合法的手机号', trigger: 'blur' }
+        ],
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 1, message: '密码长度最少为6位', trigger: 'blur' }
@@ -179,11 +160,7 @@ export default {
             text: '登录中,请稍后...',
             spinner: 'el-icon-loading'
           })
-          if (this.loginMode === 'username') {
-            this.loginForm.account = ''
-          } else {
-            this.loginForm.username = ''
-          }
+
           this.$store
             .dispatch('LoginByUsername', this.loginForm)
             .then((res) => {

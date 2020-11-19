@@ -1,7 +1,7 @@
 <template>
   <div style="height">
     <page-header
-      title="添加用户"
+      :title="`${id ? '编辑' : '添加'}用户`"
       show-back
       :back="goBack"
     />
@@ -29,9 +29,9 @@
               <h3>详细信息</h3>
             </template>
 
-            <template slot="attachment">
+            <template slot="attachments">
               <common-upload
-                v-model="form.attachment"
+                v-model="uploadFileList"
                 multiple
                 :before-upload="beforeUpload"
               >
@@ -41,21 +41,23 @@
                 >
                   支持上传png、jpg、jpge格式文件，单个文件大小＜5MB，最多5个文件
                 </div>
-                <el-button size="medium">
-                  上传
-                </el-button>
-                <ul class="upload__files">
-                  <li
-                    v-for="(item, index) in form.attachment"
-                    :key="index"
-                  >
-                    {{ item.localName }}
-                    <i
-                      class="el-icon-close"
-                      @click.stop="handleRemoveAttachment(index)"
-                    ></i>
-                  </li>
-                </ul>
+                <template #default>
+                  <el-button size="medium">
+                    上传
+                  </el-button>
+                  <ul class="upload__files">
+                    <li
+                      v-for="(item, index) in form.uploadFileList"
+                      :key="index"
+                    >
+                      {{ item.localName }}
+                      <i
+                        class="el-icon-close"
+                        @click.stop="handleRemoveAttachment(index)"
+                      ></i>
+                    </li>
+                  </ul>
+                </template>
               </common-upload>
             </template>
           </common-form>
@@ -75,17 +77,23 @@
 </template>
 
 <script>
-import { checkUserInfo, createUser } from '@/api/personnel/roster'
+import { checkUserInfo, createUser, createNewWorkNo, editUser } from '@/api/personnel/roster'
+import { getStaffBasicInfo } from '@/api/personalInfo'
 import { getRoleList } from '@/api/system/role'
 import { getUserWorkList, getOrgTreeSimple } from '@/api/org/org'
 import { mapGetters } from 'vuex'
 import commonUpload from '@/components/common-upload/commonUpload'
 export default {
+  name: 'EditUser',
   components: {
     commonUpload
   },
   data() {
     var checkPhonenum = (rule, value, callback) => {
+      if (this.id) {
+        callback()
+        return
+      }
       checkUserInfo({ phonenum: value })
         .then(() => {
           callback()
@@ -95,6 +103,10 @@ export default {
         })
     }
     var checkEmail = (rule, value, callback) => {
+      if (this.id) {
+        callback()
+        return
+      }
       checkUserInfo({ email: value })
         .then(() => {
           callback()
@@ -111,12 +123,19 @@ export default {
         sex: '',
         phonenum: '',
         email: '',
-        role: [],
+        roleIds: [],
         orgId: '',
-        birthday: '',
+        birthDate: '',
         leaderId: '',
+        position: '',
+        postLevel: '',
+        post: '',
+        positionTitle: '',
+        entryDate: null,
+        ipScope: '',
         attachment: []
       },
+      uploadFileList: [],
       columns: [
         {
           prop: 'title1',
@@ -137,7 +156,7 @@ export default {
           prop: 'phonenum',
           itemType: 'input',
           label: '手机号码',
-          maxLength: 11,
+          maxlength: 11,
           offset: 4,
           props: {
             onlyNumber: true
@@ -154,7 +173,7 @@ export default {
           prop: 'email',
           label: '电子邮件',
           rules: [
-            { required: true, message: '请输入邮箱', trigger: 'blur' },
+            // { required: true, message: '请输入邮箱', trigger: 'blur' },
             { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] },
             { validator: checkEmail, trigger: 'blur' }
           ]
@@ -171,8 +190,9 @@ export default {
         },
         {
           itemType: 'select',
-          prop: 'role',
+          prop: 'roleIds',
           label: '角色',
+          multiple: true,
           props: {
             label: 'roleName',
             value: 'roleId'
@@ -180,7 +200,7 @@ export default {
           options: []
         },
         {
-          prop: 'birthday',
+          prop: 'birthDate',
           offset: 4,
           itemType: 'datePicker',
           label: '出生日期'
@@ -217,10 +237,11 @@ export default {
           load: this.loadUser,
           offset: 4,
           optionProps: {
-            formatter: (item) => `${item.name}(${item.workNo})`,
+            formatter: (item) => `${item.name}`,
             key: 'userId',
             value: 'userId'
           },
+          // firstOption: null,
           prop: 'leaderId',
           label: '直接领导'
         },
@@ -231,43 +252,50 @@ export default {
         },
         {
           itemType: 'input',
-          prop: 'job',
+          prop: 'postLevel',
           offset: 4,
           label: '职级'
         },
         {
           itemType: 'input',
-          prop: 'job1',
+          prop: 'post',
           label: '职务'
         },
         {
           itemType: 'input',
-          prop: 'job2',
+          prop: 'positionTitle',
           offset: 4,
           label: '职称'
         },
         {
-          prop: 'date',
-          itemType: 'datePicker',
-          label: '入职日期'
+          prop: 'entryDate',
+          label: '入职日期',
+          itemType: 'datePicker'
         },
         {
           itemType: 'input',
-          prop: 'ip',
+          prop: 'ipScope',
           offset: 4,
-          label: '允许IP范围'
+          label: '允许IP范围',
+          rules: [
+            {
+              pattern: /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))$/,
+              message: 'IP地址格式错误',
+              trigger: 'blur'
+            }
+          ]
         },
         {
           itemType: 'input',
           type: 'textarea',
-          prop: 'desc',
+          prop: 'remark',
           label: '备注',
           span: 24,
           maxLength: 100
         },
         {
           itemType: 'slot',
-          prop: 'attachment',
+          prop: 'attachments',
           span: 24,
           label: '附件'
         }
@@ -277,16 +305,55 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userId'])
+    ...mapGetters(['userId']),
+    id() {
+      return this.$route.query.userId
+    }
+  },
+  watch: {
+    uploadFileList(val) {
+      this.$set(
+        this.form,
+        'attachments',
+        val.map((item) => ({ url: item.url, name: item.localName }))
+      )
+    }
   },
 
-  activated() {},
+  activated() {
+    this.loadUserData()
+    this.resetForm()
+  },
   created() {
     this.loadOrgData()
     this.loadRoleData()
   },
 
   methods: {
+    resetForm() {
+      this.$refs['form'].resetFields()
+    },
+    loadUserData() {
+      if (!this.id) {
+        return
+      }
+      getStaffBasicInfo({ userId: this.id }).then((res) => {
+        this.uploadFileList = _.map(res.attachments, (item) => ({
+          url: item.url,
+          localName: item.name
+        }))
+        // this.columns.find((item) => item.prop === 'leaderId').firstOption = {
+        //   userId: res.leaderId + '',
+        //   name: res.leaderName
+        // }
+        this.form.leaderId = this.form = {
+          roleIds: _.map(res.roles, 'roleId'),
+          leaderId: res.leaderId + '',
+          ...res
+        }
+        delete this.form.roles
+      })
+    },
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: '0' }).then((res) => {
         this.columns.find((item) => item.prop === 'orgId').props.treeParams.data = res
@@ -294,9 +361,10 @@ export default {
     },
     loadRoleData() {
       getRoleList({ categoryId: '' }).then((res) => {
-        this.columns.find((item) => item.prop === 'role').options = res
+        this.columns.find((item) => item.prop === 'roleIds').options = res
       })
     },
+
     loadUser(params) {
       return getUserWorkList(params)
     },
@@ -331,28 +399,42 @@ export default {
       await this.onSubmit()
       this.goBack()
     },
-    onSubmit() {
+    createWorkNo() {
       return new Promise((resolve, reject) => {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            const params = { ...this.form, entryUser: this.userId }
-            this.loading = true
-            createUser(params)
-              .then(() => {
-                this.$message.success('创建成功')
-                this.loading = false
-                Object.assign(this.$data.form, this.$options.data().form)
-                resolve()
-              })
-              .catch(() => {
-                this.loading = false
-              })
-          } else {
-            this.$message.error('请完善信息')
-            reject('校验失败')
-          }
-        })
+        createNewWorkNo()
+          .then((res) => {
+            resolve(res.workNo)
+          })
+          .catch((err) => reject(err))
       })
+    },
+    async onSubmit() {
+      try {
+        await this.$refs.form.validate()
+      } catch (error) {
+        this.$message.error('请完善信息')
+        throw error
+      }
+
+      const params = { ...this.form, entryUser: this.userId }
+      this.loading = true
+      let func
+      if (this.id) {
+        func = editUser
+      } else {
+        func = createUser
+        const workNo = await this.createWorkNo()
+        params.workNo = workNo
+      }
+      try {
+        await func(params)
+        this.$message.success('创建成功')
+        this.loading = false
+        Object.assign(this.$data.form, this.$options.data().form)
+      } catch (error) {
+        this.loading = false
+        throw error
+      }
     }
   }
 }
