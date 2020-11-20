@@ -18,7 +18,7 @@
         :columns="formColumns"
         :model="formData"
       >
-        <template #picUrl>
+        <template #attachments>
           <common-upload
             v-model="uploader.fileList"
             :limit="uploader.limit"
@@ -26,7 +26,7 @@
           >
             <template #default>
               <div
-                v-if="_.size(uploader.fileList) < uploader.limit && _.isNil(formData.picUrl)"
+                v-if="_.size(uploader.fileList) < uploader.limit"
                 style="display: flex;"
               >
                 <el-button>上传</el-button>
@@ -39,10 +39,13 @@
             </template>
           </common-upload>
         </template>
+        <template #download>
+          <el-switch v-model="allow_download_swtich" />
+        </template>
       </common-form>
 
       <div class="container__editor">
-        <tinymce v-model="formData.content" />
+        <tinymce v-model="formData.introduction" />
       </div>
 
       <div class="container__buttons">
@@ -52,11 +55,11 @@
           type="primary"
           @click="() => handlePublishBtnClick()"
         >
-          发布
+          完成
         </el-button>
         <el-button
           size="medium"
-          @click="() => handlePreviewBtnClick()"
+          @click="() => handleContinueAdd()"
         >
           完成并继续添加
         </el-button>
@@ -66,34 +69,30 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import {
-  getNewsCategory,
-  postV1News,
-  postNewsPublish,
-  getNewsDetail,
-  putV1News
-} from '@/api/newsCenter/newCenter'
+  addKnowledgeList,
+  updateKnowledge,
+  getKnowledgeManageTaglist,
+  getKnowledgeCatalogList,
+  getKnowledgeManageDetails
+} from '@/api/knowledge/knowledge'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
-
 // 接口需要的参数
-const API_PARAMS = ['id', 'title', 'categoryId', 'picUrl', 'content', 'brief', 'userId']
-// vue 深度监听
-const vmSetDeep = (target, key, value) => {
-  const set = Vue.set
-  if (_.isObject(value)) {
-    set(target, key, _.isArray(value) ? [] : {})
-    for (let k in value) {
-      vmSetDeep(target[key], k, value[k])
-    }
-  } else {
-    set(target, key, value)
-  }
-}
+const API_PARAMS = [
+  'id',
+  'resName',
+  'catalogId',
+  'uploadType',
+  'resUrl',
+  'introduction',
+  'provideName',
+  'allow_download',
+  'attachments'
+]
 
 export default {
-  name: 'NewsEdit',
+  name: 'KnowledgeEdit',
   components: {
     CommonUpload
   },
@@ -103,50 +102,90 @@ export default {
       {
         itemType: 'input',
         label: '资源名称',
-        prop: 'title',
+        prop: 'resName',
         required: true,
-        span: 12
+        span: 11,
+        offset: 0
       },
       {
-        itemType: 'select',
         label: '所在目录',
-        options: [],
-        prop: 'categoryId',
-        props: {
-          label: 'name',
-          value: 'id'
-        },
+        itemType: 'treeSelect',
+        prop: 'catalogId',
         required: true,
-        span: 12
+        span: 11,
+        offset: 1,
+        props: {
+          selectParams: {
+            placeholder: '请选择所在目录',
+            multiple: false
+          },
+          treeParams: {
+            'check-strictly': true,
+            'default-expand-all': false,
+            'expand-on-click-node': false,
+            clickParent: true,
+            data: [],
+            filterable: false,
+            props: {
+              children: 'children',
+              label: 'name',
+              value: 'id'
+            },
+            required: true
+          }
+        }
       },
       {
         itemType: 'input',
         label: '提供人',
-        prop: 'provide ',
-        span: 12
+        prop: 'provideName',
+        span: 11,
+        offset: 0
+      },
+      {
+        itemType: 'select',
+        label: '添加标签',
+        prop: 'tags',
+        required: false,
+        filterable: true,
+        multiple: true,
+        props: {
+          label: 'name',
+          value: 'id'
+        },
+        options: [],
+        span: 11,
+        offset: 1
       },
       {
         itemType: 'radio',
         label: '上传模式',
-        prop: 'mode',
+        prop: 'uploadType',
         required: true,
         span: 12,
         options: [
           {
             label: '本地文件',
-            value: 'local'
+            value: 0
           },
           {
             label: '链接文件',
-            value: 'link'
+            value: 1
           }
         ]
+      },
+      {
+        itemType: 'slot',
+        label: '是否允许下载',
+        prop: 'download',
+        required: false,
+        span: 12
       }
     ]
     const UPLOAD_FILE = {
       itemType: 'slot',
       label: '附件',
-      prop: 'picUrl',
+      prop: 'attachments',
       props: {
         label: 'jobName',
         value: 'id'
@@ -157,7 +196,7 @@ export default {
     const UPLOAD_INPUT = {
       itemType: 'input',
       label: '资源路径',
-      prop: 'path',
+      prop: 'resUrl',
       required: true,
       span: 24
     }
@@ -166,16 +205,21 @@ export default {
       UPLOAD_INPUT,
       formColumns: FORM_COLUMNS,
       loading: false,
+      allow_download_swtich: true,
       formData: {
-        title: '',
-        categoryId: '',
-        provide: '',
-        mode: 'local'
+        resName: '',
+        catalogId: '',
+        provideName: '',
+        tags: [],
+        uploadType: 0, // 0本地文件 1链接文件
+        resUrl: '',
+        allow_download: 0, //是否运行下载 0允许 1不允许
+        introduction: '',
+        attachments: []
       },
-
       uploader: {
         fileList: [],
-        limit: 1,
+        limit: 5,
         loading: false,
         previewVisible: false,
         progress: 0
@@ -184,54 +228,45 @@ export default {
       hasEdit: false // 用于标记是否进行了修改
     }
   },
-
+  beforeRouteEnter(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   computed: {
-    // 根据 formData.content生成brief
-    brief() {
-      const { content } = this.formData
-      const BRIEF_MAX_LEN = 200 // 长度限制为200
-      // 清除所有的tag元素,并 反转义 得到 原始的数据
-      return _(content)
-        .replace(new RegExp('<[^>]*>', 'g'), '')
-        .substr(0, BRIEF_MAX_LEN)
-        .trim()
-    },
-
     // 查询参数
     _formData() {
-      const { userId, brief } = this
       const formData = _.cloneDeep(this.formData)
-      formData.content = _.escape(formData.content)
+      formData.introduction = _.escape(formData.introduction)
       return _(null)
-        .assign(formData, { userId, brief })
+        .assign(formData)
         .pick(API_PARAMS)
         .value()
     },
-
     id() {
       return this.$route.query.id || null
     },
-    // userId() {
-    //   return this.$route.query.userId || null
-    // }
-
-    ...mapGetters(['userId', 'tag'])
+    ...mapGetters(['tag'])
   },
 
   watch: {
-    // 同步uploader与表单
-    'formData.mode': {
+    allow_download_swtich: {
+      handler(val) {
+        this.formData.allow_download = val ? 0 : 1
+      }
+    },
+    // 上传模式变化
+    'formData.uploadType': {
       deep: true,
       immediate: true,
       handler(val) {
-        this.formColumns[4] = val === 'local' ? this.UPLOAD_FILE : this.UPLOAD_INPUT
+        this.formColumns[6] = val === 0 ? this.UPLOAD_FILE : this.UPLOAD_INPUT
       }
     },
     // 同步uploader与表单
     'uploader.fileList'(val) {
       const file = _.head(val)
       const url = _.get(file, 'fileUrl', null)
-      this.$set(this.formData, 'picUrl', url)
+      this.$set(this.formData, 'attachments', url)
     },
 
     formData: {
@@ -243,82 +278,60 @@ export default {
     }
   },
 
-  // 路由hook
-  beforeRouteEnter(to, from, next) {
-    to.meta.$keepAlive = false // 禁用页面缓存
-    const { raw } = to.params
-    next((vm) => {
-      for (let prop in raw) {
-        vmSetDeep(vm, prop, raw[prop])
-      }
-    })
+  mounted() {
+    this.initData()
   },
-  beforeRouteLeave(to, from, next) {
-    next()
-  },
-
-  created() {
-    this.refresh()
-  },
-
   methods: {
+    /**
+     * 初始选择数据
+     */
+    initData() {
+      let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      let tagsList = _.find(this.formColumns, { prop: 'tags' })
+      if (tagsList) {
+        getKnowledgeManageTaglist().then((res) => {
+          tagsList.options = res
+        })
+      }
+      if (catalogId) {
+        getKnowledgeCatalogList().then((res) => (catalogId.props.treeParams.data = res))
+      }
+    },
+    // 点击完成
     handlePublishBtnClick() {
       this.validate()
         .then(async () => {
           try {
-            await this.$confirm('确认发布新闻吗？', '提示', {
-              type: 'info'
-            })
-            try {
-              this.submitting = true
-              // 需要先存为草稿再发布新闻
-              const { id } = _.isNull(this.id)
-                ? await this.postNews(_.pickBy(this._formData))
-                : await this.updateNews(_.pickBy(this._formData))
-              await this.publishNews(id)
-              this.$message.success('发布成功')
-              this.hasEdit = false
-              this.handleBack()
-            } catch (error) {
-              this.$message.error(error.message)
-            } finally {
-              this.submitting = false
-            }
+            this.submitting = true
+            // 区分是编辑还是新增
+            _.isNull(this.id)
+              ? await this.createKnowledgeFun(_.pickBy(this._formData))
+              : await this.updateKnowledgeFun(_.pickBy(this._formData))
+            this.$message.success('发布成功')
+            this.hasEdit = false
+            this.handleBack()
           } catch (error) {
-            //  不对取消操作进行提示，原因是不需要，此外还会出现catch网络问题与后台返回错误等 sideeffect
-            // this.$message.info('取消操作')
+            this.$message.error(error.message)
+          } finally {
+            this.submitting = false
           }
         })
-        .catch((error) => {
-          _.isString(error) && this.$message.warning(error)
-          this.scrollTop() // 校验不通过的时候到顶部的提示文本处
+        .catch(() => {
+          this.$message.error('请填写完整必填项')
         })
     },
-    handlePreviewBtnClick() {
-      const { _formData } = this
-      this.$router.push(
-        {
-          path: '/newsCenter/newsDetail'
-        },
-        (route) => {
-          route.params.data = _formData
-          route.params.raw = _.cloneDeep(this.$data) // 传递原始数据
-        }
-      )
-    },
+    handleContinueAdd() {},
     handleBack() {
-      this.handleLeave()
-        .then(() => {
-          this.$router.back()
-          this.$store.commit('DEL_TAG', this.tag)
-        })
-        .catch(() => {})
+      this.$router.back()
+      this.$store.commit('DEL_TAG', this.tag)
+      // this.handleLeave().then(() => {
+      //   this.$router.back()
+      //   this.$store.commit('DEL_TAG', this.tag)
+      // })
     },
-
     handleUploaderRemove() {
       this.uploader.fileList = []
     },
-
     // 处理用户离开进行保存等相关操作
     async handleLeave() {
       // 如果表单为空 或 用户没有对数据进行编辑
@@ -345,24 +358,22 @@ export default {
         }
       }
     },
-
     // 加载详细
     async loadDetail(id = this.id) {
       this.loading = true
-      const data = _(await getNewsDetail({ id }))
+      const data = _(await getKnowledgeManageDetails({ id }))
         .pick(API_PARAMS)
         .omit('id')
         .value()
       for (let key in data) {
         this.$set(this.formData, key, data[key])
       }
-      this.formData.content = _.unescape(this.formData.content) // 反转义获取 dom
+      this.formData.introduction = _.unescape(this.formData.introduction) // 反转义获取 dom
       this.loading = false
       // 修改了formData 重置标记
       this.$nextTick(() => (this.hasEdit = false))
       return data
     },
-
     validate(...args) {
       // const BRIEF_MIN_LEN = 10 // 限制最小输入长度
       return new Promise((resolve, reject) => {
@@ -370,11 +381,6 @@ export default {
           .validate(...args)
           .then((data) => {
             resolve(data)
-            // if (_.size(this.brief) < BRIEF_MIN_LEN) {
-            //   reject('内容太少，请重新输入')
-            // } else {
-            //   resolve(data)
-            // }
           })
           .catch((error) => reject(error))
       })
@@ -382,76 +388,46 @@ export default {
     clearValidate(...args) {
       return this.$refs.form.clearValidate(...args)
     },
-
-    scrollTop() {
-      this.$refs.wrapper.parentElement.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      })
-      // this.$refs.wrapper.scrollTop = 0
-    },
-
-    refresh() {
-      // 表单栏目选择
-      getNewsCategory().then(
-        (res) =>
-          (_.find(this.formColumns, {
-            prop: 'categoryId'
-          }).options = res)
-      )
-      if (this.id) {
-        this.loadDetail()
-      }
-    },
-
-    // 存储草稿
-    async postNews(params) {
+    // 新增资源
+    async createKnowledgeFun(params) {
       this.loading = true
-      const data = await postV1News(params)
+      const data = await addKnowledgeList(params)
       this.loading = false
       return data
     },
-
     // 更新数据
-    async updateNews(params) {
+    async updateKnowledgeFun(params) {
       this.loading = true
-      await putV1News(_.assign({ id: this.id }, params))
+      await updateKnowledge(_.assign({ id: this.id }, params))
       this.loading = false
       return { id: this.id }
-    },
-
-    // 发布接口
-    async publishNews(id) {
-      return await postNewsPublish({ id, userId: this.userId })
     }
   }
 }
 </script>
 
-<style lang="sass" scoped>
-$color_active: #368AFA
-$color_border: #E3E7E9
-$color_placeholder: #757C85
-$color_font_uploader: #A0A8AE
+<style lang="scss" scoped>
+$color_active: #368afa;
+$color_border: #e3e7e9;
+$color_placeholder: #757c85;
+$color_font_uploader: #a0a8ae;
 
-.wrapper
-  .basic-container--block
-    height: 0
-    min-height: calc(100% - 92px)
-  .uploader
-    display: flex
-    flex-direction: column
-    justify-content: flex-start
-    .uploader__description
-      font-size: smaller
-      color: $color_placeholder
-  .container__buttons
-    margin-top: 1rem
-
-  /deep/.el-form-item
-    // margin-bottom: 11px // 减少底边距会造成错误提示的文本显示样式问题
-  /deep/.el-select
-    max-width: 80%
-  /deep/.el-input
-    max-width: 80%
+.wrapper {
+  .basic-container--block {
+    height: 0;
+    min-height: calc(100% - 92px);
+  }
+  .uploader {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    .uploader__description {
+      font-size: smaller;
+      color: $color_placeholder;
+    }
+  }
+}
+.container__buttons {
+  margin-top: 1rem;
+}
 </style>

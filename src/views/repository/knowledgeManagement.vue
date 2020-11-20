@@ -66,19 +66,36 @@
             </div>
           </div>
         </template>
-        <template slot="multiSelectMenu">
+        <template #status="{row}">
+          {{ row.status === 0 ? '已上架' : '已下架' }}
+        </template>
+        <template #uploadType="{row}">
+          {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
+        </template>
+        <template #tags="{row}">
+          <el-tag
+            v-for="(item, index) in row.tags"
+            :key="index"
+            style="margin-right: 10px"
+          >
+            {{ _.get(item, 'name', '') }}
+          </el-tag>
+        </template>
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
           <el-button
             type="text"
             size="medium"
             icon="el-icon-delete"
-            @click="multipleDeleteClick"
+            @click="multipleDeleteClick(selection)"
           >
             批量删除
           </el-button>
         </template>
-        <!-- 编号列 -->
         <template
-          slot="title"
+          slot="resName"
           slot-scope="{ row }"
         >
           <div
@@ -87,27 +104,24 @@
             style="color: #207EFA; cursor:pointer"
             @click="jumpDetail(row)"
           >
-            {{ row.title }}
+            {{ row.resName }}
           </div>
         </template>
-        <template
-          slot="handler"
-          slot-scope="scope"
-        >
+        <template #handler="{row}">
           <el-button
             type="text"
-            size="medium"
-            @click.stop="handleDelete(scope.row)"
+            class="top-button"
+            @click="handleTop(row)"
           >
-            置顶
+            {{ row.isTop === 0 ? '置顶' : '已置顶' }}
           </el-button>
           <el-button
             type="text"
-            size="medium"
-            @click.stop="handleDelete(scope.row)"
+            @click="handleStatus(row)"
           >
-            下架
+            {{ row.status === 0 ? '下架' : '上架' }}
           </el-button>
+
           <el-dropdown @command="handleCommand($event, row)">
             <el-button
               type="text"
@@ -128,7 +142,14 @@
 </template>
 
 <script>
-import { getNoticeList, delNoticeList } from '@/api/noticeCenter/noticeCenter'
+import {
+  getKnowledgeManageList,
+  deleteKnowledgeList,
+  topingKnowledge,
+  updateStatusKnowledgeList,
+  getKnowledgeCatalogList,
+  getKnowledgeManageTaglist
+} from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
 
 // 表格属性
@@ -137,26 +158,34 @@ const TABLE_COLUMNS = [
     label: '资源名称',
     minWidth: 150,
     slot: true,
-    prop: 'title'
+    prop: 'resName'
   },
   {
     label: '状态',
-    prop: 'publishUserName1',
+    slot: true,
+    prop: 'status',
     maxWidth: 100
   },
   {
     label: '所在目录',
-    prop: 'publishTime2',
+    prop: 'catalogName',
     minWidth: 100
   },
   {
     label: '上传模式',
-    prop: 'readNum',
+    slot: true,
+    prop: 'uploadType',
     minWidth: 100
   },
   {
+    label: '标签',
+    slot: true,
+    prop: 'tags',
+    minWidth: 150
+  },
+  {
     label: '创建人',
-    prop: 'publishTime3',
+    prop: 'createName',
     minWidth: 100
   },
   {
@@ -180,7 +209,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入资源名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'search',
+    field: 'resName',
     label: '',
     type: 'input'
   }
@@ -188,47 +217,59 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'select',
-    field: 'publishUserName1',
+    field: 'status',
     label: '状态',
     data: '',
     options: [
-      { value: 'Enterprise', label: '正常' },
-      { value: 'Company', label: '停用' }
-    ],
-    config: { optionLabel: '', optionValue: '' }
+      { value: '', label: '全部' },
+      { value: 0, label: '上架' },
+      { value: 1, label: '下架' }
+    ]
   },
   {
-    type: 'select',
-    field: 'orgType',
+    type: 'treeSelect',
+    field: 'catalogId',
     label: '所在目录',
     data: '',
-    options: [
-      { value: 'Enterprise', label: '正常' },
-      { value: 'Company', label: '停用' }
-    ],
-    config: { optionLabel: '', optionValue: '' }
+    config: {
+      selectParams: {
+        placeholder: '请输入内容',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     type: 'select',
-    field: 'publishUserName2',
+    field: 'uploadType',
     label: '上传模式',
     data: '',
     options: [
-      { value: 'Enterprise', label: '正常' },
-      { value: 'Company', label: '停用' }
-    ],
-    config: { optionLabel: '', optionValue: '' }
+      { value: '', label: '全部' },
+      { value: 0, label: '本地文件' },
+      { value: 1, label: '链接文件' }
+    ]
   },
   {
     type: 'select',
-    field: 'publishUserName3',
+    field: 'tagId',
     label: '标签',
     data: '',
-    options: [
-      { value: 'Enterprise', label: '正常' },
-      { value: 'Company', label: '停用' }
-    ],
-    config: { optionLabel: '', optionValue: '' }
+    options: [],
+    config: { optionLabel: 'name', optionValue: 'id' }
   }
 ]
 let SEARCH_POPOVER_CONFIG = {
@@ -258,11 +299,11 @@ export default {
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        title: '',
-        publishUserId: '',
-        beginPublishTime: '',
-        endPublishTime: '',
-        status: 'Published'
+        resName: '',
+        catalogId: '',
+        uploadType: '',
+        tagId: '',
+        status: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
@@ -273,39 +314,82 @@ export default {
     }
   },
   activated() {
+    this.initSearchData()
     this.refreshTableData()
   },
   methods: {
-    multipleDeleteClick() {},
+    initSearchData() {
+      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
+      let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
+      if (catalogId) {
+        getKnowledgeCatalogList().then(
+          (res) =>
+            (catalogId.config.treeParams.data = _.concat(
+              [
+                {
+                  id: '',
+                  name: '全部'
+                }
+              ],
+              res
+            ))
+        )
+      }
+      if (tagId) {
+        getKnowledgeManageTaglist().then(
+          (res) =>
+            (tagId.options = _.concat(
+              [
+                {
+                  id: '',
+                  name: '全部'
+                }
+              ],
+              res
+            ))
+        )
+      }
+    },
+    multipleDeleteClick(selected) {
+      let selectedIds = []
+      _.each(selected, (item) => {
+        selectedIds.push(item.id)
+      })
+      this.delFun(selectedIds)
+    },
+    // 置顶与取消置顶
+    async handleTop(rowData) {
+      await topingKnowledge({ id: rowData.id, isTop: rowData.isTop === 0 ? 1 : 0 })
+      this.$message.success(`${rowData.isTop === 0 ? '' : '取消'}置顶成功`)
+      this.loadTableData()
+    },
+    // 上架与下架
+    async handleStatus(rowData) {
+      await updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === 0 ? 1 : 0 })
+      this.$message.success(`${rowData.status === 0 ? '下架' : '上架'}成功`)
+      this.loadTableData()
+    },
+    async handleCommand($event, row) {
+      if ($event === 'deleteOrg') {
+        let that = this
+        this.$confirm('是否删除当前资源', '提示', {
+          confirmButtonText: '删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          that.delFun(row)
+        })
+      }
+    },
     createResource() {
-      this.$store.commit('SET_NOTICE', '')
       this.$router.push({
         path: '/repository/knowledgeEdit'
       })
     },
-    handleDelete(data) {
-      let that = this
-      this.$confirm('是否删除公告', '删除提示', {
-        confirmButtonText: '删除',
-        cancelButtonText: '不删除',
-        type: 'warning'
-      })
-        .then(() => {
-          that.delFun(data)
-        })
-        .catch(() => {
-          that.$message({
-            type: 'info',
-            message: '已取消！'
-          })
-        })
-    },
-    delFun(data) {
-      delNoticeList({ id: data.id }).then(() => {
-        this.$message.success('删除成功')
-        // 删除完成后更新视图
-        this.loadTableData()
-      })
+    async delFun(row) {
+      await deleteKnowledgeList({ id: row.id })
+      this.$message.success('删除成功')
+      this.loadTableData()
     },
     /**
      * 处理页码改变
@@ -348,7 +432,7 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getNoticeList(this.queryInfo)
+        let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
@@ -361,6 +445,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.top-button {
+  width: 40px;
+}
 .operations-right {
   i {
     margin-left: 12px;
