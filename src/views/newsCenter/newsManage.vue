@@ -45,7 +45,7 @@
         </div>
         <div>
           <el-input
-            v-model="form.ENUMS_STATUS[activeName].name"
+            v-model="form.ENUMS_STATUS[activeName].search"
             placeholder="输入公告编号或标题搜索"
           >
             <i
@@ -105,11 +105,11 @@ export default {
       form: {
         ENUMS_STATUS: {
           Published: {
-            name: '',
+            search: '',
             publishColumn: ''
           },
           Draft: {
-            name: '',
+            search: '',
             publishColumn: ''
           }
         }
