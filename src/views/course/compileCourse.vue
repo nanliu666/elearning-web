@@ -29,12 +29,16 @@
         <el-button size="small">
           预览
         </el-button>
-        <el-button size="small">
+        <el-button
+          size="small"
+          @click="addCourse(2)"
+        >
           存草稿
         </el-button>
         <el-button
           size="small"
           type="primary"
+          @click="addCourse(1)"
         >
           发布
         </el-button>
@@ -163,19 +167,19 @@
               label="通过条件"
               prop="passCondition"
             >
-              <el-checkbox-group v-model="ruleForm.passCondition">
-                <el-checkbox
-                  label="教师评定"
-                  name="a"
-                ></el-checkbox>
-                <el-checkbox
-                  label="考试通过"
-                  name="b"
-                ></el-checkbox>
-                <el-checkbox
-                  label="达到课程学时"
-                  name="c"
-                ></el-checkbox>
+              <el-checkbox-group
+                v-model="checkboxVal"
+                @change="setCheckboxVal"
+              >
+                <el-checkbox label="a">
+                  教师评定
+                </el-checkbox>
+                <el-checkbox label="b">
+                  考试通过
+                </el-checkbox>
+                <el-checkbox label="c">
+                  达到课程学时
+                </el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
@@ -206,9 +210,26 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第五行 -->
+        <span>添加标签</span>
         <el-row class="switch_box">
+          <el-col :span="10">
+            <el-select
+              v-model="value1"
+              multiple
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="4">
+          </el-col>
           <el-col :span="10">
             <div>
               <span class="switch_title">是否推荐</span>
@@ -221,6 +242,7 @@
             </div>
           </el-col>
         </el-row>
+        {{ ruleForm.isRecommend }}
         <!-- 第六行 -->
         <el-row>
           <el-col :span="10">
@@ -363,6 +385,7 @@
                 <el-button
                   type="text"
                   size="small"
+                  @click="deleteContent(scope.id)"
                 >
                   删除
                 </el-button>
@@ -392,10 +415,35 @@
 </template>
 
 <script>
-import { getCourseList } from '@/api/course/course'
+import { getCourseList, delCourseContent, editCourseInfo } from '@/api/course/course'
 export default {
   data() {
     return {
+      checkboxVal: [],
+      // 添加标签
+      options: [
+        {
+          value: '选项1',
+          label: '黄金糕'
+        },
+        {
+          value: '选项2',
+          label: '双皮奶'
+        },
+        {
+          value: '选项3',
+          label: '蚵仔煎'
+        },
+        {
+          value: '选项4',
+          label: '龙须面'
+        },
+        {
+          value: '选项5',
+          label: '北京烤鸭'
+        }
+      ],
+      value1: [],
       // 页面切换
       headIndex: 1,
       // 上传课程内容章节类型
@@ -423,13 +471,14 @@ export default {
       ],
       // 填写课程信息
       ruleForm: {
+        status: '',
         name: '', // 课程名称
         teacherId: '', // 讲师
         catalogId: '', // 所在目录
         type: '', // 课程类型(1:在线 2:面授 3:直播)
         period: 0, //学时
         credit: 0, // 学分
-        passCondition: '', //通过条件（前端为多选，用a,b,c,d,...组合）
+        passCondition: [], //通过条件（前端为多选，用a,b,c,d,...组合）
         electiveType: '', //选修类型
         isRecommend: '', //是否推荐(0：否   1：是)
         cover: '', //封面
@@ -457,16 +506,15 @@ export default {
       },
       rules: {
         name: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
-        teacher_id: [{ required: true, message: '请输入讲师名称', trigger: 'blur' }],
-        Catalog_id: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
+        teacherId: [{ required: true, message: '请输入讲师名称', trigger: 'blur' }],
+        catalogId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }],
-        Pass_condition: [{ required: true, message: '请选择通过条件', trigger: 'blur' }],
-        Elective_type: [{ required: true, message: '请选择选修类型', trigger: 'blur' }],
-        Cover_id: [{ required: true, message: '请选择课程封面', trigger: 'blur' }],
-        Introduction: [{ required: true, message: '请书写课程介绍', trigger: 'blur' }],
-        Think_content: [{ required: true, message: '请书写课前思考内容', trigger: 'blur' }],
-
-        imageUrl: [{ required: true, message: '请输入活动名称', trigger: 'blur' }]
+        passCondition: [{ required: true, message: '请选择通过条件', trigger: 'blur' }],
+        electiveType: [{ required: true, message: '请选择选修类型', trigger: 'blur' }],
+        cover: [{ required: true, message: '请选择课程封面', trigger: 'blur' }],
+        introduction: [{ required: true, message: '请书写课程介绍', trigger: 'blur' }],
+        thinkContent: [{ required: true, message: '请书写课前思考内容', trigger: 'blur' }],
+        imageUrl: [{ required: true, message: '请上传照片', trigger: 'blur' }]
       }
     }
   },
@@ -475,6 +523,36 @@ export default {
     this.getInfo()
   },
   methods: {
+    setCheckboxVal() {
+      this.ruleForm.passCondition = this.checkboxVal
+    },
+    // 发布&草稿
+    addCourse(status) {
+      this.ruleForm.status = status
+      editCourseInfo(this.ruleForm).then((res) => {
+        window.console.log(res)
+        this.$message({
+          message: '发送成功！！！',
+          type: 'success'
+        })
+      })
+    },
+    // 删除
+    deleteContent(id) {
+      delCourseContent(id)
+        .then((res) => {
+          window.console.log(res)
+          this.$message({
+            message: '该章节已成功删除',
+            type: 'success'
+          })
+        })
+        .catch((err) => {
+          window.console.log(err)
+          this.$message.error(err.resMsg)
+        })
+    },
+
     // 拿数据
     getInfo() {
       getCourseList(1).then((res) => {

@@ -17,296 +17,477 @@
       </el-dropdown>
     </page-header>
 
+    <!-- Dialog无数据 -->
+    <div
+      v-if="!tableData"
+      id="isdialog_show"
+    >
+      <div>如何创建课程：</div>
+      <div>1.先在 <span>【课程中心-目录管理】</span> 完善展示的目录配置；</div>
+      <div>
+        2.开始创建课程。
+      </div>
+      <i class="el-icon-close"></i>
+    </div>
+
     <div class="course_in">
       <!-- 导航 -->
       <div class="select_bar">
         <span
-          :class="{ select: isSelect === 1 }"
-          @click="showSelect(1)"
+          :class="{ select: status === 1 }"
+          @click="status = 1"
         >已发布</span>
         <span
-          :class="{ select: isSelect === 2 }"
-          @click="showSelect(2)"
+          :class="{ select: status === 2 }"
+          @click="status = 2"
         >草稿</span>
       </div>
 
       <!-- 内容 -->
       <div class="draft">
         <!-- 表格内容 -->
-        <common-table
-          ref="crud"
-          :config="tableConfig"
-          :columns="columns"
-          :loading="loading"
-          :data="draftData"
-          :page="page"
-          @current-page-change="currentChange"
-          @page-size-change="sizeChange"
-        >
-          <template
-            slot="multiSelectMenu"
-            slot-scope="{ selection }"
+        <basic-container block>
+          <common-table
+            ref="table"
+            :columns="columnsVisible | columnsFilter"
+            :config="tableConfig"
+            :data="tableData"
+            :page-config="tablePageConfig"
+            :page="page"
+            @current-page-change="handleCurrentPageChange"
+            @page-size-change="handlePageSizeChange"
           >
-            <el-button
-              type="text"
-              style="margin-bottom:0;"
-              @click="handleReset(selection)"
-            >
-              批量做点什么
-            </el-button>
-          </template>
-          <template slot="topMenu">
-            <div class="flex flex-flow flex-justify-between flex-items">
-              <el-input
-                v-model="query.name"
-                placeholder="请输入目录名称搜索"
-                clearable
-                style="width:280px;margin-right:12px;"
-                suffix-icon="el-icon-search"
-                @input="searchLoadData"
-              />
-            </div>
-          </template>
-          <!-- 序号 -->
-          <template
-            slot="index"
-            slot-scope="{ row }"
-          >
-            <span>{{ draftData.indexOf(row) + 1 }}</span>
-          </template>
-          <!-- 课程名称 -->
-          <template
-            slot="name"
-            slot-scope="{ row }"
-          >
-            <div id="recommend">
-              <span
-                v-if="row.isTop === 1"
-                id="triangle_topleft"
-              ></span>
-              <span
-                v-if="row.isTop === 1"
-                class="icon_rec"
-              >推荐</span>
+            <template #topMenu>
+              <div class="operations">
+                <seach-popover
+                  :popover-options="searchPopoverConfig.popoverOptions"
+                  :require-options="searchPopoverConfig.requireOptions"
+                  @submit="handleSearch"
+                />
+                <div class="operations__btns">
+                  <el-tooltip
+                    class="operations__btns--tooltip"
+                    content="刷新"
+                    effect="dark"
+                    placement="top"
+                    style="color:#acb3b8;"
+                  >
+                    <el-button
+                      class="operations__btns--item"
+                      size="mini"
+                      icon="el-icon-refresh-right"
+                      type="text"
+                      @click="refreshTableData"
+                    >
+                      <i class="iconfont iconicon_refresh" />
+                    </el-button>
+                  </el-tooltip>
+                  <span class="text_refresh">刷新</span>
+                  <el-popover
+                    placement="bottom"
+                    width="40"
+                    trigger="click"
+                  >
+                    <el-tooltip
+                      slot="reference"
+                      class="operations__btns--tooltip"
+                      content="显隐"
+                      effect="dark"
+                      placement="top"
+                    >
+                      <el-button
+                        class="operations__btns--item"
+                        size="mini"
+                        type="text"
+                        icon="el-icon-setting"
+                        style="color:#acb3b8;"
+                      >
+                        <i class="iconfont iconicon_setting" />
+                      </el-button>
+                    </el-tooltip>
+
+                    <!-- 设置表格列可见性 -->
+                    <div class="operations__column--visible">
+                      <el-checkbox-group v-model="columnsVisible">
+                        <el-checkbox
+                          v-for="item of tableColumns"
+                          :key="item.prop"
+                          :disabled="item.prop === 'name'"
+                          :label="item.prop"
+                          class="operations__column--item"
+                        >
+                          {{ item.label }}
+                          123
+                        </el-checkbox>
+                      </el-checkbox-group>
+                    </div>
+                  </el-popover>
+                </div>
+              </div>
+            </template>
+
+            <template #multiSelectMenu="{ selection }">
               <el-button
-                id="recommend_info"
+                style="margin-bottom:0;"
                 type="text"
+                @click="() => handleRemoveItems(selection)"
               >
+                批量删除
+              </el-button>
+            </template>
+            <!-- //序号 -->
+            <template
+              slot="index"
+              slot-scope="{ row }"
+            >
+              <span>{{ tableData.indexOf(row) + 1 }}</span>
+            </template>
+
+            <!-- 课程名称 -->
+            <template
+              slot="name"
+              slot-scope="{ row }"
+            >
+              <el-button type="text">
                 {{ row.name }}
               </el-button>
-            </div>
-          </template>
-          <!-- 课程类型 -->
-          <template
-            slot="type"
-            slot-scope="{ row }"
-          >
-            <span v-if="row.type === 1">在线课程</span>
-            <span v-if="row.type === 2">面授课程</span>
-            <span v-if="row.type === 3">直播课程</span>
-          </template>
-          <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
-          <template
-            slot="passCondition"
-            slot-scope="{ row }"
-          >
-            <span v-if="row.passCondition === 'a'">教师评定</span>
-            <span v-if="row.passCondition === 'b'">考试通过</span>
-            <span v-if="row.passCondition === 'c'">达到课程学时</span>
-          </template>
-          <!-- electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修) -->
-          <template
-            slot="electiveType"
-            slot-scope="{ row }"
-          >
-            <span v-if="row.electiveType === 1">开发选修</span>
-            <span v-if="row.electiveType === 2">通过审批</span>
-            <span v-if="row.electiveType === 3">禁止选修</span>
-          </template>
-
-          <template
-            slot="handler"
-            slot-scope="{ row }"
-          >
-            <el-button
-              size="medium"
-              type="text"
-              @click="handleEditRole(row)"
+            </template>
+            <!-- 课程类型 -->
+            <template
+              slot="type"
+              slot-scope="{ row }"
             >
-              编辑
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click="handleReset(row)"
+              <span v-if="row.type === 1">在线课程</span>
+              <span v-if="row.type === 2">面授课程</span>
+              <span v-if="row.type === 3">直播课程</span>
+            </template>
+            <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
+            <template
+              slot="passCondition"
+              slot-scope="{ row }"
             >
-              删除
-            </el-button>
-          </template>
-        </common-table>
-      </div>
-    </div>
+              <span v-if="row.passCondition === 'a'">教师评定</span>
+              <span v-if="row.passCondition === 'b'">考试通过</span>
+              <span v-if="row.passCondition === 'c'">达到课程学时</span>
+            </template>
+            <!-- electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修) -->
+            <template
+              slot="electiveType"
+              slot-scope="{ row }"
+            >
+              <span v-if="row.electiveType === 1">开发选修</span>
+              <span v-if="row.electiveType === 2">通过审批</span>
+              <span v-if="row.electiveType === 3">禁止选修</span>
+            </template>
+            <!-- 标签 -->
+            <template
+              slot="a"
+              slot-scope="{ row }"
+            >
+              {{ row }}
+            </template>
+            <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
+            <template
+              slot="isRecommend"
+              slot-scope="{ row }"
+            >
+              <span v-if="row.isRecommend === 0">否</span>
+              <span v-if="row.isRecommend === 1">是</span>
+            </template>
 
-    <!-- Dialog无数据 -->
-    <div
-      v-show="dialogVisible"
-      v-if="draftData"
-      class="dialog"
-    >
-      <i
-        class="el-icon-close"
-        @click="dialogVisible = false"
-      ></i>
-
-      <div class="guide">
-        <p>如何快速添加课程 !</p>
-        <div class="box_all">
-          <div class="bxo">
-            <div class="bxo_x"></div>
-            <div class="bxo_y"></div>
-            <div class="number">
-              1
-            </div>
-          </div>
-          <div class="arrows">
-            <i class="el-icon-caret-right"></i>
-            <div class="wire"></div>
-          </div>
-          <div class="bxo">
-            <div class="bxo_x"></div>
-            <div class="bxo_y"></div>
-            <div class="number">
-              2
-            </div>
-          </div>
-        </div>
-
-        <div class="describe">
-          <span>先完善展示的目录配置</span>
-          <span>开始创建课程</span>
-        </div>
-
-        <div class="btn_b">
-          <el-button
-            type="primary"
-            size="mini"
-          >
-            &nbsp; &nbsp; 知道了，马上去完善目录配置 &nbsp; &nbsp;
-          </el-button>
-        </div>
+            <!-- isTop: 0, //是否置顶（0：否；1：是） -->
+            <template
+              slot="handler"
+              slot-scope="scope"
+            >
+              <el-button
+                v-if="scope.row.isTop === 0"
+                type="text"
+                size="medium"
+                @click.stop="handleConfig(scope.row, scope.index)"
+              >
+                置顶
+              </el-button>
+              <span v-if="scope.row.isTop === 1">已置顶</span>
+              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+              <el-button
+                type="text"
+                size="medium"
+              >
+                下架
+              </el-button>
+              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+              <el-dropdown
+                trigger="hover"
+                style="color: #a0a8ae;"
+                @command="handleCommand($event, scope.row)"
+              >
+                <span class="el-dropdown-link">
+                  <i class="el-icon-more" />
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item command="edit">
+                    编辑
+                  </el-dropdown-item>
+                  <el-dropdown-item command="del">
+                    删除
+                  </el-dropdown-item>
+                  <el-dropdown-item command="del">
+                    移动
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </template>
+          </common-table>
+        </basic-container>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { getOrgUserList, resetPwd } from '@/api/system/user'
-import { getCourseList } from '@/api/course/course'
-export default {
-  props: {
-    activeOrg: {
-      type: Object,
-      default: () => null
+import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
+import { getOrgUserList } from '@/api/system/user'
+import { getCourseListData } from '@/api/course/course'
+// 表格属性
+const TABLE_COLUMNS = [
+  {
+    label: '序号',
+    prop: 'index',
+    width: '70',
+    slot: true
+  },
+  {
+    label: '目录名称',
+    minWidth: 140,
+    prop: 'name',
+    slot: true
+  },
+  {
+    label: '讲师',
+    prop: 'teacherId'
+  },
+  {
+    label: '状态',
+    prop: 'alias'
+  },
+  {
+    label: '所在目录',
+    prop: 'catalogId'
+  },
+  {
+    label: '课程类型',
+    prop: 'type',
+
+    slot: true
+  },
+  {
+    label: '通过条件',
+    prop: 'passCondition',
+
+    slot: true
+  },
+  {
+    label: '选修类型',
+    prop: 'electiveType',
+    slot: true
+  },
+
+  {
+    label: '标签',
+    prop: 'a',
+    slot: true
+  },
+  {
+    label: '是否推荐',
+    prop: 'isRecommend',
+    slot: true
+  },
+  {
+    label: '创建人',
+    prop: 'createName'
+  },
+  {
+    label: '更新时间',
+    prop: 'b'
+  }
+]
+const TABLE_CONFIG = {
+  handlerColumn: {
+    width: 200
+  },
+  enableMultiSelect: true,
+  enablePagination: true,
+  showHandler: true,
+  showIndexColumn: false,
+
+  // 树形结构懒加载
+  lazy: true,
+  load: async (row, treeNode, resolve) => {
+    try {
+      let items = await getMenuInfo(row.menuId)
+      resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
+    } catch (err) {
+      resolve([])
     }
   },
+  rowKey: 'menuId',
+  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+}
+const TABLE_PAGE_CONFIG = {}
+
+// 搜索配置
+const SEARCH_POPOVER_REQUIRE_OPTIONS = [
+  {
+    config: { placeholder: '请输入目录名称搜索' },
+    data: '',
+    field: 'name',
+    label: '',
+    type: 'input'
+  }
+]
+const SEARCH_POPOVER_POPOVER_OPTIONS = [
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'code',
+    label: '状态',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'teacherId',
+    label: '讲师',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'catalogId',
+    label: '所在目录',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'type',
+    label: '课程类型',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'passCondition',
+    label: '通过条件',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'electiveType',
+    label: '选修类型',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'isRecommend',
+    label: '是否推荐',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'createId',
+    label: '创建人',
+    type: 'select'
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'label',
+    label: '标签',
+    type: 'select'
+  }
+]
+const SEARCH_POPOVER_CONFIG = {
+  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
+  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
+}
+export default {
+  name: 'Menu',
+  // 搜索组件
+  components: {
+    SeachPopover: () => import('@/components/searchPopOver')
+  },
+  filters: {
+    // 过滤不可见的列
+    columnsFilter: (visibleColProps) =>
+      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+  },
+
   data() {
     return {
       // Dialog无数据
       dialogVisible: false,
       // 导航
-      isSelect: 2,
+      status: 2,
       // 表格
       query: {
         name: ''
       },
-      loading: false,
       page: {
         currentPage: 1,
         size: 10,
         total: 0
       },
-      tableConfig: {
-        showHandler: true,
-        enableMultiSelect: true,
-        enablePagination: true,
-        showIndexColumn: false,
-        rowKey: 'userId',
-        handlerColumn: {
-          width: '180'
-        }
-      },
-      columns: [
-        {
-          label: '序号',
-          prop: 'index',
-          width: '70',
-          slot: true
-        },
+      // tableConfig: {
+      //   showHandler: true,
+      //   enableMultiSelect: true,
+      //   enablePagination: true,
+      //   showIndexColumn: false,
+      //   rowKey: 'userId',
+      //   handlerColumn: {
+      //     width: '180'
+      //   }
+      // },
 
+      // 默认选中所有列
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      searchPopoverConfig: SEARCH_POPOVER_CONFIG,
+      // query: {},
+      tableColumns: TABLE_COLUMNS,
+      tableConfig: TABLE_CONFIG,
+      tableData: [
         {
-          label: '课程名称',
-          prop: 'name',
-          slot: true
+          isRecommend: 1,
+          passCondition: 'c',
+          catalogId: 4,
+          teacherId: 4,
+          isTop: 1,
+          createId: 4,
+          name: 'dd',
+          electiveType: 2,
+          id: 4,
+          type: 2,
+          createName: '小红'
         },
         {
-          label: '讲师',
-          prop: 'teacherId'
-        },
-        {
-          label: '所在目录',
-          prop: 'catalogId'
-        },
-        {
-          label: '课程类型',
-          prop: 'type',
-          slot: true
-        },
-        {
-          label: '通过条件',
-          prop: 'passCondition',
-          slot: true
-        },
-        {
-          label: '选修类型',
-          prop: 'electiveType',
-          slot: true
-        },
-        {
-          label: '创建人',
-          prop: 'createName'
+          isRecommend: 1, //是否推荐课程（0:否；1：是）
+          passCondition: 'a', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
+          catalogId: 1, //	课程目录id
+          teacherId: 1, //课程讲师id
+          isTop: 0, //是否置顶（0：否；1：是）
+          createId: 1, //创建人账号
+          name: 'aa', //	课程名称
+          electiveType: 1, //选修类型(1:开放选修 2:通过审批 3:禁止选修)
+          id: 1, //	主键id
+          type: 1, //课程类型(1:在线 2:面授 3:直播)
+          createName: '初始用户' //创建人
         }
       ],
-      // 表格数据
-      draftData: [
-        {
-          isRecommend: 1, //是否推荐课程
-          passCondition: 'c', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
-          catalogId: 4, //课程目录id
-          teacherId: 4, //	课程讲师id
-          isTop: 1, //是否置顶
-          createId: 4, //创建人账号
-          name: 'dd', //课程名称
-          electiveType: 2, //选修类型
-          id: 4, //主键id
-          type: 2, //	课程类型(1:在线 2:面授 3:直播)
-          createName: '小红' //创建人
-        },
-        {
-          isRecommend: 1, //是否推荐课程
-          passCondition: 'c', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
-          catalogId: 4, //课程目录id
-          teacherId: 4, //	课程讲师id
-          isTop: 1, //是否置顶
-          createId: 4, //创建人账号
-          name: 'dd', //课程名称
-          electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修)
-          id: 4, //主键id
-          type: 2, //	课程类型(1:在线 2:面授 3:直播)
-          createName: '小红' //创建人
-        }
-      ],
-      editVisible: false,
-      editingUser: {}
+      tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
   watch: {
@@ -327,74 +508,66 @@ export default {
     }
   },
   created() {
+    this.refreshTableData()
     this.loadData()
-    // this.getInfo()
-    // console.log(this.draftData)
+    this.getInfo()
   },
   activated() {
     this.loadData()
   },
   methods: {
+    //  处理页码改变
+    handleCurrentPageChange() {
+      this.getInfo()
+    },
+    handlePageSizeChange() {
+      this.getInfo()
+    },
+
+    handleSearch(searchParams) {
+      this.loadTableData(_.pickBy(searchParams))
+    },
+
+    handleRemoveItems(selection) {
+      this.$confirm('确定将选择数据删除?', {
+        type: 'warning'
+      })
+        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
+        .then(() => {
+          // 删除完成后更新视图
+          this.$refs.table.clearSelection()
+          this.refreshTableData()
+        })
+    },
+
+    // 刷新列表数据
+    refreshTableData() {},
+
     // 拿数据
     getInfo() {
-      getCourseList(1).then((res) => {
-        // this.data= res
-        window.console.log('1--------------', res)
+      // currentPage	当前页	body	true
+      // size	页面显示数量	body	true
+      // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
+      // courseName	课程名称	body	false
+      let params = {
+        currentPage: '',
+        size: '',
+        status: '',
+        courseName: ''
+      }
+      params = { ...this.page }
+      params.status = this.status
+      getCourseListData(params).then((res) => {
+        this.tableData = res
       })
-      // console.log('2--------------',this.data);
     },
-    // Dialog无数据
-    handleClose() {},
-
     // 导航
     showSelect(index) {
       this.isSelect = index
     },
 
     // 以下都是表格
-    searchLoadData: _.debounce(function() {
-      this.loadData()
-    }, 500),
-    // 编辑
-    handleEditRole(user) {
-      this.$refs['userRoleEdit'].init(user)
-    },
-    currentChange(currentPage) {
-      this.page.currentPage = currentPage
-      this.loadData()
-    },
-    sizeChange(pageSize) {
-      this.page.size = pageSize
-      this.loadData()
-    },
-    handleReset(data) {
-      let ids
-      if (Array.isArray(data)) {
-        ids = data.map((item) => item.userId).join(',')
-      } else {
-        ids = data.userId
-      }
-      this.$confirm('确定将选择账号密码重置为123456?', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.resetPwd(ids, data)
-        })
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
-        })
-    },
-    resetPwd(ids, data) {
-      resetPwd(ids).then(() => {
-        Array.isArray(data) ? (data.length = 0) : ''
-        this.loadData()
-      })
-    },
+
     loadData() {
       this.loading = true
       getOrgUserList({
@@ -417,6 +590,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#isdialog_show {
+  width: 100%;
+  height: 100px;
+  background-color: #6b6b6b;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 20px;
+  color: #fff;
+  position: relative;
+  span {
+    color: #a0b5fd;
+  }
+  i {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 22px;
+  }
+}
 .addUser {
   font-size: 14px;
   display: inline-block;
@@ -573,4 +765,73 @@ export default {
     padding-left: 15px;
   }
 }
+</style>
+<style lang="sass" scoped>
+
+/deep/.el-input
+  width: 100%
+/deep/.el-select
+  width: 100%
+/deep/.el-input
+
+.operations__btns
+    color: #acb3b8
+    display: flex;
+.text_refresh
+    color: #acb3b8
+    margin-right: 20px
+$color_icon: #A0A8AE
+
+.basic-container--block
+  height: calc(100% - 92px)
+  min-height: calc(100% - 92px)
+.operations
+  align-items: center
+  display: flex
+  justify-content: space-between
+  &__column--item
+    height: 25px
+  &__column--visible
+    height: 200px
+    overflow: scroll
+  &__btns
+    align-items: center
+    display: flex
+    height: 24px
+    justify-content: flex-start
+  &__btns--item
+    margin: 0
+    margin-right: 4px
+    padding: 0
+    height: 24px
+    width: 24px
+    line-height: 24px
+    &:last-child
+      margin: 0
+    // margin-bottom: 8px
+    // margin-right: 8px
+  .iconfont
+    color: $color_icon
+    font-weight: bold
+    font-size: 16px
+
+.Menu
+  // 添加一个分隔号 "｜"
+  .table__handler
+    display: flex
+    justify-content: flex-end
+    > .el-button--text
+      text-align: center
+      padding: 0 8px
+      margin-left: 0px
+      position: relative
+      &:not(:last-child)::after
+        background-color: #e3e7e9
+        content: ''
+        height: 10px
+        position: absolute
+        right: 0
+        top: 50%
+        transform: translateY(-50%)
+        width: 1px
 </style>

@@ -5,7 +5,7 @@
         slot="rightMenu"
         size="medium"
         type="primary"
-        @click="handleMenuAddBtnClick"
+        @click="dialogFormVisible = true"
       >
         新建目录
       </el-button>
@@ -102,49 +102,192 @@
           <i :class="_.get(row, 'icon', '')" />
         </template>
 
-        <template #handler="{row}">
-          <div class="table__handler">
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleMenuItemAddBtnClick(row)"
-            >
-              停用
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleMenuEditBtnClick(row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleRemoveItems([row])"
-            >
-              删除
-            </el-button>
-          </div>
+        <template
+          slot="handler"
+          slot-scope="scope"
+        >
+          <el-button
+            type="text"
+            size="medium"
+            @click.stop="handleConfig(scope.row, scope.index)"
+          >
+            停用
+          </el-button>
+          <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+          <el-button
+            type="text"
+            size="medium"
+            @click="dialogVisible = true"
+          >
+            权限配置
+          </el-button>
+          <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+          <el-dropdown
+            trigger="hover"
+            style="color: #a0a8ae;"
+            @command="handleCommand($event, scope.row)"
+          >
+            <span class="el-dropdown-link">
+              <i class="el-icon-more" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="edit">
+                编辑
+              </el-dropdown-item>
+              <el-dropdown-item command="del">
+                删除
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </template>
       </common-table>
     </basic-container>
 
-    <!-- 添加/编辑 菜单弹窗 -->
-    <menu-edit
-      ref="menuEdit"
-      :visible.sync="menuEditVisible"
-      v-on="{
-        submitAdd: (query) => handleMenuEditSubmit({ query, type: 'add' }),
-        submitAddItem: (query) => handleMenuEditSubmit({ query, type: 'addItem' }),
-        submitEdit: (query) => handleMenuEditSubmit({ query, type: 'edit' })
-      }"
-    />
+    <!-- 新建目录dialog -->
+
+    <el-dialog
+      id="my_dialog"
+      title="收货地址"
+      :visible.sync="dialogFormVisible"
+      :modal-append-to-body="false"
+      width="30%"
+    >
+      <el-form :model="form">
+        <el-form-item
+          label="活动名称"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.name"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="活动区域"
+          :label-width="formLabelWidth"
+        >
+          <el-select
+            v-model="form.region"
+            placeholder="请选择活动区域"
+          >
+            <el-option
+              label="区域一"
+              value="shanghai"
+            ></el-option>
+            <el-option
+              label="区域二"
+              value="beijing"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="dialogFormVisible = false"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 权限配置dialog -->
+    <el-dialog
+      title="请选择管理者"
+      :visible.sync="dialogVisible"
+      width="70%"
+      :modal-append-to-body="false"
+    >
+      <div class="jurisdiction_dialog_box">
+        <div class="box_title">
+          <div class="box_title_i">
+            已选 :
+          </div>
+          <div class="box_title_i">
+            未选 :
+          </div>
+        </div>
+        <div class="box_con">
+          <div class="box_con_i">
+            <el-tabs
+              v-model="activeName"
+              @tab-click="handleClick"
+            >
+              <el-tab-pane
+                label="组织架构"
+                name="first"
+              >
+                <div class="box_con_i_pane">
+                  <el-input
+                    v-model="filterText"
+                    placeholder="输入关键字进行过滤"
+                    suffix-icon="el-icon-search"
+                  >
+                  </el-input>
+
+                  <el-tree
+                    ref="tree"
+                    class="filter-tree"
+                    :data="data"
+                    :props="defaultProps"
+                    default-expand-all
+                    :filter-node-method="filterNode"
+                    show-checkbox
+                    highlight-current
+                    node-key="id"
+                    @check="getNodeKey(data)"
+                  >
+                  </el-tree>
+                </div>
+              </el-tab-pane>
+              <el-tab-pane
+                label="角色"
+                name="second"
+              >
+                角色
+              </el-tab-pane>
+            </el-tabs>
+          </div>
+
+          <div class="box_con_i">
+            <div class="box_con_i_list">
+              <span
+                v-for="(item, index) in nodeKeyList"
+                :key="item.id"
+                class="nodekeylist"
+              >{{ item.label }} &nbsp; &nbsp;
+                <i
+                  class="el-icon-close"
+                  @click="deleteNodekeylist(index)"
+                ></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
+import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -239,7 +382,6 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   name: 'Menu',
   components: {
-    MenuEdit: () => import('./components/courseEdit'),
     SeachPopover: () => import('@/components/searchPopOver')
   },
   filters: {
@@ -249,9 +391,82 @@ export default {
   },
   data() {
     return {
+      // 权限配置dialog
+      nodeKeyList: '',
+      dialogVisible: false,
+      activeName: 'first',
+      filterText: '',
+      data: [
+        {
+          id: 1,
+          label: '一级 1',
+          children: [
+            {
+              id: 4,
+              label: '二级 1-1',
+              children: [
+                {
+                  id: 9,
+                  label: '三级 1-1-1'
+                },
+                {
+                  id: 10,
+                  label: '三级 1-1-2'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: '一级 2',
+          children: [
+            {
+              id: 5,
+              label: '二级 2-1'
+            },
+            {
+              id: 6,
+              label: '二级 2-2'
+            }
+          ]
+        },
+        {
+          id: 3,
+          label: '一级 3',
+          children: [
+            {
+              id: 7,
+              label: '二级 3-1'
+            },
+            {
+              id: 8,
+              label: '二级 3-2'
+            }
+          ]
+        }
+      ],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
+
+      // 新建目录dialog
+      dialogFormVisible: false,
+      form: {
+        name: '',
+        region: '',
+        date1: '',
+        date2: '',
+        delivery: false,
+        type: [],
+        resource: '',
+        desc: ''
+      },
+      formLabelWidth: '120px',
+
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      menuEditVisible: false,
       parentId: '0',
       page: {
         currentPage: 1,
@@ -267,10 +482,34 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  // 权限配置dialog
+  watch: {
+    filterText(val) {
+      this.$refs.tree.filter(val)
+    }
+  },
   created() {
     this.refreshTableData()
   },
   methods: {
+    // 权限配置dialog
+    deleteNodekeylist(index) {
+      // console.log(index)
+      this.nodeKeyList.splice(index, 1)
+    },
+    getNodeKey() {
+      // console.log('------',data);
+      this.nodeKeyList = this.$refs.tree.getCheckedNodes(true)
+      // console.log(this.nodeKeyList)
+    },
+    handleClick() {
+      // console.log(tab, event)
+    },
+    filterNode(value, data) {
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
+    },
+
     handleSearch(searchParams) {
       this.loadTableData(_.pickBy(searchParams))
     },
@@ -286,47 +525,13 @@ export default {
           this.refreshTableData()
         })
     },
-    // 新建按钮
-    handleMenuAddBtnClick() {
-      this.$refs.menuEdit.init()
-    },
     // 停用按钮
-    handleMenuItemAddBtnClick({ menuId }) {
-      this.$refs.menuEdit.init({ parentId: menuId })
-    },
+    handleMenuItemAddBtnClick() {},
 
     // 编辑按钮
-    handleMenuEditBtnClick(row) {
-      this.$refs.menuEdit.init(row)
-    },
+    handleMenuEditBtnClick() {},
 
     // 表单弹窗提交
-    handleMenuEditSubmit({ query, type }) {
-      const menuEdit = this.$refs.menuEdit
-      let api = null
-      switch (type) {
-        case 'add': // 与case "addItem": 处理相同
-        case 'addItem':
-          api = postMenuInfo
-          break
-        case 'edit':
-          api = putMenuInfo
-          break
-        default:
-          return
-      }
-      menuEdit.loading = true
-      api(_.set(query, 'status', true))
-        .then(() => {
-          this.$message.success('操作成功!')
-          this.refreshTableData()
-          this.$refs.menuEdit.close()
-        })
-        .catch((err) => {
-          window.console.log(err)
-        })
-        .finally(() => (menuEdit.loading = false))
-    },
 
     // 刷新列表数据
     refreshTableData() {
@@ -359,7 +564,55 @@ export default {
 }
 </script>
 
+<style lang="scss" scoped>
+.jurisdiction_dialog_box {
+  width: 100%;
+  .box_title {
+    display: flex;
+    .box_title_i {
+      width: 50%;
+      height: 45px;
+      line-height: 45px;
+      box-sizing: border-box;
+      padding-left: 10px;
+      border: 1px solid #ccc;
+    }
+  }
+  .box_con {
+    display: flex;
+    .box_con_i {
+      width: 50%;
+      border: 1px solid #ccc;
+      /deep/.el-tabs__item {
+        padding-left: 90px;
+      }
+      .box_con_i_pane {
+        padding: 25px;
+      }
+      .box_con_i_list {
+        padding: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        .nodekeylist {
+          padding: 5px;
+          background-color: #cdcdcd;
+          margin: 10px;
+          border-radius: 3px;
+        }
+      }
+    }
+  }
+}
+</style>
+
 <style lang="sass" scoped>
+
+/deep/.el-input
+  width: 100%
+/deep/.el-select
+  width: 100%
+/deep/.el-input
+
 .operations__btns
     color: #acb3b8
     display: flex;
