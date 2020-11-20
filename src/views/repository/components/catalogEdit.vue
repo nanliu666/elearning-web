@@ -17,10 +17,10 @@
     >
       <el-form-item
         label="目录名称"
-        prop="orgName"
+        prop="name"
       >
         <el-input
-          v-model.trim="form.orgName"
+          v-model.trim="form.name"
           placeholder="请输入"
         />
       </el-form-item>
@@ -38,7 +38,7 @@
               v-for="(item1, k) in leaderList"
               :key="k"
               :label="item1.name !== '空缺' ? item1.name + '（' + item1.workNo + '）' : item1.name"
-              :value="item1.userId"
+              :value="item1.id"
             />
             <div
               v-show="loadLeader"
@@ -93,8 +93,11 @@
 </template>
 
 <script>
-import { getOrgTreeSimple, editOrg, createOrg, getUserWorkList } from '@/api/org/org'
-
+import {
+  updateKnowledgeCatalog,
+  addKnowledgeCatalog,
+  getKnowledgeCatalogList
+} from '@/api/knowledge/knowledge'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -117,7 +120,7 @@ export default {
       },
       parentOrgIdLabel: '',
       rules: {
-        orgName: [{ required: true, message: '请输入目录名称', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入目录名称', trigger: 'blur' }]
       },
       orgTree: [],
       leaderList: [],
@@ -129,26 +132,26 @@ export default {
   },
   created() {
     this.loadOrgTree()
-    getUserWorkList({ pageNo: this.leaderPageNo, pageSize: 1000 }).then((res) => {
-      this.leaderList = res.data
-      this.leaderList.splice(0, 0, {
-        userId: '',
-        name: '空缺',
-        workNo: ''
-      })
-      this.leaderPageNo += 1
+    getKnowledgeCatalogList().then((res) => {
+      this.leaderList = res
+      // this.leaderList.splice(0, 0, {
+      //   userId: '',
+      //   name: '空缺',
+      //   workNo: ''
+      // })
+      // this.leaderPageNo += 1
     })
   },
   methods: {
     loadOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      getKnowledgeCatalogList().then((res) => {
         this.orgTree = res
       })
     },
     loadMoreLeader() {
       if (this.loadLeader || this.noMoreLeader) return
       this.loadLeader = true
-      getUserWorkList({ pageNo: this.leaderPageNo, pageSize: 100 }).then((res) => {
+      getKnowledgeCatalogList({ pageNo: this.leaderPageNo, pageSize: 100 }).then((res) => {
         if (res.data.length > 0) {
           this.leaderList.push(...res.data)
           this.leaderPageNo += 1
@@ -174,7 +177,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            createOrg(this.form)
+            addKnowledgeCatalog(this.form)
               .then(() => {
                 this.$message.success('创建成功')
                 this.$emit('refresh')
@@ -186,7 +189,7 @@ export default {
               })
           } else {
             this.loading = true
-            editOrg(this.form)
+            updateKnowledgeCatalog(this.form)
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
@@ -231,7 +234,7 @@ export default {
         this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       }
       this.form = JSON.parse(JSON.stringify(row))
-      this.parentOrgIdLabel = this.findOrg(row.parentOrgId).orgName
+      this.parentOrgIdLabel = this.findOrg(row.parentOrgId).name
       this.form.parentOrgType = this.findOrg(row.parentOrgId).orgType
       this.loadRadio(true)
       this.$emit('changevisible', true)
@@ -314,7 +317,7 @@ export default {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.form.parentOrgId = data.orgId
-        this.parentOrgIdLabel = data.orgName
+        this.parentOrgIdLabel = data.name
         this.form.parentOrgType = data.orgType
         this.loadRadio()
         if (this.type !== 'createChild') this.$refs.parentOrgId && this.$refs.parentOrgId.blur()

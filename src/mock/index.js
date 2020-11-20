@@ -25,6 +25,7 @@ import taskcenter from './modules/taskcenter'
 import todo from './modules/todo'
 import transction from './modules/transction'
 import user from './modules/user'
+import knowledge from './modules/knowledge'
 /**
  * @param {boolean} enable 全局启用mock
  * @returns {void}
@@ -43,6 +44,7 @@ export default (enable) => {
     timeout: 500
   })
   menu({ mock: true })
+  knowledge({ mock: true })
   newsCenter(options)
   noticeCenter(options)
   user(options)

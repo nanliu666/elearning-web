@@ -10,7 +10,7 @@
           v-loading="loading"
           :data="data"
           node-key="orgId"
-          :props="{ label: 'orgName' }"
+          :props="{ label: 'name' }"
           default-expand-all
           draggable
           :allow-drop="allowDrop"
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { getOrgTree, sortOrgTree } from '@/api/org/org'
+import { getKnowledgeCatalogList, sortSaveKnowledgeCatalog } from '@/api/knowledge/knowledge'
 
 export default {
   name: 'OrgSort',
@@ -47,9 +47,6 @@ export default {
       loading: true,
       sameNameMessage: false
     }
-  },
-  created() {
-    this.getOrgTree()
   },
   activated() {
     this.getOrgTree()
@@ -113,9 +110,9 @@ export default {
       return org
     },
     getOrgTree() {
-      getOrgTree({ parentOrgId: 0 }).then((res) => {
+      getKnowledgeCatalogList().then((res) => {
         this.data = res
-        this.oldData = JSON.parse(JSON.stringify(res))
+        this.oldData = _.cloneDeep(res)
         this.loading = false
       })
     },
@@ -137,11 +134,10 @@ export default {
     },
     onSubmit() {
       this.loadSort(this.data)
-      // { orgs: this.data }
       this.loading = true
-      sortOrgTree(this.data).then(() => {
+      sortSaveKnowledgeCatalog(this.data).then(() => {
         this.$message.success('保存成功')
-        getOrgTree({ parentOrgId: 0 }).then((res) => {
+        getKnowledgeCatalogList().then((res) => {
           this.data = res
           this.loading = false
         })
