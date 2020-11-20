@@ -28,7 +28,7 @@
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
         >
-          置顶
+          {{ row.topTime ? '已置顶' : '置顶' }}
         </el-button>
 
         <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真) -->
@@ -242,15 +242,15 @@ export default {
       })
     },
     // toggle isTop handler
-    handleTopItemBtnClick({ id, isTop, title }) {
-      const ACTION_NAME = isTop ? '取消置顶' : '置顶'
+    handleTopItemBtnClick({ id, topTime, title }) {
+      const ACTION_NAME = topTime ? '取消置顶' : '置顶'
       this.$confirm(`确认${ACTION_NAME}标题为《${title}》的新闻吗？`, {
         title: `是否${ACTION_NAME}新闻`,
         type: 'info'
       }).then(async () => {
         try {
           this.tableLoading = true
-          await postNewsTop({ id, isTop: isTop ^ 1 })
+          await postNewsTop({ id, isTop: topTime ? 0 : 1 })
           this.$message.success(ACTION_NAME + '成功')
         } catch (error) {
           this.$message.error(error.message)
