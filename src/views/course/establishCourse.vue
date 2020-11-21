@@ -585,15 +585,25 @@ export default {
     },
     // 发布&草稿
     addCourse(status) {
-      this.ruleForm.status = status
-      addCourse(this.ruleForm).then((res) => {
-        window.console.log(res)
-        this.$message({
-          message: '发送成功！！！',
-          type: 'success'
-        })
+      this.$refs.ruleForm.validate((valid) => {
+        if (!valid) {
+          this.$message({
+            message: '信息填写不完整',
+            type: 'warning'
+          })
+        } else {
+          this.ruleForm.status = status
+          addCourse(this.ruleForm).then((res) => {
+            window.console.log(res)
+            this.$message({
+              message: '发送成功！！！',
+              type: 'success'
+            })
+          })
+        }
       })
     },
+
     // 删除
     delContent(id) {
       delCourseContent(id)

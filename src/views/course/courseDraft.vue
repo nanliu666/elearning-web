@@ -35,11 +35,11 @@
       <div class="select_bar">
         <span
           :class="{ select: status === 1 }"
-          @click="status = 1"
+          @click="showSelect(1)"
         >已发布</span>
         <span
           :class="{ select: status === 2 }"
-          @click="status = 2"
+          @click="showSelect(2)"
         >草稿</span>
       </div>
 
@@ -154,12 +154,12 @@
             </template>
             <!-- 课程类型 -->
             <template
-              slot="type"
+              slot="courseType"
               slot-scope="{ row }"
             >
-              <span v-if="row.type === 1">在线课程</span>
-              <span v-if="row.type === 2">面授课程</span>
-              <span v-if="row.type === 3">直播课程</span>
+              <span v-if="row.courseType === 1">在线课程</span>
+              <span v-if="row.courseType === 2">面授课程</span>
+              <span v-if="row.courseType === 3">直播课程</span>
             </template>
             <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
             <template
@@ -232,7 +232,7 @@
                   <el-dropdown-item command="del">
                     删除
                   </el-dropdown-item>
-                  <el-dropdown-item command="del">
+                  <el-dropdown-item command="move">
                     移动
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -247,8 +247,7 @@
 
 <script>
 import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
-import { getOrgUserList } from '@/api/system/user'
-import { getCourseListData } from '@/api/course/course'
+import { getCourseListData, delCourseInfo } from '@/api/course/course'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -260,7 +259,7 @@ const TABLE_COLUMNS = [
   {
     label: '目录名称',
     minWidth: 140,
-    prop: 'name',
+    prop: 'catalogName',
     slot: true
   },
   {
@@ -277,8 +276,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '课程类型',
-    prop: 'type',
-
+    prop: 'courseType',
     slot: true
   },
   {
@@ -309,7 +307,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '更新时间',
-    prop: 'b'
+    prop: 'updateTime'
   }
 ]
 const TABLE_CONFIG = {
@@ -491,36 +489,73 @@ export default {
     }
   },
   watch: {
-    isSelect(newVal) {
-      if (newVal === 1) {
-        this.dialogVisible = true
-      } else {
-        this.dialogVisible = false
-      }
-    },
-    activeOrg: function() {
-      this.page = {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      }
-      this.loadData()
-    }
+    // isSelect(newVal) {
+    //   if (newVal === 1) {
+    //     this.dialogVisible = true
+    //   } else {
+    //     this.dialogVisible = false
+    //   }
+    // },
+    // activeOrg: function() {
+    //   this.page = {
+    //     currentPage: 1,
+    //     size: 10,
+    //     total: 0
+    //   }
+    //   // this.loadData()
+    // this.getInfo()
+    // }
   },
   created() {
     this.refreshTableData()
-    this.loadData()
+    // this.loadData()
     this.getInfo()
   },
   activated() {
-    this.loadData()
+    // this.loadData()
+    this.getInfo()
   },
   methods: {
+    // 编辑&删除&移动
+    handleCommand(e, row) {
+      window.console.log(row)
+      if (e === 'edit') {
+        // 编辑
+      }
+      if (e === 'del') {
+        // 删除
+        this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            delCourseInfo({ courseId: row.catalogId }).then(() => {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+            })
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+      }
+      if (e === 'move') {
+        // 移动
+      }
+    },
     //  处理页码改变
-    handleCurrentPageChange() {
+    handleCurrentPageChange(param) {
+      this.page.currentPage = param
       this.getInfo()
     },
-    handlePageSizeChange() {
+    handlePageSizeChange(param) {
+      window.console.log(param)
+      this.page.size = param
       this.getInfo()
     },
 
@@ -559,32 +594,34 @@ export default {
       params.status = this.status
       getCourseListData(params).then((res) => {
         this.tableData = res
+        window.console.log(this.tableData)
       })
     },
     // 导航
     showSelect(index) {
-      this.isSelect = index
-    },
+      this.status = index
+      this.getInfo()
+    }
 
     // 以下都是表格
 
-    loadData() {
-      this.loading = true
-      getOrgUserList({
-        pageNo: this.page.currentPage,
-        pageSize: this.page.size,
-        orgId: this.activeOrg ? this.activeOrg.orgId : '0',
-        search: this.query.name
-      })
-        .then((res) => {
-          this.page.total = res.totalNum
-          this.data = res.data
-          // this.selectionClear()
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    }
+    // loadData() {
+    //   this.loading = true
+    //   getOrgUserList({
+    //     pageNo: this.page.currentPage,
+    //     pageSize: this.page.size,
+    //     orgId: this.activeOrg ? this.activeOrg.orgId : '0',
+    //     search: this.query.name
+    //   })
+    //     .then((res) => {
+    //       this.page.total = res.totalNum
+    //       this.data = res.data
+    //       // this.selectionClear()
+    //     })
+    //     .finally(() => {
+    //       this.loading = false
+    //     })
+    // }
   }
 }
 </script>

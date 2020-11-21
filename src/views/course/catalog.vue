@@ -19,6 +19,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
+        row-key="id"
       >
         <template #topMenu>
           <div class="operations">
@@ -147,38 +148,31 @@
 
     <el-dialog
       id="my_dialog"
-      title="收货地址"
+      title="新建目录"
       :visible.sync="dialogFormVisible"
       :modal-append-to-body="false"
       width="30%"
     >
-      <el-form :model="form">
+      <el-form :model="newForm">
         <el-form-item
-          label="活动名称"
+          label="目录名称"
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="form.name"
+            v-model="newForm.newName"
             autocomplete="off"
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="活动区域"
+          label="上级目录"
           :label-width="formLabelWidth"
         >
-          <el-select
-            v-model="form.region"
-            placeholder="请选择活动区域"
-          >
-            <el-option
-              label="区域一"
-              value="shanghai"
-            ></el-option>
-            <el-option
-              label="区域二"
-              value="beijing"
-            ></el-option>
-          </el-select>
+          <el-cascader
+            v-model="newForm.newValue"
+            :options="tableData"
+            :props="{ label: 'name', value: 'id' }"
+            :show-all-levels="false"
+          ></el-cascader>
         </el-form-item>
       </el-form>
       <div
@@ -190,7 +184,54 @@
         </el-button>
         <el-button
           type="primary"
-          @click="dialogFormVisible = false"
+          @click="newCatalogue"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 编辑目录dialog -->
+
+    <el-dialog
+      id="my_dialog"
+      title="编辑目录"
+      :visible.sync="compileDialogFormVisible"
+      :modal-append-to-body="false"
+      width="30%"
+    >
+      <el-form :model="newForm">
+        <el-form-item
+          label="目录名称"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="newForm.newName"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="上级目录"
+          :label-width="formLabelWidth"
+        >
+          <el-cascader
+            v-model="newForm.newValue"
+            :options="tableData"
+            :props="{ label: 'name', value: 'id' }"
+            :show-all-levels="false"
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="compileDialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="compileCatalogue"
         >
           确 定
         </el-button>
@@ -287,7 +328,8 @@
 </template>
 
 <script>
-import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
+import { deleteMenuInfo } from '@/api/system/menu'
+import { getCatalog, addCatalog, delCatalag, editCatalog } from '@/api/course/course'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -310,17 +352,17 @@ const TABLE_COLUMNS = [
       return text
     },
     label: '状态',
-    prop: 'isShow',
+    prop: 'status',
     width: 300
   },
   {
     label: '创建人',
-    prop: 'code',
+    prop: 'createName',
     width: 300
   },
   {
     label: '更新时间',
-    prop: 'alias',
+    prop: 'updateTime',
     width: 300
   }
 ]
@@ -332,18 +374,17 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
     try {
-      let items = await getMenuInfo(row.menuId)
+      let items = await getCatalog(row.id)
       resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
     } catch (err) {
       resolve([])
     }
   },
-  rowKey: 'menuId',
+  rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 const TABLE_PAGE_CONFIG = {}
@@ -362,7 +403,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'code',
+    field: 'status',
     label: '状态',
     type: 'select'
   },
@@ -453,17 +494,13 @@ export default {
 
       // 新建目录dialog
       dialogFormVisible: false,
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+      // 编辑目录dialog
+      compileDialogFormVisible: false,
+      newForm: {
+        newName: '',
+        newValue: ''
       },
-      formLabelWidth: '120px',
+      formLabelWidth: '70px',
 
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -477,7 +514,33 @@ export default {
       query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [],
+      tableData: [
+        {
+          children: [
+            {
+              children: [{}],
+              createId: 0,
+              createName: '',
+              createTime: '',
+              id: 0,
+              name: '',
+              parentId: 0,
+              sort: 0,
+              status: 0,
+              updateTime: ''
+            }
+          ],
+          createId: 0,
+          createName: '',
+          createTime: '',
+          id: 0,
+          name: '',
+          parentId: 0,
+          sort: 0,
+          status: 0,
+          updateTime: ''
+        }
+      ],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
     }
@@ -492,13 +555,88 @@ export default {
     this.refreshTableData()
   },
   methods: {
+    // 删除&编辑
+    handleCommand(e, row) {
+      if (e === 'del') {
+        // 删除
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            delCatalag({ catalogId: row.id }).then(() => {
+              this.$message({
+                message: '删除成功!!!',
+                type: 'success'
+              })
+            })
+            this.refreshTableData()
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+      }
+      if (e === 'edit') {
+        // 编辑
+        // editCatalog()
+        this.compileDialogFormVisible = true
+        this.newForm.newName = row.name
+        this.newForm.newValue = row.id
+      }
+    },
+    // 编辑
+    compileCatalogue() {
+      let params = {
+        name: this.newForm.newName,
+        parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
+      }
+      editCatalog(params).then(() => {
+        this.dialogFormVisible = false
+        this.refreshTableData()
+        this.newForm.newName = ''
+        this.newForm.newValue = []
+        this.$message({
+          message: '编辑目录成功!!!',
+          type: 'success'
+        })
+      })
+    },
+
+    //新建目录
+    newCatalogue() {
+      // let params = { ...this.tableData[0] }
+      // params.name = this.newForm.newName
+      // params.parentId = this.newForm.newValue[this.newForm.newValue.length - 1]
+      // params.id = +params.id
+      // params.parentId = +params.parentId
+      // window.console.log(params)
+      let params = {
+        name: this.newForm.newName,
+        parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
+      }
+      window.console.log(params)
+
+      addCatalog(params).then(() => {
+        this.dialogFormVisible = false
+        this.refreshTableData()
+        this.newForm.newName = ''
+        this.newForm.newValue = []
+        this.$message({
+          message: '新建目录成功!!!',
+          type: 'success'
+        })
+      })
+    },
+
     // 权限配置dialog
     deleteNodekeylist(index) {
-      // console.log(index)
       this.nodeKeyList.splice(index, 1)
     },
     getNodeKey() {
-      // console.log('------',data);
       this.nodeKeyList = this.$refs.tree.getCheckedNodes(true)
       // console.log(this.nodeKeyList)
     },
@@ -540,6 +678,21 @@ export default {
       this.loadTableData({ parentId: '0' })
     },
 
+    // 递归去除空children
+    getTreeData(data) {
+      // 循环遍历json数据
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].children.length < 1) {
+          // children若为空数组，则将children设为undefined
+          data[i].children = undefined
+        } else {
+          // children若不为空数组，则继续 递归调用 本方法
+          this.getTreeData(data[i].children)
+        }
+      }
+      return data
+    },
+
     // 加载表格数据
     async loadTableData(param = {}) {
       if (this.tableLoading) {
@@ -548,12 +701,11 @@ export default {
       this.tableLoading = true
       try {
         const query = _.assign(null, _.omit(param, 'parentId'))
-        const tableData = await getMenuInfo(param.parentId || '0', query)
-        this.tableData = _.map(tableData, (t) => ({
-          children: [],
-          hasChildren: true,
-          ...t
-        }))
+        const tableData = await getCatalog(param.parentId || '0', query)
+
+        this.tableData = this.getTreeData(tableData)
+
+        window.console.log('----------------------', this.tableData)
       } catch (error) {
         window.console.log(error)
       } finally {
@@ -565,6 +717,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/.el-input {
+  width: 280px !important;
+}
+
 .jurisdiction_dialog_box {
   width: 100%;
   .box_title {
