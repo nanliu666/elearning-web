@@ -52,6 +52,7 @@
 | cascader   | 级联选择器   |
 | treeSelect | 下拉树选择器 |
 | datePicker | 日期选择器   |
+| switch     | 开关         |
 | slot       | 自定义       |
 
 
