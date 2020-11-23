@@ -5,7 +5,7 @@
         slot="rightMenu"
         size="medium"
         type="primary"
-        @click="handleMenuAddBtnClick"
+        @click="dialogFormVisible = true"
       >
         新建目录
       </el-button>
@@ -19,6 +19,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
+        row-key="id"
       >
         <template #topMenu>
           <div class="operations">
@@ -27,40 +28,63 @@
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
             />
+
             <div class="operations__btns">
-              <div
-                class="search-sort-box"
-                @click="toSort"
+              <el-tooltip
+                class="operations__btns--tooltip"
+                content="刷新"
+                effect="dark"
+                placement="top"
+                style="color:#acb3b8;"
               >
-                <i class="el-icon-sort" />
-                <span class="sort-text">调整排序</span>
-              </div>
+                <el-button
+                  class="operations__btns--item"
+                  size="mini"
+                  icon="el-icon-refresh-right"
+                  type="text"
+                  @click="refreshTableData"
+                >
+                  <i class="iconfont iconicon_refresh" />
+                </el-button>
+              </el-tooltip>
+              <span class="text_refresh">刷新</span>
               <el-popover
                 placement="bottom"
                 width="40"
                 trigger="click"
-                style="margin-left:10px"
               >
-                <el-checkbox-group
-                  v-model="checkColumn"
-                  style="display: flex;flex-direction: column;"
-                  @change="columnChange"
-                >
-                  <el-checkbox
-                    v-for="item of tableColumns"
-                    :key="item.prop"
-                    :disabled="item.prop === 'name'"
-                    :label="item.prop"
-                    class="operations__column--item"
-                  >
-                    {{ item.label }}
-                  </el-checkbox>
-                </el-checkbox-group>
-                <i
+                <el-tooltip
                   slot="reference"
-                  class="el-icon-setting"
-                  style="cursor: pointer;"
-                />
+                  class="operations__btns--tooltip"
+                  content="显隐"
+                  effect="dark"
+                  placement="top"
+                >
+                  <el-button
+                    class="operations__btns--item"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-setting"
+                    style="color:#acb3b8;"
+                  >
+                    <i class="iconfont iconicon_setting" />
+                  </el-button>
+                </el-tooltip>
+
+                <!-- 设置表格列可见性 -->
+                <div class="operations__column--visible">
+                  <el-checkbox-group v-model="columnsVisible">
+                    <el-checkbox
+                      v-for="item of tableColumns"
+                      :key="item.prop"
+                      :disabled="item.prop === 'name'"
+                      :label="item.prop"
+                      class="operations__column--item"
+                    >
+                      {{ item.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
               </el-popover>
             </div>
           </div>
@@ -80,49 +104,245 @@
           <i :class="_.get(row, 'icon', '')" />
         </template>
 
-        <template #handler="{row}">
-          <div class="table__handler">
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleMenuItemAddBtnClick(row)"
-            >
-              停用
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleMenuEditBtnClick(row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              size="medium"
-              type="text"
-              @click.stop="() => handleRemoveItems([row])"
-            >
-              删除
-            </el-button>
-          </div>
+        <template
+          slot="handler"
+          slot-scope="scope"
+        >
+          <el-button
+            v-if="!scope.status"
+            type="text"
+            size="medium"
+            @click.stop="handlestatus(scope.row, 1)"
+          >
+            停用
+          </el-button>
+          <span
+            v-else
+            style="color:#ccc;"
+            @click.stop="handlestatus(scope.row, 0)"
+          >启用</span>
+          <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+          <el-button
+            type="text"
+            size="medium"
+            @click="dialogVisible = true"
+          >
+            权限配置
+          </el-button>
+          <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+          <el-dropdown
+            trigger="hover"
+            style="color: #a0a8ae;"
+            @command="handleCommand($event, scope.row)"
+          >
+            <span class="el-dropdown-link">
+              <i class="el-icon-more" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="edit">
+                编辑
+              </el-dropdown-item>
+              <el-dropdown-item command="del">
+                删除
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </template>
       </common-table>
     </basic-container>
 
-    <!-- 添加/编辑 菜单弹窗 -->
-    <menu-edit
-      ref="menuEdit"
-      :visible.sync="menuEditVisible"
-      v-on="{
-        submitAdd: (query) => handleMenuEditSubmit({ query, type: 'add' }),
-        submitAddItem: (query) => handleMenuEditSubmit({ query, type: 'addItem' }),
-        submitEdit: (query) => handleMenuEditSubmit({ query, type: 'edit' })
-      }"
-    />
+    <!-- 新建目录dialog -->
+
+    <el-dialog
+      id="my_dialog"
+      title="新建目录"
+      :visible.sync="dialogFormVisible"
+      :modal-append-to-body="false"
+      width="30%"
+    >
+      <el-form :model="newForm">
+        <el-form-item
+          label="目录名称"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="newForm.newName"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="上级目录"
+          :label-width="formLabelWidth"
+        >
+          <el-cascader
+            v-model="newForm.newValue"
+            :options="tableData"
+            :props="{ label: 'name', value: 'id' }"
+            :show-all-levels="false"
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="newCatalogue"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 编辑目录dialog -->
+
+    <el-dialog
+      id="my_dialog"
+      title="编辑目录"
+      :visible.sync="compileDialogFormVisible"
+      :modal-append-to-body="false"
+      width="30%"
+    >
+      <el-form :model="newForm">
+        <el-form-item
+          label="目录名称"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="newForm.newName"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="上级目录"
+          :label-width="formLabelWidth"
+        >
+          <el-cascader
+            v-model="newForm.newValue"
+            :options="tableData"
+            :props="{ label: 'name', value: 'id' }"
+            :show-all-levels="false"
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="compileDialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="compileCatalogue"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 权限配置dialog -->
+    <el-dialog
+      title="请选择管理者"
+      :visible.sync="dialogVisible"
+      width="70%"
+      :modal-append-to-body="false"
+    >
+      <div class="jurisdiction_dialog_box">
+        <div class="box_title">
+          <div class="box_title_i">
+            已选 :
+          </div>
+          <div class="box_title_i">
+            未选 :
+          </div>
+        </div>
+        <div class="box_con">
+          <div class="box_con_i">
+            <el-tabs
+              v-model="activeName"
+              @tab-click="handleClick"
+            >
+              <el-tab-pane
+                label="组织架构"
+                name="first"
+              >
+                <div class="box_con_i_pane">
+                  <el-input
+                    v-model="filterText"
+                    placeholder="输入关键字进行过滤"
+                    suffix-icon="el-icon-search"
+                  >
+                  </el-input>
+
+                  <el-tree
+                    ref="tree"
+                    class="filter-tree"
+                    :data="data"
+                    :props="defaultProps"
+                    default-expand-all
+                    :filter-node-method="filterNode"
+                    show-checkbox
+                    highlight-current
+                    node-key="id"
+                    @check="getNodeKey(data)"
+                  >
+                  </el-tree>
+                </div>
+              </el-tab-pane>
+              <el-tab-pane
+                label="角色"
+                name="second"
+              >
+                角色
+              </el-tab-pane>
+            </el-tabs>
+          </div>
+
+          <div class="box_con_i">
+            <div class="box_con_i_list">
+              <span
+                v-for="(item, index) in nodeKeyList"
+                :key="item.id"
+                class="nodekeylist"
+              >{{ item.label }} &nbsp; &nbsp;
+                <i
+                  class="el-icon-close"
+                  @click="deleteNodekeylist(index)"
+                ></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
+import { deleteMenuInfo } from '@/api/system/menu'
+import {
+  getCatalog,
+  addCatalog,
+  delCatalag,
+  editCatalog,
+  getCourseByCatalogId
+} from '@/api/course/course'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -145,17 +365,17 @@ const TABLE_COLUMNS = [
       return text
     },
     label: '状态',
-    prop: 'isShow',
+    prop: 'status',
     width: 300
   },
   {
     label: '创建人',
-    prop: 'code',
+    prop: 'createName',
     width: 300
   },
   {
     label: '更新时间',
-    prop: 'alias',
+    prop: 'updateTime',
     width: 300
   }
 ]
@@ -167,18 +387,17 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
     try {
-      let items = await getMenuInfo(row.menuId)
+      let items = await getCatalog(row.id)
       resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
-    } catch (err) {
+    } catch {
       resolve([])
     }
   },
-  rowKey: 'menuId',
+  rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 const TABLE_PAGE_CONFIG = {}
@@ -195,18 +414,23 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请选择状态' },
     data: '',
-    field: 'code',
+    field: 'status',
     label: '状态',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'alias',
+    field: 'createName',
     label: '创建人',
-    type: 'select'
+    type: 'cascader',
+    options: [{ value: '', label: '' }]
   }
 ]
 const SEARCH_POPOVER_CONFIG = {
@@ -217,7 +441,6 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   name: 'Menu',
   components: {
-    MenuEdit: () => import('./components/courseEdit'),
     SeachPopover: () => import('@/components/searchPopOver')
   },
   filters: {
@@ -227,19 +450,78 @@ export default {
   },
   data() {
     return {
-      checkColumn: [
-        'orgName',
-        'orgType',
-        'orgCode',
-        'leaders',
-        'jobNum',
-        'userNum',
-        'workNum',
-        'remark'
+      // 权限配置dialog
+      nodeKeyList: '',
+      dialogVisible: false,
+      activeName: 'first',
+      filterText: '',
+      data: [
+        {
+          id: 1,
+          label: '一级 1',
+          children: [
+            {
+              id: 4,
+              label: '二级 1-1',
+              children: [
+                {
+                  id: 9,
+                  label: '三级 1-1-1'
+                },
+                {
+                  id: 10,
+                  label: '三级 1-1-2'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: '一级 2',
+          children: [
+            {
+              id: 5,
+              label: '二级 2-1'
+            },
+            {
+              id: 6,
+              label: '二级 2-2'
+            }
+          ]
+        },
+        {
+          id: 3,
+          label: '一级 3',
+          children: [
+            {
+              id: 7,
+              label: '二级 3-1'
+            },
+            {
+              id: 8,
+              label: '二级 3-2'
+            }
+          ]
+        }
       ],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
+
+      // 新建目录dialog
+      dialogFormVisible: false,
+      // 编辑目录dialog
+      compileDialogFormVisible: false,
+      newForm: {
+        newName: '',
+        newValue: ''
+      },
+      formLabelWidth: '70px',
+
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      menuEditVisible: false,
       parentId: '0',
       page: {
         currentPage: 1,
@@ -250,23 +532,192 @@ export default {
       query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [],
+      tableData: [
+        {
+          children: [
+            {
+              children: [{}],
+              createId: 0,
+              createName: '',
+              createTime: '',
+              id: 0,
+              name: '',
+              parentId: 0,
+              sort: 0,
+              status: 0,
+              updateTime: ''
+            }
+          ],
+          createId: 0,
+          createName: '',
+          createTime: '',
+          id: 0,
+          name: '',
+          parentId: 0,
+          sort: 0,
+          status: 0,
+          updateTime: ''
+        }
+      ],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  // 权限配置dialog
+  watch: {
+    filterText(val) {
+      this.$refs.tree.filter(val)
+    }
+  },
   created() {
     this.refreshTableData()
+    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].value = this.tableData.id
+    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].label = this.tableData.createName
+    // window.console.log(SEARCH_POPOVER_POPOVER_OPTIONS)
   },
   methods: {
-    columnChange() {
-      this.option.column = TABLE_COLUMNS.filter((item) => {
-        return this.checkColumn.indexOf(item.prop) > -1
+    // 停用
+    handlestatus(row, i) {
+      editCatalog({ id: row.id, status: i }).then(() => {
+        this.loadTableData()
       })
     },
-    toSort() {},
-    handleSearch(searchParams) {
-      this.loadTableData(_.pickBy(searchParams))
+    // 删除&编辑
+    handleCommand(e, row) {
+      if (e === 'del') {
+        // 删除
+        getCourseByCatalogId({ catalogId: row.id })
+          .then(() => {
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(() => {
+                delCatalag({ catalogId: row.id }).then(() => {
+                  this.$message({
+                    message: '删除成功!!!',
+                    type: 'success'
+                  })
+                })
+                this.refreshTableData()
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          })
+          .catch(() => {
+            this.$confirm(
+              '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。您确定要删除选中的目录吗？',
+              '提示',
+              {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            )
+              .then(() => {
+                this.$confirm('此操作将永久删除该目录, 是否继续?', '提示', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning'
+                })
+                  .then(() => {
+                    delCatalag({ catalogId: row.id }).then(() => {
+                      this.$message({
+                        message: '删除成功!!!',
+                        type: 'success'
+                      })
+                    })
+                    this.refreshTableData()
+                  })
+                  .catch(() => {
+                    this.$message({
+                      type: 'info',
+                      message: '已取消删除'
+                    })
+                  })
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          })
+      }
+      if (e === 'edit') {
+        // 编辑
+        // editCatalog()
+        this.compileDialogFormVisible = true
+        this.newForm.newName = row.name
+        this.newForm.newValue = row.id
+      }
+    },
+    // 编辑
+    compileCatalogue() {
+      let params = {
+        name: this.newForm.newName,
+        parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
+      }
+      editCatalog(params).then(() => {
+        this.dialogFormVisible = false
+        this.refreshTableData()
+        this.newForm.newName = ''
+        this.newForm.newValue = []
+        this.$message({
+          message: '编辑目录成功!!!',
+          type: 'success'
+        })
+      })
+    },
+
+    //新建目录
+    newCatalogue() {
+      // let params = { ...this.tableData[0] }
+      // params.name = this.newForm.newName
+      // params.parentId = this.newForm.newValue[this.newForm.newValue.length - 1]
+      // params.id = +params.id
+      // params.parentId = +params.parentId
+      // window.console.log(params)
+      let params = {
+        name: this.newForm.newName,
+        parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
+      }
+
+      addCatalog(params).then(() => {
+        this.dialogFormVisible = false
+        this.refreshTableData()
+        this.newForm.newName = ''
+        this.newForm.newValue = []
+        this.$message({
+          message: '新建目录成功!!!',
+          type: 'success'
+        })
+      })
+    },
+
+    // 权限配置dialog
+    deleteNodekeylist(index) {
+      this.nodeKeyList.splice(index, 1)
+    },
+    getNodeKey() {
+      this.nodeKeyList = this.$refs.tree.getCheckedNodes(true)
+    },
+    handleClick() {
+      // console.log(tab, event)
+    },
+    filterNode(value, data) {
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
+    },
+
+    handleSearch() {
+      // this.loadTableData(_.pickBy(searchParams))
+      // window.console.log(searchParams)
     },
 
     handleRemoveItems(selection) {
@@ -280,53 +731,34 @@ export default {
           this.refreshTableData()
         })
     },
-    // 新建按钮
-    handleMenuAddBtnClick() {
-      this.$refs.menuEdit.init()
-    },
     // 停用按钮
-    handleMenuItemAddBtnClick({ menuId }) {
-      this.$refs.menuEdit.init({ parentId: menuId })
-    },
+    handleMenuItemAddBtnClick() {},
 
     // 编辑按钮
-    handleMenuEditBtnClick(row) {
-      this.$refs.menuEdit.init(row)
-    },
+    handleMenuEditBtnClick() {},
 
     // 表单弹窗提交
-    handleMenuEditSubmit({ query, type }) {
-      const menuEdit = this.$refs.menuEdit
-      let api = null
-      switch (type) {
-        case 'add': // 与case "addItem": 处理相同
-        case 'addItem':
-          api = postMenuInfo
-          break
-        case 'edit':
-          api = putMenuInfo
-          break
-        default:
-          return
-      }
-      menuEdit.loading = true
-      api(_.set(query, 'status', true))
-        .then(() => {
-          this.$message.success('操作成功!')
-          this.refreshTableData()
-          this.$refs.menuEdit.close()
-        })
-        .catch((err) => {
-          window.console.log(err)
-        })
-        .finally(() => (menuEdit.loading = false))
-    },
 
     // 刷新列表数据
     refreshTableData() {
       //  因为只加载了最外层的数据，children仍然是旧的，清空数据
       this.tableData = []
       this.loadTableData({ parentId: '0' })
+    },
+
+    // 递归去除空children
+    getTreeData(data) {
+      // 循环遍历json数据
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].children.length < 1) {
+          // children若为空数组，则将children设为undefined
+          data[i].children = undefined
+        } else {
+          // children若不为空数组，则继续 递归调用 本方法
+          this.getTreeData(data[i].children)
+        }
+      }
+      return data
     },
 
     // 加载表格数据
@@ -337,14 +769,11 @@ export default {
       this.tableLoading = true
       try {
         const query = _.assign(null, _.omit(param, 'parentId'))
-        const tableData = await getMenuInfo(param.parentId || '0', query)
-        this.tableData = _.map(tableData, (t) => ({
-          children: [],
-          hasChildren: true,
-          ...t
-        }))
-      } catch (error) {
-        window.console.log(error)
+        const tableData = await getCatalog(param.parentId || '0', query)
+
+        this.tableData = this.getTreeData(tableData)
+
+        // window.console.log('----------------------', this.tableData)
       } finally {
         this.tableLoading = false
       }
@@ -352,38 +781,60 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.operations__btns {
-  i {
-    color: #a0a8ae;
-    font-size: 18px;
-  }
-  display: flex;
-  align-items: center;
-  .search-sort-box {
-    position: relative;
+/deep/.el-input {
+  width: 280px !important;
+}
+
+.jurisdiction_dialog_box {
+  width: 100%;
+  .box_title {
     display: flex;
-    align-items: center;
-    padding: 0 10px;
-    cursor: pointer;
-    .sort-text {
-      color: #a0a8ae;
-      margin-left: 6px;
-      font-size: 14px;
+    .box_title_i {
+      width: 50%;
+      height: 45px;
+      line-height: 45px;
+      box-sizing: border-box;
+      padding-left: 10px;
+      border: 1px solid #ccc;
     }
-    &::before {
-      position: absolute;
-      content: '';
-      top: 3px;
-      right: 0px;
-      width: 0.5px;
-      height: 80%;
-      background-color: #a0a8ae;
+  }
+  .box_con {
+    display: flex;
+    .box_con_i {
+      width: 50%;
+      border: 1px solid #ccc;
+      /deep/.el-tabs__item {
+        padding-left: 90px;
+      }
+      .box_con_i_pane {
+        padding: 25px;
+      }
+      .box_con_i_list {
+        padding: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        .nodekeylist {
+          padding: 5px;
+          background-color: #cdcdcd;
+          margin: 10px;
+          border-radius: 3px;
+        }
+      }
     }
   }
 }
 </style>
+
 <style lang="sass" scoped>
+
+/deep/.el-input
+  width: 100%
+/deep/.el-select
+  width: 100%
+/deep/.el-input
+
 .operations__btns
     color: #acb3b8
     display: flex;
