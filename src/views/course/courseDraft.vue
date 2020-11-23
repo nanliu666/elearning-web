@@ -554,7 +554,6 @@ export default {
   methods: {
     // 编辑&删除&移动
     handleCommand(e, row) {
-      window.console.log(row)
       if (e === 'edit') {
         // 编辑
       }
@@ -590,7 +589,6 @@ export default {
       this.getInfo()
     },
     handlePageSizeChange(param) {
-      window.console.log(param)
       this.page.size = param
       this.getInfo()
     },
@@ -632,7 +630,6 @@ export default {
       params.status = this.status
       getCourseListData(params).then((res) => {
         this.tableData = res
-        window.console.log(this.tableData)
       })
     },
     // 导航

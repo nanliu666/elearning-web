@@ -535,8 +535,7 @@ export default {
           })
         } else {
           this.ruleForm.status = status
-          editCourseInfo(this.ruleForm).then((res) => {
-            window.console.log(res)
+          editCourseInfo(this.ruleForm).then(() => {
             this.$message({
               message: '发送成功！！！',
               type: 'success'
@@ -548,15 +547,13 @@ export default {
     // 删除
     deleteContent(id) {
       delCourseContent(id)
-        .then((res) => {
-          window.console.log(res)
+        .then(() => {
           this.$message({
             message: '该章节已成功删除',
             type: 'success'
           })
         })
         .catch((err) => {
-          window.console.log(err)
           this.$message.error(err.resMsg)
         })
     },

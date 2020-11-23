@@ -393,7 +393,7 @@ const TABLE_CONFIG = {
     try {
       let items = await getCatalog(row.id)
       resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
-    } catch (err) {
+    } catch {
       resolve([])
     }
   },
@@ -578,19 +578,16 @@ export default {
   methods: {
     // 停用
     handlestatus(row, i) {
-      window.console.log(row)
       editCatalog({ id: row.id, status: i }).then(() => {
         this.loadTableData()
       })
     },
     // 删除&编辑
     handleCommand(e, row) {
-      window.console.log(row)
       if (e === 'del') {
         // 删除
         getCourseByCatalogId({ catalogId: row.id })
-          .then((res) => {
-            window.console.log('删除1', res)
+          .then(() => {
             this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
@@ -612,9 +609,7 @@ export default {
                 })
               })
           })
-          .catch((err) => {
-            window.console.log('删除2', err)
-
+          .catch(() => {
             this.$confirm(
               '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。您确定要删除选中的目录吗？',
               '提示',
@@ -692,7 +687,6 @@ export default {
         name: this.newForm.newName,
         parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
       }
-      window.console.log(params)
 
       addCatalog(params).then(() => {
         this.dialogFormVisible = false
@@ -712,7 +706,6 @@ export default {
     },
     getNodeKey() {
       this.nodeKeyList = this.$refs.tree.getCheckedNodes(true)
-      // console.log(this.nodeKeyList)
     },
     handleClick() {
       // console.log(tab, event)
@@ -722,9 +715,9 @@ export default {
       return data.label.indexOf(value) !== -1
     },
 
-    handleSearch(searchParams) {
+    handleSearch() {
       // this.loadTableData(_.pickBy(searchParams))
-      window.console.log(searchParams)
+      // window.console.log(searchParams)
     },
 
     handleRemoveItems(selection) {
@@ -781,8 +774,6 @@ export default {
         this.tableData = this.getTreeData(tableData)
 
         // window.console.log('----------------------', this.tableData)
-      } catch (error) {
-        window.console.log(error)
       } finally {
         this.tableLoading = false
       }
