@@ -339,7 +339,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '请输入目录名称搜索' },
     data: '',
-    field: 'name',
+    field: 'catalogName',
     label: '',
     type: 'input'
   }
@@ -350,63 +350,99 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     data: '',
     field: 'code',
     label: '状态',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'teacherId',
     label: '讲师',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'catalogId',
     label: '所在目录',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'type',
     label: '课程类型',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'passCondition',
     label: '通过条件',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'electiveType',
     label: '选修类型',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'isRecommend',
     label: '是否推荐',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'createId',
     label: '创建人',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'label',
     label: '标签',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   }
 ]
 const SEARCH_POPOVER_CONFIG = {
@@ -560,7 +596,8 @@ export default {
     },
 
     handleSearch(searchParams) {
-      this.loadTableData(_.pickBy(searchParams))
+      // this.loadTableData(_.pickBy(searchParams))
+      this.getInfo(searchParams)
     },
 
     handleRemoveItems(selection) {
@@ -579,7 +616,7 @@ export default {
     refreshTableData() {},
 
     // 拿数据
-    getInfo() {
+    getInfo(courseName) {
       // currentPage	当前页	body	true
       // size	页面显示数量	body	true
       // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
@@ -590,6 +627,7 @@ export default {
         status: '',
         courseName: ''
       }
+      params.courseName = courseName
       params = { ...this.page }
       params.status = this.status
       getCourseListData(params).then((res) => {

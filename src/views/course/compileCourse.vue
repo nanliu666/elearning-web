@@ -283,7 +283,7 @@
         <div class="editorTitle">
           <el-form-item
             label="课程介绍"
-            prop="editorTitle"
+            prop="introduction"
           >
             <tinymce v-model="ruleForm.introduction" />
           </el-form-item>

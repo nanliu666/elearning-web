@@ -28,6 +28,7 @@
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
             />
+
             <div class="operations__btns">
               <el-tooltip
                 class="operations__btns--tooltip"
@@ -108,12 +109,18 @@
           slot-scope="scope"
         >
           <el-button
+            v-if="!scope.status"
             type="text"
             size="medium"
-            @click.stop="handleConfig(scope.row, scope.index)"
+            @click.stop="handlestatus(scope.row, 1)"
           >
             停用
           </el-button>
+          <span
+            v-else
+            style="color:#ccc;"
+            @click.stop="handlestatus(scope.row, 0)"
+          >启用</span>
           <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
           <el-button
             type="text"
@@ -329,7 +336,13 @@
 
 <script>
 import { deleteMenuInfo } from '@/api/system/menu'
-import { getCatalog, addCatalog, delCatalag, editCatalog } from '@/api/course/course'
+import {
+  getCatalog,
+  addCatalog,
+  delCatalag,
+  editCatalog,
+  getCourseByCatalogId
+} from '@/api/course/course'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -401,18 +414,23 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请选择状态' },
     data: '',
     field: 'status',
     label: '状态',
-    type: 'select'
+    type: 'select',
+    options: [
+      { value: 1, label: '成功' },
+      { value: 0, label: '失败' }
+    ]
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'alias',
+    field: 'createName',
     label: '创建人',
-    type: 'select'
+    type: 'cascader',
+    options: [{ value: '', label: '' }]
   }
 ]
 const SEARCH_POPOVER_CONFIG = {
@@ -553,31 +571,87 @@ export default {
   },
   created() {
     this.refreshTableData()
+    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].value = this.tableData.id
+    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].label = this.tableData.createName
+    // window.console.log(SEARCH_POPOVER_POPOVER_OPTIONS)
   },
   methods: {
+    // 停用
+    handlestatus(row, i) {
+      window.console.log(row)
+      editCatalog({ id: row.id, status: i }).then(() => {
+        this.loadTableData()
+      })
+    },
     // 删除&编辑
     handleCommand(e, row) {
+      window.console.log(row)
       if (e === 'del') {
         // 删除
-        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            delCatalag({ catalogId: row.id }).then(() => {
-              this.$message({
-                message: '删除成功!!!',
-                type: 'success'
+        getCourseByCatalogId({ catalogId: row.id })
+          .then((res) => {
+            window.console.log('删除1', res)
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(() => {
+                delCatalag({ catalogId: row.id }).then(() => {
+                  this.$message({
+                    message: '删除成功!!!',
+                    type: 'success'
+                  })
+                })
+                this.refreshTableData()
               })
-            })
-            this.refreshTableData()
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
           })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
+          .catch((err) => {
+            window.console.log('删除2', err)
+
+            this.$confirm(
+              '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。您确定要删除选中的目录吗？',
+              '提示',
+              {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            )
+              .then(() => {
+                this.$confirm('此操作将永久删除该目录, 是否继续?', '提示', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning'
+                })
+                  .then(() => {
+                    delCatalag({ catalogId: row.id }).then(() => {
+                      this.$message({
+                        message: '删除成功!!!',
+                        type: 'success'
+                      })
+                    })
+                    this.refreshTableData()
+                  })
+                  .catch(() => {
+                    this.$message({
+                      type: 'info',
+                      message: '已取消删除'
+                    })
+                  })
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
           })
       }
       if (e === 'edit') {
@@ -649,7 +723,8 @@ export default {
     },
 
     handleSearch(searchParams) {
-      this.loadTableData(_.pickBy(searchParams))
+      // this.loadTableData(_.pickBy(searchParams))
+      window.console.log(searchParams)
     },
 
     handleRemoveItems(selection) {
@@ -705,7 +780,7 @@ export default {
 
         this.tableData = this.getTreeData(tableData)
 
-        window.console.log('----------------------', this.tableData)
+        // window.console.log('----------------------', this.tableData)
       } catch (error) {
         window.console.log(error)
       } finally {

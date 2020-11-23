@@ -54,3 +54,9 @@ export const delCatalag = (params) => get('/api/blade-manage/v1/course/delCatala
  * @param {Object} courseId - 参数
  * */
 export const editCatalog = (params) => get('/api/blade-manage/v1/course/editCatalog', params)
+/**
+ * 确认某个课程目录id下是否有课程信息
+ * @param {Object} courseId - 参数
+ * */
+export const getCourseByCatalogId = (params) =>
+  get('/api/blade-manage/v1/course/getCourseByCatalogId', params)
