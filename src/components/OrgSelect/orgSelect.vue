@@ -52,6 +52,8 @@
       :org="org"
       :users="selectOldData"
       :visible.sync="show"
+      :title="'请选择' + title"
+      :is-range="isRange"
       v-bind="type"
       @addUser="adduser"
     />
@@ -70,6 +72,12 @@ export default {
     event: 'change'
   },
   props: {
+    isRange: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
+    },
     emptyText: {
       type: String,
       default: ''

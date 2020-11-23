@@ -20,10 +20,13 @@
         @tab-click="handleClick"
       >
         <el-tab-pane
-          label="Web端权限"
+          label="后台系统菜单"
           name="webPermission"
         >
-          <web-permission :client-id="clientId" />
+          <web-permission
+            ref="permission"
+            :client-id="clientId"
+          />
         </el-tab-pane>
         <el-tab-pane
           label="Mobile端权限"
@@ -32,6 +35,7 @@
       </el-tabs>
     </basic-container>
     <roleLimits
+      v-if="configVisible"
       :visible.sync="configVisible"
       :client-id="clientId"
       @setConfig="setVisible"
@@ -65,6 +69,7 @@ export default {
     },
     setVisible() {
       this.configVisible = !this.configVisible
+      this.$refs.permission.refreshTableData()
     }
   }
 }

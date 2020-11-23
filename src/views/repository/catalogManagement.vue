@@ -1,24 +1,14 @@
 <template>
   <div class="fill">
-    <page-header title="组织管理">
-      <el-dropdown
+    <page-header title="目录管理">
+      <el-button
         slot="rightMenu"
-        @command="handleCommand"
+        type="primary"
+        size="medium"
+        @click="handleAdd"
       >
-        <el-button
-          type="primary"
-          size="medium"
-        >
-          新建组织
-          <i class="el-icon-arrow-down el-icon--right" />
-        </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="add">
-            单个新建
-          </el-dropdown-item>
-          <!-- <el-dropdown-item>Excel导入</el-dropdown-item> -->
-        </el-dropdown-menu>
-      </el-dropdown>
+        新建目录
+      </el-button>
     </page-header>
 
     <basic-container block>
@@ -89,14 +79,6 @@
                   <div class="multipleLength">
                     已选中 {{ multipleSelection.length }} 项
                   </div>
-                  <el-button
-                    type="text"
-                    size="medium"
-                    icon="el-icon-delete"
-                    @click="multipleDeleteClick"
-                  >
-                    批量删除
-                  </el-button>
                 </div>
                 <el-button
                   size="medium"
@@ -108,31 +90,30 @@
             </transition>
           </div>
         </template>
-        <template
-          slot="orgName"
-          slot-scope="{ row }"
-        >
-          <span
-            style="cursor: pointer"
-            @click="toOrgDetail(row)"
-          >
-            <el-button type="text">{{ row.orgName }}</el-button>
-          </span>
+        <template slot="orgType">
+          <!-- <template #orgType="{row}"> -->
+          正常
         </template>
-        <template #orgType="{row}">
-          {{ orgTypeObj[row.orgType] }}
-        </template>
-        <template #leaders="{row}">
-          {{ leaderFilter(row) }}
+        <template slot="leaders">
+          <!-- <template #leaders="{row}"> -->
+          2020-10-14 11:24:32
         </template>
 
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-if="row.parentId === '0'"
               type="text"
-              @click="handleCreateChild(row)"
+              @click="handleDisabled(row)"
             >
-              新建子组织
+              停用
+            </el-button>
+            <el-button
+              v-if="row.parentId !== '0'"
+              type="text"
+              @click="handleEnabled(row)"
+            >
+              启用
             </el-button>
             <el-button
               type="text"
@@ -140,64 +121,52 @@
             >
               编辑
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
-              <el-button
-                type="text"
-                style="margin-left: 10px"
-              >
-                <i class="el-icon-arrow-down el-icon-more" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="deleteOrg">
-                  删除
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+            <el-button
+              type="text"
+              @click="handleDelete(row)"
+            >
+              删除
+            </el-button>
           </div>
         </template>
       </common-table>
-      <org-edit
-        ref="orgEdit"
-        :visible="createOrgDailog"
-        @refresh="loadTableData"
-        @changevisible="changevisible"
-      />
     </basic-container>
+    <catalog-edit
+      ref="orgEdit"
+      :visible="createOrgDailog"
+      @refresh="loadTableData"
+      @changevisible="changevisible"
+    />
   </div>
 </template>
 
 <script>
-import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader } from '@/api/org/org'
+import { getOrgTree, deleteOrg, getOrgLeader } from '@/api/org/org'
 import { tableOptions } from '@/util/constant'
 import SearchPopover from '@/components/searchPopOver/index'
-import OrgEdit from './components/orgEdit'
+import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
   {
-    label: '组织名称',
+    label: '目录名称',
     prop: 'orgName',
     slot: true,
     minWidth: 150
   },
   {
-    label: '组织类型',
+    label: '状态',
     prop: 'orgType',
     slot: true,
     minWidth: 120
   },
   {
-    label: '组织编码',
+    label: '创建人',
     prop: 'orgCode',
     minWidth: 120
   },
   {
-    label: '组织负责人',
+    label: '更新时间',
     slot: true,
     prop: 'leaders',
-    minWidth: 120
-  },
-  {
-    label: '描述',
-    prop: 'remark',
     minWidth: 120
   }
 ]
@@ -205,16 +174,16 @@ const TABLE_CONFIG = {
   rowKey: 'orgId',
   showHandler: true,
   defaultExpandAll: true,
-  showIndexColumn: false,
+  showIndexColumn: true,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   handlerColumn: {
     minWidth: 100
   }
 }
 export default {
-  name: 'OrgManagement',
-  components: { SearchPopover, OrgEdit },
+  name: 'CatelogManager',
+  components: { SearchPopover, CatalogEdit },
   filters: {
     // 过滤不可见的列
     columnsFilter: (columns, visibleColProps) =>
@@ -241,65 +210,31 @@ export default {
       searchConfig: {
         requireOptions: [
           {
-            type: 'treeSelect',
-            field: 'parentOrgId',
-            label: '',
-            data: '',
-            config: {
-              selectParams: {
-                placeholder: '请输入内容',
-                multiple: false
-              },
-              treeParams: {
-                data: [],
-                'check-strictly': true,
-                'default-expand-all': false,
-                'expand-on-click-node': false,
-                clickParent: true,
-                filterable: false,
-                props: {
-                  children: 'children',
-                  label: 'orgName',
-                  disabled: 'disabled',
-                  value: 'orgId'
-                }
-              }
-            }
-          },
-          {
             type: 'input',
             field: 'orgName',
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '组织名称', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '请输入目录名称搜索', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
           {
             type: 'select',
             field: 'orgType',
-            label: '组织类型',
+            label: '状态',
             data: '',
             options: [
-              { value: 'Enterprise', label: '企业' },
-              { value: 'Company', label: '公司' },
-              { value: 'Department', label: '部门' },
-              { value: 'Group', label: '小组' }
+              { value: 'Enterprise', label: '正常' },
+              { value: 'Company', label: '停用' }
             ],
             config: { optionLabel: '', optionValue: '' }
-          },
-          {
-            type: 'numInterval',
-            field: 'minUserNum,maxUserNum',
-            data: { min: '', max: '' },
-            label: '组织人数'
           },
           {
             type: 'select',
             field: 'userId',
             data: '',
-            label: '负责人',
+            label: '创建人',
             options: [],
             config: { optionLabel: 'name', optionValue: 'userId' },
             loading: false,
@@ -344,7 +279,6 @@ export default {
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'change' }]
       },
       createOrgDailog: false,
-      orgTypeObj: { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' },
       searchParams: { parentOrgId: 0 }
     }
   },
@@ -360,50 +294,13 @@ export default {
   },
   created() {
     getOrgLeader({ pageNo: 1, pageSize: 100 }).then((res) => {
-      this.searchConfig.popoverOptions[2].options.push(...res.data)
-    })
-    getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-      this.searchConfig.requireOptions[0].config.treeParams.data = res
-      this.$refs['searchPopover'].treeDataUpdateFun(res, 'parentOrgId')
-      this.searchConfig.requireOptions[0].data = res[0].orgId
+      this.searchConfig.popoverOptions[1].options.push(...res.data)
     })
   },
   activated() {
     this.loadTableData()
   },
   methods: {
-    leaderFilter(row) {
-      if (row.leaders.length > 0) {
-        let leadersList = []
-        for (var i = 0; i < row.leaders.length; i++) {
-          leadersList = this.turnToLevelArray(row.leaders)
-        }
-        let leadersString = ''
-        for (var j = 0; j < leadersList.length; j++) {
-          for (var k = 0; k < leadersList[j].userNameArr.length; k++) {
-            if (leadersList[j].userNameArr[k] === '' || leadersList[j].userNameArr[k] === null) {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + '空缺'
-              } else {
-                leadersString = leadersString + '空缺，'
-              }
-            } else {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + leadersList[j].userNameArr[k]
-              } else {
-                leadersString = leadersString + leadersList[j].userNameArr[k] + '，'
-              }
-            }
-          }
-          leadersString = leadersString + '；'
-        }
-        return leadersString
-      } else {
-        return ''
-      }
-    },
     turnToLevelArray(data = []) {
       let responsibleList = []
       const maxLevel = Math.max.apply(
@@ -465,9 +362,6 @@ export default {
         newData.push(it)
         item.children && item.children.length > 0 && this.recursion(item.children, newData)
       })
-    },
-    toOrgDetail(row) {
-      this.$router.push({ path: '/orgs/orgDetail?orgId=' + row.orgId })
     },
     handleSearch(params) {
       this.searchParams = params
@@ -539,11 +433,81 @@ export default {
         this.loadTableData()
       })
     },
+    handleDelete(row) {
+      let hasChildren = !_.isEmpty(row.children)
+      this.$confirm(`您确定要启用该目录${hasChildren ? '及其子目录' : ''}吗？`, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          await this.loadTableData()
+          this.$message({
+            type: 'success',
+            message: '启用成功!'
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消启用'
+          })
+        })
+    },
+    handleAdd() {
+      this.$refs.orgEdit.create()
+    },
     handleOrgEdit(row) {
       this.$refs.orgEdit.edit(row)
     },
-    handleCreateChild(row) {
-      this.$refs.orgEdit.createChild(row)
+    handleEnabled(row) {
+      let hasChildren = !_.isEmpty(row.children)
+      let content = '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。'
+      let deleteText = '您确定要删除选中的目录吗？'
+      this.$confirm(`${hasChildren ? content : ''}${deleteText}`, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          await this.loadTableData()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+      // this.$message.error('很抱歉，您选中的目录下存在子目录，请先将子目录调整后再删除!')
+    },
+    handleDisabled(row) {
+      let hasChildren = !_.isEmpty(row.children)
+      this.$confirm(
+        `您确定要停用该目录吗吗？停用后，该目录${hasChildren ? '及其子目录' : ''}将暂停使用?`,
+        '提醒',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(async () => {
+          await this.loadTableData()
+          this.$message({
+            type: 'success',
+            message: '停用成功!'
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消停用'
+          })
+        })
     },
     columnChange() {
       this.option.column = TABLE_COLUMNS.filter((item) => {
@@ -593,7 +557,7 @@ export default {
       }
     },
     toSort() {
-      this.$router.push({ path: '/orgs/orgSort' })
+      this.$router.push({ path: '/repository/catalogSort', query: { type: 'catalog' } })
     }
   }
 }

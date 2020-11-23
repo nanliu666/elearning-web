@@ -61,6 +61,7 @@ export default {
         // next({ total }) {
         //     that.uploadPercent = parseInt(total.percent)
         // },
+
         error(err) {
           that.uploading = false
           if (err.code === 614) {

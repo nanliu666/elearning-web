@@ -46,7 +46,7 @@
               slot-scope="{ node, data }"
               class="custom-tree-node"
             >
-              <span>{{ data.orgName }}{{ '  ' }} ({{ data.workNum }})</span>
+              <span>{{ data.orgName }}{{ '  ' }} ({{ data.userNum }})</span>
             </span>
           </el-tree>
         </basic-container>
@@ -124,7 +124,7 @@ export default {
     },
     handleCommand(command) {
       if (command === 'add') {
-        this.$router.push('/system/addUser')
+        this.$router.push('/system/editUser')
       }
     },
     loadTree(parentOrgId = '0') {

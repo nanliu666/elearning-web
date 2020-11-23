@@ -39,17 +39,17 @@
               <el-option
                 v-for="it in group.options"
                 :key="it.value"
-                :label="it[item.config.optionLabel || 'label']"
-                :value="it[item.config.optionValue || 'value']"
+                :label="it[_.get(item, 'config.optionLabel', 'label')]"
+                :value="it[_.get(item, 'config.optionValue', 'value')]"
               />
             </el-option-group>
           </template>
           <template v-else>
             <el-option
               v-for="it in item.options"
-              :key="it[item.config.optionValue || 'value']"
-              :label="it[item.config.optionLabel || 'label']"
-              :value="it[item.config.optionValue || 'value']"
+              :key="it[_.get(item, 'config.optionValue', 'value')]"
+              :label="it[_.get(item, 'config.optionLabel', 'label')]"
+              :value="it[_.get(item, 'config.optionValue', 'value')]"
             />
           </template>
           <div
@@ -172,17 +172,17 @@
                           <el-option
                             v-for="it in group.options"
                             :key="it.value"
-                            :label="it[item.config.optionLabel || 'label']"
-                            :value="it[item.config.optionValue || 'value']"
+                            :label="it[_.get(item, 'config.optionLabel', 'label')]"
+                            :value="it[_.get(item, 'config.optionValue', 'value')]"
                           />
                         </el-option-group>
                       </template>
                       <template v-else>
                         <el-option
                           v-for="it in item.options"
-                          :key="it[item.config.optionValue || 'value']"
-                          :label="it[item.config.optionLabel || 'label']"
-                          :value="it[item.config.optionValue || 'value']"
+                          :key="it[_.get(item, 'config.optionValue', 'value')]"
+                          :label="it[_.get(item, 'config.optionLabel', 'label')]"
+                          :value="it[_.get(item, 'config.optionValue', 'value')]"
                         />
                       </template>
                       <div
@@ -428,7 +428,7 @@ export default {
         } else if (item.type === 'treeSelect' || item.type === 'select') {
           if (
             (item.type === 'select' && item.config && item.config.multiple) ||
-            (item.type === 'treeSelect' && item.config.selectParams.multiple)
+            (item.type === 'treeSelect' && _.get(item, 'config.selectParams.multiple'))
           ) {
             params[item.field] = item.data
           } else {
@@ -458,9 +458,9 @@ export default {
         if (item.type === 'numInterval') {
           item.data = { min: '', max: '' }
         } else if (
-          (item.type === 'treeSelect' && item.config.selectParams.multiple) ||
+          (item.type === 'treeSelect' && _.get(item, 'config.selectParams.multiple')) ||
           (item.config && item.config.type && item.config.type.indexOf('range') > -1) ||
-          (item.type === 'select' && item.config.multiple)
+          (item.type === 'select' && _.get(item, 'config.multiple'))
         ) {
           item.data = []
         } else {

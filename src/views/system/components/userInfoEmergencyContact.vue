@@ -8,7 +8,7 @@
     </div>
     <div class="info-content-wrapper">
       <div v-if="emergencyInfo.length == 0">
-        <avue-empty />
+        <comEmpty />
       </div>
       <div
         v-for="(item, index) in emergencyInfo"
@@ -164,6 +164,7 @@ import { deepClone } from '@/util/util'
 import { isMobile, validateName } from '@/util/validate'
 let curItem = {}
 export default {
+  components: { ComEmpty: () => import('@/components/common-empty/empty') },
   props: {
     userid: {
       type: String,

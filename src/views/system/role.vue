@@ -1,6 +1,16 @@
 <template>
   <div class="role-wrap fill">
-    <page-header title="角色管理" />
+    <page-header title="角色管理">
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        type="primary"
+        :disabled="!options.currentId"
+        @click="onHandleEdit('add')"
+      >
+        新建角色
+      </el-button>
+    </page-header>
     <basic-container block>
       <el-container style="height:100%">
         <roleAside
@@ -37,16 +47,12 @@
                     clearable
                     style="width:200px;margin-right:12px;"
                   />
-                  <div>
-                    <span
-                      class="addUser"
-                      :disabled="!options.currentId"
-                      @click="onHandleEdit('add')"
-                    >新建角色</span>
+                  <div class="refresh-container">
                     <span
                       class="icon  el-icon-refresh-right"
                       @click="loadRoleData"
                     />
+                    <span class="refresh-text">刷新</span>
                   </div>
                 </div>
               </template>
@@ -67,7 +73,7 @@
                   size="medium"
                   @click.stop="handleCheck(scope.row, scope.index)"
                 >
-                  查看用户
+                  {{ user(scope.row) }}
                 </el-button>
                 <el-button
                   v-if="scope.row.isBasic == 1"
@@ -109,6 +115,11 @@
           @reload="reload"
           @fiter="fiter"
         />
+        <add-user-dialog
+          :visible.sync="editVisible"
+          :role-id="roleId"
+          @after-submit="handleAfterSubmit"
+        ></add-user-dialog>
       </el-container>
     </basic-container>
   </div>
@@ -118,15 +129,17 @@
 import roleEdit from './components/roleEdit'
 import roleAside from './components/roleAside'
 import { getRoleList, getCate, getPositions, delRole } from '../../api/system/role'
-
+import addUserDialog from './components/addUserDialog'
 export default {
   name: 'Role',
   components: {
     roleEdit,
-    roleAside
+    roleAside,
+    addUserDialog
   },
   data() {
     return {
+      editVisible: false,
       loading: false,
       JodOrg: [],
       associated: [],
@@ -139,7 +152,8 @@ export default {
         currentId: '',
         props: {
           label: 'label',
-          id: 'cateId'
+          id: 'cateId',
+          name: 'name'
         },
         treeList: [],
         positionProps: {
@@ -175,30 +189,8 @@ export default {
           prop: 'roleName'
         },
         {
-          label: '关联类型',
-          prop: 'type',
-          formatter: (row, column, cellValue) => {
-            let str = ''
-            switch (cellValue) {
-              case 'Job':
-                str = '关联职位'
-                break
-              case 'Position':
-                str = '岗位'
-                break
-              case 'No':
-                str = '无关联'
-                break
-              default:
-                break
-            }
-            return str
-          }
-        },
-        {
-          label: '关联职位',
-          prop: 'jobs',
-          formatter: this.messageFormatter
+          label: '用户人数',
+          prop: 'userNum'
         },
         {
           label: '角色描述',
@@ -223,10 +215,17 @@ export default {
     this.onLoad()
   },
   activated() {
-    this.getPositionsFunc()
-    this.onLoad()
+    // this.getPositionsFunc()
+    // this.onLoad()
   },
   methods: {
+    handleAfterSubmit() {
+      this.loadRoleData()
+    },
+    user(data) {
+      this.row = _.cloneDeep(data)
+      return data.userNum ? '查看用户' : '添加用户'
+    },
     handlerDeleteAll(list) {
       this.$confirm('您确定要删除你所选中的角色吗?', {
         confirmButtonText: '确定',
@@ -316,7 +315,8 @@ export default {
             return {
               cateId: item.id,
               label: item.name,
-              roleNum: item.roleNum || 0
+              roleNum: item.roleNum || 0,
+              isDefault: item.isDefault || 0
               // children
             }
           })
@@ -362,7 +362,12 @@ export default {
     },
     handleCheck(row) {
       this.roleId = row.roleId
-      this.$router.push({ path: '/system/userDetail?roleId=' + row.roleId })
+      if (!row.userNum) {
+        this.editVisible = true
+      } else {
+        this.$router.push({ path: '/system/roleUsers?roleId=' + row.roleId })
+      }
+
       // this.userVisible = !this.userVisible
     },
     handleCommand(command, row) {
@@ -383,14 +388,14 @@ export default {
 
     // 点击删除角色，提示
     handleDel(rows = []) {
-      if (rows.findIndex((row) => row.type !== 'No') > -1) {
-        this.$alert('很抱歉，您选中的角色已关联职位/岗位信息，请先解绑才可以删除', '提示', {
-          confirmButtonText: '确定',
-          type: 'warning',
-          dangerouslyUseHTMLString: true
-        })
-        return
-      }
+      // if (rows.findIndex((row) => row.type !== 'No') > -1) {
+      //   this.$alert('很抱歉，您选中的角色已关联职位/岗位信息，请先解绑才可以删除', '提示', {
+      //     confirmButtonText: '确定',
+      //     type: 'warning',
+      //     dangerouslyUseHTMLString: true
+      //   })
+      //   return
+      // }
       this.$confirm('您确定要删除该角色吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -446,6 +451,17 @@ export default {
     > .el-card__body {
       height: 100%;
     }
+  }
+}
+.refresh-container {
+  cursor: pointer;
+  color: #a0a8ae;
+  display: flex;
+  align-items: center;
+  .refresh-text {
+    padding-left: 6px;
+    display: inline-block;
+    height: 18px;
   }
 }
 .role-wrap {

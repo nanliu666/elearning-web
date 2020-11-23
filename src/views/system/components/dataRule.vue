@@ -27,61 +27,62 @@
           :draggable="false"
           show-checkbox
           node-key="orgId"
+          default-expand-all
           highlight-current
           :props="orgTreeProps"
           :filter-node-method="orgfilterNode"
         />
       </el-tab-pane>
-      <el-tab-pane
-        label="业务部门"
-        name="business"
-      >
-        <el-tree
-          ref="bizTree"
-          :data="bizPermissionData"
-          :draggable="false"
-          show-checkbox
-          node-key="bizId"
-          highlight-current
-          :props="bizTreeProps"
-          :filter-node-method="bizFilterNode"
-        />
-      </el-tab-pane>
-      <el-tab-pane
-        label="自定义"
-        name="custom"
-      >
-        <el-form
-          ref="costumeForm"
-          :model="form"
-          label-width="100px"
-          label-position="top"
-          class="newOrgDailog"
-        >
-          <el-form-item
-            label="权限类名"
-            prop="scopeClass"
-          >
-            <el-input
-              v-model="form.scopeClass"
-              placeholder="请输入权限类名"
-            />
-          </el-form-item>
-          <el-form-item
-            label="规则值"
-            prop="scopeValue"
-          >
-            <el-input
-              v-model="form.scopeValue"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入规则值"
-              maxlength="200"
-              show-word-limit
-            />
-          </el-form-item>
-        </el-form>
-      </el-tab-pane>
+      <!--      <el-tab-pane-->
+      <!--        label="业务部门"-->
+      <!--        name="business"-->
+      <!--      >-->
+      <!--        <el-tree-->
+      <!--          ref="bizTree"-->
+      <!--          :data="bizPermissionData"-->
+      <!--          :draggable="false"-->
+      <!--          show-checkbox-->
+      <!--          node-key="bizId"-->
+      <!--          highlight-current-->
+      <!--          :props="bizTreeProps"-->
+      <!--          :filter-node-method="bizFilterNode"-->
+      <!--        />-->
+      <!--      </el-tab-pane>-->
+      <!--      <el-tab-pane-->
+      <!--        label="自定义"-->
+      <!--        name="custom"-->
+      <!--      >-->
+      <!--        <el-form-->
+      <!--          ref="costumeForm"-->
+      <!--          :model="form"-->
+      <!--          label-width="100px"-->
+      <!--          label-position="top"-->
+      <!--          class="newOrgDailog"-->
+      <!--        >-->
+      <!--          <el-form-item-->
+      <!--            label="权限类名"-->
+      <!--            prop="scopeClass"-->
+      <!--          >-->
+      <!--            <el-input-->
+      <!--              v-model="form.scopeClass"-->
+      <!--              placeholder="请输入权限类名"-->
+      <!--            />-->
+      <!--          </el-form-item>-->
+      <!--          <el-form-item-->
+      <!--            label="规则值"-->
+      <!--            prop="scopeValue"-->
+      <!--          >-->
+      <!--            <el-input-->
+      <!--              v-model="form.scopeValue"-->
+      <!--              type="textarea"-->
+      <!--              :rows="2"-->
+      <!--              placeholder="请输入规则值"-->
+      <!--              maxlength="200"-->
+      <!--              show-word-limit-->
+      <!--            />-->
+      <!--          </el-form-item>-->
+      <!--        </el-form>-->
+      <!--      </el-tab-pane>-->
     </el-tabs>
     <span
       slot="footer"
@@ -198,15 +199,15 @@ export default {
       let orgPermissionChecked = this.$refs.tree.getCheckedNodes().map((item) => {
         return item.orgId
       })
-      let bizPermissionChecked = this.$refs.bizTree.getCheckedNodes().map((item) => {
-        return item.bizId
-      })
+      // let bizPermissionChecked = this.$refs.bizTree.getCheckedNodes().map((item) => {
+      //   return item.bizId
+      // })
       let param = {
         roleId: this.roleId,
         menuId: this.$menuId,
         ...this.form,
-        orgId: orgPermissionChecked.join(','),
-        bizId: bizPermissionChecked.join(',')
+        orgId: orgPermissionChecked.join(',')
+        // bizId: bizPermissionChecked.join(',')
       }
       this.loading = true
       putRolePermission(param).then(() => {

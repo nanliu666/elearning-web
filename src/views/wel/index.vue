@@ -1,7 +1,7 @@
 <template>
   <!-- <div>首页</div> -->
   <div class="page clearfix">
-    <div class="aside">
+    <!-- <div class="aside">
       <infoViewArea />
     </div>
     <div class="main">
@@ -10,25 +10,25 @@
       <scheduleCard />
       <noticeAndNews />
       <mg-footer class="footer-style" />
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
-import noticeAndNews from './noticeAndNews'
-import infoViewArea from './InfoViewArea'
-import workArea from './workArea'
-import taskCenterCard from './taskCenterCard'
-import scheduleCard from './scheduleCard'
+// import noticeAndNews from './noticeAndNews'
+// import infoViewArea from './InfoViewArea'
+// import workArea from './workArea'
+// import taskCenterCard from './taskCenterCard'
+// import scheduleCard from './scheduleCard'
 export default {
   name: 'Wel',
   components: {
-    infoViewArea,
-    noticeAndNews,
-    workArea,
-    taskCenterCard,
-    scheduleCard,
-    MgFooter: () => import('@/components/footer/footer')
+    // infoViewArea,
+    // noticeAndNews,
+    // workArea,
+    // taskCenterCard,
+    // scheduleCard,
+    // MgFooter: () => import('@/components/footer/footer')
   },
   data() {
     return {}
