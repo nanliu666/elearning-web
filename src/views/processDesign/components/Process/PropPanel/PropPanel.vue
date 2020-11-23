@@ -299,6 +299,7 @@
                 :all="all"
                 :org="org"
                 :type="type"
+                title="发起人"
               />
             </el-col>
           </el-row>

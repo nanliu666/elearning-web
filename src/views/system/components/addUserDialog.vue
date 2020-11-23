@@ -105,6 +105,12 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    roleId: {
+      type: String,
+      default: () => {
+        return ''
+      }
     }
   },
   data() {
@@ -320,7 +326,7 @@ export default {
         return item.userId
       })
       let params = {
-        roleId: this.$route.query.roleId,
+        roleId: this.roleId || this.$route.query.roleId,
         userId: userIdArr.join(',')
       }
       addUser(params)

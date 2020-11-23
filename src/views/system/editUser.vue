@@ -346,7 +346,7 @@ export default {
         //   userId: res.leaderId + '',
         //   name: res.leaderName
         // }
-        this.form.leaderId = this.form = {
+        this.form = {
           roleIds: _.map(res.roles, 'roleId'),
           leaderId: res.leaderId + '',
           ...res

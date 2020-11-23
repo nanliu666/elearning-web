@@ -13,7 +13,7 @@
           v-loading="loading"
           :data="data"
           node-key="orgId"
-          :props="{ label: 'orgName' }"
+          :props="{ label: 'name' }"
           default-expand-all
           draggable
           :allow-drop="allowDrop"
@@ -39,10 +39,10 @@
 </template>
 
 <script>
-import { getOrgTree, sortOrgTree } from '@/api/org/org'
+import { getCatalog, editCatalog } from '@/api/course/course'
 
 export default {
-  name: 'OrgSort',
+  name: 'Name',
   data() {
     return {
       data: [],
@@ -116,7 +116,7 @@ export default {
       return org
     },
     getOrgTree() {
-      getOrgTree({ parentOrgId: 0 }).then((res) => {
+      getCatalog({ parentOrgId: 0 }).then((res) => {
         this.data = res
         this.oldData = JSON.parse(JSON.stringify(res))
         this.loading = false
@@ -142,9 +142,9 @@ export default {
       this.loadSort(this.data)
       // { orgs: this.data }
       this.loading = true
-      sortOrgTree(this.data).then(() => {
+      editCatalog(this.data).then(() => {
         this.$message.success('保存成功')
-        getOrgTree({ parentOrgId: 0 }).then((res) => {
+        getCatalog({ parentOrgId: 0 }).then((res) => {
           this.data = res
           this.loading = false
         })

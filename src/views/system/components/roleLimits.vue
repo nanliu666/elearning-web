@@ -17,7 +17,7 @@
             v-model="tree"
             title="菜单权限"
             :default-props="menuProps"
-            :tree-list="menuPrivileges"
+            :tree-list="menuData"
             :disabled="disabled"
             @nodeClick="nodeClick"
           />
@@ -32,10 +32,10 @@
             v-if="buttonMenuId"
             v-model="page"
             title=""
-            :check-list="buttonData[buttonMenuId] || []"
+            :check-list="buttonData || []"
             :default-props="{
               value: 'menuId',
-              label: 'menuName',
+              label: 'name',
               check: 'isOwn'
             }"
             :disabled="disabled"
@@ -48,7 +48,7 @@
       >
         <div class="limit-item">
           <div class="limit-title">
-            数据规则
+            管理范围
           </div>
           <data-rule
             v-if="buttonMenuId"
@@ -89,7 +89,8 @@
 import checkLimits from './roleCheckPermission'
 import menuRulePermission from './menuRulePermission'
 import dataRule from './dataRulePermission'
-import { getRoleMenuPermission, updateRoleMenuPermission } from '../../../api/system/menu'
+import { getRoleMenuPermission, postOrgPrivilege } from '../../../api/system/menu'
+import { flatTree } from '@/util/util'
 
 const pages = [
   {
@@ -141,6 +142,7 @@ export default {
   },
   data() {
     return {
+      menuData: [],
       loading: false,
       submiting: false,
       defualtRuleData: {}, //回显数据规则已选择数据
@@ -159,7 +161,7 @@ export default {
       org: [0, 1, 2],
       tree: [],
       dataPrivileges: [],
-      buttonData: {},
+      buttonData: [],
       buttonMenuId: '',
       originData: [],
       dataRuleDialog: false
@@ -176,15 +178,34 @@ export default {
     }
   },
   watch: {
-    visible(val) {
-      val && this.getRolePrivilege()
-    }
+    menuPrivileges: {
+      handler(val) {
+        let data = []
+        this.filterData(val, data)
+        this.menuData = data
+      },
+      deep: true
+    },
+    visible() {}
   },
   created() {
     this.roleId = this.$route.query.roleId
+    this.getRolePrivilege()
   },
   mounted() {},
   methods: {
+    filterData(data, table) {
+      data.map((it, i) => {
+        if (it.menuType !== 'Button') {
+          table.push(_.cloneDeep(it))
+        }
+        if (it.children && it.children.length > 0) {
+          table[i].childrenList = _.cloneDeep(it).children
+          table[i].children = []
+          this.filterData(it.children, table[i].children)
+        }
+      })
+    },
     //获取数据规则选中
     getDataRuleCleck(data) {
       this.defualtRuleData = {
@@ -234,65 +255,108 @@ export default {
         })
     },
 
-    // 判断当前菜单类型是Button的菜单过滤掉
-    menuFilter(arr, parentId) {
-      return (
-        arr.filter((item) => {
-          if (item.menuType === 'Button') {
-            // 如果节点是按钮类型，保存到buttonData
-            if (this.buttonData[parentId]) {
-              this.buttonData[parentId].push(item)
-            } else {
-              this.$set(this.buttonData, parentId || 0, [item])
-            }
-            return false
-          } else {
-            if (item.children && item.children.length > 0) {
-              item.children = this.menuFilter(item.children, item.menuId)
-            }
-            return true
-          }
-        }) || []
-      )
-    },
-    ping(data, menus, popover) {
-      data.map((it) => {
-        menus.push(it)
-        popover.push(it.dataPrivileges)
+    // // 判断当前菜单类型是Button的菜单过滤掉
+    // menuFilter(arr, parentId) {
+    //   return (
+    //     arr.filter((item) => {
+    //       if (item.menuType === 'Button') {
+    //         // 如果节点是按钮类型，保存到buttonData
+    //         if (this.buttonData[parentId]) {
+    //           this.buttonData[parentId].push(item)
+    //         } else {
+    //           this.$set(this.buttonData, parentId || 0, [item])
+    //         }
+    //         return false
+    //       } else {
+    //         if (item.children && item.children.length > 0) {
+    //           item.children = this.menuFilter(item.children, item.menuId)
+    //         }
+    //         return true
+    //       }
+    //     }) || []
+    //   )
+    // },
+    // ping(data, menus, popover) {
+    //   data.map((it) => {
+    //     menus.push(it)
+    //     popover.push(it.dataPrivileges)
+    //     if (it.children && it.children.length > 0) {
+    //       this.ping(it.children, menus, popover)
+    //     }
+    //   })
+    // },
+    filterID(data, table) {
+      data.map((it, i) => {
+        if (it.menuType !== 'Button') {
+          table.push(_.cloneDeep(it))
+        }
         if (it.children && it.children.length > 0) {
-          this.ping(it.children, menus, popover)
+          table[i].childrenList = _.cloneDeep(it).children
+          table[i].children = []
+          this.filterData(it.children, table[i].children)
         }
       })
     },
     // 点击保存
-    onClickSave() {
-      // let save = this.$refs.privilege.getCheck()
-      if (!this.buttonMenuId) {
-        this.$message.warning('请选择菜单权限')
-        return
-      }
+    async onClickSave() {
+      let save = this.$refs.privilege.getCheck()
+      // save = save.join(',')
+      // this.filterID()
+      let fiterTree = flatTree(this.menuData)
+      let pageButtonId = []
+      fiterTree.map((it) => {
+        if (it.childrenList && it.childrenList.length > 0) {
+          it.childrenList.map((it) => {
+            it.menuType === 'Button' && it.isOwn && pageButtonId.push(it.menuId)
+          })
+        }
+      })
+      let allId = [...save, ...pageButtonId]
+      // pageButtonId && allId.push(pageButtonId)
 
       this.submitData.map((item) => {
-        item.orgId = item.orgId.join(',')
-        item.bizId = item.bizId.join(',')
+        item.orgId && (item.orgId = item.orgId.join(','))
+        item.bizId && (item.bizId = item.bizId.join(','))
       })
-
-      let params = {
+      let submitData = this.submitData.filter((it) => {
+        if (allId.includes(it.menuId)) {
+          return it
+        }
+      })
+      let idList = []
+      submitData.map((item) => {
+        idList.push(item.menuId)
+      })
+      let menuIdList = []
+      allId.map((it) => {
+        if (!idList.includes(it)) {
+          let newItem = {
+            menuId: it
+          }
+          menuIdList.push(newItem)
+        }
+      })
+      menuIdList = menuIdList.concat(submitData)
+      if (menuIdList.length === 0) {
+        this.$message.warning('请选择权限')
+      }
+      let param = {
         roleId: this.roleId,
-        privileges: this.submitData
+        privileges: menuIdList
       }
 
       this.loading = true
-      updateRoleMenuPermission(params)
-        .then(() => {
-          this.$message.success('权限添加成功')
-          this.buttonMenuId = ''
-          this.submitData = []
-          this.$emit('setConfig')
-        })
-        .finally(() => {
-          this.loading = false
-        })
+      await postOrgPrivilege(param)
+      this.$message.success('权限添加成功')
+      this.buttonMenuId = ''
+      this.submitData = []
+      this.$emit('setConfig')
+      // if(this.buttonMenuId){
+      //
+      // }else{
+      //   // this.$message.success('权限添加成功')
+      //   // this.$emit('setConfig')
+      // }
     },
 
     // 根据原数据，添加operatorType字段，Add-添加，Del-删除
@@ -376,6 +440,16 @@ export default {
             scopeValue: this.submitData[index].scopeValue
           }
         }
+      }
+
+      if (data) {
+        this.buttonData = []
+        data.childrenList &&
+          data.childrenList.map((it) => {
+            if (it.menuType === 'Button') {
+              this.buttonData.push(it)
+            }
+          })
       }
     }
   }

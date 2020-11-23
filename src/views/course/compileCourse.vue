@@ -210,7 +210,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第五行 -->
         <span>添加标签</span>
         <el-row class="switch_box">
@@ -284,7 +283,7 @@
         <div class="editorTitle">
           <el-form-item
             label="课程介绍"
-            prop="editorTitle"
+            prop="introduction"
           >
             <tinymce v-model="ruleForm.introduction" />
           </el-form-item>
@@ -309,7 +308,6 @@
             <el-button
               type="primary"
               size="small"
-              @click="dialogVisible = true"
             >
               添加章节
             </el-button>
@@ -348,18 +346,13 @@
               width="185"
             >
               <template slot-scope="scope">
-                <el-select
-                  v-model="scope.row.type"
-                  placeholder="请选择"
-                >
-                  <el-option
-                    v-for="item in typeOption"
-                    :key="item.value"
-                    :label="item.name"
-                    :value="item.value"
-                  >
-                  </el-option>
-                </el-select>
+                <div v-if="typeOption[scope.row.type - 1]">
+                  <span v-if="typeOption[scope.row.type - 1].value === 1">文章</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 2">课件</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 3">知识点</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 4">考试</span>
+                  <span v-if="typeOption[scope.row.type - 1].value === 5">视频</span>
+                </div>
               </template>
             </el-table-column>
 
@@ -370,22 +363,7 @@
               width="250"
             >
               <template slot-scope="scope">
-                <el-button
-                  v-if="typeOption[scope.row.type - 1]"
-                  size="medium"
-                >
-                  <span v-if="typeOption[scope.row.type - 1].value === 1">添加文章</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 2">上传课件</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 3">关联知识点</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 4">关联考试</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 5">上传视频</span>
-                </el-button>
-                <el-button
-                  v-else
-                  size="medium"
-                >
-                  请选择章节类型
-                </el-button>
+                <span>{{ scope.row.articleContent }}</span>
               </template>
             </el-table-column>
 
@@ -401,12 +379,12 @@
                   type="text"
                   size="small"
                 >
-                  保存
+                  编辑
                 </el-button>
                 <el-button
                   type="text"
                   size="small"
-                  @click="delContent(scope.row.id)"
+                  @click="deleteContent(scope.id)"
                 >
                   删除
                 </el-button>
@@ -429,36 +407,6 @@
               </template>
             </el-table-column>
           </el-table>
-          <!-- 添加文章 -->
-          <el-dialog
-            title="添加文章"
-            :visible.sync="dialogVisible"
-            width="60%"
-            :modal-append-to-body="false"
-          >
-            <div class="dialog_input">
-              <span>标题</span>
-              <el-input
-                v-model="addArticle.name"
-                placeholder="请输入标题"
-              ></el-input>
-            </div>
-            <div class="dialog_tinymce">
-              <span>内容</span>
-              <div><tinymce v-model="addArticle.thinkContent" /></div>
-            </div>
-
-            <span
-              slot="footer"
-              class="dialog-footer"
-            >
-              <el-button @click="dialogVisible = false">取 消</el-button>
-              <el-button
-                type="primary"
-                @click="dialogVisible = false"
-              >确 定</el-button>
-            </span>
-          </el-dialog>
         </div>
       </div>
     </div>
@@ -466,17 +414,11 @@
 </template>
 
 <script>
-import { getCourseList, delCourseContent, addCourse } from '@/api/course/course'
+import { getCourseList, delCourseContent, editCourseInfo } from '@/api/course/course'
 export default {
   data() {
     return {
       checkboxVal: [],
-      // 添加文章
-      dialogVisible: false,
-      addArticle: {
-        name: '',
-        thinkContent: ''
-      },
       // 添加标签
       options: [
         {
@@ -528,14 +470,14 @@ export default {
       ],
       // 填写课程信息
       ruleForm: {
-        status: '', //课程状态
+        status: '',
         name: '', // 课程名称
         teacherId: '', // 讲师
         catalogId: '', // 所在目录
         type: '', // 课程类型(1:在线 2:面授 3:直播)
         period: 0, //学时
         credit: 0, // 学分
-        passCondition: '', //通过条件（前端为多选，用a,b,c,d,...组合）
+        passCondition: [], //通过条件（前端为多选，用a,b,c,d,...组合）
         electiveType: '', //选修类型
         isRecommend: '', //是否推荐(0：否   1：是)
         cover: '', //封面
@@ -593,7 +535,7 @@ export default {
           })
         } else {
           this.ruleForm.status = status
-          addCourse(this.ruleForm).then(() => {
+          editCourseInfo(this.ruleForm).then(() => {
             this.$message({
               message: '发送成功！！！',
               type: 'success'
@@ -602,9 +544,8 @@ export default {
         }
       })
     },
-
     // 删除
-    delContent(id) {
+    deleteContent(id) {
       delCourseContent(id)
         .then(() => {
           this.$message({
@@ -616,6 +557,7 @@ export default {
           this.$message.error(err.resMsg)
         })
     },
+
     // 拿数据
     getInfo() {
       getCourseList(1).then((res) => {
@@ -630,10 +572,12 @@ export default {
     // 向上移动
     upward(scope) {
       this.swapArray(this.ruleForm.contents, scope - 1, scope)
+      //   console.log(scope)
     },
     // 向下移动
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
+      //   console.log(scope)
     },
     // 图片
     handleAvatarSuccess(res, file) {
@@ -796,26 +740,6 @@ export default {
   }
   /deep/.el-upload__tip {
     line-height: 0;
-  }
-  .dialog_input {
-    margin: 20px;
-    display: flex;
-    width: 70%;
-    span {
-      width: 50px;
-      line-height: 35px;
-    }
-  }
-  .dialog_tinymce {
-    margin: 20px;
-    display: flex;
-    span {
-      width: 50px;
-      line-height: 35px;
-    }
-    div {
-      width: 100%;
-    }
   }
 }
 </style>

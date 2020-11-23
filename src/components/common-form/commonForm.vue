@@ -116,6 +116,11 @@
             v-bind="itemAttrs(column)"
             :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
           />
+          <el-switch
+            v-if="column.itemType == 'switch'"
+            v-model="modle[column.prop]"
+            v-bind="itemAttrs(column)"
+          />
           <slot
             v-if="column.itemType == 'slot'"
             v-bind="itemAttrs(column)"

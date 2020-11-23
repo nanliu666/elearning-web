@@ -27,19 +27,19 @@
 
       <template #handler="{row}">
         <div class="table__handler">
-          <el-button
-            size="medium"
-            type="text"
-            @click.stop="() => handleMenuEditBtnClick(row)"
-          >
-            页面控件权限
-          </el-button>
+          <!--          <el-button-->
+          <!--            size="medium"-->
+          <!--            type="text"-->
+          <!--            @click.stop="() => handleMenuEditBtnClick(row)"-->
+          <!--          >-->
+          <!--            页面控件权限-->
+          <!--          </el-button>-->
           <el-button
             size="medium"
             type="text"
             @click.stop="() => handleMenuItemAddBtnClick(row.menuId)"
           >
-            数据规则
+            管理范围
           </el-button>
           <el-button
             size="medium"
@@ -62,6 +62,7 @@
       :visible="pageRuleDialog"
       :parent-id="parentId"
       :client-id="clientId"
+      :data="pageData"
       @closeDialog="closePageDialogs"
       @clearMenuId="setMenuId"
     />
@@ -69,7 +70,7 @@
 </template>
 
 <script>
-import { getMenuInfo } from '@/api/system/menu'
+import { getPrivilege, delPrivilege } from '@/api/system/menu'
 import dataRule from './dataRule'
 import pageRule from './pageRule'
 const TABLE_COLUMNS = [
@@ -118,14 +119,32 @@ const TABLE_CONFIG = {
   lazy: true,
   load: async (row, treeNode, resolve) => {
     try {
-      let items = await getMenuInfo(row.menuId)
-      resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
+      resolve(row.children)
+      //
+      // let params ={
+      //   parentId:row.menuId,
+      //   roleId:roleId,
+      //   clientId:'Admin'
+      // }
+      // let items = await getPrivilege(params)
+      // let itemList = []
+      // _.map(items,(it)=>{
+      //
+      //   let newData = {
+      //     hasChildren: true,
+      //     childrens: [],
+      //     ...it
+      //   }
+      //   itemList.push(newData)
+      // })
+      // resolve(itemList)
+      // resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
     } catch (err) {
       resolve([])
     }
   },
   rowKey: 'menuId',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  treeProps: { hasChildren: 'hasChildren', children: 'childrens' }
 }
 const TABLE_PAGE_CONFIG = {}
 // 搜索配置
@@ -176,6 +195,7 @@ export default {
   },
   data() {
     return {
+      pageData: [],
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -202,6 +222,39 @@ export default {
     this.refreshTableData()
   },
   methods: {
+    async handleDelete(data) {
+      let menuId = []
+      data.map((it) => {
+        menuId.push(it.menuId)
+      })
+      menuId = menuId.join(',')
+      let params = {
+        roleId: this.$route.query.roleId,
+        menuId: menuId
+      }
+      await delPrivilege(params)
+      this.refreshTableData()
+      this.$message({
+        type: 'success',
+        message: '删除成功!'
+      })
+    },
+    handleRemoveItems(data) {
+      this.$confirm('此操作将该权限, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.handleDelete(data)
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
     //  处理页码改变
     handleCurrentPageChange() {},
     handlePageSizeChange() {},
@@ -233,10 +286,14 @@ export default {
 
     // 点击页面控件权限
     handleMenuEditBtnClick(row) {
-      // this.menuId = menuId
       this.parentId = row.parentId || 0
       this.pageRuleDialog = true
-      // this.$refs.menuEdit.init(row)
+      this.pageData = _.cloneDeep(row.children)
+      this.pageData = this.pageData.filter((it) => {
+        if (it.menuType === 'Button') {
+          return true
+        }
+      })
     },
 
     // 表单弹窗提交
@@ -276,19 +333,25 @@ export default {
 
     // 加载表格数据
     // TODO: 分页还未实现
-    async loadTableData(param = {}, page) {
+    async loadTableData(param = {}) {
       if (this.tableLoading) {
         return
       }
       this.tableLoading = true
       try {
-        const query = _.assign(null, _.omit(param, 'parentId'), page)
-        const tableData = await getMenuInfo(param.parentId || '0', query)
-        this.tableData = _.map(tableData, (t) => ({
-          children: [],
-          hasChildren: true,
-          ...t
-        }))
+        // const query = _.assign(null, _.omit(param, 'parentId'), page)
+        let params = {
+          parentId: param.parentId || '0',
+          roleId: this.$route.query.roleId,
+          clientId: 'Admin'
+        }
+        const tableData = await getPrivilege(params)
+
+        this.tableData = []
+
+        let arr = []
+        this.filterData(tableData, arr)
+        this.tableData = arr
         // 更新分页器数据
         this.page.total = _.size(tableData)
       } catch (error) {
@@ -296,6 +359,17 @@ export default {
       } finally {
         this.tableLoading = false
       }
+    },
+    filterData(data, table) {
+      data.map((it) => {
+        if (it.isOwn) {
+          table.push(_.cloneDeep(it))
+        }
+        if (it.isOwn && it.children && it.children.length > 0) {
+          table[table.length - 1].children = []
+          this.filterData(it.children, table[table.length - 1].children)
+        }
+      })
     },
     closeDialogs() {
       this.dataRuleDialog = false
