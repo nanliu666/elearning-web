@@ -101,6 +101,12 @@
             v-bind="itemAttrs(column)"
             :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
           />
+          <el-time-picker
+            v-if="column.itemType == 'timePicker'"
+            v-model="model[column.prop]"
+            v-bind="itemAttrs(column)"
+            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+          />
 
           <el-tree-select
             v-if="column.itemType == 'treeSelect'"
@@ -118,7 +124,7 @@
           />
           <el-switch
             v-if="column.itemType == 'switch'"
-            v-model="modle[column.prop]"
+            v-model="model[column.prop]"
             v-bind="itemAttrs(column)"
           />
           <slot

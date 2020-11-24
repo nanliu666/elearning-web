@@ -6,6 +6,7 @@
         <el-button
           type="primary"
           size="medium"
+          @click="handleEditSchedule(null)"
         >
           添加线下日程
         </el-button>
@@ -19,9 +20,9 @@
           title="第1天 2020-10-10"
         >
           <common-table
-            :config="ScheduleConfig"
-            :columns="ScheduleColumn"
-            :data="scheduleData"
+            :config="schedule.config"
+            :columns="schedule.columns"
+            :data="schedule.data"
           >
             <template #handler="{row}">
               <el-button
@@ -52,9 +53,9 @@
         </el-button>
       </div>
       <common-table
-        :config="CoursesConfig"
-        :columns="CoursesColumn"
-        :data="coursesData"
+        :config="course.config"
+        :columns="course.columns"
+        :data="course.data"
       >
         <template #handler="{row}">
           <el-button
@@ -83,9 +84,9 @@
         </el-button>
       </div>
       <common-table
-        :config="TestConfig"
-        :columns="TestColumn"
-        :data="testData"
+        :config="test.config"
+        :columns="test.columns"
+        :data="test.data"
       >
         <template #handler="{row}">
           <el-button
@@ -103,16 +104,22 @@
         </template>
       </common-table>
     </section>
+    <EditScheduleDrawer
+      :visible.sync="schedule.drawerVisible"
+      :schedule="schedule.editingRecord"
+    />
   </div>
 </template>
 
 <script>
-const ScheduleColumn = [
+import EditScheduleDrawer from './editScheduleDrawer'
+const ScheduleColumns = [
   {
     prop: 'time'
   },
   {
-    prop: 'title'
+    prop: 'title',
+    minWidth: 150
   },
   {
     prop: 'teacher'
@@ -126,14 +133,16 @@ const ScheduleConfig = {
   showHandler: true,
   handlerColumn: { label: '操作', width: 150 }
 }
-const CoursesColumn = [
+const CourseColumns = [
   {
     prop: 'date',
-    label: '上课日期'
+    label: '上课日期',
+    width: 220
   },
   {
     prop: 'courses',
-    label: '关联课程'
+    label: '关联课程',
+    minWidth: 150
   },
   {
     prop: 'teacher',
@@ -141,13 +150,13 @@ const CoursesColumn = [
   },
   { prop: 'type', label: '修读类型' }
 ]
-const CoursesConfig = {
+const CourseConfig = {
   showHandler: true,
   handlerColumn: { label: '操作', width: 150 }
 }
-const TestColumn = [
-  { prop: 'date', label: '考试日期' },
-  { prop: 'tests', label: '关联考试' },
+const TestColumns = [
+  { prop: 'date', label: '考试日期', width: 220 },
+  { prop: 'tests', label: '关联考试', minWidth: 150 },
   { prop: 'time', label: '考试时间(分钟)' }
 ]
 const TestConfig = {
@@ -156,41 +165,38 @@ const TestConfig = {
 }
 export default {
   name: 'EditArrangement',
+  components: { EditScheduleDrawer },
   data() {
     return {
       activeName: '1',
-      ScheduleConfig,
-      ScheduleColumn,
-      scheduleData: [
-        {
-          time: '8:00 ~ 10:00',
-          title: '[面授课程]论程序员的自我修养',
-          teacher: '讲师：马云',
-          location: '地点：马赛'
-        }
-      ],
-      CoursesConfig,
-      CoursesColumn,
-      coursesData: [
-        {
-          date: '2020-10-10 ~ 2020-10-11',
-          courses: 'Java中级讲义',
-          teacher: '李绅',
-          type: '必修'
-        }
-      ],
-      TestConfig,
-      TestColumn,
-      testData: [
-        {
-          date: '2020-10-10 ~ 2020-10-11',
-          tests: 'Java编程考试',
-          time: '不限时长'
-        }
-      ]
+      schedule: {
+        config: ScheduleConfig,
+        columns: ScheduleColumns,
+        drawerVisible: false,
+        editingRecord: {},
+        data: []
+      },
+      course: {
+        config: CourseConfig,
+        columns: CourseColumns,
+        drawerVisible: false,
+        editingRecord: {},
+        data: []
+      },
+      test: {
+        config: TestConfig,
+        columns: TestColumns,
+        drawerVisible: false,
+        editingRecord: {},
+        data: []
+      }
     }
   },
   methods: {
+    handleEditSchedule(row) {
+      this.schedule.editingRecord = row
+      this.schedule.drawerVisible = true
+    },
     // eslint-disable-next-line
     handleEdit(row) {
       // console.log(row)
