@@ -34,13 +34,15 @@
         />
       </div>
 
-      <el-button
-        class="publish-btn"
-        size="medium"
-        type="primary"
-      >
-        发布
-      </el-button>
+      <div class="page-right">
+        <el-button
+          class="publish-btn"
+          size="medium"
+          type="primary"
+        >
+          发布
+        </el-button>
+      </div>
     </header>
     <el-row
       type="flex"
@@ -147,7 +149,6 @@ $header-height: 54px;
     font-size: 14px;
     position: fixed;
     top: 0;
-
     .page-actions {
       height: 100%;
       text-align: center;
@@ -168,12 +169,11 @@ $header-height: 54px;
 
     .step-tab {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       height: 100%;
       position: relative;
-
+      width: 50%;
       > .step {
-        width: 140px;
         font-size: 16px;
         line-height: $header-height;
         text-align: center;
@@ -227,6 +227,9 @@ $header-height: 54px;
           box-sizing: border-box;
         }
       }
+    }
+    .page-right {
+      padding-right: 20px;
     }
   }
   .page__content {
