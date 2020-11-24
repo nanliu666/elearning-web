@@ -4,17 +4,19 @@
       title="学习情况"
       show-back
     />
-    <basic-container block>
+    <basic-container>
       <div class="details-container">
         <div class="details-top">
           <div class="top-title">
-            <span class="title-text">{{ konwledgeDetail.title }}</span>
-            <span class="title-status">{{ konwledgeDetail.status | statusFilterer }}</span>
+            <span class="title-text">{{ konwledgeDetail.resName }}</span>
+            <el-tag :type="getStatusType(konwledgeDetail.status)">
+              {{ konwledgeDetail.status | statusFilterer }}
+            </el-tag>
           </div>
           <ul class="details-ul">
             <li class="details-li">
               <span class="li-label">创建人：</span>
-              <span class="li-value">{{ konwledgeDetail.createPerson }}</span>
+              <span class="li-value">{{ konwledgeDetail.creatorName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">更新时间：</span>
@@ -22,15 +24,31 @@
             </li>
             <li class="details-li">
               <span class="li-label">所在目录：</span>
-              <span class="li-value">{{ konwledgeDetail.whereIn }}</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">提供人：</span>
-              <span class="li-value">{{ konwledgeDetail.providePeople }}</span>
+              <span class="li-value">{{ konwledgeDetail.provideName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">上传模式：</span>
-              <span class="li-value">{{ konwledgeDetail.uploadType }}</span>
+              <span class="li-value">{{
+                konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
+              }}</span>
+            </li>
+            <li class="details-li">
+              <span class="li-label">是否允许下载：</span>
+              <span class="li-value">{{
+                konwledgeDetail.allowDownload === '0' ? '是' : '否'
+              }}</span>
+            </li>
+            <li
+              v-if="konwledgeDetail.uploadType === 1"
+              class="details-li"
+              style="width: 100%;"
+            >
+              <span class="li-label">链接地址：</span>
+              <span class="li-value">{{ konwledgeDetail.resUrl }}</span>
             </li>
           </ul>
         </div>
@@ -40,7 +58,7 @@
               查看人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.view }}
+              {{ konwledgeDetail.watchNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -48,7 +66,7 @@
               收藏人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.start }}
+              {{ konwledgeDetail.collectNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -56,7 +74,7 @@
               评论人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.comment }}
+              {{ konwledgeDetail.commentNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -64,45 +82,141 @@
               下载人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.download }}
+              {{ konwledgeDetail.downloadNum }}
             </div>
           </li>
         </div>
+      </div>
+    </basic-container>
+    <basic-container style="margin-top: 20px">
+      <el-menu
+        :default-active="activeIndex"
+        class="el-menu-demo"
+        mode="horizontal"
+        @select="handleSelect"
+      >
+        <el-menu-item index="1">
+          资源介绍
+        </el-menu-item>
+        <el-menu-item
+          v-if="_.size(konwledgeDetail.attachments) > 0"
+          index="2"
+        >
+          附件
+        </el-menu-item>
+      </el-menu>
+      <div style="padding: 20px; min-height:32vh">
+        <div
+          v-if="activeIndex === '1'"
+          v-html="_.unescape(konwledgeDetail.introduction)"
+        />
+        <section v-if="activeIndex === '2'">
+          <div class="image-ul">
+            <div
+              v-for="(item, index) in fileGroup.true"
+              :key="index"
+              class="image-li"
+            >
+              <el-image
+                style="width: 100px; height: 100px"
+                :src="item.url"
+                :preview-src-list="previewSrcList"
+              >
+              </el-image>
+            </div>
+          </div>
+          <ul
+            v-for="(item, index) in fileGroup.false"
+            :key="index"
+          >
+            <li
+              class="file-title"
+              @click="openFile(item.url)"
+            >
+              {{ item.fileName }}
+            </li>
+          </ul>
+        </section>
       </div>
     </basic-container>
   </div>
 </template>
 
 <script>
+import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
 export default {
   filters: {
     statusFilterer(data) {
-      return data
+      return data === 0 ? '已上架' : '已下架'
     }
   },
   data() {
     return {
-      konwledgeDetail: {
-        title: 'Java函数式编程',
-        status: '已上架',
-        createPerson: '张勋',
-        updateTime: '2020-10-10 12:21:10',
-        whereIn: ' Java技能课程/Java高级培训',
-        providePeople: '张勋',
-        uploadType: '本地文件',
-        view: 25,
-        start: 86,
-        comment: 55,
-        download: 78
-      }
+      fileGroup: {},
+      previewSrcList: [],
+      activeIndex: '1',
+      konwledgeDetail: {}
     }
   },
-  created() {},
-  methods: {}
+  created() {
+    this.initData()
+  },
+  methods: {
+    /**
+     * 标识状态
+     */
+    getStatusType(status) {
+      const TYPE_STATUS = {
+        0: 'danger',
+        1: 'success'
+      }
+      return TYPE_STATUS[status]
+    },
+    /**
+     * 预览除图片外的附件
+     */
+    openFile(url) {
+      window.open(url)
+    },
+    /**
+     * 初始数据，并处理附件
+     */
+    initData() {
+      getKnowledgeManageDetails({ id: this.$route.query.id }).then((res) => {
+        this.konwledgeDetail = res
+        this.fileGroup = _.groupBy(this.konwledgeDetail.attachments, (item) => {
+          return this.fileTypeIsImage(item.fileName)
+        })
+        _.each(this.fileGroup.true, (item) => {
+          this.previewSrcList.push(item.url)
+        })
+      })
+    },
+    // 判断当前格式是否为图片类型的格式
+    fileTypeIsImage(fileName) {
+      const lastIndex = fileName.lastIndexOf('.')
+      const fileType = fileName.substr(lastIndex + 1, fileName.length)
+      const imageType = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff']
+      if (imageType.includes(fileType)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    /**
+     * 处理nav切换
+     */
+    handleSelect(key) {
+      this.activeIndex = key
+    }
+  }
 }
 </script>
 
 <style scoped lang="scss">
+/deep/ .el-menu--horizontal {
+  border-bottom: 1px solid #cccccc !important;
+}
 .details-container {
   background-color: #fff;
   .details-top {
@@ -117,10 +231,6 @@ export default {
         font-weight: 550;
         margin-right: 10px;
       }
-      .title-status {
-        background-color: #d2f5e7;
-        padding: 4px;
-      }
     }
     .details-ul {
       display: flex;
@@ -131,7 +241,7 @@ export default {
         display: flex;
         margin-bottom: 10px;
         .li-label {
-          min-width: 20%;
+          min-width: 80px;
           display: inline-block;
           color: #666666;
         }
@@ -153,10 +263,29 @@ export default {
       width: 25%;
       .bottom-li-title {
         color: #666666;
+        font-size: 16px;
       }
       .bottom-li-value {
+        font-size: 18px;
+        color: #1e1e1e;
+        font-weight: 500;
+        margin-top: 10px;
       }
     }
   }
+}
+.image-ul {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  .image-li {
+    margin-right: 10px;
+    border: 1px solid #ccc;
+  }
+}
+.file-title {
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 </style>

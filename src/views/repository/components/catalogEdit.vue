@@ -17,41 +17,37 @@
     >
       <el-form-item
         label="目录名称"
-        prop="orgName"
+        prop="name"
       >
         <el-input
-          v-model.trim="form.orgName"
+          v-model.trim="form.name"
           placeholder="请输入"
         />
       </el-form-item>
       <el-form-item label="上级目录">
         <el-col>
           <el-select
-            v-model="form.highlightLevel"
-            v-loadmore="loadMoreLeader"
-            multiple
-            filterable
+            v-model="form.parentId"
+            :disabled="type === 'createChild'"
             :multiple-limit="10"
-            placeholder="请选择或输入上级目录名称搜索"
+            placeholder="请选择"
           >
             <el-option
-              v-for="(item1, k) in leaderList"
-              :key="k"
-              :label="item1.name !== '空缺' ? item1.name + '（' + item1.workNo + '）' : item1.name"
-              :value="item1.userId"
-            />
-            <div
-              v-show="loadLeader"
-              class="addressLoading"
+              style="height: auto;padding:0"
+              :value="form.parentId"
+              :label="parentOrgIdLabel"
             >
-              <i class="el-icon-loading" />
-            </div>
-            <div
-              v-show="noMoreLeader"
-              style="text-align: center; font-size:14px;color: #606266;"
-            >
-              没有更多了
-            </div>
+              <el-tree
+                ref="orgTree"
+                :data="orgTree"
+                node-key="orgId"
+                :props="{
+                  children: 'children',
+                  label: 'name'
+                }"
+                @node-click="handleOrgNodeClick"
+              />
+            </el-option>
           </el-select>
           <div class="select-tips">
             可通过选择上级目录为其构建子目录
@@ -93,8 +89,11 @@
 </template>
 
 <script>
-import { getOrgTreeSimple, editOrg, createOrg, getUserWorkList } from '@/api/org/org'
-
+import {
+  updateKnowledgeCatalog,
+  addKnowledgeCatalog,
+  getKnowledgeCatalogList
+} from '@/api/knowledge/knowledge'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -112,69 +111,31 @@ export default {
         Group: false
       },
       form: {
-        orgType: '',
-        highlightLevel: ''
+        parentId: ''
       },
       parentOrgIdLabel: '',
       rules: {
-        orgName: [{ required: true, message: '请输入目录名称', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入目录名称', trigger: 'blur' }]
       },
       orgTree: [],
-      leaderList: [],
-      loadLeader: false,
-      noMoreLeader: false,
-      leaderPageNo: 1,
       loading: false
     }
   },
-  created() {
-    this.loadOrgTree()
-    getUserWorkList({ pageNo: this.leaderPageNo, pageSize: 1000 }).then((res) => {
-      this.leaderList = res.data
-      this.leaderList.splice(0, 0, {
-        userId: '',
-        name: '空缺',
-        workNo: ''
-      })
-      this.leaderPageNo += 1
-    })
-  },
   methods: {
     loadOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      getKnowledgeCatalogList().then((res) => {
         this.orgTree = res
       })
     },
-    loadMoreLeader() {
-      if (this.loadLeader || this.noMoreLeader) return
-      this.loadLeader = true
-      getUserWorkList({ pageNo: this.leaderPageNo, pageSize: 100 }).then((res) => {
-        if (res.data.length > 0) {
-          this.leaderList.push(...res.data)
-          this.leaderPageNo += 1
-          this.loadLeader = false
-        } else {
-          this.noMoreLeader = true
-          this.loadLeader = false
-        }
-      })
-    },
-
-    submitAndCreate() {
-      // this.$refs.ruleForm.validate((valid, obj) => {
-      //   if (valid) {
-      //   } else {
-      //     this.$message.error(obj[Object.keys(obj)[0]][0].message)
-      //     return false
-      //   }
-      // })
-    },
+    // 完成并创建课程
+    submitAndCreate() {},
+    // 提交
     submit() {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            createOrg(this.form)
+            addKnowledgeCatalog(this.form)
               .then(() => {
                 this.$message.success('创建成功')
                 this.$emit('refresh')
@@ -186,7 +147,7 @@ export default {
               })
           } else {
             this.loading = true
-            editOrg(this.form)
+            updateKnowledgeCatalog(this.form)
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
@@ -203,79 +164,34 @@ export default {
         }
       })
     },
+    // 新建目录
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
     },
+    // 新建子目录
     createChild(row) {
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
-      this.handleOrgNodeClick(row)
-      // this.form.parentOrgId = row.parentOrgId
-      this.form.parentOrgType = row.orgType
-      this.loadRadio()
+      this.form = _.cloneDeep(row)
+      this.form.parentId = row.id
+      this.form.name = ''
+      this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
-      this.loadOrgTree()
     },
     edit(row) {
       this.type = 'edit'
-      let leadersIdList = []
-      if (row.leaders.length > 0) {
-        //有负责人数据
-        leadersIdList = this.turnToLevelArray(row.leaders)
-        this.allUserIdArr = JSON.parse(JSON.stringify(leadersIdList))
-      } else {
-        this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
-      }
-      this.form = JSON.parse(JSON.stringify(row))
-      this.parentOrgIdLabel = this.findOrg(row.parentOrgId).orgName
-      this.form.parentOrgType = this.findOrg(row.parentOrgId).orgType
-      this.loadRadio(true)
+      this.form = _.cloneDeep(row)
+      this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
       this.loadOrgTree()
-    },
-    //单个uesr数据转换成按级别分的数组
-    turnToLevelArray(data = []) {
-      let responsibleList = []
-      const maxLevel = Math.max.apply(
-        Math,
-        data.map((item) => item.level)
-      )
-      for (var j = 0; j < maxLevel; j++) {
-        responsibleList.push({
-          level: j + 1,
-          userIdArr: []
-        })
-      }
-      data.map((item) => {
-        responsibleList[item.level - 1]['userIdArr'].push(item.userId)
-      })
-      return responsibleList
-    },
-
-    //责任人可搜索条件
-    searchFilter(val) {
-      if (val) {
-        //val存在
-        this.leaderListCopy = JSON.parse(JSON.stringify(this.leaderList))
-        this.leaderList = this.leaderListCopy.filter((item) => {
-          if (
-            !!~item.label.indexOf(val) ||
-            !!~item.label.toUpperCase().indexOf(val.toUpperCase())
-          ) {
-            return true
-          }
-        })
-      }
     },
     findOrg(id) {
       let org = {}
       function deep(arr) {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].orgId === id) {
+          if (arr[i].id === id) {
             org = arr[i]
             return
           }
@@ -288,7 +204,7 @@ export default {
       return org
     },
     handleClose() {
-      this.form = { orgType: '', parentOrgId: '' }
+      this.form = { parentId: '' }
       this.radioDisable = {
         Company: false,
         Department: false,
@@ -296,28 +212,10 @@ export default {
       }
       this.$emit('changevisible', false)
     },
-    loadRadio(noChangeType) {
-      this.radioDisable = this.$options.data().radioDisable
-      if (this.form.parentOrgType === 'Enterprise') {
-        if (!noChangeType) this.form.orgType = 'Company'
-      } else if (this.form.parentOrgType === 'Company') {
-        if (!noChangeType) this.form.orgType = 'Department'
-      } else if (this.form.parentOrgType === 'Department') {
-        this.radioDisable.Company = true
-        if (!noChangeType) this.form.orgType = 'Department'
-      } else if (this.form.parentOrgType === 'Group') {
-        this.radioDisable.Company = true
-        this.radioDisable.Department = true
-        if (!noChangeType) this.form.orgType = 'Group'
-      }
-    },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.form.parentOrgId = data.orgId
-        this.parentOrgIdLabel = data.orgName
-        this.form.parentOrgType = data.orgType
-        this.loadRadio()
-        if (this.type !== 'createChild') this.$refs.parentOrgId && this.$refs.parentOrgId.blur()
+        this.form.parentId = data.id
+        this.parentOrgIdLabel = data.name
       }
     }
   }
