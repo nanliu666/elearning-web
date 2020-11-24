@@ -1,5 +1,6 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
+import TrainingEdit from '@/views/training/trainingEdit'
 import demoRoutes from './demo'
 import todo from './todo'
 export default [
@@ -11,6 +12,15 @@ export default [
     path: '/process/design',
     name: '流程设计器',
     component: ProcessDesign,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
+    path: '/training/edit',
+    name: '编辑培训',
+    component: TrainingEdit,
     meta: {
       keepAlive: true,
       isTab: false

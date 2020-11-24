@@ -1,5 +1,7 @@
 <template>
-  <div class="editDetail"></div>
+  <div class="editDetail">
+    配置详细信息
+  </div>
 </template>
 
 <script>

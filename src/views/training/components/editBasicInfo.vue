@@ -1,5 +1,7 @@
 <template>
-  <div class="editBasicInfo"></div>
+  <div class="editBasicInfo">
+    填写基本信息
+  </div>
 </template>
 
 <script>
