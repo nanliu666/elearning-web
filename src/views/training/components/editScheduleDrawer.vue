@@ -15,6 +15,7 @@
         <el-button
           type="primary"
           :loading="loading"
+          @click="submit"
         >
           {{ loading ? '提交中 ...' : '保存' }}
         </el-button>
@@ -27,6 +28,8 @@
 </template>
 
 <script>
+import { createUniqueID } from '@/util/util'
+import moment from 'moment'
 const EventColumns = [
   {
     itemType: 'radio',
@@ -35,22 +38,22 @@ const EventColumns = [
     required: true,
     span: 24,
     options: [
-      { label: '面授课程', value: 'course' },
-      { label: '活动', value: 'event' }
+      { label: '面授课程', value: '1' },
+      { label: '活动', value: '2' }
     ]
   },
-  { itemType: 'datePicker', span: 24, required: true, prop: 'eventDate', label: '活动日期' },
+  { itemType: 'datePicker', span: 24, required: true, prop: 'todoDate', label: '活动日期' },
   {
     itemType: 'timePicker',
     span: 24,
     required: true,
-    prop: 'eventTime',
+    prop: 'todoTime',
     isRange: true,
     label: '活动时间'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'eventTheme', label: '活动主题' },
-  { itemType: 'input', span: 24, required: true, prop: 'eventHost', label: '主持人' },
-  { itemType: 'input', span: 24, prop: 'eventLocation', label: '授课地点' }
+  { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
+  { itemType: 'input', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
+  { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const CourseColumns = [
   {
@@ -60,16 +63,15 @@ const CourseColumns = [
     label: '类型',
     required: true,
     options: [
-      { label: '面授课程', value: 'course' },
-      { label: '活动', value: 'event' }
+      { label: '面授课程', value: '1' },
+      { label: '活动', value: '2' }
     ]
   },
   {
     itemType: 'datePicker',
     span: 24,
     required: true,
-    prop: 'courseDate',
-    type: 'daterange',
+    prop: 'todoDate',
     label: '授课日期'
   },
   {
@@ -77,7 +79,10 @@ const CourseColumns = [
     span: 24,
     required: true,
     isRange: true,
-    prop: 'courseTime',
+    pickerOptions: {
+      step: '00:15'
+    },
+    prop: 'todoTime',
     label: '授课时间'
   },
   {
@@ -88,36 +93,36 @@ const CourseColumns = [
     label: '关联课程',
     load: () => Promise.resolve({ data: [] })
   },
-  { itemType: 'input', span: 24, disabled: true, prop: 'courseTeacher', label: '讲师' },
-  { itemType: 'input', span: 24, prop: 'courseLocation', label: '授课地点' }
+  { itemType: 'input', span: 24, disabled: true, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
+const modelCopy = {
+  type: '1',
+  todoDate: null,
+  todoTime: [new Date(), new Date()],
+  theme: '',
+  lecturerName: null,
+  lecturerId: null,
+  address: '',
+  courseId: null,
+  courseName: null
+}
 export default {
   name: 'EditScheduleDrawer',
   props: {
-    schedule: { type: Object, default: null },
+    schedule: { type: Object, default: () => ({}) },
     visible: { type: Boolean, default: false }
   },
   data() {
     return {
       loading: false,
       columns: CourseColumns,
-      model: {
-        type: 'course',
-        eventDate: '',
-        eventTime: [],
-        eventTheme: '',
-        eventHost: '',
-        eventLocation: '',
-        courseDate: '',
-        courseTime: [],
-        course: null,
-        courseLocation: ''
-      }
+      model: modelCopy
     }
   },
   computed: {
     title() {
-      if (this.schedule && this.schedule.scheduleId) {
+      if (_.isNumber(this.schedule.id)) {
         return '编辑线下日程'
       } else {
         return '创建线下日程'
@@ -136,10 +141,24 @@ export default {
   watch: {
     'model.type': {
       handler(value) {
-        if (value === 'course') {
+        if (value === '1') {
           this.columns = CourseColumns
         } else {
           this.columns = EventColumns
+        }
+      }
+    },
+    schedule(value) {
+      this.model = {
+        ...modelCopy,
+        ...value
+      }
+      if (value.todoDate) {
+        this.model.todoDate = moment(value.todoDate).toDate()
+        if (value.todoTime) {
+          this.model.todoTime = value.todoTime.map((time) =>
+            moment(value.todoDate + ' ' + time).toDate()
+          )
         }
       }
     }
@@ -149,8 +168,16 @@ export default {
       this.innnerVisible = false
     },
     submit() {
-      this.$refs.form.validate().then(function() {
-        // console.log('校验通过')
+      this.$refs.form.validate().then(() => {
+        const data = this.model
+        data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
+        data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
+        if (!_.isNumber(this.schedule.id)) {
+          this.$emit('submit', { ...data, id: createUniqueID() })
+        } else {
+          this.$emit('submit', data)
+        }
+        this.close()
       })
     }
   }
