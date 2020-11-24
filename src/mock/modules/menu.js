@@ -220,7 +220,7 @@ const res = {
             menuName: '原始菜单管理',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'system_menu_all',
             alias: 'menuAll ',
             path: '/system/menuAll',
