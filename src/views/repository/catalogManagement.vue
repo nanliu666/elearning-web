@@ -5,7 +5,7 @@
         slot="rightMenu"
         type="primary"
         size="medium"
-        @click="handleAdd"
+        @click="$refs.orgEdit.create()"
       >
         新建目录
       </el-button>
@@ -76,32 +76,46 @@
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
           >
-            删除
+            批量删除
           </el-button>
         </template>
         <template #status="{row}">
-          {{ row.status === 0 ? '已启用' : '已停用' }}
+          {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
               type="text"
+              :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status === 0 ? '停用' : '启用' }}
+              {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
               type="text"
-              @click="handleOrgEdit(row)"
+              @click="handleAuth(row)"
             >
-              编辑
+              权限配置
             </el-button>
-            <el-button
-              type="text"
-              @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
+            <el-dropdown @command="handleCommand($event, row)">
+              <el-button
+                type="text"
+                style="margin-left: 10px"
+              >
+                <i class="el-icon-arrow-down el-icon-more" />
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="edit">
+                  编辑
+                </el-dropdown-item>
+                <el-dropdown-item command="delete">
+                  删除
+                </el-dropdown-item>
+                <el-dropdown-item command="addChild">
+                  新建子目录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
         </template>
       </common-table>
@@ -139,7 +153,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'createName',
+    prop: 'creatorName',
     minWidth: 120
   },
   {
@@ -155,7 +169,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 100
   }
@@ -175,7 +189,7 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      checkColumn: ['name', 'status', 'createName', 'updateTime'],
+      checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: {
         requireOptions: [
           {
@@ -238,13 +252,72 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 如果父级停用，子级的启用按钮需要置灰处理
+    getButtonDisabled(row) {
+      let target = {}
+      const loop = function(data) {
+        _.each(data, (item) => {
+          if (row.parentId === item.id) {
+            target = item
+          }
+          if (!_.isEmpty(item.children)) {
+            loop(item.children)
+          }
+        })
+      }
+      loop(this.tableData)
+      const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
+      return isDisabled
+    },
+    // 权限配置窗口
+    handleAuth() {
+      this.$message.warning('正在开发中...')
+    },
+    // 多种操作
+    async handleCommand($event, row) {
+      const TYPE_COMMAND = {
+        delete: this.handleDelete,
+        edit: this.handleOrgEdit,
+        addChild: this.handleAddChild
+      }
+      TYPE_COMMAND[$event](row)
+    },
+    // 具体的删除函数
+    deleteFun(id) {
+      deleteKnowledgeCatalog({ id }).then(() => {
+        this.loadTableData()
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      })
+    },
+    // 删除检测
+    deleteCheck() {},
+    // 单个删除
+    handleDelete(row) {
+      let hasChildren = !_.isEmpty(row.children)
+      if (hasChildren) {
+        this.$message.error('很抱歉，您选中的目录下存在子目录，请先将子目录调整后再删除!')
+      } else {
+        this.$confirm('您确定要删除选中的目录吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.deleteFun(row.id)
+        })
+      }
+    },
+    // 批量删除
     deleteSelected(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      this.deleteFun(selectedIds)
+      this.deleteFun(selectedIds.join(','))
     },
+    // 加载函数
     async loadTableData() {
       if (this.tableLoading) {
         return
@@ -255,13 +328,8 @@ export default {
         getKnowledgeCatalogList(params).then((res) => {
           this.tableData = res
           this.tableLoading = false
-
-          if (this.searchParams.orgName) {
-            let newData = []
-            this.recursion(this.data, newData)
-            this.data = newData
-          }
         })
+        this.$refs.orgEdit.loadOrgTree()
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -271,75 +339,62 @@ export default {
     changevisible(data) {
       this.createOrgDailog = data
     },
-
-    /**
-     *  @author guanfenda
-     *  @desc 处理扁平化数组
-     * */
-    recursion(data, newData) {
-      data.filter((item) => {
-        let it = JSON.parse(JSON.stringify(item))
-        it.children && delete it.children
-        newData.push(it)
-        item.children && item.children.length > 0 && this.recursion(item.children, newData)
-      })
-    },
+    // 搜索
     handleSearch(params) {
       this.searchParams = params
       this.loadTableData()
     },
-    async deleteFun(id) {
-      await deleteKnowledgeCatalog(id)
-      await this.loadTableData()
-      this.$message({
-        type: 'success',
-        message: '删除成功!'
-      })
+    // 添加子目录
+    handleAddChild(row) {
+      this.$refs.orgEdit.createChild(row)
     },
-    handleDelete(row) {
-      let hasChildren = !_.isEmpty(row.children)
-      let content = '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。'
-      let deleteText = '您确定要删除选中的目录吗？'
-      this.$confirm(`${hasChildren ? content : ''}${deleteText}`, '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.deleteFun(row.id)
-      })
-    },
-    handleAdd() {
-      this.$refs.orgEdit.create()
-    },
+    // 编辑目录
     handleOrgEdit(row) {
       this.$refs.orgEdit.edit(row)
-    },
-    handleStatusFun(row) {
-      updateStatusKnowledgeCatalog({ id: row.id, status: row.status })
     },
     /**
      * 处理停用启用
      */
     handleStatus(row) {
+      // 停启用当前目录是否存在子目录
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status === 0 ? '停用' : '启用'
+      const statusText = row.status === '0' ? '停用' : '启用'
       const stopContent = `您确定要停用该目录吗吗？停用后，该目录${
         hasChildren ? '及其子目录' : ''
       }将暂停使用。`
+      // 获取到当前目录以及子目录的id集合
+      let ids = this.getDeepIds(row)
+      const params = { ids, status: row.status === '0' ? 1 : 0 }
       const startContent = `您确定要启用该目录${hasChildren ? '及其子目录' : ''}吗？`
-      this.$confirm(`${row.status === 0 ? stopContent : startContent}`, '提醒', {
+      this.$confirm(`${row.status === '0' ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(async () => {
-        await this.handleStatusFun(row)
-        await this.loadTableData()
-        this.$message({
-          type: 'success',
-          message: `${statusText}成功!`
+      }).then(() => {
+        updateStatusKnowledgeCatalog(params).then(() => {
+          this.loadTableData()
+          this.$message({
+            type: 'success',
+            message: `${statusText}成功!`
+          })
         })
       })
     },
+    // 递归获取所有的停启用的id集合
+    getDeepIds(row) {
+      let ids = []
+      const deep = function(row) {
+        ids.push(row.id)
+        if (!_.isEmpty(row.children)) {
+          _.each(row.children, (item) => {
+            deep(item)
+          })
+        }
+      }
+      deep(row)
+      return ids
+    },
+    // 跳转排序
     toSort() {
       this.$router.push({ path: '/repository/catalogSort', query: { type: 'catalog' } })
     }
