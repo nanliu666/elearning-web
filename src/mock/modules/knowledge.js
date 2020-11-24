@@ -83,6 +83,9 @@ export default ({ mock }) => {
   Mock.mock(new RegExp('/manage/v1/knowledge/list/updateStatus' + '(\\?.*)?$'), 'post', (req) => {
     return _.defaults({ req }, RESPONSE_COMMON)
   })
+  Mock.mock(new RegExp('/manage/v1/knowledge/list/move' + '(\\?.*)?$'), 'post', (req) => {
+    return _.defaults({ req }, RESPONSE_COMMON)
+  })
   Mock.mock(new RegExp('/manage/v1/knowledge/list/toping' + '(\\?.*)?$'), 'post', (req) => {
     return _.defaults({ req }, RESPONSE_COMMON)
   })
@@ -119,13 +122,13 @@ export default ({ mock }) => {
     return _.assign({ response: { data: response, totalNum: 100 } }, RESPONSE_COMMON)
   })
   Mock.mock(new RegExp('/manage/v1/knowledge/manage/details' + '(\\?.*)?$'), 'get', (req) => {
-    const tags = _.times(2, () => {
+    const tags = _.times(2, () =>
       Mock.mock({
         id: '@integer(100000, 10000000000)',
         name: '@ctitle(1, 10)'
       })
-    })
-    let time = Math.floor(Math.random() * 4)
+    )
+    let time = Math.ceil(Math.random() * 4)
     const attachments = _.times(time, () =>
       Mock.mock({
         id: '@integer(100000, 10000000000)',
@@ -146,7 +149,7 @@ export default ({ mock }) => {
       'status|1': [0, 1],
       'isTop|1': [0, 1],
       tags,
-      catalogIds: [{ id: '@integer(100000, 10000000000)' }],
+      catalogId: '@integer(100000, 10000000000)',
       attachments
     })
     window.console.debug(`${req.type} ${req.url}`, { req, response })
