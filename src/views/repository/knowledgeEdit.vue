@@ -4,15 +4,12 @@
     class="NewsEdit wrapper"
   >
     <page-header
-      title="创建资源"
+      :title="pageTitle"
       :back="() => handleBack()"
       show-back
     />
 
-    <basic-container
-      v-loading="loading"
-      block
-    >
+    <basic-container block>
       <common-form
         ref="form"
         :columns="formColumns"
@@ -20,24 +17,35 @@
       >
         <template #attachments>
           <common-upload
-            v-model="uploader.fileList"
-            :limit="uploader.limit"
-            class="uploader"
+            :limit="uploaderLimit"
+            :before-upload="beforeUpload"
+            @getValue="getValue"
           >
             <template #default>
               <div
-                v-if="_.size(uploader.fileList) < uploader.limit"
+                v-if="_.size(formData.attachments) < uploaderLimit"
                 style="display: flex;"
               >
                 <el-button>上传</el-button>
               </div>
             </template>
-            <template slot="tip">
-              <span class="uploader__description">
-                支持上传png、jpg、jpge格式文件，单个文件大小＜5MB，最多5个文件
-              </span>
-            </template>
           </common-upload>
+          <ul class="uploader-ul">
+            <li
+              v-for="(item, index) in formData.attachments"
+              :key="index"
+              class="uploader-li"
+            >
+              <span
+                class="uploader-file"
+                @click.stop="previewFile(item)"
+              >{{ item.fileName }}</span>
+              <i
+                class="el-icon-close"
+                @click.stop="deleteUpload(item)"
+              />
+            </li>
+          </ul>
         </template>
         <template #download>
           <el-switch v-model="allow_download_swtich" />
@@ -45,7 +53,10 @@
       </common-form>
 
       <div class="container__editor">
-        <tinymce v-model="formData.introduction" />
+        <tinymce
+          ref="tinymceRef"
+          v-model="formData.introduction"
+        />
       </div>
 
       <div class="container__buttons">
@@ -72,31 +83,18 @@
 import {
   addKnowledgeList,
   updateKnowledge,
-  getKnowledgeManageTaglist,
+  // getKnowledgeManageTaglist,
   getKnowledgeCatalogList,
   getKnowledgeManageDetails
 } from '@/api/knowledge/knowledge'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
-// 接口需要的参数
-const API_PARAMS = [
-  'id',
-  'resName',
-  'catalogId',
-  'uploadType',
-  'resUrl',
-  'introduction',
-  'provideName',
-  'allow_download',
-  'attachments'
-]
 
 export default {
   name: 'KnowledgeEdit',
   components: {
     CommonUpload
   },
-
   data() {
     const FORM_COLUMNS = [
       {
@@ -138,22 +136,30 @@ export default {
       {
         itemType: 'input',
         label: '提供人',
-        prop: 'provideName',
+        prop: 'providerName',
         span: 11,
         offset: 0
       },
+      // {
+      //   itemType: 'select',
+      //   label: '添加标签',
+      //   prop: 'tags',
+      //   required: false,
+      //   filterable: true,
+      //   multiple: true,
+      //   props: {
+      //     label: 'name',
+      //     value: 'id'
+      //   },
+      //   options: [],
+      //   span: 11,
+      //   offset: 1
+      // },
       {
-        itemType: 'select',
-        label: '添加标签',
-        prop: 'tags',
+        itemType: 'slot',
+        label: '是否允许下载',
+        prop: 'download',
         required: false,
-        filterable: true,
-        multiple: true,
-        props: {
-          label: 'name',
-          value: 'id'
-        },
-        options: [],
         span: 11,
         offset: 1
       },
@@ -173,57 +179,25 @@ export default {
             value: 1
           }
         ]
-      },
-      {
-        itemType: 'slot',
-        label: '是否允许下载',
-        prop: 'download',
-        required: false,
-        span: 12
       }
     ]
-    const UPLOAD_FILE = {
-      itemType: 'slot',
-      label: '附件',
-      prop: 'attachments',
-      props: {
-        label: 'jobName',
-        value: 'id'
-      },
-      required: true,
-      span: 24
-    }
-    const UPLOAD_INPUT = {
-      itemType: 'input',
-      label: '资源路径',
-      prop: 'resUrl',
-      required: true,
-      span: 24
-    }
+
     return {
-      UPLOAD_FILE,
-      UPLOAD_INPUT,
+      pageTitle: '',
       formColumns: FORM_COLUMNS,
-      loading: false,
       allow_download_swtich: true,
       formData: {
         resName: '',
         catalogId: '',
-        provideName: '',
-        tags: [],
+        providerName: '',
+        // tags: [],
         uploadType: 0, // 0本地文件 1链接文件
         resUrl: '',
         allow_download: 0, //是否运行下载 0允许 1不允许
         introduction: '',
         attachments: []
       },
-      uploader: {
-        fileList: [],
-        limit: 5,
-        loading: false,
-        previewVisible: false,
-        progress: 0
-      },
+      uploaderLimit: 5,
       submitting: false,
       hasEdit: false // 用于标记是否进行了修改
     }
@@ -237,10 +211,7 @@ export default {
     _formData() {
       const formData = _.cloneDeep(this.formData)
       formData.introduction = _.escape(formData.introduction)
-      return _(null)
-        .assign(formData)
-        .pick(API_PARAMS)
-        .value()
+      return formData
     },
     id() {
       return this.$route.query.id || null
@@ -259,16 +230,38 @@ export default {
       deep: true,
       immediate: true,
       handler(val) {
-        this.formColumns[6] = val === 0 ? this.UPLOAD_FILE : this.UPLOAD_INPUT
+        const UPLOAD_FILE = {
+          itemType: 'slot',
+          label: '附件',
+          prop: 'attachments',
+          props: {
+            label: 'jobName',
+            value: 'id'
+          },
+          required: false,
+          span: 24
+        }
+        var checkAge = (rule, value, callback) => {
+          if (!this.checkURL(value)) {
+            callback(new Error('正确的url路径'))
+          } else {
+            callback()
+          }
+        }
+        const UPLOAD_INPUT = {
+          itemType: 'input',
+          label: '资源路径',
+          prop: 'resUrl',
+          required: false,
+          rules: [{ validator: checkAge, trigger: 'blur' }],
+          span: 24
+        }
+        let index = _.findIndex(this.formColumns, (item) => {
+          return item.prop === 'uploadType'
+        })
+        this.formColumns[index + 1] = val === 0 ? UPLOAD_FILE : UPLOAD_INPUT
       }
     },
-    // 同步uploader与表单
-    'uploader.fileList'(val) {
-      const file = _.head(val)
-      const url = _.get(file, 'fileUrl', null)
-      this.$set(this.formData, 'attachments', url)
-    },
-
     formData: {
       deep: true,
       handler() {
@@ -277,39 +270,99 @@ export default {
       }
     }
   },
-
   mounted() {
+    this.pageTitle = this.id ? '编辑资源' : '创建资源'
     this.initData()
   },
   methods: {
+    // 检测资源路径的格式
+    checkURL(URL) {
+      var sRegex =
+        '^((https|http|ftp|rtsp|mms)?://)' +
+        '?(([0-9a-z_!~*\'().&=+$%-]+: )?[0-9a-z_!~*\'().&=+$%-]+@)?' + //ftp的user@
+        '(([0-9]{1,3}.){3}[0-9]{1,3}' + // IP形式的URL- 199.194.52.184
+        '|' + // 允许IP和DOMAIN（域名）
+        '([0-9a-z_!~*\'()-]+.)*' + // 域名- www.
+        '([0-9a-z][0-9a-z-]{0,61})?[0-9a-z].' + // 二级域名
+        '[a-z]{2,6})' + // first level domain- .com or .museum
+        '(:[0-9]{1,4})?' + // 端口- :80
+        '((/?)|' + // a slash isn't required if there is no file name
+        '(/[0-9a-z_!~*\'().;?:@&=+$,%#-]+)+/?)$'
+      var re = new RegExp(sRegex)
+      if (re.test(URL)) {
+        return true
+      }
+      return false
+    },
+    // 新增附件时，直接赋值
+    getValue(value) {
+      _.each(value, (item) => {
+        item.fileName = item.localName
+      })
+      let index = _.findIndex(
+        this.formData.attachments,
+        (item) => item.fileName === value[0].fileName
+      )
+      if (index > -1) {
+        this.$message.error('附件已存在，请勿重复上传')
+      }
+      this.formData.attachments = _.uniqBy([...this.formData.attachments, ...value], 'fileName')
+    },
+    // 上传格式校验
+    beforeUpload(file) {
+      const isLt100M = file.size / 1024 / 1024 < 10
+      if (!isLt100M) {
+        this.$message.error('上传文件大小不能超过 10MB!')
+      }
+      return isLt100M
+    },
+    // 预览附件
+    previewFile(data) {
+      window.open(data.fileUrl)
+    },
+    // 删除上传文件
+    deleteUpload(data) {
+      let index = _.findIndex(this.formData.attachments, (item) => {
+        return item.uid === data.uid
+      })
+      this.formData.attachments.splice(index, 1)
+    },
     /**
      * 初始选择数据
      */
     initData() {
       let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
-      let tagsList = _.find(this.formColumns, { prop: 'tags' })
-      if (tagsList) {
-        getKnowledgeManageTaglist().then((res) => {
-          tagsList.options = res
-        })
-      }
+      // let tagsList = _.find(this.formColumns, { prop: 'tags' })
+      // if (tagsList) {
+      //   getKnowledgeManageTaglist().then((res) => {
+      //     tagsList.options = res
+      //   })
+      // }
       if (catalogId) {
         getKnowledgeCatalogList().then((res) => (catalogId.props.treeParams.data = res))
       }
+      if (this.id) {
+        this.loadDetail()
+      }
     },
     // 点击完成
-    handlePublishBtnClick() {
+    handlePublishBtnClick(isContinue = false) {
       this.validate()
         .then(async () => {
           try {
             this.submitting = true
             // 区分是编辑还是新增
             _.isNull(this.id)
-              ? await this.createKnowledgeFun(_.pickBy(this._formData))
-              : await this.updateKnowledgeFun(_.pickBy(this._formData))
+              ? await this.createKnowledgeFun(this._formData)
+              : await this.updateKnowledgeFun(this._formData)
             this.$message.success('发布成功')
             this.hasEdit = false
-            this.handleBack()
+            if (!isContinue) {
+              this.handleBack()
+            }
+            this.$refs.form.resetFields()
+            this.formData.introduction = ''
+            this.clearValidate()
           } catch (error) {
             this.$message.error(error.message)
           } finally {
@@ -320,56 +373,20 @@ export default {
           this.$message.error('请填写完整必填项')
         })
     },
-    handleContinueAdd() {},
+    handleContinueAdd() {
+      this.handlePublishBtnClick(true)
+    },
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)
-      // this.handleLeave().then(() => {
-      //   this.$router.back()
-      //   this.$store.commit('DEL_TAG', this.tag)
-      // })
-    },
-    handleUploaderRemove() {
-      this.uploader.fileList = []
-    },
-    // 处理用户离开进行保存等相关操作
-    async handleLeave() {
-      // 如果表单为空 或 用户没有对数据进行编辑
-      if (
-        _(this.formData)
-          .pickBy()
-          .isEmpty() ||
-        !this.hasEdit
-      ) {
-        return
-      } else {
-        try {
-          await this.$confirm(
-            '是否对已编辑的内容进行保存，保存的新闻可以在草稿箱中重新编辑',
-            '提示',
-            {
-              confirmButtonText: '保存',
-              cancelButtonText: '不保存',
-              type: 'warning'
-            }
-          )
-        } catch (error) {
-          // 不保存操作
-        }
-      }
     },
     // 加载详细
     async loadDetail(id = this.id) {
-      this.loading = true
-      const data = _(await getKnowledgeManageDetails({ id }))
-        .pick(API_PARAMS)
-        .omit('id')
-        .value()
+      const data = await getKnowledgeManageDetails({ id })
       for (let key in data) {
         this.$set(this.formData, key, data[key])
       }
       this.formData.introduction = _.unescape(this.formData.introduction) // 反转义获取 dom
-      this.loading = false
       // 修改了formData 重置标记
       this.$nextTick(() => (this.hasEdit = false))
       return data
@@ -390,17 +407,26 @@ export default {
     },
     // 新增资源
     async createKnowledgeFun(params) {
-      this.loading = true
       const data = await addKnowledgeList(params)
-      this.loading = false
       return data
     },
     // 更新数据
     async updateKnowledgeFun(params) {
-      this.loading = true
-      await updateKnowledge(_.assign({ id: this.id }, params))
-      this.loading = false
-      return { id: this.id }
+      const API_PARAMS = [
+        'allowDownload',
+        'attachments',
+        'catalogId',
+        'introduction',
+        'knowledgeId',
+        'providerName',
+        'resName',
+        'resUrl',
+        'updateTime',
+        'uploadType'
+      ]
+      const param = _.assign({ knowledgeId: this.id }, _.pick(params, API_PARAMS))
+      await updateKnowledge(param)
+      return { knowledgeId: this.id }
     }
   }
 }
@@ -417,17 +443,19 @@ $color_font_uploader: #a0a8ae;
     height: 0;
     min-height: calc(100% - 92px);
   }
-  .uploader {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    .uploader__description {
-      font-size: smaller;
-      color: $color_placeholder;
-    }
-  }
 }
 .container__buttons {
   margin-top: 1rem;
+}
+.uploader-ul {
+  .uploader-li {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    cursor: pointer;
+    i {
+      margin-left: 10px;
+    }
+  }
 }
 </style>

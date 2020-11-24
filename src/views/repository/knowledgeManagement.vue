@@ -72,15 +72,20 @@
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
         </template>
-        <template #tags="{row}">
-          <el-tag
-            v-for="(item, index) in row.tags"
-            :key="index"
-            style="margin-right: 10px"
-          >
-            {{ _.get(item, 'name', '') }}
-          </el-tag>
-        </template>
+        <!-- <template #tags="{row}">
+          <div v-if="_.size(row.tags) > 0">
+            <el-tag
+              v-for="(item, index) in row.tags"
+              :key="index"
+              style="margin-right: 10px"
+            >
+              {{ _.get(item, 'name', '') }}
+            </el-tag>
+          </div>
+          <div v-else>
+            {{ '' }}
+          </div>
+        </template> -->
         <template
           slot="multiSelectMenu"
           slot-scope="{ selection }"
@@ -113,13 +118,13 @@
             class="top-button"
             @click="handleTop(row)"
           >
-            {{ row.isTop === 0 ? '置顶' : '已置顶' }}
+            {{ row.topTime ? '已置顶' : '置顶' }}
           </el-button>
           <el-button
             type="text"
             @click="handleStatus(row)"
           >
-            {{ row.status === 0 ? '下架' : '上架' }}
+            {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
 
           <el-dropdown @command="handleCommand($event, row)">
@@ -130,14 +135,51 @@
               <i class="el-icon-arrow-down el-icon-more" />
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="deleteOrg">
+              <el-dropdown-item command="editKnow">
+                编辑
+              </el-dropdown-item>
+              <el-dropdown-item command="deleteKnow">
                 删除
+              </el-dropdown-item>
+              <el-dropdown-item command="moveKnow">
+                移动
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
       </common-table>
     </basic-container>
+
+    <el-dialog
+      title="移动目录"
+      :visible.sync="dialogTableVisible"
+      append-to-body
+      width="500px"
+    >
+      <div style="margin-bottom: 15px">
+        所在目录：{{ moveKnowledgeRow.catalogName }}
+      </div>
+      <common-form
+        ref="form"
+        :columns="formColumns"
+        :model="formData"
+      >
+      </common-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogTableVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="saveMove"
+        >
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -148,7 +190,8 @@ import {
   topingKnowledge,
   updateStatusKnowledgeList,
   getKnowledgeCatalogList,
-  getKnowledgeManageTaglist
+  getKnowledgeManageTaglist,
+  moveKnowledge
 } from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
 
@@ -177,20 +220,20 @@ const TABLE_COLUMNS = [
     prop: 'uploadType',
     minWidth: 100
   },
-  {
-    label: '标签',
-    slot: true,
-    prop: 'tags',
-    minWidth: 150
-  },
+  // {
+  //   label: '标签',
+  //   slot: true,
+  //   prop: 'tags',
+  //   minWidth: 150
+  // },
   {
     label: '创建人',
-    prop: 'createName',
+    prop: 'creatorName',
     minWidth: 100
   },
   {
     label: '更新时间',
-    prop: 'publishTime',
+    prop: 'updateTime',
     minWidth: 100
   }
 ]
@@ -276,6 +319,35 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+const FORM_COLUMNS = [
+  {
+    label: '移动到新目录',
+    itemType: 'treeSelect',
+    prop: 'catalogId',
+    required: true,
+    span: 24,
+    props: {
+      selectParams: {
+        placeholder: '请选择所在目录',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        },
+        required: true
+      }
+    }
+  }
+]
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -288,6 +360,12 @@ export default {
   },
   data() {
     return {
+      moveKnowledgeRow: {},
+      formColumns: FORM_COLUMNS,
+      formData: {
+        catalogId: ''
+      },
+      dialogTableVisible: false,
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       page: {
@@ -318,23 +396,23 @@ export default {
     this.refreshTableData()
   },
   methods: {
-    initSearchData() {
-      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
-      let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
-      if (catalogId) {
-        getKnowledgeCatalogList().then(
-          (res) =>
-            (catalogId.config.treeParams.data = _.concat(
-              [
-                {
-                  id: '',
-                  name: '全部'
-                }
-              ],
-              res
-            ))
+    getCategoryList() {
+      return getKnowledgeCatalogList().then((res) => {
+        return _.concat(
+          [
+            {
+              id: '',
+              name: '全部'
+            }
+          ],
+          res
         )
-      }
+      })
+    },
+    async initSearchData() {
+      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
+      let moveCatalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
       if (tagId) {
         getKnowledgeManageTaglist().then(
           (res) =>
@@ -349,47 +427,90 @@ export default {
             ))
         )
       }
+      let catalogList = await this.getCategoryList()
+      if (catalogId) {
+        catalogId.config.treeParams.data = catalogList
+      }
+      if (moveCatalogId) {
+        moveCatalogId.props.treeParams.data = _.drop(catalogList)
+      }
     },
-    multipleDeleteClick(selected) {
+    async multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      this.delFun(selectedIds)
-    },
-    // 置顶与取消置顶
-    async handleTop(rowData) {
-      await topingKnowledge({ id: rowData.id, isTop: rowData.isTop === 0 ? 1 : 0 })
-      this.$message.success(`${rowData.isTop === 0 ? '' : '取消'}置顶成功`)
-      this.loadTableData()
-    },
-    // 上架与下架
-    async handleStatus(rowData) {
-      await updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === 0 ? 1 : 0 })
-      this.$message.success(`${rowData.status === 0 ? '下架' : '上架'}成功`)
-      this.loadTableData()
-    },
-    async handleCommand($event, row) {
-      if ($event === 'deleteOrg') {
-        let that = this
-        this.$confirm('是否删除当前资源', '提示', {
-          confirmButtonText: '删除',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          that.delFun(row)
-        })
-      }
-    },
-    createResource() {
-      this.$router.push({
-        path: '/repository/knowledgeEdit'
-      })
-    },
-    async delFun(row) {
-      await deleteKnowledgeList({ id: row.id })
+      await deleteKnowledgeList({ id: selectedIds.join(',') })
       this.$message.success('删除成功')
       this.loadTableData()
+    },
+    // 置顶与取消置顶
+    handleTop(rowData) {
+      topingKnowledge({ id: rowData.id, isTop: rowData.topTime ? 0 : 1 }).then(() => {
+        this.$message.success(`${rowData.topTime ? '取消' : ''}置顶成功`)
+        this.loadTableData()
+      })
+    },
+    // 上架与下架
+    handleStatus(rowData) {
+      updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === '0' ? 1 : 0 }).then(
+        () => {
+          this.$message.success(`${rowData.status === '0' ? '下架' : '上架'}成功`)
+          this.loadTableData()
+        }
+      )
+    },
+    // 多种操作
+    async handleCommand($event, row) {
+      const TYPE_COMMAND = {
+        deleteKnow: this.delFun,
+        editKnow: this.editFun,
+        moveKnow: this.moveFun
+      }
+      TYPE_COMMAND[$event](row)
+    },
+    // 编辑
+    editFun(row) {
+      this.createResource(row.id)
+    },
+    // 打开移动弹窗
+    moveFun(row) {
+      this.dialogTableVisible = true
+      this.moveKnowledgeRow = row
+    },
+    // 保存移动
+    async saveMove() {
+      this.$refs.form.validate().then((data) => {
+        if (data) {
+          this.dialogTableVisible = false
+          moveKnowledge({ id: this.moveKnowledgeRow.id, catalogId: this.formData.catalogId }).then(
+            () => {
+              this.$message.success('移动成功')
+              this.loadTableData()
+            }
+          )
+        }
+      })
+    },
+    // 创建以及编辑资源
+    createResource(id) {
+      const path = { path: '/repository/knowledgeEdit' }
+      const fullPath = _.isObject(id)
+        ? path
+        : _.assign(path, { query: { id, tagName: '编辑资源' } })
+      this.$router.push(fullPath)
+    },
+    delFun(row) {
+      let that = this
+      this.$confirm('是否删除当前资源', '提示', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await deleteKnowledgeList({ id: row.id })
+        that.$message.success('删除成功')
+        that.loadTableData()
+      })
     },
     /**
      * 处理页码改变

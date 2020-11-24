@@ -3,13 +3,14 @@
     <page-header
       title="调整排序"
       show-back
+      :back="close"
     />
     <basic-container :block="true">
       <div class="treeBox">
         <el-tree
           v-loading="loading"
           :data="data"
-          node-key="orgId"
+          node-key="id"
           :props="{ label: 'name' }"
           default-expand-all
           draggable
@@ -55,22 +56,27 @@ export default {
     messageFun() {
       if (this.sameNameMessage) return
       this.$message.error({
-        message: '该组织名称在目标层级已存在',
+        message: '该目录名称在目标层级已存在',
         onClose: () => {
           this.sameNameMessage = false
         }
       })
     },
+    /**
+     * draggingNode: 当前拖拽点
+     * dropNode: 目标节点
+     */
     allowDrop(draggingNode, dropNode, type) {
+      // 同级节点前后移动
       if (type === 'prev' || type === 'next') {
-        let parentOrg = this.findParentOrg(dropNode.data.orgId)
-        let draggingNodeParent = this.findParentOrg(draggingNode.data.orgId)
-        if (parentOrg.orgId === draggingNodeParent.orgId) {
+        let parentOrg = this.findParentOrg(dropNode.data.id)
+        let draggingNodeParent = this.findParentOrg(draggingNode.data.id)
+        if (parentOrg.id === draggingNodeParent.id) {
           return true
         }
         if (parentOrg && parentOrg.children) {
           for (let i = 0; i < parentOrg.children.length; i++) {
-            if (parentOrg.children[i].orgName === draggingNode.data.orgName) {
+            if (parentOrg.children[i].name === draggingNode.data.name) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -79,9 +85,10 @@ export default {
         }
         return true
       } else if (type === 'inner') {
+        // 插入节点
         if (dropNode.data.children) {
           for (let i = 0; i < dropNode.data.children.length; i++) {
-            if (dropNode.data.children[i].orgName === draggingNode.data.orgName) {
+            if (dropNode.data.children[i].name === draggingNode.data.name) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -97,7 +104,7 @@ export default {
         arr.forEach((item) => {
           if (item.children) {
             for (let i = 0; i < item.children.length; i++) {
-              if (item.children[i].orgId === id) {
+              if (item.children[i].id === id) {
                 org = item
                 return
               }
@@ -116,13 +123,10 @@ export default {
         this.loading = false
       })
     },
-    goBack() {
-      this.$router.push('/orgs/orgManagement')
-    },
     close() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
       this.data = JSON.parse(JSON.stringify(this.oldData))
-      this.goBack()
+      this.$router.push('/repository/catalogManagement')
     },
     loadSort(arr) {
       arr.forEach((item, index) => {
@@ -137,10 +141,7 @@ export default {
       this.loading = true
       sortSaveKnowledgeCatalog(this.data).then(() => {
         this.$message.success('保存成功')
-        getKnowledgeCatalogList().then((res) => {
-          this.data = res
-          this.loading = false
-        })
+        this.close()
       })
     }
   }
@@ -176,7 +177,7 @@ export default {
 }
 /deep/ .basic-container {
   flex: 1;
-  height: calc(100% - 58px);
+  height: calc(100% - 98px);
   display: flex;
   flex-direction: column;
   .el-card {

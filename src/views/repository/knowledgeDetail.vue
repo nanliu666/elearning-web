@@ -9,16 +9,18 @@
         <div class="details-top">
           <div class="top-title">
             <span class="title-text">{{ konwledgeDetail.resName }}</span>
-            <span class="title-status">{{ konwledgeDetail.status | statusFilterer }}</span>
+            <el-tag :type="getStatusType(konwledgeDetail.status)">
+              {{ konwledgeDetail.status | statusFilterer }}
+            </el-tag>
           </div>
           <ul class="details-ul">
             <li class="details-li">
               <span class="li-label">创建人：</span>
-              <span class="li-value">{{ konwledgeDetail.createName }}</span>
+              <span class="li-value">{{ konwledgeDetail.creatorName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">更新时间：</span>
-              <span class="li-value">{{ konwledgeDetail.updateTime || new Date() }}</span>
+              <span class="li-value">{{ konwledgeDetail.updateTime }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">所在目录：</span>
@@ -34,11 +36,18 @@
                 konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
               }}</span>
             </li>
+            <li class="details-li">
+              <span class="li-label">是否允许下载：</span>
+              <span class="li-value">{{
+                konwledgeDetail.allowDownload === '0' ? '是' : '否'
+              }}</span>
+            </li>
             <li
-              v-if="konwledgeDetail.uploadType !== 0"
+              v-if="konwledgeDetail.uploadType === 1"
               class="details-li"
+              style="width: 100%;"
             >
-              <span class="li-label">资源地址：</span>
+              <span class="li-label">链接地址：</span>
               <span class="li-value">{{ konwledgeDetail.resUrl }}</span>
             </li>
           </ul>
@@ -49,7 +58,7 @@
               查看人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.view || 20 }}
+              {{ konwledgeDetail.watchNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -57,7 +66,7 @@
               收藏人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.start || 20 }}
+              {{ konwledgeDetail.collectNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -65,7 +74,7 @@
               评论人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.comment || 20 }}
+              {{ konwledgeDetail.commentNum }}
             </div>
           </li>
           <li class="bottom-li">
@@ -73,7 +82,7 @@
               下载人数
             </div>
             <div class="bottom-li-value">
-              {{ konwledgeDetail.download || 20 }}
+              {{ konwledgeDetail.downloadNum }}
             </div>
           </li>
         </div>
@@ -96,12 +105,38 @@
           附件
         </el-menu-item>
       </el-menu>
-      <div style="padding: 20px">
+      <div style="padding: 20px; min-height:32vh">
         <div
           v-if="activeIndex === '1'"
-          v-html="konwledgeDetail.introduction"
+          v-html="_.unescape(konwledgeDetail.introduction)"
         />
-        <div v-if="activeIndex === '2'"></div>
+        <section v-if="activeIndex === '2'">
+          <div class="image-ul">
+            <div
+              v-for="(item, index) in fileGroup.true"
+              :key="index"
+              class="image-li"
+            >
+              <el-image
+                style="width: 100px; height: 100px"
+                :src="item.url"
+                :preview-src-list="previewSrcList"
+              >
+              </el-image>
+            </div>
+          </div>
+          <ul
+            v-for="(item, index) in fileGroup.false"
+            :key="index"
+          >
+            <li
+              class="file-title"
+              @click="openFile(item.url)"
+            >
+              {{ item.fileName }}
+            </li>
+          </ul>
+        </section>
       </div>
     </basic-container>
   </div>
@@ -117,6 +152,8 @@ export default {
   },
   data() {
     return {
+      fileGroup: {},
+      previewSrcList: [],
       activeIndex: '1',
       konwledgeDetail: {}
     }
@@ -125,11 +162,50 @@ export default {
     this.initData()
   },
   methods: {
+    /**
+     * 标识状态
+     */
+    getStatusType(status) {
+      const TYPE_STATUS = {
+        0: 'danger',
+        1: 'success'
+      }
+      return TYPE_STATUS[status]
+    },
+    /**
+     * 预览除图片外的附件
+     */
+    openFile(url) {
+      window.open(url)
+    },
+    /**
+     * 初始数据，并处理附件
+     */
     initData() {
       getKnowledgeManageDetails({ id: this.$route.query.id }).then((res) => {
         this.konwledgeDetail = res
+        this.fileGroup = _.groupBy(this.konwledgeDetail.attachments, (item) => {
+          return this.fileTypeIsImage(item.fileName)
+        })
+        _.each(this.fileGroup.true, (item) => {
+          this.previewSrcList.push(item.url)
+        })
       })
     },
+    // 判断当前格式是否为图片类型的格式
+    fileTypeIsImage(fileName) {
+      const lastIndex = fileName.lastIndexOf('.')
+      const fileType = fileName.substr(lastIndex + 1, fileName.length)
+      const imageType = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff']
+      if (imageType.includes(fileType)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    /**
+     * 处理nav切换
+     */
     handleSelect(key) {
       this.activeIndex = key
     }
@@ -155,11 +231,6 @@ export default {
         font-weight: 550;
         margin-right: 10px;
       }
-      .title-status {
-        background-color: #d2f5e7;
-        color: #2a666b;
-        padding: 4px;
-      }
     }
     .details-ul {
       display: flex;
@@ -170,7 +241,7 @@ export default {
         display: flex;
         margin-bottom: 10px;
         .li-label {
-          min-width: 20%;
+          min-width: 80px;
           display: inline-block;
           color: #666666;
         }
@@ -202,5 +273,19 @@ export default {
       }
     }
   }
+}
+.image-ul {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  .image-li {
+    margin-right: 10px;
+    border: 1px solid #ccc;
+  }
+}
+.file-title {
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 </style>
