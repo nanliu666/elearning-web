@@ -86,14 +86,15 @@
         <el-button
           type="primary"
           size="medium"
+          @click="handleEditExamine(null)"
         >
           添加考试
         </el-button>
       </div>
       <common-table
-        :config="test.config"
-        :columns="test.columns"
-        :data="test.data"
+        :config="examine.config"
+        :columns="examine.columns"
+        :data="examine.data"
       >
         <template #handler="{row}">
           <el-button
@@ -120,12 +121,18 @@
       :course="course.editingRecord"
       @submit="courseSubmit"
     />
+    <EditExamineDrawer
+      :visible.sync="examine.drawerVisible"
+      :examine="examine.editingRecord"
+      @submit="courseSubmit"
+    />
   </div>
 </template>
 
 <script>
 import EditScheduleDrawer from './editScheduleDrawer'
 import EditCourseDrawer from './editCourseDrawer'
+import EditExamineDrawer from './editExamineDrawer'
 const ScheduleColumns = [
   {
     prop: 'time'
@@ -179,7 +186,7 @@ const TestConfig = {
 }
 export default {
   name: 'EditArrangement',
-  components: { EditScheduleDrawer, EditCourseDrawer },
+  components: { EditScheduleDrawer, EditCourseDrawer, EditExamineDrawer },
   data() {
     return {
       activeName: '1',
@@ -197,7 +204,7 @@ export default {
         editingRecord: {},
         data: []
       },
-      test: {
+      examine: {
         config: TestConfig,
         columns: TestColumns,
         drawerVisible: false,
@@ -211,7 +218,12 @@ export default {
       this.schedule.editingRecord = row
       this.schedule.drawerVisible = true
     },
-    // 在线课程
+    // 新增与编辑考试
+    handleEditExamine(row) {
+      this.examine.editingRecord = row
+      this.examine.drawerVisible = true
+    },
+    // 新增与编辑在线课程
     handleEditCourse(row) {
       this.course.editingRecord = row
       this.course.drawerVisible = true

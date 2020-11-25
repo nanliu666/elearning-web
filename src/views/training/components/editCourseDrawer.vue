@@ -88,7 +88,7 @@ export default {
             this.model = _.cloneDeep(this.course)
             this.title = '编辑在线课程'
           } else {
-            this.$refs.form.resetFields()
+            this.$refs.form && this.$refs.form.resetFields()
           }
         }
       }
