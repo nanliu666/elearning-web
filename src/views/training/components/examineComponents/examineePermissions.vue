@@ -8,18 +8,15 @@
 </template>
 
 <script>
-import { createUniqueID } from '@/util/util'
 import CustomSwitch from './customSwitch'
 const switchConfig = [
   {
     label: '允许考生查看本机资料(开卷考试)',
-    prop: 'isDecoil',
-    value: false
+    prop: 'isDecoil'
   },
   {
     label: '允许考生查看成绩',
     prop: 'openResults',
-    value: false,
     expand: {
       defaultValue: 0,
       pre: '考生在',
@@ -28,27 +25,22 @@ const switchConfig = [
   },
   {
     label: '允许考生查看答卷',
-    prop: 'openAnswerSheet',
-    value: false
+    prop: 'openAnswerSheet'
   },
   {
     label: '允许考生自己评卷',
-    prop: 'selfMarking',
-    value: false
+    prop: 'selfMarking'
   },
   {
     label: '允许考生查看标准答案',
-    prop: 'publicAnswers',
-    value: false
+    prop: 'publicAnswers'
   },
   {
     label: '允许考生报名参加考试',
-    prop: 'openEntrance',
-    value: false
+    prop: 'openEntrance'
   },
   {
     label: '考生报名考试需要审批',
-    value: false,
     prop: 'isExamine'
   }
 ]
@@ -60,9 +52,14 @@ export default {
   data() {
     return {
       switchConfig,
-      switchForm: {},
-      model: {
-        id: createUniqueID()
+      switchForm: {
+        isDecoil: 0,
+        openResults: 0,
+        openAnswerSheet: 0,
+        selfMarking: 0,
+        publicAnswers: 0,
+        openEntrance: 0,
+        isExamine: 0
       }
     }
   }
