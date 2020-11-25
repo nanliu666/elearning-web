@@ -17,6 +17,8 @@
       </ul>
       <div class="form">
         <BasicSetting v-show="currentIndex === 0" />
+        <testEnvironment v-show="currentIndex === 1" />
+        <ExamineePermissions v-show="currentIndex === 2" />
       </div>
       <div class="footer">
         <el-checkbox v-model="isSyncChecked">
@@ -45,10 +47,14 @@
 <script>
 const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
 import BasicSetting from './examineComponents/basicSetting'
+import testEnvironment from './examineComponents/testEnvironment'
+import ExamineePermissions from './examineComponents/examineePermissions'
 export default {
   name: 'EditExamineDrawer',
   components: {
-    BasicSetting
+    BasicSetting,
+    testEnvironment,
+    ExamineePermissions
   },
   props: {
     examine: { type: Object, default: null },
