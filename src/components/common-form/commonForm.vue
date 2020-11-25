@@ -225,6 +225,8 @@ export default {
         value = _.replace(value, '+', '') // 省略正号
         value = _.replace(value, /\.$/, '') // 省略结束的小数点
         this.model[column.prop] = value
+      } else {
+        this.model[column.prop] = _.replace(value, /[^\d]/, '')
       }
     },
 

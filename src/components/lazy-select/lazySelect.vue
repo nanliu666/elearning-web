@@ -5,6 +5,8 @@
     :placeholder="placeholder"
     :filterable="searchable"
     :remote="searchable"
+    allow-create
+    default-first-option
     :remote-method="remoteMethod"
     @change="handleChange"
     @visible-change="visibleChange"
