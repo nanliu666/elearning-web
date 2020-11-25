@@ -1,5 +1,8 @@
 <template>
-  <el-radio :label="innerValue">
+  <el-checkbox
+    v-model="checked"
+    class="checkbox-input"
+  >
     {{ textBefore }}
     <el-input
       v-model.number="innerValue"
@@ -9,14 +12,14 @@
       @input="inputNumber"
     ></el-input>
     {{ textAfter }}
-  </el-radio>
+  </el-checkbox>
 </template>
 
 <script>
 export default {
   props: {
     value: {
-      type: [String, Number],
+      type: Number,
       default: null
     },
     textBefore: {
@@ -28,7 +31,7 @@ export default {
       default: ''
     },
     defaultValue: {
-      type: [String, Number],
+      type: Number,
       default: 10
     },
     inputLength: {
@@ -48,6 +51,18 @@ export default {
   computed: {
     disabled() {
       return this.value === 0
+    },
+    checked: {
+      get() {
+        return !!this.value
+      },
+      set(val) {
+        if (val) {
+          this.$emit('input', this.innerValue)
+        } else {
+          this.$emit('input', 0)
+        }
+      }
     }
   },
   watch: {
@@ -57,9 +72,16 @@ export default {
   },
   methods: {
     inputNumber(value) {
-      value = value.replace(/[^\d]/g, '')
-      this.innerValue = value
+      value = _.toNumber(value.replace(/[^\d]/g, ''))
+      this.innerValue = value < 1 ? 1 : value
     }
   }
 }
 </script>
+<style lang="scss">
+.checkbox-input {
+  .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: #606266;
+  }
+}
+</style>
