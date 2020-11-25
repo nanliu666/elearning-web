@@ -5,8 +5,8 @@
     :placeholder="placeholder"
     :filterable="searchable"
     :remote="searchable"
-    allow-create
-    default-first-option
+    :allow-create="isCreate"
+    :default-first-option="isCreate"
     :remote-method="remoteMethod"
     @change="handleChange"
     @visible-change="visibleChange"
@@ -51,6 +51,12 @@ export default {
     value: {
       type: [String, Boolean],
       default: ''
+    },
+    isCreate: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
     },
     /** 默认选项
      * 解决初始已选中的值没有被翻译的问题
@@ -107,6 +113,13 @@ export default {
     handleChange(value) {
       this.$emit('change', value)
       this.dispatch('ElFormItem', 'el.form.change', value)
+      if (this.isCreate) {
+        let selectItem = {}
+        this.optionList.map((it) => {
+          it.name === value && (selectItem = it)
+        })
+        this.$emit('handleChange', selectItem)
+      }
     },
     loadOptionData(refresh = false) {
       if ((this.noMore && !refresh) || this.loading) {

@@ -11,8 +11,10 @@
           <lazySelect
             v-model="formData.contact_name"
             :load="loadCoordinator"
-            :searchable="formData.contact_name"
+            :is-create="isCreate"
+            :searchable="remote"
             :option-props="personOptionProps"
+            @handleChange="change"
           >
           </lazySelect>
         </template>
@@ -32,7 +34,7 @@ import { getOrgUserList } from '@/api/system/user'
 
 const personOptionProps = {
   label: 'name',
-  value: 'userId',
+  value: 'name',
   key: 'userId'
 }
 export default {
@@ -47,6 +49,8 @@ export default {
       }
     }
     return {
+      remote: true,
+      isCreate: true,
       personOptionProps,
       infoFormColumns: [
         {
@@ -196,11 +200,43 @@ export default {
         }
       ],
       formData: {
-        contact_name: ''
+        contact_name: '',
+        train_name: '',
+        category_id: '',
+        train_time: '',
+        people: '',
+        trainObject: '',
+        train_way: '',
+        address: '',
+        contact_phone: '',
+        sponsor: '',
+        introduction: ''
       }
     }
   },
   methods: {
+    getdata() {
+      return new Promise((resolve, reject) => {
+        this.$refs['form']
+          .validate()
+          .then((valid) => {
+            if (!valid) {
+              reject()
+              return
+            }
+
+            resolve({ formData: this.formData }) // TODO 提交表单
+          })
+          .catch(() => {
+            this.$emit('jump', 'basicInfo')
+          })
+      })
+    },
+    change(data) {
+      if (data.phonenum) {
+        this.formData.contact_phone = data.phonenum
+      }
+    },
     loadCoordinator() {
       let params = {
         pageNo: 1,
