@@ -32,22 +32,22 @@ const EventColumns = [
     itemType: 'datePicker',
     span: 24,
     required: true,
-    prop: 'date',
+    prop: 'classTime',
     type: 'daterange',
     label: '上课日期'
   },
   // TODO：关联课程应该用lazy-select
-  { itemType: 'input', span: 24, required: true, prop: 'courses', label: '关联课程' },
-  { itemType: 'input', span: 24, required: false, prop: 'teacher', label: '讲师' },
+  { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '关联课程' },
+  { itemType: 'input', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
   {
     itemType: 'radio',
-    prop: 'type',
+    prop: 'studyType',
     label: '修读类型',
     required: true,
     span: 24,
     options: [
-      { label: '必修', value: 'compulsory' },
-      { label: '选修', value: 'elective' }
+      { label: '必修', value: 0 },
+      { label: '选修', value: 1 }
     ]
   }
 ]
@@ -63,10 +63,10 @@ export default {
       title: '添加在线课程',
       model: {
         id: createUniqueID(),
-        type: 'compulsory',
-        courses: '',
-        teacher: '',
-        date: []
+        studyType: 0,
+        courseName: '',
+        lecturerName: '',
+        classTime: []
       }
     }
   },
