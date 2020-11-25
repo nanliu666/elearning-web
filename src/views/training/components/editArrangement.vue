@@ -6,7 +6,7 @@
         <el-button
           type="primary"
           size="medium"
-          @click="handleEditSchedule(null)"
+          @click="handleEditSchedule({})"
         >
           添加线下日程
         </el-button>
@@ -16,29 +16,41 @@
         accordion
       >
         <el-collapse-item
-          name="1"
-          title="第1天 2020-10-10"
+          v-for="(item, index) in scheduleList"
+          :key="item.date"
+          :name="item.date"
+          :title="`第${index + 1}天 ${item.date}`"
         >
           <common-table
             :config="schedule.config"
             :columns="schedule.columns"
-            :data="schedule.data"
+            :data="item.list"
           >
             <template #handler="{row}">
               <el-button
                 type="text"
-                @click="handleEdit(row)"
+                @click="handleEditSchedule(row)"
               >
                 修改
               </el-button>
               <el-button
                 type="text"
-                @click="handleDelete(row)"
+                @click="handleDeleteSchedule(row)"
               >
                 删除
               </el-button>
             </template>
           </common-table>
+        </el-collapse-item>
+        <el-collapse-item
+          v-if="scheduleList.length === 0"
+          name="0"
+          title=""
+          class="empty-collapse-item"
+        >
+          <div class="empty-block">
+            暂无数据
+          </div>
         </el-collapse-item>
       </el-collapse>
     </section>
@@ -115,6 +127,7 @@
     <EditScheduleDrawer
       :visible.sync="schedule.drawerVisible"
       :schedule="schedule.editingRecord"
+      @submit="handleSubmitSchedule($event)"
     />
     <EditCourseDrawer
       :visible.sync="course.drawerVisible"
@@ -135,17 +148,37 @@ import EditCourseDrawer from './editCourseDrawer'
 import EditExamineDrawer from './editExamineDrawer'
 const ScheduleColumns = [
   {
-    prop: 'time'
+    prop: 'todoTime',
+    formatter: function(record) {
+      return record.todoTime.join(' ~ ')
+    }
   },
   {
     prop: 'title',
-    minWidth: 150
+    minWidth: 150,
+    formatter(record) {
+      if (record.type === '1') {
+        return `【面授课程】${record.courseName}`
+      } else {
+        return `【活动】${record.theme}`
+      }
+    }
   },
   {
-    prop: 'teacher'
+    prop: 'lecturerName',
+    formatter(record) {
+      if (record.type === '1') {
+        return `讲师：${record.lecturerName}`
+      } else {
+        return `主持人：${record.lecturerName}`
+      }
+    }
   },
   {
-    prop: 'location'
+    prop: 'address',
+    formatter(record) {
+      return `地点：${record.address}`
+    }
   }
 ]
 const ScheduleConfig = {
@@ -189,7 +222,7 @@ export default {
   components: { EditScheduleDrawer, EditCourseDrawer, EditExamineDrawer },
   data() {
     return {
-      activeName: '1',
+      activeName: '0',
       schedule: {
         config: ScheduleConfig,
         columns: ScheduleColumns,
@@ -211,6 +244,17 @@ export default {
         editingRecord: {},
         data: []
       }
+    }
+  },
+  computed: {
+    scheduleList() {
+      return _(this.schedule.data)
+        .groupBy(this.schedule.data, 'todoDate')
+        .map((list) => ({
+          date: list[0].todoDate,
+          list: _.sortBy(list, (i) => i.todoTime && i.todoTime[0])
+        }))
+        .value()
     }
   },
   methods: {
@@ -236,6 +280,17 @@ export default {
     handleDeleteCourse(row) {
       let index = _.findIndex(this.course.data, (item) => item.id === row.id)
       this.course.data.splice(index, 1)
+    },
+    handleDeleteSchedule(row) {
+      this.schedule.data = this.schedule.data.filter((item) => item !== row)
+    },
+    handleSubmitSchedule(data) {
+      const index = _.findIndex(this.schedule.data, { id: data.id })
+      if (index >= 0) {
+        this.$set(this.schedule.data, index, data)
+      } else {
+        this.schedule.data.push(data)
+      }
     },
     // eslint-disable-next-line
     handleEdit(row) {
@@ -264,6 +319,15 @@ export default {
       margin-bottom: 8px;
       font-size: 16px;
     }
+  }
+  /deep/.el-collapse-item__header {
+    background-color: #f7f8fa;
+  }
+  .empty-block {
+    margin-top: 25px;
+    line-height: 20px;
+    text-align: center;
+    color: #718199;
   }
 }
 </style>
