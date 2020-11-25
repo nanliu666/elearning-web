@@ -20,7 +20,7 @@
         <template #assistant>
           <lazy-select
             v-model="formData.assistantId"
-            :load="loadAssistant('assistant')"
+            :load="loadAssistant"
             :option-props="personOptionProps"
           />
         </template>
@@ -141,12 +141,15 @@ export default {
   },
   methods: {
     loadCoordinator() {
+      return Promise.resolve({ data: [] })
       // return getUserWorkList(params)
     },
     loadAssistant() {
+      return Promise.resolve({ data: [] })
       // return getUserWorkList(params)
     },
     loadCertificate() {
+      return Promise.resolve({ data: [] })
       // return getUserWorkList(params)
     }
   }
