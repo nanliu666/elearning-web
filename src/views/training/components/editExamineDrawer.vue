@@ -1,0 +1,151 @@
+<template>
+  <el-drawer
+    :title="title"
+    :visible.sync="innnerVisible"
+  >
+    <div class="wrapper">
+      <ul class="nav-ul">
+        <li
+          v-for="(item, index) in navList"
+          :key="index"
+          class="nav-li"
+          :class="{ 'active-nav': currentIndex === index }"
+          @click="navChange(index)"
+        >
+          {{ item }}
+        </li>
+      </ul>
+      <div class="form">
+        <BasicSetting v-show="currentIndex === 0" />
+      </div>
+      <div class="footer">
+        <el-checkbox v-model="isSyncChecked">
+          本条考试信息数据同步至【考试管理】
+        </el-checkbox>
+        <div>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="submit"
+          >
+            保存
+          </el-button>
+          <el-button
+            size="medium"
+            @click="close"
+          >
+            取消
+          </el-button>
+        </div>
+      </div>
+    </div>
+  </el-drawer>
+</template>
+
+<script>
+const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
+import BasicSetting from './examineComponents/basicSetting'
+export default {
+  name: 'EditExamineDrawer',
+  components: {
+    BasicSetting
+  },
+  props: {
+    examine: { type: Object, default: null },
+    visible: { type: Boolean, default: false }
+  },
+  data() {
+    return {
+      isSyncChecked: false,
+      currentIndex: 0,
+      title: '添加考试',
+      navList
+    }
+  },
+  computed: {
+    innnerVisible: {
+      get: function() {
+        return this.visible
+      },
+      set: function(value) {
+        this.$emit('update:visible', value)
+      }
+    }
+  },
+  watch: {
+    visible: {
+      handler: function(val) {
+        if (val) {
+          if (!_.isEmpty(this.examine)) {
+            // this.model = _.cloneDeep(this.examine)
+            this.title = '编辑考试'
+          } else {
+            // this.$refs.form && this.$refs.form.resetFields()
+          }
+        }
+      }
+    }
+  },
+  methods: {
+    navChange(index) {
+      this.currentIndex = index
+    },
+    close() {
+      this.innnerVisible = false
+    },
+    submit() {
+      this.$refs.form.validate().then(() => {
+        this.close()
+        // this.$emit('submit', this.model)
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .nav-ul {
+    margin: 0 30px 20px;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #c7cbd1;
+    .nav-li {
+      flex: 1;
+      height: 100%;
+      width: calc(100% / 5);
+      padding: 4px 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid #c7cbd1;
+      cursor: pointer;
+      &:last-child {
+        border-right: 0;
+      }
+    }
+    .active-nav {
+      background-color: #437bfd;
+      color: #ffffff;
+    }
+  }
+}
+.form {
+  flex: 1;
+  padding: 0 30px;
+}
+
+.footer {
+  display: flex;
+  padding: 20px 10px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f5f5f7;
+  /deep/ .el-checkbox__label {
+    font-size: 12px;
+  }
+}
+</style>

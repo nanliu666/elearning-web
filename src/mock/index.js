@@ -44,7 +44,7 @@ export default (enable) => {
     timeout: 500
   })
   menu({ mock: true })
-  knowledge({ mock: true })
+  knowledge(options)
   newsCenter(options)
   noticeCenter(options)
   user(options)

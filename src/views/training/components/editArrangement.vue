@@ -60,6 +60,7 @@
         <el-button
           type="primary"
           size="medium"
+          @click="handleEditCourse(null)"
         >
           添加在线课程
         </el-button>
@@ -69,16 +70,22 @@
         :columns="course.columns"
         :data="course.data"
       >
+        <template #date="{row}">
+          {{ row.date[0] }} 至 {{ row.date[1] }}
+        </template>
+        <template #type="{row}">
+          {{ row.type === 'compulsory' ? '必修' : '选修' }}
+        </template>
         <template #handler="{row}">
           <el-button
             type="text"
-            @click="handleEdit(row)"
+            @click="handleEditCourse(row)"
           >
             修改
           </el-button>
           <el-button
             type="text"
-            @click="handleDelete(row)"
+            @click="handleDeleteCourse(row)"
           >
             删除
           </el-button>
@@ -91,14 +98,15 @@
         <el-button
           type="primary"
           size="medium"
+          @click="handleEditExamine(null)"
         >
           添加考试
         </el-button>
       </div>
       <common-table
-        :config="test.config"
-        :columns="test.columns"
-        :data="test.data"
+        :config="examine.config"
+        :columns="examine.columns"
+        :data="examine.data"
       >
         <template #handler="{row}">
           <el-button
@@ -121,11 +129,23 @@
       :schedule="schedule.editingRecord"
       @submit="handleSubmitSchedule($event)"
     />
+    <EditCourseDrawer
+      :visible.sync="course.drawerVisible"
+      :course="course.editingRecord"
+      @submit="courseSubmit"
+    />
+    <EditExamineDrawer
+      :visible.sync="examine.drawerVisible"
+      :examine="examine.editingRecord"
+      @submit="courseSubmit"
+    />
   </div>
 </template>
 
 <script>
 import EditScheduleDrawer from './editScheduleDrawer'
+import EditCourseDrawer from './editCourseDrawer'
+import EditExamineDrawer from './editExamineDrawer'
 const ScheduleColumns = [
   {
     prop: 'todoTime',
@@ -169,6 +189,7 @@ const ScheduleConfig = {
 const CourseColumns = [
   {
     prop: 'date',
+    slot: true,
     label: '上课日期',
     width: 220
   },
@@ -181,7 +202,7 @@ const CourseColumns = [
     prop: 'teacher',
     label: '讲师'
   },
-  { prop: 'type', label: '修读类型' }
+  { prop: 'type', slot: true, label: '修读类型' }
 ]
 const CourseConfig = {
   showHandler: true,
@@ -198,7 +219,7 @@ const TestConfig = {
 }
 export default {
   name: 'EditArrangement',
-  components: { EditScheduleDrawer },
+  components: { EditScheduleDrawer, EditCourseDrawer, EditExamineDrawer },
   data() {
     return {
       activeName: '0',
@@ -216,7 +237,7 @@ export default {
         editingRecord: {},
         data: []
       },
-      test: {
+      examine: {
         config: TestConfig,
         columns: TestColumns,
         drawerVisible: false,
@@ -240,6 +261,25 @@ export default {
     handleEditSchedule(row) {
       this.schedule.editingRecord = row
       this.schedule.drawerVisible = true
+    },
+    // 新增与编辑考试
+    handleEditExamine(row) {
+      this.examine.editingRecord = row
+      this.examine.drawerVisible = true
+    },
+    // 新增与编辑在线课程
+    handleEditCourse(row) {
+      this.course.editingRecord = row
+      this.course.drawerVisible = true
+    },
+    // 在线课程提交后
+    courseSubmit(data) {
+      this.course.data.push(data)
+    },
+    // 删除课程
+    handleDeleteCourse(row) {
+      let index = _.findIndex(this.course.data, (item) => item.id === row.id)
+      this.course.data.splice(index, 1)
     },
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
