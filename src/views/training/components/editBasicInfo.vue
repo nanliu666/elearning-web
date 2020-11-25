@@ -56,7 +56,7 @@ export default {
         {
           itemType: 'input',
           label: '培训班名称',
-          prop: 'train_name',
+          prop: 'trainName',
           required: true,
           span: 11,
           offset: 0
@@ -64,7 +64,7 @@ export default {
         {
           itemType: 'select',
           label: '分类',
-          prop: 'category_id',
+          prop: 'categoryId',
           options: [
             {
               id: '12344',
@@ -86,7 +86,7 @@ export default {
         {
           itemType: 'datePicker',
           label: '培训时间',
-          prop: 'train_time',
+          prop: 'trainTime',
           options: [''],
           required: true,
           type: 'daterange',
@@ -114,7 +114,7 @@ export default {
         {
           itemType: 'radio',
           label: '培训方式',
-          prop: 'train_way',
+          prop: 'trainWay',
           options: [
             {
               label: '在线',
@@ -144,7 +144,7 @@ export default {
         {
           itemType: 'slot',
           label: '联系人',
-          prop: 'contact_name',
+          prop: 'contactName',
           options: [''],
           required: true,
           span: 11,
@@ -153,7 +153,7 @@ export default {
         {
           itemType: 'input',
           label: '手机号码',
-          prop: 'contact_phone',
+          prop: 'contactPhone',
           props: {
             onlyNumber: true
           },
@@ -200,15 +200,15 @@ export default {
         }
       ],
       formData: {
-        contact_name: '',
-        train_name: '',
-        category_id: '',
-        train_time: '',
+        contactName: '',
+        trainName: '',
+        categoryId: '',
+        trainTime: '',
         people: '',
         trainObject: '',
-        train_way: '',
+        trainWay: '',
         address: '',
-        contact_phone: '',
+        contactPhone: '',
         sponsor: '',
         introduction: ''
       }

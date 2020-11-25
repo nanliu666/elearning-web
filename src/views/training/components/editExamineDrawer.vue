@@ -2,6 +2,7 @@
   <el-drawer
     :title="title"
     :visible.sync="innnerVisible"
+    size="524px"
   >
     <div class="wrapper">
       <ul class="nav-ul">
