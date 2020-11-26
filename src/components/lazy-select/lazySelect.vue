@@ -115,10 +115,11 @@ export default {
       this.$emit('change', value)
       this.dispatch('ElFormItem', 'el.form.change', value)
 
+      // 把当前选中的对象返回出去
       const selectItems = this.optionList.filter((it) => it[this.optionProps.value] === value)
       if (selectItems.length !== 0) {
         this.$emit('selectItem', selectItems[0])
-      } else {
+      } else if (this.allowCreate) {
         this.$emit('selectItem', { [this.optionProps.label]: value })
       }
     },

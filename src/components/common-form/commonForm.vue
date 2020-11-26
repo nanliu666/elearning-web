@@ -120,6 +120,7 @@
             v-if="column.itemType === 'lazySelect'"
             v-model="model[column.prop]"
             v-bind="itemAttrs(column)"
+            :option-list.sync="column.optionList"
             :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
           />
           <el-switch
