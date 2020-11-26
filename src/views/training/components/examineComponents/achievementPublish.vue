@@ -59,6 +59,7 @@ export default {
         value: ''
       },
       hideCondition: {},
+      hideFixedTime: {},
       passCondition: [
         {
           passType: 1,
@@ -72,8 +73,9 @@ export default {
       formData: {
         passType: 1,
         passScope: 0,
-        publishRules: 0,
-        autoEvaluate: 1
+        publishRules: 1,
+        autoEvaluate: 1,
+        fixedTime: []
       },
       columns: [
         {
@@ -93,6 +95,14 @@ export default {
             { label: '系统即时发布', value: 1 },
             { label: '定时自动发布', value: 2 }
           ]
+        },
+        {
+          itemType: 'datePicker',
+          span: 24,
+          type: 'datetimerange',
+          required: true,
+          prop: 'fixedTime',
+          label: '定时发布日期时间'
         }
       ]
     }
@@ -102,6 +112,23 @@ export default {
       handler(i) {
         this.formData.passScope = this.passCondition[i - 1]['passScope']
       },
+      deep: true
+    },
+    'formData.publishRules': {
+      handler(data) {
+        if (data === 1) {
+          this.columns = this.columns.filter((it) => {
+            if (it.prop === 'fixedTime') {
+              this.hideFixedTime = it
+            } else {
+              return it
+            }
+          })
+        } else {
+          this.columns.push(this.hideFixedTime)
+        }
+      },
+      immediate: true,
       deep: true
     }
   },
@@ -140,5 +167,8 @@ export default {
 }
 .content {
   margin-top: 20px;
+}
+/deep/.el-date-range-picker {
+  width: 600px !important;
 }
 </style>
