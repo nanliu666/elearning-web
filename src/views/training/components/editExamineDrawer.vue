@@ -33,6 +33,10 @@
           v-show="currentIndex === 3"
           ref="evaluationStrategyRef"
         />
+        <achievementPublish
+          v-show="currentIndex === 4"
+          ref="achievementPublishRef"
+        />
       </div>
       <div class="footer">
         <el-checkbox
@@ -67,14 +71,15 @@ import basicSetting from './examineComponents/basicSetting'
 import testEnvironment from './examineComponents/testEnvironment'
 import examineePermissions from './examineComponents/examineePermissions'
 import evaluationStrategy from './examineComponents/evaluationStrategy'
-
+import achievementPublish from './examineComponents/achievementPublish'
 export default {
   name: 'EditExamineDrawer',
   components: {
     basicSetting,
     testEnvironment,
     examineePermissions,
-    evaluationStrategy
+    evaluationStrategy,
+    achievementPublish
   },
   props: {
     examine: { type: Object, default: null },
@@ -180,6 +185,10 @@ export default {
 .form {
   flex: 1;
   padding: 0 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 300px;
+  /*height: calc(100% - 400px);*/
 }
 
 .footer {

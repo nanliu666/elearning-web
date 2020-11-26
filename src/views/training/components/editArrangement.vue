@@ -333,7 +333,8 @@ export default {
 .editArrangement {
   background-color: #fff;
   padding: 20px;
-  height: calc(100% - 30px);
+  min-height: calc(100% - 30px);
+  margin-bottom: 30px;
   section {
     margin-bottom: 30px;
     .header {
