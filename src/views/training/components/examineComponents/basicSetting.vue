@@ -60,7 +60,6 @@
 </template>
 
 <script>
-import { createUniqueID } from '@/util/util'
 import radioInput from './radioInput'
 import checkboxInput from './checkboxInput'
 const EventColumns = [
@@ -140,7 +139,7 @@ export default {
       input: '',
       columns: EventColumns,
       model: {
-        id: createUniqueID(),
+        id: '',
         examTime: '',
         examName: '',
         testPaper: '',

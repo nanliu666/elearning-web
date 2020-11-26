@@ -88,7 +88,7 @@ const CourseColumns = [
   {
     itemType: 'lazySelect',
     span: 24,
-    required: true,
+    required: false,
     prop: 'course',
     label: '关联课程',
     load: () => Promise.resolve({ data: [] })

@@ -105,7 +105,7 @@ export default {
         {
           itemType: 'select',
           label: '培训对象',
-          prop: 'trainObject',
+          prop: 'trainObjectsList',
           options: [''],
           required: true,
           span: 11,
@@ -205,8 +205,8 @@ export default {
         categoryId: '',
         trainTime: '',
         people: '',
-        trainObject: '',
-        trainWay: '',
+        trainObjectsList: 'sgs',
+        trainWay: 3,
         address: '',
         contactPhone: '',
         sponsor: '',
@@ -214,20 +214,25 @@ export default {
       }
     }
   },
+  watch: {
+    'formData.trainWay': {
+      handler(val) {
+        this.$emit('changeWay', val)
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
-    getdata() {
+    getData() {
       return new Promise((resolve, reject) => {
         this.$refs['form']
           .validate()
-          .then((valid) => {
-            if (!valid) {
-              reject()
-              return
-            }
-
-            resolve({ formData: this.formData }) // TODO 提交表单
+          .then(() => {
+            resolve(this.formData) // TODO 提交表单
           })
           .catch(() => {
+            reject()
             this.$emit('jump', 'basicInfo')
           })
       })
