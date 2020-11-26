@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="TestEnvironment">
     <CustomSwitch
       :config="switchConfig"
       :data.sync="switchForm"
@@ -76,4 +76,9 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.TestEnvironment {
+  overflow: scroll;
+  height: 100%;
+}
+</style>

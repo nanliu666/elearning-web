@@ -21,6 +21,7 @@
         <testEnvironment v-show="currentIndex === 1" />
         <ExamineePermissions v-show="currentIndex === 2" />
         <evaluationStrategy v-show="currentIndex === 3" />
+        <achievementPublish v-show="currentIndex === 4" />
       </div>
       <div class="footer">
         <el-checkbox v-model="isSyncChecked">
@@ -52,14 +53,15 @@ import BasicSetting from './examineComponents/basicSetting'
 import testEnvironment from './examineComponents/testEnvironment'
 import ExamineePermissions from './examineComponents/examineePermissions'
 import evaluationStrategy from './examineComponents/evaluationStrategy'
-
+import achievementPublish from './examineComponents/achievementPublish'
 export default {
   name: 'EditExamineDrawer',
   components: {
     BasicSetting,
     testEnvironment,
     ExamineePermissions,
-    evaluationStrategy
+    evaluationStrategy,
+    achievementPublish
   },
   props: {
     examine: { type: Object, default: null },
@@ -147,6 +149,10 @@ export default {
 .form {
   flex: 1;
   padding: 0 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 300px;
+  /*height: calc(100% - 400px);*/
 }
 
 .footer {

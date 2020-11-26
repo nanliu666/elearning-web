@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="basecSetting">
     <common-form
       ref="form"
       :model="model"
@@ -37,6 +37,24 @@
           </div>
         </el-radio-group>
       </template>
+      <template #integral>
+        <checkbox-input
+          v-model="model.integral"
+          text-before="本考试记录系统积分，积分值为"
+          text-after="分"
+          :input-width="60"
+          :input-props="{ maxLength: 4 }"
+        ></checkbox-input>
+      </template>
+      <template #publishTest>
+        <checkbox-input
+          v-model="model.publishTest"
+          text-before="考试开始前"
+          text-after="分钟发布考试信息"
+          :input-width="60"
+          :input-props="{ maxLength: 4 }"
+        ></checkbox-input>
+      </template>
     </common-form>
   </div>
 </template>
@@ -44,6 +62,7 @@
 <script>
 import { createUniqueID } from '@/util/util'
 import radioInput from './radioInput'
+import checkboxInput from './checkboxInput'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -94,7 +113,7 @@ const EventColumns = [
   },
   {
     itemType: 'radio',
-    prop: 'type',
+    prop: 'testStrategy',
     label: '考试名称',
     required: true,
     span: 24,
@@ -102,12 +121,27 @@ const EventColumns = [
       { label: '允许进入考试的时间', value: 'compulsory' },
       { label: '允许参考时间（到结束时间，会自动提交。）', value: 'elective' }
     ]
+  },
+  {
+    itemType: 'slot',
+    prop: 'integral',
+    label: '积分',
+    required: true,
+    span: 24
+  },
+  {
+    itemType: 'slot',
+    prop: 'publishTest',
+    label: '发布考试',
+    required: true,
+    span: 24
   }
 ]
 export default {
   name: 'BasicSetting',
   components: {
-    radioInput
+    radioInput,
+    checkboxInput
   },
   data() {
     return {
@@ -121,7 +155,10 @@ export default {
         teacher: '',
         date: [],
         testTime: 0,
-        testNumber: 0
+        testNumber: 0,
+        integral: 0,
+        testStrategy: 'compulsory',
+        publishTest: 0
       }
     }
   },
@@ -130,4 +167,9 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.basecSetting {
+  overflow: scroll;
+  height: 100%;
+}
+</style>
