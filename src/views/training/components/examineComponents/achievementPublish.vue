@@ -72,7 +72,8 @@ export default {
       formData: {
         passType: 1,
         passScope: 0,
-        publishRules: 0
+        publishRules: 0,
+        autoEvaluate: 1
       },
       columns: [
         {
@@ -106,6 +107,7 @@ export default {
   },
   methods: {
     changeSwitch(data) {
+      this.formData.autoEvaluate = data ? 1 : 0
       if (!data) {
         this.columns = this.columns.filter((it) => {
           if (it.prop === 'passType') {
