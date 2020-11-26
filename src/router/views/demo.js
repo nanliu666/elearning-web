@@ -12,6 +12,14 @@ export default [
           fullscreen: true
         },
         component: () => import(/* webpackChunkName: "page" */ '@/views/demo/demoForm')
+      },
+      {
+        path: 'test',
+        name: '测试页',
+        meta: {
+          fullscreen: true
+        },
+        component: () => import(/* webpackChunkName: "page" */ '@/views/demo/demoTest')
       }
       // {
       //   path: 'details',
