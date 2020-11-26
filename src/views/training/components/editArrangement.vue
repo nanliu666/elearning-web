@@ -70,11 +70,11 @@
         :columns="course.columns"
         :data="course.data"
       >
-        <template #date="{row}">
-          {{ row.date[0] }} 至 {{ row.date[1] }}
+        <template #classTime="{row}">
+          {{ row.classTime[0] }} 至 {{ row.classTime[1] }}
         </template>
-        <template #type="{row}">
-          {{ row.type === 'compulsory' ? '必修' : '选修' }}
+        <template #studyType="{row}">
+          {{ row.studyType === '0' ? '必修' : '选修' }}
         </template>
         <template #handler="{row}">
           <el-button
@@ -188,21 +188,21 @@ const ScheduleConfig = {
 }
 const CourseColumns = [
   {
-    prop: 'date',
+    prop: 'classTime',
     slot: true,
     label: '上课日期',
     width: 220
   },
   {
-    prop: 'courses',
+    prop: 'courseName',
     label: '关联课程',
     minWidth: 150
   },
   {
-    prop: 'teacher',
+    prop: 'lecturerName',
     label: '讲师'
   },
-  { prop: 'type', slot: true, label: '修读类型' }
+  { prop: 'studyType', slot: true, label: '修读类型' }
 ]
 const CourseConfig = {
   showHandler: true,
