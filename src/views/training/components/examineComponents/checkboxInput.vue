@@ -6,7 +6,7 @@
     {{ textBefore }}
     <el-input
       v-model.number="innerValue"
-      :style="`width:${inputLength}px`"
+      :style="`width:${inputWidth}px`"
       :disabled="disabled"
       v-bind="inputProps"
       @input="inputNumber"
@@ -34,7 +34,7 @@ export default {
       type: Number,
       default: 10
     },
-    inputLength: {
+    inputWidth: {
       type: Number,
       default: 50
     },
