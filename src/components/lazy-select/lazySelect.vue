@@ -119,7 +119,7 @@ export default {
       if (selectItems.length !== 0) {
         this.$emit('selectItem', selectItems[0])
       } else {
-        this.$emit('selectItem', { [this.optionProps.lable]: value })
+        this.$emit('selectItem', { [this.optionProps.label]: value })
       }
     },
     loadOptionData(refresh = false) {
