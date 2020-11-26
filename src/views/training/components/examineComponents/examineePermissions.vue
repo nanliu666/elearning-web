@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ExamineePermissions">
     <CustomSwitch
       :config="switchConfig"
       :data.sync="switchForm"
@@ -66,4 +66,9 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.ExamineePermissions {
+  overflow: scroll;
+  height: 100%;
+}
+</style>
