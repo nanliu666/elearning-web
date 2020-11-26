@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import { createUniqueID } from '@/util/util'
 import radioInput from './radioInput'
 const EventColumns = [
   {
@@ -115,7 +114,6 @@ export default {
       input: '',
       columns: EventColumns,
       model: {
-        id: createUniqueID(),
         type: 'compulsory',
         courses: '',
         teacher: '',

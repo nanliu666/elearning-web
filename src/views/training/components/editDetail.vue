@@ -5,21 +5,23 @@
         人员设置
       </div>
       <common-form
-        ref="form"
+        ref="personForm"
         class="person-form-style"
         :columns="personFormColumns"
         :model="formData"
       >
-        <template #coordinator>
+        <template #headTeacher>
           <lazy-select
-            v-model="formData.coordinatorId"
+            v-model="formData.headTeacher"
+            :allow-create="isCreate"
+            :searchable="remote"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />
         </template>
-        <template #assistant>
+        <template #teachAssistant>
           <lazy-select
-            v-model="formData.assistantId"
+            v-model="formData.teachAssistant"
             :load="loadAssistant"
             :option-props="personOptionProps"
           />
@@ -29,11 +31,11 @@
     <section class="config-section">
       <div class="section-title">
         <span style="margin-right: 10px">评估管理</span>
-        <el-switch v-model="hasAssess" />
+        <el-switch v-model="formData.evaluation" />
       </div>
       <common-form
-        v-if="hasAssess"
-        ref="form"
+        v-if="formData.evaluation"
+        ref="assessForm"
         class="person-form-style"
         :columns="assessFormColumns"
         :model="formData"
@@ -42,11 +44,11 @@
     <section class="config-section">
       <div class="section-title">
         <span style="margin-right: 10px">证书管理</span>
-        <el-switch v-model="hasCertificate" />
+        <el-switch v-model="formData.certificate" />
       </div>
-      <common-form
-        v-if="hasCertificate"
-        ref="form"
+      <!-- <common-form
+        v-if="formData.certificate"
+        ref="certificateForm"
         class="person-form-style"
         :columns="certificateFormColumns"
         :model="formData"
@@ -58,17 +60,18 @@
             :option-props="personOptionProps"
           />
         </template>
-      </common-form>
+      </common-form> -->
     </section>
   </div>
 </template>
 
 <script>
+import { getOrgUserList } from '@/api/system/user'
 const assessFormColumns = [
   {
     itemType: 'checkbox',
     label: '问卷类型',
-    prop: 'questionnaireTypes',
+    prop: 'evaluationType',
     required: true,
     span: 11,
     offset: 0,
@@ -104,7 +107,7 @@ const personFormColumns = [
   {
     itemType: 'slot',
     label: '班主任',
-    prop: 'coordinator',
+    prop: 'headTeacher',
     required: true,
     span: 11,
     offset: 0
@@ -112,7 +115,7 @@ const personFormColumns = [
   {
     itemType: 'slot',
     label: '助教',
-    prop: 'assistant',
+    prop: 'teachAssistant',
     required: true,
     span: 11,
     offset: 2
@@ -125,32 +128,64 @@ export default {
   },
   data() {
     return {
-      hasAssess: true,
-      hasCertificate: true,
+      remote: true,
+      isCreate: true,
       assessFormColumns,
       certificateFormColumns,
       personFormColumns,
       personOptionProps,
       formData: {
-        questionnaireTypes: [],
+        evaluation: true,
+        certificate: true,
+        evaluationType: [0],
         templateId: '',
-        coordinatorId: null,
-        assistantId: null
+        headTeacher: null,
+        teachAssistant: null
       }
     }
   },
   methods: {
+    getLiData(name) {
+      return new Promise((resolve, reject) => {
+        this.$refs[name]
+          .validate()
+          .then((valid) => {
+            resolve(valid)
+          })
+          .catch(() => {
+            reject()
+            this.$emit('jump', 'detail')
+          })
+      })
+    },
+    getData() {
+      const personForm = this.getLiData('personForm')
+      const assessForm = this.getLiData('assessForm')
+      // const certificateForm = this.getLiData('certificateForm')
+      return Promise.all([personForm, assessForm]).then(() => {
+        return this.formData
+      })
+    },
     loadCoordinator() {
-      return Promise.resolve({ data: [] })
-      // return getUserWorkList(params)
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        orgId: this.$store.getters.userInfo.org_id || 0
+      }
+      return getOrgUserList(params)
     },
     loadAssistant() {
-      return Promise.resolve({ data: [] })
-      // return getUserWorkList(params)
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        orgId: this.$store.getters.userInfo.org_id || 0
+      }
+      return getOrgUserList(params)
     },
     loadCertificate() {
       return Promise.resolve({ data: [] })
-      // return getUserWorkList(params)
     }
   }
 }

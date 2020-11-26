@@ -18,7 +18,7 @@
           :key="index"
           class="step"
           :class="[activeStep == item.key ? 'active' : '']"
-          @click="changeSteps(item)"
+          @click="changeSteps(item.key)"
         >
           <span class="step-index">
             <i
@@ -39,6 +39,7 @@
           class="publish-btn"
           size="medium"
           type="primary"
+          @click="publish"
         >
           发布
         </el-button>
@@ -57,9 +58,22 @@
         :xs="22"
         class="page__content--inner"
       >
-        <EditBasicInfo v-if="activeStep === 'basicInfo'" />
-        <EditArrangement v-if="activeStep === 'arrangement'" />
-        <EditDetail v-if="activeStep === 'detail'" />
+        <EditBasicInfo
+          v-show="activeStep === 'basicInfo'"
+          ref="editBasicInfo"
+          @changeWay="changeWay"
+          @jump="changeSteps"
+        />
+        <EditArrangement
+          v-show="activeStep === 'arrangement'"
+          ref="editArrangement"
+          :train-way="trainWay"
+        />
+        <EditDetail
+          v-show="activeStep === 'detail'"
+          ref="editDetail"
+          @jump="changeSteps"
+        />
       </el-col>
     </el-row>
   </div>
@@ -69,7 +83,8 @@
 import EditArrangement from './components/editArrangement'
 import EditBasicInfo from './components/editBasicInfo'
 import EditDetail from './components/editDetail'
-
+import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
+import { mapGetters } from 'vuex'
 // 培训编辑
 export default {
   name: 'TrainingEdit',
@@ -80,6 +95,7 @@ export default {
   },
   data() {
     return {
+      trainWay: 0,
       loading: false,
       activeStep: 'basicInfo',
       steps: [
@@ -104,11 +120,64 @@ export default {
   computed: {
     translateX() {
       return `translateX(${this.steps.findIndex((t) => t.key === this.activeStep) * 100}%)`
-    }
+    },
+    id() {
+      return _.get(this.$route.query, 'id', null)
+    },
+    ...mapGetters(['userInfo'])
+  },
+  created() {
+    this.initData()
   },
   methods: {
-    changeSteps(item) {
-      this.activeStep = item.key
+    initData() {
+      if (this.id) {
+        // 编辑的时候的数据回显
+        getTrainDetail({ trainId: this.id, tenantId: this.userInfo.tenantId }).then(() => {})
+      }
+    },
+    // 培训方式改变，会导致培训安排内的线下日程/在线课程存在形式改变
+    changeWay(data) {
+      this.trainWay = data
+    },
+    // 发布区分编辑发布还是新增发布
+    publish() {
+      const basicData = this.$refs.editBasicInfo.getData()
+      const editArrangement = this.$refs.editArrangement.getData()
+      const detailData = this.$refs.editDetail.getData()
+      Promise.all([basicData, editArrangement, detailData]).then((res) => {
+        let params = this.handleParams(res)
+        let editFun = this.$route.query.id ? putTrain : createTrain
+        editFun(params).then((resData) => {
+          if (resData) {
+            this.$router.go(-1)
+          }
+        })
+      })
+    },
+    // 统一处理入参
+    handleParams(res) {
+      // console.log('未处理的总参数==', res)
+      // 基本信息(除培训对象外)详细信息
+      const trainObjectsList = _.pick(res[0], 'trainObjectsList')
+      // 培训对象
+      const trainInfo = _.chain(res[0])
+        .omit('trainObjectsList')
+        .assign(res[2])
+        .value()
+      const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
+      let params = {
+        trainInfo,
+        trainObjectsList,
+        trainExam,
+        trainOfflineTodo,
+        trainOnlineCourse
+      }
+      // console.log('处理后的总参数==', params)
+      return params
+    },
+    changeSteps(key) {
+      this.activeStep = key
     },
     exit() {
       this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {

@@ -3,7 +3,7 @@
     <div>
       <CustomSwitch
         :config="switchConfig"
-        :data.sync="switchForm"
+        :data.sync="model"
         @changeSwitch="changeSwitch"
       />
       <div>
@@ -94,7 +94,7 @@ export default {
       currentRadio: 1,
       insertConfig,
       switchConfig: switchConfig,
-      switchForm: {
+      model: {
         modifyAnswer: 0,
         modifyLimit: 0,
         scopeLimit: 0,

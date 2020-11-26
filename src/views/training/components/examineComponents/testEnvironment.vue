@@ -2,7 +2,7 @@
   <div>
     <CustomSwitch
       :config="switchConfig"
-      :data.sync="switchForm"
+      :data.sync="model"
     />
   </div>
 </template>
@@ -62,7 +62,7 @@ export default {
   data() {
     return {
       switchConfig,
-      switchForm: {
+      model: {
         isLimitIp: 0,
         isShuffle: 0,
         createAnswers: 0,

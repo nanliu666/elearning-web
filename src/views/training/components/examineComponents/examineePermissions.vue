@@ -2,7 +2,7 @@
   <div>
     <CustomSwitch
       :config="switchConfig"
-      :data.sync="switchForm"
+      :data.sync="model"
     />
   </div>
 </template>
@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       switchConfig,
-      switchForm: {
+      model: {
         isDecoil: 0,
         openResults: 0,
         openAnswerSheet: 0,

@@ -17,13 +17,28 @@
         </li>
       </ul>
       <div class="form">
-        <BasicSetting v-show="currentIndex === 0" />
-        <testEnvironment v-show="currentIndex === 1" />
-        <ExamineePermissions v-show="currentIndex === 2" />
-        <evaluationStrategy v-show="currentIndex === 3" />
+        <basicSetting
+          v-show="currentIndex === 0"
+          ref="basicSettingRef"
+        />
+        <testEnvironment
+          v-show="currentIndex === 1"
+          ref="testEnvironmentRef"
+        />
+        <examineePermissions
+          v-show="currentIndex === 2"
+          ref="examineePermissionsRef"
+        />
+        <evaluationStrategy
+          v-show="currentIndex === 3"
+          ref="evaluationStrategyRef"
+        />
       </div>
       <div class="footer">
-        <el-checkbox v-model="isSyncChecked">
+        <el-checkbox
+          v-model="isSyncChecked"
+          :disabled="syncDisabled"
+        >
           本条考试信息数据同步至【考试管理】
         </el-checkbox>
         <div>
@@ -48,17 +63,17 @@
 
 <script>
 const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
-import BasicSetting from './examineComponents/basicSetting'
+import basicSetting from './examineComponents/basicSetting'
 import testEnvironment from './examineComponents/testEnvironment'
-import ExamineePermissions from './examineComponents/examineePermissions'
+import examineePermissions from './examineComponents/examineePermissions'
 import evaluationStrategy from './examineComponents/evaluationStrategy'
 
 export default {
   name: 'EditExamineDrawer',
   components: {
-    BasicSetting,
+    basicSetting,
     testEnvironment,
-    ExamineePermissions,
+    examineePermissions,
     evaluationStrategy
   },
   props: {
@@ -74,6 +89,11 @@ export default {
     }
   },
   computed: {
+    // 在首次创建或编辑时是可编辑的，一旦勾选，保存后若再次编辑，则不能撤销勾
+    // 编辑模式，并且有值不可编辑
+    syncDisabled() {
+      return this.examine && this.isSyncChecked ? true : false
+    },
     innnerVisible: {
       get: function() {
         return this.visible
@@ -105,10 +125,23 @@ export default {
       this.innnerVisible = false
     },
     submit() {
-      this.$refs.form.validate().then(() => {
-        this.close()
-        // this.$emit('submit', this.model)
-      })
+      const basicSettingData = this.$refs.basicSettingRef.model
+      const testEnvironmentData = this.$refs.testEnvironmentRef.model
+      const examineePermissionsData = this.$refs.examineePermissionsRef.model
+      const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
+      const testData = {
+        ...basicSettingData,
+        ...testEnvironmentData,
+        ...examineePermissionsData,
+        ...evaluationStrategyData,
+        ...{ isSyncExam: this.isSyncChecked ? 1 : 0 }
+      }
+      testData
+      // console.log('testData==', testData)
+      // this.$refs.basicSettingRef.$refs.form.validate().then(() => {
+      //   this.$emit('submit', this.model)
+      //   this.close()
+      // })
     }
   }
 }

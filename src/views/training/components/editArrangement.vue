@@ -1,6 +1,9 @@
 <template>
   <div class="editArrangement">
-    <section class="schedule">
+    <section
+      v-if="trainWay === 2 || trainWay === 3"
+      class="schedule"
+    >
       <div class="header">
         <span class="header--title">线下日程</span>
         <el-button
@@ -54,7 +57,10 @@
         </el-collapse-item>
       </el-collapse>
     </section>
-    <section class="courses">
+    <section
+      v-if="trainWay === 1 || trainWay === 3"
+      class="courses"
+    >
       <div class="header">
         <span class="header--title">在线课程</span>
         <el-button
@@ -111,13 +117,13 @@
         <template #handler="{row}">
           <el-button
             type="text"
-            @click="handleEdit(row)"
+            @click="handleEditExamine(row)"
           >
             修改
           </el-button>
           <el-button
             type="text"
-            @click="handleDelete(row)"
+            @click="handleDeleteExamine(row)"
           >
             删除
           </el-button>
@@ -137,7 +143,7 @@
     <EditExamineDrawer
       :visible.sync="examine.drawerVisible"
       :examine="examine.editingRecord"
-      @submit="courseSubmit"
+      @submit="examineSubmit"
     />
   </div>
 </template>
@@ -220,6 +226,12 @@ const TestConfig = {
 export default {
   name: 'EditArrangement',
   components: { EditScheduleDrawer, EditCourseDrawer, EditExamineDrawer },
+  props: {
+    trainWay: {
+      type: Number,
+      default: 3 //1在线，2面授，3混合
+    }
+  },
   data() {
     return {
       activeName: '0',
@@ -258,14 +270,28 @@ export default {
     }
   },
   methods: {
-    handleEditSchedule(row) {
-      this.schedule.editingRecord = row
-      this.schedule.drawerVisible = true
+    getData() {
+      return new Promise((resolve) => {
+        resolve({
+          trainOfflineTodo: this.schedule.data,
+          trainOnlineCourse: this.course.data,
+          trainExam: this.examine.data
+        })
+      })
     },
     // 新增与编辑考试
     handleEditExamine(row) {
       this.examine.editingRecord = row
       this.examine.drawerVisible = true
+    },
+    // 考试安排提交后
+    examineSubmit(data) {
+      this.examine.data.push(data)
+    },
+    // 删除考试安排
+    handleDeleteExamine(row) {
+      let index = _.findIndex(this.examine.data, (item) => item.id === row.id)
+      this.examine.data.splice(index, 1)
     },
     // 新增与编辑在线课程
     handleEditCourse(row) {
@@ -276,14 +302,21 @@ export default {
     courseSubmit(data) {
       this.course.data.push(data)
     },
-    // 删除课程
+    // 删除在线课程
     handleDeleteCourse(row) {
       let index = _.findIndex(this.course.data, (item) => item.id === row.id)
       this.course.data.splice(index, 1)
     },
+    // 编辑与新增线下日程
+    handleEditSchedule(row) {
+      this.schedule.editingRecord = row
+      this.schedule.drawerVisible = true
+    },
+    // 删除线下日程
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
     },
+    // 线下日程提交后的数据处理
     handleSubmitSchedule(data) {
       const index = _.findIndex(this.schedule.data, { id: data.id })
       if (index >= 0) {
@@ -291,14 +324,6 @@ export default {
       } else {
         this.schedule.data.push(data)
       }
-    },
-    // eslint-disable-next-line
-    handleEdit(row) {
-      // console.log(row)
-    },
-    // eslint-disable-next-line
-    handleDelete(row) {
-      // console.log(row)
     }
   }
 }
