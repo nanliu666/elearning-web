@@ -5,8 +5,8 @@
     :placeholder="placeholder"
     :filterable="searchable"
     :remote="searchable"
-    :allow-create="isCreate"
-    :default-first-option="isCreate"
+    :allow-create="allowCreate"
+    :default-first-option="allowCreate"
     :remote-method="remoteMethod"
     @change="handleChange"
     @visible-change="visibleChange"
@@ -52,7 +52,8 @@ export default {
       type: [String, Boolean],
       default: ''
     },
-    isCreate: {
+    // 允许创建条目
+    allowCreate: {
       type: Boolean,
       default: () => {
         return false
@@ -113,12 +114,12 @@ export default {
     handleChange(value) {
       this.$emit('change', value)
       this.dispatch('ElFormItem', 'el.form.change', value)
-      if (this.isCreate) {
-        let selectItem = {}
-        this.optionList.map((it) => {
-          it.name === value && (selectItem = it)
-        })
-        this.$emit('handleChange', selectItem)
+
+      const selectItems = this.optionList.filter((it) => it[this.optionProps.value] === value)
+      if (selectItems.length !== 0) {
+        this.$emit('selectItem', selectItems[0])
+      } else {
+        this.$emit('selectItem', { [this.optionProps.lable]: value })
       }
     },
     loadOptionData(refresh = false) {

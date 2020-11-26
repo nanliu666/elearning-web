@@ -7,14 +7,14 @@
         :columns="infoFormColumns"
         :model="formData"
       >
-        <template #contact_name>
+        <template #contactName>
           <lazySelect
-            v-model="formData.contact_name"
+            v-model="formData.contactName"
             :load="loadCoordinator"
-            :is-create="isCreate"
+            :allow-create="isCreate"
             :searchable="remote"
             :option-props="personOptionProps"
-            @handleChange="change"
+            @selectItem="selectContact"
           >
           </lazySelect>
         </template>
@@ -232,9 +232,11 @@ export default {
           })
       })
     },
-    change(data) {
+    selectContact(data) {
       if (data.phonenum) {
-        this.formData.contact_phone = data.phonenum
+        this.formData.contactPhone = data.phonenum
+      } else {
+        this.formData.contactPhone = ''
       }
     },
     loadCoordinator() {
