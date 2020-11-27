@@ -17,7 +17,8 @@
           v-for="(item, index) in steps"
           :key="index"
           class="step"
-          :class="[activeStep == item.key ? 'active' : '']"
+          :class="[activeStep === index ? 'active' : '']"
+          @click="jumpStep(index)"
         >
           <span class="step-index">
             <i
@@ -35,7 +36,7 @@
 
       <div class="page-right">
         <el-button
-          v-if="activeStep !== 'editBasicInfo'"
+          v-if="activeStep !== 0"
           class="publish-btn"
           size="medium"
           type="primary"
@@ -44,7 +45,7 @@
           上一步
         </el-button>
         <el-button
-          v-if="activeStep !== 'editDetail'"
+          v-if="activeStep !== 2"
           class="publish-btn"
           size="medium"
           type="primary"
@@ -53,7 +54,7 @@
           下一步
         </el-button>
         <el-button
-          v-if="activeStep === 'editDetail'"
+          v-if="activeStep === 2"
           class="publish-btn"
           size="medium"
           type="primary"
@@ -77,20 +78,18 @@
         class="page__content--inner"
       >
         <EditBasicInfo
-          v-show="activeStep === 'editBasicInfo'"
+          v-show="activeStep === 0"
           ref="editBasicInfo"
           @changeWay="changeWay"
-          @jump="changeSteps"
         />
         <EditArrangement
-          v-show="activeStep === 'editArrangement'"
+          v-show="activeStep === 1"
           ref="editArrangement"
           :train-way="trainWay"
         />
         <EditDetail
-          v-show="activeStep === 'editDetail'"
+          v-show="activeStep === 2"
           ref="editDetail"
-          @jump="changeSteps"
         />
       </el-col>
     </el-row>
@@ -103,6 +102,7 @@ import EditBasicInfo from './components/editBasicInfo'
 import EditDetail from './components/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
 import { mapGetters } from 'vuex'
+const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑
 export default {
   name: 'TrainingEdit',
@@ -113,23 +113,21 @@ export default {
   },
   data() {
     return {
+      refsList: REFS_LIST,
       trainWay: 0,
       loading: false,
-      activeStep: 'editBasicInfo',
+      activeStep: 0,
       steps: [
         {
           label: '填写基本信息',
-          key: 'editBasicInfo',
           icon: 'icon-approval-info-outlined'
         },
         {
           label: '填写培训安排',
-          key: 'editArrangement',
           icon: 'icon-approval-form-outlined'
         },
         {
           label: '配置详细信息',
-          key: 'editDetail',
           icon: 'icon-approval-flow-outlined'
         }
       ]
@@ -137,7 +135,8 @@ export default {
   },
   computed: {
     translateX() {
-      return `translateX(${this.steps.findIndex((t) => t.key === this.activeStep) * 100}%)`
+      return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
+        100}%)`
     },
     id() {
       return _.get(this.$route.query, 'id', null)
@@ -148,19 +147,18 @@ export default {
     this.initData()
   },
   methods: {
+    jumpStep(index) {
+      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+        this.activeStep = index
+      })
+    },
     /***
      * @author guanfenda
      * @desc 返回上一步
      *
      * */
     handlePreviousStep() {
-      // this.$refs[this.activeStep].getData().then(() =>{
-      let previousStep = {
-        editDetail: 'editArrangement',
-        editArrangement: 'editBasicInfo'
-      }
-      this.activeStep = previousStep[this.activeStep]
-      // })
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
     /***
      * @author guanfenda
@@ -168,12 +166,8 @@ export default {
      *
      * */
     handleNextStep() {
-      this.$refs[this.activeStep].getData().then(() => {
-        let nextStep = {
-          editBasicInfo: 'editArrangement',
-          editArrangement: 'editDetail'
-        }
-        this.activeStep = nextStep[this.activeStep]
+      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
       })
     },
     initData() {
@@ -228,9 +222,6 @@ export default {
       }
       // console.log('处理后的总参数==', JSON.stringify(params))
       return params
-    },
-    changeSteps(key) {
-      this.activeStep = key
     },
     exit() {
       this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {
