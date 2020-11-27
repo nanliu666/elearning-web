@@ -187,7 +187,7 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
-          options: [''],
+          options: [],
           required: true,
           span: 24,
           offset: 0
@@ -235,7 +235,7 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'basicInfo')
+            this.$emit('jump', 'editBasicInfo')
           })
       })
     },

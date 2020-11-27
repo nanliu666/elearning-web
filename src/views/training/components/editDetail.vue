@@ -154,7 +154,7 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'detail')
+            this.$emit('jump', 'EditDetail')
           })
       })
     },
