@@ -263,15 +263,13 @@ export default {
   },
   computed: {
     scheduleList() {
-      const scheduleList = _.chain(this.schedule.data)
-        .groupBy(this.schedule.data, 'todoDate')
+      return _.chain(this.schedule.data)
+        .groupBy('todoDate')
         .map((list) => ({
           date: list[0].todoDate,
           list: _.sortBy(list, (i) => i.todoTime && i.todoTime[0])
         }))
         .value()
-      // console.log('scheduleList==', scheduleList)
-      return scheduleList
     }
   },
   methods: {
@@ -290,8 +288,15 @@ export default {
       this.examine.drawerVisible = true
     },
     // 考试安排提交后
-    examineSubmit(data) {
-      this.examine.data.push(data)
+    examineSubmit(data, type) {
+      if (type == 'add') {
+        this.examine.data.push(data)
+      } else {
+        let index = _.findIndex(this.examine.data, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.examine.data, index, data)
+      }
     },
     // 删除考试安排
     handleDeleteExamine(row) {
@@ -304,8 +309,15 @@ export default {
       this.course.drawerVisible = true
     },
     // 在线课程提交后
-    courseSubmit(data) {
-      this.course.data.push(data)
+    courseSubmit(data, type) {
+      if (type == 'add') {
+        this.course.data.push(data)
+      } else {
+        let index = _.findIndex(this.course.data, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.course.data, index, data)
+      }
     },
     // 删除在线课程
     handleDeleteCourse(row) {
