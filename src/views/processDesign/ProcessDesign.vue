@@ -1303,7 +1303,7 @@ $header-height = 54px;
         &.active {
           font-size: 16px;
           color: #202940;
-          border-bottom: 2px solid #207EFA;
+          border-bottom: 2px solid $primaryColor;
         }
 
         &.active > .step-index {

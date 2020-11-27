@@ -251,7 +251,7 @@ export default {
       font-size: 16px;
       color: #333333;
       padding-left: 8px;
-      border-left: 4px solid #207efa;
+      border-left: 4px solid $primaryColor;
       margin-bottom: 16px;
     }
     .employment-item {

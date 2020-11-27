@@ -415,7 +415,7 @@ export default {
       }
       .content-item:hover {
         span {
-          color: #207efa;
+          color: $primaryColor;
         }
         position: relative;
         .Smectite {
@@ -503,7 +503,7 @@ export default {
         }
       }
       .content-item:hover span {
-        color: #207efa;
+        color: $primaryColor;
       }
     }
   }

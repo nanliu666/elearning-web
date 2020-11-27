@@ -155,7 +155,7 @@ export default {
 $color_active: #368AFA
 $color_danger: #ff6464
 $color_icon: #757C85
-$color_hover: #207EFA
+
 $header-height: 60px
 .NewsManage
   height: 100%;
@@ -163,7 +163,7 @@ $header-height: 60px
     color: $color_active
     &:hover
       cursor: pointer
-      color: $color_hover
+      color: $primaryColor
   .status-span
       padding: 4px
       /*border-radius: 2px*/

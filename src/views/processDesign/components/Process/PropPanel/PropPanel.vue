@@ -1889,7 +1889,7 @@ export default {
   }
 
   .active {
-    background: #207EFA;
+    background: $primaryColor;
     color: #FFFFFF;
   }
 }

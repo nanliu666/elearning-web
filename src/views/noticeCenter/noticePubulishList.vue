@@ -84,9 +84,7 @@
           slot-scope="{ row }"
         >
           <div
-            type="text"
-            class="ellipsis"
-            style="color: #207EFA; cursor:pointer"
+            class="ellipsis title"
             @click="jumpDetail(row)"
           >
             {{ row.title }}
@@ -313,6 +311,9 @@ $color_icon: #A0A8AE
 .basic-container--block
   height: calc(100% - 92px)
   min-height: calc(100% - 92px)
+.title
+  color: $primaryColor
+  cursor: pointer
 .operations
   align-items: center
   display: flex

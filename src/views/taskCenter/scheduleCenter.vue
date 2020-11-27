@@ -341,7 +341,7 @@ export default {
         cursor: pointer;
       }
       .blue-tip {
-        background: #207efa;
+        background: $primaryColor;
         color: #ffffff;
       }
       .grey-tip {
@@ -353,7 +353,7 @@ export default {
   .day-num {
     height: 36px;
     width: 36px;
-    background: #207efa;
+    background: $primaryColor;
     line-height: 36px;
     text-align: center;
     border-radius: 100%;
@@ -387,7 +387,7 @@ export default {
       // normal
     }
     .blue-tip {
-      background: #207efa;
+      background: $primaryColor;
       color: #ffffff;
     }
     .grey-tip {
@@ -412,7 +412,7 @@ export default {
   .day-num {
     height: 36px;
     width: 36px;
-    background: #207efa;
+    background: $primaryColor;
     line-height: 36px;
     text-align: center;
     border-radius: 100%;
@@ -430,7 +430,7 @@ export default {
       margin-bottom: 5px;
       height: 36px;
       width: 36px;
-      background: #207efa;
+      background: $primaryColor;
       line-height: 36px;
       text-align: center;
       border-radius: 100%;

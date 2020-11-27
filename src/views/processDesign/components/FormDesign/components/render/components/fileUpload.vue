@@ -140,7 +140,7 @@ $commonWidth: 80px;
     align-items: center;
     &:hover,
     &:focus {
-      border-color: #207efa;
+      border-color: $primaryColor;
     }
     .uploader-icon {
       font-size: 40px;

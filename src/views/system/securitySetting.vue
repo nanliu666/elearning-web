@@ -135,7 +135,7 @@ export default {
   .edit-item {
     cursor: pointer;
     padding: 8px;
-    color: #207efa;
+    color: $primaryColor;
   }
 }
 </style>

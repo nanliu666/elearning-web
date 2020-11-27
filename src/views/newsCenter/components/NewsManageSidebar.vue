@@ -210,7 +210,7 @@ export default {
 $color_active: #368AFA
 $color_danger: #ff6464
 $color_icon: #757C85
-$color_hover: #207EFA
+
 
 .wrapper
   position: relative
