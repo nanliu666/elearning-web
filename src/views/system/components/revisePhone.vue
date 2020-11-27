@@ -115,7 +115,7 @@
                     :src="identity.image"
                     class="login-code-img"
                     @click="refreshCode"
-                  >
+                  />
                 </div>
               </el-form-item>
 
@@ -570,8 +570,8 @@ export default {
   font-size: 14px;
 }
 .get-test-code {
-  color: #207efa;
-  border: 1px solid #207efa;
+  color: $primaryColor;
+  border: 1px solid $primaryColor;
 }
 .count-down-time {
   width: 100px;
@@ -597,7 +597,7 @@ export default {
 // .next-button .el-button {
 //   width: 94px;
 //   height: 42px;
-//   background: #207efa;
+//   background: $primaryColor;
 //   border-radius: 4px;
 //   border-radius: 4px;
 //   color: #fff;
@@ -621,7 +621,7 @@ export default {
   margin-top: 40px;
 }
 .goback-login {
-  background: #207efa;
+  background: $primaryColor;
   border-radius: 4px;
   border-radius: 4px;
   width: 136px;

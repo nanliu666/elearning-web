@@ -139,6 +139,12 @@ module.exports = {
       // 给 stylus-loader 传递选项
       stylus: {
         import: '~@/assets/style/global.styl'
+      },
+      scss: {
+        data: '@import "~@/styles/variables.scss";'
+      },
+      sass: {
+        data: '@import "~@/styles/variables.scss";'
       }
     }
   }

@@ -29,7 +29,7 @@
                 <img
                   :src="_.get(data[child.index], 'picUrl')"
                   alt="news image"
-                >
+                />
               </div>
 
               <span class="news__title">
@@ -47,7 +47,7 @@
             class="news__img"
             :src="_.get(data[index], 'picUrl')"
             alt="news image"
-          >
+          />
           <span class="news__title">
             {{ _.get(data[index], 'title') }}
           </span>
@@ -123,7 +123,7 @@ export default {
 $color_active: #368AFA
 $color_danger: #ff6464
 $color_icon: #A0A8AE
-$color_hover: #207EFA
+
 
 .NewsCenterHeadLine
   .container

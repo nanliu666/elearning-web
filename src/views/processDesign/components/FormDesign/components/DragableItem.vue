@@ -67,7 +67,7 @@ const layouts = {
         </div>
         {components.itemBtns.apply(this, arguments)}
         {element.__config__.type === 'detail' && (
-          <div style="text-align: center;background: white;color: #207efa;padding: .4rem 1rem;">
+          <div style="text-align: center;background: white;color: $primaryColor;padding: .4rem 1rem;">
             <i class="el-icon-plus"></i> {element.actionText}
           </div>
         )}

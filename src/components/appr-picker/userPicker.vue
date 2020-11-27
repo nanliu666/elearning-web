@@ -43,7 +43,7 @@
                 <img
                   v-if="item.avatarUrl"
                   :src="item.avatarUrl"
-                >
+                />
                 <i
                   v-else
                   class="el-icon-user"
@@ -196,7 +196,7 @@ export default {
             height: 32px;
             width: 32px;
             text-align: center;
-            background: #207efa;
+            background: $primaryColor;
             border-radius: 50%;
             margin-right: 8px;
             img {

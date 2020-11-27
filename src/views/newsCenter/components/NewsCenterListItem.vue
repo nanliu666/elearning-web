@@ -8,7 +8,7 @@
         <img
           :src="_.get(data, 'picUrl', null)"
           alt="news__img"
-        >
+        />
       </div>
       <div class="news__content">
         <span
@@ -69,7 +69,7 @@ export default {
 $color_active: #368AFA
 $color_aside: #666
 $color_danger: #ff6464
-$color_hover: #207EFA
+
 $color_icon: #A0A8AE
 $size_gutter: .5rem
 

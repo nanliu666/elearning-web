@@ -513,7 +513,6 @@ export default {
 $color_active: #368AFA
 $color_danger: #ff6464
 $color_icon: #A0A8AE
-$color_hover: #207EFA
 .export-button
   cursor: pointer
 .Recordlist
@@ -528,7 +527,7 @@ $color_hover: #207EFA
     color: $color_active
     &:hover
       cursor: pointer
-      color: $color_hover
+      color: $primaryColor
   .table__tags
     >*
       margin-left: 1rem

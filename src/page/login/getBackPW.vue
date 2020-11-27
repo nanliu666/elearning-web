@@ -632,8 +632,8 @@ export default {
   font-size: 14px;
 }
 .get-test-code {
-  color: #207efa;
-  border: 1px solid #207efa;
+  color: $primaryColor;
+  border: 1px solid $primaryColor;
   vertical-align: middle;
 }
 .count-down-time {
@@ -679,7 +679,7 @@ export default {
   margin-top: 40px;
 }
 .goback-login {
-  background: #207efa;
+  background: $primaryColor;
   border-radius: 4px;
   border-radius: 4px;
   width: 136px;

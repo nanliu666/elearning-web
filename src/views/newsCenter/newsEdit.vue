@@ -650,7 +650,7 @@ $color_font_uploader: #A0A8AE
     align-items: center
     margin-bottom: 4px
     &:hover
-      color: #207efa
+      color: $primaryColor
 .select
   width: 194px
 </style>

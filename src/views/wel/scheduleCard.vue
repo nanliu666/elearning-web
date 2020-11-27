@@ -293,13 +293,13 @@ export default {
         text-align: center;
       }
       .is-selected {
-        background: #207efa;
+        background: $primaryColor;
         box-shadow: 0 4px 8px 2px rgba(8, 85, 163, 0.16);
         border-radius: 100%;
         color: #fff;
       }
       .date-item:hover {
-        border: 2px solid #207efa;
+        border: 2px solid $primaryColor;
         line-height: 32px;
         border-radius: 100%;
         box-sizing: border-box;
@@ -351,7 +351,7 @@ export default {
             height: 36px;
             border-left: 3px solid #6aafff;
             font-size: 14px;
-            color: #207efa;
+            color: $primaryColor;
             line-height: 36px;
             box-sizing: border-box;
             padding-left: 21px;

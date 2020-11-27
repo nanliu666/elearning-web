@@ -274,6 +274,6 @@ export default {
   top: -15px;
 }
 .button {
-  color: #207efa;
+  color: $primaryColor;
 }
 </style>
