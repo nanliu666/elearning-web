@@ -121,12 +121,24 @@ export default {
             this.title = '编辑考试'
             this.editType = 'edit'
             this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
+            this.$refs.testEnvironmentRef.model = this.getNavModel(
+              this.$refs.testEnvironmentRef.model
+            )
+            this.$refs.examineePermissionsRef.model = this.getNavModel(
+              this.$refs.examineePermissionsRef.model
+            )
+            this.$refs.evaluationStrategyRef.model = this.getNavModel(
+              this.$refs.evaluationStrategyRef.model
+            )
           } else {
             // 新增的时候重置数据
             this.editType = 'add'
             this.model.id = createUniqueID()
+            this.isSyncChecked = false
             this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
             this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
+            this.$refs.examineePermissionsRef && this.$refs.examineePermissionsRef.resetFields()
+            this.$refs.evaluationStrategyRef && this.$refs.evaluationStrategyRef.resetFields()
           }
         }
       }
@@ -160,10 +172,15 @@ export default {
         ...{ isSyncExam: this.isSyncChecked ? 1 : 0 }
       }
       // console.log('testData==', examineData)
-      this.$refs.basicSettingRef.$refs.form.validate().then(() => {
-        this.$emit('submit', examineData, this.editType)
-        this.close()
-      })
+      this.$refs.basicSettingRef.$refs.form
+        .validate()
+        .then(() => {
+          this.$emit('submit', examineData, this.editType)
+          this.close()
+        })
+        .catch(() => {
+          this.currentIndex = 0
+        })
     }
   }
 }

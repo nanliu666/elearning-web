@@ -150,14 +150,13 @@ export default {
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
-            this.$router.go(-1)
+            // this.$router.go(-1)
           }
         })
       })
     },
     // 统一处理入参
     handleParams(res) {
-      // console.log('未处理的总参数==', res)
       // 培训对象
       let trainObjectsList = []
       const pickTrain = _.get(res[0], 'trainObjectsList')

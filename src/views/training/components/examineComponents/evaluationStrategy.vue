@@ -69,6 +69,15 @@ const switchConfig = [
     prop: 'decideItem'
   }
 ]
+const defaultValue = {
+  id: '',
+  modifyAnswer: false,
+  modifyLimit: false,
+  scopeLimit: false,
+  scopeLimitValue: 100, // 最高分默认值100
+  objectiveQuestions: false,
+  decideItem: false
+}
 export default {
   name: 'EvaluationStrategy',
   components: {
@@ -98,15 +107,7 @@ export default {
       currentRadio: 1,
       insertConfig,
       switchConfig: switchConfig,
-      model: {
-        id: '',
-        modifyAnswer: false,
-        modifyLimit: false,
-        scopeLimit: false,
-        scopeLimitValue: 100, // 最高分默认值100
-        objectiveQuestions: false,
-        decideItem: false
-      }
+      model: _.cloneDeep(defaultValue)
     }
   },
   methods: {
@@ -121,6 +122,9 @@ export default {
           this.switchConfig.splice(index, 1)
         }
       }
+    },
+    resetFields() {
+      this.model = _.cloneDeep(defaultValue)
     }
   }
 }
