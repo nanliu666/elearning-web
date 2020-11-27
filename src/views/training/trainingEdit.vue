@@ -173,7 +173,7 @@ export default {
         trainOfflineTodo,
         trainOnlineCourse
       }
-      // console.log('处理后的总参数==', params)
+      // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },
     changeSteps(key) {

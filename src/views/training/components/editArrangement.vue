@@ -114,6 +114,9 @@
         :columns="examine.columns"
         :data="examine.data"
       >
+        <template #reckonTime="{row}">
+          {{ row.reckonTime === 0 ? '不计时' : row.reckonTime }}
+        </template>
         <template #handler="{row}">
           <el-button
             type="text"
@@ -215,9 +218,9 @@ const CourseConfig = {
   handlerColumn: { label: '操作', width: 150 }
 }
 const TestColumns = [
-  { prop: 'date', label: '考试日期', width: 220 },
-  { prop: 'tests', label: '关联考试', minWidth: 150 },
-  { prop: 'time', label: '考试时间(分钟)' }
+  { prop: 'examTime', label: '考试日期', width: 220 },
+  { prop: 'testPaper', label: '关联考试', minWidth: 150 },
+  { prop: 'reckonTime', slot: true, label: '考试时间(分钟)' }
 ]
 const TestConfig = {
   showHandler: true,

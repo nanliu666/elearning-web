@@ -112,6 +112,7 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
+          // console.log('val==', this.examine)
           if (!_.isEmpty(this.examine)) {
             // this.model = _.cloneDeep(this.examine)
             this.title = '编辑考试'
@@ -132,21 +133,22 @@ export default {
     submit() {
       const basicSettingData = this.$refs.basicSettingRef.model
       const testEnvironmentData = this.$refs.testEnvironmentRef.model
-      const examineePermissionsData = this.$refs.examineePermissionsRef.model
+      const examinePermissionsData = this.$refs.examineePermissionsRef.model
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
-      const testData = {
+      const achievementPublishData = this.$refs.achievementPublishRef.formData
+      const examineData = {
         ...basicSettingData,
         ...testEnvironmentData,
-        ...examineePermissionsData,
+        ...examinePermissionsData,
         ...evaluationStrategyData,
+        ...achievementPublishData,
         ...{ isSyncExam: this.isSyncChecked ? 1 : 0 }
       }
-      testData
-      // console.log('testData==', testData)
-      // this.$refs.basicSettingRef.$refs.form.validate().then(() => {
-      //   this.$emit('submit', this.model)
-      //   this.close()
-      // })
+      // console.log('testData==', examineData)
+      this.$refs.basicSettingRef.$refs.form.validate().then(() => {
+        this.$emit('submit', examineData)
+        this.close()
+      })
     }
   }
 }
