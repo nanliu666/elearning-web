@@ -152,9 +152,9 @@
 </template>
 
 <script>
-import EditScheduleDrawer from './editScheduleDrawer'
-import EditCourseDrawer from './editCourseDrawer'
-import EditExamineDrawer from './editExamineDrawer'
+import EditScheduleDrawer from './drawerComponents/editScheduleDrawer'
+import EditCourseDrawer from './drawerComponents/editCourseDrawer'
+import EditExamineDrawer from './drawerComponents/editExamineDrawer'
 const ScheduleColumns = [
   {
     prop: 'todoTime',

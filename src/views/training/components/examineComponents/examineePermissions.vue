@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const switchConfig = [
   {
     label: '允许考生查看本机资料(开卷考试)',

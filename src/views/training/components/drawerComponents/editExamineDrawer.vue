@@ -67,11 +67,11 @@
 
 <script>
 const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
-import basicSetting from './examineComponents/basicSetting'
-import testEnvironment from './examineComponents/testEnvironment'
-import examineePermissions from './examineComponents/examineePermissions'
-import evaluationStrategy from './examineComponents/evaluationStrategy'
-import achievementPublish from './examineComponents/achievementPublish'
+import basicSetting from '../examineComponents/basicSetting'
+import testEnvironment from '../examineComponents/testEnvironment'
+import examineePermissions from '../examineComponents/examineePermissions'
+import evaluationStrategy from '../examineComponents/evaluationStrategy'
+import achievementPublish from '../examineComponents/achievementPublish'
 export default {
   name: 'EditExamineDrawer',
   components: {

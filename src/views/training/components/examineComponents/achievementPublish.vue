@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import achivementRadioInput from './achivementRadioInput'
+import achivementRadioInput from '../atomComponents/achivementRadioInput'
 export default {
   name: 'AchievementPublish',
   components: {

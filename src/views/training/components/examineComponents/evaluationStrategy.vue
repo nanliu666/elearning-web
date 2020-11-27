@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const insertConfig = {
   label: '不允许修改考生客观题及其评分结果',
   prop: 'modifyLimit'

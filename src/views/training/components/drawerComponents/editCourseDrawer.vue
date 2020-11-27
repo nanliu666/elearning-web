@@ -26,7 +26,6 @@
 </template>
 
 <script>
-import { createUniqueID } from '@/util/util'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -62,7 +61,6 @@ export default {
       columns: EventColumns,
       title: '添加在线课程',
       model: {
-        id: createUniqueID(),
         studyType: 0,
         courseName: '',
         lecturerName: '',

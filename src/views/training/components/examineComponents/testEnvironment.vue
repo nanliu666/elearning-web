@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const switchConfig = [
   {
     label: '启用IP限制(需设定考生合法IP范围)',
