@@ -354,7 +354,7 @@ export default {
       .title,
       .type {
         font-size: 14px;
-        color: #207efa;
+        color: $primaryColor;
         line-height: 22px;
         font-weight: bold;
         cursor: pointer;

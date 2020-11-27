@@ -327,7 +327,7 @@ export default {
 // .custom-tree-node {
 // 	height: 36px;
 // 	.el-icon-folder-opened {
-// 		color: #207efa;
+// 		color: $primaryColor;
 // 		font-size: 14px;
 // 	}
 // 	.item {
@@ -360,7 +360,7 @@ export default {
         }
         .el-icon-folder-opened {
           margin-right: 8px;
-          color: #207efa;
+          color: $primaryColor;
           font-size: 24px;
         }
       }

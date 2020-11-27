@@ -26,7 +26,7 @@
                 v-if="perosonnalInfo.avatarUrl"
                 :src="perosonnalInfo.avatarUrl"
                 class="avatar"
-              >
+              />
               <i
                 v-else
                 class="el-icon-plus avatar-uploader-icon"
@@ -691,7 +691,7 @@ li {
   height: 30px;
   .el-icon-edit {
     font-size: 18px;
-    color: #207efa;
+    color: $primaryColor;
   }
   .edit-button-text {
     font-size: 14px !important;

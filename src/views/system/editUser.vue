@@ -456,7 +456,7 @@ export default {
     align-items: center;
     margin-bottom: 4px;
     &:hover {
-      color: #207efa;
+      color: $primaryColor;
     }
   }
 }

@@ -512,7 +512,7 @@ export default {
   width: 98%;
   margin: 10px 0;
   .icon:hover {
-    color: #207efa;
+    color: $primaryColor;
   }
 }
 .imgs {
@@ -524,7 +524,7 @@ export default {
   line-height: 30px;
   text-align: center;
   font-size: 18px;
-  background: #207efa;
+  background: $primaryColor;
   color: #fff;
 }
 .imgss {
@@ -537,9 +537,9 @@ export default {
   text-align: center;
   font-size: 30px;
   background: #fff;
-  color: #207efa;
+  color: $primaryColor;
 }
   .company{
-    color: #207efa;
+    color: $primaryColor;
   }
 </style>
