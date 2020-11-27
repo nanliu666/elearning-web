@@ -18,7 +18,6 @@ const switchConfig = [
     label: '允许考生查看成绩',
     prop: 'openResults',
     expand: {
-      defaultValue: 0,
       pre: '考生在',
       before: '天内可以查看成绩（0代表永久）'
     }
@@ -53,13 +52,14 @@ export default {
     return {
       switchConfig,
       model: {
-        isDecoil: 0,
-        openResults: 0,
-        openAnswerSheet: 0,
-        selfMarking: 0,
-        publicAnswers: 0,
-        openEntrance: 0,
-        isExamine: 0
+        isDecoil: false,
+        openResults: false,
+        openAnswerSheet: false,
+        selfMarking: false,
+        publicAnswers: false,
+        openEntrance: false,
+        isExamine: false,
+        openAnswerSheetValue: 0 // 默认值0，表示永久
       }
     }
   }
