@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const insertConfig = {
   label: '不允许修改考生客观题及其评分结果',
   prop: 'modifyLimit'
@@ -54,7 +54,11 @@ const switchConfig = [
 
   {
     label: '评卷限定最高得分',
-    prop: 'scopeLimit'
+    prop: 'scopeLimit',
+    expand: {
+      pre: '最高得分为',
+      before: '分'
+    }
   },
   {
     label: '手工评卷是否显示客观题',
@@ -95,11 +99,13 @@ export default {
       insertConfig,
       switchConfig: switchConfig,
       model: {
-        modifyAnswer: 0,
-        modifyLimit: 0,
-        scopeLimit: 0,
-        objectiveQuestions: 0,
-        decideItem: 0
+        id: '',
+        modifyAnswer: false,
+        modifyLimit: false,
+        scopeLimit: false,
+        scopeLimitValue: 100, // 最高分默认值100
+        objectiveQuestions: false,
+        decideItem: false
       }
     }
   },

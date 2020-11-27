@@ -271,3 +271,9 @@ export const getOrgPrivilege = (params) => get('/sys/v1/role/org/privilege', par
  * @param {Object} params 过滤条件
  */
 export const getBizPrivilege = (params) => get('/sys/v1/role/biz/privilege', params)
+// /blade-manage/v1/train/getCatalogs
+/**
+ * @desc 角色业务部门权限查询
+ * @param {Object} params 过滤条件
+ */
+export const getTrainGetCatalogs = (params) => get('/api/blade-manage/v1/train/getCatalogs', params)

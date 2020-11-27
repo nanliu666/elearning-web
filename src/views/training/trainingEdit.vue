@@ -1,7 +1,7 @@
 <template>
   <div
     v-loading="loading"
-    class="trainingEdit page"
+    class="page"
   >
     <header class="page__header">
       <div class="page-actions">
@@ -18,7 +18,6 @@
           :key="index"
           class="step"
           :class="[activeStep == item.key ? 'active' : '']"
-          @click="changeSteps(item.key)"
         >
           <span class="step-index">
             <i
@@ -36,6 +35,25 @@
 
       <div class="page-right">
         <el-button
+          v-if="activeStep !== 'editBasicInfo'"
+          class="publish-btn"
+          size="medium"
+          type="primary"
+          @click="handlePreviousStep"
+        >
+          上一步
+        </el-button>
+        <el-button
+          v-if="activeStep !== 'editDetail'"
+          class="publish-btn"
+          size="medium"
+          type="primary"
+          @click="handleNextStep"
+        >
+          下一步
+        </el-button>
+        <el-button
+          v-if="activeStep === 'editDetail'"
           class="publish-btn"
           size="medium"
           type="primary"
@@ -59,18 +77,18 @@
         class="page__content--inner"
       >
         <EditBasicInfo
-          v-show="activeStep === 'basicInfo'"
+          v-show="activeStep === 'editBasicInfo'"
           ref="editBasicInfo"
           @changeWay="changeWay"
           @jump="changeSteps"
         />
         <EditArrangement
-          v-show="activeStep === 'arrangement'"
+          v-show="activeStep === 'editArrangement'"
           ref="editArrangement"
           :train-way="trainWay"
         />
         <EditDetail
-          v-show="activeStep === 'detail'"
+          v-show="activeStep === 'editDetail'"
           ref="editDetail"
           @jump="changeSteps"
         />
@@ -97,21 +115,21 @@ export default {
     return {
       trainWay: 0,
       loading: false,
-      activeStep: 'basicInfo',
+      activeStep: 'editBasicInfo',
       steps: [
         {
           label: '填写基本信息',
-          key: 'basicInfo',
+          key: 'editBasicInfo',
           icon: 'icon-approval-info-outlined'
         },
         {
           label: '填写培训安排',
-          key: 'arrangement',
+          key: 'editArrangement',
           icon: 'icon-approval-form-outlined'
         },
         {
           label: '配置详细信息',
-          key: 'detail',
+          key: 'editDetail',
           icon: 'icon-approval-flow-outlined'
         }
       ]
@@ -130,6 +148,34 @@ export default {
     this.initData()
   },
   methods: {
+    /***
+     * @author guanfenda
+     * @desc 返回上一步
+     *
+     * */
+    handlePreviousStep() {
+      // this.$refs[this.activeStep].getData().then(() =>{
+      let previousStep = {
+        editDetail: 'editArrangement',
+        editArrangement: 'editBasicInfo'
+      }
+      this.activeStep = previousStep[this.activeStep]
+      // })
+    },
+    /***
+     * @author guanfenda
+     * @desc 处理下一步 验证当前form是否符合规范
+     *
+     * */
+    handleNextStep() {
+      this.$refs[this.activeStep].getData().then(() => {
+        let nextStep = {
+          editBasicInfo: 'editArrangement',
+          editArrangement: 'editDetail'
+        }
+        this.activeStep = nextStep[this.activeStep]
+      })
+    },
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
@@ -158,9 +204,16 @@ export default {
     // 统一处理入参
     handleParams(res) {
       // console.log('未处理的总参数==', res)
-      // 基本信息(除培训对象外)详细信息
-      const trainObjectsList = _.pick(res[0], 'trainObjectsList')
       // 培训对象
+      let trainObjectsList = []
+      const pickTrain = _.get(res[0], 'trainObjectsList')
+      _.each(pickTrain, (item) => {
+        trainObjectsList.push({
+          type: item.type,
+          bizId: item.type === 'User' ? item.userId : item.bizId
+        })
+      })
+      // 基本信息(除培训对象外)详细信息
       const trainInfo = _.chain(res[0])
         .omit('trainObjectsList')
         .assign(res[2])
@@ -173,7 +226,7 @@ export default {
         trainOfflineTodo,
         trainOnlineCourse
       }
-      // console.log('处理后的总参数==', params)
+      // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },
     changeSteps(key) {
@@ -196,8 +249,6 @@ export default {
 
 <style lang="scss" scoped>
 $header-height: 54px;
-.trainingEdit {
-}
 .page {
   width: 100vw;
   height: 100vh;
