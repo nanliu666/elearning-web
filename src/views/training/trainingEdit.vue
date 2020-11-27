@@ -147,7 +147,7 @@ export default {
       const detailData = this.$refs.editDetail.getData()
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
         let params = this.handleParams(res)
-        let editFun = this.$route.query.id ? putTrain : createTrain
+        let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
             this.$router.go(-1)
@@ -174,6 +174,7 @@ export default {
         .value()
       const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
       let params = {
+        id: this.id,
         trainInfo,
         trainObjectsList,
         trainExam,

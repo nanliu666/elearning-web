@@ -114,6 +114,9 @@
         :columns="examine.columns"
         :data="examine.data"
       >
+        <template #examTime="{row}">
+          {{ row.examTime[0] }} 至 {{ row.examTime[1] }}
+        </template>
         <template #reckonTime="{row}">
           {{ row.reckonTime === 0 ? '不计时' : row.reckonTime }}
         </template>

@@ -150,7 +150,7 @@ export default {
       const testEnvironmentData = this.$refs.testEnvironmentRef.model
       const examinePermissionsData = this.$refs.examineePermissionsRef.model
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
-      const achievementPublishData = this.$refs.achievementPublishRef.formData
+      const achievementPublishData = this.$refs.achievementPublishRef.model
       const examineData = {
         ...basicSettingData,
         ...testEnvironmentData,
