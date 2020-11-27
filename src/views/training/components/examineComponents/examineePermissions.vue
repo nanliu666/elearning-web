@@ -52,7 +52,7 @@ const defaultValue = {
   publicAnswers: false,
   openEntrance: false,
   isExamine: false,
-  openAnswerSheetValue: 0 // 默认值0，表示永久
+  openResultsValue: 0 // 默认值0，表示永久
 }
 export default {
   name: 'ExamineePermissions',
