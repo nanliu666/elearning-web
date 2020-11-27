@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { createUniqueID } from '@/util/util'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -58,6 +59,7 @@ export default {
   },
   data() {
     return {
+      editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
       model: {
@@ -82,11 +84,14 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          if (!_.isEmpty(this.course)) {
+          if (_.isNumber(this.course.id)) {
             this.model = _.cloneDeep(this.course)
             this.title = '编辑在线课程'
+            this.editType = 'edit'
           } else {
             this.$refs.form && this.$refs.form.resetFields()
+            this.model.id = createUniqueID()
+            this.editType = 'add'
           }
         }
       }
@@ -99,7 +104,7 @@ export default {
     submit() {
       this.$refs.form.validate().then(() => {
         this.close()
-        this.$emit('submit', this.model)
+        this.$emit('submit', this.model, this.editType)
       })
     }
   }

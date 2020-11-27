@@ -72,6 +72,7 @@ import testEnvironment from '../examineComponents/testEnvironment'
 import examineePermissions from '../examineComponents/examineePermissions'
 import evaluationStrategy from '../examineComponents/evaluationStrategy'
 import achievementPublish from '../examineComponents/achievementPublish'
+import { createUniqueID } from '@/util/util'
 export default {
   name: 'EditExamineDrawer',
   components: {
@@ -87,6 +88,7 @@ export default {
   },
   data() {
     return {
+      editType: 'add',
       isSyncChecked: false,
       currentIndex: 0,
       title: '添加考试',
@@ -112,11 +114,14 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          if (!_.isEmpty(this.examine)) {
+          if (_.isNumber(this.examine.id)) {
             this.title = '编辑考试'
+            this.editType = 'edit'
             this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
           } else {
             // 新增的时候重置数据
+            this.editType = 'add'
+            this.model.id = createUniqueID()
             this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
             this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
           }
@@ -153,7 +158,7 @@ export default {
       }
       // console.log('testData==', examineData)
       this.$refs.basicSettingRef.$refs.form.validate().then(() => {
-        this.$emit('submit', examineData)
+        this.$emit('submit', examineData, this.editType)
         this.close()
       })
     }
