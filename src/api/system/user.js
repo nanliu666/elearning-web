@@ -35,7 +35,13 @@ export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
  * @returns {{bizs: Array<any>; users: Array<any>}}
  */
 export const getBizUserChild = (params) => get('/org/v1/biz/org/user/child', params)
-
+/**
+ * 获取外部用户
+ * @param {object} params 参数
+ * @param {string} params.pageNo
+ * @param {string} params.pageSize
+ */
+export const getOuterUser = (params) => get('/user/v1/user/outer', params)
 /**
  * 类目列表
  * @param {String} userId - 用户ID

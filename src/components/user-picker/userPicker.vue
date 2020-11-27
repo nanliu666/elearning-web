@@ -15,11 +15,21 @@
         <div>
           <el-tabs v-model="activeTab">
             <el-tab-pane
+              v-if="selectTypes.includes('Org')"
               label="组织架构"
               name="Org"
             />
+            <el-tab-pane
+              v-if="selectTypes.includes('OuterUser')"
+              label="外部联系人"
+              name="OuterUser"
+            >
+            </el-tab-pane>
           </el-tabs>
-          <div v-show="activeTab === 'Org'">
+          <div
+            v-if="selectTypes.includes('Org')"
+            v-show="activeTab === 'Org'"
+          >
             <el-input
               v-model="orgSearch"
               placeholder="搜索组织部门或成员姓名"
@@ -46,6 +56,32 @@
                 @check="handleCheckItem"
               />
             </div>
+          </div>
+          <div
+            v-show="activeTab === 'OuterUser'"
+            v-if="selectTypes.includes('OuterUser')"
+            class="outer-user"
+          >
+            <el-input
+              v-model.trim="outerParams.search"
+              placeholder="搜索姓名或手机号码"
+            />
+            <ul
+              ref="outerUser"
+              @scroll="debounceOuterScrollHandler"
+            >
+              <li
+                v-for="item in outerData"
+                :key="item.bizId"
+              >
+                <el-checkbox
+                  :value="!!_.find(selected, { bizId: item.bizId })"
+                  @change="handleSelectUser(item)"
+                ></el-checkbox>
+
+                {{ item.bizName }}{{ item.phonenum ? `(${item.phonenum})` : '' }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -103,13 +139,14 @@
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild } from '@/api/system/user'
+import { getOrgUserChild, getOuterUser } from '@/api/system/user'
 const SEARCH_DELAY = 200
 const NODE_TYPE = {
   All: 'All',
   Org: 'Org',
   User: 'User'
 }
+const SELECT_TYPE = ['Org', 'OuterUser']
 
 const loadOrgTree = async ({ parentId, parentPath, search }) => {
   search = _.trim(search)
@@ -161,6 +198,11 @@ export default {
       default: () => {
         return '请选择'
       }
+    },
+    // 选择类型，用逗号分隔，可选项包括 Org(组织机构),OuterUser(外部联系人)
+    selectType: {
+      type: String,
+      default: 'Org'
     }
   },
   data() {
@@ -169,22 +211,32 @@ export default {
       loading: false,
       orgSearch: '',
       orgSearchData: [],
-
+      outerParams: {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        loaded: false
+      },
+      outerData: [],
       // 存放node对象
-      selected: []
+      selected: [],
+      debounceOuterScrollHandler: _.debounce(this.handleOuterScroll, SEARCH_DELAY),
+      debounceOuterSearchFn: _.debounce(this.handleSearchOuterUser, SEARCH_DELAY)
     }
   },
 
   computed: {
     // 树形组件的props属性
     treeProps() {
-      const props = {
+      return {
         disabled: 'disabled',
         label: 'bizName',
         isLeaf: 'isLeaf',
         children: 'children'
       }
-      return props
+    },
+    selectTypes() {
+      return this.selectType.split(',').filter((item) => SELECT_TYPE.includes(item))
     },
     innerVisible: {
       get() {
@@ -219,7 +271,15 @@ export default {
           )
         })
         .finally(() => (this.loading = false))
-    }, SEARCH_DELAY)
+    }, SEARCH_DELAY),
+    'outerParams.search'() {
+      this.debounceOuterSearchFn()
+    }
+  },
+  mounted() {
+    if (_.includes(this.selectType, 'OuterUser')) {
+      this.loadOuterUser()
+    }
   },
 
   methods: {
@@ -283,6 +343,70 @@ export default {
       this.$emit('input', _.uniqBy(this.selected, 'bizId'))
       this.close()
     },
+    handleSelectUser(user) {
+      const index = _.findIndex(this.selected, { bizId: user.bizId })
+      if (index > -1) {
+        this.selected = _.filter(this.selected, (item, i) => i != index)
+      } else {
+        this.selected.push(user)
+      }
+    },
+    handleOuterScroll() {
+      const ref = this.$refs.outerUser
+      if (ref.scrollTop + ref.offsetHeight >= ref.scrollHeight) {
+        this.loadOuterUser()
+      }
+    },
+    handleSearchOuterUser() {
+      this.outerParams.loaded = false
+      this.outerParams.pageNo = 1
+      this.loadOuterUser(true)
+    },
+    async loadOuterUser(isRefresh) {
+      if (this.outerParams.loaded) {
+        return
+      }
+      const { pageNo, pageSize, search } = this.outerParams
+      this.loading = true
+      getOuterUser({ pageNo, search, pageSize })
+        .then((res) => {
+          // const data = _.times(20, function(index) {
+          //   return {
+          //     bizId: index + '',
+          //     type: 'User',
+          //     account: '13800000000',
+          //     bizName: '用户' + index,
+          //     phonenum: '13800000000',
+          //     userStatus: '1',
+          //     userEmail: 'shaokang@epro.com',
+          //     categoryId: '',
+          //     avatarUrl: '',
+          //     roles: []
+          //   }
+          // })
+          if (_.size(res.data) > 0) {
+            const data = _.map(res.data, (item) =>
+              _.assign(item, {
+                path: item.userId,
+                bizId: item.userId,
+                bizName: item.name,
+                type: NODE_TYPE.User
+              })
+            )
+            if (isRefresh) {
+              this.outerData = data
+            } else {
+              this.outerData = _.concat(this.outerData, data)
+            }
+          } else {
+            this.outerParams.loaded = true
+          }
+          this.outerParams.pageNo = pageNo + 1
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
     /**
      * 懒加载组织树形组件数据
      * @param {string} [parentId="0"] 父级id
@@ -307,12 +431,12 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 .user-select {
   .tree {
     // 隐藏disabled属性的树形组件的checkbox输入框。
     >>> .el-checkbox.is-disabled {
-      display: none
+      display: none;
     }
   }
 }
@@ -339,8 +463,25 @@ export default {
     }
   }
 }
+.outer-user {
+  ul {
+    overflow: auto;
+    padding-top: 8px;
+    height: 340px;
+    li {
+      &:hover {
+        background-color: $lightGray;
+      }
+      padding: 6px;
+
+      label {
+        margin-right: 4px;
+      }
+    }
+  }
+}
 .tree {
-  height: 400px;
+  height: 340px;
   overflow-y: auto;
   padding-top: 10px;
 }
@@ -375,7 +516,7 @@ export default {
   background: #fff;
   color: $primaryColor;
 }
-  .company{
-    color: $primaryColor;
-  }
+.company {
+  color: $primaryColor;
+}
 </style>
