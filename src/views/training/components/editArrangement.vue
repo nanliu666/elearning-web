@@ -263,7 +263,7 @@ export default {
   },
   computed: {
     scheduleList() {
-      const scheduleList = _(this.schedule.data)
+      const scheduleList = _.chain(this.schedule.data)
         .groupBy(this.schedule.data, 'todoDate')
         .map((list) => ({
           date: list[0].todoDate,

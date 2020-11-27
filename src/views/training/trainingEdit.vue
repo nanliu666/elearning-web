@@ -158,9 +158,16 @@ export default {
     // 统一处理入参
     handleParams(res) {
       // console.log('未处理的总参数==', res)
-      // 基本信息(除培训对象外)详细信息
-      const trainObjectsList = _.pick(res[0], 'trainObjectsList')
       // 培训对象
+      let trainObjectsList = []
+      const pickTrain = _.get(res[0], 'trainObjectsList')
+      _.each(pickTrain, (item) => {
+        trainObjectsList.push({
+          type: item.type,
+          bizId: item.type === 'User' ? item.userId : item.bizId
+        })
+      })
+      // 基本信息(除培训对象外)详细信息
       const trainInfo = _.chain(res[0])
         .omit('trainObjectsList')
         .assign(res[2])

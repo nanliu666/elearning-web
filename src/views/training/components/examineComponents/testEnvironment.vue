@@ -51,6 +51,18 @@ const switchConfig = [
     prop: 'isHold'
   }
 ]
+const defaultValue = {
+  isLimitIp: false,
+  isShuffle: false,
+  createAnswers: false,
+  lateBanExam: false,
+  answerBanExam: false,
+  preCreate: false,
+  isHold: false,
+  lateBanExamValue: 15, // 迟到15
+  answerBanExamValue: 30, // 最低30分钟才可交卷
+  preCreateValue: 10 // 预打印10份
+}
 export default {
   name: 'TestEnvironment',
   components: {
@@ -71,6 +83,11 @@ export default {
         answerBanExamValue: 30, // 最低30分钟才可交卷
         preCreateValue: 10 // 预打印10份
       }
+    }
+  },
+  methods: {
+    resetFields() {
+      this.model = defaultValue
     }
   }
 }
