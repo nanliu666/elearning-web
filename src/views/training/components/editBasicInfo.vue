@@ -33,7 +33,7 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList } from '@/api/system/user'
+import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
 import SelectUser from './atomComponents/trainingSelectUser'
 const personOptionProps = {
   label: 'name',
@@ -49,13 +49,6 @@ export default {
         return callback(new Error('请输入正确的手机号码'))
       } else {
         callback()
-      }
-    }
-    const validObject = function(rule, value, callback) {
-      if (value.length > 0) {
-        callback()
-      } else {
-        return callback(new Error('请选择培训对象'))
       }
     }
     return {
@@ -75,16 +68,7 @@ export default {
           itemType: 'select',
           label: '分类',
           prop: 'categoryId',
-          options: [
-            {
-              id: '12344',
-              name: '测试'
-            },
-            {
-              id: '1232344',
-              name: '生产'
-            }
-          ],
+          options: [],
           props: {
             label: 'name',
             value: 'id'
@@ -117,13 +101,7 @@ export default {
           label: '培训对象',
           prop: 'trainObjectsList',
           options: [''],
-          rules: [
-            {
-              required: true,
-              validator: validObject,
-              trigger: 'change'
-            }
-          ],
+          required: true,
           span: 11,
           offset: 0
         },
@@ -177,7 +155,7 @@ export default {
             {
               required: true,
               message: '请输入手机号码',
-              trigger: 'blur'
+              trigger: 'change'
             },
             {
               required: true,
@@ -209,7 +187,7 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
-          options: [''],
+          options: [],
           required: true,
           span: 24,
           offset: 0
@@ -239,7 +217,15 @@ export default {
       immediate: true
     }
   },
+  mounted() {
+    this.getCatalogs()
+  },
   methods: {
+    getCatalogs() {
+      getTrainGetCatalogs().then((res) => {
+        this.infoFormColumns.find((it) => it.prop === 'categoryId').options = res
+      })
+    },
     getData() {
       return new Promise((resolve, reject) => {
         this.$refs['form']
@@ -249,7 +235,7 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'basicInfo')
+            this.$emit('jump', 'editBasicInfo')
           })
       })
     },
