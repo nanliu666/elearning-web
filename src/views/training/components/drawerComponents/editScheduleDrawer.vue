@@ -134,7 +134,7 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          if (_.isNumber(this.schedule.id)) {
+          if (!_.isEmpty(this.schedule)) {
             this.model = _.cloneDeep(this.schedule)
             this.title = '编辑线下日程'
             this.editType = 'edit'

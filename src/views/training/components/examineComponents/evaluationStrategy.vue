@@ -99,6 +99,7 @@ export default {
       insertConfig,
       switchConfig: switchConfig,
       model: {
+        id: '',
         modifyAnswer: false,
         modifyLimit: false,
         scopeLimit: false,

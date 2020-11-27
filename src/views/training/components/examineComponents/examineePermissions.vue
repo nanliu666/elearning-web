@@ -52,6 +52,7 @@ export default {
     return {
       switchConfig,
       model: {
+        id: '',
         isDecoil: false,
         openResults: false,
         openAnswerSheet: false,
@@ -61,6 +62,11 @@ export default {
         isExamine: false,
         openAnswerSheetValue: 0 // 默认值0，表示永久
       }
+    }
+  },
+  methods: {
+    resetFields() {
+      // this.model = defaultValue
     }
   }
 }

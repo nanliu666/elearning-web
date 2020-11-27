@@ -92,7 +92,10 @@ export default {
       isSyncChecked: false,
       currentIndex: 0,
       title: '添加考试',
-      navList
+      navList,
+      model: {
+        id: ''
+      }
     }
   },
   computed: {
@@ -114,7 +117,7 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          if (_.isNumber(this.examine.id)) {
+          if (!_.isEmpty(this.examine)) {
             this.title = '编辑考试'
             this.editType = 'edit'
             this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)

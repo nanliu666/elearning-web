@@ -52,6 +52,7 @@ const switchConfig = [
   }
 ]
 const defaultValue = {
+  id: '',
   isLimitIp: false,
   isShuffle: false,
   createAnswers: false,
@@ -72,6 +73,7 @@ export default {
     return {
       switchConfig,
       model: {
+        id: '',
         isLimitIp: false,
         isShuffle: false,
         createAnswers: false,

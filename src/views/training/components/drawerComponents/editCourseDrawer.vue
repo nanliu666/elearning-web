@@ -84,7 +84,7 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          if (_.isNumber(this.course.id)) {
+          if (!_.isEmpty(this.course)) {
             this.model = _.cloneDeep(this.course)
             this.title = '编辑在线课程'
             this.editType = 'edit'
