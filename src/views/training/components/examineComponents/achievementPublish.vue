@@ -11,25 +11,25 @@
     <div class="content">
       <common-form
         ref="form"
-        :model="formData"
+        :model="model"
         class="form"
         :columns="columns"
       >
         <template #passType>
-          <el-radio-group v-model="formData.passType">
+          <el-radio-group v-model="model.passType">
             <achivementRadioInput
-              v-model="formData.passType"
+              v-model="model.passType"
               label-text="按成绩"
               text-before="成绩不低于"
               text-after="分"
               :input-width="60"
               :default-value="passCondition[0].passType"
               :number.sync="passCondition[0].passScope"
-              :pass-scope="formData.passScope"
+              :pass-scope="model.passScope"
               :input-props="{ maxLength: 4 }"
             ></achivementRadioInput>
             <achivementRadioInput
-              v-model="formData.passType"
+              v-model="model.passType"
               label-text="按得分率"
               text-before="得分率不低于"
               text-after="%"
@@ -70,7 +70,7 @@ export default {
           passScope: 80
         }
       ],
-      formData: {
+      model: {
         passType: 1,
         passScope: 0,
         publishRules: 1,
@@ -108,13 +108,13 @@ export default {
     }
   },
   watch: {
-    'formData.passType': {
+    'model.passType': {
       handler(i) {
-        this.formData.passScope = this.passCondition[i - 1]['passScope']
+        this.model.passScope = this.passCondition[i - 1]['passScope']
       },
       deep: true
     },
-    'formData.publishRules': {
+    'model.publishRules': {
       handler(data) {
         if (data === 1) {
           this.columns = this.columns.filter((it) => {
@@ -134,7 +134,7 @@ export default {
   },
   methods: {
     changeSwitch(data) {
-      this.formData.autoEvaluate = data ? 1 : 0
+      this.model.autoEvaluate = data ? 1 : 0
       if (!data) {
         this.columns = this.columns.filter((it) => {
           if (it.prop === 'passType') {

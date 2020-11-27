@@ -112,18 +112,35 @@ export default {
     visible: {
       handler: function(val) {
         if (val) {
-          // console.log('val==', this.examine)
           if (!_.isEmpty(this.examine)) {
-            // this.model = _.cloneDeep(this.examine)
             this.title = '编辑考试'
+            this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
+            this.$refs.testEnvironmentRef.model = this.getNavModel(
+              this.$refs.testEnvironmentRef.model
+            )
+            this.$refs.examineePermissionsRef.model = this.getNavModel(
+              this.$refs.examineePermissionsRef.model
+            )
+            this.$refs.evaluationStrategyRef.model = this.getNavModel(
+              this.$refs.evaluationStrategyRef.model
+            )
+            // this.$refs.achievementPublishRef.model = this.getNavModel(this.$refs.achievementPublishRef.model)
           } else {
-            // this.$refs.form && this.$refs.form.resetFields()
+            // 新增的时候重置数据
+            this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
+            this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.$refs.form.resetFields()
           }
         }
       }
     }
   },
   methods: {
+    // 获取每个nav的值
+    getNavModel(currentRef) {
+      return _.chain(this.examine)
+        .pick(_.keys(currentRef))
+        .value()
+    },
     navChange(index) {
       this.currentIndex = index
     },

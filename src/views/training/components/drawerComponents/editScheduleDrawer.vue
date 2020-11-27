@@ -14,10 +14,9 @@
       <div class="footer">
         <el-button
           type="primary"
-          :loading="loading"
           @click="submit"
         >
-          {{ loading ? '提交中 ...' : '保存' }}
+          保存
         </el-button>
         <el-button @click="close">
           取消
@@ -115,7 +114,6 @@ export default {
   },
   data() {
     return {
-      loading: false,
       columns: CourseColumns,
       model: modelCopy
     }

@@ -263,13 +263,15 @@ export default {
   },
   computed: {
     scheduleList() {
-      return _(this.schedule.data)
+      const scheduleList = _(this.schedule.data)
         .groupBy(this.schedule.data, 'todoDate')
         .map((list) => ({
           date: list[0].todoDate,
           list: _.sortBy(list, (i) => i.todoTime && i.todoTime[0])
         }))
         .value()
+      // console.log('scheduleList==', scheduleList)
+      return scheduleList
     }
   },
   methods: {

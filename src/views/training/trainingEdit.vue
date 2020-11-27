@@ -1,7 +1,7 @@
 <template>
   <div
     v-loading="loading"
-    class="trainingEdit page"
+    class="page"
   >
     <header class="page__header">
       <div class="page-actions">
@@ -198,8 +198,6 @@ export default {
 
 <style lang="scss" scoped>
 $header-height: 54px;
-.trainingEdit {
-}
 .page {
   width: 100vw;
   height: 100vh;
