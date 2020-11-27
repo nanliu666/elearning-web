@@ -37,7 +37,7 @@
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList } from '@/api/system/user'
-import SelectUser from './trainingSelectUser'
+import SelectUser from './atomComponents/trainingSelectUser'
 const personOptionProps = {
   label: 'name',
   value: 'name',
