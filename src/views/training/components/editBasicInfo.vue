@@ -23,6 +23,9 @@
             <tinymce v-model="formData.introduction" />
           </div>
         </template>
+        <template #trainObjectsList>
+          <SelectUser v-model="formData.trainObjectsList"></SelectUser>
+        </template>
       </common-form>
     </section>
   </div>
@@ -31,7 +34,7 @@
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList } from '@/api/system/user'
-
+import SelectUser from './trainingSelectUser'
 const personOptionProps = {
   label: 'name',
   value: 'name',
@@ -39,13 +42,20 @@ const personOptionProps = {
 }
 export default {
   name: 'EditBasicInfo',
-  components: { lazySelect },
+  components: { lazySelect, SelectUser },
   data() {
     const validMobile = function(rule, value, callback) {
       if (!/^1[0-9]{10}$/.test(value)) {
         return callback(new Error('请输入正确的手机号码'))
       } else {
         callback()
+      }
+    }
+    const validObject = function(rule, value, callback) {
+      if (value.length > 0) {
+        callback()
+      } else {
+        return callback(new Error('请选择培训对象'))
       }
     }
     return {
@@ -103,11 +113,17 @@ export default {
           offset: 2
         },
         {
-          itemType: 'select',
+          itemType: 'slot',
           label: '培训对象',
           prop: 'trainObjectsList',
           options: [''],
-          required: true,
+          rules: [
+            {
+              required: true,
+              validator: validObject,
+              trigger: 'change'
+            }
+          ],
           span: 11,
           offset: 0
         },
@@ -205,7 +221,7 @@ export default {
         categoryId: '',
         trainTime: '',
         people: '',
-        trainObjectsList: 'sgs',
+        trainObjectsList: [],
         trainWay: 3,
         address: '',
         contactPhone: '',
