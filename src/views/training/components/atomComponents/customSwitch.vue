@@ -9,12 +9,12 @@
         <label class="switch-label">{{ item.label }}</label>
         <!-- 控制显示隐藏 -->
         <el-switch
-          v-model="insertData[item.prop]"
+          v-model="data[item.prop]"
           @change="changeSwitch(...arguments, item)"
         />
       </div>
       <div
-        v-if="insertData[item.prop] && item.expand"
+        v-if="data[item.prop] && item.expand"
         class="expand-container"
       >
         <span>{{ item.expand.pre }}</span>
@@ -24,15 +24,8 @@
             :rules="rules"
           >
             <el-input
-              v-if="data[item.prop]"
-              v-model.number="data[item.prop]"
+              v-model.number="data[`${item.prop}Value`]"
               class="expand-input"
-            ></el-input>
-            <el-input
-              v-else
-              v-model.number="item.expand.defaultValue"
-              class="expand-input"
-              @input="defaultValueInput(...arguments, item)"
             ></el-input>
           </el-form-item>
         </el-form>
@@ -61,7 +54,6 @@ export default {
   },
   data() {
     return {
-      insertData: _.cloneDeep(this.data), //用来做true/false处理
       rules: [
         {
           required: true,
@@ -71,40 +63,7 @@ export default {
       ]
     }
   },
-  watch: {
-    insertData: {
-      handler() {
-        // 开启了switch，需要在判断默认值，有默认值用默认值，没开启用原先的初始值0
-        _.forIn(this.insertData, (value, key) => {
-          let temp = 0
-          if (value) {
-            let configFilter = _.filter(this.config, (config) => {
-              return config.prop === key
-            })[0]
-            if (!_.isEmpty(configFilter.expand)) {
-              temp = this.data[key] === 0 ? configFilter.expand.defaultValue : this.data[key]
-            } else {
-              temp = this.data[key]
-            }
-          } else {
-            temp = 0
-          }
-          this.data[key] = temp
-        })
-      },
-      deep: true
-    }
-  },
-  created() {
-    _.forIn(this.insertData, (value, key) => {
-      this.insertData[key] = value === 0 ? false : true
-    })
-  },
   methods: {
-    // 默认值改变后，赋值需要传给后端的数据
-    defaultValueInput(data, args) {
-      this.data[args.prop] = Number(data)
-    },
     changeSwitch(args, data) {
       this.$emit('changeSwitch', args, data)
     }

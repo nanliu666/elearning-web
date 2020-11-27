@@ -59,10 +59,10 @@ export default {
   },
   data() {
     return {
+      editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
       model: {
-        id: createUniqueID(),
         studyType: 0,
         courseName: '',
         lecturerName: '',
@@ -87,8 +87,11 @@ export default {
           if (!_.isEmpty(this.course)) {
             this.model = _.cloneDeep(this.course)
             this.title = '编辑在线课程'
+            this.editType = 'edit'
           } else {
             this.$refs.form && this.$refs.form.resetFields()
+            this.model.id = createUniqueID()
+            this.editType = 'add'
           }
         }
       }
@@ -101,7 +104,7 @@ export default {
     submit() {
       this.$refs.form.validate().then(() => {
         this.close()
-        this.$emit('submit', this.model)
+        this.$emit('submit', this.model, this.editType)
       })
     }
   }

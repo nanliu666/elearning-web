@@ -60,8 +60,8 @@
 </template>
 
 <script>
-import radioInput from './radioInput'
-import checkboxInput from './checkboxInput'
+import radioInput from '../atomComponents/radioInput'
+import checkboxInput from '../atomComponents/checkboxInput'
 const EventColumns = [
   {
     itemType: 'datePicker',

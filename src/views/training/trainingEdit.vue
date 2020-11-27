@@ -1,7 +1,7 @@
 <template>
   <div
     v-loading="loading"
-    class="trainingEdit page"
+    class="page"
   >
     <header class="page__header">
       <div class="page-actions">
@@ -204,9 +204,16 @@ export default {
     // 统一处理入参
     handleParams(res) {
       // console.log('未处理的总参数==', res)
-      // 基本信息(除培训对象外)详细信息
-      const trainObjectsList = _.pick(res[0], 'trainObjectsList')
       // 培训对象
+      let trainObjectsList = []
+      const pickTrain = _.get(res[0], 'trainObjectsList')
+      _.each(pickTrain, (item) => {
+        trainObjectsList.push({
+          type: item.type,
+          bizId: item.type === 'User' ? item.userId : item.bizId
+        })
+      })
+      // 基本信息(除培训对象外)详细信息
       const trainInfo = _.chain(res[0])
         .omit('trainObjectsList')
         .assign(res[2])
@@ -219,7 +226,7 @@ export default {
         trainOfflineTodo,
         trainOnlineCourse
       }
-      // console.log('处理后的总参数==', params)
+      // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },
     changeSteps(key) {
@@ -242,8 +249,6 @@ export default {
 
 <style lang="scss" scoped>
 $header-height: 54px;
-.trainingEdit {
-}
 .page {
   width: 100vw;
   height: 100vh;

@@ -7,6 +7,9 @@
         :columns="infoFormColumns"
         :model="formData"
       >
+        <template #people="{row}">
+          {{ row.people === 0 ? '' : row.people }}
+        </template>
         <template #contactName>
           <lazySelect
             v-model="formData.contactName"
@@ -91,6 +94,7 @@ export default {
           itemType: 'input',
           label: '计划人数',
           prop: 'people',
+          slot: true,
           type: 'Number',
           required: false,
           span: 11,
@@ -198,7 +202,7 @@ export default {
         trainName: '',
         categoryId: '',
         trainTime: '',
-        people: '',
+        people: 0,
         trainObjectsList: [],
         trainWay: 3,
         address: '',

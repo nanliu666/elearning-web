@@ -67,11 +67,12 @@
 
 <script>
 const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
-import basicSetting from './examineComponents/basicSetting'
-import testEnvironment from './examineComponents/testEnvironment'
-import examineePermissions from './examineComponents/examineePermissions'
-import evaluationStrategy from './examineComponents/evaluationStrategy'
-import achievementPublish from './examineComponents/achievementPublish'
+import basicSetting from '../examineComponents/basicSetting'
+import testEnvironment from '../examineComponents/testEnvironment'
+import examineePermissions from '../examineComponents/examineePermissions'
+import evaluationStrategy from '../examineComponents/evaluationStrategy'
+import achievementPublish from '../examineComponents/achievementPublish'
+import { createUniqueID } from '@/util/util'
 export default {
   name: 'EditExamineDrawer',
   components: {
@@ -87,10 +88,14 @@ export default {
   },
   data() {
     return {
+      editType: 'add',
       isSyncChecked: false,
       currentIndex: 0,
       title: '添加考试',
-      navList
+      navList,
+      model: {
+        id: ''
+      }
     }
   },
   computed: {
@@ -113,16 +118,27 @@ export default {
       handler: function(val) {
         if (val) {
           if (!_.isEmpty(this.examine)) {
-            // this.model = _.cloneDeep(this.examine)
             this.title = '编辑考试'
+            this.editType = 'edit'
+            this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
           } else {
-            // this.$refs.form && this.$refs.form.resetFields()
+            // 新增的时候重置数据
+            this.editType = 'add'
+            this.model.id = createUniqueID()
+            this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
+            this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
           }
         }
       }
     }
   },
   methods: {
+    // 获取每个nav的值
+    getNavModel(currentRef) {
+      return _.chain(this.examine)
+        .pick(_.keys(currentRef))
+        .value()
+    },
     navChange(index) {
       this.currentIndex = index
     },
@@ -132,21 +148,22 @@ export default {
     submit() {
       const basicSettingData = this.$refs.basicSettingRef.model
       const testEnvironmentData = this.$refs.testEnvironmentRef.model
-      const examineePermissionsData = this.$refs.examineePermissionsRef.model
+      const examinePermissionsData = this.$refs.examineePermissionsRef.model
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
-      const testData = {
+      const achievementPublishData = this.$refs.achievementPublishRef.formData
+      const examineData = {
         ...basicSettingData,
         ...testEnvironmentData,
-        ...examineePermissionsData,
+        ...examinePermissionsData,
         ...evaluationStrategyData,
+        ...achievementPublishData,
         ...{ isSyncExam: this.isSyncChecked ? 1 : 0 }
       }
-      testData
-      // console.log('testData==', testData)
-      // this.$refs.basicSettingRef.$refs.form.validate().then(() => {
-      //   this.$emit('submit', this.model)
-      //   this.close()
-      // })
+      // console.log('testData==', examineData)
+      this.$refs.basicSettingRef.$refs.form.validate().then(() => {
+        this.$emit('submit', examineData, this.editType)
+        this.close()
+      })
     }
   }
 }
