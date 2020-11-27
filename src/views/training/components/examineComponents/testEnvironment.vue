@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const switchConfig = [
   {
     label: '启用IP限制(需设定考生合法IP范围)',
@@ -26,7 +26,6 @@ const switchConfig = [
     label: '迟到后禁止考试',
     prop: 'lateBanExam',
     expand: {
-      defaultValue: 15,
       pre: '迟到',
       before: '分钟禁止参见考试'
     }
@@ -35,7 +34,6 @@ const switchConfig = [
     label: '答卷时间过少禁止交卷',
     prop: 'answerBanExam',
     expand: {
-      defaultValue: 30,
       pre: '开始答卷',
       before: '分钟内禁止交卷'
     }
@@ -45,7 +43,6 @@ const switchConfig = [
     prop: 'preCreate',
     expand: {
       pre: '试卷最多预生成',
-      defaultValue: 10,
       before: '份'
     }
   },
@@ -54,6 +51,19 @@ const switchConfig = [
     prop: 'isHold'
   }
 ]
+const defaultValue = {
+  id: '',
+  isLimitIp: false,
+  isShuffle: false,
+  createAnswers: false,
+  lateBanExam: false,
+  answerBanExam: false,
+  preCreate: false,
+  isHold: false,
+  lateBanExamValue: 15, // 迟到15
+  answerBanExamValue: 30, // 最低30分钟才可交卷
+  preCreateValue: 10 // 预打印10份
+}
 export default {
   name: 'TestEnvironment',
   components: {
@@ -63,14 +73,23 @@ export default {
     return {
       switchConfig,
       model: {
-        isLimitIp: 0,
-        isShuffle: 0,
-        createAnswers: 0,
-        lateBanExam: 0,
-        answerBanExam: 0,
-        preCreate: 0,
-        isHold: 0
+        id: '',
+        isLimitIp: false,
+        isShuffle: false,
+        createAnswers: false,
+        lateBanExam: false,
+        answerBanExam: false,
+        preCreate: false,
+        isHold: false,
+        lateBanExamValue: 15, // 迟到15
+        answerBanExamValue: 30, // 最低30分钟才可交卷
+        preCreateValue: 10 // 预打印10份
       }
+    }
+  },
+  methods: {
+    resetFields() {
+      this.model = defaultValue
     }
   }
 }

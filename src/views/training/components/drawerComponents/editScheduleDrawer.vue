@@ -14,10 +14,9 @@
       <div class="footer">
         <el-button
           type="primary"
-          :loading="loading"
           @click="submit"
         >
-          {{ loading ? '提交中 ...' : '保存' }}
+          保存
         </el-button>
         <el-button @click="close">
           取消
@@ -115,20 +114,13 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      title: '创建线下日程',
       columns: CourseColumns,
+      editType: 'add',
       model: modelCopy
     }
   },
   computed: {
-    title() {
-      if (_.isNumber(this.schedule.id)) {
-        return '编辑线下日程'
-      } else {
-        return '创建线下日程'
-      }
-    },
-
     innnerVisible: {
       get: function() {
         return this.visible
@@ -139,6 +131,21 @@ export default {
     }
   },
   watch: {
+    visible: {
+      handler: function(val) {
+        if (val) {
+          if (!_.isEmpty(this.schedule)) {
+            this.model = _.cloneDeep(this.schedule)
+            this.title = '编辑线下日程'
+            this.editType = 'edit'
+          } else {
+            // 新增的时候重置数据
+            this.editType = 'add'
+            this.model.id = createUniqueID()
+          }
+        }
+      }
+    },
     'model.type': {
       handler(value) {
         if (value === '1') {
@@ -172,11 +179,7 @@ export default {
         const data = this.model
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
-        if (!_.isNumber(this.schedule.id)) {
-          this.$emit('submit', { ...data, id: createUniqueID() })
-        } else {
-          this.$emit('submit', data)
-        }
+        this.$emit('submit', data, this.editType)
         this.close()
       })
     }
