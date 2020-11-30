@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-loading="loading"
-    class="page"
-  >
+  <div class="page">
     <header class="page__header">
       <div class="page-actions">
         <div
@@ -65,6 +62,7 @@
       </div>
     </header>
     <el-row
+      v-loading="loading"
       type="flex"
       justify="center"
       class="page__content"
@@ -101,7 +99,6 @@ import EditArrangement from './components/editArrangement'
 import EditBasicInfo from './components/editBasicInfo'
 import EditDetail from './components/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
-import { mapGetters } from 'vuex'
 const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑
 export default {
@@ -140,10 +137,9 @@ export default {
     },
     id() {
       return _.get(this.$route.query, 'id', null)
-    },
-    ...mapGetters(['userInfo'])
+    }
   },
-  created() {
+  mounted() {
     this.initData()
   },
   methods: {
@@ -173,7 +169,25 @@ export default {
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
-        getTrainDetail({ trainId: this.id, tenantId: this.userInfo.tenantId }).then(() => {})
+        const basicKeyList = _.keys(this.$refs.editBasicInfo.formData)
+        const detailKeyList = _.keys(this.$refs.editDetail.formData)
+        this.loading = true
+        getTrainDetail({ id: this.id })
+          .then(({ trainExam, trainInfo, trainOfflineTodo, trainOnlineCourse }) => {
+            this.loading = false
+            const basicInfo = _.pick(trainInfo, basicKeyList)
+            basicInfo['introduction'] = _.unescape(basicInfo['introduction'])
+            const detailData = _.pick(trainInfo, detailKeyList)
+            this.$refs.editBasicInfo.formData = basicInfo
+            this.$refs.editDetail.formData = detailData
+            this.$refs.editArrangement.schedule.data = trainOfflineTodo
+            this.$refs.editArrangement.course.data = trainOnlineCourse
+            this.$refs.editArrangement.examine.data = trainExam
+          })
+          .catch((error) => {
+            this.$message.error(error)
+            this.loading = false
+          })
       }
     },
     // 培训方式改变，会导致培训安排内的线下日程/在线课程存在形式改变
@@ -190,6 +204,7 @@ export default {
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
+            this.$message.success('发布成功')
             // this.$router.go(-1)
           }
         })
@@ -211,6 +226,7 @@ export default {
         .omit('trainObjectsList')
         .assign(res[2])
         .value()
+      trainInfo['introduction'] = _.escape(trainInfo['introduction'])
       const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
       let params = {
         id: this.id,

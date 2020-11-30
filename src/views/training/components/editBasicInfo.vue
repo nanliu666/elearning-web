@@ -100,7 +100,7 @@ export default {
           itemType: 'slot',
           label: '培训对象',
           prop: 'trainObjectsList',
-          options: [''],
+          options: [],
           required: true,
           span: 11,
           offset: 0
@@ -139,7 +139,7 @@ export default {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
-          options: [''],
+          options: [],
           required: true,
           span: 11,
           offset: 2
@@ -204,6 +204,7 @@ export default {
         address: '',
         contactPhone: '',
         sponsor: '',
+        organizer: '',
         introduction: ''
       }
     }
@@ -215,6 +216,12 @@ export default {
       },
       deep: true,
       immediate: true
+    },
+    'formData.categoryId': {
+      handler(val) {
+        this.formData.categoryId = _.isNumber(val) ? val : Number(val)
+      },
+      deep: true
     }
   },
   mounted() {

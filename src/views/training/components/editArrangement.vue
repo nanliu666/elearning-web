@@ -169,20 +169,20 @@ const ScheduleColumns = [
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      if (record.type === '1') {
-        return `【面授课程】${record.courseName}`
+      if (record.type === 1) {
+        return `【面授课程】${_.get(record, 'course', '')}`
       } else {
-        return `【活动】${record.theme}`
+        return `【活动】${_.get(record, 'theme', '')}`
       }
     }
   },
   {
     prop: 'lecturerName',
     formatter(record) {
-      if (record.type === '1') {
-        return `讲师：${record.lecturerName}`
+      if (record.type === 1) {
+        return `讲师：${_.get(record, 'lecturerName', '')}`
       } else {
-        return `主持人：${record.lecturerName}`
+        return `主持人：${_.get(record, 'lecturerName', '')}`
       }
     }
   },
@@ -206,7 +206,7 @@ const CourseColumns = [
     width: 220
   },
   {
-    prop: 'courseName',
+    prop: 'course',
     label: '关联课程',
     minWidth: 150
   },

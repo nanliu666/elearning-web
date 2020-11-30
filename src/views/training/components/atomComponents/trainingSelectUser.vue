@@ -59,7 +59,7 @@ export default {
   data() {
     return {
       visible: false,
-      userList: this.value
+      userList: []
     }
   },
   computed: {
@@ -73,6 +73,13 @@ export default {
     }
   },
   watch: {
+    value: {
+      handler(data) {
+        if (data) {
+          this.userList = data
+        }
+      }
+    },
     userList: {
       handler(data) {
         this.$nextTick(() => {

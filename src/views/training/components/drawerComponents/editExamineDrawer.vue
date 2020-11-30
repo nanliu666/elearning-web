@@ -39,12 +39,10 @@
         />
       </div>
       <div class="footer">
-        <el-checkbox
-          v-model="isSyncChecked"
-          :disabled="syncDisabled"
-        >
-          本条考试信息数据同步至【考试管理】
-        </el-checkbox>
+        <div class="footer-inner">
+          注：培训发布后，本条考试信息数据将会 同步至【考评管理】，可在考试安排和成
+          绩管理查到对应信息
+        </div>
         <div>
           <el-button
             type="primary"
@@ -89,21 +87,13 @@ export default {
   data() {
     return {
       editType: 'add',
-      isSyncChecked: false,
       currentIndex: 0,
       title: '添加考试',
       navList,
-      model: {
-        id: ''
-      }
+      model: {}
     }
   },
   computed: {
-    // 在首次创建或编辑时是可编辑的，一旦勾选，保存后若再次编辑，则不能撤销勾
-    // 编辑模式，并且有值不可编辑
-    syncDisabled() {
-      return this.examine && this.isSyncChecked ? true : false
-    },
     innnerVisible: {
       get: function() {
         return this.visible
@@ -113,38 +103,34 @@ export default {
       }
     }
   },
-  watch: {
-    visible: {
-      handler: function(val) {
-        if (val) {
-          if (!_.isEmpty(this.examine)) {
-            this.title = '编辑考试'
-            this.editType = 'edit'
-            this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
-            this.$refs.testEnvironmentRef.model = this.getNavModel(
-              this.$refs.testEnvironmentRef.model
-            )
-            this.$refs.examineePermissionsRef.model = this.getNavModel(
-              this.$refs.examineePermissionsRef.model
-            )
-            this.$refs.evaluationStrategyRef.model = this.getNavModel(
-              this.$refs.evaluationStrategyRef.model
-            )
-          } else {
-            // 新增的时候重置数据
-            this.editType = 'add'
-            this.model.id = createUniqueID()
-            this.isSyncChecked = false
-            this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
-            this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
-            this.$refs.examineePermissionsRef && this.$refs.examineePermissionsRef.resetFields()
-            this.$refs.evaluationStrategyRef && this.$refs.evaluationStrategyRef.resetFields()
-          }
-        }
-      }
+  updated() {
+    if (!_.isEmpty(this.examine) && !_.isEmpty(this.$refs)) {
+      this.assignmentInEdit()
+    } else {
+      this.clearInAdd()
     }
   },
   methods: {
+    assignmentInEdit() {
+      this.title = '编辑考试'
+      this.editType = 'edit'
+      this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
+      this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
+      this.$refs.examineePermissionsRef.model = this.getNavModel(
+        this.$refs.examineePermissionsRef.model
+      )
+      this.$refs.evaluationStrategyRef.model = this.getNavModel(
+        this.$refs.evaluationStrategyRef.model
+      )
+    },
+    clearInAdd() {
+      // 新增的时候重置数据
+      this.editType = 'add'
+      this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
+      this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
+      this.$refs.examineePermissionsRef && this.$refs.examineePermissionsRef.resetFields()
+      this.$refs.evaluationStrategyRef && this.$refs.evaluationStrategyRef.resetFields()
+    },
     // 获取每个nav的值
     getNavModel(currentRef) {
       return _.chain(this.examine)
@@ -168,10 +154,9 @@ export default {
         ...testEnvironmentData,
         ...examinePermissionsData,
         ...evaluationStrategyData,
-        ...achievementPublishData,
-        ...{ isSyncExam: this.isSyncChecked ? 1 : 0 }
+        ...achievementPublishData
       }
-      // console.log('testData==', examineData)
+      examineData.id = this.editType === 'add' ? createUniqueID() : this.examine.id
       this.$refs.basicSettingRef.$refs.form
         .validate()
         .then(() => {
@@ -231,6 +216,11 @@ export default {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid #f5f5f7;
+  .footer-inner {
+    font-size: 12px;
+    color: #cccccc;
+    width: 70%;
+  }
   /deep/ .el-checkbox__label {
     font-size: 12px;
   }
