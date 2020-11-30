@@ -14,7 +14,6 @@
           default-expand-all
           draggable
           :allow-drop="allowDrop"
-          :node-drop="nodeDrop"
         />
       </div>
       <div class="btnBox">

@@ -56,7 +56,7 @@ export default {
     messageFun() {
       if (this.sameNameMessage) return
       this.$message.error({
-        message: '该目录名称在目标层级已存在',
+        message: '该分类名称在分类层级已存在',
         onClose: () => {
           this.sameNameMessage = false
         }

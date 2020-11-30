@@ -141,7 +141,10 @@
             >
               编辑
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-if="row.parentId !== '0'"
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"

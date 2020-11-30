@@ -145,7 +145,7 @@ import {
   modifyUserStatus,
   resetPwd,
   delUser,
-  getOuterUser
+  getOuterUserList
 } from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
 
@@ -426,7 +426,7 @@ export default {
       this.loading = true
       let func = getOrgUserList
       if (!this.activeOrg.orgId) {
-        func = getOuterUser
+        func = getOuterUserList
       }
       func({
         pageNo: this.page.currentPage,

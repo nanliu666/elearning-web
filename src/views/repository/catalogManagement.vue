@@ -7,7 +7,7 @@
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        新建目录
+        新建分类
       </el-button>
     </page-header>
 
@@ -112,7 +112,7 @@
                   删除
                 </el-dropdown-item>
                 <el-dropdown-item command="addChild">
-                  新建子目录
+                  新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -140,7 +140,7 @@ import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
   {
-    label: '目录名称',
+    label: '分类名称',
     prop: 'name',
     slot: true,
     minWidth: 150
@@ -198,7 +198,7 @@ export default {
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '请输入目录名称搜索', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '请输入分类名称搜索', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
@@ -298,9 +298,9 @@ export default {
     handleDelete(row) {
       let hasChildren = !_.isEmpty(row.children)
       if (hasChildren) {
-        this.$message.error('很抱歉，您选中的目录下存在子目录，请先将子目录调整后再删除!')
+        this.$message.error('很抱歉，您选中的分类下存在子分类，请先将子分类调整后再删除!')
       } else {
-        this.$confirm('您确定要删除选中的目录吗？', '提醒', {
+        this.$confirm('您确定要删除选中的分类吗？', '提醒', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -344,11 +344,11 @@ export default {
       this.searchParams = params
       this.loadTableData()
     },
-    // 添加子目录
+    // 添加子分类
     handleAddChild(row) {
       this.$refs.orgEdit.createChild(row)
     },
-    // 编辑目录
+    // 编辑分类
     handleOrgEdit(row) {
       this.$refs.orgEdit.edit(row)
     },
@@ -356,16 +356,16 @@ export default {
      * 处理停用启用
      */
     handleStatus(row) {
-      // 停启用当前目录是否存在子目录
+      // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
       const statusText = row.status === '0' ? '停用' : '启用'
-      const stopContent = `您确定要停用该目录吗吗？停用后，该目录${
-        hasChildren ? '及其子目录' : ''
+      const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
+        hasChildren ? '及其子分类' : ''
       }将暂停使用。`
-      // 获取到当前目录以及子目录的id集合
+      // 获取到当前分类以及子分类的id集合
       let ids = this.getDeepIds(row)
       const params = { ids, status: row.status === '0' ? 1 : 0 }
-      const startContent = `您确定要启用该目录${hasChildren ? '及其子目录' : ''}吗？`
+      const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
       this.$confirm(`${row.status === '0' ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
