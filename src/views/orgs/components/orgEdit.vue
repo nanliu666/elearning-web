@@ -323,6 +323,12 @@ export default {
     submitAndCreate() {
       this.turnToLeaderList(this.allUserIdArr)
       this.$refs.ruleForm.validate((valid, obj) => {
+        if (this.form.leaders.length === 0) {
+          this.isrules = true
+          return
+        } else {
+          this.isrules = false
+        }
         if (valid) {
           this.loading = true
           createOrg(this.form)

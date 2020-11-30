@@ -14,6 +14,7 @@
           default-expand-all
           draggable
           :allow-drop="allowDrop"
+          :node-drop="nodeDrop"
         />
       </div>
       <div class="btnBox">
@@ -45,7 +46,9 @@ export default {
       data: [],
       oldData: [],
       loading: true,
-      sameNameMessage: false
+      sameNameMessage: false,
+      orgTypeList: ['Enterprise', 'Company', 'Department', 'Group']
+      // Enterprise-企业，Company-公司，Department-部门，Group-小组
     }
   },
   created() {
@@ -55,16 +58,24 @@ export default {
     this.getOrgTree()
   },
   methods: {
-    messageFun() {
+    messageFun(org) {
       if (this.sameNameMessage) return
       this.$message.error({
-        message: '该组织名称在目标层级已存在',
+        message: org ? org : '该组织名称在目标层级已存在',
         onClose: () => {
           this.sameNameMessage = false
         }
       })
     },
     allowDrop(draggingNode, dropNode, type) {
+      let draggIndex = this.orgTypeList.indexOf(draggingNode.data.orgType)
+      let dropIndex = this.orgTypeList.indexOf(dropNode.data.orgType)
+      if (draggIndex < dropIndex) {
+        this.messageFun('不能将大组织放入小组织内')
+        this.sameNameMessage = true
+        return false
+      }
+      // console.log('type______',type)
       if (type === 'prev' || type === 'next') {
         let parentOrg = this.findParentOrg(dropNode.data.orgId)
         let draggingNodeParent = this.findParentOrg(draggingNode.data.orgId)
