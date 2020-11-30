@@ -10,6 +10,15 @@
         class="form"
         :columns="columns"
       >
+        <template #course>
+          <lazy-select
+            v-model="model.course"
+            :allow-create="isCreate"
+            :searchable="remote"
+            :load="loadCourse"
+            :option-props="personOptionProps"
+          />
+        </template>
       </common-form>
       <div class="footer">
         <el-button
@@ -28,7 +37,14 @@
 
 <script>
 import { createUniqueID } from '@/util/util'
+import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
+const personOptionProps = {
+  label: 'name',
+  value: 'name',
+  key: 'id'
+}
+
 const EventColumns = [
   {
     itemType: 'radio',
@@ -37,8 +53,8 @@ const EventColumns = [
     required: true,
     span: 24,
     options: [
-      { label: '面授课程', value: '1' },
-      { label: '活动', value: '2' }
+      { label: '面授课程', value: 1 },
+      { label: '活动', value: 2 }
     ]
   },
   { itemType: 'datePicker', span: 24, required: true, prop: 'todoDate', label: '活动日期' },
@@ -62,8 +78,8 @@ const CourseColumns = [
     label: '类型',
     required: true,
     options: [
-      { label: '面授课程', value: '1' },
-      { label: '活动', value: '2' }
+      { label: '面授课程', value: 1 },
+      { label: '活动', value: 2 }
     ]
   },
   {
@@ -85,18 +101,17 @@ const CourseColumns = [
     label: '授课时间'
   },
   {
-    itemType: 'lazySelect',
+    itemType: 'slot',
     span: 24,
-    required: false,
+    required: true,
     prop: 'course',
-    label: '关联课程',
-    load: () => Promise.resolve({ data: [] })
+    label: '关联课程'
   },
   { itemType: 'input', span: 24, disabled: true, prop: 'lecturerName', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
-  type: '1',
+  type: 1,
   todoDate: null,
   todoTime: [new Date(), new Date()],
   theme: '',
@@ -104,16 +119,26 @@ const modelCopy = {
   lecturerId: null,
   address: '',
   courseId: null,
-  courseName: null
+  course: null
 }
 export default {
   name: 'EditScheduleDrawer',
+  components: {
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
+  },
   props: {
     schedule: { type: Object, default: () => ({}) },
     visible: { type: Boolean, default: false }
   },
   data() {
     return {
+      remote: true,
+      isCreate: true,
+      personOptionProps,
+      courseParams: {
+        pageNo: 1,
+        pageSize: 10
+      },
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
@@ -148,7 +173,7 @@ export default {
     },
     'model.type': {
       handler(value) {
-        if (value === '1') {
+        if (value === 1) {
           this.columns = CourseColumns
         } else {
           this.columns = EventColumns
@@ -171,6 +196,13 @@ export default {
     }
   },
   methods: {
+    loadCourse() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10
+      }
+      return getTrainCource(params)
+    },
     close() {
       this.innnerVisible = false
     },

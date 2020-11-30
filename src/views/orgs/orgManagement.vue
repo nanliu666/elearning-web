@@ -42,6 +42,7 @@
                     ref="searchPopover"
                     :require-options="searchConfig.requireOptions"
                     :popover-options="searchConfig.popoverOptions"
+                    @submit="handleSearch"
                   />
                   <div
                     class="search-sort-box"
@@ -157,6 +158,7 @@
         </template>
       </common-table>
       <org-edit
+        v-if="createOrgDailog"
         ref="orgEdit"
         :visible="createOrgDailog"
         @refresh="loadTableData"
@@ -271,7 +273,6 @@ export default {
             field: 'orgName',
             label: '',
             data: '',
-            options: [],
             config: { placeholder: '组织名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
@@ -286,8 +287,7 @@ export default {
               { value: 'Company', label: '公司' },
               { value: 'Department', label: '部门' },
               { value: 'Group', label: '小组' }
-            ],
-            config: { optionLabel: '', optionValue: '' }
+            ]
           },
           {
             type: 'numInterval',
@@ -476,7 +476,9 @@ export default {
     handleCommand(command, row) {
       if (command === 'add') {
         this.createOrgDailog = true
-        this.$refs.orgEdit.create()
+        this.$nextTick(() => {
+          this.$refs.orgEdit.create()
+        })
       } else if (command === 'deleteOrg') {
         if (row.parentId === 0) {
           this.$message.error('顶级组织不可删除')
@@ -540,10 +542,16 @@ export default {
       })
     },
     handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
+      this.createOrgDailog = true
+      this.$nextTick(() => {
+        this.$refs.orgEdit.edit(row)
+      })
     },
     handleCreateChild(row) {
-      this.$refs.orgEdit.createChild(row)
+      this.createOrgDailog = true
+      this.$nextTick(() => {
+        this.$refs.orgEdit.createChild(row)
+      })
     },
     columnChange() {
       this.option.column = TABLE_COLUMNS.filter((item) => {

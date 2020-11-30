@@ -7,9 +7,6 @@
         :columns="infoFormColumns"
         :model="formData"
       >
-        <template #people="{row}">
-          {{ row.people === 0 ? '' : row.people }}
-        </template>
         <template #contactName>
           <lazySelect
             v-model="formData.contactName"
@@ -37,7 +34,7 @@
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
-import SelectUser from './trainingSelectUser'
+import SelectUser from './atomComponents/trainingSelectUser'
 const personOptionProps = {
   label: 'name',
   value: 'name',
@@ -94,7 +91,6 @@ export default {
           itemType: 'input',
           label: '计划人数',
           prop: 'people',
-          slot: true,
           type: 'Number',
           required: false,
           span: 11,
@@ -104,7 +100,7 @@ export default {
           itemType: 'slot',
           label: '培训对象',
           prop: 'trainObjectsList',
-          options: [''],
+          options: [],
           required: true,
           span: 11,
           offset: 0
@@ -143,7 +139,7 @@ export default {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
-          options: [''],
+          options: [],
           required: true,
           span: 11,
           offset: 2
@@ -208,6 +204,7 @@ export default {
         address: '',
         contactPhone: '',
         sponsor: '',
+        organizer: '',
         introduction: ''
       }
     }
@@ -219,6 +216,12 @@ export default {
       },
       deep: true,
       immediate: true
+    },
+    'formData.categoryId': {
+      handler(val) {
+        this.formData.categoryId = _.isNumber(val) ? val : Number(val)
+      },
+      deep: true
     }
   },
   mounted() {
@@ -239,7 +242,6 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'editBasicInfo')
           })
       })
     },

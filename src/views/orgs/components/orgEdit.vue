@@ -251,7 +251,10 @@ export default {
       allUserIdArr: [],
       parentOrgIdLabel: '',
       rules: {
-        orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
+        orgName: [
+          { required: true, message: '请输入组织名称', trigger: 'blur' },
+          { max: 64, message: '组织名称最多64个字符', trigger: 'change' }
+        ],
         parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'blur' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
         orgCode: [{ required: true, message: '请输入组织编码', trigger: 'blur' }]
@@ -323,6 +326,12 @@ export default {
     submitAndCreate() {
       this.turnToLeaderList(this.allUserIdArr)
       this.$refs.ruleForm.validate((valid, obj) => {
+        if (this.form.leaders.length === 0) {
+          this.isrules = true
+          return
+        } else {
+          this.isrules = false
+        }
         if (valid) {
           this.loading = true
           createOrg(this.form)
