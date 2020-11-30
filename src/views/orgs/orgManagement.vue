@@ -157,6 +157,7 @@
         </template>
       </common-table>
       <org-edit
+        v-if="createOrgDailog"
         ref="orgEdit"
         :visible="createOrgDailog"
         @refresh="loadTableData"
@@ -476,7 +477,9 @@ export default {
     handleCommand(command, row) {
       if (command === 'add') {
         this.createOrgDailog = true
-        this.$refs.orgEdit.create()
+        this.$nextTick(() => {
+          this.$refs.orgEdit.create()
+        })
       } else if (command === 'deleteOrg') {
         if (row.parentId === 0) {
           this.$message.error('顶级组织不可删除')
@@ -540,10 +543,16 @@ export default {
       })
     },
     handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
+      this.createOrgDailog = true
+      this.$nextTick(() => {
+        this.$refs.orgEdit.edit(row)
+      })
     },
     handleCreateChild(row) {
-      this.$refs.orgEdit.createChild(row)
+      this.createOrgDailog = true
+      this.$nextTick(() => {
+        this.$refs.orgEdit.createChild(row)
+      })
     },
     columnChange() {
       this.option.column = TABLE_COLUMNS.filter((item) => {
