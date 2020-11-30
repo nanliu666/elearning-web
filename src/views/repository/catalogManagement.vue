@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="目录管理">
+    <page-header title="分类管理">
       <el-button
         slot="rightMenu"
         type="primary"

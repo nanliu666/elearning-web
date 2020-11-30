@@ -46,7 +46,9 @@
               slot-scope="{ node, data }"
               class="custom-tree-node"
             >
-              <span>{{ data.orgName }}{{ '  ' }} ({{ data.userNum }})</span>
+              <span>{{ data.orgName }}{{ '  ' }} ({{
+                data.orgId ? data.userNum : outerUserCount
+              }})</span>
             </span>
           </el-tree>
         </basic-container>
@@ -66,7 +68,7 @@
 </template>
 
 <script>
-import { getOrganization } from '@/api/system/user'
+import { getOrganization, getOuterUser } from '@/api/system/user'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -80,16 +82,14 @@ export default {
       activeTabName: 'orgTree',
       loading: true,
       treeData: [], // 组织架构数据
-      businessTreeData: [], // 业务部门数据
       treeProps: {
         labelText: '标题',
         label: 'orgName',
         value: 'orgId',
         children: 'children'
       },
-      activeTag: null,
-      activeOrg: null,
-      activeBus: null,
+      outerUserCount: 0,
+      activeOrg: { orgId: '0' },
       parentOrgId: 0,
       treeSearch: '',
       businessSearch: '',
@@ -102,20 +102,14 @@ export default {
   watch: {
     treeSearch(val) {
       this.$refs.orgTree.filter(val)
-    },
-    businessSearch(val) {
-      this.$refs.businessTree.filter(val)
     }
   },
   mounted() {
     this.loadTree()
+    this.loadOuterUserCount()
   },
   methods: {
     filterNode(value, data) {
-      if (!value) return true
-      return data.orgName.indexOf(value) !== -1
-    },
-    filterBusNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1
     },
@@ -127,10 +121,18 @@ export default {
         this.$router.push('/system/editUser')
       }
     },
+    loadOuterUserCount() {
+      getOuterUser({ pageSize: 1, pageNo: 1 }).then((res) => {
+        this.outerUserCount = res.totalNum
+      })
+    },
     loadTree(parentOrgId = '0') {
       this.treeLoading = true
       getOrganization({ parentOrgId })
         .then((data) => {
+          if (parentOrgId === '0') {
+            data.push({ orgId: null, orgName: '外部人员' })
+          }
           this.treeData = data
           this.treeLoading = false
         })

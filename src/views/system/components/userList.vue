@@ -140,7 +140,13 @@
 </template>
 
 <script>
-import { getOrgUserList, modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
+import {
+  getOrgUserList,
+  modifyUserStatus,
+  resetPwd,
+  delUser,
+  getOuterUser
+} from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
 
 const COLUMNS = [
@@ -418,10 +424,14 @@ export default {
     },
     loadData() {
       this.loading = true
-      getOrgUserList({
+      let func = getOrgUserList
+      if (!this.activeOrg.orgId) {
+        func = getOuterUser
+      }
+      func({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        orgId: this.activeOrg ? this.activeOrg.orgId : '0',
+        orgId: this.activeOrg.orgId,
         ...this.query
       })
         .then((res) => {

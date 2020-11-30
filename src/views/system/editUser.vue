@@ -47,7 +47,7 @@
                   </el-button>
                   <ul class="upload__files">
                     <li
-                      v-for="(item, index) in form.uploadFileList"
+                      v-for="(item, index) in uploadFileList"
                       :key="index"
                     >
                       {{ item.localName }}
@@ -133,7 +133,7 @@ export default {
         positionTitle: '',
         entryDate: null,
         ipScope: '',
-        attachment: []
+        attachments: []
       },
       uploadFileList: [],
       columns: [
@@ -164,8 +164,8 @@ export default {
           required: true,
           rules: [
             { required: true, message: '请输入手机号码', trigger: 'blur' },
-            { validator: checkPhonenum, trigger: 'blur' },
-            { pattern: /^[0-9]{11}$/, message: '必须为11位数字', trigger: 'blur' }
+            { pattern: /^1[3456789]\d{9}$/, message: '手机号码不合法', trigger: 'blur' },
+            { validator: checkPhonenum, trigger: 'blur' }
           ]
         },
         {

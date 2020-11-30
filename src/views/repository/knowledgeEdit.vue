@@ -34,7 +34,6 @@
             <li
               v-for="(item, index) in formData.attachments"
               :key="index"
-              class="uploader-li"
             >
               <span
                 class="uploader-file"
@@ -168,7 +167,7 @@ export default {
         label: '上传模式',
         prop: 'uploadType',
         required: true,
-        span: 12,
+        span: 24,
         options: [
           {
             label: '本地文件',
@@ -239,7 +238,7 @@ export default {
             value: 'id'
           },
           required: false,
-          span: 24
+          span: 12
         }
         var checkAge = (rule, value, callback) => {
           if (!this.checkURL(value)) {
@@ -448,13 +447,14 @@ $color_font_uploader: #a0a8ae;
   margin-top: 1rem;
 }
 .uploader-ul {
-  .uploader-li {
+  margin-top: 4px;
+  li {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
-    cursor: pointer;
-    i {
-      margin-left: 10px;
+    margin-bottom: 4px;
+    &:hover {
+      color: $primaryColor;
     }
   }
 }
