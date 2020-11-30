@@ -1,5 +1,3 @@
-import Layout from '@/page/index/'
-
 export default [
   {
     path: '/login',
@@ -77,5 +75,9 @@ export default [
     path: '/',
     name: '主页',
     redirect: '/wel'
+  },
+  {
+    path: '*',
+    redirect: '/404'
   }
 ]

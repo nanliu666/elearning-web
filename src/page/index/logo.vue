@@ -3,7 +3,7 @@
     class="avue-logo"
     @click="goWork"
   >
-    <img :src="JSON.parse(tenantContent).logo || logo">
+    <img :src="JSON.parse(tenantContent).logo || logo" />
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
   created() {},
   methods: {
     goWork() {
-      this.$router.replace({ path: '/wel/index' })
+      this.$router.replace({ path: '/wel' })
     }
   }
 }

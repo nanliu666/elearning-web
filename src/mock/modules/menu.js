@@ -359,14 +359,13 @@ const res = {
         children: [
           {
             menuId: '1260401852546387969',
-            menuName: '目录管理',
+            menuName: '分类管理',
             menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
             code: 'role',
             alias: '目录管理',
             path: '/repository/catalogManagement',
-            icon: 'iconfont iconicon_group',
             dataPrivileges: [],
             children: []
           },

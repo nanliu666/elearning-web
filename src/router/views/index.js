@@ -29,24 +29,14 @@ export default [
   {
     path: '/wel',
     component: Layout,
-    redirect: '/wel/index',
     children: [
       {
-        path: 'index',
+        path: '',
         name: '工作台',
         meta: {
           i18n: 'dashboard'
         },
         component: () => import('@/views/wel/index')
-      },
-      {
-        path: 'dashboard',
-        name: '控制台',
-        meta: {
-          i18n: 'dashboard',
-          menu: false
-        },
-        component: () => import('@/views/wel/dashboard')
       }
     ]
   },
