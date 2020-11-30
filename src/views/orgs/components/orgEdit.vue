@@ -253,7 +253,7 @@ export default {
       rules: {
         orgName: [
           { required: true, message: '请输入组织名称', trigger: 'blur' },
-          { max: 20, message: '组织名称最多20个字符', trigger: 'change' }
+          { max: 64, message: '组织名称最多64个字符', trigger: 'change' }
         ],
         parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'blur' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
