@@ -9,7 +9,17 @@
         :model="model"
         class="form"
         :columns="columns"
-      />
+      >
+        <template #courseName>
+          <lazy-select
+            v-model="model.courseName"
+            :allow-create="isCreate"
+            :searchable="remote"
+            :load="loadCourse"
+            :option-props="personOptionProps"
+          />
+        </template>
+      </common-form>
       <div class="footer">
         <el-button
           type="primary"
@@ -27,6 +37,7 @@
 
 <script>
 import { createUniqueID } from '@/util/util'
+import { getTrainCource } from '@/api/train/train'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -37,7 +48,7 @@ const EventColumns = [
     label: '上课日期'
   },
   // TODO：关联课程应该用lazy-select
-  { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '关联课程' },
+  { itemType: 'slot', span: 24, required: true, prop: 'courseName', label: '关联课程' },
   { itemType: 'input', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
   {
     itemType: 'radio',
@@ -51,14 +62,26 @@ const EventColumns = [
     ]
   }
 ]
+const personOptionProps = {
+  label: 'name',
+  value: 'name',
+  key: 'id'
+}
+
 export default {
   name: 'EditCourseDrawer',
+  components: {
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
+  },
   props: {
     course: { type: Object, default: null },
     visible: { type: Boolean, default: false }
   },
   data() {
     return {
+      remote: true,
+      personOptionProps,
+      isCreate: true,
       editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
@@ -98,6 +121,13 @@ export default {
     }
   },
   methods: {
+    loadCourse() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10
+      }
+      return getTrainCource(params)
+    },
     close() {
       this.innnerVisible = false
     },

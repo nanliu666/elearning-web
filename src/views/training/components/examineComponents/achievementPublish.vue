@@ -47,6 +47,14 @@
 
 <script>
 import achivementRadioInput from '../atomComponents/achivementRadioInput'
+const defaultValue = {
+  id: '',
+  passType: 1,
+  passScope: 0,
+  publishRules: 1,
+  autoEvaluate: 1,
+  fixedTime: []
+}
 export default {
   name: 'AchievementPublish',
   components: {
@@ -70,13 +78,7 @@ export default {
           passScope: 80
         }
       ],
-      model: {
-        passType: 1,
-        passScope: 0,
-        publishRules: 1,
-        autoEvaluate: 1,
-        fixedTime: []
-      },
+      model: _.cloneDeep(defaultValue),
       columns: [
         {
           itemType: 'slot',
@@ -133,6 +135,9 @@ export default {
     }
   },
   methods: {
+    resetFields() {
+      this.model = _.cloneDeep(defaultValue)
+    },
     changeSwitch(data) {
       this.model.autoEvaluate = data ? 1 : 0
       if (!data) {

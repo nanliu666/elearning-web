@@ -154,15 +154,19 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'editDetail')
           })
       })
     },
     getData() {
+      let promiseList = []
       const personForm = this.getLiData('personForm')
-      const assessForm = this.getLiData('assessForm')
+      promiseList.push(personForm)
+      if (this.formData.evaluation) {
+        const assessForm = this.getLiData('assessForm')
+        promiseList.push(assessForm)
+      }
       // const certificateForm = this.getLiData('certificateForm')
-      return Promise.all([personForm, assessForm]).then(() => {
+      return Promise.all(promiseList).then(() => {
         return this.formData
       })
     },

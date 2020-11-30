@@ -135,7 +135,6 @@ export default {
   },
   data() {
     return {
-      checked: true,
       input: '',
       columns: EventColumns,
       model: {

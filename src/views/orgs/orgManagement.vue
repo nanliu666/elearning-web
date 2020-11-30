@@ -42,6 +42,7 @@
                     ref="searchPopover"
                     :require-options="searchConfig.requireOptions"
                     :popover-options="searchConfig.popoverOptions"
+                    @submit="handleSearch"
                   />
                   <div
                     class="search-sort-box"
@@ -272,7 +273,6 @@ export default {
             field: 'orgName',
             label: '',
             data: '',
-            options: [],
             config: { placeholder: '组织名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
@@ -287,8 +287,7 @@ export default {
               { value: 'Company', label: '公司' },
               { value: 'Department', label: '部门' },
               { value: 'Group', label: '小组' }
-            ],
-            config: { optionLabel: '', optionValue: '' }
+            ]
           },
           {
             type: 'numInterval',
