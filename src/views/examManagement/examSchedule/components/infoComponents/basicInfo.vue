@@ -216,7 +216,6 @@ const EventColumns = [
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
-import elFormEmitter from '@/mixins/elFormEmitter'
 export default {
   name: 'BasicSetting',
   components: {
@@ -224,7 +223,6 @@ export default {
     checkboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
-  mixins: [elFormEmitter],
   data() {
     return {
       personOptionProps,

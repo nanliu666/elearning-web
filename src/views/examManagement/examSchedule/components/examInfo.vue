@@ -1,15 +1,19 @@
 <template>
   <div class="exam-info">
     <BasicSetting />
+    <Permission />
   </div>
 </template>
 
 <script>
 import BasicSetting from './infoComponents/basicInfo'
+import Permission from './infoComponents/permission'
+
 export default {
   name: 'ExamInfo',
   components: {
-    BasicSetting
+    BasicSetting,
+    Permission
   },
   data() {
     return {}
