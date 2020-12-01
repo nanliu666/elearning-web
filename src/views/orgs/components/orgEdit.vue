@@ -21,6 +21,7 @@
       >
         <el-input
           v-model.trim="form.orgName"
+          maxlength="64"
           placeholder="请输入"
         />
       </el-form-item>
@@ -252,10 +253,7 @@ export default {
       allUserIdArr: [],
       parentOrgIdLabel: '',
       rules: {
-        orgName: [
-          { required: true, message: '请输入组织名称', trigger: 'blur' },
-          { max: 64, message: '最大长度为64', trigger: ['blur', 'change'] }
-        ],
+        orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
         parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
         orgCode: [{ required: true, message: '请输入组织编码', trigger: 'blur' }]
