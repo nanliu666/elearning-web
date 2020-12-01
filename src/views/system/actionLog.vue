@@ -171,7 +171,7 @@ export default {
   },
   methods: {
     columnChange() {
-      this.option.column = column.filter((item) => {
+      this.columns = column.filter((item) => {
         return this.checkColumn.indexOf(item.prop) > -1
       })
     },

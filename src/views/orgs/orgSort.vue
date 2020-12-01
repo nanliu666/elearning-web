@@ -83,7 +83,10 @@ export default {
         }
         if (parentOrg && parentOrg.children) {
           for (let i = 0; i < parentOrg.children.length; i++) {
-            if (parentOrg.children[i].orgName === draggingNode.data.orgName) {
+            if (
+              parentOrg.children[i].orgName === draggingNode.data.orgName &&
+              parentOrg.children[i].orgId !== draggingNode.data.orgId
+            ) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -94,7 +97,10 @@ export default {
       } else if (type === 'inner') {
         if (dropNode.data.children) {
           for (let i = 0; i < dropNode.data.children.length; i++) {
-            if (dropNode.data.children[i].orgName === draggingNode.data.orgName) {
+            if (
+              dropNode.data.children[i].orgName === draggingNode.data.orgName &&
+              dropNode.data.children[i].orgId !== draggingNode.data.orgId
+            ) {
               this.messageFun()
               this.sameNameMessage = true
               return false

@@ -21,6 +21,7 @@
       >
         <el-input
           v-model.trim="form.orgName"
+          maxlength="64"
           placeholder="请输入"
         />
       </el-form-item>
@@ -229,7 +230,8 @@ export default {
       orgType: '',
       radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
       form: {
-        orgType: ''
+        orgType: '',
+        parentOrgId: ''
       },
       column: {
         span: 20,
@@ -262,11 +264,8 @@ export default {
       allUserIdArr: [],
       parentOrgIdLabel: '',
       rules: {
-        orgName: [
-          { required: true, message: '请输入组织名称', trigger: 'blur' },
-          { max: 64, message: '组织名称最多64个字符', trigger: 'change' }
-        ],
-        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'blur' }],
+        orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
+        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
         orgCode: [{ required: true, message: '请输入组织编码', trigger: 'blur' }],
         leaders: [{ required: true, message: '请选择负责人', trigger: 'blur' }]
