@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import achivementRadioInput from '../atomComponents/achivementRadioInput'
+import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
 const defaultValue = {
   id: '',
   passType: 1,

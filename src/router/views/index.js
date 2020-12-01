@@ -1,6 +1,7 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
+import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import demoRoutes from './demo'
 import todo from './todo'
 export default [
@@ -21,6 +22,15 @@ export default [
     path: '/training/edit',
     name: '编辑培训',
     component: TrainingEdit,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
+    path: '/examManagement/examSchedule/edit',
+    name: '新建考试',
+    component: ExamEdit,
     meta: {
       keepAlive: true,
       isTab: false

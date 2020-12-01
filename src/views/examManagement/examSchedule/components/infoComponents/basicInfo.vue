@@ -6,6 +6,13 @@
       class="form"
       :columns="columns"
     >
+      <template #title1>
+        基础信息
+      </template>
+      <template #title2>
+        基础设置
+      </template>
+
       <template #reckonTime>
         <el-radio-group v-model="model.reckonTime">
           <el-radio :label="0">
@@ -64,28 +71,49 @@ import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
 const EventColumns = [
   {
-    itemType: 'datePicker',
+    prop: 'title1',
+    itemType: 'slotout',
     span: 24,
-    required: true,
-    prop: 'examTime',
-    type: 'daterange',
-    rangeSeparator: '~',
-    label: '考试日期'
+    label: ''
   },
   {
     itemType: 'input',
-    span: 24,
+    span: 11,
     required: true,
     prop: 'examName',
     label: '考试名称'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'testPaper', label: '关联用卷' },
-  { itemType: 'input', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
+  {
+    itemType: 'select',
+    span: 11,
+    offset: 2,
+    required: true,
+    options: [],
+    prop: 'examName1',
+    label: '考试分类'
+  },
+  {
+    itemType: 'select',
+    span: 11,
+    required: true,
+    options: [],
+    prop: 'examName2',
+    label: '考试用卷'
+  },
+  { itemType: 'input', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'switch', span: 11, required: false, prop: 'reviewer1', label: '是否发放证书' },
+  { itemType: 'input', span: 11, offset: 2, required: true, prop: 'testPaper', label: '证书模板' },
+  {
+    prop: 'title2',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
   {
     itemType: 'radio',
     prop: 'answerMode',
     label: '答题模式',
-    span: 24,
+    span: 11,
     options: [
       { label: '整卷模式', value: 1 },
       { label: '逐卷模式', value: 2 }
@@ -95,13 +123,21 @@ const EventColumns = [
     itemType: 'slot',
     prop: 'reckonTime',
     label: '考试时长',
-    span: 24
+    offset: 2,
+    span: 11
   },
   {
     itemType: 'slot',
     prop: 'joinNum',
     label: '参加次数',
-    span: 24
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    prop: 'joinNum1',
+    label: '补考次数',
+    offset: 2,
+    span: 11
   },
   {
     itemType: 'radio',
@@ -117,13 +153,14 @@ const EventColumns = [
     itemType: 'slot',
     prop: 'integral',
     label: '积分',
-    span: 24
+    span: 11
   },
   {
     itemType: 'slot',
     prop: 'publishTime',
     label: '发布考试',
-    span: 24
+    offset: 2,
+    span: 11
   }
 ]
 export default {

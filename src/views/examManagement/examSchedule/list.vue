@@ -3,7 +3,7 @@
     <page-header title="考试安排">
       <el-dropdown
         slot="rightMenu"
-        @command="handleCommand"
+        @command="createExam"
       >
         <el-button
           type="primary"
@@ -16,7 +16,7 @@
           <el-dropdown-item command="general">
             普通考试
           </el-dropdown-item>
-          <el-dropdown-item command="offline  ">
+          <el-dropdown-item command="offline">
             线下考试
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -57,13 +57,6 @@
               v-if="activeIndex === '1'"
               class="filter-box"
             >
-              <div
-                class="search-sort-box"
-                @click="toSort"
-              >
-                <i class="el-icon-upload2" />
-                <span class="sort-text">导入</span>
-              </div>
               <div
                 class="search-sort-box"
                 @click="toSort"
@@ -183,6 +176,12 @@ const TABLE_COLUMNS = [
     label: '考试类型',
     slot: true,
     prop: 'updateTime1',
+    minWidth: 120
+  },
+  {
+    label: '考试方式',
+    slot: true,
+    prop: 'updateTime12',
     minWidth: 120
   },
   {
@@ -366,6 +365,12 @@ export default {
         copy: this.handleCopy
       }
       TYPE_COMMAND[$event](row)
+    },
+    createExam($event) {
+      this.$router.push({
+        path: '/examManagement/examSchedule/edit',
+        query: { type: $event }
+      })
     },
     // 复制
     handleCopy() {},

@@ -21,7 +21,7 @@
       >
         <el-input
           v-model.trim="form.orgName"
-          maxlength="64"
+          maxlength="32"
           placeholder="请输入"
         />
       </el-form-item>
