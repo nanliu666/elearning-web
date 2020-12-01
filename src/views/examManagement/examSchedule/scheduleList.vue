@@ -59,7 +59,7 @@
                   class="search-sort-box"
                   @click="toSort"
                 >
-                  <i class="el-icon-download" />
+                  <i class="el-icon-upload2" />
                   <span class="sort-text">导入</span>
                 </div>
                 <div
