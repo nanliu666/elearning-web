@@ -33,6 +33,14 @@
 
       <div class="page-right">
         <el-button
+          v-if="!id"
+          class="publish-btn"
+          size="medium"
+          @click="handleDraft"
+        >
+          存草稿
+        </el-button>
+        <el-button
           v-if="activeStep !== 0"
           class="publish-btn"
           size="medium"
@@ -193,13 +201,17 @@ export default {
     changeWay(data) {
       this.trainWay = data
     },
+    // 存草稿
+    handleDraft() {
+      this.publish(2)
+    },
     // 发布区分编辑发布还是新增发布
-    publish() {
+    publish(type = 1) {
       const basicData = this.$refs.editBasicInfo.getData()
       const editArrangement = this.$refs.editArrangement.getData()
       const detailData = this.$refs.editDetail.getData()
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
-        let params = this.handleParams(res)
+        let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
@@ -210,7 +222,7 @@ export default {
       })
     },
     // 统一处理入参
-    handleParams(res) {
+    handleParams(res, type) {
       // 培训对象
       let trainObjectsList = []
       const pickTrain = _.get(res[0], 'trainObjectsList')
@@ -226,6 +238,7 @@ export default {
         .assign(res[2])
         .value()
       trainInfo['introduction'] = _.escape(trainInfo['introduction'])
+      trainInfo['type'] = type
       const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
       let params = {
         id: this.id,
