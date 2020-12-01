@@ -456,16 +456,4 @@ export default {
     }
   }
 }
-
-/deep/ .avue-crud__pagination {
-  height: 0px;
-}
-.newOrgDailog {
-  .el-select {
-    width: 100%;
-  }
-}
-/deep/ .avue-crud__pagination {
-  display: none;
-}
 </style>

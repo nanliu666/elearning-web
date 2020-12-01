@@ -34,7 +34,7 @@
             <el-button
               type="primary"
               size="medium"
-              @click="$refs.orgEdit.create()"
+              @click="addCategory"
             >
               新建分类
             </el-button>
@@ -236,7 +236,11 @@ export default {
     this.loadTableData()
   },
   methods: {
+    addCategory() {
+      this.$refs.orgEdit.create(this.activeIndex - 1)
+    },
     handleSelect(key) {
+      this.activeIndex = key
       this.statusValue = ''
       let searchParams = { clientId: this.clientTypeList[key - 1].type }
       this.handleSearch(searchParams)
@@ -431,17 +435,5 @@ export default {
       background-color: #a0a8ae;
     }
   }
-}
-
-/deep/ .avue-crud__pagination {
-  height: 0px;
-}
-.newOrgDailog {
-  .el-select {
-    width: 100%;
-  }
-}
-/deep/ .avue-crud__pagination {
-  display: none;
 }
 </style>
