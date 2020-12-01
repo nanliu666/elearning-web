@@ -3,7 +3,6 @@
     <common-form
       ref="form"
       :model="model"
-      class="form"
       :columns="columns"
     >
       <template #title1>
@@ -64,19 +63,20 @@
         </el-radio-group>
       </template>
       <template #joinNum1>
-        <el-radio-group v-model="model.joinNum">
+        <el-radio-group v-model="model.joinNum1Boo">
           <div class="flex-flow flex flexcenter">
-            <el-radio :label="0">
+            <el-radio :label="false">
               不允许
             </el-radio>
-            <radioInput
-              v-model="model.joinNum"
-              text-before="允许补考"
-              text-after="次"
-              :default-value="3"
-              :input-width="60"
-              :input-props="{ maxLength: 4 }"
-            ></radioInput>
+            <el-radio :label="true">
+              允许补考
+              <el-input
+                v-model.number="model.joinNum1"
+                :disabled="!model.joinNum1Boo"
+                style="width: 60px;"
+              ></el-input>
+              次
+            </el-radio>
           </div>
         </el-radio-group>
       </template>
@@ -113,7 +113,13 @@ const personOptionProps = {
   value: 'userId',
   key: 'userId'
 }
-
+const checkMakeUp = (rule, value, callback) => {
+  if (value === '') {
+    return callback(new Error('补考次数不能为空'))
+  } else {
+    callback()
+  }
+}
 const EventColumns = [
   {
     prop: 'title1',
@@ -182,7 +188,8 @@ const EventColumns = [
     prop: 'joinNum1',
     label: '补考次数',
     offset: 2,
-    span: 11
+    span: 11,
+    rules: [{ validator: checkMakeUp, trigger: 'change' }]
   },
   {
     itemType: 'radio',
@@ -209,6 +216,7 @@ const EventColumns = [
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
+import elFormEmitter from '@/mixins/elFormEmitter'
 export default {
   name: 'BasicSetting',
   components: {
@@ -216,6 +224,7 @@ export default {
     checkboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
+  mixins: [elFormEmitter],
   data() {
     return {
       personOptionProps,
@@ -230,10 +239,35 @@ export default {
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
+        joinNum1: 3,
+        joinNum1Boo: false,
         integral: 0,
         strategy: 0,
         publishTime: 0
       }
+    }
+  },
+  watch: {
+    // 补考次数因为存在0有检验，所以手动添加校验规则
+    'model.joinNum1Boo': {
+      handler(value) {
+        const checkMakeUpZero = (rule, value, callback) => {
+          if (value === 0) {
+            return callback(new Error('补考次数必须大于0'))
+          } else {
+            callback()
+          }
+        }
+        const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
+        const target = _.chain(this.columns)
+          .filter((item) => {
+            return item.prop === 'joinNum1'
+          })
+          .get('[0].rules', {})
+          .value()
+        value ? target.push(zeroRuler) : target.pop()
+      },
+      deep: true
     }
   },
   created() {},
