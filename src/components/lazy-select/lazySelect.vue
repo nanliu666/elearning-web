@@ -12,7 +12,7 @@
     @visible-change="visibleChange"
   >
     <el-option
-      v-for="item in _.compact([firstOption, ...optionList])"
+      v-for="item in _.uniqBy(_.compact([firstOption, ...optionList]), optionProps.value)"
       :key="optionProps.key ? item[optionProps.key] : item[optionProps.value]"
       :label="optionProps.formatter ? optionProps.formatter(item) : item[optionProps.label]"
       :value="item[optionProps.value]"
