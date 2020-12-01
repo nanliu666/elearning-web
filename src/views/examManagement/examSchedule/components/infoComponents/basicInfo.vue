@@ -12,7 +12,24 @@
       <template #title2>
         基础设置
       </template>
-
+      <template #testPaper>
+        <lazy-select
+          v-model="model.testPaper"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
+      <template #reviewer>
+        <lazy-select
+          v-model="model.reviewer"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
       <template #reckonTime>
         <el-radio-group v-model="model.reckonTime">
           <el-radio :label="0">
@@ -22,6 +39,7 @@
             v-model="model.reckonTime"
             text-before="限制时长"
             text-after="分钟"
+            :default-value="60"
             :input-width="60"
             :input-props="{ maxLength: 4 }"
           ></radioInput>
@@ -38,17 +56,37 @@
               v-model="model.joinNum"
               text-before="限制次数 不超过"
               text-after="次"
+              :default-value="3"
               :input-width="60"
               :input-props="{ maxLength: 4 }"
             ></radioInput>
           </div>
         </el-radio-group>
       </template>
+      <template #joinNum1>
+        <el-radio-group v-model="model.joinNum">
+          <div class="flex-flow flex flexcenter">
+            <el-radio :label="0">
+              不允许
+            </el-radio>
+            <radioInput
+              v-model="model.joinNum"
+              text-before="允许补考"
+              text-after="次"
+              :default-value="3"
+              :input-width="60"
+              :input-props="{ maxLength: 4 }"
+            ></radioInput>
+          </div>
+        </el-radio-group>
+      </template>
+
       <template #integral>
         <checkbox-input
           v-model="model.integral"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
+          :default-value="2"
           :input-width="60"
           :input-props="{ maxLength: 4 }"
         ></checkbox-input>
@@ -59,6 +97,7 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
+          :default-value="10"
           :input-props="{ maxLength: 4 }"
         ></checkbox-input>
       </template>
@@ -69,6 +108,12 @@
 <script>
 import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
+const personOptionProps = {
+  label: 'name',
+  value: 'userId',
+  key: 'userId'
+}
+
 const EventColumns = [
   {
     prop: 'title1',
@@ -93,16 +138,16 @@ const EventColumns = [
     label: '考试分类'
   },
   {
-    itemType: 'select',
+    itemType: 'slot',
     span: 11,
     required: true,
     options: [],
-    prop: 'examName2',
+    prop: 'testPaper',
     label: '考试用卷'
   },
-  { itemType: 'input', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
   { itemType: 'switch', span: 11, required: false, prop: 'reviewer1', label: '是否发放证书' },
-  { itemType: 'input', span: 11, offset: 2, required: true, prop: 'testPaper', label: '证书模板' },
+  { itemType: 'input', span: 11, offset: 2, required: true, prop: 'testPaper1', label: '证书模板' },
   {
     prop: 'title2',
     itemType: 'slotout',
@@ -163,14 +208,17 @@ const EventColumns = [
     span: 11
   }
 ]
+import { getOrgUserList } from '@/api/system/user'
 export default {
   name: 'BasicSetting',
   components: {
     radioInput,
-    checkboxInput
+    checkboxInput,
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
     return {
+      personOptionProps,
       input: '',
       columns: EventColumns,
       model: {
@@ -189,7 +237,17 @@ export default {
     }
   },
   created() {},
-  methods: {}
+  methods: {
+    loadCoordinator() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        orgId: this.$store.getters.userInfo.org_id || 0
+      }
+      return getOrgUserList(params)
+    }
+  }
 }
 </script>
 
