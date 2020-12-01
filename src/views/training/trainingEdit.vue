@@ -36,7 +36,6 @@
           v-if="activeStep !== 0"
           class="publish-btn"
           size="medium"
-          type="primary"
           @click="handlePreviousStep"
         >
           上一步

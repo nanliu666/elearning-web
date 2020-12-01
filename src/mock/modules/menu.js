@@ -497,6 +497,91 @@ const res = {
         ]
       },
       {
+        menuId: '1259467456745245678718',
+        menuName: '考评管理',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'system',
+        alias: 'system',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        dataPrivileges: [
+          {
+            dataId: '1',
+            scopeName: '个人可见',
+            isOwn: 1
+          }
+        ],
+        children: [
+          {
+            menuId: '12590734567456735058',
+            menuName: '分类管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/catalog',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073456754674589',
+            menuName: '题库管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseSort',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259074567456731235058',
+            menuName: '试卷管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseDraft',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590567456745635058',
+            menuName: '考试安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examSchedule/scheduleList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259056745476834562058',
+            menuName: '成绩管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/compileCourse',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          }
+        ]
+      },
+      {
         menuId: '1590112075691',
         menuName: '审批管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
