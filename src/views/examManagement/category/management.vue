@@ -339,10 +339,12 @@ export default {
     },
     // 添加子分类
     handleAddChild(row) {
+      this.$refs.orgEdit.create(this.activeIndex - 1)
       this.$refs.orgEdit.createChild(row)
     },
     // 编辑分类
     handleOrgEdit(row) {
+      this.$refs.orgEdit.create(this.activeIndex - 1)
       this.$refs.orgEdit.edit(row)
     },
     /**
