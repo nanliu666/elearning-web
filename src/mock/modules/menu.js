@@ -561,7 +561,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/examSchedule/scheduleList',
+            path: '/examManagement/examSchedule/scheduleList',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
