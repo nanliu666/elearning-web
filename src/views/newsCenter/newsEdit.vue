@@ -222,7 +222,13 @@ export default {
         itemType: 'slot',
         label: '正文',
         prop: 'content',
-        required: true,
+        rules: [
+          {
+            required: true,
+            message: '请填写正文',
+            trigger: 'blur'
+          }
+        ],
         span: 24
       },
       {

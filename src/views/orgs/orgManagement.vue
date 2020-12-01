@@ -123,9 +123,6 @@
         <template #orgType="{row}">
           {{ orgTypeObj[row.orgType] }}
         </template>
-        <template #leaders="{row}">
-          {{ leaderFilter(row) }}
-        </template>
 
         <template #handler="{row}">
           <div class="menuClass">
@@ -176,6 +173,7 @@ import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader } from '@/api/org
 import { tableOptions } from '@/util/constant'
 import SearchPopover from '@/components/searchPopOver/index'
 import OrgEdit from './components/orgEdit'
+
 const TABLE_COLUMNS = [
   {
     label: '组织名称',
@@ -196,9 +194,13 @@ const TABLE_COLUMNS = [
   },
   {
     label: '组织负责人',
-    slot: true,
     prop: 'leaders',
-    minWidth: 120
+    minWidth: 120,
+    formatter(row) {
+      return _.map(row.leaders, 'userName')
+        .filter((i) => i)
+        .join(',')
+    }
   },
   {
     label: '描述',
@@ -372,58 +374,9 @@ export default {
     })
   },
   activated() {
-    this.loadTableData()
+    // this.loadTableData()
   },
   methods: {
-    leaderFilter(row) {
-      if (row.leaders.length > 0) {
-        let leadersList = []
-        for (var i = 0; i < row.leaders.length; i++) {
-          leadersList = this.turnToLevelArray(row.leaders)
-        }
-        let leadersString = ''
-        for (var j = 0; j < leadersList.length; j++) {
-          for (var k = 0; k < leadersList[j].userNameArr.length; k++) {
-            if (leadersList[j].userNameArr[k] === '' || leadersList[j].userNameArr[k] === null) {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + '空缺'
-              } else {
-                leadersString = leadersString + '空缺，'
-              }
-            } else {
-              if (k === leadersList[j].userNameArr.length - 1) {
-                //最后一个不要逗号
-                leadersString = leadersString + leadersList[j].userNameArr[k]
-              } else {
-                leadersString = leadersString + leadersList[j].userNameArr[k] + '，'
-              }
-            }
-          }
-          leadersString = leadersString + '；'
-        }
-        return leadersString
-      } else {
-        return ''
-      }
-    },
-    turnToLevelArray(data = []) {
-      let responsibleList = []
-      const maxLevel = Math.max.apply(
-        Math,
-        data.map((item) => item.level)
-      )
-      for (var j = 0; j < maxLevel; j++) {
-        responsibleList.push({
-          level: j + 1,
-          userNameArr: []
-        })
-      }
-      data.map((item) => {
-        responsibleList[item.level - 1]['userNameArr'].push(item.userName)
-      })
-      return responsibleList
-    },
     async loadTableData() {
       if (this.tableLoading) {
         return
@@ -615,34 +568,42 @@ export default {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
 }
+
 .originColumn {
   height: 25px;
 }
+
 .transitionBox {
   position: relative;
   height: 50px;
 }
+
 .searchBox {
   position: absolute;
   width: 100%;
+
   i {
     color: #a0a8ae;
     font-size: 18px;
   }
+
   .search-box {
     display: flex;
     align-items: center;
+
     .search-sort-box {
       position: relative;
       display: flex;
       align-items: center;
       padding: 0 10px;
       cursor: pointer;
+
       .sort-text {
         color: #a0a8ae;
         margin-left: 6px;
         font-size: 14px;
       }
+
       &::before {
         position: absolute;
         content: '';
@@ -654,27 +615,33 @@ export default {
       }
     }
   }
+
   > div {
     display: flex;
+
     :first-child {
       flex: 1;
     }
+
     > button {
       height: 34px;
     }
   }
 }
+
 .multipleBox {
   position: absolute;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 62px;
+
   .multipleLeft {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-right: 20px;
+
     .multipleLength {
       padding: 0 20px;
       margin-right: 20px;
@@ -686,11 +653,13 @@ export default {
 /deep/ .avue-crud__pagination {
   height: 0px;
 }
+
 .newOrgDailog {
   .el-select {
     width: 100%;
   }
 }
+
 /deep/ .avue-crud__pagination {
   display: none;
 }

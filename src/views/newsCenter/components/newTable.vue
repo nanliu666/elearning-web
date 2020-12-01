@@ -331,10 +331,10 @@ export default {
         this.tableLoading = true
         const page = {
           pageNo: this.page.currentPage,
-          pageSize: this.page.size
+          pageSize: this.page.pageSize
         }
         const searchParams = { status: ENUMS_STATUS[this.status], ...this.searchParams }
-        const { data, totalNum } = await getV1News(_.assign(null, page, params, searchParams))
+        const { data, totalNum } = await getV1News(_.assign(null, params, searchParams, page))
         this.tableData = data
         this.page.total = totalNum
         this.$emit('update:number', totalNum)
