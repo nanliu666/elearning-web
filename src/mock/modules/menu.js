@@ -522,7 +522,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/course/catalog',
+            path: '/examManagement/category/management',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
