@@ -242,10 +242,10 @@ export default {
       parentOrgIdLabel: '',
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
-        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'blur' }],
-        orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
+        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
+        orgType: [{ required: true, message: '请选择组织类型', trigger: 'change' }],
         orgCode: [{ required: true, message: '请输入组织编码', trigger: 'blur' }],
-        leaders: [{ required: true, message: '请选择负责人', trigger: 'blur' }]
+        leaders: [{ required: true, message: '请选择负责人', trigger: 'change' }]
       },
 
       orgTree: [],
@@ -268,6 +268,7 @@ export default {
       this.leaderPageNo += 1
     })
   },
+  mounted() {},
   methods: {
     check(data) {
       this.orgType = data.orgType
@@ -334,10 +335,13 @@ export default {
               this.$message.success('创建成功')
               this.form = { orgType: '' }
               this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
-              this.$refs.ruleForm.clearValidate()
+
               this.loadOrgTree()
               this.parentOrgIdLabel = ''
               this.$emit('refresh')
+              this.$nextTick(() => {
+                this.$refs.ruleForm.clearValidate(...arguments)
+              })
               this.loading = false
             })
             .catch(() => {
@@ -390,6 +394,9 @@ export default {
       this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.$nextTick(() => {
+        this.$refs.ruleForm.clearValidate(...arguments)
+      })
     },
     createChild(row) {
       this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容

@@ -14,6 +14,9 @@
         :model="form"
         :columns="columns"
       >
+        <template #examineeName>
+          {{ form.examineeName }}
+        </template>
         <template #answerTime>
           <el-input
             v-model="form.answerTime"
@@ -38,7 +41,7 @@
             >分</i>
           </el-input>
         </template>
-        <template #answerTime>
+        <template #totalScore>
           <el-input
             v-model="form.totalScore"
             placeholder="请输入试卷总分"
@@ -64,6 +67,7 @@
         <el-button
           type="primary"
           size="medium"
+          @click="onsubmit"
         >
           保存
         </el-button>
@@ -73,6 +77,8 @@
 </template>
 
 <script>
+import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
+
 export default {
   name: 'ExamineeDialog',
   components: {},
@@ -80,26 +86,6 @@ export default {
     visible: {
       type: Boolean,
       default: false
-    },
-    jobs: {
-      type: Array,
-      default: () => []
-    },
-    positions: {
-      type: Array,
-      default: () => []
-    },
-    jobProps: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    positionProps: {
-      type: Object,
-      default: () => {
-        return {}
-      }
     },
     row: {
       type: Object,
@@ -125,15 +111,14 @@ export default {
     }
     const BASE_COLUMNS = [
       {
-        prop: 'roleName',
-        itemType: 'input',
+        prop: 'examineeName',
+        itemType: 'slot',
         label: '考生姓名',
         span: 24,
-        disabled: true,
         required: false
       },
       {
-        prop: 'remark',
+        prop: 'examTime',
         itemType: 'datePicker',
         type: 'datetimerange',
         label: '考试时间',
@@ -172,7 +157,7 @@ export default {
         }
       },
       {
-        prop: 'radiso',
+        prop: 'isPass',
         itemType: 'radio',
         label: '是否通过',
         span: 24,
@@ -194,11 +179,11 @@ export default {
           value: 'value'
         },
         options: [
-          { label: '已发布', value: 4 },
-          { label: '已提交', value: 3 },
-          { label: '已阅卷', value: 2 },
-          { label: '考试中', value: 1 },
-          { label: '阅卷中', value: 0 }
+          { label: '已发布', value: 5 },
+          { label: '已提交', value: 4 },
+          { label: '已阅卷', value: 3 },
+          { label: '考试中', value: 2 },
+          { label: '阅卷中', value: 1 }
         ]
       }
     ]
@@ -208,11 +193,13 @@ export default {
       loading: false,
       roleVisible: true,
       form: {
-        roleId: '',
-        roleName: '',
-        remark: '',
         answerTime: '',
-        totalScore: ''
+        totalScore: '',
+        examineeName: '',
+        examTime: '',
+        score: '',
+        isPass: '',
+        status: ''
       },
       jobDicData: []
     }
@@ -220,11 +207,18 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { roleId, roleName, remark } = { ...newVal }
+        let { answerTime, totalScore, examineeName, examTime, score, isPass, status, id } = {
+          ...newVal
+        }
         this.form = {
-          roleId,
-          roleName,
-          remark
+          answerTime,
+          totalScore,
+          examineeName,
+          examTime,
+          score,
+          isPass,
+          status,
+          id
         }
       },
       immediate: true,
@@ -238,6 +232,15 @@ export default {
   },
   mounted() {},
   methods: {
+    onsubmit() {
+      this.$refs.form.validate().then((valid) => {
+        if (!valid) return
+        getExamineeAchievementEdit(this.form).then(() => {
+          this.$message.success('修改成功')
+          this.onClose()
+        })
+      })
+    },
     numberInput(value, data) {
       this.form[data] = value.replace(/[^\d]/g, '')
     },

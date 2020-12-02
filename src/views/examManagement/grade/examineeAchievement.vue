@@ -1,6 +1,9 @@
 <template>
   <div class="fill">
-    <page-header title="查看考生成绩" />
+    <page-header
+      title="查看考生成绩"
+      show-back
+    />
 
     <basic-container block>
       <common-table
@@ -11,6 +14,8 @@
         :page="page"
         :data="tableData"
         :loading="tableLoading"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="transitionBox">
@@ -22,7 +27,10 @@
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSearch"
                 />
-                <div class="refresh-container">
+                <div
+                  class="refresh-container"
+                  @click="loadTableData"
+                >
                   <span class="icon  el-icon-refresh-right" />
                   <span class="refresh-text">刷新</span>
                 </div>
@@ -40,7 +48,7 @@
                       v-for="item in tableColumns"
                       :key="item.prop"
                       :label="item.prop"
-                      :disabled="item.prop === 'orgName'"
+                      :disabled="item.prop === 'examName'"
                       class="originColumn"
                     >
                       {{ item.label }}
@@ -80,69 +88,70 @@
       <examineeDialog
         v-if="visible"
         :visible.sync="visible"
+        :row="row"
       ></examineeDialog>
     </basic-container>
   </div>
 </template>
 
 <script>
-import { getKnowledgeCatalogList } from '@/api/knowledge/knowledge'
+import { getExamineeAchievement } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
 import examineeDialog from './compoments/examineeDialog'
 const TABLE_COLUMNS = [
   {
     label: '姓名',
-    prop: 'name',
+    prop: 'examineeName',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '手机号码',
-    prop: 'status',
+    prop: 'phoneNum',
     slot: true,
     minWidth: 120
   },
   {
     label: '所在部门',
-    prop: 'creatorName',
-    minWidth: 120
+    prop: 'orgName',
+    minWidth: 150
   },
   {
     label: '考试时间',
     slot: true,
-    prop: 'updateTime',
-    minWidth: 120
+    prop: 'examTime',
+    minWidth: 350
   },
   {
     label: '答卷时间（分钟）',
     slot: true,
-    prop: 'updateTime1',
+    prop: 'answerTime',
     minWidth: 150
   },
   {
     label: '成绩',
     slot: true,
-    prop: 'updateTime2',
+    prop: 'score',
     minWidth: 120
   },
   {
     label: '试卷总分',
     slot: true,
-    prop: 'updateTime23',
+    prop: 'totalScore',
     minWidth: 120
   },
   {
     label: '是否通过',
     slot: true,
-    prop: 'updateTime223',
+    prop: 'isPass',
     minWidth: 120
   },
   {
     label: '状态',
     slot: true,
-    prop: 'updateTime2223',
+    prop: 'status',
     minWidth: 120
   }
 ]
@@ -157,6 +166,14 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
+// 1-已发布 2-已提交 3-已阅卷 4-考试中 5-阅卷中
+const status = [
+  { label: '已发布', value: 1 },
+  { label: '已提交', value: 2 },
+  { label: '已阅卷', value: 3 },
+  { label: '考试中', value: 4 },
+  { label: '阅卷中', value: 5 }
+]
 export default {
   name: 'ExamineeAchievement',
   components: { SearchPopover, examineeDialog },
@@ -167,6 +184,7 @@ export default {
   },
   data() {
     return {
+      row: {},
       visible: false,
       page: {
         currentPage: 1,
@@ -196,7 +214,7 @@ export default {
             // data多选是数组单选是字符串
             data: [],
             label: '所在部门',
-            field: 'orgs',
+            field: 'orgName',
             arrField: 'orgId',
             config: {
               multiple: true,
@@ -218,29 +236,11 @@ export default {
                   value: 'orgId'
                 }
               }
-            },
-            firstLoad(flag, item, callBack) {
-              // fage为true，selsec框展开
-              if (flag && item.config.treeParams.data.length === 0) {
-                item.loadMoreFun(item, callBack)
-              }
-            },
-            loadMoreFun(item, callBack) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-                if (res.length > 0) {
-                  item.config.treeParams.data.push(...res)
-                  item.loading = false
-                  item.noMore = true
-                  callBack(item, res)
-                }
-              })
             }
           },
           {
             type: 'numInterval',
-            field: 'userId',
+            field: 'score,score2',
             data: {},
             label: '成绩',
             options: [],
@@ -250,18 +250,15 @@ export default {
           },
           {
             type: 'select',
-            field: 'status1',
+            field: 'status',
             label: '答卷状态',
             data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
+
+            options: status
           },
           {
             type: 'select',
-            field: 'status11',
+            field: 'isPass',
             label: '是否通过',
             data: '',
             options: [
@@ -278,12 +275,29 @@ export default {
   },
   activated() {
     this.loadTableData()
+    this.getOrgTree()
   },
   methods: {
-    handleEdit() {
+    /**
+     * 获取用人部门
+     */
+    getOrgTree() {
+      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+        this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      })
+    },
+    handleEdit(row) {
+      this.row = _.cloneDeep(row)
       this.visible = true
     },
-
+    handleCurrentPageChange(param) {
+      this.page.currentPage = param
+      this.loadTableData()
+    },
+    handlePageSizeChange(param) {
+      this.page.pageSize = param
+      this.loadTableData()
+    },
     // 加载函数
     async loadTableData() {
       if (this.tableLoading) {
@@ -292,8 +306,9 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
-          this.tableData = res
+        getExamineeAchievement(_.assign(params, this.page)).then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
           this.tableLoading = false
         })
       } catch (error) {
