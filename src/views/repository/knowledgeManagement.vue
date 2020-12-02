@@ -67,7 +67,7 @@
           </div>
         </template>
         <template #status="{row}">
-          {{ row.status === 0 ? '已上架' : '已下架' }}
+          {{ row.status === '0' ? '已上架' : '已下架' }}
         </template>
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
