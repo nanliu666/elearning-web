@@ -34,6 +34,7 @@
                 v-model="uploadFileList"
                 multiple
                 :before-upload="beforeUpload"
+                :limit="5"
               >
                 <div
                   slot="tip"

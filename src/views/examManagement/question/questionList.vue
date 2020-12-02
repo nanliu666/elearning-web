@@ -5,6 +5,7 @@
         slot="rightMenu"
         type="primary"
         size="medium"
+        @click="jumpCreate"
       >
         创建试题
       </el-button>
@@ -97,6 +98,7 @@
               <el-button
                 size="medium"
                 type="text"
+                @click="jumpEdit(row.questionId)"
               >
                 编辑
               </el-button>
@@ -234,6 +236,9 @@ export default {
     sizeChange(pageSize) {
       this.page.size = pageSize
       this.loadData()
+    },
+    jumpEdit(id) {
+      this.$router.push({ path: '/examManagement/question/questionEdit', query: { id } })
     },
     loadData() {
       this.loading = true
