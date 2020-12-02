@@ -3,7 +3,7 @@
     <page-header title="考试安排">
       <el-dropdown
         slot="rightMenu"
-        @command="handleCommand"
+        @command="createExam"
       >
         <el-button
           type="primary"
@@ -16,7 +16,7 @@
           <el-dropdown-item command="general">
             普通考试
           </el-dropdown-item>
-          <el-dropdown-item command="offline  ">
+          <el-dropdown-item command="offline">
             线下考试
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -46,56 +46,50 @@
         :loading="tableLoading"
       >
         <template #topMenu>
-          <div class="transitionBox">
-            <div class="searchBox">
-              <div class="search-box">
-                <search-popover
-                  ref="searchPopover"
-                  :require-options="searchConfig.requireOptions"
-                  :popover-options="searchConfig.popoverOptions"
-                  @submit="handleSearch"
-                />
-                <div
-                  class="search-sort-box"
-                  @click="toSort"
-                >
-                  <i class="el-icon-upload2" />
-                  <span class="sort-text">导入</span>
-                </div>
-                <div
-                  class="search-sort-box"
-                  @click="toSort"
-                >
-                  <i class="el-icon-sort" />
-                  <span class="sort-text">调整排序</span>
-                </div>
-                <el-popover
-                  placement="bottom"
-                  width="40"
-                  trigger="click"
-                  style="margin-left:10px"
-                >
-                  <el-checkbox-group
-                    v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
-                  >
-                    <el-checkbox
-                      v-for="item in tableColumns"
-                      :key="item.prop"
-                      :label="item.prop"
-                      :disabled="item.prop === 'orgName'"
-                      class="originColumn"
-                    >
-                      {{ item.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                  <i
-                    slot="reference"
-                    class="el-icon-setting"
-                    style="cursor: pointer;"
-                  />
-                </el-popover>
+          <div class="search-box">
+            <search-popover
+              ref="searchPopover"
+              :require-options="searchConfig.requireOptions"
+              :popover-options="searchConfig.popoverOptions"
+              @submit="handleSearch"
+            />
+            <div
+              v-if="activeIndex === '1'"
+              class="filter-box"
+            >
+              <div
+                class="search-sort-box"
+                @click="toSort"
+              >
+                <i class="el-icon-sort" />
+                <span class="sort-text">调整排序</span>
               </div>
+              <el-popover
+                placement="bottom"
+                width="40"
+                trigger="click"
+                style="margin-left:10px"
+              >
+                <el-checkbox-group
+                  v-model="columnsVisible"
+                  style="display: flex;flex-direction: column;"
+                >
+                  <el-checkbox
+                    v-for="item in tableColumns"
+                    :key="item.prop"
+                    :label="item.prop"
+                    :disabled="item.prop === 'orgName'"
+                    class="originColumn"
+                  >
+                    {{ item.label }}
+                  </el-checkbox>
+                </el-checkbox-group>
+                <i
+                  slot="reference"
+                  class="el-icon-setting"
+                  style="cursor: pointer;"
+                />
+              </el-popover>
             </div>
           </div>
         </template>
@@ -129,7 +123,10 @@
             >
               删除
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-if="activeIndex === '1'"
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"
@@ -137,7 +134,7 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="edit">
+                <el-dropdown-item command="copy">
                   复制
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -179,6 +176,12 @@ const TABLE_COLUMNS = [
     label: '考试类型',
     slot: true,
     prop: 'updateTime1',
+    minWidth: 120
+  },
+  {
+    label: '考试方式',
+    slot: true,
+    prop: 'updateTime12',
     minWidth: 120
   },
   {
@@ -330,6 +333,7 @@ export default {
   },
   methods: {
     handleSelect(key) {
+      this.activeIndex = key
       this.statusValue = ''
       let searchParams = { clientId: this.clientTypeList[key - 1].type }
       this.handleSearch(searchParams)
@@ -358,12 +362,18 @@ export default {
     // 多种操作
     async handleCommand($event, row) {
       const TYPE_COMMAND = {
-        delete: this.handleDelete,
-        edit: this.handleOrgEdit,
-        addChild: this.handleAddChild
+        copy: this.handleCopy
       }
       TYPE_COMMAND[$event](row)
     },
+    createExam($event) {
+      this.$router.push({
+        path: '/examManagement/examSchedule/edit',
+        query: { type: $event }
+      })
+    },
+    // 复制
+    handleCopy() {},
     // 具体的删除函数
     deleteFun(id) {
       deleteKnowledgeCatalog({ id }).then(() => {
@@ -411,7 +421,6 @@ export default {
           this.tableData = res
           this.tableLoading = false
         })
-        this.$refs.orgEdit.loadOrgTree()
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -425,14 +434,6 @@ export default {
     handleSearch(params) {
       this.searchParams = params
       this.loadTableData()
-    },
-    // 添加子目录
-    handleAddChild(row) {
-      this.$refs.orgEdit.createChild(row)
-    },
-    // 编辑目录
-    handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
     },
     /**
      * 处理停用启用
@@ -499,62 +500,39 @@ export default {
 .originColumn {
   height: 25px;
 }
-.transitionBox {
-  position: relative;
-  height: 50px;
-}
-.searchBox {
-  position: absolute;
-  width: 100%;
+.search-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   i {
     color: #a0a8ae;
     font-size: 18px;
   }
-  .search-box {
+  .filter-box {
     display: flex;
     align-items: center;
-    .search-sort-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      cursor: pointer;
-      .sort-text {
-        color: #a0a8ae;
-        margin-left: 6px;
-        font-size: 14px;
-      }
-      &::before {
-        position: absolute;
-        content: '';
-        top: 3px;
-        right: 0px;
-        width: 0.5px;
-        height: 80%;
-        background-color: #a0a8ae;
-      }
-    }
+    justify-content: space-between;
   }
-  > div {
+  .search-sort-box {
+    position: relative;
     display: flex;
-    :first-child {
-      flex: 1;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+    .sort-text {
+      color: #a0a8ae;
+      margin-left: 6px;
+      font-size: 14px;
     }
-    > button {
-      height: 34px;
+    &::before {
+      position: absolute;
+      content: '';
+      top: 3px;
+      right: 0px;
+      width: 0.5px;
+      height: 80%;
+      background-color: #a0a8ae;
     }
   }
-}
-
-/deep/ .avue-crud__pagination {
-  height: 0px;
-}
-.newOrgDailog {
-  .el-select {
-    width: 100%;
-  }
-}
-/deep/ .avue-crud__pagination {
-  display: none;
 }
 </style>

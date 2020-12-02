@@ -8,13 +8,13 @@
         mode="horizontal"
         @select="handleSelect"
       >
-        <el-menu-item index="1">
+        <el-menu-item index="0">
           Web端菜单
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="1">
           Mobile菜单
         </el-menu-item>
-        <el-menu-item index="3">
+        <el-menu-item index="2">
           后台系统菜单
         </el-menu-item>
       </el-menu>
@@ -94,13 +94,16 @@
         <template #isEnabled="{row}">
           {{ row.isEnabled === 1 ? '已启用' : '已停用' }}
         </template>
-
+        <!-- 系统管理,菜单管理停用不显示 -->
         <template #handler="{row}">
           <div class="table__handler">
             <el-button
               v-if="row.isEnabled === 1"
               size="medium"
               type="text"
+              :disabled="
+                row.menuId === '1329663243401719810' || row.menuId === '1329665694339067905'
+              "
               @click.stop="() => handleMenuEnable(row)"
             >
               停用
@@ -124,16 +127,16 @@
 import { getMenuInfo, putMenuInfo } from '@/api/system/menu'
 const CLIENT_TYPE = [
   {
-    type: 'Admin',
-    text: '后台系统菜单'
-  },
-  {
     type: 'OAMobile',
     text: 'Web端菜单'
   },
   {
     type: 'Mobile',
     text: 'Mobile菜单'
+  },
+  {
+    type: 'Admin',
+    text: '后台系统菜单'
   }
 ]
 // 表格属性
@@ -184,13 +187,13 @@ const TABLE_CONFIG = {
   enableMultiSelect: false,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: true,
+  showIndexColumn: false,
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
     try {
       let items = await getMenuInfo(row.menuId)
-      resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
+      resolve(_.map(items, (i) => ({ ...i, hasChildren: i.menuType !== 'Button' })))
     } catch (err) {
       resolve([])
     }
@@ -244,7 +247,7 @@ export default {
         }
       ],
       statusValue: '',
-      activeIndex: '1',
+      activeIndex: '2',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -272,8 +275,9 @@ export default {
       this.loadTableData(searchParams)
     },
     handleSelect(key) {
+      this.activeIndex = key
       this.statusValue = ''
-      let searchParams = { clientId: this.clientTypeList[key - 1].type }
+      let searchParams = { clientId: this.clientTypeList[Number(key)].type }
       this.handleSearch(searchParams)
     },
     handleMenuEnable(row) {

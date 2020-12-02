@@ -1,7 +1,13 @@
 <template>
   <el-dialog
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="
+      type === 'create'
+        ? `新建${currentType}分类`
+        : type === 'createChild'
+          ? `新建${currentType}子分类`
+          : `编辑${currentType}分类`
+    "
     :visible="visible"
     width="550px"
     :modal-append-to-body="false"
@@ -89,6 +95,7 @@
 </template>
 
 <script>
+const CLIENT_TYPE = ['题库', '试卷/考试']
 import {
   updateKnowledgeCatalog,
   addKnowledgeCatalog,
@@ -104,6 +111,8 @@ export default {
   },
   data() {
     return {
+      currentType: '',
+      CLIENT_TYPE,
       type: 'create',
       radioDisable: {
         Company: false,
@@ -165,7 +174,8 @@ export default {
       })
     },
     // 新建分类
-    create() {
+    create(type) {
+      this.currentType = this.CLIENT_TYPE[type]
       this.type = 'create'
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)

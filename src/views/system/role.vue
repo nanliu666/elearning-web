@@ -488,10 +488,6 @@ export default {
     padding-bottom: 0 !important;
   }
 
-  /deep/ .avue-crud__menu {
-    min-height: 0;
-  }
-
   .el-dropdown-link {
     cursor: pointer;
     color: #409eff;

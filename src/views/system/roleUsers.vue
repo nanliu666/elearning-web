@@ -442,9 +442,6 @@ export default {
   padding-bottom: 0 !important;
 }
 
-/deep/ .avue-crud__menu {
-  min-height: 0;
-}
 .icon {
   font-size: 18px;
   color: #a0a8ae;

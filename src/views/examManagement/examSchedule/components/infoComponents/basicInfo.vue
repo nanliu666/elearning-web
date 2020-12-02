@@ -3,9 +3,14 @@
     <common-form
       ref="form"
       :model="model"
-      class="form"
       :columns="columns"
     >
+      <template #title1>
+        基础信息
+      </template>
+      <template #title2>
+        基础设置
+      </template>
       <template #testPaper>
         <lazy-select
           v-model="model.testPaper"
@@ -57,6 +62,25 @@
           </div>
         </el-radio-group>
       </template>
+      <template #joinNum1>
+        <el-radio-group v-model="model.joinNum1Boo">
+          <div class="flex-flow flex flexcenter">
+            <el-radio :label="false">
+              不允许
+            </el-radio>
+            <el-radio :label="true">
+              允许补考
+              <el-input
+                v-model.number="model.joinNum1"
+                :disabled="!model.joinNum1Boo"
+                style="width: 60px;"
+              ></el-input>
+              次
+            </el-radio>
+          </div>
+        </el-radio-group>
+      </template>
+
       <template #integral>
         <checkbox-input
           v-model="model.integral"
@@ -73,6 +97,8 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
+          :default-value="10"
+          :input-props="{ maxLength: 4 }"
         ></checkbox-input>
       </template>
     </common-form>
@@ -87,31 +113,58 @@ const personOptionProps = {
   value: 'userId',
   key: 'userId'
 }
-
+const checkMakeUp = (rule, value, callback) => {
+  if (value === '') {
+    return callback(new Error('补考次数不能为空'))
+  } else {
+    callback()
+  }
+}
 const EventColumns = [
   {
-    itemType: 'datePicker',
+    prop: 'title1',
+    itemType: 'slotout',
     span: 24,
-    required: true,
-    prop: 'examTime',
-    type: 'daterange',
-    rangeSeparator: '~',
-    label: '考试日期'
+    label: ''
   },
   {
     itemType: 'input',
-    span: 24,
+    span: 11,
     required: true,
     prop: 'examName',
     label: '考试名称'
   },
-  { itemType: 'slot', span: 24, required: true, prop: 'testPaper', label: '关联用卷' },
-  { itemType: 'slot', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
+  {
+    itemType: 'select',
+    span: 11,
+    offset: 2,
+    required: true,
+    options: [],
+    prop: 'examName1',
+    label: '考试分类'
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    required: true,
+    options: [],
+    prop: 'testPaper',
+    label: '考试用卷'
+  },
+  { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'switch', span: 11, required: false, prop: 'reviewer1', label: '是否发放证书' },
+  { itemType: 'input', span: 11, offset: 2, required: true, prop: 'testPaper1', label: '证书模板' },
+  {
+    prop: 'title2',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
   {
     itemType: 'radio',
     prop: 'answerMode',
     label: '答题模式',
-    span: 24,
+    span: 11,
     options: [
       { label: '整卷模式', value: 1 },
       { label: '逐卷模式', value: 2 }
@@ -121,13 +174,22 @@ const EventColumns = [
     itemType: 'slot',
     prop: 'reckonTime',
     label: '考试时长',
-    span: 24
+    offset: 2,
+    span: 11
   },
   {
     itemType: 'slot',
     prop: 'joinNum',
     label: '参加次数',
-    span: 24
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    prop: 'joinNum1',
+    label: '补考次数',
+    offset: 2,
+    span: 11,
+    rules: [{ validator: checkMakeUp, trigger: 'change' }]
   },
   {
     itemType: 'radio',
@@ -143,17 +205,17 @@ const EventColumns = [
     itemType: 'slot',
     prop: 'integral',
     label: '积分',
-    span: 24
+    span: 11
   },
   {
     itemType: 'slot',
     prop: 'publishTime',
     label: '发布考试',
-    span: 24
+    offset: 2,
+    span: 11
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
-
 export default {
   name: 'BasicSetting',
   components: {
@@ -175,10 +237,35 @@ export default {
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
+        joinNum1: 3,
+        joinNum1Boo: false,
         integral: 0,
         strategy: 0,
         publishTime: 0
       }
+    }
+  },
+  watch: {
+    // 补考次数因为存在0有检验，所以手动添加校验规则
+    'model.joinNum1Boo': {
+      handler(value) {
+        const checkMakeUpZero = (rule, value, callback) => {
+          if (value === 0) {
+            return callback(new Error('补考次数必须大于0'))
+          } else {
+            callback()
+          }
+        }
+        const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
+        const target = _.chain(this.columns)
+          .filter((item) => {
+            return item.prop === 'joinNum1'
+          })
+          .get('[0].rules', {})
+          .value()
+        value ? target.push(zeroRuler) : target.pop()
+      },
+      deep: true
     }
   },
   created() {},
