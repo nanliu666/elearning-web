@@ -40,31 +40,6 @@
         label="上级组织"
         prop="parentOrgId"
       >
-        <!--        <el-select-->
-        <!--          ref="parentOrgId"-->
-        <!--          v-model="form.parentOrgId"-->
-        <!--          placeholder="请选择"-->
-        <!--          :disabled="type !== 'create'"-->
-        <!--        >-->
-        <!--          &lt;!&ndash; 注意：产品提出不可在编辑状态修改上级部门，只能在拖拽时修改上级部门 &ndash;&gt;-->
-        <!--          &lt;!&ndash; :disabled="type === 'createChild'" &ndash;&gt;-->
-        <!--          <el-option-->
-        <!--            style="height: auto;padding:0"-->
-        <!--            :value="form.parentOrgId"-->
-        <!--            :label="parentOrgIdLabel"-->
-        <!--          >-->
-        <!--            <el-tree-->
-        <!--              ref="orgTree"-->
-        <!--              :data="orgTree"-->
-        <!--              node-key="orgId"-->
-        <!--              :props="{-->
-        <!--                children: 'children',-->
-        <!--                label: 'orgName'-->
-        <!--              }"-->
-        <!--              @node-click="handleOrgNodeClick"-->
-        <!--            />-->
-        <!--          </el-option>-->
-        <!--        </el-select>-->
         <el-tree-select
           v-model="form.parentOrgId"
           :select-params="column.props && column.props.selectParams"
@@ -112,7 +87,7 @@
       </el-form-item>
       <el-form-item
         label="负责人"
-        prop="true"
+        prop="leaders"
       >
         <el-col>
           <el-select
@@ -126,7 +101,9 @@
             <el-option
               v-for="(item1, k) in leaderList"
               :key="k"
-              :label="item1.name !== '空缺' ? item1.name + '（' + item1.workNo + '）' : item1.name"
+              :label="
+                item1.name !== '空缺' ? item1.name + '（' + item1.phonenum + '）' : item1.name
+              "
               :value="item1.userId"
             />
             <div
@@ -265,7 +242,7 @@ export default {
       parentOrgIdLabel: '',
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
-        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
+        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'blur' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'blur' }],
         orgCode: [{ required: true, message: '请输入组织编码', trigger: 'blur' }],
         leaders: [{ required: true, message: '请选择负责人', trigger: 'blur' }]
@@ -344,13 +321,6 @@ export default {
       ])
       for (var i = index + 1; i < this.allUserIdArr.length; i++) {
         this.allUserIdArr[i].level = this.allUserIdArr[i].level + 1
-      }
-    },
-    //删除负责人下级
-    deleteSubLevel(index) {
-      this.allUserIdArr.splice(index, 1)
-      for (var i = index; i < this.allUserIdArr.length; i++) {
-        this.allUserIdArr[i].level = this.allUserIdArr[i].level - 1
       }
     },
     submitAndCreate() {
