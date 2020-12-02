@@ -74,6 +74,9 @@ li {
 .flex-justify-start {
   justify-content: flex-start;
 }
+.align-center {
+  align-items: center;
+}
 .el-form-item--feedback .el-input__validateIcon {
   display: none;
 }
@@ -92,11 +95,6 @@ li {
 }
 .fill {
   height: 100%;
-}
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .avue-icon-select__item {
