@@ -207,6 +207,7 @@ export default {
       {
         itemType: 'input',
         label: '新闻标题',
+        maxlength: 32,
         prop: 'title',
         required: true,
         span: 24

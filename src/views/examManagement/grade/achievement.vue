@@ -11,6 +11,8 @@
         :page="page"
         :data="tableData"
         :loading="tableLoading"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="transitionBox">
@@ -22,7 +24,10 @@
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSearch"
                 />
-                <div class="refresh-container">
+                <div
+                  class="refresh-container"
+                  @click="loadTableData"
+                >
                   <span class="icon  el-icon-refresh-right" />
                   <span class="refresh-text">刷新</span>
                 </div>
@@ -40,7 +45,7 @@
                       v-for="item in tableColumns"
                       :key="item.prop"
                       :label="item.prop"
-                      :disabled="item.prop === 'orgName'"
+                      :disabled="item.prop === 'examName'"
                       class="originColumn"
                     >
                       {{ item.label }}
@@ -88,43 +93,43 @@
 </template>
 
 <script>
-import { getKnowledgeCatalogList } from '@/api/knowledge/knowledge'
+import { getAchievement } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
-    prop: 'name',
+    prop: 'examName',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '试卷类型',
-    prop: 'status',
+    prop: 'paperType',
     slot: true,
     minWidth: 120
   },
   {
-    label: '有效试卷',
-    prop: 'creatorName',
-    minWidth: 120
+    label: '有效时间',
+    prop: 'effectiveTime',
+    minWidth: 320
   },
   {
     label: '参加人数',
     slot: true,
-    prop: 'updateTime',
+    prop: 'peopleNumber',
     minWidth: 120
   },
-  {
-    label: '无统计数据人次',
-    slot: true,
-    prop: 'updateTime1',
-    minWidth: 120
-  },
+  // {
+  //   label: '无统计数据人次',
+  //   slot: true,
+  //   prop: 'updateTime1',
+  //   minWidth: 120
+  // },
   {
     label: '出卷人',
     slot: true,
-    prop: 'updateTime2',
+    prop: 'paperMaker',
     minWidth: 120
   }
 ]
@@ -151,7 +156,7 @@ export default {
     return {
       page: {
         currentPage: 1,
-        size: 10,
+        pageSize: 10,
         total: 0
       },
       tableLoading: false,
@@ -164,7 +169,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'name',
+            field: 'examName',
             label: '',
             data: '',
             options: [],
@@ -174,7 +179,7 @@ export default {
         popoverOptions: [
           {
             type: 'select',
-            field: 'status',
+            field: 'paperType',
             label: '试卷类型',
             data: '',
             options: [
@@ -185,8 +190,8 @@ export default {
           },
           {
             type: 'numInterval',
-            field: 'userId',
-            data: {},
+            field: 'peopleNumber,peopleNumber2',
+            data: { min: '', max: '' },
             label: '参加人数',
             options: [],
             config: { optionLabel: 'name', optionValue: 'userId' },
@@ -195,7 +200,7 @@ export default {
           },
           {
             type: 'select',
-            field: 'status1',
+            field: 'paperMaker',
             label: '出卷人',
             data: '',
             options: [
@@ -222,6 +227,14 @@ export default {
       })
     },
 
+    handleCurrentPageChange(param) {
+      this.page.currentPage = param
+      this.loadTableData()
+    },
+    handlePageSizeChange(param) {
+      this.page.pageSize = param
+      this.loadTableData()
+    },
     // 加载函数
     async loadTableData() {
       if (this.tableLoading) {
@@ -230,8 +243,9 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
-          this.tableData = res
+        getAchievement(_.assign(params, this.page)).then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
           this.tableLoading = false
         })
       } catch (error) {
