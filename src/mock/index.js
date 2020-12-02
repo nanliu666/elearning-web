@@ -26,6 +26,7 @@ import todo from './modules/todo'
 import transction from './modules/transction'
 import user from './modules/user'
 import knowledge from './modules/knowledge'
+import questions from './modules/examManage/question'
 /**
  * @param {boolean} enable 全局启用mock
  * @returns {void}
@@ -43,7 +44,8 @@ export default (enable) => {
   Mock.setup({
     timeout: 500
   })
-  menu({ mock: false })
+  menu({ mock: true })
+  questions({ mock: true })
   knowledge(options)
   newsCenter(options)
   noticeCenter(options)

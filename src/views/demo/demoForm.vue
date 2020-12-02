@@ -22,6 +22,20 @@
             :model="form"
             :columns="columns"
           >
+            <template slot="title">
+              <h4>详细信息</h4>
+            </template>
+            <template slot="name-label">
+              姓名
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="提示文字"
+                placement="top-start"
+              >
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
             <template slot="resume">
               <common-upload
                 v-model="form.resume"
@@ -121,6 +135,16 @@ export default {
           required: true
         },
         {
+          prop: 'sex',
+          itemType: 'radio',
+          label: '性别',
+          options: [
+            { label: '男', value: '1' },
+            { label: '女', value: '0' }
+          ],
+          required: true
+        },
+        {
           prop: 'phonenum',
           itemType: 'input',
           label: '手机号码',
@@ -128,14 +152,15 @@ export default {
           props: {
             onlyNumber: true
           },
+          offset: 4,
           required: true,
           rules: [{ pattern: /^[0-9]{11}$/, message: '长度必须为11位', trigger: 'blur' }]
         },
+        { prop: 'title', itemType: 'slotout', span: 24 },
         {
           prop: 'email',
           itemType: 'input',
           label: '邮箱',
-          offset: 4,
           required: true,
           rules: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }]
         },
@@ -143,19 +168,20 @@ export default {
           prop: 'addressArr',
           itemType: 'cascader',
           label: '目前所在地',
+          offset: 4,
           options: provinceAndCityData
         },
         {
           prop: 'resume',
           itemType: 'slot',
           label: '简历',
-          offset: 4,
           required: true
         },
         {
           prop: 'date',
           itemType: 'datePicker',
           label: '入职日期',
+          offset: 4,
           required: true
         },
         {
@@ -163,7 +189,6 @@ export default {
           itemType: 'select',
           label: '招聘渠道',
           required: true,
-          offset: 4,
           props: {
             label: 'dictValue',
             value: 'dictKey'
@@ -173,6 +198,7 @@ export default {
           prop: 'remark',
           itemType: 'input',
           label: '备注',
+          offset: 4,
           rows: 2,
           type: 'textarea'
         },
@@ -180,7 +206,6 @@ export default {
           prop: 'orgId',
           itemType: 'treeSelect',
           label: '部门',
-          offset: 4,
           props: {
             selectParams: {
               placeholder: '请选择组织',
@@ -217,7 +242,7 @@ export default {
     this.$store.dispatch('CommonDict', 'RecruitmentChannel').then((res) => {
       this.columns.find((item) => item.prop === 'recruitment').options = res
     })
-    await this.getRecruitment()
+    // await this.getRecruitment()
     this.loadOrgData()
   },
   methods: {

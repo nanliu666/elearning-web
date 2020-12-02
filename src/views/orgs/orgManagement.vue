@@ -216,7 +216,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 100
+    width: 160
   }
 }
 export default {

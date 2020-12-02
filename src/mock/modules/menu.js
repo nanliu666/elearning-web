@@ -530,15 +530,26 @@ const res = {
           {
             menuId: '1259073456754674589',
             menuName: '题库管理',
-            menuType: 'Menu',
+            menuType: 'Dir',
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/course/courseSort',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuId: '125907345674589',
+                menuName: '题库管理',
+                menuType: 'Menu',
+                isOwn: 1,
+                isShow: 1,
+                path: '/examManagement/question/questionList',
+                code: 'questionList',
+                alias: 'questionList',
+                icon: 'iconfont iconicon_boss'
+              }
+            ]
           },
           {
             menuId: '1259074567456731235058',
