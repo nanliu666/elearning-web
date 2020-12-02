@@ -105,7 +105,7 @@ export default {
         offset: 0
       },
       {
-        label: '所在目录',
+        label: '所在分类',
         itemType: 'treeSelect',
         prop: 'catalogId',
         required: true,
@@ -271,6 +271,8 @@ export default {
   },
   mounted() {
     this.pageTitle = this.id ? '编辑资源' : '创建资源'
+    // TODO: 待自测新增分类后进入创建资源
+    this.formData.catalogId = this.$router.query.catalogId
     this.initData()
   },
   methods: {

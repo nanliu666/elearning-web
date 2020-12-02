@@ -18,10 +18,7 @@
           @click="jumpStep(index)"
         >
           <span class="step-index">
-            <i
-              class="iconfont"
-              :class="[item.icon]"
-            />
+            <i :class="[item.icon]" />
           </span>
           {{ item.label }}
         </div>
@@ -32,14 +29,6 @@
       </div>
 
       <div class="page-right">
-        <el-button
-          v-if="!id"
-          class="publish-btn"
-          size="medium"
-          @click="handleDraft"
-        >
-          存草稿
-        </el-button>
         <el-button
           v-if="activeStep !== 0"
           class="publish-btn"
@@ -82,57 +71,44 @@
         :xs="22"
         class="page__content--inner"
       >
-        <EditBasicInfo
+        <ExamInfo
           v-show="activeStep === 0"
-          ref="editBasicInfo"
-          @changeWay="changeWay"
-        />
-        <EditArrangement
-          v-show="activeStep === 1"
-          ref="editArrangement"
-          :train-way="trainWay"
-        />
-        <EditDetail
-          v-show="activeStep === 2"
-          ref="editDetail"
+          ref="examInfo"
         />
       </el-col>
+      <ExamBatch
+        v-show="activeStep === 1"
+        ref="examBatch"
+      />
     </el-row>
   </div>
 </template>
 
 <script>
-import EditArrangement from './components/editArrangement'
-import EditBasicInfo from './components/editBasicInfo'
-import EditDetail from './components/editDetail'
-import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
-const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
+import ExamInfo from './components/examInfo'
+import ExamBatch from './components/examInfo'
+import { createTrain, putTrain } from '@/api/train/train'
+const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
 export default {
-  name: 'TrainingEdit',
+  name: 'ExamEdit',
   components: {
-    EditArrangement,
-    EditBasicInfo,
-    EditDetail
+    ExamInfo,
+    ExamBatch
   },
   data() {
     return {
       refsList: REFS_LIST,
-      trainWay: 0,
       loading: false,
       activeStep: 0,
       steps: [
         {
-          label: '填写基本信息',
-          icon: 'icon-approval-info-outlined'
+          label: '考试信息',
+          icon: 'el-icon-warning-outline'
         },
         {
-          label: '填写培训安排',
-          icon: 'icon-approval-form-outlined'
-        },
-        {
-          label: '配置详细信息',
-          icon: 'icon-approval-flow-outlined'
+          label: '考生批次',
+          icon: 'el-icon-setting'
         }
       ]
     }
@@ -176,42 +152,18 @@ export default {
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
-        const basicKeyList = _.keys(this.$refs.editBasicInfo.formData)
-        const detailKeyList = _.keys(this.$refs.editDetail.formData)
-        this.loading = true
-        getTrainDetail({ id: this.id })
-          .then(({ trainExam, trainInfo, trainOfflineTodo, trainOnlineCourse }) => {
-            this.loading = false
-            const basicInfo = _.pick(trainInfo, basicKeyList)
-            basicInfo['introduction'] = _.unescape(basicInfo['introduction'])
-            const detailData = _.pick(trainInfo, detailKeyList)
-            this.$refs.editBasicInfo.formData = basicInfo
-            this.$refs.editDetail.formData = detailData
-            this.$refs.editArrangement.schedule.data = trainOfflineTodo
-            this.$refs.editArrangement.course.data = trainOnlineCourse
-            this.$refs.editArrangement.examine.data = trainExam
-          })
-          .catch((error) => {
-            this.$message.error(error)
-            this.loading = false
-          })
+        // const basicKeyList = _.keys(this.$refs.editBasicInfo.formData)
+        // const detailKeyList = _.keys(this.$refs.editDetail.formData)
       }
     },
-    // 培训方式改变，会导致培训安排内的线下日程/在线课程存在形式改变
-    changeWay(data) {
-      this.trainWay = data
-    },
-    // 存草稿
-    handleDraft() {
-      this.publish(2)
-    },
+
     // 发布区分编辑发布还是新增发布
-    publish(type = 1) {
+    publish() {
       const basicData = this.$refs.editBasicInfo.getData()
       const editArrangement = this.$refs.editArrangement.getData()
       const detailData = this.$refs.editDetail.getData()
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
-        let params = this.handleParams(res, type)
+        let params = this.handleParams(res)
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
@@ -222,7 +174,7 @@ export default {
       })
     },
     // 统一处理入参
-    handleParams(res, type) {
+    handleParams(res) {
       // 培训对象
       let trainObjectsList = []
       const pickTrain = _.get(res[0], 'trainObjectsList')
@@ -238,7 +190,6 @@ export default {
         .assign(res[2])
         .value()
       trainInfo['introduction'] = _.escape(trainInfo['introduction'])
-      trainInfo['type'] = type
       const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
       let params = {
         id: this.id,
@@ -309,7 +260,7 @@ $header-height: 54px;
       justify-content: space-between;
       height: 100%;
       position: relative;
-      width: 50%;
+      width: 20%;
       > .step {
         font-size: 16px;
         line-height: $header-height;

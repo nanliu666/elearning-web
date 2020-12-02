@@ -572,7 +572,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/examManagement/examSchedule/scheduleList',
+            path: '/examManagement/examSchedule/list',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []

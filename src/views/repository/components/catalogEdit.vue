@@ -68,7 +68,7 @@
       <el-button
         size="medium"
         @click="submitAndCreate"
-      >完成并创建课程</el-button>
+      >完成并创建资源</el-button>
     </span>
     <span
       v-else
@@ -128,19 +128,29 @@ export default {
       })
     },
     // 完成并创建课程
-    submitAndCreate() {},
+    submitAndCreate() {
+      this.submit('toCreate')
+    },
     // 提交
-    submit() {
+    submit(type = 'add') {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
             addKnowledgeCatalog(this.form)
-              .then(() => {
+              .then((res) => {
                 this.$message.success('创建成功')
-                this.$emit('refresh')
                 this.loading = false
                 this.$emit('changevisible', false)
+                if (type === 'add') {
+                  this.$emit('refresh')
+                } else {
+                  // TODO: 需要后端补充分类id
+                  this.$router.push({
+                    path: '/repository/knowledgeEdit',
+                    query: { catalogId: res.id }
+                  })
+                }
               })
               .catch(() => {
                 this.loading = false
