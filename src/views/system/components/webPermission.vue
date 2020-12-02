@@ -52,6 +52,7 @@
       </template>
     </common-table>
     <data-rule
+      v-if="dataRuleDialog"
       :visible="dataRuleDialog"
       :menu-id="menuId"
       class="data-rule"
@@ -59,6 +60,7 @@
       @clearMenuId="setMenuId"
     />
     <page-rule
+      v-if="pageRuleDialog"
       :visible="pageRuleDialog"
       :parent-id="parentId"
       :client-id="clientId"

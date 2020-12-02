@@ -27,6 +27,7 @@ import transction from './modules/transction'
 import user from './modules/user'
 import knowledge from './modules/knowledge'
 import questions from './modules/examManage/question'
+import achievement from './modules/achievement'
 /**
  * @param {boolean} enable 全局启用mock
  * @returns {void}
@@ -46,6 +47,7 @@ export default (enable) => {
   })
   menu({ mock: true })
   questions({ mock: true })
+  achievement({ mock: true })
   knowledge(options)
   newsCenter(options)
   noticeCenter(options)

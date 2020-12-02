@@ -126,12 +126,14 @@ export default {
         itemType: 'input',
         label: '角色名称',
         span: 24,
+        maxlength: 32,
         required: true
       },
       {
         prop: 'remark',
         itemType: 'slot',
         label: '描述',
+        maxlength: 200,
         span: 24
       }
     ]

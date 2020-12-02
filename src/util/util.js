@@ -1,6 +1,4 @@
-import {
-  validatenull
-} from './validate'
+import { validatenull } from './validate'
 import moment from 'moment'
 /**
  * 反转义
@@ -104,12 +102,7 @@ export const setTheme = (name) => {
  * 加密处理
  */
 export const encryption = (params) => {
-  let {
-    data,
-    type,
-    param,
-    key
-  } = params
+  let { data, type, param, key } = params
   let result = JSON.parse(JSON.stringify(data))
   if (type == 'Base64') {
     param.forEach((ele) => {
@@ -140,16 +133,16 @@ export const listenfullscreen = (callback) => {
   function listen() {
     callback()
   }
-  document.addEventListener('fullscreenchange', function () {
+  document.addEventListener('fullscreenchange', function() {
     listen()
   })
-  document.addEventListener('mozfullscreenchange', function () {
+  document.addEventListener('mozfullscreenchange', function() {
     listen()
   })
-  document.addEventListener('webkitfullscreenchange', function () {
+  document.addEventListener('webkitfullscreenchange', function() {
     listen()
   })
-  document.addEventListener('msfullscreenchange', function () {
+  document.addEventListener('msfullscreenchange', function() {
     listen()
   })
 }
@@ -206,7 +199,7 @@ export const findParent = (menu, id) => {
   }
 }
 /**
- * 递归过滤节点，生成新的树结构
+ * 原地递归过滤节点
  * @param {Node[]} nodes 要过滤的节点
  * @param {node => boolean} predicate 过滤条件，符合条件的节点保留
  * @return 过滤后的节点
@@ -230,6 +223,23 @@ export const filterTree = (nodes, predicate, shouldUp = false) => {
     }
   }
   return newChildren
+}
+/**
+ * 查找所有符合条件的节点
+ * @param {Node[]} nodes 要查找的节点
+ * @param {node => boolean} predicate 查找条件
+ * @return {Array} 符合条件的所有节点数组
+ **/
+export const findTreeNodes = (nodes = [], predicate, result = []) => {
+  nodes.forEach((node) => {
+    if (predicate(node)) {
+      result.push(node)
+    }
+    if (node.children) {
+      findTreeNodes(node.children, predicate, result)
+    }
+  })
+  return result
 }
 /**
  * 原地排序树节点
@@ -361,16 +371,16 @@ export const openWindow = (url, title, w, h) => {
   const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left
   const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top
 
-  const width = window.innerWidth ?
-    window.innerWidth :
-    document.documentElement.clientWidth ?
-    document.documentElement.clientWidth :
-    screen.width
-  const height = window.innerHeight ?
-    window.innerHeight :
-    document.documentElement.clientHeight ?
-    document.documentElement.clientHeight :
-    screen.height
+  const width = window.innerWidth
+    ? window.innerWidth
+    : document.documentElement.clientWidth
+    ? document.documentElement.clientWidth
+    : screen.width
+  const height = window.innerHeight
+    ? window.innerHeight
+    : document.documentElement.clientHeight
+    ? document.documentElement.clientHeight
+    : screen.height
 
   const left = width / 2 - w / 2 + dualScreenLeft
   const top = height / 2 - h / 2 + dualScreenTop
@@ -379,13 +389,13 @@ export const openWindow = (url, title, w, h) => {
     title,
     // eslint-disable-next-line max-len
     'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=yes, copyhistory=no, width=' +
-    w +
-    ', height=' +
-    h +
-    ', top=' +
-    top +
-    ', left=' +
-    left
+      w +
+      ', height=' +
+      h +
+      ', top=' +
+      top +
+      ', left=' +
+      left
   )
 
   // Puts focus on the newWindow
@@ -434,7 +444,7 @@ export const compareDate = (beginArr = [], overArr = []) => {
  */
 export const createUniqueID = (() => {
   var i = 0
-  return function () {
+  return function() {
     return i++
   }
 })()
@@ -448,9 +458,9 @@ export const createUniqueID = (() => {
  */
 export const renameKey = (target, keys, names) => {
   const cloned = _.omit(target, keys)
-  _.isArray(keys) ?
-    _.each(keys, (key, i) => (cloned[names[i]] = target[key])) :
-    (cloned[names] = target[keys])
+  _.isArray(keys)
+    ? _.each(keys, (key, i) => (cloned[names[i]] = target[key]))
+    : (cloned[names] = target[keys])
   return cloned
 }
 
@@ -511,15 +521,19 @@ function isArray(arr) {
 export const equalsObj = (oldData, newData) => {
   // 类型为基本类型时,如果相同,则返回true
   if (oldData == newData) return true
-  if (isObject(oldData) && isObject(newData) && Object.keys(oldData).length == Object.keys(newData).length) {
+  if (
+    isObject(oldData) &&
+    isObject(newData) &&
+    Object.keys(oldData).length == Object.keys(newData).length
+  ) {
     // 类型为对象并且元素个数相同
 
     // 遍历所有对象中所有属性,判断元素是否相同
     for (var key in oldData) {
       if (oldData.hasOwnProperty(key)) {
         if (!equalsObj(oldData[key], newData[key]))
-        // 对象中具有不相同属性 返回false
-        return false
+          // 对象中具有不相同属性 返回false
+          return false
       }
     }
   } else if (isArray(oldData) && isArray(newData) && oldData.length == newData.length) {
@@ -533,7 +547,6 @@ export const equalsObj = (oldData, newData) => {
           return false
         }
       // 如果数组元素中具有不相同元素,返回false
-
     }
   } else {
     // 其它类型,均返回false
