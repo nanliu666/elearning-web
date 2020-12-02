@@ -27,8 +27,15 @@
           :style="{ transform: translateX }"
         />
       </div>
-
       <div class="page-right">
+        <el-button
+          v-if="!id"
+          class="publish-btn"
+          size="medium"
+          @click="handleDraft"
+        >
+          存草稿
+        </el-button>
         <el-button
           v-if="activeStep !== 0"
           class="publish-btn"
@@ -75,18 +82,18 @@
           v-show="activeStep === 0"
           ref="examInfo"
         />
+        <ExamBatch
+          v-show="activeStep === 1"
+          ref="examBatch"
+        />
       </el-col>
-      <ExamBatch
-        v-show="activeStep === 1"
-        ref="examBatch"
-      />
     </el-row>
   </div>
 </template>
 
 <script>
 import ExamInfo from './components/examInfo'
-import ExamBatch from './components/examInfo'
+import ExamBatch from './components/examBatch'
 import { createTrain, putTrain } from '@/api/train/train'
 const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
@@ -127,9 +134,11 @@ export default {
   },
   methods: {
     jumpStep(index) {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = index
-      })
+      this.activeStep = index
+
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      //   this.activeStep = index
+      // })
     },
     /***
      * @author guanfenda
@@ -156,7 +165,8 @@ export default {
         // const detailKeyList = _.keys(this.$refs.editDetail.formData)
       }
     },
-
+    // 存草稿
+    handleDraft() {},
     // 发布区分编辑发布还是新增发布
     publish() {
       const basicData = this.$refs.editBasicInfo.getData()
@@ -167,8 +177,10 @@ export default {
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
-            this.$message.success('发布成功')
-            // this.$router.go(-1)
+            this.$message.success('已成功创建考试，3秒后自动返回考试列表')
+            setTimeout(() => {
+              this.$router.go(-1)
+            }, 3000)
           }
         })
       })

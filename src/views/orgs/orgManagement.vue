@@ -161,7 +161,7 @@
         v-if="createOrgDailog"
         ref="orgEdit"
         :visible="createOrgDailog"
-        @refresh="loadTableData"
+        @refresh="refresh"
         @changevisible="changevisible"
       />
     </basic-container>
@@ -374,9 +374,12 @@ export default {
     })
   },
   activated() {
-    // this.loadTableData()
+    this.loadTableData()
   },
   methods: {
+    refresh() {
+      this.loadTableData()
+    },
     async loadTableData() {
       if (this.tableLoading) {
         return

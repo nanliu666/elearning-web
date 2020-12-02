@@ -23,12 +23,12 @@
               <span class="li-value">{{ konwledgeDetail.updateTime }}</span>
             </li>
             <li class="details-li">
-              <span class="li-label">所在目录：</span>
+              <span class="li-label">所在分类：</span>
               <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">提供人：</span>
-              <span class="li-value">{{ konwledgeDetail.provideName }}</span>
+              <span class="li-value">{{ konwledgeDetail.providerName }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">上传模式：</span>
@@ -147,7 +147,7 @@ import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
 export default {
   filters: {
     statusFilterer(data) {
-      return data === 0 ? '已上架' : '已下架'
+      return data === '0' ? '已上架' : '已下架'
     }
   },
   data() {
@@ -158,7 +158,7 @@ export default {
       konwledgeDetail: {}
     }
   },
-  created() {
+  activated() {
     this.initData()
   },
   methods: {
@@ -167,8 +167,8 @@ export default {
      */
     getStatusType(status) {
       const TYPE_STATUS = {
-        0: 'danger',
-        1: 'success'
+        '0': 'success',
+        '1': 'danger'
       }
       return TYPE_STATUS[status]
     },
