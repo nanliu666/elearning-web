@@ -43,7 +43,7 @@ export default (enable) => {
   Mock.setup({
     timeout: 500
   })
-  menu({ mock: true })
+  menu({ mock: false })
   knowledge(options)
   newsCenter(options)
   noticeCenter(options)
