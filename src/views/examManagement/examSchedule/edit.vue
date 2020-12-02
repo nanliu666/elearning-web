@@ -177,8 +177,10 @@ export default {
         let editFun = this.id ? putTrain : createTrain
         editFun(params).then((resData) => {
           if (resData) {
-            this.$message.success('发布成功')
-            // this.$router.go(-1)
+            this.$message.success('已成功创建考试，3秒后自动返回考试列表')
+            setTimeout(() => {
+              this.$router.go(-1)
+            }, 3000)
           }
         })
       })

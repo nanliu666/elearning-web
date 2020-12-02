@@ -28,9 +28,9 @@
                 class="el-icon-arrow-down"
                 style="margin-right:6px"
               />
-              <span>第{{ index + 1 }}批 {{ item.startTime }}~{{ item.endTime }}（共{{
-                _.size(item.students)
-              }}人）</span>
+              <span>第{{ index + 1 }}批 {{ item.fixedTime[0] | filterMoment }}~{{
+                item.fixedTime[1] | filterMoment
+              }}（共{{ _.size(item.trainObjectsList) }}人）</span>
             </div>
             <el-button
               size="medium"
@@ -45,7 +45,7 @@
             class="students-ul"
           >
             <li
-              v-for="(studentItem, studentIndex) in item.students"
+              v-for="(studentItem, studentIndex) in item.trainObjectsList"
               :key="studentIndex"
               class="students-li"
             >
@@ -64,58 +64,52 @@
         </li>
       </ul>
     </section>
+    <BatchEdit
+      v-if="dialogVisible"
+      :visible.sync="dialogVisible"
+      @submit="submitBatch"
+    />
   </div>
 </template>
 
 <script>
+import moment from 'moment'
+import BatchEdit from './batchEdit'
 import ComEmpty from '@/components/common-empty/empty'
 export default {
   name: 'ExamBatch',
   components: {
-    ComEmpty
+    ComEmpty,
+    BatchEdit
+  },
+  filters: {
+    filterMoment(data) {
+      return moment(data).format('YYYY-MM-DD HH:mm')
+    }
   },
   data() {
     return {
+      dialogVisible: false,
       currentExpand: -1,
-      batchList: [
-        {
-          startTime: '2020-10-10 23:21',
-          endTime: '2020-10-10 24:21',
-          students: [
-            {
-              name: '白浅',
-              phone: '1235464212654',
-              part: '广州分公司/政企组'
-            },
-            {
-              name: '白浅',
-              phone: '1235464212654',
-              part: '广州分公司/政企组'
-            }
-          ]
-        },
-        {
-          startTime: '2020-10-10 23:21',
-          endTime: '2020-10-10 24:21',
-          students: [
-            {
-              name: '白浅',
-              phone: '1235464212654',
-              part: '广州分公司/政企组'
-            },
-            {
-              name: '白浅',
-              phone: '1235464212654',
-              part: '广州分公司/政企组'
-            }
-          ]
-        }
-      ]
+      batchList: []
     }
   },
   created() {},
   methods: {
-    addBatch() {},
+    submitBatch(data) {
+      this.batchList.push(data)
+      // 先用开始时间排序
+      this.batchList = _.sortBy(this.batchList, (item) => {
+        return item.fixedTime[0]
+      })
+      // 再用结束时间排序
+      this.batchList = _.sortBy(this.batchList, (item) => {
+        return item.fixedTime[1]
+      })
+    },
+    addBatch() {
+      this.dialogVisible = true
+    },
     collapseExpand(index) {
       this.currentExpand = this.currentExpand === index ? -1 : index
     },
@@ -124,8 +118,8 @@ export default {
     },
     // 删除单独的项，当这个批次内的所有考生都删除后，必须将本批次删除
     deleteBatchItem(index, sonIndex) {
-      this.batchList[index].students.splice(sonIndex, 1)
-      if (_.size(this.batchList[index].students) === 0) {
+      this.batchList[index].trainObjectsList.splice(sonIndex, 1)
+      if (_.size(this.batchList[index].trainObjectsList) === 0) {
         this.deleteBatch(index)
       }
     }

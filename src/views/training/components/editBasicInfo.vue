@@ -34,7 +34,7 @@
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
-import SelectUser from './atomComponents/trainingSelectUser'
+import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 const personOptionProps = {
   label: 'name',
   value: 'name',
@@ -100,6 +100,7 @@ export default {
           itemType: 'slot',
           label: '培训对象',
           prop: 'trainObjectsList',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           options: [],
           required: true,
           span: 11,
