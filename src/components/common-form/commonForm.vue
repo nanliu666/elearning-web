@@ -17,6 +17,12 @@
           v-bind="elFormItemAttrs(column)"
           :rules="getRules(column)"
         >
+          <slot
+            slot="label"
+            :name="column.prop + '-label'"
+          >
+            {{ column.label }}
+          </slot>
           <el-input-number
             v-if="column.itemType == 'inputNumber'"
             v-model="model[column.prop]"
