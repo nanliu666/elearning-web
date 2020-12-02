@@ -199,12 +199,15 @@ export default {
         introduction: '',
         attachments: []
       },
-      submitting: false,
-      hasEdit: false // 用于标记是否进行了修改
+      submitting: false
     }
   },
   beforeRouteEnter(to, from, next) {
     to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
   computed: {
@@ -270,7 +273,9 @@ export default {
   mounted() {
     this.pageTitle = this.id ? '编辑资源' : '创建资源'
     // TODO: 待自测新增分类后进入创建资源
-    this.formData.catalogId = this.catalogId
+    if (this.catalogId) {
+      this.formData.catalogId = this.catalogId
+    }
     this.initData()
   },
   methods: {
@@ -360,16 +365,18 @@ export default {
               ? await this.createKnowledgeFun(this._formData)
               : await this.updateKnowledgeFun(this._formData)
             this.$message.success('发布成功')
-            this.hasEdit = false
+            // 去往列表页
             if (!isContinue) {
-              this.handleBack()
+              this.$router.push({ path: '/repository/knowledgeManagement' })
+            } else {
+              // 继续添加
+              this.$refs.form.resetFields()
+              this.formData.introduction = ''
+              // 删除elTree的校验
+              this.$nextTick(() => {
+                this.clearValidate()
+              })
             }
-            this.$refs.form.resetFields()
-            this.formData.introduction = ''
-            // 删除elTree的校验
-            this.$nextTick(() => {
-              this.clearValidate()
-            })
           } catch (error) {
             this.$message.error(error.message)
           } finally {
@@ -394,9 +401,6 @@ export default {
         this.$set(this.formData, key, data[key])
       }
       this.formData.introduction = _.unescape(this.formData.introduction) // 反转义获取 dom
-      // 修改了formData 重置标记
-      this.$nextTick(() => (this.hasEdit = false))
-      return data
     },
     validate(...args) {
       // const BRIEF_MIN_LEN = 10 // 限制最小输入长度
