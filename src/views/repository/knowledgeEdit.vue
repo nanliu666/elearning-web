@@ -17,16 +17,18 @@
       >
         <template #attachments>
           <common-upload
-            :limit="uploaderLimit"
             :before-upload="beforeUpload"
             @getValue="getValue"
           >
             <template #default>
-              <div
-                v-if="_.size(formData.attachments) < uploaderLimit"
-                style="display: flex;"
-              >
+              <div style="display: flex;">
                 <el-button>上传</el-button>
+              </div>
+              <div
+                slot="tip"
+                style="color: #a1a8ae; font-size:12px"
+              >
+                不支持上传.exe/.bat格式文件，单个文件大小＜10MB，最多5个文件
               </div>
             </template>
           </common-upload>
@@ -34,6 +36,7 @@
             <li
               v-for="(item, index) in formData.attachments"
               :key="index"
+              style="cursor: pointer;"
             >
               <span
                 class="uploader-file"
@@ -196,7 +199,6 @@ export default {
         introduction: '',
         attachments: []
       },
-      uploaderLimit: 5,
       submitting: false,
       hasEdit: false // 用于标记是否进行了修改
     }
@@ -308,10 +310,15 @@ export default {
     // 上传格式校验
     beforeUpload(file) {
       const isLt100M = file.size / 1024 / 1024 < 10
+      const LIMIT = 2
+      const isLimitLength = _.size(this.formData.attachments) < LIMIT
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
       }
-      return isLt100M
+      if (!isLimitLength) {
+        this.$message.error('上传文件数量超过限制!')
+      }
+      return isLt100M && isLimitLength
     },
     // 预览附件
     previewFile(data) {
@@ -359,6 +366,7 @@ export default {
             }
             this.$refs.form.resetFields()
             this.formData.introduction = ''
+            // 删除elTree的校验
             this.$nextTick(() => {
               this.clearValidate()
             })
