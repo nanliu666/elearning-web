@@ -23,7 +23,7 @@
               <span class="li-value">{{ konwledgeDetail.updateTime }}</span>
             </li>
             <li class="details-li">
-              <span class="li-label">所在目录：</span>
+              <span class="li-label">所在分类：</span>
               <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
             </li>
             <li class="details-li">
