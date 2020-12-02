@@ -120,6 +120,15 @@ const checkMakeUp = (rule, value, callback) => {
     callback()
   }
 }
+const testPaper1Config = {
+  itemType: 'input',
+  span: 11,
+  offset: 2,
+  required: true,
+  prop: 'testPaper1',
+  label: '证书模板'
+}
+
 const EventColumns = [
   {
     prop: 'title1',
@@ -153,7 +162,6 @@ const EventColumns = [
   },
   { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
   { itemType: 'switch', span: 11, required: false, prop: 'reviewer1', label: '是否发放证书' },
-  { itemType: 'input', span: 11, offset: 2, required: true, prop: 'testPaper1', label: '证书模板' },
   {
     prop: 'title2',
     itemType: 'slotout',
@@ -246,6 +254,23 @@ export default {
     }
   },
   watch: {
+    // 是否发放证书
+    'model.reviewer1': {
+      handler(value) {
+        const reviewer1Index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'reviewer1'
+        })
+        const testPaper1Index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'testPaper1'
+        })
+        if (value) {
+          this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+        } else {
+          this.columns.splice(testPaper1Index, 1)
+        }
+      },
+      deep: true
+    },
     // 补考次数因为存在0有检验，所以手动添加校验规则
     'model.joinNum1Boo': {
       handler(value) {
