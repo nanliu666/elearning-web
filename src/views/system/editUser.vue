@@ -81,7 +81,7 @@ import { checkUserInfo, createUser, createNewWorkNo, editUser } from '@/api/pers
 import { getStaffBasicInfo } from '@/api/personalInfo'
 import { getRoleList } from '@/api/system/role'
 import { getUserWorkList, getOrgTree } from '@/api/org/org'
-import { filterTree } from '@/util/util'
+import { findTreeNodes } from '@/util/util'
 import { mapGetters } from 'vuex'
 import commonUpload from '@/components/common-upload/commonUpload'
 export default {
@@ -330,7 +330,7 @@ export default {
       )
     },
     'form.orgId'(val) {
-      let selectedOrg = filterTree(this.orgTreeData, (item) => item.orgId === val, true)[0]
+      let selectedOrg = findTreeNodes(this.orgTreeData, (item) => item.orgId === val)[0]
       let leaders = _.filter(selectedOrg.leaders, 'userId')
       if (leaders.length > 0) {
         this.form.leaderId = _.head(leaders).userId

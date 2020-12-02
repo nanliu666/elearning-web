@@ -34,6 +34,7 @@
           />
           <el-tree
             ref="orgTree"
+            v-loading="treeLoading"
             :filter-node-method="filterNode"
             :data="treeData"
             node-key="orgId"
@@ -61,6 +62,7 @@
           ref="userList"
           :active-org="activeOrg"
           style="padding-right:0;"
+          @refresh="loadData"
         />
       </el-col>
     </el-row>
@@ -105,8 +107,7 @@ export default {
     }
   },
   mounted() {
-    this.loadTree()
-    this.loadOuterUserCount()
+    this.loadData()
   },
   methods: {
     filterNode(value, data) {
@@ -120,6 +121,10 @@ export default {
       if (command === 'add') {
         this.$router.push('/system/editUser')
       }
+    },
+    loadData() {
+      this.loadOuterUserCount()
+      this.loadTree()
     },
     loadOuterUserCount() {
       getOuterUser({ pageSize: 1, pageNo: 1 }).then((res) => {

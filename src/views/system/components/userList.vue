@@ -37,7 +37,7 @@
           <div class="operations-right">
             <div
               class="refresh-container"
-              @click="loadData"
+              @click="handleRefresh"
             >
               <i class="el-icon-refresh-right" />
               <span>刷新</span>
@@ -317,6 +317,10 @@ export default {
     },
     handleEditRole(user) {
       this.$refs['userRoleEdit'].init(user)
+    },
+    handleRefresh() {
+      this.$emit('refresh')
+      this.loadData()
     },
     currentChange(currentPage) {
       this.page.currentPage = currentPage
