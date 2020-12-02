@@ -137,9 +137,11 @@
 import { on, off } from './dom'
 import { each } from './utils'
 // @group api
+import Emitter from '@/mixins/elFormEmitter'
+
 export default {
   name: 'ElTreeSelect',
-  components: {},
+  mixins: [Emitter],
   props: {
     // v-model,存储的是treeParams.data里面的id
     value: {
@@ -531,6 +533,8 @@ export default {
     _emitFun() {
       const { multiple } = this.selectParams
       this.$emit('input', multiple ? this.ids : this.ids.length > 0 ? this.ids[0] : '')
+      this.dispatch('ElFormItem', 'el.form.change')
+
       this._updatePopoverLocationFun()
     },
     // 更新宽度

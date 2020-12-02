@@ -212,6 +212,9 @@ export default {
       formData.introduction = _.escape(formData.introduction)
       return formData
     },
+    catalogId() {
+      return this.$route.query.catalogId || null
+    },
     id() {
       return this.$route.query.id || null
     },
@@ -260,19 +263,12 @@ export default {
         })
         this.formColumns[index + 1] = val === 0 ? UPLOAD_FILE : UPLOAD_INPUT
       }
-    },
-    formData: {
-      deep: true,
-      handler() {
-        this.clearValidate()
-        this.hasEdit = true
-      }
     }
   },
   mounted() {
     this.pageTitle = this.id ? '编辑资源' : '创建资源'
     // TODO: 待自测新增分类后进入创建资源
-    this.formData.catalogId = this.$router.query.catalogId
+    this.formData.catalogId = this.catalogId
     this.initData()
   },
   methods: {
@@ -363,7 +359,9 @@ export default {
             }
             this.$refs.form.resetFields()
             this.formData.introduction = ''
-            this.clearValidate()
+            this.$nextTick(() => {
+              this.clearValidate()
+            })
           } catch (error) {
             this.$message.error(error.message)
           } finally {

@@ -73,7 +73,6 @@ export default {
   },
   watch: {
     innerValue(val) {
-      // console.log(123)
       this.$emit('input', val)
     }
   },
@@ -81,7 +80,6 @@ export default {
     inputNumber(value) {
       value = value.replace(/[^\d]/g, '')
       this.$emit('update:number', parseInt(value))
-      // this.value.passScope =value
     }
   }
 }
