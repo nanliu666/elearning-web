@@ -1,16 +1,31 @@
-// 单选题
+/**
+ * 单选题
+ */
 export const QUESTION_TYPE_SINGLE = 'single_choice'
 
-// 多选题
+/**
+ * 多选题
+ */
 export const QUESTION_TYPE_MULTIPLE = 'multi_choice'
 
-// 判断题
+/**
+ * 判断题
+ */
 export const QUESTION_TYPE_JUDGE = 'judgment'
 
-// 简答题
+/**
+ * 简答题
+ */
 export const QUESTION_TYPE_SHOER = 'short_answer'
 
-// 试题组
+/**
+ * 填空题
+ */
+export const QUESTION_TYPE_BLANK = 'blank'
+
+/**
+ * 试题组
+ */
 export const QUESTION_TYPE_GROUP = 'question_group'
 
 /**
@@ -21,6 +36,7 @@ export const QUESTION_TYPE_MAP = {
   multi_choice: '多选题',
   judgment: '判断题',
   short_answer: '简答题',
+  blank: '填空题',
   question_group: '试题组(阅读题)'
 }
 

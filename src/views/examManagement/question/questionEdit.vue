@@ -39,6 +39,7 @@
             <template #options-label="">
               选项
               <el-tooltip
+                v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(form.type)"
                 class="item"
                 effect="dark"
                 placement="top-start"
@@ -49,11 +50,35 @@
                 <i class="el-icon-question" />
               </el-tooltip>
             </template>
+            <template
+              v-if="form.type === QUESTION_TYPE_BLANK"
+              #content-label=""
+            >
+              题干（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）
+            </template>
+            <template
+              v-if="form.type === QUESTION_TYPE_BLANK"
+              #answer-label=""
+            >
+              标准答案（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）
+            </template>
             <template #options="">
               <question-options
+                v-if="form.type !== QUESTION_TYPE_JUDGE"
                 v-model="form.options"
                 :is-check-box="form.type === QUESTION_TYPE_MULTIPLE"
               ></question-options>
+              <template v-else>
+                <el-radio
+                  v-for="item in form.options"
+                  :key="item.key"
+                  v-model="item.isCorrect"
+                  :label="1"
+                  @change="(val) => handleRadioCheck(val, item)"
+                >
+                  {{ item.content }}
+                </el-radio>
+              </template>
             </template>
           </common-form>
         </el-col>
@@ -78,11 +103,19 @@
 </template>
 
 <script>
-import { QUESTION_TYPE_MAP, QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_SINGLE } from '@/const/examMange'
+import {
+  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MULTIPLE,
+  QUESTION_TYPE_SINGLE,
+  QUESTION_TYPE_JUDGE,
+  QUESTION_TYPE_SHOER,
+  QUESTION_TYPE_BLANK
+  // QUESTION_TYPE_GROUP
+} from '@/const/examMange'
 import QuestionOptions from './questionOptions'
 import { createUniqueID } from '@/util/util'
 import { createQuestion, getQuestion } from '@/api/examManage/question'
-const COLUMNS = [
+const BASIC_COLUMNS = [
   { prop: 'title1', span: 24, itemType: 'slotout' },
   {
     prop: 'type',
@@ -147,7 +180,12 @@ const COLUMNS = [
     offset: 4,
     itemType: 'datePicker'
   },
-  { span: 24, prop: 'title2', itemType: 'slotout' },
+  { span: 24, prop: 'title2', itemType: 'slotout' }
+]
+/**
+ * 选择题配置
+ */
+const SELECT_COLUMNS = [
   {
     prop: 'content',
     span: 24,
@@ -188,6 +226,57 @@ const COLUMNS = [
     rows: 6
   }
 ]
+/**
+ * 简答题配置
+ */
+const SHORT_COLUMNS = [
+  {
+    prop: 'content',
+    span: 24,
+    itemType: 'richtext',
+    label: '题干',
+    height: 500,
+    required: true
+  },
+  {
+    prop: 'analysis',
+    span: 24,
+    itemType: 'input',
+    type: 'textarea',
+    label: '试题分析',
+    resize: 'none',
+    rows: 6
+  }
+]
+/**
+ * 填空题配置
+ */
+const FILL_COLUMNS = [
+  {
+    prop: 'content',
+    span: 24,
+    itemType: 'richtext',
+    label: '题干',
+    height: 500,
+    required: true
+  },
+  {
+    prop: 'answer',
+    span: 24,
+    itemType: 'input',
+    label: '正确答案',
+    required: true
+  },
+  {
+    prop: 'analysis',
+    span: 24,
+    itemType: 'input',
+    type: 'textarea',
+    label: '试题分析',
+    resize: 'none',
+    rows: 6
+  }
+]
 export default {
   name: 'QuestionEdit',
   components: {
@@ -210,7 +299,7 @@ export default {
           { key: createUniqueID(), content: '', isCorrect: 0, url: '' }
         ]
       },
-      columns: COLUMNS
+      columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS]
     }
   },
   computed: {
@@ -225,15 +314,29 @@ export default {
       }
     },
     QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
-    QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE
+    QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
+    QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
+    QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
+    QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER
   },
   watch: {
     'form.type'(val, oldVal) {
-      if (![QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
-        this.columns = COLUMNS.filter((item) => item.prop !== 'options')
+      if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
+        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+      } else if (val === QUESTION_TYPE_JUDGE) {
+        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+        this.form.options = [
+          { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
+          { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
+        ]
+      } else if (QUESTION_TYPE_SHOER === val) {
+        this.columns = [...BASIC_COLUMNS, ...SHORT_COLUMNS]
+      } else if (QUESTION_TYPE_BLANK === val) {
+        this.columns = [...BASIC_COLUMNS, ...FILL_COLUMNS]
       } else {
-        this.columns = COLUMNS
+        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
       }
+      // 从多选题切换到单选题时把正确答案置空
       if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
         this.form.options.forEach((item) => {
           item.isCorrect = 0
@@ -247,6 +350,13 @@ export default {
     }
   },
   methods: {
+    handleRadioCheck(val, option) {
+      this.form.options.forEach((item) => {
+        if (item.key !== option.key) {
+          item.isCorrect = 0
+        }
+      })
+    },
     handleSubmit() {
       this.$refs.form.validate().then(() => {
         let data = _.pick(this.form, [
@@ -259,15 +369,24 @@ export default {
           'options'
         ])
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
-
+        if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
+          data.options = [{ content: this.form.answer, isCorrect: 1 }]
+        }
         createQuestion(data).then(() => {
           // console.log('成功')
         })
       })
     },
     loadData() {
-      getQuestion({ id: this.id }).then(() => {
+      getQuestion({ id: this.id }).then((res) => {
         // console.log(res)
+        this.form = res
+        this.form.timeLimitDate = new Date(
+          new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000
+        )
+        if (res.type == QUESTION_TYPE_BLANK) {
+          this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
+        }
       })
     }
   }
