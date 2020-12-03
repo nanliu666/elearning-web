@@ -56,3 +56,8 @@ export const getTeacher = (params) => post('/api/blade-manage/v1/teacher/get', p
  * @param {Object} courseId - 参数
  * */
 export const update = (params) => put('/api/blade-manage/v1/teacher/update', params)
+/**
+ *  移动
+ * @param {Object} courseId - 参数
+ * */
+export const move = (params) => post('/api/blade-manage/v1/teacher/catalog/move', params)

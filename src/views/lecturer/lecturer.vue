@@ -134,6 +134,7 @@
                 v-model="form.name"
                 autocomplete="off"
                 maxlength="32"
+                disabled
               ></el-input>
             </el-form-item>
             <el-form-item
@@ -142,19 +143,20 @@
             >
               <el-select
                 v-model="form.region"
-                placeholder="请选择活动区域"
+                placeholder="请选择"
               >
                 <el-option
-                  label="区域一"
-                  value="shanghai"
+                  v-for="(item, index) in data"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.id"
                 ></el-option>
-                <el-option
-                  label="区域二"
-                  value="beijing"
-                ></el-option>
+
+                <!-- <el-option label="区域二" value="beijing"></el-option> -->
               </el-select>
             </el-form-item>
           </el-form>
+          {{ form }}
           <div
             slot="footer"
             class="dialog-footer"
@@ -164,7 +166,7 @@
             </el-button>
             <el-button
               type="primary"
-              @click="dialogFormVisible = false"
+              @click="ismove"
             >
               确 定
             </el-button>
@@ -393,7 +395,8 @@ import {
   listTeacher,
   editSysRulus,
   deleteTeacherCatalog,
-  Teacherdelete
+  Teacherdelete,
+  move
 } from '@/api/lecturer/lecturer'
 // 侧栏数据
 
@@ -605,12 +608,7 @@ export default {
       form: {
         name: '',
         region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+        optionData: ''
       },
       // tree
       filterText: '',
@@ -655,6 +653,25 @@ export default {
   },
   activated() {},
   methods: {
+    // 移动
+    ismove() {
+      this.dialogFormVisible = false
+      this.form
+      let params = {
+        id: '', //讲师所属分类ID
+        parentId: '' //讲师所属分组ID
+      }
+      params.id = this.form.optionData.id
+      params.parentId = this.form.region
+      move(params).then(() => {
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+        this.islistTeacherCategory()
+      })
+    },
+
     // 去添加
     toAddLecturer() {
       this.$router.push({ path: '/lecturer/addLecturer' })
@@ -846,6 +863,8 @@ export default {
       //移动
       if ($event === 'move') {
         this.dialogFormVisible = true
+        this.form.name = data.label
+        this.form.optionData = data
       }
       // 删除
       if ($event === 'del') {

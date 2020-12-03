@@ -61,7 +61,6 @@ export const examDetail = (params) => get('/api/blade-manage/v1/train/examDetail
  * */
 export const examResult = (params) => get('/api/blade-manage/v1/train/examResult', params)
 
-// 培训安排
 /**
  *  查询分类
  * @param {Object} courseId - 参数
