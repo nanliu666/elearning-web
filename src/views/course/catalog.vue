@@ -1,6 +1,6 @@
 <template>
   <div class="Menu fill">
-    <page-header title="目录管理">
+    <page-header title="分类管理">
       <el-button
         slot="rightMenu"
         size="medium"
@@ -44,10 +44,13 @@
                   type="text"
                   @click="refreshTableData"
                 >
-                  <i class="iconfont iconicon_refresh" />
+                  <!-- <i class="iconfont iconicon_refresh" /> -->
                 </el-button>
               </el-tooltip>
-              <span class="text_refresh">刷新</span>
+              <span
+                class="text_refresh"
+                @click="toSort"
+              >调整排序</span>
               <el-popover
                 placement="bottom"
                 width="40"
@@ -67,7 +70,7 @@
                     icon="el-icon-setting"
                     style="color:#acb3b8;"
                   >
-                    <i class="iconfont iconicon_setting" />
+                    <!-- <i class="iconfont iconicon_setting" /> -->
                   </el-button>
                 </el-tooltip>
 
@@ -341,7 +344,8 @@ import {
   addCatalog,
   delCatalag,
   editCatalog,
-  getCourseByCatalogId
+  getCourseByCatalogId,
+  catalogUserList
 } from '@/api/course/course'
 
 // 表格属性
@@ -420,14 +424,14 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: 1, label: '正常' },
+      { value: 0, label: '停用' }
     ]
   },
   {
     config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'createName',
+    field: 'createId',
     label: '创建人',
     type: 'cascader',
     options: [{ value: '', label: '' }]
@@ -571,11 +575,23 @@ export default {
   },
   created() {
     this.refreshTableData()
-    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].value = this.tableData.id
-    SEARCH_POPOVER_POPOVER_OPTIONS[1].options[0].label = this.tableData.createName
-    // window.console.log(SEARCH_POPOVER_POPOVER_OPTIONS)
+    this.iscatalogUserList()
   },
   methods: {
+    toSort() {
+      this.$router.push({ path: '/course/courseSort' })
+    },
+    // 筛选-创建人数据
+    iscatalogUserList() {
+      catalogUserList().then((res) => {
+        res.forEach((item) => {
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
+            value: item.userId,
+            label: item.userName
+          })
+        })
+      })
+    },
     // 停用
     handlestatus(row, i) {
       editCatalog({ id: row.id, status: i }).then(() => {
@@ -665,29 +681,23 @@ export default {
       }
       editCatalog(params).then(() => {
         this.dialogFormVisible = false
-        this.refreshTableData()
         this.newForm.newName = ''
         this.newForm.newValue = []
         this.$message({
           message: '编辑目录成功!!!',
           type: 'success'
         })
+        this.refreshTableData()
       })
     },
 
     //新建目录
     newCatalogue() {
-      // let params = { ...this.tableData[0] }
-      // params.name = this.newForm.newName
-      // params.parentId = this.newForm.newValue[this.newForm.newValue.length - 1]
-      // params.id = +params.id
-      // params.parentId = +params.parentId
-      // window.console.log(params)
       let params = {
         name: this.newForm.newName,
         parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
       }
-
+      // console.log(params)
       addCatalog(params).then(() => {
         this.dialogFormVisible = false
         this.refreshTableData()
@@ -715,8 +725,9 @@ export default {
       return data.label.indexOf(value) !== -1
     },
 
-    handleSearch() {
-      // this.loadTableData(_.pickBy(searchParams))
+    // 下拉框搜索按钮
+    handleSearch(searchParams) {
+      this.loadTableData(searchParams)
       // window.console.log(searchParams)
     },
 
@@ -731,11 +742,6 @@ export default {
           this.refreshTableData()
         })
     },
-    // 停用按钮
-    handleMenuItemAddBtnClick() {},
-
-    // 编辑按钮
-    handleMenuEditBtnClick() {},
 
     // 表单弹窗提交
 
@@ -769,7 +775,7 @@ export default {
       this.tableLoading = true
       try {
         const query = _.assign(null, _.omit(param, 'parentId'))
-        const tableData = await getCatalog(param.parentId || '0', query)
+        const tableData = await getCatalog(param || '0', query)
 
         this.tableData = this.getTreeData(tableData)
 

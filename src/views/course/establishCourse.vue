@@ -466,7 +466,7 @@
 </template>
 
 <script>
-import { getCourseList, delCourseContent, addCourse } from '@/api/course/course'
+import { delCourseContent, addCourse } from '@/api/course/course'
 export default {
   data() {
     return {
@@ -618,9 +618,11 @@ export default {
     },
     // 拿数据
     getInfo() {
-      getCourseList(1).then((res) => {
-        this.ruleForm = { ...this.ruleForm } = res
-      })
+      // getCourseList(1).then((res) => {
+      //   this.ruleForm = { ...this.ruleForm } = res
+      // }).catch(err=>{
+      //   window.console.log(err)
+      // })
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
@@ -740,7 +742,7 @@ export default {
     }
   }
   /deep/.el-form-item__label {
-    width: 350px;
+    width: 450px;
     text-align: left;
   }
   .switch_box {
