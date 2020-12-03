@@ -4,236 +4,239 @@
       title="考试详情"
       show-back
     />
-    <basic-container>
-      <div class="details-container">
-        <div class="details-top">
-          <header class="top-title">
-            <div class="title-left">
-              <span class="title-text">{{ examDetail.resName }}</span>
-              <el-tag :type="getStatusType(examDetail.status).color">
-                {{ getStatusType(examDetail.status).text }}
-              </el-tag>
-            </div>
-            <div class="title-left">
+    <basic-container class="details-container">
+      <div class="details-top">
+        <header class="top-title">
+          <div class="title-left">
+            <span class="title-text">{{ examDetail.resName }}</span>
+            <el-tag :type="getStatusType(examDetail.status).color">
+              {{ getStatusType(examDetail.status).text }}
+            </el-tag>
+          </div>
+          <div class="title-left">
+            <el-button
+              type="primary"
+              size="medium"
+              @click="edit('edit')"
+            >
+              编辑
+            </el-button>
+            <el-button
+              size="medium"
+              @click="deleteFun"
+            >
+              删除
+            </el-button>
+            <el-button
+              size="medium"
+              @click="edit('copy')"
+            >
+              复制
+            </el-button>
+          </div>
+        </header>
+        <ul class="details-ul">
+          <li class="details-li">
+            <span class="li-label">考试分类：</span>
+            <span class="li-value">{{ examDetail.categoryName }}</span>
+          </li>
+          <li class="details-li">
+            <span class="li-label">考试用卷：</span>
+            <span class="li-value">
+              <span>{{ examDetail.testPaper }}</span>
               <el-button
-                type="primary"
-                size="medium"
-                @click="edit('edit')"
-              >
-                编辑
-              </el-button>
-              <el-button
-                size="medium"
-                @click="deleteFun"
-              >
-                删除
-              </el-button>
-              <el-button
-                size="medium"
-                @click="edit('copy')"
-              >
-                复制
-              </el-button>
-            </div>
-          </header>
-          <ul class="details-ul">
-            <li class="details-li">
-              <span class="li-label">考试分类：</span>
-              <span class="li-value">{{ examDetail.categoryName }}</span>
-            </li>
-            <li class="details-li">
-              <span class="li-label">考试用卷：</span>
-              <span class="li-value">
-                <span>{{ examDetail.testPaper }}</span>
-                <el-button
-                  type="text"
-                  style="padding: 0; margin-left: 20px"
-                  @click="goRelevance"
-                >查看关联试卷</el-button>
-              </span>
-            </li>
-            <li class="details-li">
-              <span class="li-label">评卷人：</span>
-              <span class="li-value">{{ examDetail.reviewer }}</span>
-            </li>
-            <li class="details-li">
-              <span class="li-label">证书模板：</span>
-              <span class="li-value">{{ examDetail.certificateName }}</span>
-            </li>
-          </ul>
-        </div>
-        <div class="details-bottom">
-          <header class="bottom-header">
-            <span class="title">详细设置</span>
+                type="text"
+                style="padding: 0; margin-left: 20px"
+                @click="goRelevance"
+              >查看关联试卷</el-button>
+            </span>
+          </li>
+          <li class="details-li">
+            <span class="li-label">评卷人：</span>
+            <span class="li-value">{{ examDetail.reviewer }}</span>
+          </li>
+          <li class="details-li">
+            <span class="li-label">证书模板：</span>
+            <span class="li-value">{{ examDetail.certificateName }}</span>
+          </li>
+        </ul>
+      </div>
+    </basic-container>
+    <basic-container class="details-container">
+      <div class="details-bottom">
+        <header class="bottom-header">
+          <span class="title">详细设置</span>
+          <div>
+            <i :class="[isExtend ? 'el-icon-arrow-up' : 'el-icon-arrow-down']" />
             <span
               class="handle"
               @click="extend"
             >{{ isExtend ? '收起' : '展开' }}</span>
-          </header>
-          <ul
-            v-if="isExtend"
-            class="extend-ul"
-          >
-            <li class="extend-li">
-              <div class="li-title">
-                基础设置：
+          </div>
+        </header>
+        <ul
+          v-if="isExtend"
+          class="extend-ul"
+        >
+          <li class="extend-li">
+            <div class="li-title">
+              基础设置：
+            </div>
+            <div class="li-content">
+              <div class="content">
+                <span>答题模式：</span>
+                <span>整卷答题</span>
               </div>
-              <div class="li-content">
-                <div class="content">
-                  <span>答题模式：</span>
-                  <span>整卷答题</span>
-                </div>
-                <div class="content">
-                  <span>考试时长：</span>
-                  <span>整卷答题</span>
-                </div>
-                <div class="content">
-                  <span>参加次数：</span>
-                  <span>不限次数</span>
-                </div>
-                <div class="content">
-                  <span>考试时间策略：</span>
-                  <span>允许进入考试的时间</span>
-                </div>
-                <div class="content">
-                  <span>积分：</span>
-                  <span>本考试记录系统积分2分</span>
-                </div>
-                <div class="content">
-                  <span>发布考试：</span>
-                  <span>考试开始前5分钟发布考试信息</span>
-                </div>
-                <div class="content">
-                  <span>补考次数：</span>
-                  <span>3次</span>
-                </div>
+              <div class="content">
+                <span>考试时长：</span>
+                <span>整卷答题</span>
               </div>
-            </li>
-            <li class="extend-li">
-              <div class="li-title">
-                考场环境：
+              <div class="content">
+                <span>参加次数：</span>
+                <span>不限次数</span>
               </div>
-              <div class="li-content">
-                <div class="content">
-                  <span>是否启用IP限制(需设定考生合法IP范围)：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>是否允许迟到分钟后禁止参加考试：</span>
-                  <span>不允许</span>
-                </div>
-                <div class="content">
-                  <span>生成试卷时是否打乱试题和选项顺序：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>交卷即时是否生成答案统计数据(建议大规模考试时不启用)：</span>
-                  <span>否</span>
-                </div>
-                <div class="content">
-                  <span>是否迟到后禁止考试：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>答卷时间过少是否禁止交卷：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>是否启用试卷预生成服务：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>是否自动保存答案到服务器：</span>
-                  <span>是</span>
-                </div>
+              <div class="content">
+                <span>考试时间策略：</span>
+                <span>允许进入考试的时间</span>
               </div>
-            </li>
-            <li class="extend-li">
-              <div class="li-title">
-                考生权限：
+              <div class="content">
+                <span>积分：</span>
+                <span>本考试记录系统积分2分</span>
               </div>
-              <div class="li-content">
-                <div class="content">
-                  <span>是否允许考生查看成绩：</span>
-                  <span>永久查看</span>
-                </div>
-                <div class="content">
-                  <span>是否允许考生查看本机资料(开卷考试)：</span>
-                  <span>不允许</span>
-                </div>
-                <div class="content">
-                  <span>是否允许考生查看答卷：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>是否允许考生自己评卷：</span>
-                  <span>否</span>
-                </div>
-                <div class="content">
-                  <span>是否允许考生查看标准答案：</span>
-                  <span>是</span>
-                </div>
+              <div class="content">
+                <span>发布考试：</span>
+                <span>考试开始前5分钟发布考试信息</span>
               </div>
-            </li>
-            <li class="extend-li">
-              <div class="li-title">
-                评卷策略：
+              <div class="content">
+                <span>补考次数：</span>
+                <span>3次</span>
               </div>
-              <div class="li-content">
-                <div class="content">
-                  <span>是否允许评卷人修改考生答案：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>是否允许修改考生客观题答案及其评分结果：</span>
-                  <span>不允许</span>
-                </div>
-                <div class="content">
-                  <span>评卷限定最高得分：</span>
-                  <span>不限制</span>
-                </div>
-                <div class="content">
-                  <span>是否手工评卷是否显示客观题：</span>
-                  <span>否</span>
-                </div>
-                <div class="content">
-                  <span>判断题是否答对得分,不答不得分,答错扣分：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>多选题：</span>
-                  <span>完全正确得分</span>
-                </div>
+            </div>
+          </li>
+          <li class="extend-li">
+            <div class="li-title">
+              考场环境：
+            </div>
+            <div class="li-content">
+              <div class="content">
+                <span>是否启用IP限制(需设定考生合法IP范围)：</span>
+                <span>是</span>
               </div>
-            </li>
-            <li class="extend-li">
-              <div class="li-title">
-                成绩分布：
+              <div class="content">
+                <span>是否允许迟到分钟后禁止参加考试：</span>
+                <span>不允许</span>
               </div>
-              <div class="li-content">
-                <div class="content">
-                  <span>是否由系统自动评定通过：</span>
-                  <span>是</span>
-                </div>
-                <div class="content">
-                  <span>通过条件：</span>
-                  <span>按成绩，成绩不低于60分</span>
-                </div>
-                <div class="content">
-                  <span>发布规则：</span>
-                  <span>定时自动发布</span>
-                </div>
-                <div class="content">
-                  <span>发布时间：</span>
-                  <span>2020-10-10 21:00:00</span>
-                </div>
+              <div class="content">
+                <span>生成试卷时是否打乱试题和选项顺序：</span>
+                <span>是</span>
               </div>
-            </li>
-          </ul>
-        </div>
+              <div class="content">
+                <span>交卷即时是否生成答案统计数据(建议大规模考试时不启用)：</span>
+                <span>否</span>
+              </div>
+              <div class="content">
+                <span>是否迟到后禁止考试：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>答卷时间过少是否禁止交卷：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>是否启用试卷预生成服务：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>是否自动保存答案到服务器：</span>
+                <span>是</span>
+              </div>
+            </div>
+          </li>
+          <li class="extend-li">
+            <div class="li-title">
+              考生权限：
+            </div>
+            <div class="li-content">
+              <div class="content">
+                <span>是否允许考生查看成绩：</span>
+                <span>永久查看</span>
+              </div>
+              <div class="content">
+                <span>是否允许考生查看本机资料(开卷考试)：</span>
+                <span>不允许</span>
+              </div>
+              <div class="content">
+                <span>是否允许考生查看答卷：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>是否允许考生自己评卷：</span>
+                <span>否</span>
+              </div>
+              <div class="content">
+                <span>是否允许考生查看标准答案：</span>
+                <span>是</span>
+              </div>
+            </div>
+          </li>
+          <li class="extend-li">
+            <div class="li-title">
+              评卷策略：
+            </div>
+            <div class="li-content">
+              <div class="content">
+                <span>是否允许评卷人修改考生答案：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>是否允许修改考生客观题答案及其评分结果：</span>
+                <span>不允许</span>
+              </div>
+              <div class="content">
+                <span>评卷限定最高得分：</span>
+                <span>不限制</span>
+              </div>
+              <div class="content">
+                <span>是否手工评卷是否显示客观题：</span>
+                <span>否</span>
+              </div>
+              <div class="content">
+                <span>判断题是否答对得分,不答不得分,答错扣分：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>多选题：</span>
+                <span>完全正确得分</span>
+              </div>
+            </div>
+          </li>
+          <li class="extend-li">
+            <div class="li-title">
+              成绩分布：
+            </div>
+            <div class="li-content">
+              <div class="content">
+                <span>是否由系统自动评定通过：</span>
+                <span>是</span>
+              </div>
+              <div class="content">
+                <span>通过条件：</span>
+                <span>按成绩，成绩不低于60分</span>
+              </div>
+              <div class="content">
+                <span>发布规则：</span>
+                <span>定时自动发布</span>
+              </div>
+              <div class="content">
+                <span>发布时间：</span>
+                <span>2020-10-10 21:00:00</span>
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
     </basic-container>
-    <basic-container style="margin-top: 20px">
+    <basic-container>
       <el-menu
         :default-active="activeIndex"
         class="el-menu-demo"
@@ -608,9 +611,8 @@ export default {
 }
 .details-container {
   background-color: #fff;
+  margin-bottom: 16px;
   .details-top {
-    padding: 20px;
-    border-bottom: 1px solid #e3e7e9;
     .top-title {
       display: flex;
       align-items: center;
@@ -637,16 +639,15 @@ export default {
         .li-label {
           min-width: 80px;
           display: inline-block;
-          color: #666666;
+          color: rgba(0, 11, 21, 0.45);
         }
         .li-value {
-          color: #1e1e1e;
+          color: rgba(0, 11, 21, 0.85);
         }
       }
     }
   }
   .details-bottom {
-    padding-top: 20px;
     .bottom-header {
       display: flex;
       justify-content: space-between;
@@ -657,32 +658,46 @@ export default {
       }
       .handle {
         cursor: pointer;
+        margin-left: 4px;
+        color: #000b15;
       }
     }
     .extend-ul {
-      padding-top: 15px;
+      padding-top: 24px;
       .extend-li {
-        padding-bottom: 20px;
+        padding-bottom: 24px;
         &:last-child {
           padding-bottom: 0;
         }
         .li-title {
-          font-size: 15px;
-          font-weight: 530;
-          margin-bottom: 15px;
+          font-family: PingFangSC-Medium;
+          font-size: 14px;
+          color: #000b15;
+          position: relative;
+          padding-left: 12px;
+          margin-bottom: 16px;
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            width: 4px;
+            height: 80%;
+            background-color: $primaryColor;
+          }
         }
         .li-content {
           display: flex;
           flex-wrap: wrap;
           .content {
             width: 50%;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
             span {
               &:first-child {
-                color: #666666;
+                color: rgba(0, 11, 21, 0.45);
               }
               &:last-child {
-                color: #333333;
+                color: rgba(0, 11, 21, 0.85);
               }
             }
           }
