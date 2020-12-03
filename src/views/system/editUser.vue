@@ -46,7 +46,10 @@
                   <el-button size="medium">
                     上传
                   </el-button>
-                  <ul class="upload__files">
+                  <ul
+                    class="upload__files"
+                    @click.stop=""
+                  >
                     <li
                       v-for="(item, index) in uploadFileList"
                       :key="index"
