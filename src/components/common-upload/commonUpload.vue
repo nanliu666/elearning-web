@@ -6,6 +6,7 @@
     action=""
     :disabled="disabled"
     :limit="limit"
+    :accept="accept"
     :multiple="multiple"
     :show-file-list="false"
     :http-request="httpRequest"
@@ -38,6 +39,10 @@ export default {
     multiple: {
       type: Boolean,
       default: false
+    },
+    accept: {
+      type: Number,
+      default: null
     },
     limit: {
       type: Number,

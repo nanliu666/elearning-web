@@ -59,10 +59,10 @@
             >
               <div
                 class="search-sort-box"
-                @click="toSort"
+                @click="loadTableData"
               >
-                <i class="el-icon-sort" />
-                <span class="sort-text">调整排序</span>
+                <i class="el-icon-refresh-right" />
+                <span class="sort-text">刷新</span>
               </div>
               <el-popover
                 placement="bottom"
@@ -91,6 +91,14 @@
                 />
               </el-popover>
             </div>
+          </div>
+        </template>
+        <template #name="{row}">
+          <div
+            class="ellipsis title"
+            @click="jumpDetail(row)"
+          >
+            {{ row.name }}
           </div>
         </template>
         <template
@@ -332,6 +340,10 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 跳转详情
+    jumpDetail(row) {
+      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
+    },
     handleSelect(key) {
       this.activeIndex = key
       this.statusValue = ''
@@ -476,10 +488,6 @@ export default {
       }
       deep(row)
       return ids
-    },
-    // 跳转排序
-    toSort() {
-      this.$router.push({ path: '/repository/catalogSort', query: { type: 'catalog' } })
     }
   }
 }
@@ -495,6 +503,10 @@ export default {
   }
   /deep/ .el-menu--horizontal {
     border-bottom: 1px solid #cccccc !important;
+  }
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
   }
 }
 .originColumn {

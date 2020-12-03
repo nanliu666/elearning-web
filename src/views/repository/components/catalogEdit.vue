@@ -63,11 +63,11 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('add')"
       >完成</el-button>
       <el-button
         size="medium"
-        @click="submitAndCreate"
+        @click="submit('toCreate')"
       >完成并创建资源</el-button>
     </span>
     <span
@@ -82,7 +82,7 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('add')"
       >保存</el-button>
     </span>
   </el-dialog>
@@ -127,12 +127,8 @@ export default {
         this.orgTree = res
       })
     },
-    // 完成并创建课程
-    submitAndCreate() {
-      this.submit('toCreate')
-    },
     // 提交
-    submit(type = 'add') {
+    submit(type) {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
