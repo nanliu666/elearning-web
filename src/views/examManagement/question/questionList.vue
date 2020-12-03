@@ -5,7 +5,7 @@
         slot="rightMenu"
         type="primary"
         size="medium"
-        @click="jumpCreate"
+        @click="jumpEdit()"
       >
         创建试题
       </el-button>

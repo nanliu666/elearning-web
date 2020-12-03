@@ -80,10 +80,7 @@ export default {
             fileName,
             localName: file.file.name
           }
-          let newValue = [newFile]
-          if (that.multiple) {
-            newValue = [...that.value, newFile]
-          }
+          let newValue = [...that.value, newFile]
           that.$emit('input', newValue)
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)

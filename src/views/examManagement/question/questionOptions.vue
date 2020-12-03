@@ -25,6 +25,7 @@
         placeholder="请输入选项内容"
       ></el-input>
       <i
+        v-if="value.length > 2"
         class="el-icon-remove-outline"
         @click="handleRemoveOption(option)"
       ></i>

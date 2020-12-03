@@ -62,6 +62,51 @@
             >
               标准答案（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）
             </template>
+            <template slot="attachments">
+              <common-upload
+                v-model="uploadFileList"
+                style="margin-bottom:20px"
+                :before-upload="beforeUpload"
+                multiple
+                :limit="5"
+              >
+                <template #default>
+                  <el-button
+                    size="medium"
+                    type="text"
+                    :style="`padding: 0; ${uploadFileList.length >= 5 ? 'color:#C0C4CC;' : ''}`"
+                    @click="handleUpload($event)"
+                  >
+                    添加图片
+                  </el-button>
+                  <ul
+                    class="upload__files"
+                    @click="handleUpload($event)"
+                  >
+                    <li
+                      v-for="(item, index) in uploadFileList"
+                      :key="index"
+                    >
+                      <el-image
+                        style="width: 64px; height: 64px"
+                        :src="item.url"
+                      >
+                      </el-image>
+                      <div class="upload__cover">
+                        <i
+                          class="el-icon-view"
+                          @click.stop="handlePreviewImage(index)"
+                        ></i>
+                        <i
+                          class="el-icon-delete"
+                          @click.stop="handleRemoveAttachment(index)"
+                        ></i>
+                      </div>
+                    </li>
+                  </ul>
+                </template>
+              </common-upload>
+            </template>
             <template #options="">
               <question-options
                 v-if="form.type !== QUESTION_TYPE_JUDGE"
@@ -81,24 +126,30 @@
               </template>
             </template>
           </common-form>
+          <div class="page-footer">
+            <el-button
+              type="primary"
+              size="medium"
+              style="padding:0"
+              @click="handleSubmit"
+            >
+              保存
+            </el-button>
+            <el-button
+              size="medium"
+              @click="handleSubmit"
+            >
+              完成并继续创建
+            </el-button>
+          </div>
         </el-col>
       </el-row>
-      <div class="page-footer">
-        <el-button
-          type="primary"
-          size="medium"
-          @click="handleSubmit"
-        >
-          保存
-        </el-button>
-        <el-button
-          size="medium"
-          @click="handleSubmit"
-        >
-          完成并继续创建
-        </el-button>
-      </div>
     </basic-container>
+    <image-viewer
+      :url-list="_.map(uploadFileList, 'url')"
+      :visible.sync="imageViewing"
+      :initial-index="imageIndex"
+    ></image-viewer>
   </div>
 </template>
 
@@ -115,6 +166,8 @@ import {
 import QuestionOptions from './questionOptions'
 import { createUniqueID } from '@/util/util'
 import { createQuestion, getQuestion } from '@/api/examManage/question'
+import CommonUpload from '@/components/common-upload/commonUpload'
+import ImageViewer from '@/components/image-viewer/ImageViewer'
 const BASIC_COLUMNS = [
   { prop: 'title1', span: 24, itemType: 'slotout' },
   {
@@ -196,6 +249,7 @@ const SELECT_COLUMNS = [
     resize: 'none',
     rows: 6
   },
+  { prop: 'attachments', span: 24, itemType: 'slotout' },
   {
     prop: 'options',
     span: 24,
@@ -280,7 +334,9 @@ const FILL_COLUMNS = [
 export default {
   name: 'QuestionEdit',
   components: {
-    QuestionOptions
+    QuestionOptions,
+    CommonUpload,
+    ImageViewer
   },
   data() {
     return {
@@ -292,6 +348,7 @@ export default {
         expiredTime: null,
         content: null,
         analysis: null,
+        attachments: [],
         timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
         options: [
           { key: createUniqueID(), content: '', isCorrect: 0, url: '' },
@@ -299,6 +356,9 @@ export default {
           { key: createUniqueID(), content: '', isCorrect: 0, url: '' }
         ]
       },
+      uploadFileList: [],
+      imageViewing: false,
+      imageIndex: 0,
       columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS]
     }
   },
@@ -320,6 +380,13 @@ export default {
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER
   },
   watch: {
+    uploadFileList(val) {
+      this.$set(
+        this.form,
+        'attachments',
+        val.map((item) => ({ fileUrl: item.url, fileName: item.localName }))
+      )
+    },
     'form.type'(val, oldVal) {
       if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
         this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
@@ -338,7 +405,7 @@ export default {
       }
       // 从多选题切换到单选题时把正确答案置空
       if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
-        this.form.options.forEach((item) => {
+        _.forEach(this.form.options, (item) => {
           item.isCorrect = 0
         })
       }
@@ -356,6 +423,35 @@ export default {
           item.isCorrect = 0
         }
       })
+    },
+    handleUpload(e) {
+      if (this.uploadFileList.length >= 5) {
+        e.stopPropagation()
+      }
+    },
+    beforeUpload(file) {
+      const regx = /^.*\.(png|jpg|jpeg)$/
+      const isLt5M = file.size / 1024 / 1024 < 5
+      if (this.uploadFileList.length >= 5) {
+        this.$message.error('上传附件不能超过5张')
+        return false
+      }
+      if (!isLt5M) {
+        this.$message.error('上传附件大小不能超过 5MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
+        return false
+      }
+      return true
+    },
+    handleRemoveAttachment(index) {
+      this.uploadFileList.splice(index, 1)
+    },
+    handlePreviewImage(index) {
+      this.imageViewing = true
+      this.imageIndex = index
     },
     handleSubmit() {
       this.$refs.form.validate().then(() => {
@@ -387,6 +483,10 @@ export default {
         if (res.type == QUESTION_TYPE_BLANK) {
           this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
         }
+        this.uploadFileList = _.map(res.attachments, (item) => ({
+          url: item.fileUrl,
+          localName: item.fileName
+        }))
       })
     }
   }
@@ -398,6 +498,39 @@ export default {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
 }
-.question-edit {
+
+/deep/ .el-upload {
+  text-align: left;
+  display: block;
+}
+.upload__files {
+  display: flex;
+  margin-top: 8px;
+  li {
+    margin-right: 10px;
+    position: relative;
+    height: 64px;
+    width: 64px;
+    border-radius: 4px;
+    overflow: hidden;
+    .upload__cover {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      display: none;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: space-evenly;
+      i {
+        color: #fff;
+      }
+    }
+    &:hover {
+      .upload__cover {
+        display: flex;
+      }
+    }
+  }
 }
 </style>
