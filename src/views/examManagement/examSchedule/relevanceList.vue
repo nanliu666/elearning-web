@@ -55,11 +55,7 @@
 </template>
 
 <script>
-import {
-  getKnowledgeManageList,
-  deleteKnowledgeList,
-  topingKnowledge
-} from '@/api/knowledge/knowledge'
+import { getKnowledgeManageList, deleteKnowledgeList } from '@/api/knowledge/knowledge'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -114,10 +110,7 @@ export default {
     },
     // 预览
     handlePreview(rowData) {
-      topingKnowledge({ id: rowData.id, isTop: rowData.topTime ? 0 : 1 }).then(() => {
-        this.$message.success(`${rowData.topTime ? '取消' : ''}置顶成功`)
-        this.loadTableData()
-      })
+      this.$router.push({ path: '/examManagement/examSchedule/preview', query: { id: rowData.id } })
     },
     // 跳去详情
     jumpDetail({ id }) {
