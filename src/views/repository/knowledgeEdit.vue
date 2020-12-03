@@ -158,14 +158,6 @@ export default {
       //   offset: 1
       // },
       {
-        itemType: 'slot',
-        label: '是否允许下载',
-        prop: 'download',
-        required: false,
-        span: 11,
-        offset: 1
-      },
-      {
         itemType: 'radio',
         label: '上传模式',
         prop: 'uploadType',
@@ -263,10 +255,31 @@ export default {
           rules: [{ validator: checkAge, trigger: 'blur' }],
           span: 24
         }
-        let index = _.findIndex(this.formColumns, (item) => {
+        const allowDownload = {
+          itemType: 'slot',
+          label: '是否允许下载',
+          prop: 'download',
+          required: false,
+          span: 11,
+          offset: 1
+        }
+        let uploadTypeIndex = _.findIndex(this.formColumns, (item) => {
           return item.prop === 'uploadType'
         })
-        this.formColumns[index + 1] = val === 0 ? UPLOAD_FILE : UPLOAD_INPUT
+        const allowDownloadIndex = _.findIndex(this.formColumns, (item) => {
+          return item.prop === 'download'
+        })
+        const providerNameIndex = _.findIndex(this.formColumns, (item) => {
+          return item.prop === 'providerName'
+        })
+
+        if (val === 0) {
+          this.formColumns[uploadTypeIndex + 1] = UPLOAD_FILE
+          this.formColumns.splice(providerNameIndex + 1, 0, allowDownload)
+        } else {
+          this.formColumns[uploadTypeIndex + 1] = UPLOAD_INPUT
+          this.formColumns.splice(allowDownloadIndex, 1)
+        }
       }
     }
   },
