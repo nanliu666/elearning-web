@@ -327,8 +327,12 @@ export default {
     },
     // 上传格式校验
     beforeUpload(file) {
+      const fileTypeIndex = file.name.lastIndexOf('.')
+      const fileType = file.name.substring(fileTypeIndex + 1, file.length)
       const isLt100M = file.size / 1024 / 1024 < 10
       const LIMIT = 2
+      const TYPE_LIST = ['exe', 'bat']
+      const notBatNorExe = _.some(TYPE_LIST, fileType)
       const isLimitLength = _.size(this.formData.attachments) < LIMIT
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
@@ -336,7 +340,10 @@ export default {
       if (!isLimitLength) {
         this.$message.error('上传文件数量超过限制!')
       }
-      return isLt100M && isLimitLength
+      if (notBatNorExe) {
+        this.$message.error('不允许上传.exe .bat类型文件')
+      }
+      return isLt100M && isLimitLength && !notBatNorExe
     },
     // 预览附件
     previewFile(data) {
