@@ -1,22 +1,21 @@
-import { get } from '@/router/axios'
+import { get, post } from '@/router/axios'
 /**
  * del, get, post, put
  * 创建课程数据导出接口
- * @param {Object} courseId - 参数
+ * @param {Object} params - 参数
  * */
-export const getCourseList = (params) => get(`/api/manage/v1/course/getCourse?courseId=${params}`)
+export const getCourseList = (params) => get('/api/manage/v1/course/getCourse', params)
 /**
  * 删除课程内容接口
  * @param {Object} contentId - 参数
  * */
 export const delCourseContent = (params) =>
-  get(`/api/blade-manage/v1/course/delCourseContent?contentId=${params}`)
+  get('/api/blade-manage/v1/course/delCourseContent', params)
 /**
  * 删除课程接口
  * @param {Object} courseId - 参数
  * */
-export const delCourseInfo = (params) =>
-  get(`/api/blade-manage/v1/course/delCourseInfo?courseId=${params}`)
+export const delCourseInfo = (params) => get('/api/blade-manage/v1/course/delCourseInfo', params)
 /**
  * 查询课程信息列表
  * @param {Object} courseId - 参数
@@ -42,7 +41,7 @@ export const getCatalog = (params) => get('/api/blade-manage/v1/course/getCatalo
  * 新增课程目录
  * @param {Object} courseId - 参数
  * */
-export const addCatalog = (params) => get('/api/blade-manage/v1/course/addCatalog', params)
+export const addCatalog = (params) => post('/api/blade-manage/v1/course/addCatalog', params)
 /**
  * 删除课程目录
  * @param {Object} courseId - 参数
@@ -60,3 +59,9 @@ export const editCatalog = (params) => get('/api/blade-manage/v1/course/editCata
  * */
 export const getCourseByCatalogId = (params) =>
   get('/api/blade-manage/v1/course/getCourseByCatalogId', params)
+/**
+ * 创建人信息列表
+ * @param {Object} courseId - 参数
+ * */
+export const catalogUserList = (params) =>
+  get('/api/blade-manage/v1/course/catalogUserList', params)
