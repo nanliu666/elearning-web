@@ -1,6 +1,5 @@
 <template>
   <el-dialog
-    v-loading="loading"
     :title="
       type === 'create'
         ? `新建${currentType}分类`
@@ -69,11 +68,11 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('refresh')"
       >完成</el-button>
       <el-button
         size="medium"
-        @click="submitAndCreate"
+        @click="submit('create')"
       >完成并创建试题</el-button>
     </span>
     <span
@@ -88,7 +87,7 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('refresh')"
       >保存</el-button>
     </span>
   </el-dialog>
@@ -125,8 +124,7 @@ export default {
       rules: {
         name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
-      orgTree: [],
-      loading: false
+      orgTree: []
     }
   },
   computed: {
@@ -144,35 +142,28 @@ export default {
         this.orgTree = res
       })
     },
-    // 完成并创建课程
-    submitAndCreate() {},
     // 提交
-    submit() {
+    submit(to) {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
-            this.loading = true
-            postCategory(_.assign(this.form, { createUser: this.userId }))
-              .then(() => {
-                this.$message.success('创建成功')
+            postCategory(_.assign(this.form, { createUser: this.userId })).then((res) => {
+              this.$message.success('创建成功')
+              if (to === 'refresh') {
                 this.$emit('refresh')
-                this.loading = false
                 this.$emit('changevisible', false)
-              })
-              .catch(() => {
-                this.loading = false
-              })
+              } else {
+                this.$router.push({
+                  path: '/examManagement/question/questionEdit',
+                  query: { categoryId: res.id }
+                })
+              }
+            })
           } else {
-            this.loading = true
-            putCategory(this.form)
-              .then(() => {
-                this.$message.success('修改成功')
-                this.$emit('refresh')
-                this.loading = false
-              })
-              .catch(() => {
-                this.loading = false
-              })
+            putCategory(this.form).then(() => {
+              this.$message.success('修改成功')
+              this.$emit('refresh')
+            })
             this.$emit('changevisible', false)
           }
         } else {
