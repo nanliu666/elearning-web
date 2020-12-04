@@ -83,5 +83,8 @@ export default {
   .el-checkbox__input.is-checked + .el-checkbox__label {
     color: #606266;
   }
+  .el-checkbox__label {
+    color: rgba(0, 11, 21, 0.85);
+  }
 }
 </style>

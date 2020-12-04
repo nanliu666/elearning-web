@@ -402,7 +402,7 @@ export default {
     createExam($event) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { examType: $event }
+        query: { examPattern: $event }
       })
     },
     // 具体的删除函数
