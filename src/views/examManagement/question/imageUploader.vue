@@ -17,6 +17,7 @@
           添加图片
         </el-button>
         <ul
+          v-if="_.size(uploadFileList) > 0"
           class="upload__files"
           @click="handleUpload($event)"
         >
@@ -133,6 +134,7 @@ export default {
 .upload__files {
   display: flex;
   margin-top: 8px;
+  font-size: 16px;
   li {
     margin-right: 10px;
     position: relative;

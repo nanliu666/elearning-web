@@ -94,3 +94,21 @@ export const FILL_COLUMNS = [
     rows: 6
   }
 ]
+/**
+ * 试题组配置
+ */
+export const GROUP_COLUMNS = [
+  {
+    prop: 'content',
+    span: 24,
+    itemType: 'richtext',
+    label: '题干',
+    height: 500,
+    required: true
+  },
+  {
+    prop: 'subQuestions',
+    itemType: 'slotout',
+    span: 24
+  }
+]

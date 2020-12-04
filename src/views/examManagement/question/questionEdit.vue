@@ -92,6 +92,23 @@
                 </el-radio>
               </template>
             </template>
+            <template #subQuestions="">
+              <div class="sub-questions">
+                <template v-for="(question, index) in form.subQuestions">
+                  <question-item
+                    :key="question.key"
+                    :value="question"
+                    :index="index"
+                  />
+                </template>
+                <div
+                  class="sub-questions__add"
+                  @click="handleAddSub"
+                >
+                  <i class="iconimage_icon_plus-outlined iconfont"> </i>添加子试题（最多20项）
+                </div>
+              </div>
+            </template>
           </common-form>
           <div class="page-footer">
             <el-button
@@ -122,13 +139,14 @@ import {
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
   QUESTION_TYPE_SHOER,
-  QUESTION_TYPE_BLANK
-  // QUESTION_TYPE_GROUP
+  QUESTION_TYPE_BLANK,
+  QUESTION_TYPE_GROUP
 } from '@/const/examMange'
 import QuestionOptions from './questionOptions'
 import ImageUploader from './imageUploader'
+import QuestionItem from './questionItem'
 import { createUniqueID } from '@/util/util'
-import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS } from './config'
+import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS, GROUP_COLUMNS } from './config'
 import { createQuestion, getQuestion } from '@/api/examManage/question'
 
 const BASIC_COLUMNS = [
@@ -198,12 +216,17 @@ const BASIC_COLUMNS = [
   },
   { span: 24, prop: 'title2', itemType: 'slotout' }
 ]
-
+const createOptions = () => [
+  { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
+  { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
+  { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] }
+]
 export default {
   name: 'QuestionEdit',
   components: {
     QuestionOptions,
-    ImageUploader
+    ImageUploader,
+    QuestionItem
   },
   data() {
     return {
@@ -217,10 +240,16 @@ export default {
         analysis: null,
         attachments: [],
         timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
-        options: [
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] }
+        options: createOptions(),
+        subQuestions: [
+          {
+            type: QUESTION_TYPE_SINGLE,
+            content: '',
+            score: 0,
+            options: createOptions(),
+            attachments: [],
+            key: createUniqueID()
+          }
         ]
       },
       columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS]
@@ -257,8 +286,8 @@ export default {
         this.columns = [...BASIC_COLUMNS, ...SHORT_COLUMNS]
       } else if (QUESTION_TYPE_BLANK === val) {
         this.columns = [...BASIC_COLUMNS, ...FILL_COLUMNS]
-      } else {
-        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+      } else if (QUESTION_TYPE_GROUP === val) {
+        this.columns = [...BASIC_COLUMNS, ...GROUP_COLUMNS]
       }
       // 从多选题切换到单选题时把正确答案置空
       if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
@@ -274,6 +303,23 @@ export default {
     }
   },
   methods: {
+    /**
+     * 添加子试题
+     */
+    handleAddSub() {
+      if (this.form.subQuestions.length >= 20) {
+        this.$message.error('最多只能添加20项子试题')
+        return
+      }
+      this.form.subQuestions.push({
+        type: QUESTION_TYPE_SINGLE,
+        content: '',
+        score: 0,
+        options: createOptions(),
+        attachments: [],
+        key: createUniqueID()
+      })
+    },
     handleRadioCheck(val, option) {
       this.form.options.forEach((item) => {
         if (item.key !== option.key) {
@@ -329,6 +375,27 @@ export default {
   }
   .page-footer {
     text-align: center;
+  }
+  .sub-questions {
+    &__add {
+      margin-top: 16px;
+      width: 100%;
+      background: #ffffff;
+      border: 1px dashed #d9dbdc;
+      border-radius: 4px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      i {
+        font-size: 16px;
+        margin-right: 8px;
+      }
+      &:hover {
+        color: $primaryColor;
+      }
+    }
   }
 }
 </style>

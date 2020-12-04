@@ -47,13 +47,14 @@
             <el-button
               size="medium"
               type="text"
-              :style="`padding: 0; ${_.size(option.fileList) !== 0 ? 'color:#C0C4CC;' : ''}`"
+              class="upload__btn"
+              :style="`${_.size(option.fileList) !== 0 ? 'color:#C0C4CC;' : ''}`"
               @click="handleClick($event, option)"
             >
               添加图片
             </el-button>
             <ul
-              v-if="option.fileList"
+              v-if="_.size(option.fileList) > 0"
               class="upload__files"
               @click="handleClick($event, option)"
             >
@@ -184,6 +185,9 @@ export default {
 .question-options {
   li {
     margin-bottom: 12px;
+    &:last-of-type {
+      margin-bottom: 0;
+    }
     .wrap {
       width: 100%;
       display: flex;
@@ -207,10 +211,16 @@ export default {
   }
   .upload__wrapper {
     padding-left: 34px;
+    line-height: 16px;
+  }
+  .upload__btn {
+    margin-top: 6px;
+    padding: 0;
   }
   .upload__files {
     display: flex;
     margin-top: 8px;
+
     li {
       margin-right: 10px;
       position: relative;
