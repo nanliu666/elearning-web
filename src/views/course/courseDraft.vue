@@ -23,7 +23,7 @@
       id="isdialog_show"
     >
       <div>如何创建课程：</div>
-      <div>1.先在 <span>【课程中心-目录管理】</span> 完善展示的目录配置；</div>
+      <div>1.先在 <span @click="toCatalog">【课程中心-目录管理】</span> 完善展示的目录配置；</div>
       <div>
         2.开始创建课程。
       </div>
@@ -79,10 +79,13 @@
                       type="text"
                       @click="refreshTableData"
                     >
-                      <i class="iconfont iconicon_refresh" />
+                      <!-- <i class="iconfont iconicon_refresh" /> -->
                     </el-button>
                   </el-tooltip>
-                  <span class="text_refresh">刷新</span>
+                  <span
+                    class="text_refresh"
+                    @click="refreshTableData"
+                  >刷新</span>
                   <el-popover
                     placement="bottom"
                     width="40"
@@ -102,7 +105,7 @@
                         icon="el-icon-setting"
                         style="color:#acb3b8;"
                       >
-                        <i class="iconfont iconicon_setting" />
+                        <!-- <i class="iconfont iconicon_setting" /> -->
                       </el-button>
                     </el-tooltip>
 
@@ -148,7 +151,10 @@
               slot="name"
               slot-scope="{ row }"
             >
-              <el-button type="text">
+              <el-button
+                type="text"
+                @click="toTrainDetail(row)"
+              >
                 {{ row.name }}
               </el-button>
             </template>
@@ -204,17 +210,34 @@
                 v-if="scope.row.isTop === 0"
                 type="text"
                 size="medium"
-                @click.stop="handleConfig(scope.row, scope.index)"
+                @click.stop="handleConfig(scope.row, 1)"
               >
-                置顶
+                &nbsp;&nbsp; 置顶&nbsp;
               </el-button>
-              <span v-if="scope.row.isTop === 1">已置顶</span>
-              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-button
+                v-if="scope.row.isTop === 1"
                 type="text"
                 size="medium"
+                @click.stop="handleConfig(scope.row, 0)"
+              >
+                已置顶
+              </el-button>
+              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+              <el-button
+                v-if="scope.row.isPutaway === 0"
+                type="text"
+                size="medium"
+                @click="alterIsPutaway(scope.row.id, 1)"
               >
                 下架
+              </el-button>
+              <el-button
+                v-if="scope.row.isPutaway === 1"
+                type="text"
+                size="medium"
+                @click="alterIsPutaway(scope.row.id, 0)"
+              >
+                上架
               </el-button>
               <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-dropdown
@@ -242,12 +265,50 @@
         </basic-container>
       </div>
     </div>
+
+    <!-- 移动dialog -->
+    <el-dialog
+      title="移动"
+      :visible.sync="dialogFormVisible"
+      :modal-append-to-body="false"
+    >
+      <el-form>
+        <el-form-item label="移动到新目录">
+          <el-select
+            v-model="tableData.name"
+            placeholder="请选择"
+          >
+            <el-option
+              label="区域一"
+              value="shanghai"
+            ></el-option>
+            <el-option
+              label="区域二"
+              value="beijing"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="dialogFormVisible = false"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
-import { getCourseListData, delCourseInfo } from '@/api/course/course'
+import { getCourseListData, delCourseInfo, editCourseInfo } from '@/api/course/course'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -259,7 +320,7 @@ const TABLE_COLUMNS = [
   {
     label: '目录名称',
     minWidth: 140,
-    prop: 'catalogName',
+    prop: 'name',
     slot: true
   },
   {
@@ -317,20 +378,9 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false,
+  showIndexColumn: false
 
   // 树形结构懒加载
-  lazy: true,
-  load: async (row, treeNode, resolve) => {
-    try {
-      let items = await getMenuInfo(row.menuId)
-      resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
-    } catch (err) {
-      resolve([])
-    }
-  },
-  rowKey: 'menuId',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 const TABLE_PAGE_CONFIG = {}
 
@@ -339,7 +389,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '请输入目录名称搜索' },
     data: '',
-    field: 'catalogName',
+    field: 'courseName',
     label: '',
     type: 'input'
   }
@@ -352,8 +402,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: true, label: '正常' },
+      { value: false, label: '停用' }
     ]
   },
   {
@@ -362,10 +412,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'teacherId',
     label: '讲师',
     type: 'select',
-    options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
-    ]
+    options: []
   },
   {
     config: { placeholder: '请选择' },
@@ -373,10 +420,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'catalogId',
     label: '所在目录',
     type: 'select',
-    options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
-    ]
+    options: []
   },
   {
     config: { placeholder: '请选择' },
@@ -385,8 +429,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程类型',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: 1, label: '在线' },
+      { value: 2, label: '面授' },
+      { value: 3, label: '直播' }
     ]
   },
   {
@@ -396,8 +441,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '通过条件',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: 'a', label: '教师评定' },
+      { value: 'b', label: '考试通过' },
+      { value: 'c', label: '达到课程学时' }
     ]
   },
   {
@@ -407,8 +453,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '选修类型',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: 1, label: '开放选修' },
+      { value: 2, label: '通过审批' },
+      { value: 3, label: '禁止选修' }
     ]
   },
   {
@@ -418,8 +465,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '是否推荐',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: true, label: '是' },
+      { value: false, label: '否' }
     ]
   },
   {
@@ -428,10 +475,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'createId',
     label: '创建人',
     type: 'select',
-    options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
-    ]
+    options: []
   },
   {
     config: { placeholder: '请选择' },
@@ -440,8 +484,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '标签',
     type: 'select',
     options: [
-      { value: 1, label: '成功' },
-      { value: 0, label: '失败' }
+      { value: 1, label: '标签1' },
+      { value: 2, label: '标签2' },
+      { value: 3, label: '标签3' }
     ]
   }
 ]
@@ -450,7 +495,6 @@ const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
 export default {
-  name: 'Menu',
   // 搜索组件
   components: {
     SeachPopover: () => import('@/components/searchPopOver')
@@ -463,10 +507,12 @@ export default {
 
   data() {
     return {
+      // 移动dialog
+      dialogFormVisible: false,
       // Dialog无数据
       dialogVisible: false,
       // 导航
-      status: 2,
+      status: 1,
       // 表格
       query: {
         name: ''
@@ -476,16 +522,6 @@ export default {
         size: 10,
         total: 0
       },
-      // tableConfig: {
-      //   showHandler: true,
-      //   enableMultiSelect: true,
-      //   enablePagination: true,
-      //   showIndexColumn: false,
-      //   rowKey: 'userId',
-      //   handlerColumn: {
-      //     width: '180'
-      //   }
-      // },
 
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -524,24 +560,6 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  watch: {
-    // isSelect(newVal) {
-    //   if (newVal === 1) {
-    //     this.dialogVisible = true
-    //   } else {
-    //     this.dialogVisible = false
-    //   }
-    // },
-    // activeOrg: function() {
-    //   this.page = {
-    //     currentPage: 1,
-    //     size: 10,
-    //     total: 0
-    //   }
-    //   // this.loadData()
-    // this.getInfo()
-    // }
-  },
   created() {
     this.refreshTableData()
     // this.loadData()
@@ -552,6 +570,58 @@ export default {
     this.getInfo()
   },
   methods: {
+    toTrainDetail() {
+      // console.log(row)
+      // this.$router.push('')
+    },
+
+    // 上架&下架
+    alterIsPutaway(id, i) {
+      // console.log({ id, isPutaway: i })
+      let lang = ''
+      if (i) {
+        lang = '您确定要下架该课程吗？下架后，该课程将不能访问。'
+      } else {
+        lang = '您确定要上架该课程吗？'
+      }
+      this.$confirm(lang, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          editCourseInfo({ id, isPutaway: i }).then(() => {
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+            this.getInfo()
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          })
+        })
+    },
+
+    // 去目录管理
+    toCatalog() {
+      this.$router.push({ path: '/course/catalog' })
+    },
+    // isTop: 0, //是否置顶（0：否；1：是）
+    handleConfig(row, i) {
+      // console.log(({id:row.id,isTop:i}));
+      editCourseInfo({ id: row.id, isTop: i }).then(() => {
+        // console.log(res)
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+        this.getInfo()
+      })
+    },
     // 编辑&删除&移动
     handleCommand(e, row) {
       if (e === 'edit') {
@@ -581,6 +651,7 @@ export default {
       }
       if (e === 'move') {
         // 移动
+        this.dialogFormVisible = true
       }
     },
     //  处理页码改变
@@ -596,22 +667,17 @@ export default {
     handleSearch(searchParams) {
       // this.loadTableData(_.pickBy(searchParams))
       this.getInfo(searchParams)
+      // console.log('------------', searchParams)
     },
 
-    handleRemoveItems(selection) {
-      this.$confirm('确定将选择数据删除?', {
-        type: 'warning'
-      })
-        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
-        .then(() => {
-          // 删除完成后更新视图
-          this.$refs.table.clearSelection()
-          this.refreshTableData()
-        })
+    handleRemoveItems() {
+      // console.log(selection)
     },
 
     // 刷新列表数据
-    refreshTableData() {},
+    refreshTableData() {
+      this.getInfo()
+    },
 
     // 拿数据
     getInfo(courseName) {
@@ -622,14 +688,33 @@ export default {
       let params = {
         currentPage: '',
         size: '',
-        status: '',
-        courseName: ''
+        status: ''
       }
-      params.courseName = courseName
-      params = { ...this.page }
+      params = { ...this.page, ...courseName }
       params.status = this.status
+      // console.log('params', params)
       getCourseListData(params).then((res) => {
         this.tableData = res
+        this.page.total = res.length
+        // window.console.log('+++++++++++', res)
+        // 下拉筛选框
+        SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+        SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+        this.tableData.forEach((item) => {
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
+            value: item.id,
+            label: item.teacherId
+          }) //讲师
+          SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
+            value: item.id,
+            label: item.catalogId
+          }) //所在目录
+          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
+            value: item.id,
+            label: item.createId
+          }) //创建人
+        })
       })
     },
     // 导航
@@ -836,6 +921,9 @@ export default {
   /deep/ #recommend_info {
     padding-left: 15px;
   }
+}
+/deep/.page-wrap[data-v-793409ea] {
+  margin-right: 70px;
 }
 </style>
 <style lang="sass" scoped>
