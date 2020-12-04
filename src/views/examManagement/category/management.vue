@@ -188,6 +188,7 @@ export default {
     handleSelect(key) {
       this.activeIndex = key
       this.searchParams.type = key
+      this.$refs.table.clearSelection()
       this.loadTableData()
     },
     // 权限配置窗口
@@ -228,6 +229,7 @@ export default {
           type: 'success',
           message: '删除成功!'
         })
+        this.$refs.table.clearSelection()
       })
     },
     // 单个删除

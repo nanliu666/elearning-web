@@ -118,7 +118,7 @@ export default {
       form: {
         parentId: '0',
         name: '',
-        type: this.$parent.searchParams.type
+        type: ''
       },
       parentOrgIdLabel: '',
       rules: {
@@ -147,7 +147,13 @@ export default {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
-            postCategory(_.assign(this.form, { createUser: this.userId })).then((res) => {
+            postCategory(
+              _.assign(
+                this.form,
+                { createUser: this.userId },
+                { type: this.$parent.searchParams.type }
+              )
+            ).then((res) => {
               this.$message.success('创建成功')
               if (to === 'refresh') {
                 this.$emit('refresh')
@@ -160,7 +166,7 @@ export default {
               }
             })
           } else {
-            putCategory(this.form).then(() => {
+            putCategory(_.assign(this.form, { type: this.$parent.searchParams.type })).then(() => {
               this.$message.success('修改成功')
               this.$emit('refresh')
             })
