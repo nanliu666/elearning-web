@@ -17,16 +17,18 @@
       >
         <template #attachments>
           <common-upload
-            :limit="uploaderLimit"
             :before-upload="beforeUpload"
             @getValue="getValue"
           >
             <template #default>
-              <div
-                v-if="_.size(formData.attachments) < uploaderLimit"
-                style="display: flex;"
-              >
+              <div style="display: flex;">
                 <el-button>上传</el-button>
+              </div>
+              <div
+                slot="tip"
+                style="color: #a1a8ae; font-size:12px"
+              >
+                不支持上传.exe/.bat格式文件，单个文件大小＜10MB，最多5个文件
               </div>
             </template>
           </common-upload>
@@ -34,6 +36,7 @@
             <li
               v-for="(item, index) in formData.attachments"
               :key="index"
+              style="cursor: pointer;"
             >
               <span
                 class="uploader-file"
@@ -196,13 +199,15 @@ export default {
         introduction: '',
         attachments: []
       },
-      uploaderLimit: 5,
-      submitting: false,
-      hasEdit: false // 用于标记是否进行了修改
+      submitting: false
     }
   },
   beforeRouteEnter(to, from, next) {
     to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
   computed: {
@@ -211,6 +216,9 @@ export default {
       const formData = _.cloneDeep(this.formData)
       formData.introduction = _.escape(formData.introduction)
       return formData
+    },
+    catalogId() {
+      return this.$route.query.catalogId || null
     },
     id() {
       return this.$route.query.id || null
@@ -260,19 +268,14 @@ export default {
         })
         this.formColumns[index + 1] = val === 0 ? UPLOAD_FILE : UPLOAD_INPUT
       }
-    },
-    formData: {
-      deep: true,
-      handler() {
-        this.clearValidate()
-        this.hasEdit = true
-      }
     }
   },
   mounted() {
     this.pageTitle = this.id ? '编辑资源' : '创建资源'
     // TODO: 待自测新增分类后进入创建资源
-    this.formData.catalogId = this.$router.query.catalogId
+    if (this.catalogId) {
+      this.formData.catalogId = this.catalogId
+    }
     this.initData()
   },
   methods: {
@@ -312,10 +315,15 @@ export default {
     // 上传格式校验
     beforeUpload(file) {
       const isLt100M = file.size / 1024 / 1024 < 10
+      const LIMIT = 2
+      const isLimitLength = _.size(this.formData.attachments) < LIMIT
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
       }
-      return isLt100M
+      if (!isLimitLength) {
+        this.$message.error('上传文件数量超过限制!')
+      }
+      return isLt100M && isLimitLength
     },
     // 预览附件
     previewFile(data) {
@@ -357,13 +365,18 @@ export default {
               ? await this.createKnowledgeFun(this._formData)
               : await this.updateKnowledgeFun(this._formData)
             this.$message.success('发布成功')
-            this.hasEdit = false
+            // 去往列表页
             if (!isContinue) {
-              this.handleBack()
+              this.$router.push({ path: '/repository/knowledgeManagement' })
+            } else {
+              // 继续添加
+              this.$refs.form.resetFields()
+              this.formData.introduction = ''
+              // 删除elTree的校验
+              this.$nextTick(() => {
+                this.clearValidate()
+              })
             }
-            this.$refs.form.resetFields()
-            this.formData.introduction = ''
-            this.clearValidate()
           } catch (error) {
             this.$message.error(error.message)
           } finally {
@@ -388,9 +401,6 @@ export default {
         this.$set(this.formData, key, data[key])
       }
       this.formData.introduction = _.unescape(this.formData.introduction) // 反转义获取 dom
-      // 修改了formData 重置标记
-      this.$nextTick(() => (this.hasEdit = false))
-      return data
     },
     validate(...args) {
       // const BRIEF_MIN_LEN = 10 // 限制最小输入长度

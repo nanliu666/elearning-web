@@ -75,8 +75,12 @@ export default {
           return true
         }
         if (parentOrg && parentOrg.children) {
+          // 同一层级不能有两个相同的节点
           for (let i = 0; i < parentOrg.children.length; i++) {
-            if (parentOrg.children[i].name === draggingNode.data.name) {
+            if (
+              parentOrg.children[i].name === draggingNode.data.name &&
+              dropNode.data.children[i].id !== draggingNode.data.id
+            ) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -86,9 +90,13 @@ export default {
         return true
       } else if (type === 'inner') {
         // 插入节点
+        // 同一层级不能有两个相同的节点
         if (dropNode.data.children) {
           for (let i = 0; i < dropNode.data.children.length; i++) {
-            if (dropNode.data.children[i].name === draggingNode.data.name) {
+            if (
+              dropNode.data.children[i].name === draggingNode.data.name &&
+              dropNode.data.children[i].id !== draggingNode.data.id
+            ) {
               this.messageFun()
               this.sameNameMessage = true
               return false

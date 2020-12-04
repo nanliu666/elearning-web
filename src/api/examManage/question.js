@@ -10,3 +10,20 @@ import { del, get, post, put } from '@/router/axios'
  * @param {String} params.search
  * */
 export const getQuestionList = (params) => get('/manage/v1/question/list', params)
+
+/**
+ * 新增试题
+ * @param {*} params
+ */
+export const createQuestion = (params) => post('/manage/v1/question', params)
+/**
+ * 修改试题
+ * @param {*} params
+ */
+export const modifyQuestion = (params) => put('/manage/v1/question', params)
+
+/**
+ * 获取试题
+ * @param {*} params
+ */
+export const getQuestion = (params) => get('/manage/v1/question', params)

@@ -1,6 +1,5 @@
 <template>
   <el-dialog
-    v-loading="loading"
     :title="type === 'create' ? '新建组织' : type === 'createChild' ? '新建子组织' : '编辑组织'"
     :visible="visible"
     width="550px"
@@ -252,8 +251,7 @@ export default {
       leaderList: [],
       loadLeader: false,
       noMoreLeader: false,
-      leaderPageNo: 1,
-      loading: false
+      leaderPageNo: 1
     }
   },
   created() {
@@ -327,26 +325,20 @@ export default {
     submitAndCreate() {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
-          this.loading = true
           let form = _.cloneDeep(this.form)
           form.leaders = _.map(form.leaders, (item) => ({ userId: item }))
-          createOrg(form)
-            .then(() => {
-              this.$message.success('创建成功')
-              this.form = { orgType: '' }
-              this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
-
-              this.loadOrgTree()
-              this.parentOrgIdLabel = ''
-              this.$emit('refresh')
-              this.$nextTick(() => {
-                this.$refs.ruleForm.clearValidate(...arguments)
-              })
-              this.loading = false
+          createOrg(form).then(() => {
+            this.$message.success('创建成功')
+            this.form = { orgType: '' }
+            this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
+            this.$refs.ruleForm.clearValidate()
+            this.loadOrgTree()
+            this.parentOrgIdLabel = ''
+            this.$emit('refresh')
+            this.$nextTick(() => {
+              this.$refs.ruleForm.clearValidate(...arguments)
             })
-            .catch(() => {
-              this.loading = false
-            })
+          })
         } else {
           this.$message.error(obj[Object.keys(obj)[0]][0].message)
           return false
@@ -358,29 +350,18 @@ export default {
         if (valid) {
           let form = _.cloneDeep(this.form)
           form.leaders = _.map(form.leaders, (item) => ({ userId: item }))
-          this.loading = true
           if (this.type !== 'edit') {
-            createOrg(form)
-              .then(() => {
-                this.$message.success('创建成功')
-                this.$emit('refresh')
-                this.loading = false
-                this.$emit('changevisible', false)
-              })
-              .catch(() => {
-                this.loading = false
-              })
+            createOrg(form).then(() => {
+              this.$message.success('创建成功')
+              this.$emit('refresh')
+              this.$emit('changevisible', false)
+            })
           } else {
-            editOrg(form)
-              .then(() => {
-                this.$message.success('修改成功')
-                this.$emit('refresh')
-                this.loading = false
-              })
-              .catch(() => {
-                this.loading = false
-              })
-            this.$emit('changevisible', false)
+            editOrg(form).then(() => {
+              this.$message.success('修改成功')
+              this.$emit('refresh')
+              this.$emit('changevisible', false)
+            })
           }
         } else {
           this.$message.error(obj[Object.keys(obj)[0]][0].message)

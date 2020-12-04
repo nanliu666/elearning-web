@@ -1,14 +1,12 @@
 <template>
-  <div>
-    <div class="tinymce-editor">
-      <editor
-        :value="value"
-        :init="init"
-        :disabled="disabled"
-        @input="$emit('input', $event)"
-        @onClick="onClick"
-      />
-    </div>
+  <div class="tinymce-editor">
+    <editor
+      :value="value"
+      :init="init"
+      :disabled="disabled"
+      @input="handleInput($event)"
+      @onClick="onClick"
+    />
   </div>
 </template>
 
@@ -34,11 +32,13 @@ import 'tinymce/plugins/contextmenu'
 import 'tinymce/plugins/imagetools'
 import { uploadQiniu } from '@/util/uploadQiniu'
 
+import Emitter from '@/mixins/elFormEmitter'
 export default {
   name: 'Tinymce',
   components: {
     Editor
   },
+  mixins: [Emitter],
   props: {
     value: {
       type: String,
@@ -131,6 +131,10 @@ export default {
     // 需要什么事件可以自己增加
     onClick(e) {
       this.$emit('onClick', e, tinymce)
+    },
+    handleInput(val) {
+      this.$emit('input', val)
+      this.dispatch('ElFormItem', 'el.form.change', val)
     }
   }
 }

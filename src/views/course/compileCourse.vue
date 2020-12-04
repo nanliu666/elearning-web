@@ -544,9 +544,10 @@ export default {
         }
       })
     },
+
     // 删除
     deleteContent(id) {
-      delCourseContent(id)
+      delCourseContent({ contentId: id })
         .then(() => {
           this.$message({
             message: '该章节已成功删除',
@@ -560,9 +561,13 @@ export default {
 
     // 拿数据
     getInfo() {
-      getCourseList(1).then((res) => {
-        this.ruleForm = { ...this.ruleForm } = res
-      })
+      getCourseList({ courseId: 1 })
+        .then((res) => {
+          this.ruleForm = { ...this.ruleForm } = res
+        })
+        .catch((err) => {
+          window.console.log(err)
+        })
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
@@ -684,7 +689,7 @@ export default {
     }
   }
   /deep/.el-form-item__label {
-    width: 350px;
+    width: 450px;
     text-align: left;
   }
   .switch_box {
