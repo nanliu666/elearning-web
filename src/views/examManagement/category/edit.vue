@@ -74,7 +74,7 @@
       <el-button
         size="medium"
         @click="submitAndCreate"
-      >完成并创建课程</el-button>
+      >完成并创建试题</el-button>
     </span>
     <span
       v-else
@@ -96,11 +96,8 @@
 
 <script>
 const CLIENT_TYPE = ['题库', '试卷/考试']
-import {
-  updateKnowledgeCatalog,
-  addKnowledgeCatalog,
-  getKnowledgeCatalogList
-} from '@/api/knowledge/knowledge'
+import { getCategoryList, putCategory, postCategory } from '@/api/examManage/category'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -120,7 +117,9 @@ export default {
         Group: false
       },
       form: {
-        parentId: ''
+        parentId: '0',
+        name: '',
+        type: this.$parent.searchParams.type
       },
       parentOrgIdLabel: '',
       rules: {
@@ -130,9 +129,18 @@ export default {
       loading: false
     }
   },
+  computed: {
+    ...mapGetters(['userId'])
+  },
   methods: {
+    // 当主页面修改后，编辑页面的加载函数修改
     loadOrgTree() {
-      getKnowledgeCatalogList().then((res) => {
+      let paramsform = {
+        parentId: '0',
+        name: '',
+        type: this.$parent.searchParams.type
+      }
+      getCategoryList(paramsform).then((res) => {
         this.orgTree = res
       })
     },
@@ -144,7 +152,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addKnowledgeCatalog(this.form)
+            postCategory(_.assign(this.form, { createUser: this.userId }))
               .then(() => {
                 this.$message.success('创建成功')
                 this.$emit('refresh')
@@ -156,7 +164,7 @@ export default {
               })
           } else {
             this.loading = true
-            updateKnowledgeCatalog(this.form)
+            putCategory(this.form)
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
