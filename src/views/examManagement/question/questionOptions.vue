@@ -4,45 +4,102 @@
       v-for="(option, index) in value"
       :key="option.key"
     >
-      <el-radio
-        v-if="!isCheckBox"
-        v-model="option.isCorrect"
-        :label="1"
-        @change="(val) => handleRadioCheck(val, option)"
-      >
-        {{ '' }}
-      </el-radio>
-      <el-checkbox
-        v-if="isCheckBox"
-        v-model="option.isCorrect"
-        :true-label="1"
-      >
-        {{ '' }}
-      </el-checkbox>
-      <el-input
-        v-model="option.content"
-        maxlength="150"
-        placeholder="请输入选项内容"
-      ></el-input>
-      <i
-        v-if="value.length > 2"
-        class="el-icon-remove-outline"
-        @click="handleRemoveOption(option)"
-      ></i>
-      <i
-        v-if="index === value.length - 1 && value.length !== 10"
-        class="el-icon-circle-plus-outline"
-        @click="handleAddOption"
-      ></i>
+      <div class="wrap">
+        <el-radio
+          v-if="!isCheckBox"
+          v-model="option.isCorrect"
+          :label="1"
+          @change="(val) => handleRadioCheck(val, option)"
+        >
+          {{ '' }}
+        </el-radio>
+        <el-checkbox
+          v-if="isCheckBox"
+          v-model="option.isCorrect"
+          :true-label="1"
+        >
+          {{ '' }}
+        </el-checkbox>
+        <el-input
+          v-model="option.content"
+          maxlength="150"
+          placeholder="请输入选项内容"
+        ></el-input>
+        <i
+          v-if="value.length > 2"
+          class="iconimage_icon_deletetheselectedentry1 iconfont"
+          @click="handleRemoveOption(option)"
+        ></i>
+        <i
+          v-if="index === value.length - 1 && value.length !== 10"
+          class="iconimage_icon_Addoptions1 iconfont"
+          @click="handleAddOption"
+        ></i>
+      </div>
+      <div class="upload__wrapper">
+        <common-upload
+          :value="option.fileList"
+          :before-upload="(file) => beforeUpload(file, option)"
+          :limit="1"
+          @input="(val) => handleUpload(val, option)"
+        >
+          <template #default>
+            <el-button
+              size="medium"
+              type="text"
+              :style="`padding: 0; ${_.size(option.fileList) !== 0 ? 'color:#C0C4CC;' : ''}`"
+              @click="handleClick($event, option)"
+            >
+              添加图片
+            </el-button>
+            <ul
+              v-if="option.fileList"
+              class="upload__files"
+              @click="handleClick($event, option)"
+            >
+              <li
+                v-for="(item, i) in option.fileList"
+                :key="i"
+              >
+                <el-image
+                  style="width: 64px; height: 64px"
+                  :src="item.url"
+                >
+                </el-image>
+                <div class="upload__cover">
+                  <i
+                    class="iconimage_icon_Preview1 iconfont"
+                    @click.stop="handlePreviewImage(option)"
+                  ></i>
+                  <i
+                    class="iconimage_icon_delete iconfont"
+                    @click.stop="handleRemoveAttachment(option)"
+                  ></i>
+                </div>
+              </li>
+            </ul>
+          </template>
+        </common-upload>
+      </div>
     </li>
+    <image-viewer
+      :url-list="[viewingUrl]"
+      :visible.sync="viewing"
+    ></image-viewer>
   </ul>
 </template>
 
 <script>
 import { createUniqueID } from '@/util/util'
 import Emitter from '@/mixins/elFormEmitter'
+import CommonUpload from '@/components/common-upload/commonUpload'
+import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
   name: 'QuestionOptions',
+  components: {
+    CommonUpload,
+    ImageViewer
+  },
   mixins: [Emitter],
   props: {
     value: {
@@ -54,7 +111,47 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      viewing: false,
+      viewingUrl: ''
+    }
+  },
   methods: {
+    handleClick(e, item) {
+      if (_.size(item.fileList) !== 0) {
+        e.stopPropagation()
+      }
+    },
+    handleUpload(val, item) {
+      item.fileList = val
+      item.url = _.head(val).url
+    },
+    beforeUpload(file, option) {
+      const regx = /^.*\.(png|jpg|jpeg)$/
+      const isLt5M = file.size / 1024 / 1024 < 5
+      if (option.fileList.length !== 0) {
+        this.$message.error('选项图片只能上传一张')
+        return false
+      }
+      if (!isLt5M) {
+        this.$message.error('上传附件大小不能超过 5MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
+        return false
+      }
+      return true
+    },
+    handleRemoveAttachment(option) {
+      option.fileList = []
+      option.url = ''
+    },
+    handlePreviewImage(option) {
+      this.viewing = true
+      this.viewingUrl = option.url
+    },
     handleRadioCheck(val, option) {
       this.value.forEach((item) => {
         if (item.key !== option.key) {
@@ -75,6 +172,7 @@ export default {
         key: createUniqueID(),
         content: '',
         isCorrect: 0,
+        fileList: [],
         url: ''
       })
     }
@@ -85,6 +183,18 @@ export default {
 <style lang="scss" scoped>
 .question-options {
   li {
+    margin-bottom: 12px;
+    .wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      i {
+        margin-left: 10px;
+        color: #8c9195;
+        font-size: 20px;
+        cursor: pointer;
+      }
+    }
     .el-radio {
       margin-right: 10px;
     }
@@ -94,14 +204,39 @@ export default {
     .el-input {
       width: 60%;
     }
-    i {
-      font-size: 24px;
-      margin-left: 8px;
-      cursor: pointer;
-    }
+  }
+  .upload__wrapper {
+    padding-left: 34px;
+  }
+  .upload__files {
     display: flex;
-    align-items: center;
-    margin-bottom: 12px;
+    margin-top: 8px;
+    li {
+      margin-right: 10px;
+      position: relative;
+      height: 64px;
+      width: 64px;
+      border-radius: 4px;
+      overflow: hidden;
+      .upload__cover {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        display: none;
+        top: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: space-evenly;
+        i {
+          color: #fff;
+        }
+      }
+      &:hover {
+        .upload__cover {
+          display: flex;
+        }
+      }
+    }
   }
 }
 </style>

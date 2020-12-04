@@ -1,5 +1,5 @@
 <template>
-  <div class="question-edit">
+  <div class="question-edit fill">
     <page-header :title="title">
     </page-header>
     <basic-container block>
@@ -54,58 +54,25 @@
               v-if="form.type === QUESTION_TYPE_BLANK"
               #content-label=""
             >
-              题干（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）
+              题干
+              <span
+                class="tips"
+              >（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）</span>
             </template>
             <template
               v-if="form.type === QUESTION_TYPE_BLANK"
               #answer-label=""
             >
-              标准答案（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）
+              标准答案
+              <span
+                class="tips"
+              >（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）</span>
             </template>
             <template slot="attachments">
-              <common-upload
-                v-model="uploadFileList"
-                style="margin-bottom:20px"
-                :before-upload="beforeUpload"
-                multiple
-                :limit="5"
-              >
-                <template #default>
-                  <el-button
-                    size="medium"
-                    type="text"
-                    :style="`padding: 0; ${uploadFileList.length >= 5 ? 'color:#C0C4CC;' : ''}`"
-                    @click="handleUpload($event)"
-                  >
-                    添加图片
-                  </el-button>
-                  <ul
-                    class="upload__files"
-                    @click="handleUpload($event)"
-                  >
-                    <li
-                      v-for="(item, index) in uploadFileList"
-                      :key="index"
-                    >
-                      <el-image
-                        style="width: 64px; height: 64px"
-                        :src="item.url"
-                      >
-                      </el-image>
-                      <div class="upload__cover">
-                        <i
-                          class="el-icon-view"
-                          @click.stop="handlePreviewImage(index)"
-                        ></i>
-                        <i
-                          class="el-icon-delete"
-                          @click.stop="handleRemoveAttachment(index)"
-                        ></i>
-                      </div>
-                    </li>
-                  </ul>
-                </template>
-              </common-upload>
+              <image-uploader
+                ref="uploader"
+                v-model="form.attachments"
+              />
             </template>
             <template #options="">
               <question-options
@@ -130,13 +97,13 @@
             <el-button
               type="primary"
               size="medium"
-              style="padding:0"
               @click="handleSubmit"
             >
               保存
             </el-button>
             <el-button
               size="medium"
+              style="margin-left:16px;"
               @click="handleSubmit"
             >
               完成并继续创建
@@ -145,11 +112,6 @@
         </el-col>
       </el-row>
     </basic-container>
-    <image-viewer
-      :url-list="_.map(uploadFileList, 'url')"
-      :visible.sync="imageViewing"
-      :initial-index="imageIndex"
-    ></image-viewer>
   </div>
 </template>
 
@@ -164,10 +126,11 @@ import {
   // QUESTION_TYPE_GROUP
 } from '@/const/examMange'
 import QuestionOptions from './questionOptions'
+import ImageUploader from './imageUploader'
 import { createUniqueID } from '@/util/util'
+import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS } from './config'
 import { createQuestion, getQuestion } from '@/api/examManage/question'
-import CommonUpload from '@/components/common-upload/commonUpload'
-import ImageViewer from '@/components/image-viewer/ImageViewer'
+
 const BASIC_COLUMNS = [
   { prop: 'title1', span: 24, itemType: 'slotout' },
   {
@@ -235,108 +198,12 @@ const BASIC_COLUMNS = [
   },
   { span: 24, prop: 'title2', itemType: 'slotout' }
 ]
-/**
- * 选择题配置
- */
-const SELECT_COLUMNS = [
-  {
-    prop: 'content',
-    span: 24,
-    itemType: 'input',
-    type: 'textarea',
-    label: '题干',
-    required: true,
-    resize: 'none',
-    rows: 6
-  },
-  { prop: 'attachments', span: 24, itemType: 'slotout' },
-  {
-    prop: 'options',
-    span: 24,
-    itemType: 'slot',
-    label: '选项',
-    required: true,
-    rules: [
-      {
-        validator: (rule, value, callback) => {
-          if (_.some(value, { content: '' })) {
-            return callback(new Error('选项内容请填写完整'))
-          } else if (!_.some(value, { isCorrect: 1 })) {
-            return callback(new Error('请设置正确选项'))
-          }
-          callback()
-        },
-        trigger: 'change'
-      }
-    ]
-  },
-  {
-    prop: 'analysis',
-    span: 24,
-    itemType: 'input',
-    type: 'textarea',
-    label: '试题分析',
-    resize: 'none',
-    rows: 6
-  }
-]
-/**
- * 简答题配置
- */
-const SHORT_COLUMNS = [
-  {
-    prop: 'content',
-    span: 24,
-    itemType: 'richtext',
-    label: '题干',
-    height: 500,
-    required: true
-  },
-  {
-    prop: 'analysis',
-    span: 24,
-    itemType: 'input',
-    type: 'textarea',
-    label: '试题分析',
-    resize: 'none',
-    rows: 6
-  }
-]
-/**
- * 填空题配置
- */
-const FILL_COLUMNS = [
-  {
-    prop: 'content',
-    span: 24,
-    itemType: 'richtext',
-    label: '题干',
-    height: 500,
-    required: true
-  },
-  {
-    prop: 'answer',
-    span: 24,
-    itemType: 'input',
-    label: '正确答案',
-    required: true
-  },
-  {
-    prop: 'analysis',
-    span: 24,
-    itemType: 'input',
-    type: 'textarea',
-    label: '试题分析',
-    resize: 'none',
-    rows: 6
-  }
-]
+
 export default {
   name: 'QuestionEdit',
   components: {
     QuestionOptions,
-    CommonUpload,
-    ImageViewer
+    ImageUploader
   },
   data() {
     return {
@@ -351,14 +218,11 @@ export default {
         attachments: [],
         timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
         options: [
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '' },
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '' },
-          { key: createUniqueID(), content: '', isCorrect: 0, url: '' }
+          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
+          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
+          { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] }
         ]
       },
-      uploadFileList: [],
-      imageViewing: false,
-      imageIndex: 0,
       columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS]
     }
   },
@@ -380,13 +244,6 @@ export default {
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER
   },
   watch: {
-    uploadFileList(val) {
-      this.$set(
-        this.form,
-        'attachments',
-        val.map((item) => ({ fileUrl: item.url, fileName: item.localName }))
-      )
-    },
     'form.type'(val, oldVal) {
       if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
         this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
@@ -424,35 +281,6 @@ export default {
         }
       })
     },
-    handleUpload(e) {
-      if (this.uploadFileList.length >= 5) {
-        e.stopPropagation()
-      }
-    },
-    beforeUpload(file) {
-      const regx = /^.*\.(png|jpg|jpeg)$/
-      const isLt5M = file.size / 1024 / 1024 < 5
-      if (this.uploadFileList.length >= 5) {
-        this.$message.error('上传附件不能超过5张')
-        return false
-      }
-      if (!isLt5M) {
-        this.$message.error('上传附件大小不能超过 5MB!')
-        return false
-      }
-      if (!regx.test(file.name)) {
-        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
-        return false
-      }
-      return true
-    },
-    handleRemoveAttachment(index) {
-      this.uploadFileList.splice(index, 1)
-    },
-    handlePreviewImage(index) {
-      this.imageViewing = true
-      this.imageIndex = index
-    },
     handleSubmit() {
       this.$refs.form.validate().then(() => {
         let data = _.pick(this.form, [
@@ -483,10 +311,6 @@ export default {
         if (res.type == QUESTION_TYPE_BLANK) {
           this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
         }
-        this.uploadFileList = _.map(res.attachments, (item) => ({
-          url: item.fileUrl,
-          localName: item.fileName
-        }))
       })
     }
   }
@@ -495,42 +319,16 @@ export default {
 
 <style lang="scss" scoped>
 .basic-container--block {
-  height: calc(100% - 92px);
+  height: initial;
   min-height: calc(100% - 92px);
 }
-
-/deep/ .el-upload {
-  text-align: left;
-  display: block;
-}
-.upload__files {
-  display: flex;
-  margin-top: 8px;
-  li {
-    margin-right: 10px;
-    position: relative;
-    height: 64px;
-    width: 64px;
-    border-radius: 4px;
-    overflow: hidden;
-    .upload__cover {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      display: none;
-      top: 0;
-      background-color: rgba(0, 0, 0, 0.6);
-      align-items: center;
-      justify-content: space-evenly;
-      i {
-        color: #fff;
-      }
-    }
-    &:hover {
-      .upload__cover {
-        display: flex;
-      }
-    }
+.question-edit {
+  .tips {
+    font-size: 12px;
+    color: rgba(0, 11, 21, 0.25);
+  }
+  .page-footer {
+    text-align: center;
   }
 }
 </style>
