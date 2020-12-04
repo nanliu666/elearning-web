@@ -156,7 +156,6 @@
               </el-select>
             </el-form-item>
           </el-form>
-          {{ form }}
           <div
             slot="footer"
             class="dialog-footer"
@@ -388,7 +387,7 @@
 </template>
 
 <script>
-import { getCourseListData, delCourseInfo } from '@/api/course/course'
+import { delCourseInfo } from '@/api/course/course'
 import {
   listTeacherCategory,
   addCatalog,
@@ -947,22 +946,6 @@ export default {
 
     // 刷新列表数据
     refreshTableData() {},
-
-    // 拿数据
-    getInfo(courseName) {
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
-      }
-
-      params = { ...this.page, ...courseName }
-      params.status = this.status
-      getCourseListData(params).then((res) => {
-        this.tableData = res
-        this.page.total = res.length
-      })
-    },
 
     // tree
     filterNode(value, data) {
