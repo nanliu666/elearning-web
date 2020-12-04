@@ -552,14 +552,40 @@ const res = {
             ]
           },
           {
-            menuId: '1259074567456731235058',
+            menuId: '1567454768323454620582323',
             menuName: '试卷管理',
             menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/course/courseDraft',
+            path: '/examManagement/testPaper/testPaper',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1567454768323454620582323',
+            menuName: '试卷管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/testPaper/randomTestPaper',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1567454768323454620582323',
+            menuName: '新建手工试卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/testPaper/handmadeTestPaper',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
