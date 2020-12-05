@@ -114,6 +114,12 @@
         :columns="examine.columns"
         :data="examine.data"
       >
+        <template #examTime="{row}">
+          {{ row.examTime[0] }} 至 {{ row.examTime[1] }}
+        </template>
+        <template #reckonTime="{row}">
+          {{ row.reckonTime === 0 ? '不计时' : row.reckonTime }}
+        </template>
         <template #handler="{row}">
           <el-button
             type="text"
@@ -149,9 +155,9 @@
 </template>
 
 <script>
-import EditScheduleDrawer from './editScheduleDrawer'
-import EditCourseDrawer from './editCourseDrawer'
-import EditExamineDrawer from './editExamineDrawer'
+import EditScheduleDrawer from './drawerComponents/editScheduleDrawer'
+import EditCourseDrawer from './drawerComponents/editCourseDrawer'
+import EditExamineDrawer from './drawerComponents/editExamineDrawer'
 const ScheduleColumns = [
   {
     prop: 'todoTime',
@@ -163,20 +169,20 @@ const ScheduleColumns = [
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      if (record.type === '1') {
-        return `【面授课程】${record.courseName}`
+      if (record.type === 1) {
+        return `【面授课程】${_.get(record, 'course', '')}`
       } else {
-        return `【活动】${record.theme}`
+        return `【活动】${_.get(record, 'theme', '')}`
       }
     }
   },
   {
     prop: 'lecturerName',
     formatter(record) {
-      if (record.type === '1') {
-        return `讲师：${record.lecturerName}`
+      if (record.type === 1) {
+        return `讲师：${_.get(record, 'lecturerName', '')}`
       } else {
-        return `主持人：${record.lecturerName}`
+        return `主持人：${_.get(record, 'lecturerName', '')}`
       }
     }
   },
@@ -200,7 +206,7 @@ const CourseColumns = [
     width: 220
   },
   {
-    prop: 'courseName',
+    prop: 'course',
     label: '关联课程',
     minWidth: 150
   },
@@ -215,9 +221,9 @@ const CourseConfig = {
   handlerColumn: { label: '操作', width: 150 }
 }
 const TestColumns = [
-  { prop: 'date', label: '考试日期', width: 220 },
-  { prop: 'tests', label: '关联考试', minWidth: 150 },
-  { prop: 'time', label: '考试时间(分钟)' }
+  { prop: 'examTime', label: '考试日期', slot: true, width: 220 },
+  { prop: 'testPaper', label: '关联考试', minWidth: 150 },
+  { prop: 'reckonTime', slot: true, label: '考试时间(分钟)' }
 ]
 const TestConfig = {
   showHandler: true,
@@ -260,8 +266,8 @@ export default {
   },
   computed: {
     scheduleList() {
-      return _(this.schedule.data)
-        .groupBy(this.schedule.data, 'todoDate')
+      return _.chain(this.schedule.data)
+        .groupBy('todoDate')
         .map((list) => ({
           date: list[0].todoDate,
           list: _.sortBy(list, (i) => i.todoTime && i.todoTime[0])
@@ -285,8 +291,15 @@ export default {
       this.examine.drawerVisible = true
     },
     // 考试安排提交后
-    examineSubmit(data) {
-      this.examine.data.push(data)
+    examineSubmit(data, type) {
+      if (type == 'add') {
+        this.examine.data.push(data)
+      } else {
+        let index = _.findIndex(this.examine.data, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.examine.data, index, data)
+      }
     },
     // 删除考试安排
     handleDeleteExamine(row) {
@@ -299,8 +312,15 @@ export default {
       this.course.drawerVisible = true
     },
     // 在线课程提交后
-    courseSubmit(data) {
-      this.course.data.push(data)
+    courseSubmit(data, type) {
+      if (type == 'add') {
+        this.course.data.push(data)
+      } else {
+        let index = _.findIndex(this.course.data, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.course.data, index, data)
+      }
     },
     // 删除在线课程
     handleDeleteCourse(row) {

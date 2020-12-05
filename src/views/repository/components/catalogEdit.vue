@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-loading="loading"
-    :title="type === 'create' ? '新建目录' : type === 'createChild' ? '新建子目录' : '编辑目录'"
+    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="550px"
     :modal-append-to-body="false"
@@ -16,7 +16,7 @@
       class="newOrgDailog"
     >
       <el-form-item
-        label="目录名称"
+        label="分类名称"
         prop="name"
       >
         <el-input
@@ -24,7 +24,7 @@
           placeholder="请输入"
         />
       </el-form-item>
-      <el-form-item label="上级目录">
+      <el-form-item label="上级分类">
         <el-col>
           <el-select
             v-model="form.parentId"
@@ -50,7 +50,7 @@
             </el-option>
           </el-select>
           <div class="select-tips">
-            可通过选择上级目录为其构建子目录
+            可通过选择上级分类为其构建子分类
           </div>
         </el-col>
       </el-form-item>
@@ -68,7 +68,7 @@
       <el-button
         size="medium"
         @click="submitAndCreate"
-      >完成并创建课程</el-button>
+      >完成并创建资源</el-button>
     </span>
     <span
       v-else
@@ -115,7 +115,7 @@ export default {
       },
       parentOrgIdLabel: '',
       rules: {
-        name: [{ required: true, message: '请输入目录名称', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
       orgTree: [],
       loading: false
@@ -128,19 +128,29 @@ export default {
       })
     },
     // 完成并创建课程
-    submitAndCreate() {},
+    submitAndCreate() {
+      this.submit('toCreate')
+    },
     // 提交
-    submit() {
+    submit(type = 'add') {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
             addKnowledgeCatalog(this.form)
-              .then(() => {
+              .then((res) => {
                 this.$message.success('创建成功')
-                this.$emit('refresh')
                 this.loading = false
                 this.$emit('changevisible', false)
+                if (type === 'add') {
+                  this.$emit('refresh')
+                } else {
+                  // TODO: 需要后端补充分类id
+                  this.$router.push({
+                    path: '/repository/knowledgeEdit',
+                    query: { catalogId: res.id }
+                  })
+                }
               })
               .catch(() => {
                 this.loading = false
@@ -164,14 +174,14 @@ export default {
         }
       })
     },
-    // 新建目录
+    // 新建分类
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
     },
-    // 新建子目录
+    // 新建子分类
     createChild(row) {
       this.type = 'createChild'
       this.form = _.cloneDeep(row)

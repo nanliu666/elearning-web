@@ -207,6 +207,7 @@ export default {
       {
         itemType: 'input',
         label: '新闻标题',
+        maxlength: 32,
         prop: 'title',
         required: true,
         span: 24
@@ -222,7 +223,13 @@ export default {
         itemType: 'slot',
         label: '正文',
         prop: 'content',
-        required: true,
+        rules: [
+          {
+            required: true,
+            message: '请填写正文',
+            trigger: 'blur'
+          }
+        ],
         span: 24
       },
       {

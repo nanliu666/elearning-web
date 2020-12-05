@@ -67,7 +67,7 @@
           </div>
         </template>
         <template #status="{row}">
-          {{ row.status === 0 ? '已上架' : '已下架' }}
+          {{ row.status === '0' ? '已上架' : '已下架' }}
         </template>
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
@@ -208,7 +208,7 @@ const TABLE_COLUMNS = [
     maxWidth: 100
   },
   {
-    label: '所在目录',
+    label: '所在分类',
     prop: 'catalogName',
     minWidth: 100
   },
@@ -270,7 +270,7 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'treeSelect',
     field: 'catalogId',
-    label: '所在目录',
+    label: '所在分类',
     data: '',
     config: {
       selectParams: {

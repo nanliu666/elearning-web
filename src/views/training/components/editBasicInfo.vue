@@ -23,6 +23,9 @@
             <tinymce v-model="formData.introduction" />
           </div>
         </template>
+        <template #trainObjectsList>
+          <SelectUser v-model="formData.trainObjectsList"></SelectUser>
+        </template>
       </common-form>
     </section>
   </div>
@@ -30,8 +33,8 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList } from '@/api/system/user'
-
+import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
+import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 const personOptionProps = {
   label: 'name',
   value: 'name',
@@ -39,7 +42,7 @@ const personOptionProps = {
 }
 export default {
   name: 'EditBasicInfo',
-  components: { lazySelect },
+  components: { lazySelect, SelectUser },
   data() {
     const validMobile = function(rule, value, callback) {
       if (!/^1[0-9]{10}$/.test(value)) {
@@ -65,16 +68,7 @@ export default {
           itemType: 'select',
           label: '分类',
           prop: 'categoryId',
-          options: [
-            {
-              id: '12344',
-              name: '测试'
-            },
-            {
-              id: '1232344',
-              name: '生产'
-            }
-          ],
+          options: [],
           props: {
             label: 'name',
             value: 'id'
@@ -103,10 +97,11 @@ export default {
           offset: 2
         },
         {
-          itemType: 'select',
+          itemType: 'slot',
           label: '培训对象',
           prop: 'trainObjectsList',
-          options: [''],
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
+          options: [],
           required: true,
           span: 11,
           offset: 0
@@ -145,7 +140,7 @@ export default {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
-          options: [''],
+          options: [],
           required: true,
           span: 11,
           offset: 2
@@ -161,7 +156,7 @@ export default {
             {
               required: true,
               message: '请输入手机号码',
-              trigger: 'blur'
+              trigger: 'change'
             },
             {
               required: true,
@@ -193,7 +188,7 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
-          options: [''],
+          options: [],
           required: true,
           span: 24,
           offset: 0
@@ -204,12 +199,13 @@ export default {
         trainName: '',
         categoryId: '',
         trainTime: '',
-        people: '',
-        trainObjectsList: 'sgs',
+        people: 0,
+        trainObjectsList: [],
         trainWay: 3,
         address: '',
         contactPhone: '',
         sponsor: '',
+        organizer: '',
         introduction: ''
       }
     }
@@ -221,9 +217,23 @@ export default {
       },
       deep: true,
       immediate: true
+    },
+    'formData.categoryId': {
+      handler(val) {
+        this.formData.categoryId = _.isNumber(val) ? val : Number(val)
+      },
+      deep: true
     }
   },
+  mounted() {
+    this.getCatalogs()
+  },
   methods: {
+    getCatalogs() {
+      getTrainGetCatalogs().then((res) => {
+        this.infoFormColumns.find((it) => it.prop === 'categoryId').options = res
+      })
+    },
     getData() {
       return new Promise((resolve, reject) => {
         this.$refs['form']
@@ -233,7 +243,6 @@ export default {
           })
           .catch(() => {
             reject()
-            this.$emit('jump', 'basicInfo')
           })
       })
     },

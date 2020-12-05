@@ -1,7 +1,10 @@
 <template>
-  <div>
+  <div class="radio-input-box">
     <el-radio :label="innerValue">
-      <span style="margin-right: 15px">{{ labelText }}</span>
+      <span
+        class="label-text"
+        style="margin-right: 15px;"
+      >{{ labelText }}</span>
       <span v-if="innerValue === value">
         {{ textBefore }}
         <el-input
@@ -70,7 +73,6 @@ export default {
   },
   watch: {
     innerValue(val) {
-      // console.log(123)
       this.$emit('input', val)
     }
   },
@@ -78,8 +80,24 @@ export default {
     inputNumber(value) {
       value = value.replace(/[^\d]/g, '')
       this.$emit('update:number', parseInt(value))
-      // this.value.passScope =value
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.radio-input-box {
+  .el-radio {
+    display: flex;
+    align-items: center;
+    .label-text {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    /deep/ .el-radio__label {
+      display: flex;
+    }
+  }
+}
+</style>

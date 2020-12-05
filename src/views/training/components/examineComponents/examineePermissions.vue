@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const switchConfig = [
   {
     label: '允许考生查看本机资料(开卷考试)',
@@ -18,7 +18,6 @@ const switchConfig = [
     label: '允许考生查看成绩',
     prop: 'openResults',
     expand: {
-      defaultValue: 0,
       pre: '考生在',
       before: '天内可以查看成绩（0代表永久）'
     }
@@ -44,6 +43,17 @@ const switchConfig = [
     prop: 'isExamine'
   }
 ]
+const defaultValue = {
+  id: '',
+  isDecoil: false,
+  openResults: false,
+  openAnswerSheet: false,
+  selfMarking: false,
+  publicAnswers: false,
+  openEntrance: false,
+  isExamine: false,
+  openResultsValue: 0 // 默认值0，表示永久
+}
 export default {
   name: 'ExamineePermissions',
   components: {
@@ -52,15 +62,12 @@ export default {
   data() {
     return {
       switchConfig,
-      model: {
-        isDecoil: 0,
-        openResults: 0,
-        openAnswerSheet: 0,
-        selfMarking: 0,
-        publicAnswers: 0,
-        openEntrance: 0,
-        isExamine: 0
-      }
+      model: _.cloneDeep(defaultValue)
+    }
+  },
+  methods: {
+    resetFields() {
+      this.model = _.cloneDeep(defaultValue)
     }
   }
 }

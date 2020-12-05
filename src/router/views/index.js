@@ -1,6 +1,7 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
+import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import demoRoutes from './demo'
 import todo from './todo'
 export default [
@@ -27,26 +28,25 @@ export default [
     }
   },
   {
+    path: '/examManagement/examSchedule/edit',
+    name: '新建考试',
+    component: ExamEdit,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
     path: '/wel',
     component: Layout,
-    redirect: '/wel/index',
     children: [
       {
-        path: 'index',
+        path: '',
         name: '工作台',
         meta: {
           i18n: 'dashboard'
         },
         component: () => import('@/views/wel/index')
-      },
-      {
-        path: 'dashboard',
-        name: '控制台',
-        meta: {
-          i18n: 'dashboard',
-          menu: false
-        },
-        component: () => import('@/views/wel/dashboard')
       }
     ]
   },

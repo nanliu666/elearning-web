@@ -33,56 +33,6 @@
           :filter-node-method="orgfilterNode"
         />
       </el-tab-pane>
-      <!--      <el-tab-pane-->
-      <!--        label="业务部门"-->
-      <!--        name="business"-->
-      <!--      >-->
-      <!--        <el-tree-->
-      <!--          ref="bizTree"-->
-      <!--          :data="bizPermissionData"-->
-      <!--          :draggable="false"-->
-      <!--          show-checkbox-->
-      <!--          node-key="bizId"-->
-      <!--          highlight-current-->
-      <!--          :props="bizTreeProps"-->
-      <!--          :filter-node-method="bizFilterNode"-->
-      <!--        />-->
-      <!--      </el-tab-pane>-->
-      <!--      <el-tab-pane-->
-      <!--        label="自定义"-->
-      <!--        name="custom"-->
-      <!--      >-->
-      <!--        <el-form-->
-      <!--          ref="costumeForm"-->
-      <!--          :model="form"-->
-      <!--          label-width="100px"-->
-      <!--          label-position="top"-->
-      <!--          class="newOrgDailog"-->
-      <!--        >-->
-      <!--          <el-form-item-->
-      <!--            label="权限类名"-->
-      <!--            prop="scopeClass"-->
-      <!--          >-->
-      <!--            <el-input-->
-      <!--              v-model="form.scopeClass"-->
-      <!--              placeholder="请输入权限类名"-->
-      <!--            />-->
-      <!--          </el-form-item>-->
-      <!--          <el-form-item-->
-      <!--            label="规则值"-->
-      <!--            prop="scopeValue"-->
-      <!--          >-->
-      <!--            <el-input-->
-      <!--              v-model="form.scopeValue"-->
-      <!--              type="textarea"-->
-      <!--              :rows="2"-->
-      <!--              placeholder="请输入规则值"-->
-      <!--              maxlength="200"-->
-      <!--              show-word-limit-->
-      <!--            />-->
-      <!--          </el-form-item>-->
-      <!--        </el-form>-->
-      <!--      </el-tab-pane>-->
     </el-tabs>
     <span
       slot="footer"
@@ -103,7 +53,6 @@
 
 <script>
 import { flatTree } from '@/util/util'
-// import { getOrgTreeSimple, editOrg, createOrg, getUserWorkList } from '@/api/org/org'
 import { getOrgPermission, getBizPermission, putRolePermission } from '@/api/system/menu'
 export default {
   name: 'DataRule',
@@ -160,11 +109,14 @@ export default {
     let roleId = this.$route.query.roleId
     this.roleId = roleId
   },
+  mounted() {
+    this.getOrgPermission()
+  },
   methods: {
     getOrgPermission() {
       let param = {
         roleId: this.roleId,
-        menuId: this.$menuId
+        menuId: this.menuId
       }
       this.loading = true
       getOrgPermission(param).then((res) => {

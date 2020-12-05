@@ -35,7 +35,19 @@ export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
  * @returns {{bizs: Array<any>; users: Array<any>}}
  */
 export const getBizUserChild = (params) => get('/org/v1/biz/org/user/child', params)
-
+/**
+ * 获取外部用户
+ * @param {object} params 参数
+ * @param {string} params.pageNo
+ * @param {string} params.pageSize
+ */
+export const getOuterUser = (params) => get('/user/v1/user/outer', params)
+/* 获取外部用户
+ * @param {object} params 参数
+ * @param {string} params.pageNo
+ * @param {string} params.pageSize
+ */
+export const getOuterUserList = (params) => get('/user/v1/user/outer/list', params)
 /**
  * 类目列表
  * @param {String} userId - 用户ID
@@ -265,3 +277,9 @@ export const getOrgPrivilege = (params) => get('/sys/v1/role/org/privilege', par
  * @param {Object} params 过滤条件
  */
 export const getBizPrivilege = (params) => get('/sys/v1/role/biz/privilege', params)
+// /blade-manage/v1/train/getCatalogs
+/**
+ * @desc 角色业务部门权限查询
+ * @param {Object} params 过滤条件
+ */
+export const getTrainGetCatalogs = (params) => get('/api/blade-manage/v1/train/getCatalogs', params)

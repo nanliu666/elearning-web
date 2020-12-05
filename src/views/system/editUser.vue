@@ -34,6 +34,7 @@
                 v-model="uploadFileList"
                 multiple
                 :before-upload="beforeUpload"
+                :limit="5"
               >
                 <div
                   slot="tip"
@@ -45,9 +46,12 @@
                   <el-button size="medium">
                     上传
                   </el-button>
-                  <ul class="upload__files">
+                  <ul
+                    class="upload__files"
+                    @click.stop=""
+                  >
                     <li
-                      v-for="(item, index) in form.uploadFileList"
+                      v-for="(item, index) in uploadFileList"
                       :key="index"
                     >
                       {{ item.localName }}
@@ -80,7 +84,8 @@
 import { checkUserInfo, createUser, createNewWorkNo, editUser } from '@/api/personnel/roster'
 import { getStaffBasicInfo } from '@/api/personalInfo'
 import { getRoleList } from '@/api/system/role'
-import { getUserWorkList, getOrgTreeSimple } from '@/api/org/org'
+import { getUserWorkList, getOrgTree } from '@/api/org/org'
+import { findTreeNodes } from '@/util/util'
 import { mapGetters } from 'vuex'
 import commonUpload from '@/components/common-upload/commonUpload'
 export default {
@@ -133,7 +138,7 @@ export default {
         positionTitle: '',
         entryDate: null,
         ipScope: '',
-        attachment: []
+        attachments: []
       },
       uploadFileList: [],
       columns: [
@@ -164,8 +169,8 @@ export default {
           required: true,
           rules: [
             { required: true, message: '请输入手机号码', trigger: 'blur' },
-            { validator: checkPhonenum, trigger: 'blur' },
-            { pattern: /^[0-9]{11}$/, message: '必须为11位数字', trigger: 'blur' }
+            { pattern: /^1[3456789]\d{9}$/, message: '手机号码不合法', trigger: 'blur' },
+            { validator: checkPhonenum, trigger: 'blur' }
           ]
         },
         {
@@ -203,7 +208,12 @@ export default {
           prop: 'birthDate',
           offset: 4,
           itemType: 'datePicker',
-          label: '出生日期'
+          label: '出生日期',
+          pickerOptions: {
+            disabledDate(time) {
+              return time.getTime() > Date.now()
+            }
+          }
         },
 
         { itemType: 'slotout', span: 24, prop: 'title2' },
@@ -241,6 +251,7 @@ export default {
             key: 'userId',
             value: 'userId'
           },
+          searchable: true,
           // firstOption: null,
           prop: 'leaderId',
           label: '直接领导'
@@ -248,23 +259,27 @@ export default {
         {
           itemType: 'input',
           prop: 'position',
-          label: '岗位'
+          label: '岗位',
+          maxlength: 32
         },
         {
           itemType: 'input',
           prop: 'postLevel',
           offset: 4,
+          maxlength: 32,
           label: '职级'
         },
         {
           itemType: 'input',
           prop: 'post',
+          maxlength: 32,
           label: '职务'
         },
         {
           itemType: 'input',
           prop: 'positionTitle',
           offset: 4,
+          maxlength: 32,
           label: '职称'
         },
         {
@@ -300,7 +315,7 @@ export default {
           label: '附件'
         }
       ],
-
+      orgTreeData: [],
       loading: false
     }
   },
@@ -317,6 +332,17 @@ export default {
         'attachments',
         val.map((item) => ({ url: item.url, name: item.localName }))
       )
+    },
+    'form.orgId'(val) {
+      let selectedOrg = findTreeNodes(this.orgTreeData, (item) => item.orgId === val)[0]
+      let leaders = _.filter(selectedOrg.leaders, 'userId')
+      if (leaders.length > 0) {
+        this.form.leaderId = _.head(leaders).userId
+        this.columns.find((item) => item.prop === 'leaderId').firstOption = {
+          userId: _.head(leaders).userId + '',
+          name: _.head(leaders).userName
+        }
+      }
     }
   },
 
@@ -355,8 +381,9 @@ export default {
       })
     },
     loadOrgData() {
-      getOrgTreeSimple({ parentOrgId: '0' }).then((res) => {
+      getOrgTree({ parentOrgId: '0' }).then((res) => {
         this.columns.find((item) => item.prop === 'orgId').props.treeParams.data = res
+        this.orgTreeData = res
       })
     },
     loadRoleData() {
@@ -371,7 +398,10 @@ export default {
     beforeUpload(file) {
       const regx = /^.*\.(png|jpg|jpeg)$/
       const isLt5M = file.size / 1024 / 1024 < 5
-
+      if (this.uploadFileList.length >= 5) {
+        this.$message.error('上传附件不能超过5张')
+        return false
+      }
       if (!isLt5M) {
         this.$message.error('上传附件大小不能超过 5MB!')
         return false
@@ -383,7 +413,7 @@ export default {
       return true
     },
     handleRemoveAttachment(index) {
-      this.form.attachment.splice(index, 1)
+      this.uploadFileList.splice(index, 1)
     },
     goBack() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)

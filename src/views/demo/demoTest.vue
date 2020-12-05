@@ -20,6 +20,7 @@
     </div>
     <user-picker
       v-model="users"
+      select-type="Org,OuterUser"
       :visible.sync="visible"
     ></user-picker>
   </div>

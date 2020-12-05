@@ -6,6 +6,24 @@
       class="form"
       :columns="columns"
     >
+      <template #testPaper>
+        <lazy-select
+          v-model="model.testPaper"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
+      <template #reviewer>
+        <lazy-select
+          v-model="model.reviewer"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
       <template #reckonTime>
         <el-radio-group v-model="model.reckonTime">
           <el-radio :label="0">
@@ -15,6 +33,7 @@
             v-model="model.reckonTime"
             text-before="限制时长"
             text-after="分钟"
+            :default-value="60"
             :input-width="60"
             :input-props="{ maxLength: 4 }"
           ></radioInput>
@@ -31,6 +50,7 @@
               v-model="model.joinNum"
               text-before="限制次数 不超过"
               text-after="次"
+              :default-value="3"
               :input-width="60"
               :input-props="{ maxLength: 4 }"
             ></radioInput>
@@ -42,6 +62,7 @@
           v-model="model.integral"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
+          :default-value="2"
           :input-width="60"
           :input-props="{ maxLength: 4 }"
         ></checkbox-input>
@@ -52,7 +73,6 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
-          :input-props="{ maxLength: 4 }"
         ></checkbox-input>
       </template>
     </common-form>
@@ -60,8 +80,14 @@
 </template>
 
 <script>
-import radioInput from './radioInput'
-import checkboxInput from './checkboxInput'
+import radioInput from '@/components/radioInput/radioInput'
+import checkboxInput from '@/components/checkboxInput/checkboxInput'
+const personOptionProps = {
+  label: 'name',
+  value: 'userId',
+  key: 'userId'
+}
+
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -79,9 +105,8 @@ const EventColumns = [
     prop: 'examName',
     label: '考试名称'
   },
-  // TODO：关联课程应该用lazy-select
-  { itemType: 'input', span: 24, required: true, prop: 'testPaper', label: '关联用卷' },
-  { itemType: 'input', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'slot', span: 24, required: true, prop: 'testPaper', label: '关联用卷' },
+  { itemType: 'slot', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
   {
     itemType: 'radio',
     prop: 'answerMode',
@@ -127,15 +152,18 @@ const EventColumns = [
     span: 24
   }
 ]
+import { getOrgUserList } from '@/api/system/user'
+
 export default {
   name: 'BasicSetting',
   components: {
     radioInput,
-    checkboxInput
+    checkboxInput,
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
     return {
-      checked: true,
+      personOptionProps,
       input: '',
       columns: EventColumns,
       model: {
@@ -154,7 +182,17 @@ export default {
     }
   },
   created() {},
-  methods: {}
+  methods: {
+    loadCoordinator() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        orgId: this.$store.getters.userInfo.org_id || 0
+      }
+      return getOrgUserList(params)
+    }
+  }
 }
 </script>
 

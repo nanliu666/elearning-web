@@ -10,14 +10,22 @@
         class="form"
         :columns="columns"
       >
+        <template #course>
+          <lazy-select
+            v-model="model.course"
+            :allow-create="isCreate"
+            :searchable="remote"
+            :load="loadCourse"
+            :option-props="personOptionProps"
+          />
+        </template>
       </common-form>
       <div class="footer">
         <el-button
           type="primary"
-          :loading="loading"
           @click="submit"
         >
-          {{ loading ? '提交中 ...' : '保存' }}
+          保存
         </el-button>
         <el-button @click="close">
           取消
@@ -29,7 +37,14 @@
 
 <script>
 import { createUniqueID } from '@/util/util'
+import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
+const personOptionProps = {
+  label: 'name',
+  value: 'name',
+  key: 'id'
+}
+
 const EventColumns = [
   {
     itemType: 'radio',
@@ -38,8 +53,8 @@ const EventColumns = [
     required: true,
     span: 24,
     options: [
-      { label: '面授课程', value: '1' },
-      { label: '活动', value: '2' }
+      { label: '面授课程', value: 1 },
+      { label: '活动', value: 2 }
     ]
   },
   { itemType: 'datePicker', span: 24, required: true, prop: 'todoDate', label: '活动日期' },
@@ -63,8 +78,8 @@ const CourseColumns = [
     label: '类型',
     required: true,
     options: [
-      { label: '面授课程', value: '1' },
-      { label: '活动', value: '2' }
+      { label: '面授课程', value: 1 },
+      { label: '活动', value: 2 }
     ]
   },
   {
@@ -86,18 +101,17 @@ const CourseColumns = [
     label: '授课时间'
   },
   {
-    itemType: 'lazySelect',
+    itemType: 'slot',
     span: 24,
-    required: false,
+    required: true,
     prop: 'course',
-    label: '关联课程',
-    load: () => Promise.resolve({ data: [] })
+    label: '关联课程'
   },
   { itemType: 'input', span: 24, disabled: true, prop: 'lecturerName', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
-  type: '1',
+  type: 1,
   todoDate: null,
   todoTime: [new Date(), new Date()],
   theme: '',
@@ -105,30 +119,33 @@ const modelCopy = {
   lecturerId: null,
   address: '',
   courseId: null,
-  courseName: null
+  course: null
 }
 export default {
   name: 'EditScheduleDrawer',
+  components: {
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
+  },
   props: {
     schedule: { type: Object, default: () => ({}) },
     visible: { type: Boolean, default: false }
   },
   data() {
     return {
-      loading: false,
+      remote: true,
+      isCreate: true,
+      personOptionProps,
+      courseParams: {
+        pageNo: 1,
+        pageSize: 10
+      },
+      title: '创建线下日程',
       columns: CourseColumns,
+      editType: 'add',
       model: modelCopy
     }
   },
   computed: {
-    title() {
-      if (_.isNumber(this.schedule.id)) {
-        return '编辑线下日程'
-      } else {
-        return '创建线下日程'
-      }
-    },
-
     innnerVisible: {
       get: function() {
         return this.visible
@@ -139,9 +156,24 @@ export default {
     }
   },
   watch: {
+    visible: {
+      handler: function(val) {
+        if (val) {
+          if (!_.isEmpty(this.schedule)) {
+            this.model = _.cloneDeep(this.schedule)
+            this.title = '编辑线下日程'
+            this.editType = 'edit'
+          } else {
+            // 新增的时候重置数据
+            this.editType = 'add'
+            this.model.id = createUniqueID()
+          }
+        }
+      }
+    },
     'model.type': {
       handler(value) {
-        if (value === '1') {
+        if (value === 1) {
           this.columns = CourseColumns
         } else {
           this.columns = EventColumns
@@ -164,6 +196,13 @@ export default {
     }
   },
   methods: {
+    loadCourse() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10
+      }
+      return getTrainCource(params)
+    },
     close() {
       this.innnerVisible = false
     },
@@ -172,11 +211,7 @@ export default {
         const data = this.model
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
-        if (!_.isNumber(this.schedule.id)) {
-          this.$emit('submit', { ...data, id: createUniqueID() })
-        } else {
-          this.$emit('submit', data)
-        }
+        this.$emit('submit', data, this.editType)
         this.close()
       })
     }

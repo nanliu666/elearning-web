@@ -359,14 +359,13 @@ const res = {
         children: [
           {
             menuId: '1260401852546387969',
-            menuName: '目录管理',
+            menuName: '分类管理',
             menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
             code: 'role',
             alias: '目录管理',
             path: '/repository/catalogManagement',
-            icon: 'iconfont iconicon_group',
             dataPrivileges: [],
             children: []
           },
@@ -595,6 +594,114 @@ const res = {
             code: 'org_user',
             alias: 'user',
             path: '/lecturer/demo',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          }
+        ]
+      },
+      {
+        menuId: '1259467456745245678718',
+        menuName: '考评管理',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'system',
+        alias: 'system',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        dataPrivileges: [
+          {
+            dataId: '1',
+            scopeName: '个人可见',
+            isOwn: 1
+          }
+        ],
+        children: [
+          {
+            menuId: '12590734567456735058',
+            menuName: '分类管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/category/management',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125907345334589',
+            menuName: '试题创建',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            path: '/examManagement/question/questionEdit',
+            code: 'questionEdit',
+            alias: 'questionEdit',
+            icon: 'iconfont iconicon_boss'
+          },
+          {
+            menuId: '125907345674589',
+            menuName: '题库管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            path: '/examManagement/question/questionList',
+            code: 'questionList',
+            alias: 'questionList',
+            icon: 'iconfont iconicon_boss'
+          },
+
+          {
+            menuId: '1259074567456731235058',
+            menuName: '试卷管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/courseDraft',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590567456745635058',
+            menuName: '考试安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/examSchedule/list',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '成绩管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/grade/achievement',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '成绩管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/grade/examineeAchievement',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []

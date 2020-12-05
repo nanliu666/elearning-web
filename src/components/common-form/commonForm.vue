@@ -17,6 +17,12 @@
           v-bind="elFormItemAttrs(column)"
           :rules="getRules(column)"
         >
+          <slot
+            slot="label"
+            :name="column.prop + '-label'"
+          >
+            {{ column.label }}
+          </slot>
           <el-input-number
             v-if="column.itemType == 'inputNumber'"
             v-model="model[column.prop]"
@@ -128,6 +134,11 @@
             v-model="model[column.prop]"
             v-bind="itemAttrs(column)"
           />
+          <tinymce
+            v-if="column.itemType == 'richtext'"
+            v-model="model[column.prop]"
+            v-bind="itemAttrs(column)"
+          />
           <slot
             v-if="column.itemType == 'slot'"
             v-bind="itemAttrs(column)"
@@ -154,6 +165,7 @@
 <script>
 import { elFormAttrs, elFormItemAttrs, noneItemAttrs, defaultAttrs } from './config'
 import LazySelect from '@/components/lazy-select/lazySelect'
+const inputTypes = ['input', 'inputNumber', 'richtext']
 export default {
   name: 'CommonForm',
   components: {
@@ -236,9 +248,7 @@ export default {
         let rules = [
           {
             required: true,
-            message: `请${
-              column.itemType == 'input' || column.itemType == 'inputNumber' ? '输入' : '选择'
-            }${column.label}`,
+            message: `请${inputTypes.includes(column.itemType) ? '输入' : '选择'}${column.label}`,
             trigger: `${column.itemType == 'input' ? 'blur' : 'change'}`
           },
           ...(column.rules ? column.rules : [])

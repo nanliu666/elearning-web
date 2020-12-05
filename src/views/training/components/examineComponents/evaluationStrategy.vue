@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import CustomSwitch from './customSwitch'
+import CustomSwitch from '../atomComponents/customSwitch'
 const insertConfig = {
   label: '不允许修改考生客观题及其评分结果',
   prop: 'modifyLimit'
@@ -54,7 +54,11 @@ const switchConfig = [
 
   {
     label: '评卷限定最高得分',
-    prop: 'scopeLimit'
+    prop: 'scopeLimit',
+    expand: {
+      pre: '最高得分为',
+      before: '分'
+    }
   },
   {
     label: '手工评卷是否显示客观题',
@@ -65,6 +69,15 @@ const switchConfig = [
     prop: 'decideItem'
   }
 ]
+const defaultValue = {
+  id: '',
+  modifyAnswer: false,
+  modifyLimit: false,
+  scopeLimit: false,
+  scopeLimitValue: 100, // 最高分默认值100
+  objectiveQuestions: false,
+  decideItem: false
+}
 export default {
   name: 'EvaluationStrategy',
   components: {
@@ -81,12 +94,12 @@ export default {
             '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
         },
         {
-          value: '完全正确得分',
+          value: '每项答错扣分',
           des:
             '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
         },
         {
-          value: '完全正确得分',
+          value: '每正确项得分',
           des:
             '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
         }
@@ -94,13 +107,7 @@ export default {
       currentRadio: 1,
       insertConfig,
       switchConfig: switchConfig,
-      model: {
-        modifyAnswer: 0,
-        modifyLimit: 0,
-        scopeLimit: 0,
-        objectiveQuestions: 0,
-        decideItem: 0
-      }
+      model: _.cloneDeep(defaultValue)
     }
   },
   methods: {
@@ -115,6 +122,9 @@ export default {
           this.switchConfig.splice(index, 1)
         }
       }
+    },
+    resetFields() {
+      this.model = _.cloneDeep(defaultValue)
     }
   }
 }

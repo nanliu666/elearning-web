@@ -37,7 +37,7 @@
           <div class="operations-right">
             <div
               class="refresh-container"
-              @click="loadData"
+              @click="handleRefresh"
             >
               <i class="el-icon-refresh-right" />
               <span>刷新</span>
@@ -140,7 +140,13 @@
 </template>
 
 <script>
-import { getOrgUserList, modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
+import {
+  getOrgUserList,
+  modifyUserStatus,
+  resetPwd,
+  delUser,
+  getOuterUserList
+} from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
 
 const COLUMNS = [
@@ -312,6 +318,10 @@ export default {
     handleEditRole(user) {
       this.$refs['userRoleEdit'].init(user)
     },
+    handleRefresh() {
+      this.$emit('refresh')
+      this.loadData()
+    },
     currentChange(currentPage) {
       this.page.currentPage = currentPage
       this.loadData()
@@ -418,10 +428,14 @@ export default {
     },
     loadData() {
       this.loading = true
-      getOrgUserList({
+      let func = getOrgUserList
+      if (!this.activeOrg.orgId) {
+        func = getOuterUserList
+      }
+      func({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        orgId: this.activeOrg ? this.activeOrg.orgId : '0',
+        orgId: this.activeOrg.orgId,
         ...this.query
       })
         .then((res) => {
