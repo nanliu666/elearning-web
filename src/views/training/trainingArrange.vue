@@ -183,7 +183,9 @@
           </div>
         </el-dialog>
 
+        <!-- 已发布 -->
         <div
+          v-if="!status"
           class="issue_r"
           :class="{ istrainingArrange: status === 1 }"
         >
@@ -208,6 +210,7 @@
                   />
                   <div class="operations__btns">
                     <el-tooltip
+                      v-if="!status"
                       class="operations__btns--tooltip"
                       content="刷新"
                       effect="dark"
@@ -215,6 +218,7 @@
                       style="color:#acb3b8;"
                     >
                       <el-button
+                        v-if="!status"
                         class="operations__btns--item"
                         size="mini"
                         icon="el-icon-refresh-right"
@@ -224,7 +228,10 @@
                         <!-- <i class="iconfont iconicon_refresh" /> -->
                       </el-button>
                     </el-tooltip>
-                    <span class="text_refresh">刷新</span>
+                    <span
+                      v-if="!status"
+                      class="text_refresh"
+                    >刷新</span>
                     <el-popover
                       placement="bottom"
                       width="40"
@@ -281,7 +288,10 @@
                 slot="trainName"
                 slot-scope="{ row }"
               >
-                <el-button type="text">
+                <el-button
+                  type="text"
+                  @click="toTrainingDetail(row.id)"
+                >
                   {{ row.trainName }}
                 </el-button>
               </template>
@@ -304,66 +314,99 @@
                 <span v-if="row.trainWay === 2">混合</span>
                 <span v-if="row.trainWay === 3">在线</span>
               </template>
-
               <!-- 标签 -->
               <template
-                slot="a"
+                slot="trainTagList"
                 slot-scope="{ row }"
               >
-                {{ row }}
+                <span
+                  v-for="(item, index) in row.trainTagList"
+                  :key="index"
+                  class="item_icon"
+                >{{
+                  item
+                }}</span>
+                <div v-if="row.trainTagList"></div>
               </template>
 
               <!-- 操作 -->
+              <!-- 已发布 -->
               <template
                 slot="handler"
                 slot-scope="scope"
               >
-                <el-button
-                  type="text"
-                  size="medium"
-                  @click.stop="handleConfig(scope.row, scope.index, 0)"
-                >
-                  开办下一期
-                </el-button>
-                <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
-                <el-button
-                  v-if="scope.row.status !== 0"
-                  type="text"
-                  size="medium"
-                  @click="isstopSchedule(scope.row.id)"
-                >
-                  结办
-                </el-button>
-                <span v-else>结办</span>
-                <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
-                <el-dropdown
-                  trigger="hover"
-                  style="color: #a0a8ae;"
-                  @command="handleCommand($event, scope.row)"
-                >
-                  <span class="el-dropdown-link">
-                    <i class="el-icon-more" />
-                  </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">
-                      编辑
-                    </el-dropdown-item>
-                    <el-dropdown-item command="del">
-                      删除
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
+                <div v-if="status === 0">
+                  <el-button
+                    type="text"
+                    size="medium"
+                    @click.stop="handleConfig(scope.row, scope.index, 0)"
+                  >
+                    开办下一期
+                  </el-button>
+                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+                  <el-button
+                    v-if="scope.row.status !== 0"
+                    type="text"
+                    size="medium"
+                    @click="isstopSchedule(scope.row.id)"
+                  >
+                    结办
+                  </el-button>
+                  <span v-else>结办</span>
+                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+                  <el-dropdown
+                    trigger="hover"
+                    style="color: #a0a8ae;"
+                    @command="handleCommand($event, scope.row)"
+                  >
+                    <span class="el-dropdown-link">
+                      <i class="el-icon-more" />
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item command="edit">
+                        编辑
+                      </el-dropdown-item>
+                      <el-dropdown-item command="del">
+                        删除
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </div>
+
+                <div v-if="status === 1">
+                  <!-- 草稿 -->
+
+                  <el-button
+                    type="text"
+                    size="medium"
+                    @click.stop=""
+                  >
+                    编辑
+                  </el-button>
+                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+                  <el-button
+                    type="text"
+                    size="medium"
+                    @click.stop="isDraftDel(scope)"
+                  >
+                    删除
+                  </el-button>
+                </div>
               </template>
             </common-table>
           </basic-container>
         </div>
+
+        <draftComponents
+          v-else
+          style="width:100%;"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { deleteMenuInfo } from '@/api/system/menu'
 // training
 import {
   addCatalog,
@@ -428,7 +471,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '标签',
-    prop: 'tagName',
+    prop: 'trainTagList',
     slot: true,
     minWidth: 200
   }
@@ -508,7 +551,9 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    // 草稿
+    draftComponents: () => import('./draftComponents')
   },
   filters: {
     // 过滤不可见的列
@@ -551,8 +596,8 @@ export default {
         name: ''
       },
       page: {
-        currentPage: 1,
-        size: 10,
+        pageNo: 1,
+        pageSize: 10,
         total: 0
       },
       // 默认选中所有列
@@ -569,34 +614,40 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val)
+    },
+    status() {
+      if (this.status) {
+        // 草稿
+        SEARCH_POPOVER_CONFIG.popoverOptions = []
+        TABLE_CONFIG.handlerColumn.width = 120
+      } else {
+        // 发布
+        SEARCH_POPOVER_CONFIG.popoverOptions = SEARCH_POPOVER_POPOVER_OPTIONS
+        TABLE_CONFIG.handlerColumn.width = 200
+      }
     }
   },
   created() {
     this.refreshTableData()
-    // this.loadData()
-    this.getInfo()
-
-    // 下拉筛选框
-    // this.tableData.forEach((item) => {
-    //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-    //     value: item.teacherId,
-    //     label: item.teacherId
-    //   }) //讲师
-    //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-    //     value: item.catalogId,
-    //     label: item.catalogId
-    //   })
-    // })
-
-    this.isqueryClassify()
-
     this.isgetCatalogs()
   },
-  activated() {
-    // this.loadData()
-    this.getInfo()
-  },
+  activated() {},
   methods: {
+    // 去培训详情
+    toTrainingDetail(id) {
+      this.$router.push({ path: '/training/trainingDetail?id=' + id })
+    },
+    // 草稿删除
+    isDraftDel(scope) {
+      let params = { ids: scope.row.id }
+      delTrain(params).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        this.isgetScheduleList()
+      })
+    },
     isstopSchedule(id) {
       stopSchedule(id).then(() => {
         this.isgetScheduleList()
@@ -606,9 +657,9 @@ export default {
     isgetScheduleList(param) {
       let params = {
         categoryId: '', //分类id
-        draft: '' //0.已发布、1.草稿
+        type: '' //0.已发布、1.草稿
       }
-      params.draft = this.status
+      params.type = this.status
       params.categoryId = this.idSchedule
       params = { ...params, ...this.page, ...param }
       getScheduleList(params).then((res) => {
@@ -660,7 +711,6 @@ export default {
     // 拿左侧列表数据
     isgetCatalogs() {
       getCatalogs().then((res) => {
-        // console.log('--------------', res)
         let datar = []
         for (let i = 0; i < res.length; i++) {
           let d = {
@@ -743,17 +793,8 @@ export default {
       })
     },
 
-    // 查询分组列表
-    isqueryClassify() {
-      // queryClassify().then(() => {
-      //   // console.log(res)
-      // })
-    },
     //   tree节点点击
     treeClickNode(data) {
-      // console.log('data----------', data)
-      // console.log('node----------', node)
-      // console.log('h----------', h)
       if (data.btnshow) {
         this.idSchedule = data.children[0].id
       } else {
@@ -795,16 +836,29 @@ export default {
       }
       // 删除
       if ($event === 'del') {
-        let params = {
-          classifyId: '', //讲师所属分类ID
-          id: '' //讲师所属分组ID
-        }
-        if (data.btnshow) {
-          params.id = data.id
-        } else {
-          params.classifyId = data.id
-        }
-        this.isdelCatalogs(params)
+        this.$confirm('此操作将删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            let params = {
+              classifyId: '', //讲师所属分类ID
+              id: '' //讲师所属分组ID
+            }
+            if (data.btnshow) {
+              params.id = data.id
+            } else {
+              params.classifyId = data.id
+            }
+            this.isdelCatalogs(params)
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
       }
     },
 
@@ -844,54 +898,51 @@ export default {
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
-      this.page.currentPage = param
-      this.getInfo()
+      this.page.pageNo = param
+      this.isgetScheduleList()
     },
     handlePageSizeChange(param) {
-      this.page.size = param
-      this.getInfo()
+      this.page.pageSize = param
+      this.isgetScheduleList()
     },
 
     handleSearch(searchParams) {
-      // this.loadTableData(_.pickBy(searchParams))
-      // this.getInfo(searchParams)
-      // console.log(searchParams)
       this.isgetScheduleList(searchParams)
     },
     handleRemoveItems(selection) {
-      this.$confirm('确定将选择数据删除?', {
+      this.$confirm('此操作将删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
         .then(() => {
-          // 删除完成后更新视图
-          this.$refs.table.clearSelection()
-          this.refreshTableData()
+          let params = { ids: '' }
+          selection.forEach((item) => {
+            params.ids += item.id + ','
+          })
+          delTrain(params).then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.isgetCatalogs()
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
         })
     },
 
     // 刷新列表数据
     refreshTableData() {},
 
-    // 拿数据
-    getInfo(courseName) {
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
-      }
-
-      params = { ...this.page, ...courseName }
-      params.status = this.status
-      // // console.log('params', params)
-      // getCourseListData(params).then((res) => {
-      //   this.tableData = res
-      //   this.page.total = res.length
-      // })
-    },
     // 已发布&草稿nav
     showSelect(index) {
       this.status = index
+      this.isgetScheduleList()
     },
     // tree
     filterNode(value, data) {
@@ -971,6 +1022,12 @@ $color_icon: #A0A8AE
         width: 1px
 </style>
 <style lang="scss" scoped>
+.item_icon {
+  padding: 5px;
+  background-color: #ccc;
+  color: #333;
+  margin-left: 10px;
+}
 .trainingArrange {
   .box_title {
     height: 60px;

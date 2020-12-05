@@ -395,7 +395,8 @@ import {
   editSysRulus,
   deleteTeacherCatalog,
   Teacherdelete,
-  move
+  move,
+  editTeacherCatalog
 } from '@/api/lecturer/lecturer'
 // 侧栏数据
 
@@ -596,6 +597,7 @@ export default {
   },
   data() {
     return {
+      compileNewly: '',
       // 保存左栏点过的的id或者默认id
       clickId: '',
       props: {
@@ -733,7 +735,7 @@ export default {
         categoryId: id
       }
 
-      if (categoryId.categoryId == '') {
+      if (!id) {
         categoryId.categoryId = this.clickId
       }
 
@@ -749,23 +751,39 @@ export default {
         })
       })
     },
-    // 新增分组/分类
+    // 新增分组/分类&编辑
     isaddCatalog(node) {
-      let params = {
-        creatorId: '', //	分组id	query	false
-        name: '', //	名称	query	false
-        parentId: '' //	类id	query	false
+      if (this.compileNewly == 1) {
+        // 编辑
+        let params = {
+          id: '',
+          name: ''
+        }
+        params.id = node.id
+        params.name = this.dataAddCatalog.input
+        editTeacherCatalog(params).then(() => {
+          this.islistTeacherCategory()
+          this.isShowinput = false
+          this.dataAddCatalog.input = ''
+        })
+      } else {
+        // 新增
+        let params = {
+          creatorId: '', //	分组id	query	false
+          name: '', //	名称	query	false
+          parentId: '' //	类id	query	false
+        }
+        if (node) {
+          params.creatorId = node.myid
+          // params.parentId = node.parentId
+        }
+        params.name = this.dataAddCatalog.input
+        addCatalog(params).then(() => {
+          this.islistTeacherCategory()
+          this.isShowinput = false
+          this.dataAddCatalog.input = ''
+        })
       }
-      if (node) {
-        params.creatorId = node.myid
-        // params.parentId = node.parentId
-      }
-      params.name = this.dataAddCatalog.input
-      addCatalog(params).then(() => {
-        this.islistTeacherCategory()
-        this.isShowinput = false
-        this.dataAddCatalog.input = ''
-      })
     },
     // 查询讲师分类列表
     islistTeacherCategory(id) {
@@ -833,7 +851,6 @@ export default {
       if (data.num === 1) {
         this.islistTeacherCategory(data.id)
       }
-
       this.islistTeacher(data.id)
     },
     // 底部btn
@@ -845,9 +862,11 @@ export default {
       if ($event === 'edit') {
         this.isEdit = true
         this.isEditId = data.id
+        this.compileNewly = 1
       }
       //   新增
       if ($event === 'add') {
+        this.compileNewly = 0
         let i = this.data.indexOf(data)
         let idNum = Math.floor(Math.random() * 10000)
         this.data[i].children.push({
@@ -905,11 +924,11 @@ export default {
     //  处理页码改变
     handleCurrentPageChange(param) {
       this.page.currentPage = param
-      // this.getInfo()
+      this.islistTeacher()
     },
     handlePageSizeChange(param) {
       this.page.size = param
-      // this.getInfo()
+      this.islistTeacher()
     },
 
     // 搜索
