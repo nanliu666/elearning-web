@@ -309,9 +309,10 @@
             <el-button
               type="primary"
               size="small"
-              @click="dialogVisible = true"
+              @click="addArticleBtn"
             >
               添加章节
+              <!-- @click="dialogVisible = true" -->
             </el-button>
           </div>
 
@@ -580,6 +581,22 @@ export default {
     this.getInfo()
   },
   methods: {
+    addArticleBtn() {
+      let item = {
+        articleContent: '', // 文件内容
+        articleTitle: '', // 文章标题
+        courseWareName: '', // 课件名称
+        courseWareUrl: '', // 课件URL
+        createId: '', // 创建人帐号
+        createTime: '', // 创建时间
+        id: 1, // 章节内容ID
+        name: '', // 内容名称
+        order: '', // 内容顺序
+        type: '', //章节类型（1:文章 2:普通课件 3:知识点 4:考试 5:视频）
+        updateTime: '' //更新时间
+      }
+      this.ruleForm.contents.push(item)
+    },
     setCheckboxVal() {
       this.ruleForm.passCondition = this.checkboxVal
     },

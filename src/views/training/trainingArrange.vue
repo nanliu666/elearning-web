@@ -796,7 +796,7 @@ export default {
     //   tree节点点击
     treeClickNode(data) {
       if (data.btnshow) {
-        this.idSchedule = data.children[0].id
+        this.idSchedule = data.children[0] ? data.children[0].id : data.id
       } else {
         this.idSchedule = data.id
       }

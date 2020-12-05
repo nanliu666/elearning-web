@@ -92,6 +92,14 @@
             </div>
           </div>
         </template>
+        <!-- 课程类型 -->
+        <template
+          slot="status"
+          slot-scope="{ row }"
+        >
+          <span v-if="row.status == 1">正常</span>
+          <span v-if="row.status == 0">停用</span>
+        </template>
 
         <template #multiSelectMenu="{ selection }">
           <el-button
@@ -112,7 +120,7 @@
           slot-scope="scope"
         >
           <el-button
-            v-if="!scope.status"
+            v-if="scope.row.status == 1"
             type="text"
             size="medium"
             @click.stop="handlestatus(scope.row, 1)"
@@ -147,6 +155,9 @@
               </el-dropdown-item>
               <el-dropdown-item command="del">
                 删除
+              </el-dropdown-item>
+              <el-dropdown-item command="news">
+                新增子分类
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -201,11 +212,11 @@
       </div>
     </el-dialog>
 
-    <!-- 编辑目录dialog -->
+    <!-- 编辑&新增目录dialog -->
 
     <el-dialog
       id="my_dialog"
-      title="编辑目录"
+      :title="editOrNewsTitle"
       :visible.sync="compileDialogFormVisible"
       :modal-append-to-body="false"
       width="30%"
@@ -229,6 +240,7 @@
             :options="tableData"
             :props="{ label: 'name', value: 'id' }"
             :show-all-levels="false"
+            :disabled="!editOrNews"
           ></el-cascader>
         </el-form-item>
       </el-form>
@@ -344,7 +356,6 @@ import {
   addCatalog,
   delCatalag,
   editCatalog,
-  getCourseByCatalogId,
   catalogUserList
 } from '@/api/course/course'
 
@@ -356,25 +367,14 @@ const TABLE_COLUMNS = [
     prop: 'name'
   },
   {
-    formatter: (row, column, text = '') => {
-      switch (text) {
-        case 0:
-          text = '停用'
-          break
-        case 1:
-          text = '正常'
-          break
-        default:
-      }
-      return text
-    },
     label: '状态',
     prop: 'status',
-    width: 300
+    width: 300,
+    slot: true
   },
   {
     label: '创建人',
-    prop: 'createName',
+    prop: 'creatorName',
     width: 300
   },
   {
@@ -431,7 +431,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'createId',
+    field: 'creatorName',
     label: '创建人',
     type: 'cascader',
     options: [{ value: '', label: '' }]
@@ -454,61 +454,17 @@ export default {
   },
   data() {
     return {
+      // 编辑&新增
+      editOrNews: 1,
+      editOrNewsTitle: '',
+      // 编辑的id
+      compileId: '',
       // 权限配置dialog
       nodeKeyList: '',
       dialogVisible: false,
       activeName: 'first',
       filterText: '',
-      data: [
-        {
-          id: 1,
-          label: '一级 1',
-          children: [
-            {
-              id: 4,
-              label: '二级 1-1',
-              children: [
-                {
-                  id: 9,
-                  label: '三级 1-1-1'
-                },
-                {
-                  id: 10,
-                  label: '三级 1-1-2'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: '一级 2',
-          children: [
-            {
-              id: 5,
-              label: '二级 2-1'
-            },
-            {
-              id: 6,
-              label: '二级 2-2'
-            }
-          ]
-        },
-        {
-          id: 3,
-          label: '一级 3',
-          children: [
-            {
-              id: 7,
-              label: '二级 3-1'
-            },
-            {
-              id: 8,
-              label: '二级 3-2'
-            }
-          ]
-        }
-      ],
+      data: [],
       defaultProps: {
         children: 'children',
         label: 'label'
@@ -536,33 +492,7 @@ export default {
       query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [
-        {
-          children: [
-            {
-              children: [{}],
-              createId: 0,
-              createName: '',
-              createTime: '',
-              id: 0,
-              name: '',
-              parentId: 0,
-              sort: 0,
-              status: 0,
-              updateTime: ''
-            }
-          ],
-          createId: 0,
-          createName: '',
-          createTime: '',
-          id: 0,
-          name: '',
-          parentId: 0,
-          sort: 0,
-          status: 0,
-          updateTime: ''
-        }
-      ],
+      tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
     }
@@ -571,6 +501,13 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val)
+    },
+    editOrNews(val) {
+      if (val) {
+        this.editOrNewsTitle = '编辑'
+      } else {
+        this.editOrNewsTitle = '新建子分类'
+      }
     }
   },
   created() {
@@ -598,97 +535,85 @@ export default {
         this.loadTableData()
       })
     },
-    // 删除&编辑
+    // 删除&编辑&新增子分类
     handleCommand(e, row) {
       if (e === 'del') {
         // 删除
-        getCourseByCatalogId({ catalogId: row.id })
-          .then(() => {
-            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
+        if (row.children) {
+          this.$message.error('很抱歉，您选中的类目下存在子分类，请先将子分类调整后再删除!')
+        } else {
+          this.$confirm('此操作将永久删除该目录, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              delCatalag({ id: row.id }).then(() => {
+                this.$message({
+                  message: '删除成功!!!',
+                  type: 'success'
+                })
+              })
+              this.refreshTableData()
             })
-              .then(() => {
-                delCatalag({ catalogId: row.id }).then(() => {
-                  this.$message({
-                    message: '删除成功!!!',
-                    type: 'success'
-                  })
-                })
-                this.refreshTableData()
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
               })
-              .catch(() => {
-                this.$message({
-                  type: 'info',
-                  message: '已取消删除'
-                })
-              })
-          })
-          .catch(() => {
-            this.$confirm(
-              '您选中的目录下含有课程，删除目录将会把该目录下的课程同时删除。您确定要删除选中的目录吗？',
-              '提示',
-              {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-              }
-            )
-              .then(() => {
-                this.$confirm('此操作将永久删除该目录, 是否继续?', '提示', {
-                  confirmButtonText: '确定',
-                  cancelButtonText: '取消',
-                  type: 'warning'
-                })
-                  .then(() => {
-                    delCatalag({ catalogId: row.id }).then(() => {
-                      this.$message({
-                        message: '删除成功!!!',
-                        type: 'success'
-                      })
-                    })
-                    this.refreshTableData()
-                  })
-                  .catch(() => {
-                    this.$message({
-                      type: 'info',
-                      message: '已取消删除'
-                    })
-                  })
-              })
-              .catch(() => {
-                this.$message({
-                  type: 'info',
-                  message: '已取消删除'
-                })
-              })
-          })
+            })
+        }
       }
       if (e === 'edit') {
+        this.editOrNews = 1
         // 编辑
         // editCatalog()
         this.compileDialogFormVisible = true
         this.newForm.newName = row.name
         this.newForm.newValue = row.id
+        this.compileId = row.id
+      }
+      if (e === 'news') {
+        // 新增子分类
+        this.editOrNews = 0
+        this.compileDialogFormVisible = true
+        this.newForm.newName = row.name
+        this.newForm.newValue = row.id
+        this.compileId = row.id
       }
     },
-    // 编辑
+    // 编辑&新增子分类
     compileCatalogue() {
-      let params = {
-        name: this.newForm.newName,
-        parentId: this.newForm.newValue[this.newForm.newValue.length - 1]
-      }
-      editCatalog(params).then(() => {
-        this.dialogFormVisible = false
-        this.newForm.newName = ''
-        this.newForm.newValue = []
-        this.$message({
-          message: '编辑目录成功!!!',
-          type: 'success'
+      if (this.editOrNews) {
+        // 编辑
+        let params = {
+          name: this.newForm.newName,
+          parentId: this.newForm.newValue[this.newForm.newValue.length - 1],
+          id: this.compileId
+        }
+        editCatalog(params).then(() => {
+          this.$message({
+            message: '编辑目录成功!!!',
+            type: 'success'
+          })
         })
-        this.refreshTableData()
-      })
+      } else {
+        // 新增子分类
+        let params = {
+          name: this.newForm.newName,
+          parentId: this.compileId
+        }
+        addCatalog(params).then(() => {
+          this.$message({
+            message: '新增子分类成功!!!',
+            type: 'success'
+          })
+        })
+      }
+      this.refreshTableData()
+      this.compileDialogFormVisible = false
+      this.newForm.newName = ''
+      this.newForm.newValue = []
     },
 
     //新建目录
@@ -755,15 +680,15 @@ export default {
     // 递归去除空children
     getTreeData(data) {
       // 循环遍历json数据
-      for (var i = 0; i < data.length; i++) {
-        if (data[i].children.length < 1) {
-          // children若为空数组，则将children设为undefined
-          data[i].children = undefined
-        } else {
-          // children若不为空数组，则继续 递归调用 本方法
-          this.getTreeData(data[i].children)
-        }
-      }
+      // for (var i = 0; i < data.length; i++) {
+      //   if (data[i].children.length < 1) {
+      //     // children若为空数组，则将children设为undefined
+      //     data[i].children = undefined
+      //   } else {
+      //     // children若不为空数组，则继续 递归调用 本方法
+      //     this.getTreeData(data[i].children)
+      //   }
+      // }
       return data
     },
 
@@ -776,10 +701,8 @@ export default {
       try {
         const query = _.assign(null, _.omit(param, 'parentId'))
         const tableData = await getCatalog(param || '0', query)
-
         this.tableData = this.getTreeData(tableData)
-
-        // window.console.log('----------------------', this.tableData)
+        // console.log(this.tableData)
       } finally {
         this.tableLoading = false
       }

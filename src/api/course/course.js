@@ -1,4 +1,4 @@
-import { get, post } from '@/router/axios'
+import { get, post, put, del } from '@/router/axios'
 /**
  * del, get, post, put
  * 创建课程数据导出接口
@@ -46,13 +46,13 @@ export const addCatalog = (params) => post('/api/blade-manage/v1/course/addCatal
  * 删除课程目录
  * @param {Object} courseId - 参数
  * */
-export const delCatalag = (params) => get('/api/blade-manage/v1/course/delCatalag', params)
+export const delCatalag = (params) => del('/api/blade-manage/v1/course/delCatalog', params)
 
 /**
  * 编辑课程目录
  * @param {Object} courseId - 参数
  * */
-export const editCatalog = (params) => get('/api/blade-manage/v1/course/editCatalog', params)
+export const editCatalog = (params) => put('/api/blade-manage/v1/course/editCatalog', params)
 /**
  * 确认某个课程目录id下是否有课程信息
  * @param {Object} courseId - 参数
