@@ -17,10 +17,15 @@
           <el-button
             type="primary"
             size="mini"
+            :disabled="issueStatus"
           >
             开办下一期
           </el-button>
-          <el-button size="mini">
+          <el-button
+            size="mini"
+            :disabled="issueStatus"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
@@ -676,7 +681,8 @@ import {
   getTrainEvaluate,
   grantCertificate,
   revokeCertificate,
-  examList
+  examList,
+  stopSchedule
 } from '@/api/training/training'
 // 表格属性
 const TABLE_COLUMNS = [
@@ -834,6 +840,8 @@ export default {
   },
   data() {
     return {
+      // 是否是已发布页过来的
+      issueStatus: this.$route.query.status,
       showExamList: [],
       showTrainEvaluate: {},
       isOfflineTodo: '',
@@ -888,7 +896,6 @@ export default {
 
   created() {
     this.refreshTableData()
-
     this.isStudentList({ trainId: 1 })
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
@@ -902,6 +909,15 @@ export default {
     // this.getInfo()
   },
   methods: {
+    // 结办
+    isstopSchedule() {
+      let id = this.$route.query.id
+      stopSchedule(id).then(() => {
+        this.isgetScheduleList()
+        this.issueStatus = false
+      })
+    },
+    // 去列表页
     toTrainingArrange() {
       this.$router.push({ path: '/training/trainingArrange' })
     },

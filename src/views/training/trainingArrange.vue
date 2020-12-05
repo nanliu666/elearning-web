@@ -290,7 +290,7 @@
               >
                 <el-button
                   type="text"
-                  @click="toTrainingDetail(row.id)"
+                  @click="toTrainingDetail(row)"
                 >
                   {{ row.trainName }}
                 </el-button>
@@ -634,8 +634,8 @@ export default {
   activated() {},
   methods: {
     // 去培训详情
-    toTrainingDetail(id) {
-      this.$router.push({ path: '/training/trainingDetail?id=' + id })
+    toTrainingDetail(row) {
+      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })
     },
     // 草稿删除
     isDraftDel(scope) {
