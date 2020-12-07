@@ -54,6 +54,11 @@ export const delCatalag = (params) => del('/api/blade-manage/v1/course/delCatalo
  * */
 export const editCatalog = (params) => put('/api/blade-manage/v1/course/editCatalog', params)
 /**
+ * 停用&启用
+ * @param {Object} courseId - 参数
+ * */
+export const updateStatus = (params) => put('/api/blade-manage/v1/course/updateStatus', params)
+/**
  * 确认某个课程目录id下是否有课程信息
  * @param {Object} courseId - 参数
  * */

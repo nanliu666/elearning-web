@@ -356,7 +356,8 @@ import {
   addCatalog,
   delCatalag,
   editCatalog,
-  catalogUserList
+  catalogUserList,
+  updateStatus
 } from '@/api/course/course'
 
 // 表格属性
@@ -529,9 +530,12 @@ export default {
         })
       })
     },
-    // 停用
+    // 停用&启用
     handlestatus(row, i) {
-      editCatalog({ id: row.id, status: i }).then(() => {
+      // console.log(row.id)
+      // console.log(i)
+      updateStatus({ ids: row.id + ', ', status: i }).then(() => {
+        // console.log(res)
         this.loadTableData()
       })
     },
