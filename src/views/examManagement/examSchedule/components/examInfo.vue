@@ -92,8 +92,8 @@
           </div>
         </el-radio-group>
       </template>
-      <template #joinNum1>
-        <el-radio-group v-model="model.joinNum1Boo">
+      <template #remakeExamValue>
+        <el-radio-group v-model="model.remakeExam">
           <div class="flex-flow flex flexcenter">
             <el-radio :label="false">
               不允许
@@ -101,8 +101,8 @@
             <el-radio :label="true">
               允许补考
               <el-input
-                v-model.number="model.joinNum1"
-                :disabled="!model.joinNum1Boo"
+                v-model.number="model.remakeExamValue"
+                :disabled="!model.remakeExam"
                 style="width: 60px;"
               ></el-input>
               次
@@ -288,13 +288,33 @@ const EventColumns = [
     label: '考试名称'
   },
   {
-    itemType: 'select',
+    itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: false, // TODO：暂时关闭必填校验
+    required: true,
     options: [],
     prop: 'categoryId',
-    label: '考试分类'
+    label: '考试分类',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     itemType: 'slot',
@@ -337,7 +357,7 @@ const EventColumns = [
   },
   {
     itemType: 'slot',
-    prop: 'joinNum1',
+    prop: 'remakeExamValue',
     label: '补考次数',
     offset: 2,
     span: 11,
@@ -526,7 +546,7 @@ const EventColumns = [
   {
     itemType: 'radio',
     span: 11,
-    prop: 'publishRules',
+    prop: 'publishType',
     label: '发布规则',
     options: [
       { label: '系统即时发布', value: 1 },
@@ -545,8 +565,9 @@ const fixedTimeConfig = {
   itemType: 'datePicker',
   span: 11,
   offset: 2,
-  type: 'datetimerange',
+  type: 'datetime',
   required: true,
+  valueFormat: 'yyyy-MM-dd HH:mm:ss',
   prop: 'fixedTime',
   label: '定时发布日期时间'
 }
@@ -570,6 +591,7 @@ const radioList = [
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
+import { getCategoryList } from '@/api/examManage/category'
 export default {
   name: 'ExamInfo',
   components: {
@@ -596,15 +618,18 @@ export default {
       personOptionProps,
       columns: EventColumns,
       model: {
+        certificateId: '',
+        certificate: '',
+        categoryId: '',
         examTime: '',
         examName: '',
         testPaper: '',
-        reviewer: '',
+        reviewer: null,
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
-        joinNum1: 3,
-        joinNum1Boo: false,
+        remakeExamValue: 3,
+        remakeExam: false,
         integral: 0,
         strategy: 0,
         publishTime: 0,
@@ -635,19 +660,19 @@ export default {
         autoEvaluate: false,
         passType: 1,
         passScope: 0,
-        publishRules: 1,
-        fixedTime: []
+        publishType: 1,
+        fixedTime: new Date()
       }
     }
   },
   watch: {
-    'model.publishRules': {
+    'model.publishType': {
       handler(value) {
         const fixedTimeIndex = _.findIndex(this.columns, (column) => {
           return column.prop === 'fixedTime'
         })
         const publishRulesIndex = _.findIndex(this.columns, (column) => {
-          return column.prop === 'publishRules'
+          return column.prop === 'publishType'
         })
         // 1隐藏， 2显示
         if (value === 1) {
@@ -676,7 +701,7 @@ export default {
       deep: true
     },
     // 补考次数因为存在0有检验，所以手动添加校验规则
-    'model.joinNum1Boo': {
+    'model.remakeExam': {
       handler(value) {
         const checkMakeUpZero = (rule, value, callback) => {
           if (value === 0) {
@@ -688,7 +713,7 @@ export default {
         const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
         const target = _.chain(this.columns)
           .filter((item) => {
-            return item.prop === 'joinNum1'
+            return item.prop === 'remakeExamValue'
           })
           .get('[0].rules', {})
           .value()
@@ -697,7 +722,14 @@ export default {
       deep: true
     }
   },
-  created() {},
+  created() {
+    getCategoryList().then((res) => {
+      let categoryId = _.filter(this.columns, (item) => {
+        return item.prop === 'categoryId'
+      })[0]
+      categoryId.props.treeParams.data = res
+    })
+  },
   methods: {
     loadCoordinator() {
       let params = {

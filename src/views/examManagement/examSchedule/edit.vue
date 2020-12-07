@@ -30,15 +30,13 @@
       <div class="page-right">
         <el-button
           v-if="!id"
-          class="publish-btn"
           size="medium"
-          @click="handleDraft"
+          @click="publish('draft')"
         >
           存草稿
         </el-button>
         <el-button
           v-if="activeStep !== 0"
-          class="publish-btn"
           size="medium"
           @click="handlePreviousStep"
         >
@@ -46,19 +44,17 @@
         </el-button>
         <el-button
           v-if="activeStep !== 2"
-          class="publish-btn"
           size="medium"
           type="primary"
           @click="handleNextStep"
         >
           下一步
         </el-button>
+        <!-- v-if="activeStep === 2" -->
         <el-button
-          v-if="activeStep === 2"
-          class="publish-btn"
           size="medium"
           type="primary"
-          @click="publish"
+          @click="publish('publish')"
         >
           发布
         </el-button>
@@ -73,9 +69,9 @@
       <el-col
         :xl="16"
         :lg="16"
-        :md="18"
-        :sm="20"
-        :xs="22"
+        :md="20"
+        :sm="22"
+        :xs="24"
         class="page__content--inner"
       >
         <ExamInfo
@@ -92,9 +88,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import ExamInfo from './components/examInfo'
 import ExamBatch from './components/examBatch'
-import { createTrain, putTrain } from '@/api/train/train'
+import { postExamArrange, putExamArrange, getExamArrange } from '@/api/examManage/schedule'
+import moment from 'moment'
 const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
 export default {
@@ -108,6 +106,7 @@ export default {
       refsList: REFS_LIST,
       loading: false,
       activeStep: 0,
+      formData: {},
       steps: [
         {
           label: '考试信息',
@@ -121,6 +120,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['userId']),
     translateX() {
       return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
         100}%)`
@@ -135,7 +135,6 @@ export default {
   methods: {
     jumpStep(index) {
       this.activeStep = index
-
       // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
       //   this.activeStep = index
       // })
@@ -161,20 +160,16 @@ export default {
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
-        // const basicKeyList = _.keys(this.$refs.editBasicInfo.formData)
-        // const detailKeyList = _.keys(this.$refs.editDetail.formData)
+        getExamArrange({ id: this.id }).then(() => {})
       }
     },
-    // 存草稿
-    handleDraft() {},
     // 发布区分编辑发布还是新增发布
-    publish() {
-      const basicData = this.$refs.editBasicInfo.getData()
-      const editArrangement = this.$refs.editArrangement.getData()
-      const detailData = this.$refs.editDetail.getData()
-      Promise.all([basicData, editArrangement, detailData]).then((res) => {
-        let params = this.handleParams(res)
-        let editFun = this.id ? putTrain : createTrain
+    publish(type) {
+      const examInfoData = this.$refs.examInfo.getData()
+      const examBatchData = this.$refs.examBatch.getData()
+      Promise.all([examInfoData, examBatchData]).then((res) => {
+        let params = this.handleParams(res, type)
+        let editFun = this.id ? putExamArrange : postExamArrange
         editFun(params).then((resData) => {
           if (resData) {
             this.$message.success('已成功创建考试，3秒后自动返回考试列表')
@@ -186,31 +181,22 @@ export default {
       })
     },
     // 统一处理入参
-    handleParams(res) {
-      // 培训对象
-      let trainObjectsList = []
-      const pickTrain = _.get(res[0], 'trainObjectsList')
-      _.each(pickTrain, (item) => {
-        trainObjectsList.push({
-          type: item.type,
-          bizId: item.type === 'User' ? item.userId : item.bizId
-        })
-      })
-      // 基本信息(除培训对象外)详细信息
-      const trainInfo = _.chain(res[0])
-        .omit('trainObjectsList')
-        .assign(res[2])
-        .value()
-      trainInfo['introduction'] = _.escape(trainInfo['introduction'])
-      const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
-      let params = {
-        id: this.id,
-        trainInfo,
-        trainObjectsList,
-        trainExam,
-        trainOfflineTodo,
-        trainOnlineCourse
+    handleParams(res, type) {
+      let [examArrangeBasis, examineeBatchList] = res
+      let examPattern = { examPattern: this.$route.query.examPattern }
+      if (this.id) {
+        let id = { id: this.id }
+        _.assign(examArrangeBasis, id)
       }
+      _.assign(examArrangeBasis, { type: type === 'publish' ? 1 : 2 })
+      _.assign(examArrangeBasis, examPattern)
+      _.assign(examArrangeBasis, { creatorId: this.userId })
+      examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
+      let params = {
+        examArrangeBasis,
+        examineeBatchList
+      }
+      // console.log('处理后的总参数==', params)
       // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },

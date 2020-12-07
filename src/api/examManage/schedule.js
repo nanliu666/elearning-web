@@ -15,3 +15,7 @@ export const putExamArrange = (params) => put('/manage/v1/exam/arrange', params)
  * 删除考试安排
  */
 export const delExamArrange = (params) => del('/manage/v1/exam/arrange', params)
+/**
+ * 获取当前组织下的所有人
+ */
+export const getUserList = (params) => get('/user/v1/user/basis', params)

@@ -11,8 +11,11 @@
       :model="formData"
       :columns="columns"
     >
-      <template #trainObjectsList>
-        <SelectUser v-model="formData.trainObjectsList"></SelectUser>
+      <template #examList>
+        <SelectUser
+          v-model="formData.examList"
+          title="考生安排"
+        ></SelectUser>
       </template>
     </common-form>
     <span slot="footer">
@@ -36,15 +39,15 @@ const EventColumns = [
     itemType: 'datePicker',
     span: 24,
     type: 'datetimerange',
-    required: true,
+    required: false,
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
-    prop: 'fixedTime',
+    prop: 'examTime',
     label: '考试时间'
   },
   {
     itemType: 'slot',
     label: '考试安排',
-    prop: 'trainObjectsList',
+    prop: 'examList',
     options: [],
     required: true,
     span: 24
@@ -65,8 +68,8 @@ export default {
     return {
       columns: EventColumns,
       formData: {
-        trainObjectsList: [],
-        fixedTime: []
+        examList: [],
+        examTime: []
       }
     }
   },

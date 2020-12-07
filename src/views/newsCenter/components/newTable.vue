@@ -348,94 +348,100 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-$color_active: #368AFA
-$color_danger: #ff6464
-$color_icon: #757C85
+<style lang="scss" scoped>
+$color_danger: #ff6464;
+$color_icon: #757c85;
+.table__link {
+  color: $primaryColor;
+  &:hover {
+    cursor: pointer;
+    color: $primaryColor;
+  }
+  .status-span {
+    padding: 4px;
+  }
+}
 
-.table__link
-  color: $color_active
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &__column--item {
+    height: 25px;
+  }
 
-  &:hover
-    cursor: pointer
-    color: $primaryColor
+  &__column--visible {
+    height: 200px;
+  }
 
-  .status-span
-    padding: 4px
-  /*border-radius: 2px*/
+  &__btns {
+    align-items: center;
+    display: flex;
+    height: 24px;
+    justify-content: flex-start;
+  }
 
+  &__btns--item {
+    margin: 0;
+    margin-right: 4px;
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+  }
 
+  &:last-child {
+    margin: 0;
+  }
+}
 
-  .operations
-    align-items: center
-    display: flex
-    justify-content: space-between
+.iconfont {
+  color: $color_icon;
+  font-weight: bold;
+  font-size: 16px;
+}
 
-    &__column--item
-      height: 25px
+.container__grid {
+  height: 0;
+  min-height: calc(100% - 92px) &--aside, &--main {
+    height: 100%;
+  }
 
-    &__column--visible
-      height: 200px
-      overflow: scroll
+  &--aside {
+    width: 250px;
+  }
 
-    &__btns
-      align-items: center
-      display: flex
-      height: 24px
-      justify-content: flex-start
+  &--main {
+    width: calc(100%);
+  }
+}
 
-    &__btns--item
-      margin: 0
-      margin-right: 4px
-      padding: 0
-      height: 24px
-      width: 24px
-      line-height: 24px
+.table__handler {
+  i {
+    color: $color_icon;
+  }
 
-      &:last-child
-        margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-    .iconfont
-      color: $color_icon
-      font-weight: bold
-      font-size: 16px
+  i.font__color--active {
+    color: $primaryColor;
+    display: flex;
+    justify-content: flex-end;
+    > .el-button--text {
+      text-align: center;
+      padding: 0 8px;
+      margin-left: 0px;
+      position: relative;
 
-  .container__grid
-    height: 0
-    min-height: calc(100% - 92px)
-
-    &--aside, &--main
-      height: 100%
-
-    &--aside
-      width: 250px
-
-    &--main
-      width: calc(100%)
-
-  .table__handler
-    i
-      color: $color_icon
-
-    i.font__color--active
-      color: $color_active
-    display: flex
-    justify-content: flex-end
-
-    > .el-button--text
-      text-align: center
-      padding: 0 8px
-      margin-left: 0px
-      position: relative
-
-      &:not(:last-child)::after
-        background-color: #e3e7e9
-        content: ''
-        height: 10px
-        position: absolute
-        right: 0
-        top: 50%
-        transform: translateY(-50%)
-        width: 1px
+      &:not(:last-child)::after {
+        background-color: #e3e7e9;
+        content: '';
+        height: 10px;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+      }
+    }
+  }
+}
 </style>

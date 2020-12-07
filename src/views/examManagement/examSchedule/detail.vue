@@ -331,7 +331,6 @@
 </template>
 
 <script>
-// import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
 const TABLE_COLUMNS = [
   {
     label: '姓名',
@@ -461,6 +460,7 @@ const SEARCH_CONFIG = {
 }
 import SearchPopover from '@/components/searchPopOver/index'
 import { getKnowledgeManageList } from '@/api/knowledge/knowledge'
+import { delExamArrange, getExamArrange } from '@/api/examManage/schedule'
 export default {
   components: { SearchPopover },
   data() {
@@ -537,11 +537,13 @@ export default {
       this.$router.push({ path: '/examManagement/examSchedule/edit', query })
     },
     deleteFun() {
-      // const params = {id: this.examDetail.id}
-      this.$message.success('删除成功')
-      this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
-      this.$nextTick(() => {
-        this.$router.push({ path: '/examManagement/examSchedule/list' })
+      const params = { id: this.examDetail.id }
+      delExamArrange(params).then(() => {
+        this.$message.success('删除成功')
+        this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+        this.$nextTick(() => {
+          this.$router.push({ path: '/examManagement/examSchedule/list' })
+        })
       })
     },
     // 前往关联试卷
@@ -572,9 +574,9 @@ export default {
      * 初始数据，并处理附件
      */
     initData() {
-      // getKnowledgeManageDetails({ id: this.$route.query.id }).then((res) => {
-      //   this.examDetail = res
-      // })
+      getExamArrange({ id: this.$route.query.id }).then((res) => {
+        this.examDetail = res
+      })
     },
     async loadTableData() {
       if (this.tableLoading) {
