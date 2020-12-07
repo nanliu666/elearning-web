@@ -1,6 +1,9 @@
 <template>
   <div class="trainingDetail">
-    <div class="trainingDetail_title">
+    <div
+      class="trainingDetail_title"
+      @click="toTrainingArrange"
+    >
       <i class="el-icon-arrow-left"></i> 培训详情
     </div>
 
@@ -14,10 +17,15 @@
           <el-button
             type="primary"
             size="mini"
+            :disabled="issueStatus"
           >
             开办下一期
           </el-button>
-          <el-button size="mini">
+          <el-button
+            size="mini"
+            :disabled="issueStatus"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
@@ -673,7 +681,8 @@ import {
   getTrainEvaluate,
   grantCertificate,
   revokeCertificate,
-  examList
+  examList,
+  stopSchedule
 } from '@/api/training/training'
 // 表格属性
 const TABLE_COLUMNS = [
@@ -773,7 +782,6 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '在线学习进度(必修)',
     type: 'select',
     options: [
-      // （1：已完成；2：未完成；不传参数则表示全部）
       { value: 1, label: '已完成' },
       { value: 2, label: '未完成' }
     ]
@@ -785,7 +793,6 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '考试情况',
     type: 'select',
     options: [
-      // （1：已通过；2：未通过；3：未开始；不传参数则表示全部）
       { value: 1, label: '已通过' },
       { value: 2, label: '未通过' },
       { value: 3, label: '未开始' }
@@ -798,7 +805,6 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '评估情况',
     type: 'select',
     options: [
-      // 评估情况（1：已评估；2：未评估；3：未开始；不传参数则表示全部）
       { value: 1, label: '已评估' },
       { value: 2, label: '未评估' },
       { value: 3, label: '未开始' }
@@ -811,7 +817,6 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '证书状态',
     type: 'select',
     options: [
-      // 1：已获得；2：未获得；3：未开始；不传参数则表示全部
       { value: 1, label: '已获得' },
       { value: 2, label: '未获得' },
       { value: 3, label: '未开始' }
@@ -835,17 +840,13 @@ export default {
   },
   data() {
     return {
+      // 是否是已发布页过来的
+      issueStatus: this.$route.query.status,
       showExamList: [],
       showTrainEvaluate: {},
       isOfflineTodo: '',
       // 查询培训线上课程  在线课程
       showOnlineCourse: [],
-      // classTime	上课时间	string
-      // course	关联课程	string
-      // lecturerName	讲师名字	string
-      // status	状态（1：已结束；2：进行中；3：未开始）	integer(int32)
-      // studyType	修读类型. 0-必修 1-选修.默认必修	integer(int32)
-      // 查询培训详情
       showTrainDetail: {
         draft: '', //草稿：0.已发布、1.草稿	integer(int32)
         id: '', //id	integer(int64)
@@ -862,28 +863,7 @@ export default {
       // 评估结果
       resultValue: 2.8,
       // 线下日程表格
-      activeNamesTableData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1516 弄'
-        }
-      ],
+      activeNamesTableData: [],
 
       // 线下日程
       activeNames: 1,
@@ -916,7 +896,6 @@ export default {
 
   created() {
     this.refreshTableData()
-
     this.isStudentList({ trainId: 1 })
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
@@ -930,17 +909,28 @@ export default {
     // this.getInfo()
   },
   methods: {
+    // 结办
+    isstopSchedule() {
+      let id = this.$route.query.id
+      stopSchedule(id).then(() => {
+        this.isgetScheduleList()
+        this.issueStatus = false
+      })
+    },
+    // 去列表页
+    toTrainingArrange() {
+      this.$router.push({ path: '/training/trainingArrange' })
+    },
     // 跳转考试详情
     toexamDetail(id) {
-      // console.log(id)
       this.$router.push({ path: '/training/examination?id=' + id })
     },
 
     // 查询培训考试安排
     isExamList() {
-      let id = '1332236640693030914'
+      let id = this.$route.query.id
+      // let id = '1332236640693030914'
       examList({ trainId: id }).then((res) => {
-        // console.log('showExamList', res)
         this.showExamList = res
       })
     },
@@ -948,7 +938,6 @@ export default {
     //发放学员证书
     isgrantCertificate(id) {
       grantCertificate([id]).then(() => {
-        // console.log(res)
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -959,7 +948,6 @@ export default {
     // 撤回学员证书
     isrevokeCertificate(id) {
       revokeCertificate([id]).then(() => {
-        // console.log(res)
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -987,15 +975,12 @@ export default {
     // 查询培训线下日程
     isGetOfflineTodo() {
       // console.log('id', this.$route.query.id)
-      let id = '1332138220456259585'
+      // let id = '1332138220456259585'
+      let id = this.$route.query.id
       getOfflineTodo({ trainId: id }).then((res) => {
         this.isOfflineTodo = res
-        // console.log('this.isOfflineTodo', res)
-
         let index = 1
-        // console.log('getOfflineTodo123', res)
         for (const key in res) {
-          //  console.log('key',key);
           ++index
           if (key == this.getNowFormatDate()) {
             this.activeNames = index
@@ -1006,7 +991,8 @@ export default {
     // 查询培训线上课程
     isGetOnlineCourse() {
       // console.log('id', this.$route.query.id)
-      let id = '1331882612830322689'
+      // let id = '1331882612830322689'
+      let id = this.$route.query.id
       getOnlineCourse({ trainId: id }).then((res) => {
         // console.log('------------+',res)
         this.showOnlineCourse = res
@@ -1015,7 +1001,8 @@ export default {
     // 查询培训详情
     isGetTrainDetail() {
       // console.log('id', this.$route.query.id)
-      let id = '1332136482139570178'
+      let id = this.$route.query.id
+      // let id = '1332136482139570178'
       getTrainDetail({ trainId: id }).then((res) => {
         this.showTrainDetail = res
       })
@@ -1033,11 +1020,9 @@ export default {
       page.pageSize = this.page.size
       let params = { ...page, ...courseName }
       params.status = this.status
-      params.trainId = 1
-      // console.log('params', params)
+      // params.trainId = 1
+      params.trainId = this.$route.query.id
       studentList(params).then((res) => {
-        // console.log('---------------', res.data)
-
         this.tableData = res.data
         SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
         this.tableData.forEach((item) => {
@@ -1052,17 +1037,14 @@ export default {
 
     isgetTrainEvaluate() {
       // console.log('id', this.$route.query.id)
-      let params = { trainId: 1 }
+      let params = { trainId: this.$route.query.id++ }
       getTrainEvaluate(params).then((res) => {
-        // console.log(res)
         this.showTrainEvaluate = res
       })
     },
 
     // 线下日程
-    handleChange() {
-      // console.log(val)
-    },
+    handleChange() {},
 
     // 编辑&删除&移动
     handleCommand(e, row) {
@@ -1108,7 +1090,6 @@ export default {
     handleSearch(searchParams) {
       // this.loadTableData(_.pickBy(searchParams))
       this.isStudentList(searchParams)
-      // console.log(searchParams)
     },
 
     handleRemoveItems(selection) {
@@ -1126,30 +1107,9 @@ export default {
     // 刷新列表数据
     refreshTableData() {},
 
-    // 拿数据
-    // getInfo (courseName) {
-    //   // currentPage	当前页	body	true
-    //   // size	页面显示数量	body	true
-    //   // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
-    //   // courseName	课程名称	body	false
-    //   let params = {
-    //     currentPage: '',
-    //     size: '',
-    //     status: ''
-    //   }
-    //   params = { ...this.page, ...courseName }
-    //   params.status = this.status
-    //   // console.log('params', params)
-    //   // getCourseListData(params).then((res) => {
-    //   //   this.tableData = res
-    //   //   this.page.total = res.length
-    //   //   // window.console.log(res)
-    //   // })
-    // },
     // 导航
     showSelect(index) {
       this.status = index
-      // this.getInfo()
     },
 
     // 查询培训详情数据获取
