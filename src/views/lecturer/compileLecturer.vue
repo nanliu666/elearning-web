@@ -4,7 +4,7 @@
       class="addLecturer_head"
       @click="toLecturer"
     >
-      <i class="el-icon-arrow-left"></i> 添加讲师
+      <i class="el-icon-arrow-left"></i> 编辑讲师
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
