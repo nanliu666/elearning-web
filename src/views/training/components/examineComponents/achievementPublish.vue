@@ -53,7 +53,7 @@ const defaultValue = {
   passScope: 0,
   publishRules: 1,
   autoEvaluate: 1,
-  fixedTime: []
+  fixedTime: new Date()
 }
 export default {
   name: 'AchievementPublish',
@@ -101,7 +101,7 @@ export default {
         {
           itemType: 'datePicker',
           span: 24,
-          type: 'datetimerange',
+          type: 'datetime',
           required: true,
           prop: 'fixedTime',
           label: '定时发布日期时间'
