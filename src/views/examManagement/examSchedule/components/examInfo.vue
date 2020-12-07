@@ -288,13 +288,33 @@ const EventColumns = [
     label: '考试名称'
   },
   {
-    itemType: 'select',
+    itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: false, // TODO：暂时关闭必填校验
+    required: true,
     options: [],
     prop: 'categoryId',
-    label: '考试分类'
+    label: '考试分类',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     itemType: 'slot',
@@ -571,6 +591,7 @@ const radioList = [
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
+import { getCategoryList } from '@/api/examManage/category'
 export default {
   name: 'ExamInfo',
   components: {
@@ -603,7 +624,7 @@ export default {
         examTime: '',
         examName: '',
         testPaper: '',
-        reviewer: '',
+        reviewer: null,
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
@@ -701,7 +722,14 @@ export default {
       deep: true
     }
   },
-  created() {},
+  created() {
+    getCategoryList().then((res) => {
+      let categoryId = _.filter(this.columns, (item) => {
+        return item.prop === 'categoryId'
+      })[0]
+      categoryId.props.treeParams.data = res
+    })
+  },
   methods: {
     loadCoordinator() {
       let params = {

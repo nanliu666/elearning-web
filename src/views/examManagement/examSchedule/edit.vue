@@ -92,6 +92,7 @@ import { mapGetters } from 'vuex'
 import ExamInfo from './components/examInfo'
 import ExamBatch from './components/examBatch'
 import { postExamArrange, putExamArrange, getExamArrange } from '@/api/examManage/schedule'
+import moment from 'moment'
 const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
 export default {
@@ -190,6 +191,7 @@ export default {
       _.assign(examArrangeBasis, { type: type === 'publish' ? 1 : 2 })
       _.assign(examArrangeBasis, examPattern)
       _.assign(examArrangeBasis, { creatorId: this.userId })
+      examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
       let params = {
         examArrangeBasis,
         examineeBatchList
