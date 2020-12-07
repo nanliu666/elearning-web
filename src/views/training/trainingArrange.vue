@@ -8,6 +8,7 @@
         <el-button
           type="primary"
           size="small"
+          @click="toCreateTraining"
         >
           &nbsp; 创建培训 &nbsp;
         </el-button>
@@ -633,6 +634,10 @@ export default {
   },
   activated() {},
   methods: {
+    // 去创建培训
+    toCreateTraining() {
+      this.$router.push({ path: '/training/edit' })
+    },
     // 去培训详情
     toTrainingDetail(row) {
       this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })

@@ -532,10 +532,8 @@ export default {
     },
     // 停用&启用
     handlestatus(row, i) {
-      // console.log(row.id)
-      // console.log(i)
-      updateStatus({ ids: row.id + ', ', status: i }).then(() => {
-        // console.log(res)
+      // let id = row.id + ','
+      updateStatus({ ids: row.id, status: i }).then(() => {
         this.loadTableData()
       })
     },
