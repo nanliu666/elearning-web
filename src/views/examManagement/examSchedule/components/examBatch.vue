@@ -96,6 +96,11 @@ export default {
   },
   created() {},
   methods: {
+    getData() {
+      return new Promise((resolve) => {
+        resolve(this.batchList)
+      })
+    },
     submitBatch(data) {
       this.batchList.push(data)
       // 先用开始时间排序

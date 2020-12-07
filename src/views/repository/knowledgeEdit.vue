@@ -158,14 +158,6 @@ export default {
       //   offset: 1
       // },
       {
-        itemType: 'slot',
-        label: '是否允许下载',
-        prop: 'download',
-        required: false,
-        span: 11,
-        offset: 1
-      },
-      {
         itemType: 'radio',
         label: '上传模式',
         prop: 'uploadType',
@@ -263,10 +255,31 @@ export default {
           rules: [{ validator: checkAge, trigger: 'blur' }],
           span: 24
         }
-        let index = _.findIndex(this.formColumns, (item) => {
+        const allowDownload = {
+          itemType: 'slot',
+          label: '是否允许下载',
+          prop: 'download',
+          required: false,
+          span: 11,
+          offset: 1
+        }
+        let uploadTypeIndex = _.findIndex(this.formColumns, (item) => {
           return item.prop === 'uploadType'
         })
-        this.formColumns[index + 1] = val === 0 ? UPLOAD_FILE : UPLOAD_INPUT
+        const allowDownloadIndex = _.findIndex(this.formColumns, (item) => {
+          return item.prop === 'download'
+        })
+        const providerNameIndex = _.findIndex(this.formColumns, (item) => {
+          return item.prop === 'providerName'
+        })
+
+        if (val === 0) {
+          this.formColumns[uploadTypeIndex + 1] = UPLOAD_FILE
+          this.formColumns.splice(providerNameIndex + 1, 0, allowDownload)
+        } else {
+          this.formColumns[uploadTypeIndex + 1] = UPLOAD_INPUT
+          this.formColumns.splice(allowDownloadIndex, 1)
+        }
       }
     }
   },
@@ -314,8 +327,12 @@ export default {
     },
     // 上传格式校验
     beforeUpload(file) {
+      const fileTypeIndex = file.name.lastIndexOf('.')
+      const fileType = file.name.substring(fileTypeIndex + 1, file.length)
       const isLt100M = file.size / 1024 / 1024 < 10
       const LIMIT = 2
+      const TYPE_LIST = ['exe', 'bat']
+      const notBatNorExe = _.some(TYPE_LIST, fileType)
       const isLimitLength = _.size(this.formData.attachments) < LIMIT
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
@@ -323,7 +340,10 @@ export default {
       if (!isLimitLength) {
         this.$message.error('上传文件数量超过限制!')
       }
-      return isLt100M && isLimitLength
+      if (notBatNorExe) {
+        this.$message.error('不允许上传.exe .bat类型文件')
+      }
+      return isLt100M && isLimitLength && !notBatNorExe
     },
     // 预览附件
     previewFile(data) {

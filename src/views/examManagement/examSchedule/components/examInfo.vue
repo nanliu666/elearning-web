@@ -1,25 +1,758 @@
 <template>
   <div class="exam-info">
-    <BasicSetting />
-    <Permission />
+    <common-form
+      ref="form"
+      :model="model"
+      :columns="columns"
+    >
+      <template #basicTitle>
+        <div class="title-box">
+          基础信息
+        </div>
+      </template>
+      <template #basicInfoTitle>
+        <div class="title-box">
+          基础设置
+        </div>
+      </template>
+      <template #environment>
+        <div class="title-box">
+          考场环境
+        </div>
+      </template>
+      <template #privilegeTitle>
+        <div class="title-box">
+          考生权限
+        </div>
+      </template>
+      <template #strategyTitle>
+        <div class="title-box">
+          评卷策略
+        </div>
+      </template>
+      <template #multipleTitle>
+        <span class="multiple-title">多选题</span>
+      </template>
+      <template #branchTitle>
+        <div
+          class="title-box"
+          style="margin-top: -12px"
+        >
+          成绩分布
+        </div>
+      </template>
+      <template #testPaper>
+        <lazy-select
+          v-model="model.testPaper"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
+      <template #reviewer>
+        <lazy-select
+          v-model="model.reviewer"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCoordinator"
+          :option-props="personOptionProps"
+        />
+      </template>
+      <template #reckonTime>
+        <el-radio-group v-model="model.reckonTime">
+          <el-radio :label="0">
+            不计时
+          </el-radio>
+          <radioInput
+            v-model="model.reckonTime"
+            text-before="限制时长"
+            text-after="分钟"
+            :default-value="60"
+            :input-width="60"
+            :input-props="{ maxLength: 4 }"
+          ></radioInput>
+        </el-radio-group>
+      </template>
+
+      <template #joinNum>
+        <el-radio-group v-model="model.joinNum">
+          <div class="flex-flow flex flexcenter">
+            <el-radio :label="0">
+              不限次数
+            </el-radio>
+            <radioInput
+              v-model="model.joinNum"
+              text-before="限制次数 不超过"
+              text-after="次"
+              :default-value="3"
+              :input-width="60"
+              :input-props="{ maxLength: 4 }"
+            ></radioInput>
+          </div>
+        </el-radio-group>
+      </template>
+      <template #joinNum1>
+        <el-radio-group v-model="model.joinNum1Boo">
+          <div class="flex-flow flex flexcenter">
+            <el-radio :label="false">
+              不允许
+            </el-radio>
+            <el-radio :label="true">
+              允许补考
+              <el-input
+                v-model.number="model.joinNum1"
+                :disabled="!model.joinNum1Boo"
+                style="width: 60px;"
+              ></el-input>
+              次
+            </el-radio>
+          </div>
+        </el-radio-group>
+      </template>
+
+      <template #integral>
+        <checkbox-input
+          v-model="model.integral"
+          text-before="本考试记录系统积分，积分值为"
+          text-after="分"
+          :default-value="2"
+          :input-width="60"
+          :input-props="{ maxLength: 4 }"
+        ></checkbox-input>
+      </template>
+      <template #publishTime>
+        <checkbox-input
+          v-model="model.publishTime"
+          text-before="考试开始前"
+          text-after="分钟发布考试信息"
+          :input-width="60"
+          :default-value="10"
+          :input-props="{ maxLength: 4 }"
+        ></checkbox-input>
+      </template>
+      <template #lateBanExam>
+        <switch-input
+          :switch-value.sync="model.lateBanExam"
+          :input-value.sync="model.lateBanExamValue"
+          pre-text="迟到"
+          after-text="分钟禁止参加考试"
+        />
+      </template>
+      <template #answerBanExam>
+        <switch-input
+          :switch-value.sync="model.answerBanExam"
+          :input-value.sync="model.answerBanExamValue"
+          pre-text="开始答卷"
+          after-text="分钟内禁止交卷"
+        />
+      </template>
+      <template #preCreate>
+        <switch-input
+          :switch-value.sync="model.preCreate"
+          :input-value.sync="model.preCreateValue"
+          pre-text="试卷最多预生成"
+          after-text="份"
+        />
+      </template>
+      <template #openResults>
+        <switch-input
+          :switch-value.sync="model.openResults"
+          :input-value.sync="model.openResultsValue"
+          pre-text="考生"
+          after-text="天内可以查看成绩（0代表永久）"
+        />
+      </template>
+      <template #scopeLimit>
+        <switch-input
+          :switch-value.sync="model.scopeLimit"
+          :input-value.sync="model.scopeLimitValue"
+          pre-text="最高得分为"
+          after-text="分"
+        />
+      </template>
+      <template #modifyAnswer>
+        <el-switch
+          v-model="model.modifyAnswer"
+          @change="modifyAnswerChange"
+        />
+      </template>
+      <template #autoEvaluate>
+        <el-switch
+          v-model="model.autoEvaluate"
+          @change="autoEvaluateChange"
+        />
+      </template>
+      <template #answerMode1>
+        <el-radio-group
+          v-model="currentRadio"
+          class="radio-group"
+        >
+          <el-radio
+            v-for="(item, index) in radioList"
+            :key="index"
+            class="radio-li"
+            :label="index"
+          >
+            {{ item.value }}
+            <el-tooltip
+              v-if="item.des"
+              effect="dark"
+              width="400px"
+              :content="item.des"
+              placement="top"
+            >
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+      </template>
+      <template #passType>
+        <el-radio-group
+          v-model="model.passType"
+          style="display: flex;"
+        >
+          <achivementRadioInput
+            v-model="model.passType"
+            style="margin-right:40px"
+            label-text="按成绩"
+            text-before="成绩不低于"
+            text-after="分"
+            :input-width="60"
+            :default-value="passCondition[0].passType"
+            :number.sync="passCondition[0].passScope"
+            :pass-scope="model.passScope"
+            :input-props="{ maxLength: 4 }"
+          ></achivementRadioInput>
+          <achivementRadioInput
+            v-model="model.passType"
+            label-text="按得分率"
+            text-before="得分率不低于"
+            text-after="%"
+            :input-width="60"
+            :default-value="passCondition[1].passType"
+            :number.sync="passCondition[1].passScope"
+            :input-props="{ maxLength: 4 }"
+          ></achivementRadioInput>
+        </el-radio-group>
+      </template>
+    </common-form>
   </div>
 </template>
 
 <script>
-import BasicSetting from './infoComponents/basicInfo'
-import Permission from './infoComponents/permission'
+import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
+import SwitchInput from './atomComponents/switchInput'
+import radioInput from '@/components/radioInput/radioInput'
+import checkboxInput from '@/components/checkboxInput/checkboxInput'
+const personOptionProps = {
+  label: 'name',
+  value: 'userId',
+  key: 'userId'
+}
+const insertConfig = {
+  itemType: 'switch',
+  span: 11,
+  offset: 2,
+  prop: 'modifyLimit',
+  label: '不允许修改考生客观题及其评分结果'
+}
+const checkMakeUp = (rule, value, callback) => {
+  if (value === '') {
+    return callback(new Error('补考次数不能为空'))
+  } else {
+    callback()
+  }
+}
+const testPaper1Config = {
+  itemType: 'input',
+  span: 11,
+  offset: 2,
+  required: true,
+  prop: 'certificateId',
+  label: '证书模板'
+}
 
+const EventColumns = [
+  {
+    prop: 'basicTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'input',
+    span: 11,
+    required: true,
+    prop: 'examName',
+    label: '考试名称'
+  },
+  {
+    itemType: 'select',
+    span: 11,
+    offset: 2,
+    required: false, // TODO：暂时关闭必填校验
+    options: [],
+    prop: 'categoryId',
+    label: '考试分类'
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    required: true,
+    options: [],
+    prop: 'testPaper',
+    label: '考试用卷'
+  },
+  { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'switch', span: 11, required: false, prop: 'certificate', label: '是否发放证书' },
+  {
+    prop: 'basicInfoTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'radio',
+    prop: 'answerMode',
+    label: '答题模式',
+    span: 11,
+    options: [
+      { label: '整卷模式', value: 1 },
+      { label: '逐卷模式', value: 2 }
+    ]
+  },
+  {
+    itemType: 'slot',
+    prop: 'reckonTime',
+    label: '考试时长',
+    offset: 2,
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    prop: 'joinNum',
+    label: '参加次数',
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    prop: 'joinNum1',
+    label: '补考次数',
+    offset: 2,
+    span: 11,
+    rules: [{ validator: checkMakeUp, trigger: 'change' }]
+  },
+  {
+    itemType: 'radio',
+    prop: 'strategy',
+    label: '考试时间策略',
+    span: 24,
+    options: [
+      { label: '允许进入考试的时间', value: 0 },
+      { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
+    ]
+  },
+  {
+    itemType: 'slot',
+    prop: 'integral',
+    label: '积分',
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    prop: 'publishTime',
+    label: '发布考试',
+    offset: 2,
+    span: 11
+  },
+  {
+    prop: 'environment',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'isLimitIp',
+    label: '启用IP限制(需设定考生合法IP范围)'
+  },
+  {
+    itemType: 'switch',
+    prop: 'isShuffle',
+    label: '生成试卷时打乱试题和选项顺序',
+    offset: 2,
+    span: 11
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'createAnswers',
+    label: '交卷即时生成答案统计数据(建议大规模考试时不启用)'
+  },
+  {
+    itemType: 'slot',
+    prop: 'lateBanExam',
+    label: '迟到后禁止考试',
+    offset: 2,
+    span: 11
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    prop: 'answerBanExam',
+    label: '答卷时间过少禁止交卷'
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    offset: 2,
+    prop: 'preCreate',
+    label: '启用试卷预生成服务'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'isHold',
+    label: '自动保存答案到服务器'
+  },
+  {
+    prop: 'privilegeTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'isDecoil',
+    label: '允许考生查看本机资料(开卷考试)'
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    offset: 2,
+    prop: 'openResults',
+    label: '允许考生查看成绩'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'openAnswerSheet',
+    label: '允许考生查看答卷'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    offset: 2,
+    prop: 'selfMarking',
+    label: '允许考生自己评卷'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'publicAnswers',
+    label: '允许考生查看标准答案'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    offset: 2,
+    prop: 'openEntrance',
+    label: '允许考生报名参加考试'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    prop: 'isExamine',
+    label: '考生报名考试需要审批'
+  },
+  {
+    prop: 'strategyTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    prop: 'modifyAnswer',
+    label: '允许评卷人修改考生答案'
+  },
+  {
+    itemType: 'slot',
+    span: 11,
+    prop: 'scopeLimit',
+    label: '评卷限定最高得分'
+  },
+  {
+    itemType: 'switch',
+    span: 11,
+    offset: 2,
+    prop: 'objectiveQuestions',
+    label: '手工评卷是否显示客观题'
+  },
+  {
+    itemType: 'switch',
+    span: 24,
+    prop: 'decideItem',
+    label: '判断题答对得分，不答不得分，答错扣分'
+  },
+  {
+    prop: 'multipleTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'slot',
+    prop: 'answerMode1',
+    label: '',
+    span: 24
+  },
+  {
+    prop: 'branchTitle',
+    itemType: 'slotout',
+    span: 24,
+    label: ''
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    prop: 'autoEvaluate',
+    label: '自动评定是否通过'
+  },
+  {
+    itemType: 'radio',
+    span: 11,
+    prop: 'publishRules',
+    label: '发布规则',
+    options: [
+      { label: '系统即时发布', value: 1 },
+      { label: '定时自动发布', value: 2 }
+    ]
+  }
+]
+const passTypeConfig = {
+  itemType: 'slot',
+  span: 11,
+  offset: 2,
+  prop: 'passType',
+  label: '通过条件'
+}
+const fixedTimeConfig = {
+  itemType: 'datePicker',
+  span: 11,
+  offset: 2,
+  type: 'datetimerange',
+  required: true,
+  prop: 'fixedTime',
+  label: '定时发布日期时间'
+}
+const radioList = [
+  { value: '完全正确得分' },
+  { value: '按正确选项个数计分' },
+  {
+    value: '每项得扣分',
+    des:
+      '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
+  },
+  {
+    value: '每项答错扣分',
+    des:
+      '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
+  },
+  {
+    value: '每正确项得分',
+    des:
+      '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
+  }
+]
+import { getOrgUserList } from '@/api/system/user'
 export default {
   name: 'ExamInfo',
   components: {
-    BasicSetting,
-    Permission
+    achivementRadioInput,
+    SwitchInput,
+    radioInput,
+    checkboxInput,
+    LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
-    return {}
+    return {
+      currentRadio: 0,
+      radioList,
+      passCondition: [
+        {
+          passType: 1,
+          passScope: 60
+        },
+        {
+          passType: 2,
+          passScope: 80
+        }
+      ],
+      personOptionProps,
+      columns: EventColumns,
+      model: {
+        examTime: '',
+        examName: '',
+        testPaper: '',
+        reviewer: '',
+        answerMode: 1,
+        reckonTime: 0,
+        joinNum: 0,
+        joinNum1: 3,
+        joinNum1Boo: false,
+        integral: 0,
+        strategy: 0,
+        publishTime: 0,
+        isLimitIp: false,
+        isShuffle: false,
+        createAnswers: false,
+        lateBanExam: false,
+        answerBanExam: false,
+        preCreate: false,
+        isHold: false,
+        lateBanExamValue: 15, // 迟到15
+        answerBanExamValue: 30, // 最低30分钟才可交卷
+        preCreateValue: 10, // 预打印10份
+        isDecoil: false,
+        openResults: false,
+        openAnswerSheet: false,
+        selfMarking: false,
+        publicAnswers: false,
+        openEntrance: false,
+        isExamine: false,
+        openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
+        modifyAnswer: false,
+        modifyLimit: false,
+        scopeLimit: false,
+        scopeLimitValue: 100, // 最高分默认值100
+        objectiveQuestions: false,
+        decideItem: false,
+        autoEvaluate: false,
+        passType: 1,
+        passScope: 0,
+        publishRules: 1,
+        fixedTime: []
+      }
+    }
+  },
+  watch: {
+    'model.publishRules': {
+      handler(value) {
+        const fixedTimeIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'fixedTime'
+        })
+        const publishRulesIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'publishRules'
+        })
+        // 1隐藏， 2显示
+        if (value === 1) {
+          this.columns.splice(fixedTimeIndex, 1)
+        } else {
+          this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+        }
+      },
+      deep: true
+    },
+    // 是否发放证书
+    'model.certificate': {
+      handler(value) {
+        const reviewer1Index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'certificate'
+        })
+        const testPaper1Index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'certificateId'
+        })
+        if (value) {
+          this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+        } else {
+          this.columns.splice(testPaper1Index, 1)
+        }
+      },
+      deep: true
+    },
+    // 补考次数因为存在0有检验，所以手动添加校验规则
+    'model.joinNum1Boo': {
+      handler(value) {
+        const checkMakeUpZero = (rule, value, callback) => {
+          if (value === 0) {
+            return callback(new Error('补考次数必须大于0'))
+          } else {
+            callback()
+          }
+        }
+        const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
+        const target = _.chain(this.columns)
+          .filter((item) => {
+            return item.prop === 'joinNum1'
+          })
+          .get('[0].rules', {})
+          .value()
+        value ? target.push(zeroRuler) : target.pop()
+      },
+      deep: true
+    }
   },
   created() {},
-  methods: {}
+  methods: {
+    loadCoordinator() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        search: '',
+        orgId: this.$store.getters.userInfo.org_id || 0
+      }
+      return getOrgUserList(params)
+    },
+    getData() {
+      return new Promise((resolve, reject) => {
+        this.$refs['form']
+          .validate()
+          .then(() => {
+            resolve(this.model) // TODO 提交表单
+          })
+          .catch(() => {
+            reject()
+          })
+      })
+    },
+    // 允许评卷人修改考生答案关联修改客观题
+    modifyAnswerChange(value) {
+      const index = _.findIndex(this.columns, (column) => {
+        return column.prop === 'modifyAnswer'
+      })
+      const limitIndex = _.findIndex(this.columns, (column) => {
+        return column.prop === 'modifyLimit'
+      })
+      if (value) {
+        this.columns.splice(index + 1, 0, insertConfig)
+        this.columns[index].span = 11
+      } else {
+        this.columns[index].span = 24
+        this.columns.splice(limitIndex, 1)
+      }
+    },
+    // 自动评定是否通过关联通过条件
+    autoEvaluateChange(value) {
+      const autoEvaluateIndex = _.findIndex(this.columns, (column) => {
+        return column.prop === 'autoEvaluate'
+      })
+      const passTypeIndex = _.findIndex(this.columns, (column) => {
+        return column.prop === 'passType'
+      })
+      if (value) {
+        this.columns[autoEvaluateIndex].span = 11
+        this.columns.splice(autoEvaluateIndex + 1, 0, passTypeConfig)
+      } else {
+        this.columns[autoEvaluateIndex].span = 24
+        this.columns.splice(passTypeIndex, 1)
+      }
+    }
+  }
 }
 </script>
 
@@ -28,5 +761,34 @@ export default {
   background-color: #fff;
   padding: 20px 60px;
   margin-bottom: 30px;
+  /deep/ .el-form-item__label {
+    white-space: nowrap;
+  }
+  /deep/ .el-form-item {
+    margin-bottom: 16px;
+  }
+  /deep/ .el-form-item__label {
+    font-size: 14px;
+    color: rgba(0, 11, 21, 0.65);
+  }
+  .multiple-title {
+    color: rgba(0, 11, 21, 0.65);
+  }
+  .radio-group {
+    display: flex;
+    // flex-direction: column;
+    margin-top: -20px;
+    .radio-li {
+      // margin: 10px 0;
+      margin-right: 30px;
+      margin-top: 10px;
+    }
+  }
+  .title-box {
+    font-size: 18px;
+    color: rgba(0, 11, 21, 0.85);
+    font-weight: 550;
+    margin-top: 8px;
+  }
 }
 </style>

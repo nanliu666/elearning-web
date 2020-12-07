@@ -44,6 +44,10 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
+        :page-config="tablePageConfig"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="search-box">
@@ -59,10 +63,10 @@
             >
               <div
                 class="search-sort-box"
-                @click="toSort"
+                @click="loadTableData"
               >
-                <i class="el-icon-sort" />
-                <span class="sort-text">调整排序</span>
+                <i class="el-icon-refresh-right" />
+                <span class="sort-text">刷新</span>
               </div>
               <el-popover
                 placement="bottom"
@@ -93,6 +97,14 @@
             </div>
           </div>
         </template>
+        <template #resName="{row}">
+          <div
+            class="ellipsis title"
+            @click="jumpDetail(row)"
+          >
+            {{ row.resName }}
+          </div>
+        </template>
         <template
           slot="multiSelectMenu"
           slot-scope="{ selection }"
@@ -119,13 +131,13 @@
             </el-button>
             <el-button
               type="text"
-              @click="handleAuth(row)"
+              @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-dropdown
               v-if="activeIndex === '1'"
-              @command="handleCommand($event, row)"
+              @command="handleCommand(row)"
             >
               <el-button
                 type="text"
@@ -148,7 +160,7 @@
 
 <script>
 import {
-  getKnowledgeCatalogList,
+  getKnowledgeManageList,
   getKnowledgeCreatUsers,
   deleteKnowledgeCatalog,
   updateStatusKnowledgeCatalog
@@ -157,7 +169,7 @@ import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
-    prop: 'name',
+    prop: 'resName',
     slot: true,
     minWidth: 150
   },
@@ -234,6 +246,12 @@ export default {
       activeIndex: '1',
       tableLoading: false,
       tableData: [],
+      tablePageConfig: {},
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -241,7 +259,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'name',
+            field: 'resName',
             label: '',
             data: '',
             options: [],
@@ -322,7 +340,7 @@ export default {
       },
       data: [],
       createOrgDailog: false,
-      searchParams: {}
+      queryInfo: {}
     }
   },
   activated() {
@@ -332,11 +350,29 @@ export default {
     this.loadTableData()
   },
   methods: {
+    /**
+     * 处理页码改变
+     */
+    handleCurrentPageChange(param) {
+      this.queryInfo.pageNo = param
+      this.loadTableData()
+    },
+    /**
+     * 处理页码大小更改
+     */
+    handlePageSizeChange(param) {
+      this.queryInfo.pageSize = param
+      this.loadTableData()
+    },
+    // 跳转详情
+    jumpDetail(row) {
+      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
+    },
     handleSelect(key) {
       this.activeIndex = key
       this.statusValue = ''
-      let searchParams = { clientId: this.clientTypeList[key - 1].type }
-      this.handleSearch(searchParams)
+      let queryInfo = { clientId: this.clientTypeList[key - 1].type }
+      this.handleSearch(queryInfo)
     },
     // 如果父级停用，子级的启用按钮需要置灰处理
     getButtonDisabled(row) {
@@ -355,25 +391,20 @@ export default {
       const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
       return isDisabled
     },
-    // 权限配置窗口
-    handleAuth() {
-      this.$message.warning('正在开发中...')
-    },
     // 多种操作
-    async handleCommand($event, row) {
-      const TYPE_COMMAND = {
-        copy: this.handleCopy
-      }
-      TYPE_COMMAND[$event](row)
+    handleCommand(row) {
+      this.$router.push({
+        path: '/examManagement/examSchedule/edit',
+        query: { id: row.id, type: 'copy' }
+      })
     },
+    // 创建考试
     createExam($event) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { type: $event }
+        query: { examPattern: $event }
       })
     },
-    // 复制
-    handleCopy() {},
     // 具体的删除函数
     deleteFun(id) {
       deleteKnowledgeCatalog({ id }).then(() => {
@@ -388,18 +419,13 @@ export default {
     deleteCheck() {},
     // 单个删除
     handleDelete(row) {
-      let hasChildren = !_.isEmpty(row.children)
-      if (hasChildren) {
-        this.$message.error('很抱歉，您选中的目录下存在子目录，请先将子目录调整后再删除!')
-      } else {
-        this.$confirm('您确定要删除选中的目录吗？', '提醒', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.deleteFun(row.id)
-        })
-      }
+      this.$confirm('您确定要删除选中的考试吗？', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteFun(row.id)
+      })
     },
     // 批量删除
     deleteSelected(selected) {
@@ -415,12 +441,10 @@ export default {
         return
       }
       try {
-        const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
-          this.tableData = res
-          this.tableLoading = false
-        })
+        let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
+        this.tableData = data
+        this.page.total = totalNum
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -432,7 +456,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.searchParams = params
+      this.queryInfo = params
       this.loadTableData()
     },
     /**
@@ -476,10 +500,6 @@ export default {
       }
       deep(row)
       return ids
-    },
-    // 跳转排序
-    toSort() {
-      this.$router.push({ path: '/repository/catalogSort', query: { type: 'catalog' } })
     }
   }
 }
@@ -495,6 +515,10 @@ export default {
   }
   /deep/ .el-menu--horizontal {
     border-bottom: 1px solid #cccccc !important;
+  }
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
   }
 }
 .originColumn {

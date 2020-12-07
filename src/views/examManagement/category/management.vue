@@ -8,17 +8,17 @@
         mode="horizontal"
         @select="handleSelect"
       >
-        <el-menu-item index="1">
+        <el-menu-item index="0">
           题库分类
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="1">
           试卷/考试分类
         </el-menu-item>
       </el-menu>
       <common-table
         id="demo"
         ref="table"
-        :columns="columnsVisible | columnsFilter"
+        :columns="columnsVisible"
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
@@ -53,7 +53,7 @@
           </el-button>
         </template>
         <template #status="{row}">
-          {{ row.status === '0' ? '已启用' : '已停用' }}
+          {{ row.status === 0 ? '正常' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -62,7 +62,7 @@
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status === '0' ? '停用' : '启用' }}
+              {{ row.status === 0 ? '停用' : '启用' }}
             </el-button>
             <el-button
               type="text"
@@ -103,12 +103,7 @@
 </template>
 
 <script>
-import {
-  getKnowledgeCatalogList,
-  getKnowledgeCreatUsers,
-  deleteKnowledgeCatalog,
-  updateStatusKnowledgeCatalog
-} from '@/api/knowledge/knowledge'
+import { getCategoryList, ableCategory, delCategory } from '@/api/examManage/category'
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './edit'
 const TABLE_COLUMNS = [
@@ -126,7 +121,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'creatorName',
+    prop: 'createUser',
     minWidth: 120
   },
   {
@@ -147,103 +142,67 @@ const TABLE_CONFIG = {
     minWidth: 100
   }
 }
-const CLIENT_TYPE = [
-  {
-    type: 'questionBank',
-    text: '题库分类'
-  },
-  {
-    type: 'testPaper',
-    text: '试卷/考试分类'
-  }
-]
+const searchConfig = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'name',
+      label: '',
+      data: '',
+      options: [],
+      config: { placeholder: '请输入分类名称搜索', 'suffix-icon': 'el-icon-search' }
+    }
+  ],
+  popoverOptions: []
+}
 export default {
   name: 'CatelogManager',
   components: { SearchPopover, CatalogEdit },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
+
   data() {
     return {
-      clientTypeList: CLIENT_TYPE,
-      activeIndex: '1',
+      activeIndex: '0',
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
-      searchConfig: {
-        requireOptions: [
-          {
-            type: 'input',
-            field: 'name',
-            label: '',
-            data: '',
-            options: [],
-            config: { placeholder: '请输入分类名称搜索', 'suffix-icon': 'el-icon-search' }
-          }
-        ],
-        popoverOptions: [
-          {
-            type: 'select',
-            field: 'status',
-            label: '状态',
-            data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
-          },
-          {
-            type: 'select',
-            field: 'userId',
-            data: '',
-            label: '创建人',
-            options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
-            loading: false,
-            noMore: false,
-            pageNo: 2,
-            loadMoreFun(item) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getKnowledgeCreatUsers().then((res) => {
-                if (res.length > 0) {
-                  item.options.push(...res)
-                  item.pageNo += 1
-                  item.loading = false
-                } else {
-                  item.noMore = true
-                  item.loading = false
-                }
-              })
-            }
-          }
-        ]
-      },
+      columnsVisible: TABLE_COLUMNS,
+      checkColumn: ['name', 'status', 'createUser', 'updateTime'],
+      searchConfig,
       data: [],
       createOrgDailog: false,
-      searchParams: {}
+      searchParams: {
+        parentId: 0,
+        type: '0',
+        name: ''
+      }
     }
   },
   activated() {
-    getKnowledgeCreatUsers().then((res) => {
-      this.searchConfig.popoverOptions[1].options.push(...res)
-    })
     this.loadTableData()
   },
   methods: {
+    // 新增分类
     addCategory() {
-      this.$refs.orgEdit.create(this.activeIndex - 1)
+      this.$refs.orgEdit.create(Number(this.activeIndex))
     },
     handleSelect(key) {
       this.activeIndex = key
-      this.statusValue = ''
-      let searchParams = { clientId: this.clientTypeList[key - 1].type }
-      this.handleSearch(searchParams)
+      this.searchParams.type = key
+      this.$refs.table.clearSelection()
+      this.loadTableData()
+    },
+    // 权限配置窗口
+    handleAuth() {
+      this.$message.warning('正在开发中...')
+    },
+    // 多种操作
+    async handleCommand($event, row) {
+      const TYPE_COMMAND = {
+        delete: this.handleDelete,
+        edit: this.handleOrgEdit,
+        addChild: this.handleAddChild
+      }
+      TYPE_COMMAND[$event](row)
     },
     // 如果父级停用，子级的启用按钮需要置灰处理
     getButtonDisabled(row) {
@@ -259,34 +218,20 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status === 1 ? true : false
       return isDisabled
-    },
-    // 权限配置窗口
-    handleAuth() {
-      this.$message.warning('正在开发中...')
-    },
-    // 多种操作
-    async handleCommand($event, row) {
-      const TYPE_COMMAND = {
-        delete: this.handleDelete,
-        edit: this.handleOrgEdit,
-        addChild: this.handleAddChild
-      }
-      TYPE_COMMAND[$event](row)
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteKnowledgeCatalog({ id }).then(() => {
+      delCategory({ id }).then(() => {
         this.loadTableData()
         this.$message({
           type: 'success',
           message: '删除成功!'
         })
+        this.$refs.table.clearSelection()
       })
     },
-    // 删除检测
-    deleteCheck() {},
     // 单个删除
     handleDelete(row) {
       let hasChildren = !_.isEmpty(row.children)
@@ -312,13 +257,10 @@ export default {
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
-        const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
+        getCategoryList(this.searchParams).then((res) => {
           this.tableData = res
           this.tableLoading = false
         })
@@ -334,17 +276,17 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.searchParams = params
+      _.assign(this.searchParams, params)
       this.loadTableData()
     },
     // 添加子分类
     handleAddChild(row) {
-      this.$refs.orgEdit.create(this.activeIndex - 1)
+      this.$refs.orgEdit.create(Number(this.activeIndex))
       this.$refs.orgEdit.createChild(row)
     },
     // 编辑分类
     handleOrgEdit(row) {
-      this.$refs.orgEdit.create(this.activeIndex - 1)
+      this.$refs.orgEdit.create(Number(this.activeIndex))
       this.$refs.orgEdit.edit(row)
     },
     /**
@@ -359,14 +301,14 @@ export default {
       }将暂停使用。`
       // 获取到当前分类以及子分类的id集合
       let ids = this.getDeepIds(row)
-      const params = { ids, status: row.status === '0' ? 1 : 0 }
+      const params = { ids, status: row.status === 0 ? 1 : 0 }
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
-      this.$confirm(`${row.status === '0' ? stopContent : startContent}`, '提醒', {
+      this.$confirm(`${row.status === 0 ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        updateStatusKnowledgeCatalog(params).then(() => {
+        ableCategory(params).then(() => {
           this.loadTableData()
           this.$message({
             type: 'success',

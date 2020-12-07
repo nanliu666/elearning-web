@@ -1,6 +1,5 @@
 <template>
   <el-dialog
-    v-loading="loading"
     :title="
       type === 'create'
         ? `新建${currentType}分类`
@@ -69,12 +68,12 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('refresh')"
       >完成</el-button>
       <el-button
         size="medium"
-        @click="submitAndCreate"
-      >完成并创建课程</el-button>
+        @click="submit('create')"
+      >完成并创建试题</el-button>
     </span>
     <span
       v-else
@@ -88,7 +87,7 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit"
+        @click="submit('refresh')"
       >保存</el-button>
     </span>
   </el-dialog>
@@ -96,11 +95,8 @@
 
 <script>
 const CLIENT_TYPE = ['题库', '试卷/考试']
-import {
-  updateKnowledgeCatalog,
-  addKnowledgeCatalog,
-  getKnowledgeCatalogList
-} from '@/api/knowledge/knowledge'
+import { getCategoryList, putCategory, postCategory } from '@/api/examManage/category'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -120,51 +116,60 @@ export default {
         Group: false
       },
       form: {
-        parentId: ''
+        parentId: '0',
+        name: '',
+        type: ''
       },
       parentOrgIdLabel: '',
       rules: {
         name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
-      orgTree: [],
-      loading: false
+      orgTree: []
     }
   },
+  computed: {
+    ...mapGetters(['userId'])
+  },
   methods: {
+    // 当主页面修改后，编辑页面的加载函数修改
     loadOrgTree() {
-      getKnowledgeCatalogList().then((res) => {
+      let paramsform = {
+        parentId: '0',
+        name: '',
+        type: this.$parent.searchParams.type
+      }
+      getCategoryList(paramsform).then((res) => {
         this.orgTree = res
       })
     },
-    // 完成并创建课程
-    submitAndCreate() {},
     // 提交
-    submit() {
+    submit(to) {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
-            this.loading = true
-            addKnowledgeCatalog(this.form)
-              .then(() => {
-                this.$message.success('创建成功')
+            postCategory(
+              _.assign(
+                this.form,
+                { createUser: this.userId },
+                { type: this.$parent.searchParams.type }
+              )
+            ).then((res) => {
+              this.$message.success('创建成功')
+              if (to === 'refresh') {
                 this.$emit('refresh')
-                this.loading = false
                 this.$emit('changevisible', false)
-              })
-              .catch(() => {
-                this.loading = false
-              })
+              } else {
+                this.$router.push({
+                  path: '/examManagement/question/questionEdit',
+                  query: { categoryId: res.id }
+                })
+              }
+            })
           } else {
-            this.loading = true
-            updateKnowledgeCatalog(this.form)
-              .then(() => {
-                this.$message.success('修改成功')
-                this.$emit('refresh')
-                this.loading = false
-              })
-              .catch(() => {
-                this.loading = false
-              })
+            putCategory(_.assign(this.form, { type: this.$parent.searchParams.type })).then(() => {
+              this.$message.success('修改成功')
+              this.$emit('refresh')
+            })
             this.$emit('changevisible', false)
           }
         } else {

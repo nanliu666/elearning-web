@@ -681,6 +681,45 @@ const res = {
             children: []
           },
           {
+            menuId: '12590567456745635058',
+            menuName: '考试详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/examSchedule/detail',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12590567456745635058',
+            menuName: '查看关联考卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/examSchedule/relevanceList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125905674567456351058',
+            menuName: '预览试卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/examSchedule/preview',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
             menuId: '15674547683454620582323',
             menuName: '成绩管理',
             menuType: 'Menu',
