@@ -98,7 +98,9 @@
                   <question-item
                     :key="question.key"
                     :value="question"
+                    :parent="form.subQuestions"
                     :index="index"
+                    @move="handleMoveSubQuestions"
                   />
                 </template>
                 <div
@@ -303,6 +305,17 @@ export default {
     }
   },
   methods: {
+    handleDeleteSubQuestion(index) {
+      this.form.subQuestions.splice(index, 1)
+    },
+    handleMoveSubQuestions(index, flag) {
+      const subQuestions = this.form.subQuestions
+      if (subQuestions[index + flag]) {
+        let temp = subQuestions[index]
+        this.$set(subQuestions, index, subQuestions[index + flag])
+        this.$set(subQuestions, index + flag, temp)
+      }
+    },
     /**
      * 添加子试题
      */
@@ -377,6 +390,7 @@ export default {
     text-align: center;
   }
   .sub-questions {
+    margin-bottom: 12px;
     &__add {
       margin-top: 16px;
       width: 100%;
@@ -393,6 +407,7 @@ export default {
         margin-right: 8px;
       }
       &:hover {
+        background-color: rgba($primaryColor, 0.1);
         color: $primaryColor;
       }
     }

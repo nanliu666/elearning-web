@@ -31,7 +31,7 @@
           @click="handleRemoveOption(option)"
         ></i>
         <i
-          v-if="index === value.length - 1 && value.length !== 10"
+          v-if="index === value.length - 1 && value.length <= 10"
           class="iconimage_icon_Addoptions1 iconfont"
           @click="handleAddOption"
         ></i>

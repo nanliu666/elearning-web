@@ -14,12 +14,14 @@
       </span>
       <span class="question-item__handler">
         <el-button
+          v-if="editing"
           type="text"
           @click="handleSubmit"
         >
           保存
         </el-button>
         <el-button
+          v-if="!editing"
           type="text"
           @click="handleEdit"
         >
@@ -33,12 +35,14 @@
         </el-button>
         <el-button
           type="text"
+          :disabled="index == 0"
           @click="handleMoveUp"
         >
           上移
         </el-button>
         <el-button
           type="text"
+          :disabled="index == parent.length - 1"
           @click="handleMoveDown"
         >
           下移
@@ -144,7 +148,9 @@ export default {
       type: Object,
       default: () => ({})
     },
-    index: { type: Number, default: null }
+    index: { type: Number, default: null },
+    // 子试题列表数据
+    parent: { type: Array, default: () => [] }
   },
   data() {
     return {
@@ -215,13 +221,25 @@ export default {
   },
   methods: {
     handleDelete() {
-      this.$emit('delete', this.value)
+      this.$confirm('您确认要删除该试题吗？', '', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$emit('delete', this.index)
+        })
+        .catch()
     },
     handleEdit() {
       this.editing = true
     },
     handleSubmit() {
-      this.editing = false
+      Promise.all([this.$refs.formHeader.validate(), this.$refs.formContent.validate()])
+        .then(() => {
+          this.editing = false
+        })
+        .catch()
     },
     handleMoveUp() {
       this.$emit('move', this.index, -1)
