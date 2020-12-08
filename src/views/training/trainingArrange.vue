@@ -8,6 +8,7 @@
         <el-button
           type="primary"
           size="small"
+          @click="goAdd"
         >
           &nbsp; 创建培训 &nbsp;
         </el-button>
@@ -636,6 +637,9 @@ export default {
     this.getInfo()
   },
   methods: {
+    goAdd() {
+      this.$router.push({ path: '/training/edit' })
+    },
     isqueryClassify() {
       queryClassify().then(() => {
         // console.log(res)

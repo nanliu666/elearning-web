@@ -205,11 +205,9 @@ export default {
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
         let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
-        editFun(params).then((resData) => {
-          if (resData) {
-            this.$message.success('发布成功')
-            this.$router.go(-1)
-          }
+        editFun(params).then(() => {
+          this.$message.success('发布成功')
+          this.$router.push({ path: '/training/trainingArrange' })
         })
       })
     },
