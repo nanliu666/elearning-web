@@ -870,6 +870,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
+        this.$router.push({ path: '/training/edit', query: { id: row.id } })
       }
       if (e === 'del') {
         // 删除
