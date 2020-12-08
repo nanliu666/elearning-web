@@ -85,6 +85,45 @@ const data = {
     ]
   }
 }
+const testPaper = {
+  ...normalData,
+  response: {
+    totalNum: 1,
+    totalPage: 10,
+    data: [
+      {
+        id: '1',
+        name: '考试名称',
+        status: '1',
+        categoryId: 'Java技能培训/中级',
+        type: 'manual',
+        testNum: '关联考试数',
+        founder: '创建人',
+        effectiveTime: '2020-10-10 21:41:15'
+      },
+      {
+        id: '2',
+        name: '考试名称',
+        status: '2',
+        categoryId: 'Java技能培训/中级',
+        type: 'random',
+        testNum: '关联考试数',
+        founder: '创建人',
+        effectiveTime: '2020-10-10 21:41:15'
+      },
+      {
+        id: '3',
+        name: '考试名称',
+        status: '1',
+        categoryId: 'Java技能培训/中级',
+        type: 'random',
+        testNum: '关联考试数',
+        founder: '创建人',
+        effectiveTime: '2020-10-10 21:41:15'
+      }
+    ]
+  }
+}
 export default ({ mock }) => {
   if (!mock) return
   Mock.mock(new RegExp('/api/grade/achievement' + '.*'), 'get', () => {
@@ -94,6 +133,21 @@ export default ({ mock }) => {
     return data
   })
   Mock.mock(new RegExp('/api/grade/examineeAchievement/edit' + '.*'), 'put', () => {
+    return normalData
+  })
+  Mock.mock(new RegExp('/api/grade/testPaperList' + '.*'), 'get', () => {
+    return testPaper
+  })
+  Mock.mock(new RegExp('/api/grade/testPaperList/delete' + '.*'), 'delete', () => {
+    return testPaper
+  })
+  Mock.mock(new RegExp('/api/grade/testPaper' + '.*'), 'post', () => {
+    return normalData
+  })
+  Mock.mock(new RegExp('/api/grade/testPaper' + '.*'), 'put', () => {
+    return normalData
+  })
+  Mock.mock(new RegExp('/api/grade/testPaper' + '.*'), 'get', () => {
     return normalData
   })
 }

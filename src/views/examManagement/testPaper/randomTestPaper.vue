@@ -169,6 +169,8 @@
 </template>
 
 <script>
+import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
+
 const BASE_COLUMNS = [
   {
     prop: 'name',
@@ -176,7 +178,7 @@ const BASE_COLUMNS = [
     label: '试卷名称',
     span: 11,
     maxlength: 32,
-    required: false
+    required: true
   },
   {
     prop: 'categoryId',
@@ -188,7 +190,7 @@ const BASE_COLUMNS = [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
     ],
-    required: true
+    required: false
   },
   {
     prop: 'totalScore',
@@ -196,7 +198,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
-    required: true,
+    required: false,
     props: {
       onlyNumber: true
     }
@@ -207,7 +209,7 @@ const BASE_COLUMNS = [
     label: '是否折算成计划分数',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
@@ -235,7 +237,7 @@ const BASE_COLUMNS = [
     label: '过期时间',
     type: 'datetime',
     span: 11,
-    required: true,
+    required: false,
     props: {
       label: 'label',
       value: 'value'
@@ -404,8 +406,16 @@ export default {
   },
   mounted() {
     this.tableData.push(_.cloneDeep(this.tableItem))
+    this.testPaper = {}
+    this.getData()
   },
   methods: {
+    getData() {
+      if (!this.$route.query.id) return
+      getTestPaper().then((res) => {
+        res
+      })
+    },
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => it.id !== row.id)
       this.questionChange()
@@ -418,6 +428,15 @@ export default {
           this.tableData.filter((it) => !it.categoryId || !it.questionNum || !it.score).length > 0
         )
           return
+        let testPaperMether =
+          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+        let params = {
+          ...this.form,
+          tableData: this.tableData
+        }
+        testPaperMether(params).then(() => {
+          this.$message.success('提交成功')
+        })
       })
     },
     questionChange() {

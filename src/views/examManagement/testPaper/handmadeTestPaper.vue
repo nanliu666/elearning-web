@@ -62,11 +62,25 @@
           class="block"
         >
           <themeBlock
-            :data="block"
+            :block-data="block"
             :length="testPaper.length"
+            :valid="valid"
             @delete="handleDeleteBlock"
+            @update="update"
           ></themeBlock>
         </div>
+      </div>
+      <div class="flex flexcenter footer">
+        <el-button
+          type="primary"
+          size="medium"
+          @click="onSubmit"
+        >
+          完成
+        </el-button>
+        <el-button size="medium">
+          取消
+        </el-button>
       </div>
     </basic-container>
   </div>
@@ -74,6 +88,7 @@
 
 <script>
 import themeBlock from './components/themeBlock'
+import { getTestPaper, postTestPaper, putTestPaper } from '@/api/examManagement/achievement'
 
 const BASE_COLUMNS = [
   {
@@ -82,7 +97,7 @@ const BASE_COLUMNS = [
     label: '试卷名称',
     span: 11,
     maxlength: 32,
-    required: false
+    required: true
   },
   {
     prop: 'categoryId',
@@ -94,7 +109,7 @@ const BASE_COLUMNS = [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
     ],
-    required: true
+    required: false
   },
   {
     prop: 'totalScore',
@@ -102,7 +117,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
-    required: true,
+    required: false,
     props: {
       onlyNumber: true
     }
@@ -113,7 +128,7 @@ const BASE_COLUMNS = [
     label: '是否折算成计划分数',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
@@ -141,7 +156,7 @@ const BASE_COLUMNS = [
     label: '过期时间',
     type: 'datetime',
     span: 11,
-    required: true,
+    required: false,
     props: {
       label: 'label',
       value: 'value'
@@ -164,6 +179,7 @@ export default {
   },
   data() {
     return {
+      valid: false,
       columns: BASE_COLUMNS,
       TotalScore: '',
       score: '',
@@ -187,17 +203,65 @@ export default {
         }
       ],
       themeBlock: {
-        id: 1
+        id: 1,
+        type: '',
+        title: '',
+        tableData: '',
+        totalScore: ''
       },
       testPaper: []
     }
   },
   mounted() {
     this.testPaper.push(_.cloneDeep(this.themeBlock))
+    this.getData()
   },
   methods: {
+    getData() {
+      if (!this.$route.query.id) return
+      getTestPaper().then((res) => {
+        res
+      })
+    },
+    onSubmit() {
+      this.valid = true
+      this.$refs.form.validate().then((valid) => {
+        if (!valid) return
+
+        if (
+          this.testPaper.filter((it) => it.tableData.filter((item) => !item.score).length).length >
+          0
+        )
+          return
+        let testPaperMether =
+          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+        let params = {
+          ...this.form,
+          tableData: this.testPaper
+        }
+        testPaperMether(params).then(() => {
+          this.$message.success('提交成功')
+        })
+      })
+    },
+    update(data) {
+      this.testPaper.map((it) => {
+        it.id === data.id && (it = Object.assign(it, data))
+      })
+      let scoreList = _.compact(this.testPaper.map((it) => it.totalScore))
+      scoreList.length &&
+        (this.TotalScore = scoreList.reduce((prev, cur) => {
+          return Number(prev) + Number(cur)
+        }, 0))
+    },
     handleDeleteBlock(data) {
-      this.testPaper = this.testPaper.filter((it) => it.id !== data.id)
+      this.$confirm('您确定要删除选中的题型吗', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.testPaper = this.testPaper.filter((it) => it.id !== data.id)
+      })
     },
     handleAddType() {
       this.themeBlock.id += 1
@@ -241,5 +305,8 @@ export default {
 }
 .block {
   margin-bottom: 60px;
+}
+.footer {
+  margin-top: 30px;
 }
 </style>

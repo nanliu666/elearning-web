@@ -15,7 +15,7 @@
           <el-dropdown-item command="random">
             随机试卷
           </el-dropdown-item>
-          <el-dropdown-item command="handmade">
+          <el-dropdown-item command="manual">
             手工试卷
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -107,13 +107,13 @@
             </el-button>
             <el-button
               type="text"
-              @click="handleLookUp(row)"
+              @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-button
               type="text"
-              @click="handleLookUp(row)"
+              @click="handleCope(row)"
             >
               复制
             </el-button>
@@ -125,12 +125,12 @@
 </template>
 
 <script>
-import { getAchievement } from '@/api/examManagement/achievement'
+import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
-    prop: 'examName',
+    prop: 'name',
     slot: true,
     fixed: true,
     minWidth: 150
@@ -138,32 +138,37 @@ const TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'status',
-    slot: true,
-    fixed: true,
-    minWidth: 150
+    minWidth: 150,
+    formatter: (row) => {
+      return (
+        {
+          '1': '正常',
+          '2': '禁用'
+        }[row.status] || ''
+      )
+    }
   },
   {
     label: '试卷分类',
-    prop: 'paperType',
-    slot: true,
+    prop: 'categoryId',
     minWidth: 120
   },
   {
     label: '关联考试数',
-    prop: 'peopleNumber',
+    prop: 'testNum',
     slot: true,
     minWidth: 120
   },
   {
     label: '创建人',
-    prop: 'people',
-    minWidth: 320
+    prop: 'founder',
+    minWidth: 120
   },
   {
     label: '有效时间',
     slot: true,
-    prop: 'time',
-    minWidth: 120
+    prop: 'effectiveTime',
+    minWidth: 320
   }
 ]
 const TABLE_CONFIG = {
@@ -261,24 +266,53 @@ export default {
     this.loadTableData()
   },
   methods: {
-    handleCommand(data) {
-      if (data === 'handmade') {
-        this.handleHandmade()
+    handleCommand(data, id, copy) {
+      if (data === 'manual') {
+        this.handleManual(id, copy)
       } else {
-        this.handleRandom()
+        this.handleRandom(id, copy)
       }
     },
-    handleRandom() {
+    handleRandom(id, copy) {
+      let query = {}
+      id && (query.id = id)
+      copy && (query.copy = copy)
       this.$router.push({
-        path: '/examManagement/testPaper/randomTestPaper'
+        path: '/examManagement/testPaper/randomTestPaper',
+        query
       })
     },
-    handleHandmade() {
+    handleManual(id, copy) {
+      let query = {}
+      id && (query.id = id)
+      copy && (query.copy = copy)
       this.$router.push({
-        path: '/examManagement/testPaper/handmadeTestPaper'
+        path: '/examManagement/testPaper/handmadeTestPaper',
+        query
       })
     },
-    handleLookUp() {},
+    handleLookUp(row) {
+      this.handleCommand(row.type, row.id)
+      this.$store.dispatch('setTestPaper', row)
+    },
+    handleCope(row) {
+      this.handleCommand(row.type, row.id, 'copy')
+    },
+    handleDelete(row) {
+      this.$confirm('您确定要删除该条信息吗？', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let params = {
+          id: row.id
+        }
+        deleteTestPaper(params).then(() => {
+          this.$message.success('删除成功')
+          this.loadTableData()
+        })
+      })
+    },
 
     handleCurrentPageChange(param) {
       this.page.currentPage = param
@@ -296,7 +330,7 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getAchievement(_.assign(params, this.page)).then((res) => {
+        getTestPaperList(_.assign(params, this.page)).then((res) => {
           this.tableData = res.data
           this.page.total = res.totalNum
           this.tableLoading = false
@@ -321,34 +355,42 @@ export default {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
 }
+
 .originColumn {
   height: 25px;
 }
+
 .transitionBox {
   position: relative;
   height: 50px;
 }
+
 .searchBox {
   position: absolute;
   width: 100%;
+
   i {
     color: #a0a8ae;
     font-size: 18px;
   }
+
   .search-box {
     display: flex;
     align-items: center;
+
     .search-sort-box {
       position: relative;
       display: flex;
       align-items: center;
       padding: 0 10px;
       cursor: pointer;
+
       .sort-text {
         color: #a0a8ae;
         margin-left: 6px;
         font-size: 14px;
       }
+
       &::before {
         position: absolute;
         content: '';
@@ -360,11 +402,14 @@ export default {
       }
     }
   }
+
   > div {
     display: flex;
+
     :first-child {
       flex: 1;
     }
+
     > button {
       height: 34px;
     }
@@ -374,14 +419,17 @@ export default {
 /deep/ .avue-crud__pagination {
   height: 0px;
 }
+
 .newOrgDailog {
   .el-select {
     width: 100%;
   }
 }
+
 /deep/ .avue-crud__pagination {
   display: none;
 }
+
 .refresh-text {
   padding-left: 6px;
   display: inline-block;

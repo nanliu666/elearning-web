@@ -216,7 +216,7 @@ export default {
 }
 .form-bottom {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   .change-mode {
     font-size: 12px;

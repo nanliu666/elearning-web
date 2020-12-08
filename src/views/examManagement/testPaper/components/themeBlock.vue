@@ -8,6 +8,7 @@
             v-model="form.type"
             style="width: 200px"
             placeholder="请选择试题类型"
+            @visible-change="visibleChange"
           >
             <el-option
               v-for="item in typeList"
@@ -19,7 +20,10 @@
           </el-select>
         </div>
         <div class="flex flex-flow">
-          <div class="add">
+          <div
+            class="add"
+            @click="handleAddTheme"
+          >
             添加试题
           </div>
           <div
@@ -51,7 +55,7 @@
               v-model="row.score"
               placeholder="请输入内容"
               type="Number"
-              @change="questionChange($event, row)"
+              @change="scoreChange($event, row)"
             >
             </el-input>
             <div
@@ -64,13 +68,13 @@
           <template #handler="{row}">
             <el-button
               type="text"
-              @click="handleDelete(row)"
+              @click="handleUp(row)"
             >
               上移
             </el-button>
             <el-button
               type="text"
-              @click="handleDelete(row)"
+              @click="handleDown(row)"
             >
               下移
             </el-button>
@@ -82,12 +86,18 @@
             </el-button>
           </template>
         </common-table>
+        <stemContent
+          v-model="stemList"
+          :visible.sync="visible"
+          :title="'添加' + title"
+        ></stemContent>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import stemContent from '@/components/stem-content/stemContent'
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
@@ -202,19 +212,27 @@ const BASE_COLUMNS = [
     required: false
   }
 ]
+
 export default {
   name: 'ThemeBlock',
+  components: {
+    stemContent
+  },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   props: {
-    data: {
+    blockData: {
       type: Object,
       default: () => {
         return {}
       }
+    },
+    valid: {
+      type: Boolean,
+      default: false
     },
     length: {
       type: Number,
@@ -223,9 +241,17 @@ export default {
       }
     }
   },
+
   data() {
     return {
-      form: {},
+      totalScore: '',
+      title: '',
+      visible: false,
+      form: {
+        type: '1',
+        title: ''
+      },
+      stemList: [],
       typeList: [
         {
           label: '单选题',
@@ -248,33 +274,134 @@ export default {
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       columns: BASE_COLUMNS,
-      valid: false,
-      tableData: [
-        {
-          id: '1',
-          type: 1,
-          score: '',
-          limitTime: '5:00:00'
-        }
-      ]
+      tableData: []
     }
   },
   watch: {
-    data: {
+    blockData: {
       handler() {},
       deep: true,
       immediate: true
+    },
+    stemList: {
+      handler(val) {
+        let obj = val.map((it) => {
+          return { score: Number(it.workNo), name: it.bizName }
+        })
+        this.tableData = obj.map((it, index) => ({
+          id: index,
+          type: it.name,
+          score: it.score,
+          Original: it.score,
+          limitTime: '5:00:00'
+        }))
+        this.countScore()
+      },
+      deep: true
+    },
+    totalScore() {
+      let block = {
+        id: this.blockData.id,
+        type: this.form.type,
+        title: this.form.title,
+        tableData: this.tableData,
+        totalScore: this.totalScore
+      }
+      this.$emit('update', block)
+    },
+    form: {
+      handler() {
+        let block = {
+          id: this.blockData.id,
+          type: this.form.type,
+          title: this.form.title,
+          tableData: this.tableData,
+          totalScore: this.totalScore
+        }
+        this.$emit('update', block)
+      },
+      deep: true
     }
   },
   methods: {
+    countScore() {
+      let scoreList = _.compact(this.tableData.map((it) => it.score))
+      this.totalScore = scoreList.reduce((prev, cur) => {
+        return Number(prev) + Number(cur)
+      }, 0)
+    },
+    visibleChange(data) {
+      if (!data) return
+      this.$nextTick(() => {
+        setTimeout(() => {
+          if (this.tableData.length > 0) {
+            this.$confirm(
+              '您已添加试题，若更改题型，已添加的试题将会被删除！您是否继续更改题型？',
+              '提示',
+              {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            ).then(() => {
+              this.tableData = []
+            })
+          }
+        }, 300)
+      })
+    },
+    handleAddTheme() {
+      this.visible = true
+      this.title = '单选题'
+    },
     handleDeleteBlock() {
-      this.$emit('delete', this.data)
+      this.$emit('delete', this.blockData)
     },
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => it.id !== row.id)
       this.questionChange()
     },
-    questionChange() {}
+    handleDown(row) {
+      let i = this.tableData.map((it) => it.id).indexOf(row.id)
+      let newData = _.cloneDeep(row)
+      this.tableData.splice(i, 1)
+      let length = this.tableData.length
+      if (i === length) {
+        this.tableData.splice(0, 0, newData)
+      } else {
+        this.tableData.splice(i + 1, 0, newData)
+      }
+    },
+    handleUp(row) {
+      let i = this.tableData.map((it) => it.id).indexOf(row.id)
+      let newData = _.cloneDeep(row)
+      let length = this.tableData.length
+      this.tableData.splice(i, 1)
+      if (i === 0) {
+        this.tableData.splice(length - 1, 0, newData)
+      } else {
+        this.tableData.splice(i - 1, 0, newData)
+      }
+    },
+    scoreChange(val, row) {
+      if (row.Original != val) {
+        this.$confirm(
+          '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '恢复原分值',
+            type: 'warning'
+          }
+        )
+          .then(() => {
+            this.countScore()
+          })
+          .catch(() => {
+            row.score = row.Original
+          })
+      }
+    }
   }
 }
 </script>
@@ -313,5 +440,15 @@ label {
   line-height: 22px;
   cursor: pointer;
   margin-left: 17px;
+}
+/deep/.el-table td .cell {
+  line-height: 60px !important;
+}
+.valid {
+  position: absolute;
+  line-height: 18px !important;
+  bottom: -3px;
+  font-size: 12px;
+  color: #f56c6c;
 }
 </style>
