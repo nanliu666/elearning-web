@@ -334,7 +334,7 @@
 const TABLE_COLUMNS = [
   {
     label: '姓名',
-    prop: 'examineeName',
+    prop: 'userName',
     slot: true,
     minWidth: 150
   },
@@ -358,7 +358,7 @@ const TABLE_COLUMNS = [
   {
     label: '考试情况',
     slot: true,
-    prop: 'status', //1-已经通过 2-未通过 3-未开始
+    prop: 'isTested', //true-已经通过 false-未通过
     minWidth: 120
   }
 ]
@@ -459,8 +459,7 @@ const SEARCH_CONFIG = {
   ]
 }
 import SearchPopover from '@/components/searchPopOver/index'
-import { getKnowledgeManageList } from '@/api/knowledge/knowledge'
-import { delExamArrange, getExamArrange } from '@/api/examManage/schedule'
+import { delExamArrange, getExamArrange, getBatchList } from '@/api/examManage/schedule'
 export default {
   components: { SearchPopover },
   data() {
@@ -584,7 +583,7 @@ export default {
       }
       try {
         this.tableLoading = true
-        let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
+        let { totalNum, data } = await getBatchList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {

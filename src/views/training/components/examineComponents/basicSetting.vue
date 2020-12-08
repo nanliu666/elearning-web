@@ -21,6 +21,7 @@
           :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
+          :multiple="true"
           :option-props="personOptionProps"
         />
       </template>
@@ -171,7 +172,7 @@ export default {
         examTime: '',
         examName: '',
         testPaper: '',
-        reviewer: '',
+        reviewer: null,
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
