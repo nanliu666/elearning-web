@@ -57,6 +57,7 @@
           :searchable="true"
           :load="loadCoordinator"
           :option-props="personOptionProps"
+          :multiple="true"
         />
       </template>
       <template #reckonTime>

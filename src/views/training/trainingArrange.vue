@@ -8,6 +8,7 @@
         <el-button
           type="primary"
           size="small"
+          @click="goAdd"
         >
           &nbsp; 创建培训 &nbsp;
         </el-button>

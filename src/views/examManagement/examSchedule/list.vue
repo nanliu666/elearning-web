@@ -124,8 +124,7 @@
           <div class="menuClass">
             <el-button
               type="text"
-              :disabled="getButtonDisabled(row)"
-              @click="handleStatus(row)"
+              @click="handleEdit(row)"
             >
               编辑
             </el-button>
@@ -159,13 +158,8 @@
 </template>
 
 <script>
-import {
-  getKnowledgeManageList,
-  getKnowledgeCreatUsers,
-  deleteKnowledgeCatalog,
-  updateStatusKnowledgeCatalog
-} from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
+import { getArrangeList, delExamArrange } from '@/api/examManage/schedule'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
@@ -320,21 +314,7 @@ export default {
             config: { optionLabel: 'name', optionValue: 'userId' },
             loading: false,
             noMore: false,
-            pageNo: 2,
-            loadMoreFun(item) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getKnowledgeCreatUsers().then((res) => {
-                if (res.length > 0) {
-                  item.options.push(...res)
-                  item.pageNo += 1
-                  item.loading = false
-                } else {
-                  item.noMore = true
-                  item.loading = false
-                }
-              })
-            }
+            pageNo: 2
           }
         ]
       },
@@ -344,9 +324,6 @@ export default {
     }
   },
   activated() {
-    getKnowledgeCreatUsers().then((res) => {
-      this.searchConfig.popoverOptions[1].options.push(...res)
-    })
     this.loadTableData()
   },
   methods: {
@@ -374,23 +351,6 @@ export default {
       let queryInfo = { clientId: this.clientTypeList[key - 1].type }
       this.handleSearch(queryInfo)
     },
-    // 如果父级停用，子级的启用按钮需要置灰处理
-    getButtonDisabled(row) {
-      let target = {}
-      const loop = function(data) {
-        _.each(data, (item) => {
-          if (row.parentId === item.id) {
-            target = item
-          }
-          if (!_.isEmpty(item.children)) {
-            loop(item.children)
-          }
-        })
-      }
-      loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
-      return isDisabled
-    },
     // 多种操作
     handleCommand(row) {
       this.$router.push({
@@ -407,7 +367,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteKnowledgeCatalog({ id }).then(() => {
+      delExamArrange({ id }).then(() => {
         this.loadTableData()
         this.$message({
           type: 'success',
@@ -442,7 +402,7 @@ export default {
       }
       try {
         this.tableLoading = true
-        let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
+        let { totalNum, data } = await getArrangeList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
@@ -460,31 +420,12 @@ export default {
       this.loadTableData()
     },
     /**
-     * 处理停用启用
+     * 编辑
      */
-    handleStatus(row) {
-      // 停启用当前目录是否存在子目录
-      const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status === '0' ? '停用' : '启用'
-      const stopContent = `您确定要停用该目录吗吗？停用后，该目录${
-        hasChildren ? '及其子目录' : ''
-      }将暂停使用。`
-      // 获取到当前目录以及子目录的id集合
-      let ids = this.getDeepIds(row)
-      const params = { ids, status: row.status === '0' ? 1 : 0 }
-      const startContent = `您确定要启用该目录${hasChildren ? '及其子目录' : ''}吗？`
-      this.$confirm(`${row.status === '0' ? stopContent : startContent}`, '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        updateStatusKnowledgeCatalog(params).then(() => {
-          this.loadTableData()
-          this.$message({
-            type: 'success',
-            message: `${statusText}成功!`
-          })
-        })
+    handleEdit(row) {
+      this.$router.push({
+        path: '/examManagement/examSchedule/edit',
+        query: { id: row.id, type: 'edit' }
       })
     },
     // 递归获取所有的停启用的id集合

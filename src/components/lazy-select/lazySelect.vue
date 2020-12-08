@@ -8,6 +8,7 @@
     :allow-create="allowCreate"
     :default-first-option="allowCreate"
     :remote-method="remoteMethod"
+    :multiple="multiple"
     @change="handleChange"
     @visible-change="visibleChange"
   >
@@ -48,8 +49,14 @@ export default {
     event: 'change'
   },
   props: {
+    multiple: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
+    },
     value: {
-      type: [String, Boolean],
+      type: [String, Boolean, Array],
       default: ''
     },
     // 允许创建条目
