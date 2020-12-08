@@ -123,14 +123,14 @@
             v-if="scope.row.status == 1"
             type="text"
             size="medium"
-            @click.stop="handlestatus(scope.row, 1)"
+            @click.stop="handlestatus(scope.row, 0)"
           >
             停用
           </el-button>
           <span
             v-else
             style="color:#ccc;"
-            @click.stop="handlestatus(scope.row, 0)"
+            @click.stop="handlestatus(scope.row, 1)"
           >启用</span>
           <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
           <el-button
@@ -351,14 +351,7 @@
 
 <script>
 import { deleteMenuInfo } from '@/api/system/menu'
-import {
-  getCatalog,
-  addCatalog,
-  delCatalag,
-  editCatalog,
-  catalogUserList,
-  updateStatus
-} from '@/api/course/course'
+import { getCatalog, addCatalog, delCatalag, editCatalog, updateStatus } from '@/api/course/course'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -432,7 +425,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'creatorName',
+    field: 'id',
     label: '创建人',
     type: 'cascader',
     options: [{ value: '', label: '' }]
@@ -513,27 +506,22 @@ export default {
   },
   created() {
     this.refreshTableData()
-    this.iscatalogUserList()
+    // this.iscatalogUserList()
   },
   methods: {
     toSort() {
       this.$router.push({ path: '/course/courseSort' })
     },
     // 筛选-创建人数据
-    iscatalogUserList() {
-      catalogUserList().then((res) => {
-        res.forEach((item) => {
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-            value: item.userId,
-            label: item.userName
-          })
-        })
-      })
-    },
+    // iscatalogUserList() {
+    //   getCatalog().then((res) => {
+
+    //   })
+    // },
     // 停用&启用
     handlestatus(row, i) {
       // let id = row.id + ','
-      updateStatus({ ids: row.id, status: i }).then(() => {
+      updateStatus({ ids: [row.id], status: i }).then(() => {
         this.loadTableData()
       })
     },
@@ -705,6 +693,13 @@ export default {
         const tableData = await getCatalog(param || '0', query)
         this.tableData = this.getTreeData(tableData)
         // console.log(this.tableData)
+        SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        this.tableData.forEach((item) => {
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
+            value: item.id,
+            label: item.creatorName
+          })
+        })
       } finally {
         this.tableLoading = false
       }

@@ -210,6 +210,7 @@
             </el-form-item>
           </el-col>
         </el-row>
+
         <!-- 第五行 -->
         <span>添加标签</span>
         <el-row class="switch_box">
@@ -260,7 +261,7 @@
                 >
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">
-                  将文件拖到此处，或<em>点击上传</em><br />
+                  <div>将文件拖到此处，或<em>点击上传</em><br /></div>
                   <div
                     slot="tip"
                     class="el-upload__tip"
@@ -282,7 +283,7 @@
         <div class="editorTitle">
           <el-form-item
             label="课程介绍"
-            prop="introduction"
+            prop="editorTitle"
           >
             <tinymce v-model="ruleForm.introduction" />
           </el-form-item>
@@ -307,8 +308,10 @@
             <el-button
               type="primary"
               size="small"
+              @click="addArticleBtn"
             >
               添加章节
+              <!-- @click="dialogVisible = true" -->
             </el-button>
           </div>
 
@@ -332,9 +335,11 @@
             >
               <template slot-scope="scope">
                 <el-input
+                  v-if="scope.row.saveOrcompile === 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
                 ></el-input>
+                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -345,13 +350,26 @@
               width="185"
             >
               <template slot-scope="scope">
-                <div v-if="typeOption[scope.row.type - 1]">
-                  <span v-if="typeOption[scope.row.type - 1].value === 1">文章</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 2">课件</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 3">知识点</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 4">考试</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 5">视频</span>
-                </div>
+                <span v-if="scope.row.saveOrcompile === 0">
+                  <el-select
+                    v-model="scope.row.type"
+                    placeholder="请选择"
+                  >
+                    <el-option
+                      v-for="item in typeOption"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </span>
+
+                <span v-if="scope.row.saveOrcompile === 1">
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    {{ typeOption[scope.row.type - 1].name }}
+                  </span>
+                </span>
               </template>
             </el-table-column>
 
@@ -362,28 +380,100 @@
               width="250"
             >
               <template slot-scope="scope">
-                <span>{{ scope.row.articleContent }}</span>
+                <div v-if="scope.row.saveOrcompile === 0">
+                  <span
+                    v-if="typeOption[scope.row.type - 1]"
+                    size="medium"
+                  >
+                    <el-button
+                      v-if="typeOption[scope.row.type - 1].value === 1"
+                      @click="dialogVisible = true"
+                    >添加文章</el-button>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 2"
+                      v-model="UploadCourseware"
+                      :before-upload="CoursewareUpload"
+                      :multiple="false"
+                    >上传课件</common-upload>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 3"
+                      v-model="UploadData"
+                      :multiple="false"
+                      :before-upload="DataUpload"
+                    >上传资料</common-upload>
+                    <el-button
+                      v-if="typeOption[scope.row.type - 1].value === 4"
+                    >关联考试</el-button>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 5"
+                      v-model="UploadVideo"
+                      :before-upload="VideoUpload"
+                      :multiple="false"
+                    >上传视频</common-upload>
+                  </span>
+                  <span
+                    v-else
+                    size="medium"
+                  >
+                    请选择章节类型
+                  </span>
+                </div>
+
+                <div v-if="scope.row.saveOrcompile === 1">
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 1">
+                      <span v-if="addArticle">{{ addArticle.name }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                      <span v-if="UploadCourseware[0]">{{ UploadCourseware[0].localName }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 3">
+                      <span v-if="UploadData[0]">{{ UploadData[0].localName }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 5">
+                      <span v-if="UploadVideo[0]">{{ UploadData[0].localName }}</span>
+                    </span>
+                  </span>
+                </div>
               </template>
             </el-table-column>
 
             <!-- 第五列 -->
             <el-table-column
-              prop="address"
               label="操作"
               fixed="right"
               width="170"
             >
               <template slot-scope="scope">
                 <el-button
+                  v-if="scope.row.saveOrcompile === 1"
                   type="text"
                   size="small"
+                  @click="scope.row.saveOrcompile = 0"
                 >
                   编辑
                 </el-button>
                 <el-button
+                  v-if="scope.row.saveOrcompile === 0"
                   type="text"
                   size="small"
-                  @click="deleteContent(scope.id)"
+                  @click="scope.row.saveOrcompile = 1"
+                >
+                  保存
+                </el-button>
+                <el-button
+                  type="text"
+                  size="small"
+                  @click="delContent(scope.$index)"
                 >
                   删除
                 </el-button>
@@ -406,6 +496,36 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- 添加文章 -->
+          <el-dialog
+            title="添加文章"
+            :visible.sync="dialogVisible"
+            width="60%"
+            :modal-append-to-body="false"
+          >
+            <div class="dialog_input">
+              <span>标题</span>
+              <el-input
+                v-model="addArticle.name"
+                placeholder="请输入标题"
+              ></el-input>
+            </div>
+            <div class="dialog_tinymce">
+              <span>内容</span>
+              <div><tinymce v-model="addArticle.thinkContent" /></div>
+            </div>
+
+            <span
+              slot="footer"
+              class="dialog-footer"
+            >
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button
+                type="primary"
+                @click="dialogVisible = false"
+              >确 定</el-button>
+            </span>
+          </el-dialog>
         </div>
       </div>
     </div>
@@ -413,11 +533,27 @@
 </template>
 
 <script>
-import { getCourseList, delCourseContent, editCourseInfo } from '@/api/course/course'
+import { addCourse } from '@/api/course/course'
 export default {
+  components: {
+    commonUpload: () => import('@/components/common-upload/commonUpload')
+  },
   data() {
     return {
+      // 上传视频
+      UploadVideo: [],
+      // 上传课件
+      UploadCourseware: [],
+      // 上传资料
+      UploadData: [],
+
       checkboxVal: [],
+      // 添加文章
+      dialogVisible: false,
+      addArticle: {
+        name: '',
+        thinkContent: ''
+      },
       // 添加标签
       options: [
         {
@@ -455,7 +591,7 @@ export default {
           value: 2
         },
         {
-          name: '知识点',
+          name: '资料下载',
           value: 3
         },
         {
@@ -469,14 +605,14 @@ export default {
       ],
       // 填写课程信息
       ruleForm: {
-        status: '',
+        status: '', //课程状态
         name: '', // 课程名称
         teacherId: '', // 讲师
         catalogId: '', // 所在目录
         type: '', // 课程类型(1:在线 2:面授 3:直播)
         period: 0, //学时
         credit: 0, // 学分
-        passCondition: [], //通过条件（前端为多选，用a,b,c,d,...组合）
+        passCondition: '', //通过条件（前端为多选，用a,b,c,d,...组合）
         electiveType: '', //选修类型
         isRecommend: '', //是否推荐(0：否   1：是)
         cover: '', //封面
@@ -498,7 +634,9 @@ export default {
             name: '', // 内容名称
             order: '', // 内容顺序
             type: '', //章节类型（1:文章 2:普通课件 3:知识点 4:考试 5:视频）
-            updateTime: '' //更新时间
+            updateTime: '', //更新时间
+            // 1保存&0编辑
+            saveOrcompile: 0
           }
         ]
       },
@@ -521,6 +659,72 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 资料校验
+    DataUpload(file) {
+      const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传资料片大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
+        return false
+      }
+      return true
+    },
+    // 视频校验
+    VideoUpload(file) {
+      const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传视频大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
+        return false
+      }
+      return true
+    },
+
+    // 课件校验
+    CoursewareUpload(file) {
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传课件大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,xls,xlsx,ppt,pptx,pdf文件')
+        return false
+      }
+      return true
+    },
+    // 1保存&0编辑btn
+    saveOrcompileBtn() {},
+    // 添加章节
+    addArticleBtn() {
+      let item = {
+        articleContent: '', // 文件内容
+        articleTitle: '', // 文章标题
+        courseWareName: '', // 课件名称
+        courseWareUrl: '', // 课件URL
+        createId: '', // 创建人帐号
+        createTime: '', // 创建时间
+        id: 1, // 章节内容ID
+        name: '', // 内容名称
+        order: '', // 内容顺序
+        type: '', //章节类型（1:文章 2:普通课件 3:知识点 4:考试 5:视频）
+        updateTime: '', //更新时间
+        saveOrcompile: 0
+      }
+      this.ruleForm.contents.push(item)
+    },
     setCheckboxVal() {
       this.ruleForm.passCondition = this.checkboxVal
     },
@@ -534,7 +738,7 @@ export default {
           })
         } else {
           this.ruleForm.status = status
-          editCourseInfo(this.ruleForm).then(() => {
+          addCourse(this.ruleForm).then(() => {
             this.$message({
               message: '发送成功！！！',
               type: 'success'
@@ -545,28 +749,17 @@ export default {
     },
 
     // 删除
-    deleteContent(id) {
-      delCourseContent({ contentId: id })
-        .then(() => {
-          this.$message({
-            message: '该章节已成功删除',
-            type: 'success'
-          })
-        })
-        .catch((err) => {
-          this.$message.error(err.resMsg)
-        })
+    delContent(index) {
+      // console.log(index)
+      this.ruleForm.contents.splice(index, 1)
     },
-
     // 拿数据
     getInfo() {
-      getCourseList({ courseId: 1 })
-        .then((res) => {
-          this.ruleForm = { ...this.ruleForm } = res
-        })
-        .catch((err) => {
-          window.console.log(err)
-        })
+      // getCourseList(1).then((res) => {
+      //   this.ruleForm = { ...this.ruleForm } = res
+      // }).catch(err=>{
+      //   window.console.log(err)
+      // })
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
@@ -576,12 +769,10 @@ export default {
     // 向上移动
     upward(scope) {
       this.swapArray(this.ruleForm.contents, scope - 1, scope)
-      //   console.log(scope)
     },
     // 向下移动
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
-      //   console.log(scope)
     },
     // 图片
     handleAvatarSuccess(res, file) {
@@ -699,6 +890,9 @@ export default {
     }
   }
   .upload-demo {
+    border: 1px solid #ccc;
+    padding: 40px 50px 20px;
+    border-radius: 7px;
     position: relative;
     .avatar {
       position: absolute;
@@ -744,6 +938,29 @@ export default {
   }
   /deep/.el-upload__tip {
     line-height: 0;
+  }
+  .el-upload__text {
+    width: 210px;
+  }
+  .dialog_input {
+    margin: 20px;
+    display: flex;
+    width: 70%;
+    span {
+      width: 50px;
+      line-height: 35px;
+    }
+  }
+  .dialog_tinymce {
+    margin: 20px;
+    display: flex;
+    span {
+      width: 50px;
+      line-height: 35px;
+    }
+    div {
+      width: 100%;
+    }
   }
 }
 </style>

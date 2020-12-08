@@ -350,19 +350,21 @@
               width="185"
             >
               <template slot-scope="scope">
-                <el-select
-                  v-if="scope.row.saveOrcompile === 0"
-                  v-model="scope.row.type"
-                  placeholder="请选择"
-                >
-                  <el-option
-                    v-for="item in typeOption"
-                    :key="item.value"
-                    :label="item.name"
-                    :value="item.value"
+                <span v-if="scope.row.saveOrcompile === 0">
+                  <el-select
+                    v-model="scope.row.type"
+                    placeholder="请选择"
                   >
-                  </el-option>
-                </el-select>
+                    <el-option
+                      v-for="item in typeOption"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </span>
+
                 <span v-if="scope.row.saveOrcompile === 1">
                   <span v-if="typeOption[scope.row.type - 1]">
                     {{ typeOption[scope.row.type - 1].name }}
@@ -397,6 +399,7 @@
                       v-if="typeOption[scope.row.type - 1].value === 3"
                       v-model="UploadData"
                       :multiple="false"
+                      :before-upload="DataUpload"
                     >上传资料</common-upload>
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 4"
@@ -415,18 +418,30 @@
                     请选择章节类型
                   </span>
                 </div>
+
                 <div v-if="scope.row.saveOrcompile === 1">
-                  <span v-if="typeOption[scope.row.type - 1].value === 1">{{
-                    addArticle.name
-                  }}</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 2">
-                    <span v-if="UploadCourseware[0]">{{ UploadCourseware[0].localName }}</span>
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 1">
+                      <span v-if="addArticle">{{ addArticle.name }}</span>
+                    </span>
                   </span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 3">
-                    <span v-if="UploadData[0]">{{ UploadData[0].localName }}</span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                      <span v-if="UploadCourseware[0]">{{ UploadCourseware[0].localName }}</span>
+                    </span>
                   </span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 5">
-                    <span v-if="UploadVideo[0]">{{ UploadData[0].localName }}</span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 3">
+                      <span v-if="UploadData[0]">{{ UploadData[0].localName }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 5">
+                      <span v-if="UploadVideo[0]">{{ UploadData[0].localName }}</span>
+                    </span>
                   </span>
                 </div>
               </template>
@@ -644,17 +659,32 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 资料校验
+    DataUpload(file) {
+      const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传资料片大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
+        return false
+      }
+      return true
+    },
     // 视频校验
     VideoUpload(file) {
-      const regx = /^.*\.(AVI|mov|rmvb|rm|FLV|mp4|3GP)$/
-      // const isLt2M = file.size / 1024 / 1024 < 3
+      const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
 
-      // if (!isLt2M) {
-      //   this.$message.error('上传图片大小不能超过 3MB!')
-      //   return false
-      // }
+      if (!isLt10M) {
+        this.$message.error('上传视频大小不能超过 10MB!')
+        return false
+      }
       if (!regx.test(file.name)) {
-        this.$message.error('上传视频只支持AVI,mov,rmvb,rm,FLV,mp4,3GP文件')
+        this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
         return false
       }
       return true
@@ -662,15 +692,15 @@ export default {
 
     // 课件校验
     CoursewareUpload(file) {
-      const regx = /^.*\.(doc|docx|pdf|ppt)$/
-      // const isLt2M = file.size / 1024 / 1024 < 3
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
 
-      // if (!isLt2M) {
-      //   this.$message.error('上传图片大小不能超过 3MB!')
-      //   return false
-      // }
+      if (!isLt10M) {
+        this.$message.error('上传课件大小不能超过 10MB!')
+        return false
+      }
       if (!regx.test(file.name)) {
-        this.$message.error('上传课件只支持word或ppt,pdf文件')
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,xls,xlsx,ppt,pptx,pdf文件')
         return false
       }
       return true
