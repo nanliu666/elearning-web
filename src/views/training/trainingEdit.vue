@@ -34,15 +34,13 @@
       <div class="page-right">
         <el-button
           v-if="!id"
-          class="publish-btn"
           size="medium"
-          @click="handleDraft"
+          @click="publish(2)"
         >
           存草稿
         </el-button>
         <el-button
           v-if="activeStep !== 0"
-          class="publish-btn"
           size="medium"
           @click="handlePreviousStep"
         >
@@ -50,7 +48,6 @@
         </el-button>
         <el-button
           v-if="activeStep !== 2"
-          class="publish-btn"
           size="medium"
           type="primary"
           @click="handleNextStep"
@@ -59,10 +56,9 @@
         </el-button>
         <el-button
           v-if="activeStep === 2"
-          class="publish-btn"
           size="medium"
           type="primary"
-          @click="publish"
+          @click="publish(1)"
         >
           发布
         </el-button>
@@ -201,12 +197,8 @@ export default {
     changeWay(data) {
       this.trainWay = data
     },
-    // 存草稿
-    handleDraft() {
-      this.publish(2)
-    },
     // 发布区分编辑发布还是新增发布
-    publish(type = 1) {
+    publish(type) {
       const basicData = this.$refs.editBasicInfo.getData()
       const editArrangement = this.$refs.editArrangement.getData()
       const detailData = this.$refs.editDetail.getData()
