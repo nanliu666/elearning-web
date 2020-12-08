@@ -261,6 +261,10 @@ export default {
 
 <style lang="scss" scoped>
 .question-list {
+  .el-tree {
+    overflow: auto;
+    max-height: calc(100% - 44px);
+  }
 }
 /deep/ .basic-container--block {
   height: 100%;

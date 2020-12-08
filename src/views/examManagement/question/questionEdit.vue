@@ -1,7 +1,9 @@
 <template>
   <div class="question-edit fill">
-    <page-header :title="title">
-    </page-header>
+    <page-header
+      :title="title"
+      show-back
+    />
     <basic-container block>
       <el-row
         type="flex"
@@ -20,10 +22,14 @@
             :model="form"
           >
             <template #title1="">
-              <h2>基础信息</h2>
+              <h3 class="title">
+                基础信息
+              </h3>
             </template>
             <template #title2="">
-              <h2>试题内容</h2>
+              <h3 class="title">
+                试题内容
+              </h3>
             </template>
             <template #score-label="">
               试题分数
@@ -382,6 +388,9 @@ export default {
   min-height: calc(100% - 92px);
 }
 .question-edit {
+  .title {
+    font-size: 18px;
+  }
   .tips {
     font-size: 12px;
     color: rgba(0, 11, 21, 0.25);
