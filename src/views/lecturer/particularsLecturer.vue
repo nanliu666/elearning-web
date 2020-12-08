@@ -123,13 +123,20 @@
         <el-button
           type="primary"
           size="medium"
+          @click="tocompileLecturer"
         >
           编辑
         </el-button>
-        <el-button size="medium">
+        <el-button
+          size="medium"
+          @click="iseditSysRulus"
+        >
           停用
         </el-button>
-        <el-button size="medium">
+        <el-button
+          size="medium"
+          @click="isTeacherdelete"
+        >
           删除
         </el-button>
       </div>
@@ -152,7 +159,7 @@
 </template>
 
 <script>
-import { getTeacher } from '@/api/lecturer/lecturer'
+import { getTeacher, Teacherdelete, editSysRulus } from '@/api/lecturer/lecturer'
 export default {
   data() {
     return {
@@ -176,6 +183,43 @@ export default {
   },
 
   methods: {
+    // 启动/停用系统规则列表
+    iseditSysRulus() {
+      let params = {
+        id: '',
+        status: '' // '0 停用 1 正常',
+      }
+      params.id = this.$route.query.id
+      params.status = 0
+      editSysRulus(params).then(() => {
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+      })
+    },
+
+    // 删除讲师
+    isTeacherdelete(id) {
+      let params = {
+        ids: id
+      }
+      params.ids = this.$route.query.id
+      Teacherdelete(params).then(() => {
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+        this.toLecturer()
+      })
+    },
+
+    // 去编辑
+    tocompileLecturer() {
+      let id = this.$route.query.id
+      id = id.trim()
+      this.$router.push({ path: '/lecturer/compileLecturer?id=' + id })
+    },
     // 去讲师列表
     toLecturer() {
       this.$router.push({ path: '/lecturer/lecturer' })
@@ -186,7 +230,6 @@ export default {
       params.id = this.$route.query.id
       params.id = params.id.trim()
       this.name = this.$route.query.name
-      // console.log(params)
       getTeacher(params).then((res) => {
         this.teacherData = res.teacherInfo
       })

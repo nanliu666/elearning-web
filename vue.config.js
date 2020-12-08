@@ -106,7 +106,7 @@ module.exports = {
         // target: 'http://122.112.190.144/',
 
         // 辛桃发IP
-        //  target: 'http://192.168.40.134',
+        // target: 'http://192.168.40.134',
 
         // 贺磊IP
         // target: 'http://192.168.40.112',

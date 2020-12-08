@@ -2,6 +2,7 @@
   <div class="image-viewer">
     <el-image-viewer
       v-if="visible"
+      :initial-index="initialIndex"
       :url-list="urlList"
       :on-close="onClose"
     />
@@ -19,6 +20,10 @@ export default {
     urlList: {
       type: Array,
       default: () => []
+    },
+    initialIndex: {
+      type: Number,
+      default: 0
     },
     visible: {
       type: Boolean,

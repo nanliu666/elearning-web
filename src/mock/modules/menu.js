@@ -632,29 +632,28 @@ const res = {
             children: []
           },
           {
-            menuId: '1259073456754674589',
+            menuId: '125907345334589',
+            menuName: '试题创建',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            path: '/examManagement/question/questionEdit',
+            code: 'questionEdit',
+            alias: 'questionEdit',
+            icon: 'iconfont iconicon_boss'
+          },
+          {
+            menuId: '125907345674589',
             menuName: '题库管理',
-            menuType: 'Dir',
+            menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: [
-              {
-                menuId: '125907345674589',
-                menuName: '题库管理',
-                menuType: 'Menu',
-                isOwn: 1,
-                isShow: 1,
-                path: '/examManagement/question/questionList',
-                code: 'questionList',
-                alias: 'questionList',
-                icon: 'iconfont iconicon_boss'
-              }
-            ]
+            path: '/examManagement/question/questionList',
+            code: 'questionList',
+            alias: 'questionList',
+            icon: 'iconfont iconicon_boss'
           },
+
           {
             menuId: '1259074567456731235058',
             menuName: '试卷管理',

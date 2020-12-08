@@ -249,13 +249,12 @@
               label="课程封面"
               prop="imageUrl"
             >
-              <el-upload
+              <common-upload
+                v-model="ruleForm.imageUrl"
                 class="upload-demo"
                 drag
-                action="https://jsonplaceholder.typicode.com/posts/"
                 multiple
                 :show-file-list="false"
-                :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload"
               >
                 >
@@ -270,11 +269,11 @@
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl"
-                  :src="ruleForm.imageUrl"
+                  v-if="ruleForm.imageUrl.localName"
+                  :src="ruleForm.imageUrl.url"
                   class="avatar"
                 />
-              </el-upload>
+              </common-upload>
             </el-form-item>
           </el-col>
         </el-row>
@@ -485,7 +484,7 @@ export default {
         thinkContent: '', //课前思考内容
         region: '', //删
         resource: '',
-        imageUrl: '',
+        imageUrl: [],
         // 表格
         contents: [
           {

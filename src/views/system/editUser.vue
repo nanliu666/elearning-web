@@ -34,6 +34,7 @@
                 v-model="uploadFileList"
                 multiple
                 :before-upload="beforeUpload"
+                :limit="5"
               >
                 <div
                   slot="tip"
@@ -45,7 +46,10 @@
                   <el-button size="medium">
                     上传
                   </el-button>
-                  <ul class="upload__files">
+                  <ul
+                    class="upload__files"
+                    @click.stop=""
+                  >
                     <li
                       v-for="(item, index) in uploadFileList"
                       :key="index"
