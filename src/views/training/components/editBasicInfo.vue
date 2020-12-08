@@ -65,13 +65,28 @@ export default {
           offset: 0
         },
         {
-          itemType: 'select',
+          itemType: 'treeSelect',
           label: '分类',
           prop: 'categoryId',
-          options: [],
           props: {
-            label: 'name',
-            value: 'id'
+            selectParams: {
+              placeholder: '请选择分类',
+              multiple: false
+            },
+            treeParams: {
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              data: [],
+              filterable: false,
+              props: {
+                children: 'list',
+                label: 'name',
+                value: 'id'
+              },
+              required: true
+            }
           },
           required: false,
           span: 11,
@@ -231,7 +246,7 @@ export default {
   methods: {
     getCatalogs() {
       getTrainGetCatalogs().then((res) => {
-        this.infoFormColumns.find((it) => it.prop === 'categoryId').options = res
+        this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
     getData() {
