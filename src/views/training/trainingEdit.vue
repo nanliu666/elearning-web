@@ -208,7 +208,7 @@ export default {
         editFun(params).then((resData) => {
           if (resData) {
             this.$message.success('发布成功')
-            // this.$router.go(-1)
+            this.$router.go(-1)
           }
         })
       })
