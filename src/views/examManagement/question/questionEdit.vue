@@ -120,16 +120,19 @@
           </common-form>
           <div class="page-footer">
             <el-button
+              v-loading="submiting"
               type="primary"
               size="medium"
-              @click="handleSubmit"
+              @click="handleSubmit()"
             >
               保存
             </el-button>
+            <!-- @click="handleSubmit(true)" -->
             <el-button
+              v-loading="submitingAndContinue"
               size="medium"
               style="margin-left:16px;"
-              @click="handleSubmit"
+              @click="handleSubmit(true)"
             >
               完成并继续创建
             </el-button>
@@ -155,7 +158,12 @@ import ImageUploader from './imageUploader'
 import QuestionItem from './questionItem'
 import { createUniqueID } from '@/util/util'
 import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS, GROUP_COLUMNS } from './config'
-import { createQuestion, getQuestion } from '@/api/examManage/question'
+import {
+  createQuestion,
+  getQuestion,
+  modifyQuestion,
+  getQuestionCategory
+} from '@/api/examManage/question'
 
 const BASIC_COLUMNS = [
   { prop: 'title1', span: 24, itemType: 'slotout' },
@@ -185,9 +193,9 @@ const BASIC_COLUMNS = [
         filterable: false,
         props: {
           children: 'children',
-          label: 'orgName',
+          label: 'name',
           disabled: 'disabled',
-          value: 'orgId'
+          value: 'id'
         }
       }
     }
@@ -224,11 +232,89 @@ const BASIC_COLUMNS = [
   },
   { span: 24, prop: 'title2', itemType: 'slotout' }
 ]
+const BASIC_COLUMNS_GROUP = [
+  { prop: 'title1', span: 24, itemType: 'slotout' },
+  {
+    prop: 'type',
+    label: '试题类型',
+    required: true,
+    itemType: 'select',
+    options: _.map(QUESTION_TYPE_MAP, (val, key) => ({ label: val, value: key }))
+  },
+  {
+    prop: 'categoryId',
+    itemType: 'treeSelect',
+    label: '所在分类',
+    offset: 4,
+    props: {
+      selectParams: {
+        placeholder: '请选择所在分类',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
+  },
+  {
+    prop: 'score',
+    label: '试题分数',
+    itemType: 'inputNumber',
+    disabled: true,
+    desc: '分数根据子试题的分数自动计算总分',
+    min: 0
+  },
+  {
+    prop: 'difficulty',
+    label: '试题难度',
+    itemType: 'select',
+    offset: 4,
+    desc: '  ',
+    options: [
+      { label: '易', value: '1' },
+      { label: '中', value: '2' },
+      { label: '难', value: '3' }
+    ]
+  },
+  {
+    prop: 'timeLimitDate',
+    label: '答题限时',
+    itemType: 'timePicker'
+  },
+  {
+    prop: 'expiredTime',
+    label: '过期时间',
+    type: 'datetime',
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
+    offset: 4,
+    itemType: 'datePicker'
+  },
+  { span: 24, prop: 'title2', itemType: 'slotout' }
+]
 const createOptions = () => [
   { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
   { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] },
   { key: createUniqueID(), content: '', isCorrect: 0, url: '', fileList: [] }
 ]
+const createSubQustion = () => ({
+  type: QUESTION_TYPE_SINGLE,
+  content: '',
+  score: 0,
+  options: createOptions(),
+  attachments: [],
+  key: createUniqueID()
+})
 export default {
   name: 'QuestionEdit',
   components: {
@@ -249,18 +335,14 @@ export default {
         attachments: [],
         timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
         options: createOptions(),
-        subQuestions: [
-          {
-            type: QUESTION_TYPE_SINGLE,
-            content: '',
-            score: 0,
-            options: createOptions(),
-            attachments: [],
-            key: createUniqueID()
-          }
-        ]
+        subQuestions: [createSubQustion()]
       },
-      columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+      columns: [...BASIC_COLUMNS, ...SELECT_COLUMNS],
+      scoreWatcher: null,
+      submiting: false,
+      submitingAndContinue: false,
+      loading: false,
+      categoryData: []
     }
   },
   computed: {
@@ -281,34 +363,65 @@ export default {
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER
   },
   watch: {
-    'form.type'(val, oldVal) {
-      if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
-        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
-      } else if (val === QUESTION_TYPE_JUDGE) {
-        this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
-        this.form.options = [
-          { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
-          { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
-        ]
-      } else if (QUESTION_TYPE_SHOER === val) {
-        this.columns = [...BASIC_COLUMNS, ...SHORT_COLUMNS]
-      } else if (QUESTION_TYPE_BLANK === val) {
-        this.columns = [...BASIC_COLUMNS, ...FILL_COLUMNS]
-      } else if (QUESTION_TYPE_GROUP === val) {
-        this.columns = [...BASIC_COLUMNS, ...GROUP_COLUMNS]
-      }
-      // 从多选题切换到单选题时把正确答案置空
-      if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
-        _.forEach(this.form.options, (item) => {
-          item.isCorrect = 0
-        })
-      }
+    'form.type': {
+      handler(val, oldVal) {
+        /**
+         * 根据试题类型切换表单内容
+         */
+        if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
+          this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+        } else if (val === QUESTION_TYPE_JUDGE) {
+          this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+          this.form.options = [
+            { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
+            { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
+          ]
+        } else if (QUESTION_TYPE_SHOER === val) {
+          this.columns = [...BASIC_COLUMNS, ...SHORT_COLUMNS]
+        } else if (QUESTION_TYPE_BLANK === val) {
+          this.columns = [...BASIC_COLUMNS, ...FILL_COLUMNS]
+        } else if (QUESTION_TYPE_GROUP === val) {
+          this.columns = [...BASIC_COLUMNS_GROUP, ...GROUP_COLUMNS]
+        }
+        /**
+         * 试题组自动计算总分数
+         */
+        if (QUESTION_TYPE_GROUP === val) {
+          if (!this.scoreWatcher) {
+            this.scoreWatcher = this.$watch(
+              'form.subQuestions',
+              () => {
+                this.form.score = this.form.subQuestions.reduce((acc, item) => acc + item.score, 0)
+              },
+              { deep: true, immediate: true }
+            )
+          } else {
+            this.form.score = this.form.subQuestions.reduce((acc, item) => acc + item.score, 0)
+          }
+        }
+        // 从多选题切换到单选题时把正确答案置空
+        if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
+          _.forEach(this.form.options, (item) => {
+            item.isCorrect = 0
+          })
+        }
+      },
+      immediate: true
     }
   },
   mounted() {
     if (this.id) {
       this.loadData()
     }
+    this.loadCategoryData()
+  },
+  activated() {
+    if (this.id) {
+      this.loadData()
+    }
+  },
+  beforeDestroy() {
+    this.scoreWatcher && this.scoreWatcher()
   },
   methods: {
     handleDeleteSubQuestion(index) {
@@ -330,14 +443,7 @@ export default {
         this.$message.error('最多只能添加20项子试题')
         return
       }
-      this.form.subQuestions.push({
-        type: QUESTION_TYPE_SINGLE,
-        content: '',
-        score: 0,
-        options: createOptions(),
-        attachments: [],
-        key: createUniqueID()
-      })
+      this.form.subQuestions.push(createSubQustion())
     },
     handleRadioCheck(val, option) {
       this.form.options.forEach((item) => {
@@ -346,7 +452,7 @@ export default {
         }
       })
     },
-    handleSubmit() {
+    handleSubmit(isContinue) {
       this.$refs.form.validate().then(() => {
         let data = _.pick(this.form, [
           'type',
@@ -355,27 +461,96 @@ export default {
           'difficulty',
           'content',
           'analysis',
-          'options'
+          'options',
+          'expiredTime',
+          'attachments'
         ])
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
         if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
           data.options = [{ content: this.form.answer, isCorrect: 1 }]
+        } else {
+          data.options.forEach((item, index) => {
+            item.sort = index
+          })
         }
-        createQuestion(data).then(() => {
-          // console.log('成功')
-        })
+
+        if (data.type === QUESTION_TYPE_GROUP) {
+          data.subQuestions = this.form.subQuestions
+        }
+        data.id = this.id
+        if (!isContinue) {
+          this.submiting = true
+        } else {
+          this.submitingAndContinue = true
+        }
+        let func = createQuestion
+        if (this.id) {
+          func = modifyQuestion
+        }
+        func(data)
+          .then(() => {
+            this.$message.success(`试题${this.id ? '修改' : '创建'}成功`)
+            this.resetFormData()
+            if (!isContinue) {
+              this.goBack()
+            }
+          })
+          .finally(() => {
+            this.submiting = false
+            this.submitingAndContinue = false
+          })
       })
     },
+    goBack() {
+      this.$router.go(-1)
+      this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    },
+    resetFormData() {
+      this.$refs.form.resetFields()
+      this.form.options = createOptions()
+      this.form.attachments = []
+      this.form.subQuestions = [createSubQustion()]
+    },
     loadData() {
-      getQuestion({ id: this.id }).then((res) => {
-        // console.log(res)
-        this.form = res
-        this.form.timeLimitDate = new Date(
-          new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000
-        )
-        if (res.type == QUESTION_TYPE_BLANK) {
-          this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
-        }
+      this.loading = true
+      getQuestion({ id: this.id })
+        .then((res) => {
+          // console.log(res)
+          this.form = res
+          this.$set(
+            this.form,
+            'timeLimitDate',
+            new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
+          )
+          this.form.options.forEach((option) => {
+            option.key = createUniqueID()
+            if (option.url) {
+              option.fileList = [{ url: option.url }]
+            } else {
+              option.fileList = []
+            }
+          })
+          if (res.type == QUESTION_TYPE_BLANK) {
+            this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
+          }
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    loadCategoryData() {
+      getQuestionCategory({ parentId: '0', type: 0 }).then((res) => {
+        this.categoryData = res
+        _.forEach(BASIC_COLUMNS, (column) => {
+          if (column.prop === 'categoryId') {
+            column.props.treeParams.data = res
+          }
+        })
+        _.forEach(BASIC_COLUMNS_GROUP, (column) => {
+          if (column.prop === 'categoryId') {
+            column.props.treeParams.data = res
+          }
+        })
       })
     }
   }

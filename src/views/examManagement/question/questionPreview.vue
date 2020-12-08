@@ -16,7 +16,7 @@
         <div class="upload__cover">
           <i
             class="iconimage_icon_Preview1 iconfont"
-            @click.stop="handlePreviewImage(_.map(attachments, 'fileUrl'), index)"
+            @click.stop="handlePreviewImage(_.map(data.attachments, 'fileUrl'), index)"
           ></i>
         </div>
       </div>
@@ -133,6 +133,7 @@ export default {
     margin-bottom: 12px;
   }
   &__attachments {
+    margin-bottom: 12px;
     .el-image {
       vertical-align: middle;
     }
