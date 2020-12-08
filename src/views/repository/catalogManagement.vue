@@ -132,7 +132,7 @@
 <script>
 import {
   getKnowledgeCatalogList,
-  getKnowledgeCreatUsers,
+  getCreatUsers,
   deleteKnowledgeCatalog,
   updateStatusKnowledgeCatalog
 } from '@/api/knowledge/knowledge'
@@ -226,7 +226,7 @@ export default {
             loadMoreFun(item) {
               if (item.loading || item.noMore) return
               item.loading = true
-              getKnowledgeCreatUsers().then((res) => {
+              getCreatUsers().then((res) => {
                 if (res.length > 0) {
                   item.options.push(...res)
                   item.pageNo += 1
@@ -246,7 +246,7 @@ export default {
     }
   },
   activated() {
-    getKnowledgeCreatUsers().then((res) => {
+    getCreatUsers().then((res) => {
       this.searchConfig.popoverOptions[1].options.push(...res)
     })
     this.loadTableData()

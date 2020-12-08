@@ -188,7 +188,7 @@ export default {
         let id = { id: this.id }
         _.assign(examArrangeBasis, id)
       }
-      _.assign(examArrangeBasis, { type: type === 'publish' ? 1 : 2 })
+      _.assign(examArrangeBasis, { type: type === 'publish' ? 0 : 1 })
       _.assign(examArrangeBasis, examPattern)
       _.assign(examArrangeBasis, { creatorId: this.userId })
       examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
