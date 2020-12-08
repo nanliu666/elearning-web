@@ -92,11 +92,11 @@ const EventColumns = [
   {
     itemType: 'datePicker',
     span: 24,
-    required: true,
+    type: 'datetimerange',
+    required: false,
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
     prop: 'examTime',
-    type: 'daterange',
-    rangeSeparator: '~',
-    label: '考试日期'
+    label: '考试时间'
   },
   {
     itemType: 'input',
