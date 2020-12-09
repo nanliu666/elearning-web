@@ -75,6 +75,7 @@ const assessFormColumns = [
     required: true,
     span: 11,
     offset: 0,
+    disabled: true,
     options: [
       {
         label: '整体满意度评估（默认）',
