@@ -634,6 +634,9 @@ export default {
   },
   activated() {},
   methods: {
+    goAdd() {
+      this.$router.push({ path: '/training/edit' })
+    },
     // 去培训详情
     toTrainingDetail(row) {
       this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })
@@ -867,6 +870,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
+        this.$router.push({ path: '/training/edit', query: { id: row.id } })
       }
       if (e === 'del') {
         // 删除

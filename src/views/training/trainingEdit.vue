@@ -35,7 +35,7 @@
         <el-button
           v-if="!id"
           size="medium"
-          @click="publish(2)"
+          @click="publish(1)"
         >
           存草稿
         </el-button>
@@ -58,7 +58,7 @@
           v-if="activeStep === 2"
           size="medium"
           type="primary"
-          @click="publish(1)"
+          @click="publish(0)"
         >
           发布
         </el-button>
