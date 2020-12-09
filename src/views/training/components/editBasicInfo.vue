@@ -107,6 +107,7 @@ export default {
           label: '计划人数',
           prop: 'people',
           type: 'Number',
+          min: 0,
           required: false,
           span: 11,
           offset: 2
