@@ -587,13 +587,13 @@ const res = {
           },
           {
             menuId: '1214878678567464558',
-            menuName: '测试111',
+            menuName: '编辑页面',
             menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            path: '/lecturer/demo',
+            path: '/training/trainingEdit',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []

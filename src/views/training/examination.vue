@@ -55,6 +55,7 @@
                   effect="dark"
                   placement="top"
                   style="color:#acb3b8;"
+                  @click="refreshTableData"
                 >
                   <el-button
                     class="operations__btns--item"
@@ -66,7 +67,10 @@
                     <!-- <i class="iconfont iconicon_refresh" /> -->
                   </el-button>
                 </el-tooltip>
-                <span class="text_refresh">刷新</span>
+                <span
+                  class="text_refresh"
+                  @click="refreshTableData"
+                >刷新</span>
                 <el-popover
                   placement="bottom"
                   width="40"
