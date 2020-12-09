@@ -6,11 +6,12 @@
         <el-button
           type="primary"
           size="medium"
+          @click="toEstablishCourse"
         >
-          新建课程
+          创建课程
         </el-button>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item>
+          <el-dropdown-item @click="toEstablishCourse">
             单个新建
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -580,13 +581,17 @@ export default {
     this.getInfo()
   },
   methods: {
+    toEstablishCourse() {
+      this.$router.push({ path: '/course/establishCourse' })
+    },
+    // 移动
     isMoveCourse() {
       let params = {
         catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
         courseId: this.moveId //课程
       }
       moveCourse(params).then(() => {
-        // console.log(res)
+        this.dialogFormVisible = false
       })
     },
     // 拿到移动数据
@@ -667,7 +672,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            delCourseInfo({ courseId: [row.id] }).then(() => {
+            delCourseInfo({ courseIds: row.id }).then(() => {
               this.$message({
                 type: 'success',
                 message: '删除成功!'
@@ -699,14 +704,35 @@ export default {
     },
 
     handleSearch(searchParams) {
-      // this.loadTableData(_.pickBy(searchParams))
       this.getInfo(searchParams)
-      // console.log('------------', searchParams)
     },
 
-    handleRemoveItems() {
+    handleRemoveItems(selection) {
       // 批量删除
-      // console.log(selection)
+      let params = ''
+      selection.forEach((item) => {
+        params += item.id + ','
+      })
+      this.$confirm('此操作将删选中课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delCourseInfo({ courseIds: params }).then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.getInfo()
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
 
     // 刷新列表数据
@@ -716,10 +742,6 @@ export default {
 
     // 拿数据
     getInfo(courseName) {
-      // currentPage	当前页	body	true
-      // size	页面显示数量	body	true
-      // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
-      // courseName	课程名称	body	false
       let params = {
         currentPage: '',
         size: '',
@@ -727,9 +749,7 @@ export default {
       }
       params = { ...this.page, ...courseName }
       params.status = this.status
-      // console.log('params', params)
       getCourseListData(params).then((res) => {
-        // window.console.log('+++++++++++', res)
         this.tableData = res.data
         this.page.total = res.totalNum
 

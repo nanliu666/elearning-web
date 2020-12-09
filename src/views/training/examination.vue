@@ -281,7 +281,7 @@ export default {
     // 查询培训考试安排详情
     isExamDetail() {
       // console.log('id', this.$route.query.id)
-      let id = { examId: '1332136484077338626' }
+      let id = { examId: this.$route.query.id }
       examDetail(id).then((res) => {
         // console.log(res)
         this.showExamDetail = res

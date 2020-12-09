@@ -26,7 +26,7 @@ export const getCourseListData = (params) =>
  * 新增课程
  * @param {Object} courseId - 参数
  * */
-export const addCourse = (params) => get('/api/blade-manage/v1/course/addCourse', params)
+export const addCourse = (params) => post('/api/blade-manage/v1/course/addCourse', params)
 /**
  * 编辑课程
  * @param {Object} courseId - 参数
@@ -92,3 +92,19 @@ export const updateCourseTop = (params) =>
  * @param {Object} params - 参数
  * */
 export const moveCourse = (params) => put('/api/blade-manage/v1/course/moveCourse', params)
+/**
+ * 创建课程--标签信息
+ * @param {Object} params - 参数
+ * */
+export const getCourseTags = (params) => get('/api/blade-manage/v1/course/getCourseTags', params)
+/**
+ * 查询单个课程信息  // 编辑页面的数据前
+ * @param {Object} params - 参数
+ * */
+export const getCourse = (params) => get('/api/blade-manage/v1/course/getCourse', params)
+/**
+ * 查询单个课程信息  // 编辑页面的数据前
+ * @param {Object} params - 参数
+ * */
+export const getCourseContents = (params) =>
+  get('/api/blade-manage/v1/course/getCourseContents', params)
