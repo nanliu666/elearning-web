@@ -1,13 +1,16 @@
 <template>
   <div class="trainingArrange">
-    <div class="box_title">
+    <div
+      title="分类管理"
+      class="box_title"
+    >
       <div class="title">
         讲师管理
       </div>
       <div>
         <el-button
           type="primary"
-          size="small"
+          size="medium"
           @click="toAddLecturer"
         >
           &nbsp; 添加讲师 &nbsp;

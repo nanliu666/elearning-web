@@ -26,17 +26,17 @@
         </div>
       </div>
       <div class="btns">
-        <el-button size="small">
+        <el-button size="medium">
           预览
         </el-button>
         <el-button
-          size="small"
+          size="medium"
           @click="isAddCourse(2)"
         >
           存草稿
         </el-button>
         <el-button
-          size="small"
+          size="medium"
           type="primary"
           @click="isAddCourse(1)"
         >
@@ -299,7 +299,7 @@
             <span>章节内容</span>
             <el-button
               type="primary"
-              size="small"
+              size="medium"
               @click="addArticleBtn"
             >
               添加章节
@@ -448,7 +448,7 @@
                 <el-button
                   v-if="scope.row.saveOrcompile === 1"
                   type="text"
-                  size="small"
+                  size="medium"
                   @click="scope.row.saveOrcompile = 0"
                 >
                   编辑
@@ -456,21 +456,21 @@
                 <el-button
                   v-if="scope.row.saveOrcompile === 0"
                   type="text"
-                  size="small"
+                  size="medium"
                   @click="scope.row.saveOrcompile = 1"
                 >
                   保存
                 </el-button>
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                   @click="delContent(scope.$index)"
                 >
                   删除
                 </el-button>
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                   :disabled="scope.$index === 0"
                   @click="upward(scope.$index)"
                 >
@@ -478,7 +478,7 @@
                 </el-button>
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                   :disabled="scope.$index === ruleForm.contents.length - 1"
                   @click="downward(scope.$index)"
                 >
