@@ -129,6 +129,7 @@ import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 const COLUMNS = [
   {
     prop: 'content',
+    label: '题目列表',
     slot: true
   }
 ]
@@ -260,8 +261,8 @@ export default {
       })
         .then(() => {
           delQuestion({ id }).then(() => {
-            this.loadData()
             this.$ref.table.clearSelection()
+            this.loadData()
           })
         })
         .catch()

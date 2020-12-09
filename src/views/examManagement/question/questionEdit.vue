@@ -4,7 +4,10 @@
       :title="title"
       show-back
     />
-    <basic-container block>
+    <basic-container
+      v-loading="loading"
+      block
+    >
       <el-row
         type="flex"
         justify="center"
@@ -102,10 +105,12 @@
               <div class="sub-questions">
                 <template v-for="(question, index) in form.subQuestions">
                   <question-item
+                    ref="subQuestion"
                     :key="question.key"
                     :value="question"
                     :parent="form.subQuestions"
                     :index="index"
+                    @delete="handleDeleteSubQuestion($event)"
                     @move="handleMoveSubQuestions"
                   />
                 </template>
@@ -311,6 +316,7 @@ const createSubQustion = () => ({
   type: QUESTION_TYPE_SINGLE,
   content: '',
   score: 0,
+  editing: true,
   options: createOptions(),
   attachments: [],
   key: createUniqueID()
@@ -454,6 +460,13 @@ export default {
     },
     handleSubmit(isContinue) {
       this.$refs.form.validate().then(() => {
+        if (
+          this.form.type === QUESTION_TYPE_GROUP &&
+          _.some(this.form.subQuestions, { editing: true })
+        ) {
+          this.$message.error('有子试题没有保存，请先保存')
+          return
+        }
         let data = _.pick(this.form, [
           'type',
           'categoryId',
