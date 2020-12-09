@@ -58,7 +58,7 @@
               @submit="handleSearch"
             />
             <div
-              v-if="activeIndex === '1'"
+              v-if="activeIndex === '0'"
               class="filter-box"
             >
               <div
@@ -82,7 +82,6 @@
                     v-for="item in tableColumns"
                     :key="item.prop"
                     :label="item.prop"
-                    :disabled="item.prop === 'orgName'"
                     class="originColumn"
                   >
                     {{ item.label }}
@@ -141,7 +140,7 @@
               删除
             </el-button>
             <el-dropdown
-              v-if="activeIndex === '1'"
+              v-if="activeIndex === '0'"
               @command="handleCommand(row)"
             >
               <el-button
@@ -167,19 +166,20 @@
 import SearchPopover from '@/components/searchPopOver/index'
 import { getArrangeList, delExamArrange } from '@/api/examManage/schedule'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
-const TABLE_COLUMNS = [
+const STATUS_CONFIG = {
+  label: '状态',
+  prop: 'status',
+  slot: true,
+  minWidth: 120
+}
+let TABLE_COLUMNS = [
   {
     label: '考试名称',
     prop: 'examName',
     slot: true,
     minWidth: 150
   },
-  {
-    label: '状态',
-    prop: 'status',
-    slot: true,
-    minWidth: 120
-  },
+
   {
     label: '考试分类',
     prop: 'category',
@@ -220,7 +220,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 100
+    minWidth: 150
   }
 }
 const STATUS_STATUS = [
@@ -337,7 +337,7 @@ export default {
         return item.value === data
       })[0].label
     },
-    // 过滤不可见的列
+    // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
@@ -372,15 +372,18 @@ export default {
     }
   },
   activated() {
-    getCreatUsers().then((res) => {
-      let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
-        return item.field === 'creatorId'
-      })[0]
-      if (creatorId) {
-        creatorId.options.push(...res)
-      }
-    })
+    let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
+      return item.field === 'creatorId'
+    })[0]
+    if (_.size(creatorId.options) === 0) {
+      getCreatUsers().then((res) => {
+        if (creatorId) {
+          creatorId.options.push(...res)
+        }
+      })
+    }
     this.loadTableData()
+    this.setConfig()
   },
   methods: {
     /**
@@ -401,10 +404,27 @@ export default {
     jumpDetail(row) {
       this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
     },
+    setConfig() {
+      const examNameIndex = _.findIndex(TABLE_COLUMNS, (item) => {
+        return item.prop === 'examName'
+      })
+      const statusIndex = _.findIndex(TABLE_COLUMNS, (item) => {
+        return item.prop === 'status'
+      })
+      if (this.activeIndex === '0') {
+        TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
+      } else {
+        TABLE_COLUMNS.splice(statusIndex, 1)
+      }
+      this.tableColumns = TABLE_COLUMNS
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+    },
     // 切换nav
     handleSelect(key) {
+      this.$refs.table.clearSelection()
       this.activeIndex = key
       this.handleSearch({ type: Number(key) })
+      this.setConfig()
     },
     // 多种操作
     handleCommand(row) {
@@ -423,6 +443,7 @@ export default {
     // 具体的删除函数
     deleteFun(id) {
       delExamArrange({ id }).then(() => {
+        this.$refs.table.clearSelection()
         this.loadTableData()
         this.$message({
           type: 'success',
@@ -430,8 +451,6 @@ export default {
         })
       })
     },
-    // 删除检测
-    deleteCheck() {},
     // 单个删除
     handleDelete(row) {
       this.$confirm('您确定要删除选中的考试吗？', '提醒', {
@@ -458,12 +477,12 @@ export default {
       try {
         this.tableLoading = true
         let { totalNum, data } = await getArrangeList(this.queryInfo)
+        this.tableLoading = false
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
-        this.$message.error(error.message)
-      } finally {
         this.tableLoading = false
+        this.$message.error(error.message)
       }
     },
     changevisible(data) {
