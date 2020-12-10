@@ -3,7 +3,7 @@
     ref="login"
     class="login-container"
   >
-    <div class="content">
+    <div class="login-content">
       <!--图片-->
       <div class="nav flex flex-flow ">
         <div class="LOGO">
@@ -131,9 +131,10 @@ export default {
 
 <style lang="scss">
 @import '@/styles/login.scss';
-.content {
+.login-content {
   padding-top: 33px;
-  width: 1200px;
+  width: 62.5vw;
+  min-width: 800px;
   margin: 0 auto;
   height: 100%;
   .nav {
@@ -153,25 +154,28 @@ export default {
   .container {
     /*background: #FFFFFF;*/
 
-    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     height: calc(100% - 60px);
     .containers {
+      border-radius: 8px;
+      overflow: hidden;
+      width: 100%;
       box-shadow: 0 6px 32px 0 rgba(0, 134, 185, 0.24);
     }
     .img {
-      width: 687px;
-      height: 680px;
+      width: 50%;
+      height: 63vh;
+
       position: relative;
       z-index: 99;
       img.bg {
         top: 0;
         position: absolute;
         z-index: -1;
-        width: 687px;
-        height: 680px;
+        width: 100%;
+        height: 100%;
       }
       .welcome_logo {
         height: 40px;
@@ -191,9 +195,9 @@ export default {
       }
     }
     .login_content {
-      width: calc(100% - 687px);
+      width: 50%;
+      height: 63vh;
       background: #fff;
-      height: 680px;
     }
   }
 }

@@ -91,7 +91,7 @@
             <template #content="{row}">
               <div class="question-content">
                 <div class="ellipsis">
-                  {{ row.content }}
+                  {{ deleteHTMLTag(row.content) }}
                 </div>
                 <div>
                   {{ QUESTION_TYPE_MAP[row.type] || '' }}<span class="divider">|</span>状态：{{
@@ -126,6 +126,7 @@
 <script>
 import { getQuestionList, delQuestion, getQuestionCategory } from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
+import { deleteHTMLTag } from '@/util/util'
 const COLUMNS = [
   {
     prop: 'content',
@@ -211,6 +212,9 @@ export default {
     this.loadData()
   },
   methods: {
+    deleteHTMLTag(...args) {
+      return deleteHTMLTag(...args)
+    },
     filterNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1

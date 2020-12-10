@@ -74,9 +74,7 @@ div {
   background: #fff;
 }
 .out-container {
-  height: calc(100vh);
   background: #f2f5f7;
-  padding: 0 32px 32px 32px !important;
   position: relative;
 }
 .select-mode-style {

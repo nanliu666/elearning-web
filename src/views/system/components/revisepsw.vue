@@ -1,11 +1,10 @@
 <template>
   <div class="security">
-    <div class="back brad-part">
-      <span @click="goback()">
-        <i class="el-icon-arrow-left" />
-      </span>
-      <span> 修改密码 </span>
-    </div>
+    <page-header
+      title="修改密码"
+      show-back
+      :back="goback"
+    ></page-header>
     <div class="securitySetting">
       <div class="form_">
         <el-form

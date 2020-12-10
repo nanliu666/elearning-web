@@ -1,11 +1,10 @@
 <template>
   <div class="out-container">
-    <div class="brad-part">
-      <span @click="goback()">
-        <i class="el-icon-arrow-left" />
-      </span>
-      <span> {{ `修改${$parent.isEmail ? '新邮箱' : '新手机号码'}` }} </span>
-    </div>
+    <page-header
+      :title="`修改${$parent.isEmail ? '新邮箱' : '新手机号码'}`"
+      show-back
+      :back="goback"
+    ></page-header>
     <el-card class="getback-pw">
       <keep-alive>
         <div class="contens-wrapper">
@@ -474,12 +473,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.out-container {
-  height: calc(100vh);
-  background: #f2f5f7;
-  padding: 68px 0 0 0 !important;
-  position: relative;
-}
 .login-code-img {
   width: 100px;
   height: 34px;
