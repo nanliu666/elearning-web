@@ -93,6 +93,7 @@
 <script>
 import themeBlock from './components/themeBlock'
 import { getTestPaper, postTestPaper, putTestPaper } from '@/api/examManagement/achievement'
+import { getcategoryTree } from '@/api/examManage/category'
 
 const BASE_COLUMNS = [
   {
@@ -122,7 +123,8 @@ const BASE_COLUMNS = [
         props: {
           children: 'children',
           label: 'name',
-          value: 'id'
+          value: 'id',
+          disabled: true
         },
         required: true
       }
@@ -173,6 +175,7 @@ const BASE_COLUMNS = [
   {
     prop: 'expiredTime',
     itemType: 'datePicker',
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
     label: '过期时间',
     type: 'datetime',
     span: 11,
@@ -204,26 +207,9 @@ export default {
       TotalScore: '',
       score: '',
       form: {},
-      typeList: [
-        {
-          label: '单选题',
-          value: '1'
-        },
-        {
-          label: '多选题',
-          value: '2'
-        },
-        {
-          label: '填空题',
-          value: '3'
-        },
-        {
-          label: '简答题',
-          value: '4'
-        }
-      ],
+      typeList: [],
       themeBlock: {
-        id: 1,
+        key: 1,
         type: '',
         title: '',
         tableData: '',
@@ -233,14 +219,46 @@ export default {
     }
   },
   mounted() {
-    this.testPaper.push(_.cloneDeep(this.themeBlock))
+    !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
+    this.getTestPaperCategory()
   },
   methods: {
+    getTestPaperCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
+      })
+    },
     getData() {
       if (!this.$route.query.id) return
-      getTestPaper().then((res) => {
-        res
+      let params = {
+        id: this.$route.query.id
+      }
+      getTestPaper(params).then((res) => {
+        let {
+          id,
+          expiredTime,
+          categoryId,
+          totalScore,
+          remark,
+          name,
+          isScore,
+          isShowScore,
+          manualSettings
+        } = res
+        this.form = { id, name, categoryId, expiredTime, totalScore, remark, isScore, isShowScore }
+        const list = _.groupBy(manualSettings, (it) => it.parentSort)
+        this.testPaper = []
+        for (let key in list) {
+          this.testPaper.push({
+            type: list[key][0].type,
+            title: list[key][0].title,
+            tableData: list[key]
+          })
+        }
       })
     },
     onSubmit() {
@@ -255,9 +273,27 @@ export default {
           return
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+
+        let manualSettings = []
+        this.testPaper.map((it, index) => {
+          it.tableData &&
+            it.tableData.map((item, i) => {
+              manualSettings.push({
+                parentSort: index + 1,
+                questionId: item.questionId,
+                content: item.content,
+                timeLimit: item.timeLimit,
+                score: item.score,
+                sort: i + 1,
+                title: it.title,
+                type: it.type
+              })
+            })
+        })
         let params = {
           ...this.form,
-          tableData: this.testPaper
+          manualSettings: manualSettings,
+          type: 'manual'
         }
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
@@ -266,7 +302,7 @@ export default {
     },
     update(data) {
       this.testPaper.map((it) => {
-        it.id === data.id && (it = Object.assign(it, data))
+        it.key === data.key && (it = Object.assign(it, data))
       })
       let scoreList = _.compact(this.testPaper.map((it) => it.totalScore))
       scoreList.length &&
@@ -284,7 +320,7 @@ export default {
       })
     },
     handleAddType() {
-      this.themeBlock.id += 1
+      this.themeBlock.key += 1
       this.testPaper.push(_.cloneDeep(this.themeBlock))
       this.$nextTick(() => {
         let scroll = this.$refs.HandmadeTestPaper

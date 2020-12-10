@@ -54,3 +54,10 @@ export const putTestPaper = (params) => put('/manage/v1/exam/paper', params)
  * @params params
  * */
 export const getTestPaper = (params) => get('/manage/v1/exam/paper', params)
+
+/**
+ * @author guanfenda
+ * @path v1/examniee/paper/maker
+ * @desc 获取出卷人
+ * */
+export const getPaperMaker = (params) => get('/manage/v1/examniee/paper/maker', params)

@@ -500,13 +500,13 @@ export default {
           ).length > 0
         )
           return
-        let testPaperMether =
-          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
         let params = {
           ...this.form,
           randomSettings: this.tableData,
           type: 'random'
         }
+        let testPaperMether =
+          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
         })

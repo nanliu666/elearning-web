@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    title="题目来源"
     :visible.sync="roleVisible"
     width="1000px"
     :close-on-click-modal="false"
@@ -21,6 +21,8 @@
             :loading="tableLoading"
             @current-page-change="handleCurrentPageChange"
             @page-size-change="handlePageSizeChange"
+            @select="select"
+            @select-all="select"
           >
             <template #topMenu>
               <div class="transitionBox">
@@ -37,6 +39,7 @@
                       size="medium"
                       class="search"
                       type="primary"
+                      @click="handleSearch"
                     >
                       搜索
                     </el-button>
@@ -44,7 +47,7 @@
                 </div>
               </div>
             </template>
-            <template slot="multiSelectMenu">
+            <template #multiSelectMenu>
               <!--          <el-button-->
               <!--            type="text"-->
               <!--            icon="el-icon-delete"-->
@@ -52,22 +55,59 @@
               <!--            批量导出-->
               <!--          </el-button>-->
             </template>
-            <template #name="{row}">
-              <el-link
-                type="primary"
-                style="line-height: 22px"
-              >
-                {{ row.name }}
-              </el-link>
-            </template>
           </common-table>
         </div>
         <div class="flex-flow flex flexcenter">
-          <div style="padding:0 20px">
+          <div class="addTopic">
             添加题目 <i class="el-icon-d-arrow-right"></i>
           </div>
         </div>
-        <div class="select"></div>
+        <div class="select">
+          <!--          <common-table-->
+          <!--            ref="table"-->
+          <!--            :columns="columnsVisible | columnsFilter"-->
+          <!--            :config="tableConfig"-->
+          <!--            :page="page"-->
+          <!--            :data="seleData"-->
+          <!--            :loading="tableLoading"-->
+          <!--            @current-page-change="handleCurrentPageChange"-->
+          <!--            @page-size-change="handlePageSizeChange"-->
+          <!--            @select="select"-->
+          <!--            @select-all="select"-->
+          <!--          >-->
+          <!--            <template #topMenu>-->
+          <!--              <div class="transitionBox">-->
+          <!--                <div class="searchBox">-->
+          <!--                  <div class="search-box">-->
+          <!--                    <commonForm-->
+          <!--                      ref="form"-->
+          <!--                      :model="form"-->
+          <!--                      :config="config"-->
+          <!--                      :columns="columns"-->
+          <!--                    >-->
+          <!--                    </commonForm>-->
+          <!--                    <el-button-->
+          <!--                      size="medium"-->
+          <!--                      class="search"-->
+          <!--                      type="primary"-->
+          <!--                      @click="handleSearch"-->
+          <!--                    >-->
+          <!--                      搜索-->
+          <!--                    </el-button>-->
+          <!--                  </div>-->
+          <!--                </div>-->
+          <!--              </div>-->
+          <!--            </template>-->
+          <!--            <template #multiSelectMenu >-->
+          <!--              &lt;!&ndash;          <el-button&ndash;&gt;-->
+          <!--              &lt;!&ndash;            type="text"&ndash;&gt;-->
+          <!--              &lt;!&ndash;            icon="el-icon-delete"&ndash;&gt;-->
+          <!--              &lt;!&ndash;          >&ndash;&gt;-->
+          <!--              &lt;!&ndash;            批量导出&ndash;&gt;-->
+          <!--              &lt;!&ndash;          </el-button>&ndash;&gt;-->
+          <!--            </template>-->
+          <!--          </common-table>-->
+        </div>
       </div>
       <div
         slot="footer"
@@ -82,6 +122,7 @@
         <el-button
           type="primary"
           size="medium"
+          @click="onsubmit"
         >
           保存
         </el-button>
@@ -93,20 +134,25 @@
 <script>
 // import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
 // import SearchPopover from '@/components/searchPopOver/index'
+import { getcategoryTree } from '@/api/examManage/category'
+import { getQuestionList } from '@/api/examManage/question'
+import { QUESTION_TYPE_MAP } from '@/const/examMange'
 const TABLE_COLUMNS = [
   {
-    label: '考试名称',
-    prop: 'name',
+    label: '题目名称',
+    prop: 'content',
     slot: true,
     fixed: true,
     minWidth: 100
   },
 
   {
-    label: '有效时间',
-    slot: true,
-    prop: 'expiredTime',
-    minWidth: 100
+    label: '题目类型',
+    prop: 'type',
+    minWidth: 100,
+    formatter: (row) => {
+      return QUESTION_TYPE_MAP[row.type] || ''
+    }
   }
 ]
 const TABLE_CONFIG = {
@@ -149,7 +195,7 @@ export default {
   data() {
     const BASE_COLUMNS = [
       {
-        prop: 'examineeName',
+        prop: 'category',
         itemType: 'treeSelect',
         props: {
           selectParams: {
@@ -176,7 +222,7 @@ export default {
         required: false
       },
       {
-        prop: 'examTime',
+        prop: 'search',
         itemType: 'input',
         type: 'datetimerange',
         label: '题目标题',
@@ -189,6 +235,7 @@ export default {
         labelPosition: 'left',
         labelWidth: '80px'
       },
+      selection: [],
       columns: BASE_COLUMNS,
       tableData: [],
       tableLoading: false,
@@ -204,13 +251,8 @@ export default {
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       form: {
-        answerTime: '',
-        totalScore: '',
-        examineeName: '',
-        examTime: '',
-        score: '',
-        isPass: '',
-        status: ''
+        category: '',
+        search: ''
       },
       jobDicData: []
     }
@@ -220,14 +262,51 @@ export default {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
       }
+    },
+    'form.category': {
+      handler() {
+        this.getData()
+      },
+      deep: true
     }
   },
-  mounted() {},
+  mounted() {
+    this.getcategoryTree()
+  },
   methods: {
+    onsubmit() {
+      this.$emit('input', this.selection)
+      this.onClose()
+    },
+    select(data) {
+      this.selection = data
+    },
+    getData() {
+      let params = {
+        pageNo: 1,
+        pageSize: 10,
+        categoryId: this.form.category,
+        search: this.form.search
+      }
+      getQuestionList(params).then((res) => {
+        this.tableData = res.data
+        this.page.total = res.totalNum
+      })
+    },
+    getcategoryTree() {
+      let params = {
+        parentId: 0,
+        type: 0
+      }
+      getcategoryTree(params).then((res) => {
+        this.columns.find((it) => it.prop === 'category').props.treeParams.data = res
+
+        this.form.category = res[0].id
+      })
+    },
     // 搜索
-    handleSearch(params) {
-      this.searchParams = params
-      this.loadTableData()
+    handleSearch() {
+      this.getData()
     },
     loadTableData() {},
     numberInput(value, data) {
@@ -312,5 +391,9 @@ export default {
     right: 0;
     top: 0;
   }
+}
+.addTopic {
+  padding: 0 20px;
+  cursor: pointer;
 }
 </style>

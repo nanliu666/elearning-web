@@ -204,6 +204,10 @@ export default {
             field: 'paperMaker',
             label: '出卷人',
             data: '',
+            props: {
+              label: 'examName',
+              value: 'id'
+            },
             options: [
               { value: '', label: '全部' },
               { value: 0, label: '启用' },
@@ -219,8 +223,15 @@ export default {
   },
   activated() {
     this.loadTableData()
+    this.getPaperMaker()
   },
   methods: {
+    getPaperMaker() {
+      // getPaperMaker().then((res) => {
+      //   console.log(res)
+      // })
+    },
+
     handleLookUp(row) {
       this.$router.push({
         path: '/examManagement/grade/ExamineeAchievement',
