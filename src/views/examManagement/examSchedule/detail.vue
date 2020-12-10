@@ -498,7 +498,7 @@ const SEARCH_CONFIG = {
       field: 'batchNumber',
       label: '考试批次',
       data: '',
-      options: [{ value: '', label: '全部' }]
+      options: []
     },
     {
       type: 'select',
@@ -525,7 +525,8 @@ import {
   getExamArrange,
   getBatchList,
   putAchievement,
-  putCertificate
+  putCertificate,
+  getBatchNumber
 } from '@/api/examManage/schedule'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
@@ -689,6 +690,7 @@ export default {
       })
       let fieldOrgId = _.find(this.searchConfig.popoverOptions, { field: 'orgId' })
       let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
+      let batchNumber = _.find(this.searchConfig.popoverOptions, { field: 'batchNumber' })
       if (fieldOrgId) {
         getOrgTreeSimple({ parentOrgId: 0 }).then(
           (res) =>
@@ -705,6 +707,11 @@ export default {
       }
       if (examSituation) {
         examSituation.options = isTestOptions
+      }
+      if (batchNumber) {
+        getBatchNumber({ id: this.$route.query.id }).then((res) => {
+          batchNumber.options = [{ value: '', label: '全部' }, ...res]
+        })
       }
     },
     async loadTableData() {
