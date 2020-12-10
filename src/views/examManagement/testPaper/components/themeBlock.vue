@@ -87,7 +87,9 @@
           </template>
         </common-table>
         <stemContent
+          v-if="visible"
           v-model="stemList"
+          :type="form.type"
           :visible.sync="visible"
           :title="'添加' + title"
         ></stemContent>
@@ -98,6 +100,7 @@
 
 <script>
 import stemContent from '@/components/stem-content/stemContent'
+import { QUESTION_TYPE_MAP } from '@/const/examMange'
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
@@ -112,7 +115,7 @@ const TABLE_CONFIG = {
 const TABLE_COLUMNS = [
   {
     label: '题目列表',
-    prop: 'type',
+    prop: 'content',
     slot: true,
     minWidth: 150
   },
@@ -124,9 +127,11 @@ const TABLE_COLUMNS = [
   },
   {
     label: '答题限时',
-    prop: 'limitTime',
+    prop: 'timeLimit',
     align: 'center',
-    slot: true,
+    formatter(row) {
+      return row.timeLimit + 's'
+    },
     minWidth: 120
   }
 ]
@@ -248,28 +253,11 @@ export default {
       title: '',
       visible: false,
       form: {
-        type: '1',
+        type: 'single_choice',
         title: ''
       },
       stemList: [],
-      typeList: [
-        {
-          label: '单选题',
-          value: '1'
-        },
-        {
-          label: '多选题',
-          value: '2'
-        },
-        {
-          label: '填空题',
-          value: '3'
-        },
-        {
-          label: '简答题',
-          value: '4'
-        }
-      ],
+      typeList: [],
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -279,21 +267,33 @@ export default {
   },
   watch: {
     blockData: {
-      handler() {},
+      handler(val) {
+        val.title && (this.form.title = _.cloneDeep(val.title))
+        val.tableData && (this.tableData = _.cloneDeep(val.tableData))
+      },
       deep: true,
       immediate: true
     },
     stemList: {
       handler(val) {
         let obj = val.map((it) => {
-          return { score: Number(it.workNo), name: it.bizName }
+          return {
+            score: Number(it.score),
+            content: it.content,
+            timeLimit: it.timeLimit,
+            type: it.type,
+            id: it.id
+          }
         })
-        this.tableData = obj.map((it, index) => ({
-          id: index,
-          type: it.name,
-          score: it.score,
-          Original: it.score,
-          limitTime: '5:00:00'
+
+        this.tableData = obj.map((it) => ({
+          key: it.id,
+          content: it.content,
+          type: it.type,
+          questionId: it.id,
+          score: it.score || '0',
+          Original: it.score || '0',
+          timeLimit: it.timeLimit ? it.timeLimit : '0'
         }))
         this.countScore()
       },
@@ -301,18 +301,18 @@ export default {
     },
     totalScore() {
       let block = {
-        id: this.blockData.id,
+        key: this.blockData.key || this.blockData.id,
         type: this.form.type,
         title: this.form.title,
         tableData: this.tableData,
         totalScore: this.totalScore
       }
-      this.$emit('update', block)
+      this.$emit('update', _.cloneDeep(block))
     },
     form: {
       handler() {
         let block = {
-          id: this.blockData.id,
+          key: this.blockData.key,
           type: this.form.type,
           title: this.form.title,
           tableData: this.tableData,
@@ -321,6 +321,12 @@ export default {
         this.$emit('update', block)
       },
       deep: true
+    }
+  },
+  mounted() {
+    this.typeList = []
+    for (let key in QUESTION_TYPE_MAP) {
+      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
   },
   methods: {
@@ -358,8 +364,10 @@ export default {
       this.$emit('delete', this.blockData)
     },
     handleDelete(row) {
-      this.tableData = this.tableData.filter((it) => it.id !== row.id)
-      this.questionChange()
+      this.tableData = this.tableData.filter((it) => {
+        if (it.id && row.id !== it.id) return true
+        if (it.key && row.key !== it.key) return true
+      })
     },
     handleDown(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
