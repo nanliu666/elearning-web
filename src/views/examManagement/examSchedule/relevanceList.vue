@@ -131,7 +131,7 @@ export default {
     handlePreview(rowData) {
       this.$router.push({
         path: '/examManagement/examSchedule/preview',
-        query: { paperId: rowData.paperId }
+        query: { paperId: rowData.paperId, previewSort: rowData.previewSort }
       })
     },
     // 加载表格数据

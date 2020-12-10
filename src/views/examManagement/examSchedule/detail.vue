@@ -361,14 +361,14 @@
             <el-button
               type="text"
               icon="el-icon-sold-out"
-              @click="deleteSelected(selection)"
+              @click="pubulishAllAchievement(selection)"
             >
               发布成绩
             </el-button>
             <el-button
               type="text"
               icon="el-icon-s-release"
-              @click="deleteSelected(selection)"
+              @click="resloveCertificate(selection)"
             >
               撤回证书
             </el-button>
@@ -380,7 +380,7 @@
             <div class="menuClass">
               <el-button
                 type="text"
-                @click="handleStatus(row)"
+                @click="pubulishAchievement({ ids: row.id })"
               >
                 发布成绩
               </el-button>
@@ -468,42 +468,66 @@ const SEARCH_CONFIG = {
   ],
   popoverOptions: [
     {
-      type: 'select',
-      field: 'status',
+      type: 'treeSelect',
+      field: 'orgId',
       label: '所属部门',
       data: '',
-      options: [
-        { value: '', label: '全部' },
-        { value: 0, label: '启用' },
-        { value: 1, label: '停用' }
-      ]
+      config: {
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'orgName',
+            disabled: 'disabled',
+            value: 'orgId'
+          }
+        }
+      }
     },
     {
       type: 'select',
-      field: 'status1',
+      field: 'batchNumber',
       label: '考试批次',
       data: '',
-      options: [
-        { value: '', label: '全部' },
-        { value: 0, label: '启用' },
-        { value: 1, label: '停用' }
-      ]
+      options: [{ value: '', label: '全部' }]
     },
     {
       type: 'select',
-      field: 'status2',
+      field: 'examSituation',
       label: '考试情况',
       data: '',
-      options: [
-        { value: '', label: '全部' },
-        { value: 0, label: '启用' },
-        { value: 1, label: '停用' }
-      ]
+      options: []
     }
   ]
 }
+const isTestOptions = [
+  { value: '', label: '全部' },
+  { value: 1, label: '未开始' },
+  { value: 2, label: '缺考' }
+]
+const notIsTestOptions = [
+  { value: '', label: '全部' },
+  { value: 3, label: '已通过' },
+  { value: 4, label: '未通过' }
+]
 import SearchPopover from '@/components/searchPopOver/index'
-import { delExamArrange, getExamArrange, getBatchList } from '@/api/examManage/schedule'
+import {
+  delExamArrange,
+  getExamArrange,
+  getBatchList,
+  putAchievement,
+  putCertificate
+} from '@/api/examManage/schedule'
+import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
   data() {
@@ -535,6 +559,43 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 发布成绩
+    pubulishAchievement(ids) {
+      this.$confirm('是否发布选择的考生的成绩?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        putAchievement(ids).then(() => {
+          this.$message.success('发布成功')
+          this.loadTableData()
+        })
+      })
+    },
+    // 批量发布
+    pubulishAllAchievement(selection) {
+      let ids = []
+      _.each(selection, (item) => {
+        ids.push(item.id)
+      })
+      this.pubulishAchievement({ ids: ids })
+    },
+    resloveCertificate(selection) {
+      let examineeId = []
+      _.each(selection, (item) => {
+        examineeId.push(item.id)
+      })
+      this.$confirm('是否撤回选择的考生的证书?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        putCertificate({ examId: this.$route.query.id, examineeId }).then(() => {
+          this.$message.success('撤回成功')
+          this.loadTableData()
+        })
+      })
+    },
     /**
      * 处理页码改变
      */
@@ -626,6 +687,25 @@ export default {
       getExamArrange({ id: this.$route.query.id }).then((res) => {
         this.examDetail = res
       })
+      let fieldOrgId = _.find(this.searchConfig.popoverOptions, { field: 'orgId' })
+      let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
+      if (fieldOrgId) {
+        getOrgTreeSimple({ parentOrgId: 0 }).then(
+          (res) =>
+            (fieldOrgId.config.treeParams.data = _.concat(
+              [
+                {
+                  orgName: '全部',
+                  orgId: ''
+                }
+              ],
+              res
+            ))
+        )
+      }
+      if (examSituation) {
+        examSituation.options = isTestOptions
+      }
     },
     async loadTableData() {
       if (this.tableLoading) {
@@ -638,6 +718,11 @@ export default {
         )
         this.tableData = data
         this.page.total = totalNum
+        // let batchNumber = _.find(this.searchConfig.popoverOptions, { field: 'batchNumber' })
+        //  batchNumber.options = []
+        // _.each(data, item => {
+        //   batchNumber.options.push({ value: item.batchNumber, label: `第${Number(item.batchNumber) + 1}批` })
+        // })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -653,6 +738,8 @@ export default {
       this.tableConfig.showHandler = key === '0' ? true : false
       this.tableColumns = key === '0' ? ALL_COLUMNS : TABLE_COLUMNS
       this.queryInfo.isTested = key
+      let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
+      examSituation.options = this.tableColumns = key === '0' ? isTestOptions : notIsTestOptions
       this.loadTableData()
     }
   }

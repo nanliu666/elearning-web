@@ -60,3 +60,11 @@ export const delExamPreview = (params) => del('/manage/v1/exam/preview', params)
  */
 export const getCertificateList = (params) =>
   get('/manage/v1/source/certificate/getCertificateList', params)
+/**
+ * 发布考生成绩
+ */
+export const putAchievement = (params) => put('/manage/v1/achievement/publish', params)
+/**
+ * 发布考生成绩
+ */
+export const putCertificate = (params) => put('/manage/v1/revoke/certificate', params)

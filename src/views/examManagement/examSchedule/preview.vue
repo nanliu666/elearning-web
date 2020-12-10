@@ -9,9 +9,10 @@
         <div class="preview-title-box">
           <div class="preview-title">
             {{ paperData.name }}
+            <span>（{{ $route.query.previewSort }}）</span>
           </div>
           <div class="preview-subhead">
-            试卷总分：{{ paperData.totalScore }}分
+            试卷总分：{{ paperData.totalScore / 10 }}分
           </div>
         </div>
         <ul>
@@ -25,7 +26,7 @@
               <span>{{ item[0].type | typeFilter }}</span>
               <span
                 v-if="paperData.type === 'manual'"
-              >（每题{{ item[0].score }}分，共{{ item.length }}题）</span>
+              >（每题{{ item[0].score / 10 }}分，共{{ item.length }}题）</span>
             </div>
             <div
               v-for="(sonitem, sonindex) in item"
