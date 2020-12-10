@@ -76,7 +76,7 @@
               <el-form-item />
               <el-form-item
                 v-if="$parent.isEmail"
-                label="新邮箱号码"
+                label="新邮箱地址"
                 prop="email"
               >
                 <el-input

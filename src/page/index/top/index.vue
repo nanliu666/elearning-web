@@ -36,7 +36,7 @@
       <el-dropdown>
         <span class="el-dropdown-link">
           <img
-            v-if="userInfo.avatar_url"
+            v-if="userInfo && userInfo.avatar_url"
             class="top-bar__img"
             :src="userInfo.avatar_url"
           />
