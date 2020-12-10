@@ -291,17 +291,19 @@ export default {
         this._setSelectNodeFun(val)
       }
     },
-    value: function(val) {
-      if (this.ids !== val) {
-        this._setMultipleFun()
-        if (this.selectParams.multiple) {
-          this.ids = [...val]
-        } else {
-          this.ids = val === '' ? [] : [val]
+    value: {
+      handler(val) {
+        if (this.ids !== val) {
+          this._setMultipleFun()
+          if (this.selectParams.multiple) {
+            this.ids = [...val]
+          } else {
+            this.ids = val === '' ? [] : [val]
+          }
         }
+
+        this.$emit('change')
       }
-      this.$emit('valueChange', this.$refs.tree.getCheckedNodes())
-      this.$emit('change')
     },
     visible: function(val) {
       this.$emit('visible-change', val)
@@ -529,11 +531,21 @@ export default {
       this.$emit('select-clear')
       this._updatePopoverLocationFun()
     },
+    getCheckedNodes() {
+      if (this.$refs.tree) {
+        return this.$refs.tree.getCheckedNodes()
+      } else {
+        return []
+      }
+    },
     // 判断类型，抛出当前选中id
     _emitFun() {
       const { multiple } = this.selectParams
       this.$emit('input', multiple ? this.ids : this.ids.length > 0 ? this.ids[0] : '')
       this.dispatch('ElFormItem', 'el.form.change')
+      this.$nextTick(() => {
+        this.$emit('valueChange', this.$refs.tree.getCheckedNodes())
+      })
 
       this._updatePopoverLocationFun()
     },

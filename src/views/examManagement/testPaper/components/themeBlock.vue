@@ -87,6 +87,7 @@
           </template>
         </common-table>
         <stemContent
+          v-if="visible"
           v-model="stemList"
           :visible.sync="visible"
           :title="'添加' + title"

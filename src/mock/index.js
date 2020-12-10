@@ -46,8 +46,8 @@ export default (enable) => {
     timeout: 500
   })
   menu({ mock: true })
-  questions({ mock: true })
-  achievement({ mock: true })
+  questions({ mock: false })
+  achievement({ mock: false })
   knowledge(options)
   newsCenter(options)
   noticeCenter(options)

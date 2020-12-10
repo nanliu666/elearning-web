@@ -23,6 +23,8 @@
               <el-switch
                 v-model="form.isMulti"
                 inactive-text="单项变为不定项选择"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -32,6 +34,8 @@
               <el-switch
                 v-model="form.isShowScore"
                 inactive-text="试卷上显示试题分数"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -100,16 +104,32 @@ const BASE_COLUMNS = [
     required: true
   },
   {
-    prop: 'categoryId',
-    itemType: 'select',
+    itemType: 'treeSelect',
     label: '试卷分类',
+    prop: 'categoryId',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        },
+        required: true
+      }
+    },
+    required: false,
     span: 11,
-    offset: 2,
-    options: [
-      { label: '是', value: 1 },
-      { label: '否', value: 0 }
-    ],
-    required: false
+    offset: 2
   },
   {
     prop: 'totalScore',
