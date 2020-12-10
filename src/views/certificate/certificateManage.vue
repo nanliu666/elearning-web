@@ -102,17 +102,17 @@
           </el-button>
           <span
             v-else
-            @click="blockStart(row.id, 0)"
+            @click="blockStart(row.id, 1)"
           >启用 &nbsp; </span>
           <!-- 预览框 -->
           <el-tooltip
             placement="top"
             effect="light"
+            @mouseover="previewMouseOver(row.id)"
           >
             <div
               slot="content"
               class="preview"
-              @mouseover="previewMouseOver(row.id)"
             >
               <div class="previewTitle">
                 <span>预览</span> <i
@@ -121,10 +121,10 @@
                 ></i>
               </div>
               <div class="previewContent">
-                <img
+                <!-- <img
                   src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1607580741521&di=18241714d0e71af8126d2f8cebc80174&imgtype=0&src=http%3A%2F%2Fgss0.baidu.com%2F9vo3dSag_xI4khGko9WTAnF6hhy%2Fzhidao%2Fpic%2Fitem%2F0df3d7ca7bcb0a463b6ecaa76d63f6246a60afe4.jpg"
                   alt=""
-                />
+                /> -->
               </div>
               <div class="previewBtn">
                 <el-button>取消</el-button>
