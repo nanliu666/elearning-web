@@ -62,17 +62,18 @@
         </div>
       </li>
     </div>
-
-    <div
-      v-if="data.type === QUESTION_TYPE_BLANK"
-      class="qustion__correct-answer"
-    >
-      <span class="qustion__label">标准答案：</span>
-      <span class="qustion__text">{{ (_.head(data.options) || {}).content }}</span>
-    </div>
-    <div class="qustion__analysis">
-      <span class="qustion__label">试题分析：</span>
-      <span class="qustion__text">{{ data.analysis }}</span>
+    <div v-if="!isPreview">
+      <div
+        v-if="data.type === QUESTION_TYPE_BLANK"
+        class="qustion__correct-answer"
+      >
+        <span class="qustion__label">标准答案：</span>
+        <span class="qustion__text">{{ (_.head(data.options) || {}).content }}</span>
+      </div>
+      <div class="qustion__analysis">
+        <span class="qustion__label">试题分析：</span>
+        <span class="qustion__text">{{ data.analysis }}</span>
+      </div>
     </div>
     <image-viewer
       :url-list="viewingImages"
@@ -100,6 +101,10 @@ export default {
     data: {
       type: Object,
       default: () => ({})
+    },
+    isPreview: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

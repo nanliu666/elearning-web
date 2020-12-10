@@ -7,9 +7,15 @@
     <basic-container class="details-container">
       <div class="details-top">
         <header class="top-title">
-          <div class="title-left">
-            <span class="title-text">{{ examDetail.resName }}</span>
-            <el-tag :type="getStatusType(examDetail.status).color">
+          <div
+            v-if="!_.isEmpty(examDetail)"
+            class="title-left"
+          >
+            <span class="title-text">{{ examDetail.examName }}</span>
+            <el-tag
+              v-if="examDetail.status"
+              :type="getStatusType(examDetail.status).color"
+            >
               {{ getStatusType(examDetail.status).text }}
             </el-tag>
           </div>
@@ -43,19 +49,28 @@
           <li class="details-li">
             <span class="li-label">考试用卷：</span>
             <span class="li-value">
-              <span>{{ examDetail.testPaper }}</span>
+              <span>{{ examDetail.paperName }}</span>
+              <!-- 随机random，手工manual -->
               <el-button
                 type="text"
                 style="padding: 0; margin-left: 20px"
                 @click="goRelevance"
-              >查看关联试卷</el-button>
+              >{{
+                examDetail.paperType === 'random' ? '查看关联试卷' : '预览试卷'
+              }}</el-button>
             </span>
           </li>
-          <li class="details-li">
+          <li
+            v-if="!_.isEmpty(examDetail.reviewerNames)"
+            class="details-li"
+          >
             <span class="li-label">评卷人：</span>
-            <span class="li-value">{{ examDetail.reviewer }}</span>
+            <span class="li-value">{{ examDetail.reviewerNames.join(', ') }}</span>
           </li>
-          <li class="details-li">
+          <li
+            v-if="examDetail.certificateName"
+            class="details-li"
+          >
             <span class="li-label">证书模板：</span>
             <span class="li-value">{{ examDetail.certificateName }}</span>
           </li>
@@ -70,7 +85,7 @@
             <i :class="[isExtend ? 'el-icon-arrow-up' : 'el-icon-arrow-down']" />
             <span
               class="handle"
-              @click="extend"
+              @click="extendFun"
             >{{ isExtend ? '收起' : '展开' }}</span>
           </div>
         </header>
@@ -85,31 +100,43 @@
             <div class="li-content">
               <div class="content">
                 <span>答题模式：</span>
-                <span>整卷答题</span>
+                <span>{{ examDetail.answerMode === 1 ? '整卷模式' : '逐卷模式' }}</span>
               </div>
               <div class="content">
                 <span>考试时长：</span>
-                <span>整卷答题</span>
+                <span>{{
+                  !examDetail.reckonTime ? '不计时' : `${examDetail.reckonTimeValue}分钟`
+                }}</span>
               </div>
               <div class="content">
                 <span>参加次数：</span>
-                <span>不限次数</span>
+                <span>{{
+                  !examDetail.joinNum ? '不限次数' : `不超过${examDetail.joinNumValue}次`
+                }}</span>
               </div>
               <div class="content">
                 <span>考试时间策略：</span>
-                <span>允许进入考试的时间</span>
+                <span>{{
+                  !examDetail.strategy
+                    ? '允许进入考试的时间'
+                    : '允许参考时间（到结束时间，会自动提交。）'
+                }}</span>
               </div>
               <div class="content">
                 <span>积分：</span>
-                <span>本考试记录系统积分2分</span>
+                <span>{{
+                  examDetail.integral === 0
+                    ? '本考试记录系统没有积分'
+                    : `本考试记录系统积分${examDetail.integral}分`
+                }}</span>
               </div>
               <div class="content">
                 <span>发布考试：</span>
-                <span>考试开始前5分钟发布考试信息</span>
-              </div>
-              <div class="content">
-                <span>补考次数：</span>
-                <span>3次</span>
+                <span>{{
+                  examDetail.publishTime === 0
+                    ? '马上发布考试'
+                    : `考试开始前${examDetail.publishTime}分钟发布考试信息`
+                }}</span>
               </div>
             </div>
           </li>
@@ -120,35 +147,43 @@
             <div class="li-content">
               <div class="content">
                 <span>是否启用IP限制(需设定考生合法IP范围)：</span>
-                <span>是</span>
-              </div>
-              <div class="content">
-                <span>是否允许迟到分钟后禁止参加考试：</span>
-                <span>不允许</span>
+                <span>{{ examDetail.isLimitIp ? '是' : '否' }}</span>
               </div>
               <div class="content">
                 <span>生成试卷时是否打乱试题和选项顺序：</span>
-                <span>是</span>
+                <span>{{ examDetail.isShuffle ? '是' : '否' }}</span>
               </div>
               <div class="content">
                 <span>交卷即时是否生成答案统计数据(建议大规模考试时不启用)：</span>
-                <span>否</span>
+                <span>{{ examDetail.createAnswers ? '是' : '否' }}</span>
               </div>
               <div class="content">
-                <span>是否迟到后禁止考试：</span>
-                <span>是</span>
+                <span>是否允许迟到分钟后禁止参加考试：</span>
+                <span>{{
+                  examDetail.lateBanExam && examDetail.lateBanExamValue
+                    ? `允许迟到${examDetail.lateBanExamValue}分钟`
+                    : '否'
+                }}</span>
               </div>
               <div class="content">
                 <span>答卷时间过少是否禁止交卷：</span>
-                <span>是</span>
+                <span>{{
+                  examDetail.answerBanExam && examDetail.answerBanExamValue
+                    ? `开始答卷${examDetail.answerBanExamValue}分钟内禁止交卷`
+                    : '否'
+                }}</span>
               </div>
               <div class="content">
                 <span>是否启用试卷预生成服务：</span>
-                <span>是</span>
+                <span>{{
+                  examDetail.preCreate && examDetail.preCreateValue
+                    ? `试卷最多预生成${examDetail.preCreateValue}份`
+                    : '否'
+                }}</span>
               </div>
               <div class="content">
                 <span>是否自动保存答案到服务器：</span>
-                <span>是</span>
+                <span>{{ examDetail.isHold ? '是' : '否' }}</span>
               </div>
             </div>
           </li>
@@ -158,24 +193,34 @@
             </div>
             <div class="li-content">
               <div class="content">
-                <span>是否允许考生查看成绩：</span>
-                <span>永久查看</span>
+                <span>是否允许考生查看本机资料(开卷考试)：</span>
+                <span>{{ examDetail.isDecoil ? '允许' : '不允许' }}</span>
               </div>
               <div class="content">
-                <span>是否允许考生查看本机资料(开卷考试)：</span>
-                <span>不允许</span>
+                <span>是否允许考生查看成绩：</span>
+                <span>{{
+                  examDetail.openResults
+                    ? examDetail.openResultsValue === 0
+                      ? '永久允许'
+                      : `考生${examDetail.openResultsValue}天内可以查看成绩`
+                    : '不允许'
+                }}</span>
               </div>
               <div class="content">
                 <span>是否允许考生查看答卷：</span>
-                <span>是</span>
+                <span>{{ examDetail.openAnswerSheet ? '允许' : '不允许' }}</span>
               </div>
               <div class="content">
                 <span>是否允许考生自己评卷：</span>
-                <span>否</span>
+                <span>{{ examDetail.selfMarking ? '允许' : '不允许' }}</span>
               </div>
               <div class="content">
                 <span>是否允许考生查看标准答案：</span>
-                <span>是</span>
+                <span>{{ examDetail.publicAnswers ? '允许' : '不允许' }}</span>
+              </div>
+              <div class="content">
+                <span>考生报名考试是否需要审批：</span>
+                <span>{{ examDetail.openEntrance ? '需要' : '不需要' }}</span>
               </div>
             </div>
           </li>
@@ -186,23 +231,28 @@
             <div class="li-content">
               <div class="content">
                 <span>是否允许评卷人修改考生答案：</span>
-                <span>是</span>
+                <span>{{ examDetail.modifyAnswer ? '允许' : '不允许' }}</span>
               </div>
-              <div class="content">
+              <div
+                v-if="examDetail.modifyAnswer"
+                class="content"
+              >
                 <span>是否允许修改考生客观题答案及其评分结果：</span>
-                <span>不允许</span>
+                <span>{{ examDetail.modifyLimit ? '允许' : '不允许' }}</span>
               </div>
               <div class="content">
                 <span>评卷限定最高得分：</span>
-                <span>不限制</span>
+                <span>{{
+                  examDetail.scopeLimit ? `限定最高${examDetail.scopeLimitValue}分` : '不限制'
+                }}</span>
               </div>
               <div class="content">
                 <span>是否手工评卷是否显示客观题：</span>
-                <span>否</span>
+                <span>{{ examDetail.objectiveQuestions ? '显示' : '不显示' }}</span>
               </div>
               <div class="content">
                 <span>判断题是否答对得分,不答不得分,答错扣分：</span>
-                <span>是</span>
+                <span>{{ examDetail.decideItem ? '是' : '否' }}</span>
               </div>
               <div class="content">
                 <span>多选题：</span>
@@ -217,19 +267,34 @@
             <div class="li-content">
               <div class="content">
                 <span>是否由系统自动评定通过：</span>
-                <span>是</span>
+                <span>{{ examDetail.autoEvaluate ? '是' : '否' }}</span>
               </div>
-              <div class="content">
+              <div
+                v-if="examDetail.autoEvaluate"
+                class="content"
+              >
                 <span>通过条件：</span>
-                <span>按成绩，成绩不低于60分</span>
+                <span>
+                  <span
+                    v-if="examDetail.passType === 1"
+                  >按成绩，成绩不低于{{ examDetail.passScope }}分</span>
+                  <span
+                    v-if="examDetail.passType === 2"
+                  >按得分率，得分率不低于{{ examDetail.passScope }}%</span>
+                </span>
               </div>
               <div class="content">
                 <span>发布规则：</span>
-                <span>定时自动发布</span>
+                <span>
+                  {{ examDetail.publishType === 1 ? '系统即时发布' : '定时自动发布' }}
+                </span>
               </div>
-              <div class="content">
+              <div
+                v-if="examDetail.publishType !== 1"
+                class="content"
+              >
                 <span>发布时间：</span>
-                <span>2020-10-10 21:00:00</span>
+                <span>{{ examDetail.fixedTime }}</span>
               </div>
             </div>
           </li>
@@ -243,10 +308,10 @@
         mode="horizontal"
         @select="handleSelect"
       >
-        <el-menu-item index="1">
+        <el-menu-item index="0">
           已考试
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="1">
           未考试
         </el-menu-item>
       </el-menu>
@@ -279,34 +344,37 @@
               {{ row.name }}
             </div>
           </template>
+          <template #batchNumber="{row}">
+            第{{ Number(row.batchNumber) + 1 }}次
+          </template>
+          <template #isTested="{row}">
+            {{ row.isTested ? '通过' : '未通过' }}
+          </template>
+          <template #gainCertificate="{row}">
+            {{ !row.gainCertificate ? '否' : '是' }}
+          </template>
+
           <template
             slot="multiSelectMenu"
             slot-scope="{ selection }"
           >
             <el-button
               type="text"
-              icon="el-icon-delete"
+              icon="el-icon-sold-out"
               @click="deleteSelected(selection)"
             >
               发布成绩
             </el-button>
             <el-button
               type="text"
-              icon="el-icon-delete"
-              @click="deleteSelected(selection)"
-            >
-              发放证书
-            </el-button>
-            <el-button
-              type="text"
-              icon="el-icon-delete"
+              icon="el-icon-s-release"
               @click="deleteSelected(selection)"
             >
               撤回证书
             </el-button>
           </template>
           <template
-            v-if="activeIndex === '1'"
+            v-if="activeIndex === '0'"
             #handler="{row}"
           >
             <div class="menuClass">
@@ -315,12 +383,6 @@
                 @click="handleStatus(row)"
               >
                 发布成绩
-              </el-button>
-              <el-button
-                type="text"
-                @click="handleAuth(row)"
-              >
-                发放证书
               </el-button>
             </div>
           </template>
@@ -377,6 +439,7 @@ const TABLE_COLUMNS_EXTENDED = [
   {
     label: '是否获得证书',
     prop: 'gainCertificate', //0-否 1-是
+    slot: true,
     minWidth: 120
   }
 ]
@@ -407,7 +470,7 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       field: 'status',
-      label: '状态',
+      label: '所属部门',
       data: '',
       options: [
         { value: '', label: '全部' },
@@ -418,7 +481,7 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       field: 'status1',
-      label: '考试分类',
+      label: '考试批次',
       data: '',
       options: [
         { value: '', label: '全部' },
@@ -429,32 +492,13 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       field: 'status2',
-      label: '考试类型',
+      label: '考试情况',
       data: '',
       options: [
         { value: '', label: '全部' },
         { value: 0, label: '启用' },
         { value: 1, label: '停用' }
       ]
-    },
-    {
-      type: 'select',
-      field: 'status3',
-      label: '关联试卷',
-      data: '',
-      options: [
-        { value: '', label: '全部' },
-        { value: 0, label: '启用' },
-        { value: 1, label: '停用' }
-      ]
-    },
-    {
-      type: 'select',
-      field: 'userId',
-      data: '',
-      label: '创建人',
-      options: [],
-      config: { optionLabel: 'name', optionValue: 'userId' }
     }
   ]
 }
@@ -465,7 +509,7 @@ export default {
   data() {
     return {
       isExtend: false,
-      activeIndex: '1',
+      activeIndex: '0',
       page: {
         currentPage: 1,
         size: 10,
@@ -475,20 +519,9 @@ export default {
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        resName: '',
-        catalogId: '',
-        uploadType: '',
-        tagId: '',
-        status: ''
+        isTested: '0'
       },
-      examDetail: {
-        resName: 'EHS应知会全员考试',
-        status: '0',
-        categoryName: 'JAVA技能课程/Java高级培训',
-        testPaper: 'EHS应知会试卷',
-        reviewer: '王华丽',
-        certificateName: '一个模板'
-      },
+      examDetail: {},
       tableLoading: false,
       tableData: [],
       tablePageConfig: {},
@@ -526,45 +559,61 @@ export default {
       this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
     },
     // 展开与收起
-    extend() {
+    extendFun() {
       this.isExtend = !this.isExtend
     },
     // 编辑和复制
     edit(type) {
-      const basicQuery = { id: this.examDetail.id }
+      const basicQuery = { id: this.$route.query.id }
       const query = type === 'copy' ? _.assign(basicQuery, { type: 'copy' }) : basicQuery
       this.$router.push({ path: '/examManagement/examSchedule/edit', query })
     },
     deleteFun() {
-      const params = { id: this.examDetail.id }
-      delExamArrange(params).then(() => {
-        this.$message.success('删除成功')
-        this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
-        this.$nextTick(() => {
-          this.$router.push({ path: '/examManagement/examSchedule/list' })
+      const params = { ids: this.$route.query.id }
+      this.$confirm('此操作将永久删除该考试, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delExamArrange(params).then(() => {
+          this.$message.success('删除成功')
+          this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+          this.$nextTick(() => {
+            this.$router.push({ path: '/examManagement/examSchedule/list' })
+          })
         })
       })
     },
-    // 前往关联试卷
+    // 前往关联试卷/预览
     goRelevance() {
-      this.$router.push({ path: '/examManagement/examSchedule/relevanceList' })
+      const relevanceList = '/examManagement/examSchedule/relevanceList'
+      const preview = '/examManagement/examSchedule/preview'
+      const path = this.examDetail.paperType === 'random' ? relevanceList : preview
+      this.$router.push({
+        path: path,
+        query: {
+          paperId: this.examDetail.testPaper,
+          examId: this.$route.query.id,
+          maxNum: this.examDetail.preCreateValue
+        }
+      })
     },
     /**
      * 标识状态
      */
     getStatusType(status) {
       const TYPE_STATUS = {
-        '0': {
+        '1': {
           color: 'success',
           text: '未开始'
         },
-        '1': {
+        '2': {
           color: 'warning',
           text: '进行中'
         },
-        '2': {
-          color: '',
-          text: '已过期'
+        '3': {
+          color: 'danger',
+          text: '已结束'
         }
       }
       return TYPE_STATUS[status]
@@ -583,7 +632,9 @@ export default {
       }
       try {
         this.tableLoading = true
-        let { totalNum, data } = await getBatchList(this.queryInfo)
+        let { totalNum, data } = await getBatchList(
+          _.assign(this.queryInfo, { id: this.$route.query.id })
+        )
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
@@ -597,9 +648,10 @@ export default {
      */
     handleSelect(key) {
       this.activeIndex = key
-      this.tableConfig.enableMultiSelect = key === '1' ? true : false
-      this.tableConfig.showHandler = key === '1' ? true : false
-      this.tableColumns = key === '1' ? ALL_COLUMNS : TABLE_COLUMNS
+      this.tableConfig.enableMultiSelect = key === '0' ? true : false
+      this.tableConfig.showHandler = key === '0' ? true : false
+      this.tableColumns = key === '0' ? ALL_COLUMNS : TABLE_COLUMNS
+      this.query.isTested = key
       this.loadTableData()
     }
   }

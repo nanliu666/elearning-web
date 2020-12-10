@@ -118,7 +118,7 @@
           {{ row.examTime[0] }} 至 {{ row.examTime[1] }}
         </template>
         <template #reckonTime="{row}">
-          {{ row.reckonTime === 0 ? '不计时' : row.reckonTime }}
+          {{ !row.reckonTime ? '不计时' : row.reckonTime }}
         </template>
         <template #handler="{row}">
           <el-button

@@ -18,7 +18,10 @@
           @click="jumpStep(index)"
         >
           <span class="step-index">
-            <i :class="[item.icon]" />
+            <i
+              :class="[item.icon]"
+              class="iconfont"
+            />
           </span>
           {{ item.label }}
         </div>
@@ -43,15 +46,15 @@
           上一步
         </el-button>
         <el-button
-          v-if="activeStep !== 2"
+          v-if="activeStep === 0"
           size="medium"
           type="primary"
           @click="handleNextStep"
         >
           下一步
         </el-button>
-        <!-- v-if="activeStep === 2" -->
         <el-button
+          v-if="activeStep === 1"
           size="medium"
           type="primary"
           @click="publish('publish')"
@@ -110,11 +113,11 @@ export default {
       steps: [
         {
           label: '考试信息',
-          icon: 'el-icon-warning-outline'
+          icon: 'iconimage_icon_Examinationinformation'
         },
         {
           label: '考生批次',
-          icon: 'el-icon-setting'
+          icon: 'iconimage_icon_Candidatesbatch'
         }
       ]
     }
@@ -134,10 +137,9 @@ export default {
   },
   methods: {
     jumpStep(index) {
-      this.activeStep = index
-      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-      //   this.activeStep = index
-      // })
+      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+        this.activeStep = index
+      })
     },
     /***
      * @author guanfenda
@@ -160,7 +162,9 @@ export default {
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
-        getExamArrange({ id: this.id }).then(() => {})
+        getExamArrange({ id: this.id }).then((res) => {
+          this.$refs.examInfo.model = res
+        })
       }
     },
     // 发布区分编辑发布还是新增发布
@@ -169,14 +173,20 @@ export default {
       const examBatchData = this.$refs.examBatch.getData()
       Promise.all([examInfoData, examBatchData]).then((res) => {
         let params = this.handleParams(res, type)
-        let editFun = this.id ? putExamArrange : postExamArrange
-        editFun(params).then((resData) => {
-          if (resData) {
-            this.$message.success('已成功创建考试，3秒后自动返回考试列表')
-            setTimeout(() => {
-              this.$router.go(-1)
-            }, 3000)
-          }
+        // 完全新增 无id
+        // 复制 有id type为copy
+        // 编辑有id 且type为edit
+        let editFun = Object.create(null)
+        if ((this.$route.query && this.$route.query.type === 'copy') || !this.id) {
+          editFun = postExamArrange
+        } else {
+          editFun = putExamArrange
+        }
+        editFun(params).then(() => {
+          this.$message.success('已成功创建考试，1秒后将自动返回考试列表')
+          setTimeout(() => {
+            this.$router.push({ path: '/examManagement/examSchedule/list' })
+          }, 1000)
         })
       })
     },
@@ -188,7 +198,7 @@ export default {
         let id = { id: this.id }
         _.assign(examArrangeBasis, id)
       }
-      _.assign(examArrangeBasis, { type: type === 'publish' ? 1 : 2 })
+      _.assign(examArrangeBasis, { type: type === 'publish' ? 0 : 1 })
       _.assign(examArrangeBasis, examPattern)
       _.assign(examArrangeBasis, { creatorId: this.userId })
       examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
