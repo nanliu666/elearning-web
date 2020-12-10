@@ -5,9 +5,8 @@
         v-if="editType == 'entry'"
         class="enty-content"
       >
-        <div class="setting-title">
-          <p>安全设置</p>
-        </div>
+        <page-header title="安全设置">
+        </page-header>
 
         <el-card
           shadow="never"
@@ -57,10 +56,12 @@ import revisePhone from './components/revisePhone.vue'
 import revisepsw from './components/revisepsw.vue'
 import { mapGetters } from 'vuex'
 import { getStaffBasicInfo } from '@/api/personalInfo'
+import PageHeader from '@/components/page-header/pageHeader.vue'
 export default {
   components: {
     revisePhone,
-    revisepsw
+    revisepsw,
+    PageHeader
   },
   data() {
     return {
