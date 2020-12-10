@@ -597,6 +597,19 @@ const res = {
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
+          },
+          {
+            menuId: '12123141231226142158',
+            menuName: '证书管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/certificate/certificateManage',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },
