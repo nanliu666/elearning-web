@@ -3,14 +3,6 @@
     class="avue-contail"
     :class="{ 'avue--collapse': isCollapse }"
   >
-    <div
-      class="avue-header"
-      :class="{ 'header-shadow': isFullscreen }"
-    >
-      <logo />
-      <!-- 顶部导航栏 -->
-      <top ref="top" />
-    </div>
     <div class="avue-layout">
       <div
         v-if="!isFullscreen"
@@ -20,6 +12,13 @@
         <sidebar />
       </div>
       <div :class="['avue-main', { 'avue-main--fullscreen avue-main--notag': isFullscreen }]">
+        <div
+          class="avue-header"
+          :class="{ 'header-shadow': isFullscreen }"
+        >
+          <!-- 顶部导航栏 -->
+          <top ref="top" />
+        </div>
         <!-- 顶部标签卡 -->
         <tags v-if="!isFullscreen" />
         <transition name="fade-scale">
@@ -61,7 +60,6 @@ import search from './search'
 import top from './top/'
 import sidebar from './sidebar/'
 import admin from '@/util/admin'
-import logo from './logo'
 import { validatenull } from '@/util/validate'
 import { calcDate } from '@/util/date.js'
 import { getStore } from '@/util/store.js'
@@ -72,8 +70,7 @@ export default {
     top,
     tags,
     search,
-    sidebar,
-    logo
+    sidebar
   },
   provide() {
     return {
