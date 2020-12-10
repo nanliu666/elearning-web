@@ -292,7 +292,6 @@
 
 <script>
 import NumInterval from '../numInterval/numInterval'
-// import TreeSelect from '../treeSelect/treeSelect'
 import ElTreeSelect from '../elTreeSelect/elTreeSelect'
 
 export default {
@@ -307,21 +306,7 @@ export default {
     requireOptions: {
       type: Array,
       default: () => {
-        return [
-          // {
-          //   // 搜索组件
-          //   type: 'input',
-          //   data: '',
-          //   // 搜索字段
-          //   field: 'input',
-          //   // 组件label
-          //   label: '输入框',
-          //   // 若有下属选择数据, 由此传入
-          //   options: {},
-          //   // 组件属性，请自行添加，注意筛选内外部一起添加，必须设置默认值
-          //   config: {}
-          // }
-        ]
+        return []
       }
     },
     // 筛选内部
@@ -342,12 +327,10 @@ export default {
     requireOptions: {
       handler(newVal) {
         newVal.forEach((item) => {
-          // items.forEach((item, idx) => {
           if (item.type === 'treeSelect') {
             this.$refs[item.field] &&
               this.$refs[item.field][0].treeDataUpdateFun(item.config.treeParams.data)
           }
-          // })
         })
       },
       deep: true
@@ -355,12 +338,10 @@ export default {
     popoverOptions: {
       handler(newVal) {
         newVal.forEach((item) => {
-          // items.forEach((item, idx) => {
           if (item.type === 'treeSelect') {
             this.$refs[item.field] &&
               this.$refs[item.field][0].treeDataUpdateFun(item.config.treeParams.data)
           }
-          // })
         })
       },
       deep: true

@@ -542,7 +542,6 @@ export default {
 .out-container {
   height: calc(100vh);
   background: #f2f5f7;
-  padding: 0 32px 0 32px !important;
   position: relative;
 }
 .brad-part {

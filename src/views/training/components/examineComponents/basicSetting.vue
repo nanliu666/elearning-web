@@ -27,17 +27,16 @@
       </template>
       <template #reckonTime>
         <el-radio-group v-model="model.reckonTime">
-          <el-radio :label="0">
+          <el-radio :label="false">
             不计时
           </el-radio>
           <radioInput
-            v-model="model.reckonTime"
+            :label="true"
+            :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
             text-after="分钟"
-            :default-value="60"
-            :input-width="60"
-            :input-props="{ maxLength: 4 }"
-          ></radioInput>
+            :input-props="{ maxLength: 4, disabled: !model.reckonTime }"
+          />
         </el-radio-group>
       </template>
 
@@ -48,13 +47,12 @@
               不限次数
             </el-radio>
             <radioInput
-              v-model="model.joinNum"
+              :label="true"
+              :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
               text-after="次"
-              :default-value="3"
-              :input-width="60"
-              :input-props="{ maxLength: 4 }"
-            ></radioInput>
+              :input-props="{ maxLength: 2, disabled: !model.joinNum }"
+            />
           </div>
         </el-radio-group>
       </template>
@@ -94,10 +92,10 @@ const EventColumns = [
     itemType: 'datePicker',
     span: 24,
     type: 'datetimerange',
-    required: false,
+    required: true,
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     prop: 'examTime',
-    label: '考试时间'
+    label: '考试日期'
   },
   {
     itemType: 'input',
@@ -174,8 +172,10 @@ export default {
         testPaper: '',
         reviewer: null,
         answerMode: 1,
-        reckonTime: 0,
-        joinNum: 0,
+        reckonTime: false,
+        reckonTimeValue: 60, // 限制时长60分钟
+        joinNum: false,
+        joinNumValue: 3, // 默认参加次数，不超过3次
         integral: 0,
         strategy: 0,
         publishTime: 0
@@ -184,14 +184,8 @@ export default {
   },
   created() {},
   methods: {
-    loadCoordinator() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-      return getOrgUserList(params)
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
     }
   }
 }

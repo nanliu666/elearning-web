@@ -1,6 +1,6 @@
 <template>
   <div class="avue-sidebar">
-    <!-- <logo /> -->
+    <logo style="margin:20px 0 20px 20px;" />
     <el-scrollbar style="height:100%">
       <div
         v-if="validatenull(menu) && validatenull(menu.children)"
@@ -36,12 +36,12 @@
 
 <script>
 import { mapGetters } from 'vuex'
-// import logo from '../logo'
+import logo from '../logo'
 import sidebarItem from './sidebarItem'
 import { validatenull } from '@/util/validate'
 export default {
   name: 'Sidebar',
-  components: { sidebarItem },
+  components: { sidebarItem, logo },
   inject: ['index'],
   data() {
     return {}

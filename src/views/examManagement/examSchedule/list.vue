@@ -30,10 +30,10 @@
         mode="horizontal"
         @select="handleSelect"
       >
-        <el-menu-item index="1">
+        <el-menu-item index="0">
           已发布
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="1">
           草稿箱
         </el-menu-item>
       </el-menu>
@@ -58,7 +58,7 @@
               @submit="handleSearch"
             />
             <div
-              v-if="activeIndex === '1'"
+              v-if="activeIndex === '0'"
               class="filter-box"
             >
               <div
@@ -82,7 +82,6 @@
                     v-for="item in tableColumns"
                     :key="item.prop"
                     :label="item.prop"
-                    :disabled="item.prop === 'orgName'"
                     class="originColumn"
                   >
                     {{ item.label }}
@@ -97,13 +96,22 @@
             </div>
           </div>
         </template>
-        <template #resName="{row}">
+        <template #examName="{row}">
           <div
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
-            {{ row.resName }}
+            {{ row.examName }}
           </div>
+        </template>
+        <template #status="{row}">
+          {{ row.status | statusFilterer }}
+        </template>
+        <template #examPattern="{row}">
+          {{ row.examPattern | patternFilterer }}
+        </template>
+        <template #examType="{row}">
+          {{ row.examType | typeFilterer }}
         </template>
         <template
           slot="multiSelectMenu"
@@ -116,9 +124,6 @@
           >
             批量删除
           </el-button>
-        </template>
-        <template #status="{row}">
-          {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -135,7 +140,7 @@
               删除
             </el-button>
             <el-dropdown
-              v-if="activeIndex === '1'"
+              v-if="activeIndex === '0'"
               @command="handleCommand(row)"
             >
               <el-button
@@ -159,50 +164,52 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList, delExamArrange } from '@/api/examManage/schedule'
-const TABLE_COLUMNS = [
+import { getArrangeList, delExamArrange, getExamList } from '@/api/examManage/schedule'
+import { getCreatUsers } from '@/api/knowledge/knowledge'
+const STATUS_CONFIG = {
+  label: '状态',
+  prop: 'status',
+  slot: true,
+  minWidth: 120
+}
+let TABLE_COLUMNS = [
   {
     label: '考试名称',
-    prop: 'resName',
+    prop: 'examName',
     slot: true,
     minWidth: 150
   },
-  {
-    label: '状态',
-    prop: 'status',
-    slot: true,
-    minWidth: 120
-  },
+
   {
     label: '考试分类',
-    prop: 'creatorName',
+    prop: 'category',
     minWidth: 120
   },
   {
     label: '考试类型',
     slot: true,
-    prop: 'updateTime1',
+    prop: 'examPattern',
     minWidth: 120
   },
   {
     label: '考试方式',
     slot: true,
-    prop: 'updateTime12',
+    prop: 'examType',
     minWidth: 120
   },
   {
     label: '关联试卷',
-    prop: 'creatorName2',
+    prop: 'testPaper',
     minWidth: 120
   },
   {
-    label: '创始人',
-    prop: 'creatorName1',
+    label: '创建人',
+    prop: 'createUser',
     minWidth: 120
   },
   {
     label: '有效时间',
-    prop: 'updateTime',
+    prop: 'effectiveTime',
     minWidth: 120
   }
 ]
@@ -211,33 +218,133 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 100
+    minWidth: 150
   }
 }
-const CLIENT_TYPE = [
-  {
-    type: 'published',
-    text: '已发布'
-  },
-  {
-    type: 'drafts',
-    text: '草稿箱'
-  }
+const STATUS_STATUS = [
+  { value: '', label: '全部' },
+  { value: '1', label: '未开始' },
+  { value: '2', label: '进行中' },
+  { value: '3', label: '已结束' }
 ]
+const PATTERN_TYPE = [
+  { value: '', label: '全部' },
+  { value: 'general', label: '普通考试' },
+  { value: 'offline', label: '线下考试' }
+]
+const TYPE_STATUS = [
+  { value: '', label: '全部' },
+  { value: 'CurrencyExam', label: '通用考试' },
+  { value: 'CourseExam', label: '课程考试' },
+  { value: 'TrainExam', label: '培训班考试' }
+]
+const SEARCH_CONFIG = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'examName',
+      label: '',
+      data: '',
+      options: [],
+      config: { placeholder: '请输入考试名称搜索', 'suffix-icon': 'el-icon-search' }
+    }
+  ],
+  popoverOptions: [
+    {
+      type: 'select',
+      field: 'status',
+      label: '状态',
+      data: '',
+      options: STATUS_STATUS
+    },
+    {
+      type: 'select',
+      field: 'examPattern',
+      label: '考试分类',
+      data: '',
+      options: PATTERN_TYPE
+    },
+    {
+      type: 'select',
+      field: 'examType',
+      label: '考试类型',
+      data: '',
+      options: TYPE_STATUS
+    },
+    {
+      data: '',
+      field: 'testPaper',
+      label: '关联试卷',
+      type: 'lazySelect',
+      optionList: [],
+      placeholder: '请选择关联试卷',
+      optionProps: {
+        formatter: (item) => `${item.name}`,
+        key: 'name',
+        value: 'id'
+      },
+      load: (params) => {
+        return getExamList(params)
+      },
+      config: { optionLabel: 'name', optionValue: 'id' }
+    },
+    {
+      type: 'select',
+      field: 'creatorId',
+      data: '',
+      label: '创建人',
+      options: [],
+      config: { optionLabel: 'name', optionValue: 'userId' },
+      loading: false,
+      noMore: false,
+      pageNo: 2,
+      loadMoreFun(item) {
+        if (item.loading || item.noMore) return
+        item.loading = true
+        getCreatUsers().then((res) => {
+          if (res.length > 0) {
+            item.options.push(...res)
+            item.pageNo += 1
+            item.loading = false
+          } else {
+            item.noMore = true
+            item.loading = false
+          }
+        })
+      }
+    }
+  ]
+}
 export default {
   name: 'CatelogManager',
   components: { SearchPopover },
   filters: {
-    // 过滤不可见的列
+    statusFilterer(data) {
+      if (data) {
+        return _.filter(STATUS_STATUS, (item) => {
+          return item.value === data
+        })[0].label
+      }
+    },
+    patternFilterer(data) {
+      return _.filter(PATTERN_TYPE, (item) => {
+        return item.value === data
+      })[0].label
+    },
+    typeFilterer(data) {
+      return _.filter(TYPE_STATUS, (item) => {
+        return item.value === data
+      })[0].label
+    },
+    // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   data() {
     return {
-      clientTypeList: CLIENT_TYPE,
-      activeIndex: '1',
+      activeIndex: '0',
       tableLoading: false,
       tableData: [],
       tablePageConfig: {},
@@ -249,82 +356,35 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      searchConfig: {
-        requireOptions: [
-          {
-            type: 'input',
-            field: 'resName',
-            label: '',
-            data: '',
-            options: [],
-            config: { placeholder: '请输入考试名称搜索', 'suffix-icon': 'el-icon-search' }
-          }
-        ],
-        popoverOptions: [
-          {
-            type: 'select',
-            field: 'status',
-            label: '状态',
-            data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
-          },
-          {
-            type: 'select',
-            field: 'status1',
-            label: '考试分类',
-            data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
-          },
-          {
-            type: 'select',
-            field: 'status2',
-            label: '考试类型',
-            data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
-          },
-          {
-            type: 'select',
-            field: 'status3',
-            label: '关联试卷',
-            data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
-          },
-          {
-            type: 'select',
-            field: 'userId',
-            data: '',
-            label: '创建人',
-            options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
-            loading: false,
-            noMore: false,
-            pageNo: 2
-          }
-        ]
-      },
+      searchConfig: SEARCH_CONFIG,
       data: [],
       createOrgDailog: false,
-      queryInfo: {}
+      queryInfo: {
+        categoryId: '', // 分类ID
+        creatorId: '', //评卷人id
+        examPattern: '', //考试方式 general-普通考试 offline-线下考试
+        examType: '', //考试类型 CurrencyExam-通用考试 CourseExam-课程考试 TrainExam-培训班考试
+        pageNo: '',
+        pageSize: '',
+        status: '', //状态: 未开始-1, 进行中-2, 已结束-3
+        testPaper: '', //关联考卷id
+        type: 0 //状态:0-已发布，1-草稿箱
+      }
     }
   },
   activated() {
+    let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
+      return item.field === 'creatorId'
+    })[0]
+    if (_.size(creatorId.options) === 0) {
+      getCreatUsers().then((res) => {
+        if (creatorId) {
+          creatorId.options.push(...res)
+        }
+      })
+    }
     this.loadTableData()
+    this.setConfig()
   },
   methods: {
     /**
@@ -345,11 +405,29 @@ export default {
     jumpDetail(row) {
       this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
     },
+    setConfig() {
+      const examNameIndex = _.findIndex(TABLE_COLUMNS, (item) => {
+        return item.prop === 'examName'
+      })
+      const statusIndex = _.findIndex(TABLE_COLUMNS, (item) => {
+        return item.prop === 'status'
+      })
+      if (this.activeIndex === '0') {
+        if (statusIndex === -1) {
+          TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
+        }
+      } else {
+        TABLE_COLUMNS.splice(statusIndex, 1)
+      }
+      this.tableColumns = TABLE_COLUMNS
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+    },
+    // 切换nav
     handleSelect(key) {
+      this.$refs.table.clearSelection()
       this.activeIndex = key
-      this.statusValue = ''
-      let queryInfo = { clientId: this.clientTypeList[key - 1].type }
-      this.handleSearch(queryInfo)
+      this.handleSearch({ type: Number(key) })
+      this.setConfig()
     },
     // 多种操作
     handleCommand(row) {
@@ -367,7 +445,8 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      delExamArrange({ id }).then(() => {
+      delExamArrange({ ids: id }).then(() => {
+        this.$refs.table.clearSelection()
         this.loadTableData()
         this.$message({
           type: 'success',
@@ -375,8 +454,6 @@ export default {
         })
       })
     },
-    // 删除检测
-    deleteCheck() {},
     // 单个删除
     handleDelete(row) {
       this.$confirm('您确定要删除选中的考试吗？', '提醒', {
@@ -401,14 +478,15 @@ export default {
         return
       }
       try {
+        this.tableData = []
         this.tableLoading = true
         let { totalNum, data } = await getArrangeList(this.queryInfo)
+        this.tableLoading = false
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
-        this.$message.error(error.message)
-      } finally {
         this.tableLoading = false
+        this.$message.error(error.message)
       }
     },
     changevisible(data) {
@@ -416,7 +494,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.queryInfo = params
+      this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
     /**

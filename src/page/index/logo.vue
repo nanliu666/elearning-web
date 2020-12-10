@@ -3,12 +3,13 @@
     class="avue-logo"
     @click="goWork"
   >
-    <img :src="JSON.parse(tenantContent).logo || logo" />
+    <!-- <img :src="JSON.parse(tenantContent).logo || logo" /> -->
+    <img :src="logo" />
   </div>
 </template>
 
 <script>
-import defaultLogoImg from '../../../public/img/logo.png'
+import defaultLogoImg from '../../assets/images/logo_icon.svg'
 import { mapGetters } from 'vuex'
 export default {
   name: 'Logo',
@@ -42,24 +43,12 @@ export default {
 }
 .avue-logo {
   cursor: pointer;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 56px;
-  width: 224px;
   font-size: 20px;
-  overflow: hidden;
-  box-sizing: border-box;
-  color: #20222a;
-  z-index: 1024;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 32px;
+
   img {
-    display: block;
+    // display: block;
     max-width: 100%;
-    max-height: 50px;
+    // max-height: 50px;
   }
 }
 </style>

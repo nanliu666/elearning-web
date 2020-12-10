@@ -209,7 +209,9 @@ const BASIC_COLUMNS = [
     prop: 'score',
     label: '试题分数',
     itemType: 'inputNumber',
-    min: 0
+    min: 0,
+    precision: 1,
+    step: 0.1
   },
   {
     prop: 'difficulty',
@@ -333,7 +335,7 @@ export default {
       form: {
         type: QUESTION_TYPE_SINGLE,
         categoryId: null,
-        score: null,
+        score: 0,
         difficulty: null,
         expiredTime: null,
         content: null,
@@ -371,6 +373,9 @@ export default {
   watch: {
     'form.type': {
       handler(val, oldVal) {
+        this.$nextTick(() => {
+          this.$refs.form.clearValidate()
+        })
         /**
          * 根据试题类型切换表单内容
          */
@@ -478,6 +483,10 @@ export default {
           'expiredTime',
           'attachments'
         ])
+        // 前端保留一位小数，提交时乘以10化为整数，使用时要除以10
+        if (data.score) {
+          data.score = parseInt(data.score * 10)
+        }
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
         if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
           data.options = [{ content: this.form.answer, isCorrect: 1 }]
@@ -535,6 +544,7 @@ export default {
             'timeLimitDate',
             new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
           )
+          this.form.score = res.score ? res.score / 10 : res.score
           this.form.options.forEach((option) => {
             option.key = createUniqueID()
             if (option.url) {
