@@ -16,11 +16,11 @@
         </div>
         <ul>
           <li
-            v-for="(item, index) in paperData.questions"
+            v-for="(item, index) in paperData"
             :key="index"
           >
             <div>
-              <span>{{ ChineseNumeric[index] }}、</span>
+              <span>{{ (index + 1) | number2zhcn }}、</span>
               <span>{{ item.type | typeFilter }}</span>
               <span>（每题{{ item.grade }}分，共{{ item.total }}题）</span>
             </div>
@@ -43,20 +43,7 @@
 <script>
 import QustionPreview from '../question/questionPreview'
 import { getManualPreview } from '@/api/examManage/schedule'
-const ChineseNumeric = [
-  '一',
-  '二',
-  '三',
-  '四',
-  '五',
-  '六',
-  '七',
-  '八',
-  '九',
-  '十一',
-  '十二',
-  '十三'
-]
+const nzhcn = require('nzh/cn')
 const TYPE_STATUS = {
   1: '单选题',
   2: '多选题',
@@ -70,6 +57,9 @@ export default {
   filters: {
     typeFilter(data) {
       return TYPE_STATUS[data]
+    },
+    number2zhcn(index) {
+      return nzhcn.encodeS(index)
     }
   },
   components: {
@@ -77,7 +67,6 @@ export default {
   },
   data() {
     return {
-      ChineseNumeric,
       paperData: [
         // {
         //   data: [
