@@ -39,7 +39,7 @@ const EventColumns = [
     itemType: 'datePicker',
     span: 24,
     type: 'datetimerange',
-    required: false,
+    required: true,
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     prop: 'examTime',
     label: '考试时间'

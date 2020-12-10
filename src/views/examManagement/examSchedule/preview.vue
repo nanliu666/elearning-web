@@ -16,7 +16,7 @@
         </div>
         <ul>
           <li
-            v-for="(item, index) in paperData"
+            v-for="(item, index) in paperData.questions"
             :key="index"
           >
             <div>
@@ -104,7 +104,7 @@ export default {
   },
   methods: {
     initData() {
-      getManualPreview({ paperId: this.$route.query.id }).then((res) => {
+      getManualPreview({ paperId: this.$route.query.paperId }).then((res) => {
         this.paperData = res
       })
     }

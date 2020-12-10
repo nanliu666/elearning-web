@@ -1,12 +1,10 @@
 <template>
-  <el-radio :label="innerValue">
+  <el-radio :label="label">
     {{ textBefore }}
     <el-input
       v-model.number="innerValue"
       :style="`width:${inputWidth}px`"
-      :disabled="disabled"
       v-bind="inputProps"
-      @input="inputNumber"
     ></el-input>
     {{ textAfter }}
   </el-radio>
@@ -15,7 +13,11 @@
 <script>
 export default {
   props: {
-    value: {
+    label: {
+      type: [String, Number, Boolean],
+      default: true
+    },
+    inputValue: {
       type: [String, Number],
       default: null
     },
@@ -27,13 +29,9 @@ export default {
       type: String,
       default: ''
     },
-    defaultValue: {
-      type: [String, Number],
-      default: 10
-    },
     inputWidth: {
       type: Number,
-      default: 50
+      default: 60
     },
     inputProps: {
       type: Object,
@@ -41,25 +39,18 @@ export default {
     }
   },
   data() {
-    return {
-      innerValue: this.defaultValue
-    }
+    return {}
   },
   computed: {
-    disabled() {
-      return this.value === 0
+    innerValue: {
+      get() {
+        return this.inputValue
+      },
+      set(value) {
+        this.$emit('update:inputValue', value)
+      }
     }
   },
-  watch: {
-    innerValue(val) {
-      this.$emit('input', val)
-    }
-  },
-  methods: {
-    inputNumber(value) {
-      value = value.replace(/[^\d]/g, '')
-      this.innerValue = value
-    }
-  }
+  methods: {}
 }
 </script>

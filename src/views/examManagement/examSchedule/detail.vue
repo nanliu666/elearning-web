@@ -105,13 +105,13 @@
               <div class="content">
                 <span>考试时长：</span>
                 <span>{{
-                  examDetail.reckonTime === 0 ? '不计时' : `${examDetail.reckonTime}分钟`
+                  !examDetail.reckonTime ? '不计时' : `${examDetail.reckonTimeValue}分钟`
                 }}</span>
               </div>
               <div class="content">
                 <span>参加次数：</span>
                 <span>{{
-                  examDetail.joinNum === 0 ? '不限次数' : `不超过${examDetail.joinNum}次`
+                  !examDetail.joinNum ? '不限次数' : `不超过${examDetail.joinNumValue}次`
                 }}</span>
               </div>
               <div class="content">
@@ -308,10 +308,10 @@
         mode="horizontal"
         @select="handleSelect"
       >
-        <el-menu-item index="1">
+        <el-menu-item index="0">
           已考试
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="1">
           未考试
         </el-menu-item>
       </el-menu>
@@ -374,7 +374,7 @@
             </el-button>
           </template>
           <template
-            v-if="activeIndex === '1'"
+            v-if="activeIndex === '0'"
             #handler="{row}"
           >
             <div class="menuClass">
@@ -509,7 +509,7 @@ export default {
   data() {
     return {
       isExtend: false,
-      activeIndex: '1',
+      activeIndex: '0',
       page: {
         currentPage: 1,
         size: 10,
@@ -518,7 +518,8 @@ export default {
       // 请求参数
       queryInfo: {
         pageNo: 1,
-        pageSize: 10
+        pageSize: 10,
+        isTested: '0'
       },
       examDetail: {},
       tableLoading: false,
@@ -588,7 +589,14 @@ export default {
       const relevanceList = '/examManagement/examSchedule/relevanceList'
       const preview = '/examManagement/examSchedule/preview'
       const path = this.examDetail.paperType === 'random' ? relevanceList : preview
-      this.$router.push({ path: path, query: { id: this.examDetail.testPaper } })
+      this.$router.push({
+        path: path,
+        query: {
+          paperId: this.examDetail.testPaper,
+          examId: this.$route.query.id,
+          maxNum: this.examDetail.preCreateValue
+        }
+      })
     },
     /**
      * 标识状态
@@ -640,9 +648,10 @@ export default {
      */
     handleSelect(key) {
       this.activeIndex = key
-      this.tableConfig.enableMultiSelect = key === '1' ? true : false
-      this.tableConfig.showHandler = key === '1' ? true : false
-      this.tableColumns = key === '1' ? ALL_COLUMNS : TABLE_COLUMNS
+      this.tableConfig.enableMultiSelect = key === '0' ? true : false
+      this.tableConfig.showHandler = key === '0' ? true : false
+      this.tableColumns = key === '0' ? ALL_COLUMNS : TABLE_COLUMNS
+      this.query.isTested = key
       this.loadTableData()
     }
   }

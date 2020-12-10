@@ -16,7 +16,7 @@
               :disabled="disabled"
               type="primary"
               size="medium"
-              @click="loadTableData"
+              @click="loadTableData('refresh')"
             >
               重新生成试卷
             </el-button>
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { getExamList, delExamList } from '@/api/examManage/schedule'
+import { getPreviewList, delExamPreview, generatePreviewList } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -83,8 +83,8 @@ export default {
       columnsVisible: TABLE_COLUMNS,
       // 请求参数
       queryInfo: {
-        pageNo: 1,
-        pageSize: 10
+        examId: '',
+        paperId: ''
       },
       tableConfig: TABLE_CONFIG,
       tableData: [],
@@ -93,49 +93,50 @@ export default {
   },
   computed: {
     disabled() {
-      return _.size(this.tableData) === 0
+      return false
     }
   },
   activated() {
-    this.refreshTableData()
+    // 现在手动生成
+    this.loadTableData('refresh')
   },
   methods: {
-    // 删除
+    // 单个删除删除
     handleDelete(row) {
-      this.$message.error(`${row.name}`)
+      delExamPreview({ id: row.id }).then(() => {
+        this.$message.success('删除成功')
+        this.loadTableData('start')
+      })
     },
-    async multipleDeleteClick(selected) {
+    // 批量删除
+    multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      await delExamList({ id: selectedIds.join(',') })
-      this.$message.success('删除成功')
-      this.loadTableData()
+      delExamPreview({ id: selectedIds.join(',') }).then(() => {
+        this.$message.success('删除成功')
+        this.loadTableData('start')
+      })
     },
     // 预览
     handlePreview(rowData) {
-      this.$router.push({ path: '/examManagement/examSchedule/preview', query: { id: rowData.id } })
-    },
-    // 跳去详情
-    jumpDetail({ id }) {
       this.$router.push({
-        path: '/repository/knowledgeDetail',
-        query: { id }
+        path: '/examManagement/examSchedule/preview',
+        query: { paperId: rowData.id }
       })
     },
-    // 刷新列表数据
-    refreshTableData() {
-      //  因为只加载了最外层的数据，children仍然是旧的，清空数据
-      this.tableData = []
-      this.loadTableData()
-    },
     // 加载表格数据
-    async loadTableData() {
+    async loadTableData(type) {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { data } = await getExamList(this.queryInfo)
+        this.tableData = []
+        let { paperId, examId, maxNum } = this.$route.query
+        let commomFarams = { paperId, examId }
+        const loadFun = type === 'start' ? getPreviewList : generatePreviewList
+        const params = type === 'start' ? commomFarams : _.assign(commomFarams, { maxNum })
+        let { data } = await loadFun(params)
         this.tableData = data
       } catch (error) {
         window.console.log(error)

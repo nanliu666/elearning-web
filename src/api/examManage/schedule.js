@@ -43,3 +43,15 @@ export const getBatchexaminee = (params) => get('/manage/v1/exam/arrange/examine
  * 获取考生批次
  */
 export const getManualPreview = (params) => get('/manage/v1/exam/preview/manual', params)
+/**
+ * 预生成试卷列表
+ */
+export const getPreviewList = (params) => get('/manage/v1/exam/preview/list', params)
+/**
+ * 生成预览随机试卷
+ */
+export const generatePreviewList = (params) => get('/manage/v1/exam/preview/generate', params)
+/**
+ * 删除预生成试卷
+ */
+export const delExamPreview = (params) => del('/manage/v1/exam/preview', params)
