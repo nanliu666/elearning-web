@@ -594,7 +594,8 @@ export default {
         query: {
           paperId: this.examDetail.testPaper,
           examId: this.$route.query.id,
-          maxNum: this.examDetail.preCreateValue
+          maxNum: this.examDetail.preCreateValue,
+          examName: this.examDetail.examName
         }
       })
     },
