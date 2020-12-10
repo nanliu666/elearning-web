@@ -106,7 +106,14 @@ const TABLE_COLUMNS = [
   {
     label: '试卷类型',
     prop: 'paperType',
-    slot: true,
+    formatter: (row) => {
+      return (
+        {
+          random: '随机试卷',
+          manual: '手工试卷'
+        }[row.paperType] || ''
+      )
+    },
     minWidth: 120
   },
   {
@@ -117,19 +124,13 @@ const TABLE_COLUMNS = [
   {
     label: '参加人数',
     slot: true,
-    prop: 'peopleNumber',
+    prop: 'peopleNum',
     minWidth: 120
   },
-  // {
-  //   label: '无统计数据人次',
-  //   slot: true,
-  //   prop: 'updateTime1',
-  //   minWidth: 120
-  // },
   {
     label: '出卷人',
     slot: true,
-    prop: 'paperMaker',
+    prop: 'paperMakerName',
     minWidth: 120
   }
 ]
@@ -184,13 +185,13 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 'random', label: '随机试卷' },
+              { value: 'manual', label: '手工试卷' }
             ]
           },
           {
             type: 'numInterval',
-            field: 'peopleNumber,peopleNumber2',
+            field: 'minPeopleNum,maxPeopleNum',
             data: { min: '', max: '' },
             label: '参加人数',
             options: [],
@@ -203,6 +204,10 @@ export default {
             field: 'paperMaker',
             label: '出卷人',
             data: '',
+            props: {
+              label: 'examName',
+              value: 'id'
+            },
             options: [
               { value: '', label: '全部' },
               { value: 0, label: '启用' },
@@ -218,8 +223,15 @@ export default {
   },
   activated() {
     this.loadTableData()
+    this.getPaperMaker()
   },
   methods: {
+    getPaperMaker() {
+      // getPaperMaker().then((res) => {
+      //   console.log(res)
+      // })
+    },
+
     handleLookUp(row) {
       this.$router.push({
         path: '/examManagement/grade/ExamineeAchievement',
