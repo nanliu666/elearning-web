@@ -2,7 +2,7 @@
   <div class="question-item">
     <div class="question-item__header">
       <common-form
-        v-if="editing"
+        v-if="value.editing"
         ref="formHeader"
         :columns="headerColumns"
         :model="value"
@@ -14,14 +14,14 @@
       </span>
       <span class="question-item__handler">
         <el-button
-          v-if="editing"
+          v-if="value.editing"
           type="text"
           @click="handleSubmit"
         >
           保存
         </el-button>
         <el-button
-          v-if="!editing"
+          v-if="!value.editing"
           type="text"
           @click="handleEdit"
         >
@@ -51,7 +51,7 @@
     </div>
     <div class="question-item__content">
       <common-form
-        v-if="editing"
+        v-if="value.editing"
         ref="formContent"
         :columns="contentColumns"
         :model="value"
@@ -154,7 +154,6 @@ export default {
   },
   data() {
     return {
-      editing: true,
       headerColumns: [
         {
           prop: 'type',
@@ -180,7 +179,20 @@ export default {
           span: 11,
           labelWidth: '70px',
           offset: 2,
-          min: 0
+          min: 0,
+          required: true,
+          rules: [
+            {
+              required: true,
+              validator: (rule, value, callback) => {
+                if (value <= 0) {
+                  return callback(new Error('试题分数必须大于零'))
+                }
+                callback()
+              },
+              trigger: 'input'
+            }
+          ]
         }
       ],
       contentColumns: SELECT_COLUMNS
@@ -232,12 +244,12 @@ export default {
         .catch()
     },
     handleEdit() {
-      this.editing = true
+      this.$set(this.value, 'editing', true)
     },
     handleSubmit() {
       Promise.all([this.$refs.formHeader.validate(), this.$refs.formContent.validate()])
         .then(() => {
-          this.editing = false
+          this.$set(this.value, 'editing', false)
         })
         .catch()
     },
@@ -286,6 +298,9 @@ export default {
     }
     /deep/ .el-form-item__content {
       width: calc(100% - 70px);
+    }
+    /deep/.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
+      margin-right: 0;
     }
     /deep/ .el-col {
       margin-bottom: 0;

@@ -39,7 +39,7 @@
               slot="label"
               class="label_"
             >
-              <span>新密码</span><span class="tip">(密码包含字母，符号或数字中至少两项且长度超过6位的密码)</span>
+              <span>新密码</span><span class="tip">(密码包含字母，符号或数字中至少两项且长度6到12个字符的密码)</span>
             </span>
             <el-input
               v-model.trim="form.newPassword"
@@ -95,10 +95,12 @@ export default {
       }
     }
     const validateNewPSW = function(rule, value, callback) {
-      if (value.length < 6) {
-        callback(new Error('密码不能少于6个字符'))
+      if (value.length < 6 || value.length > 12) {
+        callback(new Error('密码的长度需要在6到12个字符之间'))
       } else if (!validatePW(value)) {
         callback(new Error('密码必须包含字母，符号或数字中至少两项'))
+      } else if (value === this.form.oldPassword) {
+        callback(new Error('新旧密码不能相同'))
       } else {
         callback()
       }

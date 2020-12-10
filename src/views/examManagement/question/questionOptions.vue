@@ -110,6 +110,10 @@ export default {
     isCheckBox: {
       type: Boolean,
       default: false
+    },
+    validateEvent: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -159,14 +163,18 @@ export default {
           item.isCorrect = 0
         }
       })
-      this.dispatch('ElFormItem', 'el.form.change', this.value)
+      if (this.validateEvent) {
+        this.dispatch('ElFormItem', 'el.form.change', this.value)
+      }
     },
     handleRemoveOption(option) {
       this.$emit(
         'input',
         _.filter(this.value, (item) => item.key !== option.key)
       )
-      this.dispatch('ElFormItem', 'el.form.change', this.value)
+      if (this.validateEvent) {
+        this.dispatch('ElFormItem', 'el.form.change', this.value)
+      }
     },
     handleAddOption() {
       this.value.push({

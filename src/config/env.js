@@ -4,7 +4,7 @@ let baseUrl = ''
 let iconfontVersion = [
   // '1066523_6bvkeuqao36',
   '1857563_sw5dkyhhh1o',
-  // '2178669_zbls3ovulic',
+  '2178669_zbls3ovulic',
   '2232073_5nxhufhqcst'
 ]
 let iconfontUrl = '//at.alicdn.com/t/font_$key.css'
