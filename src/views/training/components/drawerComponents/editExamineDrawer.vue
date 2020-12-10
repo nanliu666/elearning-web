@@ -103,11 +103,15 @@ export default {
       }
     }
   },
-  updated() {
-    if (!_.isEmpty(this.examine) && !_.isEmpty(this.$refs)) {
-      this.assignmentInEdit()
-    } else {
-      this.clearInAdd()
+  watch: {
+    visible(value) {
+      if (value) {
+        if (!_.isEmpty(this.examine) && !_.isEmpty(this.$refs)) {
+          this.assignmentInEdit()
+        } else {
+          this.clearInAdd()
+        }
+      }
     }
   },
   methods: {
