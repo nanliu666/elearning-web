@@ -16,7 +16,7 @@
           <el-tabs v-model="activeTab">
             <el-tab-pane
               v-if="selectTypes.includes('Org')"
-              label="组织架构"
+              label="未选"
               name="Org"
             />
             <el-tab-pane
@@ -148,7 +148,7 @@ const NODE_TYPE = {
 }
 const SELECT_TYPE = ['Org', 'OuterUser']
 
-const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
+const loadOrgTree = async ({ parentId, parentPath, search }) => {
   search = _.trim(search)
   // 只能传入一个参数 当传入search的时候不使用parentId
   const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
@@ -169,9 +169,7 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
         {
           path: `${parentPath || '0'}_${item.userId}`,
           bizId: item.userId,
-          bizName: item.name,
-          orgName,
-          orgId: parentId
+          bizName: item.name
         },
         item,
         USER_PROPS
@@ -180,7 +178,7 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
   )
 }
 export default {
-  name: 'UserPicker',
+  name: 'StemContent',
   props: {
     value: {
       type: Array,
@@ -372,6 +370,20 @@ export default {
       this.loading = true
       getOuterUser({ pageNo, search, pageSize })
         .then((res) => {
+          // const data = _.times(20, function(index) {
+          //   return {
+          //     bizId: index + '',
+          //     type: 'User',
+          //     account: '13800000000',
+          //     bizName: '用户' + index,
+          //     phonenum: '13800000000',
+          //     userStatus: '1',
+          //     userEmail: 'shaokang@epro.com',
+          //     categoryId: '',
+          //     avatarUrl: '',
+          //     roles: []
+          //   }
+          // })
           if (_.size(res.data) > 0) {
             const data = _.map(res.data, (item) =>
               _.assign(item, {
@@ -403,15 +415,7 @@ export default {
     lazyLoadOrgTree(node, resolve) {
       const parentId = node.level > 0 ? node.data.bizId : '0'
       if (parentId === '0') this.loading = true
-      let orgName = {}
-      if (node) {
-        orgName = node.data && node.data.type === NODE_TYPE.Org ? node.data.bizName : ''
-      }
-      loadOrgTree({
-        parentId,
-        parentPath: node.level > 0 ? node.data.path : '0',
-        orgName
-      })
+      loadOrgTree({ parentId, parentPath: node.level > 0 ? node.data.path : '0' })
         .then((res) => resolve(this.thruHandler(res)))
         .finally(() => (this.loading = false))
     },

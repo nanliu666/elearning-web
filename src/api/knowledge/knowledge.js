@@ -6,8 +6,7 @@ export const getKnowledgeCatalogList = (params) => get('/manage/v1/knowledge/cat
 /**
  * 筛选条件创建人查询接口
  */
-export const getKnowledgeCreatUsers = (params) =>
-  get('/manage/v1/knowledge/catalog/creatUsers', params)
+export const getCreatUsers = (params) => get('/manage/v1/knowledge/catalog/creatUsers', params)
 /**
  * 删除目录
  */

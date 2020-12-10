@@ -2,7 +2,7 @@
   <div class="question-item">
     <div class="question-item__header">
       <common-form
-        v-if="editing"
+        v-if="value.editing"
         ref="formHeader"
         :columns="headerColumns"
         :model="value"
@@ -14,12 +14,14 @@
       </span>
       <span class="question-item__handler">
         <el-button
+          v-if="value.editing"
           type="text"
           @click="handleSubmit"
         >
           保存
         </el-button>
         <el-button
+          v-if="!value.editing"
           type="text"
           @click="handleEdit"
         >
@@ -33,12 +35,14 @@
         </el-button>
         <el-button
           type="text"
+          :disabled="index == 0"
           @click="handleMoveUp"
         >
           上移
         </el-button>
         <el-button
           type="text"
+          :disabled="index == parent.length - 1"
           @click="handleMoveDown"
         >
           下移
@@ -47,7 +51,7 @@
     </div>
     <div class="question-item__content">
       <common-form
-        v-if="editing"
+        v-if="value.editing"
         ref="formContent"
         :columns="contentColumns"
         :model="value"
@@ -144,11 +148,12 @@ export default {
       type: Object,
       default: () => ({})
     },
-    index: { type: Number, default: null }
+    index: { type: Number, default: null },
+    // 子试题列表数据
+    parent: { type: Array, default: () => [] }
   },
   data() {
     return {
-      editing: true,
       headerColumns: [
         {
           prop: 'type',
@@ -174,7 +179,20 @@ export default {
           span: 11,
           labelWidth: '70px',
           offset: 2,
-          min: 0
+          min: 0,
+          required: true,
+          rules: [
+            {
+              required: true,
+              validator: (rule, value, callback) => {
+                if (value <= 0) {
+                  return callback(new Error('试题分数必须大于零'))
+                }
+                callback()
+              },
+              trigger: 'input'
+            }
+          ]
         }
       ],
       contentColumns: SELECT_COLUMNS
@@ -215,13 +233,25 @@ export default {
   },
   methods: {
     handleDelete() {
-      this.$emit('delete', this.value)
+      this.$confirm('您确认要删除该试题吗？', '', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$emit('delete', this.index)
+        })
+        .catch()
     },
     handleEdit() {
-      this.editing = true
+      this.$set(this.value, 'editing', true)
     },
     handleSubmit() {
-      this.editing = false
+      Promise.all([this.$refs.formHeader.validate(), this.$refs.formContent.validate()])
+        .then(() => {
+          this.$set(this.value, 'editing', false)
+        })
+        .catch()
     },
     handleMoveUp() {
       this.$emit('move', this.index, -1)
@@ -268,6 +298,9 @@ export default {
     }
     /deep/ .el-form-item__content {
       width: calc(100% - 70px);
+    }
+    /deep/.el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
+      margin-right: 0;
     }
     /deep/ .el-col {
       margin-bottom: 0;

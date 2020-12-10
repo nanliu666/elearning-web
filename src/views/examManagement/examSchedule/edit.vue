@@ -18,7 +18,10 @@
           @click="jumpStep(index)"
         >
           <span class="step-index">
-            <i :class="[item.icon]" />
+            <i
+              :class="[item.icon]"
+              class="iconfont"
+            />
           </span>
           {{ item.label }}
         </div>
@@ -30,23 +33,20 @@
       <div class="page-right">
         <el-button
           v-if="!id"
-          class="publish-btn"
           size="medium"
-          @click="handleDraft"
+          @click="publish('draft')"
         >
           存草稿
         </el-button>
         <el-button
           v-if="activeStep !== 0"
-          class="publish-btn"
           size="medium"
           @click="handlePreviousStep"
         >
           上一步
         </el-button>
         <el-button
-          v-if="activeStep !== 2"
-          class="publish-btn"
+          v-if="activeStep === 0"
           size="medium"
           type="primary"
           @click="handleNextStep"
@@ -54,11 +54,10 @@
           下一步
         </el-button>
         <el-button
-          v-if="activeStep === 2"
-          class="publish-btn"
+          v-if="activeStep === 1"
           size="medium"
           type="primary"
-          @click="publish"
+          @click="publish('publish')"
         >
           发布
         </el-button>
@@ -73,9 +72,9 @@
       <el-col
         :xl="16"
         :lg="16"
-        :md="18"
-        :sm="20"
-        :xs="22"
+        :md="20"
+        :sm="22"
+        :xs="24"
         class="page__content--inner"
       >
         <ExamInfo
@@ -92,9 +91,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import ExamInfo from './components/examInfo'
 import ExamBatch from './components/examBatch'
-import { createTrain, putTrain } from '@/api/train/train'
+import { postExamArrange, putExamArrange, getExamArrange } from '@/api/examManage/schedule'
+import moment from 'moment'
 const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
 export default {
@@ -108,19 +109,21 @@ export default {
       refsList: REFS_LIST,
       loading: false,
       activeStep: 0,
+      formData: {},
       steps: [
         {
           label: '考试信息',
-          icon: 'el-icon-warning-outline'
+          icon: 'iconimage_icon_Examinationinformation'
         },
         {
           label: '考生批次',
-          icon: 'el-icon-setting'
+          icon: 'iconimage_icon_Candidatesbatch'
         }
       ]
     }
   },
   computed: {
+    ...mapGetters(['userId']),
     translateX() {
       return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
         100}%)`
@@ -134,11 +137,9 @@ export default {
   },
   methods: {
     jumpStep(index) {
-      this.activeStep = index
-
-      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-      //   this.activeStep = index
-      // })
+      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+        this.activeStep = index
+      })
     },
     /***
      * @author guanfenda
@@ -161,56 +162,51 @@ export default {
     initData() {
       if (this.id) {
         // 编辑的时候的数据回显
-        // const basicKeyList = _.keys(this.$refs.editBasicInfo.formData)
-        // const detailKeyList = _.keys(this.$refs.editDetail.formData)
+        getExamArrange({ id: this.id }).then((res) => {
+          this.$refs.examInfo.model = res
+        })
       }
     },
-    // 存草稿
-    handleDraft() {},
     // 发布区分编辑发布还是新增发布
-    publish() {
-      const basicData = this.$refs.editBasicInfo.getData()
-      const editArrangement = this.$refs.editArrangement.getData()
-      const detailData = this.$refs.editDetail.getData()
-      Promise.all([basicData, editArrangement, detailData]).then((res) => {
-        let params = this.handleParams(res)
-        let editFun = this.id ? putTrain : createTrain
-        editFun(params).then((resData) => {
-          if (resData) {
-            this.$message.success('已成功创建考试，3秒后自动返回考试列表')
-            setTimeout(() => {
-              this.$router.go(-1)
-            }, 3000)
-          }
+    publish(type) {
+      const examInfoData = this.$refs.examInfo.getData()
+      const examBatchData = this.$refs.examBatch.getData()
+      Promise.all([examInfoData, examBatchData]).then((res) => {
+        let params = this.handleParams(res, type)
+        // 完全新增 无id
+        // 复制 有id type为copy
+        // 编辑有id 且type为edit
+        let editFun = Object.create(null)
+        if ((this.$route.query && this.$route.query.type === 'copy') || !this.id) {
+          editFun = postExamArrange
+        } else {
+          editFun = putExamArrange
+        }
+        editFun(params).then(() => {
+          this.$message.success('已成功创建考试，1秒后将自动返回考试列表')
+          setTimeout(() => {
+            this.$router.push({ path: '/examManagement/examSchedule/list' })
+          }, 1000)
         })
       })
     },
     // 统一处理入参
-    handleParams(res) {
-      // 培训对象
-      let trainObjectsList = []
-      const pickTrain = _.get(res[0], 'trainObjectsList')
-      _.each(pickTrain, (item) => {
-        trainObjectsList.push({
-          type: item.type,
-          bizId: item.type === 'User' ? item.userId : item.bizId
-        })
-      })
-      // 基本信息(除培训对象外)详细信息
-      const trainInfo = _.chain(res[0])
-        .omit('trainObjectsList')
-        .assign(res[2])
-        .value()
-      trainInfo['introduction'] = _.escape(trainInfo['introduction'])
-      const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
-      let params = {
-        id: this.id,
-        trainInfo,
-        trainObjectsList,
-        trainExam,
-        trainOfflineTodo,
-        trainOnlineCourse
+    handleParams(res, type) {
+      let [examArrangeBasis, examineeBatchList] = res
+      let examPattern = { examPattern: this.$route.query.examPattern }
+      if (this.id) {
+        let id = { id: this.id }
+        _.assign(examArrangeBasis, id)
       }
+      _.assign(examArrangeBasis, { type: type === 'publish' ? 0 : 1 })
+      _.assign(examArrangeBasis, examPattern)
+      _.assign(examArrangeBasis, { creatorId: this.userId })
+      examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
+      let params = {
+        examArrangeBasis,
+        examineeBatchList
+      }
+      // console.log('处理后的总参数==', params)
       // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },

@@ -113,7 +113,7 @@ const CourseColumns = [
 const modelCopy = {
   type: 1,
   todoDate: null,
-  todoTime: [new Date(), new Date()],
+  todoTime: [moment().startOf('day'), moment().endOf('day')],
   theme: '',
   lecturerName: null,
   lecturerId: null,

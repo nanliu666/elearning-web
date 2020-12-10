@@ -1,5 +1,13 @@
 import { validatenull } from './validate'
 import moment from 'moment'
+
+/**
+ * 去除字符串中所有的html标签
+ * @param {string} html
+ */
+export const deleteHTMLTag = (html = '') => {
+  return html.replace(/<[^>]+>/g, '')
+}
 /**
  * 反转义
  */

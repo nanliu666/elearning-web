@@ -153,6 +153,7 @@ export default {
       justify-content: space-evenly;
       i {
         color: #fff;
+        cursor: pointer;
       }
     }
     &:hover {

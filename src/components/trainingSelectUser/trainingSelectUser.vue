@@ -33,6 +33,8 @@
     <user-picker
       v-model="userList"
       :visible.sync="visible"
+      select-type="Org,OuterUser"
+      :title="title"
     ></user-picker>
   </div>
 </template>
@@ -49,6 +51,12 @@ export default {
   mixins: [elFormEmitter],
 
   props: {
+    title: {
+      type: String,
+      default: () => {
+        return '培训对象'
+      }
+    },
     value: {
       type: Array,
       default: () => {

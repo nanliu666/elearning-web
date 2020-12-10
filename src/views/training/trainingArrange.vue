@@ -8,7 +8,7 @@
         <el-button
           type="primary"
           size="small"
-          @click="toCreateTraining"
+          @click="goAdd"
         >
           &nbsp; 创建培训 &nbsp;
         </el-button>
@@ -643,7 +643,8 @@ export default {
       this.$router.push({ path: '/training/trainingEdit?id=' + id })
     },
     // 去创建培训
-    toCreateTraining() {
+    toCreateTraining() {},
+    goAdd() {
       this.$router.push({ path: '/training/edit' })
     },
     // 去培训详情
@@ -886,7 +887,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
-        this.$router.push({ path: '/training/trainingEdit?id=' + row.id })
+        this.$router.push({ path: '/training/edit', query: { id: row.id } })
       }
       if (e === 'del') {
         // 删除

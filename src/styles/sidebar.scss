@@ -38,33 +38,22 @@
 .avue-sidebar {
   user-select: none;
   position: relative;
-  // padding-top: 60px;
   height: 100%;
-  background-color: #fff;
+  color: #fff;
   transition: width 0.2s;
   box-sizing: border-box;
-  // box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
-  border-top: 1px solid #f6f6f6;
+  background-image: linear-gradient(180deg, #1d85ff 0%, #01aafc 100%);
+  width: 100%;
+  float: left;
   .el-scrollbar__wrap {
     overflow-x: hidden;
-    //background-image: linear-gradient(180deg, #115fd4 0%, $primaryColor 100%);
-    background: #fafafa;
     box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
-    //padding-top: 16px;
   }
 
   .el-submenu.is-opened {
     > .el-submenu__title {
-      background: #fafafa;
-      > span {
-        opacity: 1;
-        color: #4270f1;
-      }
-
-      > i {
-        opacity: 1;
-        color: #4270f1;
-      }
+      background-image: linear-gradient(270deg, rgba(#c0ceff, 0.35) 0%, rgba(#ffffff, 0.35) 99%);
+      background-color: initial;
     }
   }
 
@@ -87,7 +76,7 @@
 
   .el-menu-item,
   .el-submenu__title {
-    padding: 0 24px 0 27px !important;
+    padding: 0 24px;
     height: 46px;
     line-height: 46px;
 
@@ -99,38 +88,17 @@
 
     i,
     span {
-      opacity: 0.65;
-      color: #000b15;
+      color: #fff;
     }
 
     &:hover {
-      background: #f3f6fe;
-
-      i,
-      span {
-        opacity: 1;
-        color: #4270f1;
-      }
+      background-image: linear-gradient(270deg, rgba(#c0ceff, 0.35) 0%, rgba(#ffffff, 0.35) 99%);
+      background-color: initial;
     }
 
     &.is-active {
-      &:before {
-        content: '';
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 3px;
-        background: #4270f1;
-        position: absolute;
-      }
-
-      //background: rgba(5, 67, 173, 0.5);
-      background: #f3f6fe;
-      i,
-      span {
-        opacity: 1;
-        color: #4270f1;
-      }
+      background-color: initial;
+      background-image: linear-gradient(270deg, rgba(#c0ceff, 0.35) 0%, rgba(#ffffff, 0.35) 99%);
     }
   }
 }

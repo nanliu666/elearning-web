@@ -46,8 +46,12 @@
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
-          :load="loadCoordinator"
-          :option-props="personOptionProps"
+          :load="loadTestPaper"
+          :option-props="{
+            label: 'name',
+            value: 'id',
+            key: 'id'
+          }"
         />
       </template>
       <template #reviewer>
@@ -56,61 +60,45 @@
           :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
-          :option-props="personOptionProps"
+          :option-props="{
+            label: 'name',
+            value: 'userId',
+            key: 'userId'
+          }"
+          :multiple="true"
         />
       </template>
-      <template #reckonTime>
+      <template #reckonTimeValue>
         <el-radio-group v-model="model.reckonTime">
-          <el-radio :label="0">
+          <el-radio :label="false">
             不计时
           </el-radio>
           <radioInput
-            v-model="model.reckonTime"
+            :label="true"
+            :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
             text-after="分钟"
-            :default-value="60"
-            :input-width="60"
-            :input-props="{ maxLength: 4 }"
-          ></radioInput>
+            :input-props="{ maxLength: 4, disabled: !model.reckonTime }"
+          />
         </el-radio-group>
       </template>
 
-      <template #joinNum>
+      <template #joinNumValue>
         <el-radio-group v-model="model.joinNum">
           <div class="flex-flow flex flexcenter">
-            <el-radio :label="0">
+            <el-radio :label="false">
               不限次数
             </el-radio>
             <radioInput
-              v-model="model.joinNum"
+              :label="true"
+              :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
               text-after="次"
-              :default-value="3"
-              :input-width="60"
-              :input-props="{ maxLength: 4 }"
-            ></radioInput>
+              :input-props="{ maxLength: 2, disabled: !model.joinNum }"
+            />
           </div>
         </el-radio-group>
       </template>
-      <template #joinNum1>
-        <el-radio-group v-model="model.joinNum1Boo">
-          <div class="flex-flow flex flexcenter">
-            <el-radio :label="false">
-              不允许
-            </el-radio>
-            <el-radio :label="true">
-              允许补考
-              <el-input
-                v-model.number="model.joinNum1"
-                :disabled="!model.joinNum1Boo"
-                style="width: 60px;"
-              ></el-input>
-              次
-            </el-radio>
-          </div>
-        </el-radio-group>
-      </template>
-
       <template #integral>
         <checkbox-input
           v-model="model.integral"
@@ -172,16 +160,10 @@
         />
       </template>
       <template #modifyAnswer>
-        <el-switch
-          v-model="model.modifyAnswer"
-          @change="modifyAnswerChange"
-        />
+        <el-switch v-model="model.modifyAnswer" />
       </template>
       <template #autoEvaluate>
-        <el-switch
-          v-model="model.autoEvaluate"
-          @change="autoEvaluateChange"
-        />
+        <el-switch v-model="model.autoEvaluate" />
       </template>
       <template #answerMode1>
         <el-radio-group
@@ -245,24 +227,16 @@ import achivementRadioInput from '@/components/achivementRadioInput/achivementRa
 import SwitchInput from './atomComponents/switchInput'
 import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
-const personOptionProps = {
-  label: 'name',
-  value: 'userId',
-  key: 'userId'
-}
+import { getOrgUserList } from '@/api/system/user'
+import { getCategoryList } from '@/api/examManage/category'
+import { getExamList } from '@/api/examManage/schedule'
+
 const insertConfig = {
   itemType: 'switch',
   span: 11,
   offset: 2,
   prop: 'modifyLimit',
   label: '不允许修改考生客观题及其评分结果'
-}
-const checkMakeUp = (rule, value, callback) => {
-  if (value === '') {
-    return callback(new Error('补考次数不能为空'))
-  } else {
-    callback()
-  }
 }
 const testPaper1Config = {
   itemType: 'input',
@@ -288,13 +262,33 @@ const EventColumns = [
     label: '考试名称'
   },
   {
-    itemType: 'select',
+    itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: false, // TODO：暂时关闭必填校验
+    required: true,
     options: [],
     prop: 'categoryId',
-    label: '考试分类'
+    label: '考试分类',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     itemType: 'slot',
@@ -324,24 +318,16 @@ const EventColumns = [
   },
   {
     itemType: 'slot',
-    prop: 'reckonTime',
+    prop: 'reckonTimeValue',
     label: '考试时长',
     offset: 2,
     span: 11
   },
   {
     itemType: 'slot',
-    prop: 'joinNum',
+    prop: 'joinNumValue',
     label: '参加次数',
     span: 11
-  },
-  {
-    itemType: 'slot',
-    prop: 'joinNum1',
-    label: '补考次数',
-    offset: 2,
-    span: 11,
-    rules: [{ validator: checkMakeUp, trigger: 'change' }]
   },
   {
     itemType: 'radio',
@@ -349,8 +335,8 @@ const EventColumns = [
     label: '考试时间策略',
     span: 24,
     options: [
-      { label: '允许进入考试的时间', value: 0 },
-      { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
+      { label: '允许进入考试的时间', value: false },
+      { label: '允许参考时间（到结束时间，会自动提交。）', value: true }
     ]
   },
   {
@@ -526,7 +512,7 @@ const EventColumns = [
   {
     itemType: 'radio',
     span: 11,
-    prop: 'publishRules',
+    prop: 'publishType',
     label: '发布规则',
     options: [
       { label: '系统即时发布', value: 1 },
@@ -545,8 +531,9 @@ const fixedTimeConfig = {
   itemType: 'datePicker',
   span: 11,
   offset: 2,
-  type: 'datetimerange',
+  type: 'datetime',
   required: true,
+  valueFormat: 'yyyy-MM-dd HH:mm:ss',
   prop: 'fixedTime',
   label: '定时发布日期时间'
 }
@@ -569,7 +556,7 @@ const radioList = [
       '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
   }
 ]
-import { getOrgUserList } from '@/api/system/user'
+
 export default {
   name: 'ExamInfo',
   components: {
@@ -593,20 +580,22 @@ export default {
           passScope: 80
         }
       ],
-      personOptionProps,
       columns: EventColumns,
       model: {
+        certificateId: '',
+        certificate: false,
+        categoryId: '',
         examTime: '',
         examName: '',
         testPaper: '',
-        reviewer: '',
+        reviewer: null,
         answerMode: 1,
-        reckonTime: 0,
-        joinNum: 0,
-        joinNum1: 3,
-        joinNum1Boo: false,
+        reckonTime: false,
+        reckonTimeValue: 60, // 限制时长60分钟
+        joinNum: false,
+        joinNumValue: 3, // 默认参加次数，不超过3次
         integral: 0,
-        strategy: 0,
+        strategy: false,
         publishTime: 0,
         isLimitIp: false,
         isShuffle: false,
@@ -634,26 +623,80 @@ export default {
         decideItem: false,
         autoEvaluate: false,
         passType: 1,
-        passScope: 0,
-        publishRules: 1,
-        fixedTime: []
+        passScope: 60,
+        publishType: 1,
+        fixedTime: new Date()
       }
     }
   },
   watch: {
-    'model.publishRules': {
+    'model.passType': {
+      handler(value) {
+        this.model.passScope = this.passCondition[value - 1].passScope
+      },
+      deep: true
+    },
+    'model.publishType': {
       handler(value) {
         const fixedTimeIndex = _.findIndex(this.columns, (column) => {
           return column.prop === 'fixedTime'
         })
         const publishRulesIndex = _.findIndex(this.columns, (column) => {
-          return column.prop === 'publishRules'
+          return column.prop === 'publishType'
         })
         // 1隐藏， 2显示
         if (value === 1) {
-          this.columns.splice(fixedTimeIndex, 1)
+          if (fixedTimeIndex !== -1) {
+            this.columns.splice(fixedTimeIndex, 1)
+          }
         } else {
-          this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+          if (fixedTimeIndex === -1) {
+            this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+          }
+        }
+      },
+      deep: true
+    },
+    'model.autoEvaluate': {
+      handler(value) {
+        const autoEvaluateIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'autoEvaluate'
+        })
+        const passTypeIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'passType'
+        })
+        if (value) {
+          if (passTypeIndex === -1) {
+            this.columns[autoEvaluateIndex].span = 11
+            this.columns.splice(autoEvaluateIndex + 1, 0, passTypeConfig)
+          }
+        } else {
+          if (passTypeIndex !== -1) {
+            this.columns[autoEvaluateIndex].span = 24
+            this.columns.splice(passTypeIndex, 1)
+          }
+        }
+      },
+      deep: true
+    },
+    'model.modifyAnswer': {
+      handler(value) {
+        const index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'modifyAnswer'
+        })
+        const limitIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'modifyLimit'
+        })
+        if (value) {
+          if (limitIndex === -1) {
+            this.columns.splice(index + 1, 0, insertConfig)
+            this.columns[index].span = 11
+          }
+        } else {
+          if (limitIndex !== -1) {
+            this.columns[index].span = 24
+            this.columns.splice(limitIndex, 1)
+          }
         }
       },
       deep: true
@@ -668,45 +711,33 @@ export default {
           return column.prop === 'certificateId'
         })
         if (value) {
-          this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+          if (testPaper1Index === -1) {
+            this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+          }
         } else {
-          this.columns.splice(testPaper1Index, 1)
-        }
-      },
-      deep: true
-    },
-    // 补考次数因为存在0有检验，所以手动添加校验规则
-    'model.joinNum1Boo': {
-      handler(value) {
-        const checkMakeUpZero = (rule, value, callback) => {
-          if (value === 0) {
-            return callback(new Error('补考次数必须大于0'))
-          } else {
-            callback()
+          // 删除
+          if (testPaper1Index !== -1) {
+            this.columns.splice(testPaper1Index, 1)
           }
         }
-        const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
-        const target = _.chain(this.columns)
-          .filter((item) => {
-            return item.prop === 'joinNum1'
-          })
-          .get('[0].rules', {})
-          .value()
-        value ? target.push(zeroRuler) : target.pop()
       },
       deep: true
     }
   },
-  created() {},
+  created() {
+    getCategoryList().then((res) => {
+      let categoryId = _.filter(this.columns, (item) => {
+        return item.prop === 'categoryId'
+      })[0]
+      categoryId.props.treeParams.data = res
+    })
+  },
   methods: {
-    loadCoordinator() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-      return getOrgUserList(params)
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+    },
+    loadTestPaper(params) {
+      return getExamList(params)
     },
     getData() {
       return new Promise((resolve, reject) => {
@@ -719,38 +750,6 @@ export default {
             reject()
           })
       })
-    },
-    // 允许评卷人修改考生答案关联修改客观题
-    modifyAnswerChange(value) {
-      const index = _.findIndex(this.columns, (column) => {
-        return column.prop === 'modifyAnswer'
-      })
-      const limitIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'modifyLimit'
-      })
-      if (value) {
-        this.columns.splice(index + 1, 0, insertConfig)
-        this.columns[index].span = 11
-      } else {
-        this.columns[index].span = 24
-        this.columns.splice(limitIndex, 1)
-      }
-    },
-    // 自动评定是否通过关联通过条件
-    autoEvaluateChange(value) {
-      const autoEvaluateIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'autoEvaluate'
-      })
-      const passTypeIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'passType'
-      })
-      if (value) {
-        this.columns[autoEvaluateIndex].span = 11
-        this.columns.splice(autoEvaluateIndex + 1, 0, passTypeConfig)
-      } else {
-        this.columns[autoEvaluateIndex].span = 24
-        this.columns.splice(passTypeIndex, 1)
-      }
     }
   }
 }

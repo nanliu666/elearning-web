@@ -25,12 +25,12 @@
           <header class="li-header">
             <div>
               <i
-                class="el-icon-arrow-down"
+                :class="[currentExpand !== index ? 'el-icon-arrow-down' : 'el-icon-arrow-up']"
                 style="margin-right:6px"
               />
-              <span>第{{ index + 1 }}批 {{ item.fixedTime[0] | filterMoment }}~{{
-                item.fixedTime[1] | filterMoment
-              }}（共{{ _.size(item.trainObjectsList) }}人）</span>
+              <span>第{{ index + 1 }}批 {{ item.examTime[0] | filterMoment }}~{{
+                item.examTime[1] | filterMoment
+              }}（共{{ _.size(item.examList) }}人）</span>
             </div>
             <el-button
               size="medium"
@@ -45,13 +45,13 @@
             class="students-ul"
           >
             <li
-              v-for="(studentItem, studentIndex) in item.trainObjectsList"
+              v-for="(studentItem, studentIndex) in item.examList"
               :key="studentIndex"
               class="students-li"
             >
               <span>{{ studentItem.name }}</span>
-              <span>手机：{{ studentItem.phone }}</span>
-              <span>部门：{{ studentItem.part }}</span>
+              <span>手机：{{ studentItem.phoneNum || studentItem.phonenum }}</span>
+              <span>部门：{{ studentItem.orgName }}</span>
               <el-button
                 size="medium"
                 type="text"
@@ -73,9 +73,11 @@
 </template>
 
 <script>
+import { getUserList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import BatchEdit from './batchEdit'
 import ComEmpty from '@/components/common-empty/empty'
+import { getBatchexaminee } from '@/api/examManage/schedule'
 export default {
   name: 'ExamBatch',
   components: {
@@ -94,22 +96,71 @@ export default {
       batchList: []
     }
   },
-  created() {},
+  mounted() {
+    this.initData()
+  },
   methods: {
+    initData() {
+      if (this.$route.query.id) {
+        getBatchexaminee({ id: this.$route.query.id }).then((res) => {
+          this.batchList = res
+        })
+      }
+    },
     getData() {
+      let data = []
+      _.each(this.batchList, ({ examList, examTime }, index) => {
+        let examineeIds = []
+        _.each(examList, (item) => {
+          examineeIds.push(item.userId)
+        })
+        data.push({ batchNumber: index, examTime, examineeIds })
+      })
       return new Promise((resolve) => {
-        resolve(this.batchList)
+        resolve(data)
       })
     },
-    submitBatch(data) {
+    // 拉取公司的直属员工，在map中遍历await
+    async handlerData(data) {
+      return new Promise((resolve) => {
+        setTimeout(async () => {
+          let examList = _.groupBy(data.examList, (item) => {
+            // 非人员且部门下员工不为0
+            return item.type === 'Org'
+          })
+          let personList = _.filter(data.examList, (item) => {
+            return item.type === 'User'
+          })
+          // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
+          if (examList.true) {
+            let result = []
+            result = await Promise.all(
+              examList.true.map(async (item) => {
+                return (async () => {
+                  return await getUserList({ orgId: item.id })
+                })()
+              })
+            )
+            if (_.size(personList)) {
+              data.examList = [...examList.false, ..._.flattenDeep(result)]
+            } else {
+              data.examList = _.flattenDeep(result)
+            }
+          }
+          resolve(data) // 必须要有resolve, await才能生效
+        })
+      })
+    },
+    async submitBatch(data) {
+      await this.handlerData(data)
       this.batchList.push(data)
       // 先用开始时间排序
       this.batchList = _.sortBy(this.batchList, (item) => {
-        return item.fixedTime[0]
+        return item.examTime[0]
       })
       // 再用结束时间排序
       this.batchList = _.sortBy(this.batchList, (item) => {
-        return item.fixedTime[1]
+        return item.examTime[1]
       })
     },
     addBatch() {
@@ -123,8 +174,8 @@ export default {
     },
     // 删除单独的项，当这个批次内的所有考生都删除后，必须将本批次删除
     deleteBatchItem(index, sonIndex) {
-      this.batchList[index].trainObjectsList.splice(sonIndex, 1)
-      if (_.size(this.batchList[index].trainObjectsList) === 0) {
+      this.batchList[index].examList.splice(sonIndex, 1)
+      if (_.size(this.batchList[index].examList) === 0) {
         this.deleteBatch(index)
       }
     }
@@ -171,6 +222,9 @@ export default {
           align-items: center;
           padding: 4px 20px 4px 24px;
           border-bottom: 1px solid #e4e7e9;
+          span {
+            flex: 1;
+          }
         }
       }
     }
