@@ -60,14 +60,12 @@
               }}</el-button>
             </span>
           </li>
-          <li class="details-li">
+          <li
+            v-if="!_.isEmpty(examDetail.reviewerNames)"
+            class="details-li"
+          >
             <span class="li-label">评卷人：</span>
-            <span
-              v-if="!_.isEmpty(examDetail.reviewerNames)"
-              class="li-value"
-            >{{
-              examDetail.reviewerNames.join(', ')
-            }}</span>
+            <span class="li-value">{{ examDetail.reviewerNames.join(', ') }}</span>
           </li>
           <li
             v-if="examDetail.certificateName"
