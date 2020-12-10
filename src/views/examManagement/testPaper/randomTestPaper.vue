@@ -227,6 +227,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
+    type: 'Number',
     required: false,
     props: {
       onlyNumber: true

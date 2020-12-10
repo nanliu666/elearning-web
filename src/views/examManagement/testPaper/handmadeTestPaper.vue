@@ -139,6 +139,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
+    type: 'Number',
     required: false,
     props: {
       onlyNumber: true
@@ -256,6 +257,7 @@ export default {
           this.testPaper.push({
             type: list[key][0].type,
             title: list[key][0].title,
+            key: list[key][0].id,
             tableData: list[key]
           })
         }

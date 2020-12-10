@@ -62,52 +62,7 @@
             添加题目 <i class="el-icon-d-arrow-right"></i>
           </div>
         </div>
-        <div class="select">
-          <!--          <common-table-->
-          <!--            ref="table"-->
-          <!--            :columns="columnsVisible | columnsFilter"-->
-          <!--            :config="tableConfig"-->
-          <!--            :page="page"-->
-          <!--            :data="seleData"-->
-          <!--            :loading="tableLoading"-->
-          <!--            @current-page-change="handleCurrentPageChange"-->
-          <!--            @page-size-change="handlePageSizeChange"-->
-          <!--            @select="select"-->
-          <!--            @select-all="select"-->
-          <!--          >-->
-          <!--            <template #topMenu>-->
-          <!--              <div class="transitionBox">-->
-          <!--                <div class="searchBox">-->
-          <!--                  <div class="search-box">-->
-          <!--                    <commonForm-->
-          <!--                      ref="form"-->
-          <!--                      :model="form"-->
-          <!--                      :config="config"-->
-          <!--                      :columns="columns"-->
-          <!--                    >-->
-          <!--                    </commonForm>-->
-          <!--                    <el-button-->
-          <!--                      size="medium"-->
-          <!--                      class="search"-->
-          <!--                      type="primary"-->
-          <!--                      @click="handleSearch"-->
-          <!--                    >-->
-          <!--                      搜索-->
-          <!--                    </el-button>-->
-          <!--                  </div>-->
-          <!--                </div>-->
-          <!--              </div>-->
-          <!--            </template>-->
-          <!--            <template #multiSelectMenu >-->
-          <!--              &lt;!&ndash;          <el-button&ndash;&gt;-->
-          <!--              &lt;!&ndash;            type="text"&ndash;&gt;-->
-          <!--              &lt;!&ndash;            icon="el-icon-delete"&ndash;&gt;-->
-          <!--              &lt;!&ndash;          >&ndash;&gt;-->
-          <!--              &lt;!&ndash;            批量导出&ndash;&gt;-->
-          <!--              &lt;!&ndash;          </el-button>&ndash;&gt;-->
-          <!--            </template>-->
-          <!--          </common-table>-->
-        </div>
+        <div class="select"></div>
       </div>
       <div
         slot="footer"
@@ -178,6 +133,10 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    type: {
+      type: String,
+      default: ''
     },
     row: {
       type: Object,
@@ -286,7 +245,8 @@ export default {
         pageNo: 1,
         pageSize: 10,
         categoryId: this.form.category,
-        search: this.form.search
+        search: this.form.search,
+        type: this.type
       }
       getQuestionList(params).then((res) => {
         this.tableData = res.data

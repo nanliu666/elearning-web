@@ -89,6 +89,7 @@
         <stemContent
           v-if="visible"
           v-model="stemList"
+          :type="form.type"
           :visible.sync="visible"
           :title="'添加' + title"
         ></stemContent>
@@ -285,8 +286,8 @@ export default {
           }
         })
 
-        this.tableData = obj.map((it, index) => ({
-          id: index,
+        this.tableData = obj.map((it) => ({
+          key: it.id,
           content: it.content,
           type: it.type,
           questionId: it.id,
@@ -363,8 +364,10 @@ export default {
       this.$emit('delete', this.blockData)
     },
     handleDelete(row) {
-      this.tableData = this.tableData.filter((it) => it.key !== row.key)
-      // this.questionChange()
+      this.tableData = this.tableData.filter((it) => {
+        if (it.id && row.id !== it.id) return true
+        if (it.key && row.key !== it.key) return true
+      })
     },
     handleDown(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
