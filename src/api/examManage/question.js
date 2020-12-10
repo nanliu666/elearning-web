@@ -25,5 +25,18 @@ export const modifyQuestion = (params) => put('/manage/v1/question', params)
 /**
  * 获取试题
  * @param {*} params
+ * @param {*} params.id
  */
 export const getQuestion = (params) => get('/manage/v1/question', params)
+
+/**
+ * 删除试题
+ * @param {*} params
+ * @param {*} params.id
+ */
+export const delQuestion = (params) => del('/manage/v1/question', params)
+/**
+ * 获取试题分类
+ * @param {*} params
+ */
+export const getQuestionCategory = (params) => get('/manage/v1/evaluation/category/tree', params)

@@ -15,7 +15,10 @@
       :gutter="8"
     >
       <el-col class="fill sidebar">
-        <basic-container block>
+        <basic-container
+          v-loading="treeLoading"
+          block
+        >
           <el-input
             v-model="treeSearch"
             clearable
@@ -26,7 +29,7 @@
             ref="categoryTree"
             :filter-node-method="filterNode"
             :data="treeData"
-            node-key="orgId"
+            node-key="id"
             :props="treeProps"
             :expand-on-click-node="false"
             default-expand-all
@@ -36,7 +39,7 @@
               slot-scope="{ node, data }"
               class="custom-tree-node"
             >
-              <span>{{ data.orgName }}{{ '  ' }} ({{ data.userNum }})</span>
+              <span>{{ data.name }}</span><span>{{ data.relatedNum ? ` (${data.relatedNum})` : '' }}</span>
             </span>
           </el-tree>
         </basic-container>
@@ -47,6 +50,7 @@
       >
         <basic-container block>
           <common-table
+            ref="table"
             :config="tableConfig"
             :loading="loading"
             :data="tableData"
@@ -59,7 +63,7 @@
               <el-button
                 type="text"
                 style="margin-bottom:0;"
-                @click="handleReset(selection)"
+                @click="handleDelete(selection)"
               >
                 批量删除
               </el-button>
@@ -76,7 +80,7 @@
                 <div class="operations-right">
                   <div
                     class="refresh-container"
-                    @click="loadData"
+                    @click="handleRefresh"
                   >
                     <i class="el-icon-refresh-right" />
                     <span>刷新</span>
@@ -86,7 +90,9 @@
             </template>
             <template #content="{row}">
               <div class="question-content">
-                <div>{{ row.content }}</div>
+                <div class="ellipsis">
+                  {{ row.content }}
+                </div>
                 <div>
                   {{ QUESTION_TYPE_MAP[row.type] || '' }}<span class="divider">|</span>状态：{{
                     QUESTION_STATUS_MAP[row.status] || ''
@@ -94,17 +100,18 @@
                 </div>
               </div>
             </template>
-            <template #handler="">
+            <template #handler="{row}">
               <el-button
                 size="medium"
                 type="text"
-                @click="jumpEdit(row.questionId)"
+                @click="jumpEdit(row.id)"
               >
                 编辑
               </el-button>
               <el-button
                 size="medium"
                 type="text"
+                @click="handleDelete(row)"
               >
                 删除
               </el-button>
@@ -117,12 +124,12 @@
 </template>
 
 <script>
-import { getOrganization } from '@/api/system/user'
-import { getQuestionList } from '@/api/examManage/question'
+import { getQuestionList, delQuestion, getQuestionCategory } from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 const COLUMNS = [
   {
     prop: 'content',
+    label: '题目列表',
     slot: true
   }
 ]
@@ -137,13 +144,14 @@ export default {
       treeData: [], // 组织架构数据
       treeProps: {
         labelText: '标题',
-        label: 'orgName',
-        value: 'orgId',
+        label: 'name',
+        value: 'id',
         children: 'children'
       },
       activeCategory: null,
       parentOrgId: 0,
       treeSearch: '',
+      treeLoading: false,
       tableConfig: {
         showHandler: true,
         enableMultiSelect: true,
@@ -209,21 +217,55 @@ export default {
     },
     nodeClick(data) {
       this.activeCategory = data
+      this.loadData()
     },
-    loadTree(parentOrgId = '0') {
+    loadTree() {
       this.treeLoading = true
-      getOrganization({ parentOrgId })
+      getQuestionCategory({ parentId: '0', type: '0' })
         .then((data) => {
-          this.treeData = data
-          this.treeLoading = false
+          this.treeData = [{ id: null, name: '未分类' }, ...data]
         })
-        .catch(() => {
+        .catch(() => {})
+        .finally(() => {
           this.treeLoading = false
         })
     },
     currentChange(currentPage) {
       this.page.currentPage = currentPage
       this.loadData()
+    },
+    async handleDelete(data) {
+      let id = null
+      if (Array.isArray(data)) {
+        if (_.some(data, (item) => item.examNum > 0)) {
+          await this.$confirm(
+            '你选择的数据中包含关联试卷数的试题，不能进行删除操作，是否忽略继续删除其它试题？',
+            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+          )
+          id = _.filter(data, (item) => item.examNum <= 0)
+            .map((item) => item.id)
+            .join(',')
+        } else {
+          id = _.map(data, 'id').join(',')
+        }
+      } else {
+        if (data.examNum > 0) {
+          this.$message.warning('您选中试题有正在关联的试卷，请调整后再进行删除！')
+          return
+        }
+      }
+      this.$confirm('您确定要删除选中的试题吗？', '', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delQuestion({ id }).then(() => {
+            this.$ref.table.clearSelection()
+            this.loadData()
+          })
+        })
+        .catch()
     },
     handleSubmitSearch(params) {
       this.query = { ...this.query, ...params }
@@ -232,6 +274,10 @@ export default {
     handleResetSearch() {
       this.query = {}
       this.loadData()
+    },
+    handleRefresh() {
+      this.loadData()
+      this.loadTree()
     },
     sizeChange(pageSize) {
       this.page.size = pageSize
@@ -245,6 +291,7 @@ export default {
       getQuestionList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
+        categoryId: this.activeCategory ? this.activeCategory.id : null,
         ...this.query
       })
         .then((res) => {
@@ -261,6 +308,10 @@ export default {
 
 <style lang="scss" scoped>
 .question-list {
+  .el-tree {
+    overflow: auto;
+    max-height: calc(100% - 44px);
+  }
 }
 /deep/ .basic-container--block {
   height: 100%;
@@ -275,6 +326,7 @@ export default {
 }
 .question-content {
   line-height: 22px;
+  padding: 12px 0;
 }
 .sidebar {
   width: 350px;
