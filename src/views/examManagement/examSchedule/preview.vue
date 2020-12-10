@@ -16,23 +16,49 @@
         </div>
         <ul>
           <li
-            v-for="(item, index) in paperData"
+            v-for="(item, index) in paperData.questions"
             :key="index"
+            class="main-question-li"
           >
-            <div>
+            <div style="margin-bottom: 10px">
               <span>{{ (index + 1) | number2zhcn }}、</span>
-              <span>{{ item.type | typeFilter }}</span>
-              <span>（每题{{ item.grade }}分，共{{ item.total }}题）</span>
+              <span>{{ item[0].type | typeFilter }}</span>
+              <span
+                v-if="paperData.type === 'manual'"
+              >（每题{{ item[0].score }}分，共{{ item.length }}题）</span>
             </div>
-            <ul>
-              <li
-                v-for="(paperItem, paperIndex) in item.data"
-                :key="paperIndex"
-              >
-                <span>{{ paperIndex + 1 }}</span>
-                <QustionPreview :is-preview="true" />
-              </li>
-            </ul>
+            <div
+              v-for="(sonitem, sonindex) in item"
+              :key="sonindex"
+              class="sub-question-li"
+            >
+              <div v-if="QUESTION_TYPE_GROUP !== sonitem.type">
+                <span>{{ sonindex + 1 }}.</span>
+                <QustionPreview
+                  :data="sonitem"
+                  :is-preview="true"
+                />
+              </div>
+              <div v-else>
+                <span>{{ sonindex + 1 }}.</span>
+                <span>
+                  <span v-html="sonitem.content"></span>
+                  <ul>
+                    <li
+                      v-for="(paperItem, paperIndex) in sonitem.subQuestions"
+                      :key="paperIndex"
+                      class=""
+                    >
+                      <span>{{ paperIndex + 1 }}</span>
+                      <QustionPreview
+                        :data="paperItem"
+                        :is-preview="true"
+                      />
+                    </li>
+                  </ul>
+                </span>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
@@ -43,20 +69,20 @@
 <script>
 import QustionPreview from '../question/questionPreview'
 import { getManualPreview } from '@/api/examManage/schedule'
+import {
+  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MULTIPLE,
+  QUESTION_TYPE_SINGLE,
+  QUESTION_TYPE_JUDGE,
+  QUESTION_TYPE_SHOER,
+  QUESTION_TYPE_BLANK,
+  QUESTION_TYPE_GROUP
+} from '@/const/examMange'
 const nzhcn = require('nzh/cn')
-const TYPE_STATUS = {
-  1: '单选题',
-  2: '多选题',
-  3: '判断题',
-  4: '问答题',
-  5: '填空题',
-  6: '阅读理解',
-  7: '单选题'
-}
 export default {
   filters: {
     typeFilter(data) {
-      return TYPE_STATUS[data]
+      return QUESTION_TYPE_MAP[data]
     },
     number2zhcn(index) {
       return nzhcn.encodeS(index)
@@ -67,22 +93,17 @@ export default {
   },
   data() {
     return {
-      paperData: [
-        // {
-        //   data: [
-        //     {
-        //       content: '',
-        //       attachments: [],
-        //       options: [],
-        //       type: 1
-        //     }
-        //   ],
-        //   total: 2,
-        //   grade: 5,
-        //   type: 1 //1单选 2多选 3判断 4问答 5填空 6阅读理解
-        // }
-      ]
+      paperData: []
     }
+  },
+  computed: {
+    QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
+    QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
+    QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
+    QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
+    QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -94,6 +115,14 @@ export default {
   methods: {
     initData() {
       getManualPreview({ paperId: this.$route.query.paperId }).then((res) => {
+        const data = _.chain(res.questions)
+          .groupBy('parentSort')
+          .sortBy('parentSort')
+          .map((item) => {
+            return _.sortBy(item, 'sort')
+          })
+          .value()
+        res.questions = data
         this.paperData = res
       })
     }
@@ -117,6 +146,16 @@ export default {
     .preview-subhead {
       font-size: 12px;
       color: #9c9e9c;
+    }
+  }
+  .main-question-li {
+    padding: 40px 0;
+    border-bottom: 1px solid #e4e7e9;
+    .sub-question-li {
+      margin-bottom: 40px;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }

@@ -551,7 +551,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.queryInfo = params
+      this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
     // 跳转详情

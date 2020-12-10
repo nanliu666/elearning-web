@@ -265,7 +265,7 @@ export default {
       })
         .then(() => {
           delQuestion({ id }).then(() => {
-            this.$ref.table.clearSelection()
+            this.$refs.table.clearSelection()
             this.loadData()
           })
         })
