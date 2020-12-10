@@ -55,3 +55,8 @@ export const generatePreviewList = (params) => get('/manage/v1/exam/preview/gene
  * 删除预生成试卷
  */
 export const delExamPreview = (params) => del('/manage/v1/exam/preview', params)
+/**
+ * 获取证书模板
+ */
+export const getCertificateList = (params) =>
+  get('/manage/v1/source/certificate/getCertificateList', params)

@@ -11,8 +11,12 @@
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
-          :load="loadCoordinator"
-          :option-props="personOptionProps"
+          :load="loadTestPaper"
+          :option-props="{
+            label: 'name',
+            value: 'id',
+            key: 'id'
+          }"
         />
       </template>
       <template #reviewer>
@@ -22,7 +26,7 @@
           :searchable="true"
           :load="loadCoordinator"
           :multiple="true"
-          :option-props="personOptionProps"
+          :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
         />
       </template>
       <template #reckonTime>
@@ -81,12 +85,6 @@
 <script>
 import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
-const personOptionProps = {
-  label: 'name',
-  value: 'userId',
-  key: 'userId'
-}
-
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -152,6 +150,7 @@ const EventColumns = [
   }
 ]
 import { getOrgUserList } from '@/api/system/user'
+import { getExamList } from '@/api/examManage/schedule'
 
 export default {
   name: 'BasicSetting',
@@ -162,7 +161,6 @@ export default {
   },
   data() {
     return {
-      personOptionProps,
       input: '',
       columns: EventColumns,
       model: {
@@ -186,6 +184,9 @@ export default {
   methods: {
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+    },
+    loadTestPaper(params) {
+      return getExamList(params)
     }
   }
 }

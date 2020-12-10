@@ -195,9 +195,10 @@ export default {
     justify-content: space-between;
     align-items: center;
     .header-title {
-      font-size: 16px;
-      color: #1e1e1e;
+      font-size: 18px;
+      color: rgba(0, 11, 21, 0.85);
       font-weight: 550;
+      margin-top: 8px;
     }
   }
   .batch-content {

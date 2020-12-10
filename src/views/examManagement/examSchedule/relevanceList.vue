@@ -1,6 +1,9 @@
 <template>
   <div class="Menu fill">
-    <page-header title="查看关联考卷" />
+    <page-header
+      title="查看关联考卷"
+      show-back
+    />
     <basic-container block>
       <common-table
         ref="table"

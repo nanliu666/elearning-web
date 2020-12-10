@@ -651,7 +651,7 @@ export default {
       this.tableConfig.enableMultiSelect = key === '0' ? true : false
       this.tableConfig.showHandler = key === '0' ? true : false
       this.tableColumns = key === '0' ? ALL_COLUMNS : TABLE_COLUMNS
-      this.query.isTested = key
+      this.queryInfo.isTested = key
       this.loadTableData()
     }
   }
