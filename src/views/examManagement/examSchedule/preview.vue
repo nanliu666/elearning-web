@@ -8,10 +8,10 @@
       <div class="preview-container">
         <div class="preview-title-box">
           <div class="preview-title">
-            EHS全员考试试卷（1）
+            {{ paperData.name }}
           </div>
           <div class="preview-subhead">
-            试卷总分：100分
+            试卷总分：{{ paperData.totalScore }}分
           </div>
         </div>
         <ul>
@@ -42,6 +42,7 @@
 
 <script>
 import QustionPreview from '../question/questionPreview'
+import { getManualPreview } from '@/api/examManage/schedule'
 const ChineseNumeric = [
   '一',
   '二',
@@ -78,19 +79,19 @@ export default {
     return {
       ChineseNumeric,
       paperData: [
-        {
-          data: [
-            {
-              content: '',
-              attachments: [],
-              options: [],
-              type: 1
-            }
-          ],
-          total: 2,
-          grade: 5,
-          type: 1 //1单选 2多选 3判断 4问答 5填空 6阅读理解
-        }
+        // {
+        //   data: [
+        //     {
+        //       content: '',
+        //       attachments: [],
+        //       options: [],
+        //       type: 1
+        //     }
+        //   ],
+        //   total: 2,
+        //   grade: 5,
+        //   type: 1 //1单选 2多选 3判断 4问答 5填空 6阅读理解
+        // }
       ]
     }
   },
@@ -98,8 +99,16 @@ export default {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
-  created() {},
-  methods: {}
+  created() {
+    this.initData()
+  },
+  methods: {
+    initData() {
+      getManualPreview({ paperId: this.$route.query.id }).then((res) => {
+        this.paperData = res
+      })
+    }
+  }
 }
 </script>
 

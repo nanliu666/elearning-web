@@ -46,8 +46,12 @@
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
-          :load="loadCoordinator"
-          :option-props="personOptionProps"
+          :load="loadTestPaper"
+          :option-props="{
+            label: 'name',
+            value: 'id',
+            key: 'id'
+          }"
         />
       </template>
       <template #reviewer>
@@ -56,7 +60,11 @@
           :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
-          :option-props="personOptionProps"
+          :option-props="{
+            label: 'name',
+            value: 'userId',
+            key: 'userId'
+          }"
           :multiple="true"
         />
       </template>
@@ -246,11 +254,10 @@ import achivementRadioInput from '@/components/achivementRadioInput/achivementRa
 import SwitchInput from './atomComponents/switchInput'
 import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
-const personOptionProps = {
-  label: 'name',
-  value: 'userId',
-  key: 'userId'
-}
+import { getOrgUserList } from '@/api/system/user'
+import { getCategoryList } from '@/api/examManage/category'
+import { getExamList } from '@/api/examManage/schedule'
+
 const insertConfig = {
   itemType: 'switch',
   span: 11,
@@ -370,8 +377,8 @@ const EventColumns = [
     label: '考试时间策略',
     span: 24,
     options: [
-      { label: '允许进入考试的时间', value: 0 },
-      { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
+      { label: '允许进入考试的时间', value: false },
+      { label: '允许参考时间（到结束时间，会自动提交。）', value: true }
     ]
   },
   {
@@ -591,8 +598,7 @@ const radioList = [
       '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
   }
 ]
-import { getOrgUserList } from '@/api/system/user'
-import { getCategoryList } from '@/api/examManage/category'
+
 export default {
   name: 'ExamInfo',
   components: {
@@ -616,11 +622,10 @@ export default {
           passScope: 80
         }
       ],
-      personOptionProps,
       columns: EventColumns,
       model: {
         certificateId: '',
-        certificate: '',
+        certificate: false,
         categoryId: '',
         examTime: '',
         examName: '',
@@ -632,7 +637,7 @@ export default {
         remakeExamValue: 3,
         remakeExam: false,
         integral: 0,
-        strategy: 0,
+        strategy: false,
         publishTime: 0,
         isLimitIp: false,
         isShuffle: false,
@@ -677,9 +682,57 @@ export default {
         })
         // 1隐藏， 2显示
         if (value === 1) {
-          this.columns.splice(fixedTimeIndex, 1)
+          if (fixedTimeIndex !== -1) {
+            this.columns.splice(fixedTimeIndex, 1)
+          }
         } else {
-          this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+          if (fixedTimeIndex === -1) {
+            this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+          }
+        }
+      },
+      deep: true
+    },
+    'model.autoEvaluate': {
+      handler(value) {
+        const autoEvaluateIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'autoEvaluate'
+        })
+        const passTypeIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'passType'
+        })
+        if (value) {
+          if (passTypeIndex === -1) {
+            this.columns[autoEvaluateIndex].span = 11
+            this.columns.splice(autoEvaluateIndex + 1, 0, passTypeConfig)
+          }
+        } else {
+          if (passTypeIndex !== -1) {
+            this.columns[autoEvaluateIndex].span = 24
+            this.columns.splice(passTypeIndex, 1)
+          }
+        }
+      },
+      deep: true
+    },
+    'model.modifyAnswer': {
+      handler(value) {
+        const index = _.findIndex(this.columns, (column) => {
+          return column.prop === 'modifyAnswer'
+        })
+        const limitIndex = _.findIndex(this.columns, (column) => {
+          return column.prop === 'modifyLimit'
+        })
+        if (value) {
+          if (limitIndex === -1) {
+            this.columns.splice(index + 1, 0, insertConfig)
+            this.columns[index].span = 11
+          }
+        } else {
+          if (limitIndex !== -1) {
+            this.columns[index].span = 24
+            this.columns.splice(limitIndex, 1)
+          }
         }
       },
       deep: true
@@ -694,9 +747,14 @@ export default {
           return column.prop === 'certificateId'
         })
         if (value) {
-          this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+          if (testPaper1Index === -1) {
+            this.columns.splice(reviewer1Index + 1, 0, testPaper1Config)
+          }
         } else {
-          this.columns.splice(testPaper1Index, 1)
+          // 删除
+          if (testPaper1Index !== -1) {
+            this.columns.splice(testPaper1Index, 1)
+          }
         }
       },
       deep: true
@@ -732,14 +790,11 @@ export default {
     })
   },
   methods: {
-    loadCoordinator() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-      return getOrgUserList(params)
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+    },
+    loadTestPaper(params) {
+      return getExamList(params)
     },
     getData() {
       return new Promise((resolve, reject) => {
@@ -752,38 +807,6 @@ export default {
             reject()
           })
       })
-    },
-    // 允许评卷人修改考生答案关联修改客观题
-    modifyAnswerChange(value) {
-      const index = _.findIndex(this.columns, (column) => {
-        return column.prop === 'modifyAnswer'
-      })
-      const limitIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'modifyLimit'
-      })
-      if (value) {
-        this.columns.splice(index + 1, 0, insertConfig)
-        this.columns[index].span = 11
-      } else {
-        this.columns[index].span = 24
-        this.columns.splice(limitIndex, 1)
-      }
-    },
-    // 自动评定是否通过关联通过条件
-    autoEvaluateChange(value) {
-      const autoEvaluateIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'autoEvaluate'
-      })
-      const passTypeIndex = _.findIndex(this.columns, (column) => {
-        return column.prop === 'passType'
-      })
-      if (value) {
-        this.columns[autoEvaluateIndex].span = 11
-        this.columns.splice(autoEvaluateIndex + 1, 0, passTypeConfig)
-      } else {
-        this.columns[autoEvaluateIndex].span = 24
-        this.columns.splice(passTypeIndex, 1)
-      }
     }
   }
 }

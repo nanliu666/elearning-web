@@ -77,6 +77,7 @@ import { getUserList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import BatchEdit from './batchEdit'
 import ComEmpty from '@/components/common-empty/empty'
+import { getBatchexaminee } from '@/api/examManage/schedule'
 export default {
   name: 'ExamBatch',
   components: {
@@ -95,8 +96,17 @@ export default {
       batchList: []
     }
   },
-  created() {},
+  mounted() {
+    this.initData()
+  },
   methods: {
+    initData() {
+      if (this.$route.query.id) {
+        getBatchexaminee({ id: this.$route.query.id }).then((res) => {
+          this.batchList = res
+        })
+      }
+    },
     getData() {
       let data = []
       _.each(this.batchList, ({ examList, examTime }, index) => {

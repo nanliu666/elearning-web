@@ -13,6 +13,7 @@
           <div class="topMenu">
             <span>预生成试卷列表</span>
             <el-button
+              :disabled="disabled"
               type="primary"
               size="medium"
               @click="loadTableData"
@@ -55,15 +56,14 @@
 </template>
 
 <script>
-import { getKnowledgeManageList, deleteKnowledgeList } from '@/api/knowledge/knowledge'
-
+import { getExamList, delExamList } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '试卷',
     minWidth: 500,
     slot: true,
-    prop: 'resName'
+    prop: 'name'
   }
 ]
 const TABLE_CONFIG = {
@@ -91,6 +91,11 @@ export default {
       tableLoading: false
     }
   },
+  computed: {
+    disabled() {
+      return _.size(this.tableData) === 0
+    }
+  },
   activated() {
     this.refreshTableData()
   },
@@ -104,7 +109,7 @@ export default {
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      await deleteKnowledgeList({ id: selectedIds.join(',') })
+      await delExamList({ id: selectedIds.join(',') })
       this.$message.success('删除成功')
       this.loadTableData()
     },
@@ -130,7 +135,7 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { data } = await getKnowledgeManageList(this.queryInfo)
+        let { data } = await getExamList(this.queryInfo)
         this.tableData = data
       } catch (error) {
         window.console.log(error)

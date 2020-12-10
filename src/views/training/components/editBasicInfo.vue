@@ -269,15 +269,8 @@ export default {
         this.formData.contactPhone = ''
       }
     },
-    loadCoordinator() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-
-      return getOrgUserList(params)
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
     }
   }
 }

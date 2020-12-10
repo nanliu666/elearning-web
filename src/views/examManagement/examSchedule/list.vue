@@ -164,7 +164,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList, delExamArrange } from '@/api/examManage/schedule'
+import { getArrangeList, delExamArrange, getExamList } from '@/api/examManage/schedule'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
 const STATUS_CONFIG = {
   label: '状态',
@@ -282,12 +282,11 @@ const SEARCH_CONFIG = {
       placeholder: '请选择关联试卷',
       optionProps: {
         formatter: (item) => `${item.name}`,
-        key: 'userId',
-        value: 'userId'
+        key: 'name',
+        value: 'id'
       },
-      load: () => {
-        // TODO: 待写关联试卷的接口
-        // return getTestPaper(params)
+      load: (params) => {
+        return getExamList(params)
       },
       config: { optionLabel: 'name', optionValue: 'id' }
     },
@@ -323,9 +322,11 @@ export default {
   components: { SearchPopover },
   filters: {
     statusFilterer(data) {
-      return _.filter(STATUS_STATUS, (item) => {
-        return item.value === data
-      })[0].label
+      if (data) {
+        return _.filter(STATUS_STATUS, (item) => {
+          return item.value === data
+        })[0].label
+      }
     },
     patternFilterer(data) {
       return _.filter(PATTERN_TYPE, (item) => {
@@ -412,7 +413,9 @@ export default {
         return item.prop === 'status'
       })
       if (this.activeIndex === '0') {
-        TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
+        if (statusIndex === -1) {
+          TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
+        }
       } else {
         TABLE_COLUMNS.splice(statusIndex, 1)
       }
@@ -442,7 +445,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      delExamArrange({ id }).then(() => {
+      delExamArrange({ ids: id }).then(() => {
         this.$refs.table.clearSelection()
         this.loadTableData()
         this.$message({
@@ -475,6 +478,7 @@ export default {
         return
       }
       try {
+        this.tableData = []
         this.tableLoading = true
         let { totalNum, data } = await getArrangeList(this.queryInfo)
         this.tableLoading = false

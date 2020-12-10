@@ -4,6 +4,14 @@ import { del, get, post, put } from '@/router/axios'
  */
 export const postExamArrange = (params) => post('/manage/v1/exam/arrange', params)
 /**
+ * 分页查询试卷列表
+ */
+export const getExamList = (params) => get('/manage/v1/exam/paper/list', params)
+/**
+ * 分页查询试卷列表
+ */
+export const delExamList = (params) => del('/manage/v1/exam/paper', params)
+/**
  * 考试详情
  */
 export const getExamArrange = (params) => get('/manage/v1/exam/arrange', params)
@@ -27,3 +35,11 @@ export const getArrangeList = (params) => get('/manage/v1/exam/arrange/list', pa
  * 获取详情页-考生概况
  */
 export const getBatchList = (params) => get('/manage/v1/examinee/batch', params)
+/**
+ * 获取考生批次
+ */
+export const getBatchexaminee = (params) => get('/manage/v1/exam/arrange/examinee', params)
+/**
+ * 获取考生批次
+ */
+export const getManualPreview = (params) => get('/manage/v1/exam/preview/manual', params)
