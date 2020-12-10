@@ -127,6 +127,7 @@
 <script>
 import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
+import { getcategoryTree } from '@/api/examManage/category'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
@@ -142,32 +143,32 @@ const TABLE_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '正常',
-          '2': '禁用'
+          normal: '正常',
+          expired: '已过期'
         }[row.status] || ''
       )
     }
   },
   {
     label: '试卷分类',
-    prop: 'categoryId',
+    prop: 'categoryName',
     minWidth: 120
   },
   {
     label: '关联考试数',
-    prop: 'testNum',
+    prop: 'examNum',
     slot: true,
     minWidth: 120
   },
   {
     label: '创建人',
-    prop: 'founder',
+    prop: 'creatorName',
     minWidth: 120
   },
   {
     label: '有效时间',
     slot: true,
-    prop: 'effectiveTime',
+    prop: 'expiredTime',
     minWidth: 320
   }
 ]
@@ -195,6 +196,7 @@ export default {
       page: {
         currentPage: 1,
         pageSize: 10,
+        pageNo: 1,
         total: 0
       },
       tableLoading: false,
@@ -207,7 +209,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'examName',
+            field: 'name',
             label: '',
             data: '',
             options: [],
@@ -217,13 +219,13 @@ export default {
         popoverOptions: [
           {
             type: 'select',
-            field: 'paperType',
+            field: 'categoryId',
             label: '试卷分类',
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 'normal', label: '正常' },
+              { value: 'expired', label: '已过期' }
             ]
           },
           {
@@ -233,8 +235,8 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 'normal', label: '正常' },
+              { value: 'expired', label: '过期' }
             ]
           },
           {
@@ -252,8 +254,12 @@ export default {
             type: 'dataPicker',
             label: '有效时间',
             data: '',
-            field: 'beginEntryDate,endEntryDate',
-            config: { type: 'daterange', 'range-separator': '至' }
+            field: 'beginTime,endTime',
+            config: {
+              type: 'datetimerange',
+              'range-separator': '至',
+              'value-format': 'yyyy-MM-dd HH:mm:ss'
+            }
           }
         ]
       },
@@ -266,7 +272,18 @@ export default {
     this.loadTableData()
   },
   methods: {
+    getTestPaperCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.searchConfig.popoverOptions.find((it) => it.field == 'categoryId').options = res
+      })
+    },
     handleCommand(data, id, copy) {
+      if (typeof id === 'object') {
+        id = null
+      }
       if (data === 'manual') {
         this.handleManual(id, copy)
       } else {
@@ -315,7 +332,7 @@ export default {
     },
 
     handleCurrentPageChange(param) {
-      this.page.currentPage = param
+      this.page.pageNo = param
       this.loadTableData()
     },
     handlePageSizeChange(param) {

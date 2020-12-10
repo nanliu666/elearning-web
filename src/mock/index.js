@@ -47,7 +47,7 @@ export default (enable) => {
   })
   menu({ mock: true })
   questions({ mock: false })
-  achievement({ mock: true })
+  achievement({ mock: false })
   knowledge(options)
   newsCenter(options)
   noticeCenter(options)
