@@ -12,7 +12,10 @@
             class="title-left"
           >
             <span class="title-text">{{ examDetail.examName }}</span>
-            <el-tag :type="getStatusType(examDetail.status).color">
+            <el-tag
+              v-if="examDetail.status"
+              :type="getStatusType(examDetail.status).color"
+            >
               {{ getStatusType(examDetail.status).text }}
             </el-tag>
           </div>
@@ -114,14 +117,6 @@
                 }}</span>
               </div>
               <div class="content">
-                <span>补考次数：</span>
-                <span>{{
-                  !examDetail.remakeExamValue
-                    ? '不允许'
-                    : `最多允许补考${examDetail.remakeExamValue}次`
-                }}</span>
-              </div>
-              <div class="content">
                 <span>考试时间策略：</span>
                 <span>{{
                   !examDetail.strategy
@@ -140,9 +135,9 @@
               <div class="content">
                 <span>发布考试：</span>
                 <span>{{
-                  examDetail.integral === 0
+                  examDetail.publishTime === 0
                     ? '马上发布考试'
-                    : `考试开始前5${examDetail.integral}分钟发布考试信息`
+                    : `考试开始前${examDetail.publishTime}分钟发布考试信息`
                 }}</span>
               </div>
             </div>
@@ -183,8 +178,8 @@
               <div class="content">
                 <span>是否启用试卷预生成服务：</span>
                 <span>{{
-                  examDetail.preCreate && examDetail.preCreateExamValue
-                    ? `试卷最多预生成${examDetail.preCreateExamValue}份`
+                  examDetail.preCreate && examDetail.preCreateValue
+                    ? `试卷最多预生成${examDetail.preCreateValue}份`
                     : '否'
                 }}</span>
               </div>
@@ -205,7 +200,6 @@
               </div>
               <div class="content">
                 <span>是否允许考生查看成绩：</span>
-                <span>永久查看</span>
                 <span>{{
                   examDetail.openResults
                     ? examDetail.openResultsValue === 0
@@ -250,7 +244,9 @@
               </div>
               <div class="content">
                 <span>评卷限定最高得分：</span>
-                <span>{{ examDetail.scopeLimit ? '限制' : '不限制' }}</span>
+                <span>{{
+                  examDetail.scopeLimit ? `限定最高${examDetail.scopeLimitValue}分` : '不限制'
+                }}</span>
               </div>
               <div class="content">
                 <span>是否手工评卷是否显示客观题：</span>

@@ -18,7 +18,10 @@
           @click="jumpStep(index)"
         >
           <span class="step-index">
-            <i :class="[item.icon]" />
+            <i
+              :class="[item.icon]"
+              class="iconfont"
+            />
           </span>
           {{ item.label }}
         </div>
@@ -110,11 +113,11 @@ export default {
       steps: [
         {
           label: '考试信息',
-          icon: 'el-icon-warning-outline'
+          icon: 'iconimage_icon_Examinationinformation'
         },
         {
           label: '考生批次',
-          icon: 'el-icon-setting'
+          icon: 'iconimage_icon_Candidatesbatch'
         }
       ]
     }

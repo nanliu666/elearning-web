@@ -101,25 +101,6 @@
           </div>
         </el-radio-group>
       </template>
-      <template #remakeExamValue>
-        <el-radio-group v-model="model.remakeExam">
-          <div class="flex-flow flex flexcenter">
-            <el-radio :label="false">
-              不允许
-            </el-radio>
-            <el-radio :label="true">
-              允许补考
-              <el-input
-                v-model.number="model.remakeExamValue"
-                :disabled="!model.remakeExam"
-                style="width: 60px;"
-              ></el-input>
-              次
-            </el-radio>
-          </div>
-        </el-radio-group>
-      </template>
-
       <template #integral>
         <checkbox-input
           v-model="model.integral"
@@ -181,16 +162,10 @@
         />
       </template>
       <template #modifyAnswer>
-        <el-switch
-          v-model="model.modifyAnswer"
-          @change="modifyAnswerChange"
-        />
+        <el-switch v-model="model.modifyAnswer" />
       </template>
       <template #autoEvaluate>
-        <el-switch
-          v-model="model.autoEvaluate"
-          @change="autoEvaluateChange"
-        />
+        <el-switch v-model="model.autoEvaluate" />
       </template>
       <template #answerMode1>
         <el-radio-group
@@ -264,13 +239,6 @@ const insertConfig = {
   offset: 2,
   prop: 'modifyLimit',
   label: '不允许修改考生客观题及其评分结果'
-}
-const checkMakeUp = (rule, value, callback) => {
-  if (value === '') {
-    return callback(new Error('补考次数不能为空'))
-  } else {
-    callback()
-  }
 }
 const testPaper1Config = {
   itemType: 'input',
@@ -362,14 +330,6 @@ const EventColumns = [
     prop: 'joinNum',
     label: '参加次数',
     span: 11
-  },
-  {
-    itemType: 'slot',
-    prop: 'remakeExamValue',
-    label: '补考次数',
-    offset: 2,
-    span: 11,
-    rules: [{ validator: checkMakeUp, trigger: 'change' }]
   },
   {
     itemType: 'radio',
@@ -634,8 +594,6 @@ export default {
         answerMode: 1,
         reckonTime: 0,
         joinNum: 0,
-        remakeExamValue: 3,
-        remakeExam: false,
         integral: 0,
         strategy: false,
         publishTime: 0,
@@ -665,13 +623,19 @@ export default {
         decideItem: false,
         autoEvaluate: false,
         passType: 1,
-        passScope: 0,
+        passScope: 60,
         publishType: 1,
         fixedTime: new Date()
       }
     }
   },
   watch: {
+    'model.passType': {
+      handler(value) {
+        this.model.passScope = this.passCondition[value - 1].passScope
+      },
+      deep: true
+    },
     'model.publishType': {
       handler(value) {
         const fixedTimeIndex = _.findIndex(this.columns, (column) => {
@@ -756,27 +720,6 @@ export default {
             this.columns.splice(testPaper1Index, 1)
           }
         }
-      },
-      deep: true
-    },
-    // 补考次数因为存在0有检验，所以手动添加校验规则
-    'model.remakeExam': {
-      handler(value) {
-        const checkMakeUpZero = (rule, value, callback) => {
-          if (value === 0) {
-            return callback(new Error('补考次数必须大于0'))
-          } else {
-            callback()
-          }
-        }
-        const zeroRuler = { validator: checkMakeUpZero, trigger: 'change' }
-        const target = _.chain(this.columns)
-          .filter((item) => {
-            return item.prop === 'remakeExamValue'
-          })
-          .get('[0].rules', {})
-          .value()
-        value ? target.push(zeroRuler) : target.pop()
       },
       deep: true
     }
