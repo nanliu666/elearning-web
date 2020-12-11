@@ -292,7 +292,7 @@ const TABLE_COLUMNS = [
     label: '试题类型',
     prop: 'type',
     slot: true,
-    minWidth: 150
+    minWidth: 120
   },
   {
     label: '试题来源',
@@ -328,7 +328,7 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 100
   }
 }
 
@@ -427,6 +427,9 @@ export default {
   },
   methods: {
     handeleTestQuestions(data, row) {
+      row.categoryIds = []
+      row.totalQuestionNum = ''
+      row.questionNum = ''
       this.getTopicCategory(data, row.column)
     },
     itemAttrs(column) {
@@ -479,14 +482,27 @@ export default {
           name,
           isScore,
           isShowScore,
-          randomSettings
+          randomSettings,
+          isMulti
         } = res
-        this.form = { id, name, categoryId, expiredTime, totalScore, remark, isScore, isShowScore }
+        //后台要精确到一位小数，返回是乘以10
+        totalScore = totalScore / 10
+        this.form = {
+          id,
+          name,
+          categoryId,
+          expiredTime,
+          totalScore,
+          remark,
+          isScore,
+          isShowScore,
+          isMulti
+        }
         randomSettings.map((data) => {
           data.column = _.cloneDeep(this.column)
           this.getTopicCategory(data.type, data.column)
         })
-        this.tableData = randomSettings
+        this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
       })
     },
     handleDelete(row) {
@@ -502,11 +518,17 @@ export default {
             (it) =>
               !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
           ).length > 0
-        )
+        ) {
+          this.$message.warning('请检查试题设置')
           return
+        }
+        //后台要精确到一位小数，提交是乘以10
+        let randomSettings = this.tableData.map((it) => ({ ...it, score: it.score * 10 }))
+        let form = _.cloneDeep(this.form)
+        form.totalScore = form.totalScore * 10
         let params = {
-          ...this.form,
-          randomSettings: this.tableData,
+          ...form,
+          randomSettings: randomSettings,
           type: 'random'
         }
         let testPaperMether =
@@ -524,6 +546,7 @@ export default {
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
+      this.score = this.form.totalScore - this.TotalScore
     },
     check(data, row) {
       row.totalQuestionNum = _.compact(data.map((it) => it.relatedNum)).reduce((prev, cur) => {
