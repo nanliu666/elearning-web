@@ -325,7 +325,12 @@ export default {
       this.testPaper.map((it) => {
         it.key === data.key && (it = Object.assign(it, data))
       })
-      let scoreList = _.compact(this.testPaper.map((it) => it.totalScore))
+      let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
+      let list = []
+      scoreList.map((it) => {
+        list.push(...it)
+      })
+      scoreList = list
       scoreList.length &&
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)

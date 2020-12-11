@@ -340,7 +340,6 @@ export default {
     },
     handleLookUp(row) {
       this.handleCommand(row.type, row.id)
-      this.$store.dispatch('setTestPaper', row)
     },
     handleCope(row) {
       this.handleCommand(row.type, row.id, 'copy')
