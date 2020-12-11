@@ -16,7 +16,20 @@
             :allow-create="isCreate"
             :searchable="remote"
             :load="loadCourse"
-            :option-props="personOptionProps"
+            :option-props="{
+              label: 'name',
+              value: 'name',
+              key: 'id'
+            }"
+          />
+        </template>
+        <template #lecturerName>
+          <lazy-select
+            v-model="model.lecturerName"
+            :allow-create="true"
+            :searchable="true"
+            :load="loadCoordinator"
+            :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
           />
         </template>
       </common-form>
@@ -36,6 +49,7 @@
 </template>
 
 <script>
+import { getOrgUserList } from '@/api/system/user'
 import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 const EventColumns = [
@@ -49,7 +63,7 @@ const EventColumns = [
   },
   // TODO：关联课程应该用lazy-select
   { itemType: 'slot', span: 24, required: true, prop: 'courseName', label: '关联课程' },
-  { itemType: 'input', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'slot', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
   {
     itemType: 'radio',
     prop: 'studyType',
@@ -62,11 +76,6 @@ const EventColumns = [
     ]
   }
 ]
-const personOptionProps = {
-  label: 'name',
-  value: 'name',
-  key: 'id'
-}
 
 export default {
   name: 'EditCourseDrawer',
@@ -80,7 +89,6 @@ export default {
   data() {
     return {
       remote: true,
-      personOptionProps,
       isCreate: true,
       editType: 'add',
       columns: EventColumns,
@@ -121,11 +129,10 @@ export default {
     }
   },
   methods: {
-    loadCourse() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10
-      }
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+    },
+    loadCourse(params) {
       return getTrainCource(params)
     },
     close() {

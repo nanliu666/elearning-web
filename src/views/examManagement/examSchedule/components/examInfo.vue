@@ -54,6 +54,19 @@
           }"
         />
       </template>
+      <template #certificateId>
+        <lazy-select
+          v-model="model.certificateId"
+          :allow-create="true"
+          :searchable="true"
+          :load="loadCertificateList"
+          :option-props="{
+            label: 'name',
+            value: 'id',
+            key: 'id'
+          }"
+        />
+      </template>
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
@@ -229,7 +242,7 @@ import radioInput from '@/components/radioInput/radioInput'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
-import { getExamList } from '@/api/examManage/schedule'
+import { getExamList, getCertificateList } from '@/api/examManage/schedule'
 
 const insertConfig = {
   itemType: 'switch',
@@ -239,7 +252,7 @@ const insertConfig = {
   label: '不允许修改考生客观题及其评分结果'
 }
 const testPaper1Config = {
-  itemType: 'input',
+  itemType: 'slot',
   span: 11,
   offset: 2,
   required: true,
@@ -583,7 +596,7 @@ export default {
       columns: EventColumns,
       model: {
         certificateId: '',
-        certificate: false,
+        certificate: true,
         categoryId: '',
         examTime: '',
         examName: '',
@@ -721,7 +734,8 @@ export default {
           }
         }
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   created() {
@@ -738,6 +752,9 @@ export default {
     },
     loadTestPaper(params) {
       return getExamList(params)
+    },
+    loadCertificateList(params) {
+      return getCertificateList(params)
     },
     getData() {
       return new Promise((resolve, reject) => {
