@@ -168,7 +168,10 @@
           >
             完成
           </el-button>
-          <el-button size="medium">
+          <el-button
+            size="medium"
+            @click="handleBack"
+          >
             取消
           </el-button>
         </div>
@@ -510,6 +513,7 @@ export default {
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
+          this.handleBack()
         })
       })
     },
@@ -532,6 +536,10 @@ export default {
       this.tableItem.id += 1
       this.valid = false
       this.pushItem()
+    },
+    handleBack() {
+      this.$router.back()
+      this.$store.commit('DEL_TAG', this.tag)
     }
   }
 }

@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import { getAchievement } from '@/api/examManagement/achievement'
+import { getAchievement, getPaperMaker } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
@@ -204,15 +204,8 @@ export default {
             field: 'paperMaker',
             label: '出卷人',
             data: '',
-            props: {
-              label: 'examName',
-              value: 'id'
-            },
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
+            config: { optionLabel: 'name', optionValue: 'id' },
+            options: []
           }
         ]
       },
@@ -227,9 +220,9 @@ export default {
   },
   methods: {
     getPaperMaker() {
-      // getPaperMaker().then((res) => {
-      //   console.log(res)
-      // })
+      getPaperMaker().then((res) => {
+        this.searchConfig.popoverOptions.find((it) => it.field == 'paperMaker').options = res
+      })
     },
 
     handleLookUp(row) {

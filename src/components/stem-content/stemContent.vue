@@ -2,7 +2,7 @@
   <el-dialog
     title="题目来源"
     :visible.sync="roleVisible"
-    width="1000px"
+    width="1100px"
     :close-on-click-modal="false"
     :modal-append-to-body="false"
     :before-close="onClose"
@@ -48,21 +48,64 @@
               </div>
             </template>
             <template #multiSelectMenu>
-              <!--          <el-button-->
-              <!--            type="text"-->
-              <!--            icon="el-icon-delete"-->
-              <!--          >-->
-              <!--            批量导出-->
-              <!--          </el-button>-->
             </template>
           </common-table>
         </div>
         <div class="flex-flow flex flexcenter">
-          <div class="addTopic">
+          <div
+            class="addTopic"
+            @click="addTopic"
+          >
             添加题目 <i class="el-icon-d-arrow-right"></i>
           </div>
         </div>
-        <div class="select"></div>
+        <div class="select">
+          <common-table
+            ref="table2"
+            :columns="columnsVisible | columnsFilter"
+            :config="tableConfig2"
+            :data="selectData"
+            :loading="tableLoading"
+            @current-page-change="handleCurrentPageChange"
+            @page-size-change="handlePageSizeChange"
+            @select="select"
+            @select-all="select"
+          >
+            <template #topMenu>
+              <div class="transitionBox">
+                <div class="searchBox">
+                  <div class="search-box">
+                    <div
+                      style="line-height: 40px"
+                      class="flex flex-flow flex-justify-between"
+                    >
+                      <div>已选中题目</div>
+                      <div>已添加{{ selectData.length }}条</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template #multiSelectMenu="{selection}">
+              <el-button
+                type="text"
+                @click="handleAllSelete(selection)"
+              >
+                批量删除
+              </el-button>
+            </template>
+            <template #handler="{row}">
+              <div class="menuClass">
+                <el-button
+                  type="text"
+                  @click="handleDelete(row)"
+                >
+                  删除
+                </el-button>
+              </div>
+            </template>
+          </common-table>
+        </div>
       </div>
       <div
         slot="footer"
@@ -114,7 +157,19 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: false,
   defaultExpandAll: false,
-
+  height: 300,
+  showIndexColumn: false,
+  enablePagination: false,
+  enableMultiSelect: true, // TODO：关闭批量删除
+  handlerColumn: {
+    minWidth: 150
+  }
+}
+const TABLE2_CONFIG = {
+  rowKey: 'id',
+  showHandler: true,
+  defaultExpandAll: false,
+  height: 300,
   showIndexColumn: false,
   enablePagination: false,
   enableMultiSelect: true, // TODO：关闭批量删除
@@ -194,6 +249,7 @@ export default {
         labelPosition: 'left',
         labelWidth: '80px'
       },
+      selectData: [],
       selection: [],
       columns: BASE_COLUMNS,
       tableData: [],
@@ -208,6 +264,7 @@ export default {
       roleVisible: true,
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
+      tableConfig2: TABLE2_CONFIG,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       form: {
         category: '',
@@ -233,8 +290,33 @@ export default {
     this.getcategoryTree()
   },
   methods: {
+    handleAllSelete(selection) {
+      this.selectData = this.selectData.filter((it) => {
+        let data = selection.filter((item) => item.id == it.id)
+        if (data.length === 0) {
+          return true
+        }
+      })
+    },
+    handleDelete(row) {
+      this.selectData = this.selectData.filter((it) => it.id !== row.id)
+    },
+    addTopic() {
+      this.$refs.table.clearSelection()
+      let selection = this.selection.filter((it) => {
+        if (this.selectData.length == 0) {
+          return true
+        } else {
+          let data = this.selectData.filter((item) => item.id == it.id)
+          if (data.length === 0) {
+            return true
+          }
+        }
+      })
+      this.selectData.push(...selection)
+    },
     onsubmit() {
-      this.$emit('input', this.selection)
+      this.$emit('input', this.selectData)
       this.onClose()
     },
     select(data) {
@@ -355,5 +437,11 @@ export default {
 .addTopic {
   padding: 0 20px;
   cursor: pointer;
+}
+.select {
+  width: 450px;
+}
+/deep/.el-form-item {
+  margin-bottom: 0px;
 }
 </style>

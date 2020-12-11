@@ -61,3 +61,9 @@ export const getTestPaper = (params) => get('/manage/v1/exam/paper', params)
  * @desc 获取出卷人
  * */
 export const getPaperMaker = (params) => get('/manage/v1/examniee/paper/maker', params)
+/**
+ * @author guanfenda
+ * @desc 获取创建人
+ * @path manage/v1/exam/paper/creatUsers
+ * */
+export const getCreatUsers = (params) => get('/manage/v1/exam/paper/creatUsers', params)
