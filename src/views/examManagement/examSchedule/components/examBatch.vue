@@ -121,9 +121,6 @@ export default {
         _.each(examList, (item) => {
           examineeIds.push(item.userId)
         })
-        examTime = _.map(examTime, (item) => {
-          return moment(item).format('YYYY-MM-DD HH:mm:ss')
-        })
         data.push({ batchNumber: index, examTime, examineeIds, id })
       })
       return new Promise((resolve) => {
@@ -161,17 +158,48 @@ export default {
         })
       })
     },
+    // 检测是否有重叠
+    checkOverlap(data) {
+      let temp = _.filter(this.batchList, (item) => {
+        return _.isEqual(item.examTime, data.examTime)
+      })
+      // 不为空，有重叠时间段
+      if (!_.isEmpty(temp)) {
+        this.$message.error('该时间段的批次已存在')
+        return false
+      } else {
+        return true
+      }
+    },
+    // 提交批次后数据处理
     async submitBatch(data) {
+      data.examTime = _.map(data.examTime, (item) => {
+        return moment(item).format('YYYY-MM-DD HH:mm:ss')
+      })
+      // 存在时间重叠，则不进行下一步
+      if (!this.checkOverlap(data)) return
       await this.handlerData(data)
       this.batchList.push(data)
+      this.sortExamTime()
+    },
+    // 排序
+    sortExamTime() {
       // 先用开始时间排序
-      this.batchList = _.sortBy(this.batchList, (item) => {
-        return item.examTime[0]
-      })
       // 再用结束时间排序
-      this.batchList = _.sortBy(this.batchList, (item) => {
-        return item.examTime[1]
-      })
+      this.batchList = _.chain(this.batchList)
+        .sortBy((item) => {
+          return moment(item.examTime[0])
+        })
+        .groupBy((item) => {
+          return moment(item.examTime[0])
+        })
+        .map((item) => {
+          return _.sortBy(item, (sonitem) => {
+            return moment(sonitem.examTime[1])
+          })
+        })
+        .flattenDeep()
+        .value()
     },
     addBatch() {
       this.dialogVisible = true
