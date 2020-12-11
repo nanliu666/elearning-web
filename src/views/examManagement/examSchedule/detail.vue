@@ -218,10 +218,10 @@
                 <span>是否允许考生查看标准答案：</span>
                 <span>{{ examDetail.publicAnswers ? '允许' : '不允许' }}</span>
               </div>
-              <div class="content">
+              <!-- <div class="content">
                 <span>考生报名考试是否需要审批：</span>
                 <span>{{ examDetail.openEntrance ? '需要' : '不需要' }}</span>
-              </div>
+              </div> -->
             </div>
           </li>
           <li class="extend-li">
