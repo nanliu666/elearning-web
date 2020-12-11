@@ -64,21 +64,21 @@
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
             label="Company"
-            :disabled="radioDisable.indexOf(orgType) > 1"
+            :disabled="radioDisabled('Company')"
           >
             公司
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
             label="Department"
-            :disabled="radioDisable.indexOf(orgType) > 2"
+            :disabled="radioDisabled('Department')"
           >
             部门
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
             label="Group"
-            :disabled="radioDisable.indexOf(orgType) > 3"
+            :disabled="radioDisabled('Group')"
           >
             小组
           </el-radio>
@@ -185,26 +185,9 @@ export default {
   data() {
     return {
       isrules: false,
-      labelTxt: [
-        '负责人',
-        '二级负责人',
-        '三级负责人',
-        '四级负责人',
-        '五级负责人',
-        '六级负责人',
-        '七级负责人',
-        '八级负责人',
-        '九级负责人',
-        '十级负责人'
-      ],
       type: 'create',
-      // radioDisable: {
-      //   Company: false,
-      //   Department: false,
-      //   Group: false
-      // },
       orgType: '',
-      radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
+      // radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
       form: {
         orgType: '',
         parentOrgId: ''
@@ -254,8 +237,8 @@ export default {
       leaderPageNo: 1
     }
   },
-  created() {
-    this.loadOrgTree()
+  async created() {
+    await this.loadOrgTree()
     getUserWorkList({ pageNo: this.leaderPageNo, pageSize: 1000 }).then((res) => {
       this.leaderList = res.data
       this.leaderList.splice(0, 0, {
@@ -266,8 +249,39 @@ export default {
       this.leaderPageNo += 1
     })
   },
-  mounted() {},
   methods: {
+    radioDisabled(data) {
+      if (!_.isEmpty(this.form.id)) {
+        // 从小到大
+        let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
+        // // 当前的组织类型
+        // let currentIndex = _.findIndex(radioDisable, (item) => {
+        //   return item === this.form.orgType
+        // })
+        // 父级的组织类型的次序
+        const parentIndex = _.findIndex(radioDisable, (item) => {
+          return item === this.form.parentOrgType
+        })
+        let dataIndex = _.findIndex(radioDisable, (item) => {
+          return item === data
+        })
+        let indexList = []
+        _.each(this.form.children, (item) => {
+          let it = _.findIndex(radioDisable, (radioItem) => {
+            return radioItem === item.orgType
+          })
+          indexList.push(it)
+        })
+        let subIndex = Math.max.apply(Math, indexList)
+        // 下级组织的组织类型不能大于上级组织翻译成以下意义：
+        // 可选的当前组织组织类型必须比子级的最大的组织类型要大
+        let isMoreThenSon = parentIndex >= dataIndex
+        // 可选的当前组织组织类型必须小于或者等于父级的组织类型
+        let isLessThenSon = subIndex <= dataIndex
+        let flag = isMoreThenSon && isLessThenSon
+        return !flag
+      }
+    },
     check(data) {
       this.orgType = data.orgType
       if (data.orgType !== 'Enterprise') {
@@ -286,11 +300,10 @@ export default {
 
       return copy
     },
-    loadOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-        this.orgTree = res
-        this.column.props.treeParams.data = res
-      })
+    async loadOrgTree() {
+      let res = await getOrgTreeSimple({ parentOrgId: 0 })
+      this.orgTree = res
+      this.column.props.treeParams.data = res
     },
     loadMoreLeader() {
       if (this.loadLeader || this.noMoreLeader) return
@@ -379,27 +392,24 @@ export default {
         this.$refs.ruleForm.clearValidate(...arguments)
       })
     },
-    createChild(row) {
+    async createChild(row) {
+      await this.loadOrgTree()
       this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
-      // this.form.parentOrgId = row.parentOrgId
+      this.form.parentOrgId = row.parentOrgId
       this.form.parentOrgType = row.orgType
-      // this.loadRadio()
       this.$emit('changevisible', true)
-      this.loadOrgTree()
     },
-    edit(row) {
+    async edit(row) {
+      await this.loadOrgTree()
       this.type = 'edit'
       this.form = JSON.parse(JSON.stringify(row))
       this.parentOrgIdLabel = this.findOrg(row.parentOrgId).orgName
       this.form.parentOrgType = this.findOrg(row.parentOrgId).orgType
       this.form.leaders = _.map(this.form.leaders, 'userId')
-      // this.loadRadio(true)
       this.$emit('changevisible', true)
-      this.loadOrgTree()
     },
-
     findOrg(id) {
       let org = {}
       function deep(arr) {
