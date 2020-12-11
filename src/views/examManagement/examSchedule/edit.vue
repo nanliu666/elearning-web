@@ -182,12 +182,16 @@ export default {
         } else {
           editFun = putExamArrange
         }
-        editFun(params).then(() => {
-          this.$message.success('已成功创建考试，1秒后将自动返回考试列表')
-          setTimeout(() => {
-            this.$router.push({ path: '/examManagement/examSchedule/list' })
-          }, 1000)
-        })
+        editFun(params)
+          .then(() => {
+            this.$message.success('已成功创建考试，1秒后将自动返回考试列表')
+            setTimeout(() => {
+              this.$router.push({ path: '/examManagement/examSchedule/list' })
+            }, 1000)
+          })
+          .catch(() => {
+            window.console.error(JSON.stringify(params))
+          })
       })
     },
     // 统一处理入参
@@ -206,8 +210,6 @@ export default {
         examArrangeBasis,
         examineeBatchList
       }
-      // console.log('处理后的总参数==', params)
-      // console.log('处理后的总参数==', JSON.stringify(params))
       return params
     },
     exit() {
