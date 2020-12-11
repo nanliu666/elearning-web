@@ -33,7 +33,7 @@
           <el-input
             v-model="form.score"
             placeholder="请输入成绩"
-            @input="numberInput($event, 'score')"
+            type="Number"
           >
             <i
               slot="suffix"
@@ -45,7 +45,7 @@
           <el-input
             v-model="form.totalScore"
             placeholder="请输入试卷总分"
-            @input="numberInput($event, 'totalScore')"
+            type="Number"
           >
             <i
               slot="suffix"
@@ -209,6 +209,8 @@ export default {
       handler: function(newVal) {
         let { answerTime, totalScore, name, examTime, score, isPass, status, id } = newVal
         examTime = examTime.split('~')
+        totalScore = totalScore / 10
+        score = score / 10
         this.form = {
           answerTime: answerTime / 60,
           totalScore,
@@ -234,7 +236,13 @@ export default {
     onsubmit() {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-        getExamineeAchievementEdit(this.form).then(() => {
+        let form = _.cloneDeep(this.form)
+        let params = {
+          ...form,
+          totalScore: form.totalScore * 10,
+          score: form.score * 10
+        }
+        getExamineeAchievementEdit(params).then(() => {
           this.$message.success('修改成功')
           this.$emit('loadData')
           this.onClose()

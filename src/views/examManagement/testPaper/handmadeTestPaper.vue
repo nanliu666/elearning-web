@@ -251,9 +251,22 @@ export default {
           name,
           isScore,
           isShowScore,
-          manualSettings
+          manualSettings,
+          isMulti
         } = res
-        this.form = { id, name, categoryId, expiredTime, totalScore, remark, isScore, isShowScore }
+        totalScore = totalScore / 10
+        this.form = {
+          id,
+          name,
+          categoryId,
+          expiredTime,
+          totalScore,
+          remark,
+          isScore,
+          isShowScore,
+          isMulti
+        }
+        manualSettings = manualSettings.map((it) => ({ ...it, score: it.score / 10 }))
         const list = _.groupBy(manualSettings, (it) => it.parentSort)
         this.testPaper = []
         for (let key in list) {
@@ -288,15 +301,17 @@ export default {
                 questionId: item.questionId,
                 content: item.content,
                 timeLimit: item.timeLimit,
-                score: item.score,
+                score: item.score * 10,
                 sort: i + 1,
                 title: it.title,
                 type: it.type
               })
             })
         })
+        let form = _.cloneDeep(this.form)
+        form.totalScore = form.totalScore * 10
         let params = {
-          ...this.form,
+          ...form,
           manualSettings: manualSettings,
           type: 'manual'
         }
@@ -310,11 +325,17 @@ export default {
       this.testPaper.map((it) => {
         it.key === data.key && (it = Object.assign(it, data))
       })
-      let scoreList = _.compact(this.testPaper.map((it) => it.totalScore))
+      let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
+      let list = []
+      scoreList.map((it) => {
+        list.push(...it)
+      })
+      scoreList = list
       scoreList.length &&
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
+      this.score = this.form.totalScore - this.TotalScore
     },
     handleDeleteBlock(data) {
       this.$confirm('您确定要删除选中的题型吗', '提示', {
