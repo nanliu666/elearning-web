@@ -91,6 +91,7 @@
         <EditDetail
           v-show="activeStep === 2"
           ref="editDetail"
+          @jump="jumpStep(2)"
         />
       </el-col>
     </el-row>
