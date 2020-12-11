@@ -147,14 +147,14 @@ export default {
   },
   methods: {
     getLiData(name) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         this.$refs[name]
           .validate()
           .then((valid) => {
             resolve(valid)
           })
           .catch(() => {
-            reject()
+            this.$emit('jump')
           })
       })
     },

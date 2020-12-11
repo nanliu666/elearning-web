@@ -55,3 +55,21 @@ export const generatePreviewList = (params) => get('/manage/v1/exam/preview/gene
  * 删除预生成试卷
  */
 export const delExamPreview = (params) => del('/manage/v1/exam/preview', params)
+
+/**
+ * 获取批次
+ */
+export const getBatchNumber = (params) => get('/manage//v1/exam/batch/number', params)
+/**
+ * 获取证书模板
+ */
+export const getCertificateList = (params) =>
+  get('/manage/v1/source/certificate/getCertificateList', params)
+/**
+ * 发布考生成绩
+ */
+export const putAchievement = (params) => put('/manage/v1/achievement/publish', params)
+/**
+ * 发布考生成绩
+ */
+export const putCertificate = (params) => put('/manage/v1/revoke/certificate', params)

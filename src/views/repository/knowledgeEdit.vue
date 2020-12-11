@@ -49,9 +49,6 @@
             </li>
           </ul>
         </template>
-        <template #download>
-          <el-switch v-model="allow_download_swtich" />
-        </template>
       </common-form>
 
       <div class="container__editor">
@@ -85,7 +82,6 @@
 import {
   addKnowledgeList,
   updateKnowledge,
-  // getKnowledgeManageTaglist,
   getKnowledgeCatalogList,
   getKnowledgeManageDetails
 } from '@/api/knowledge/knowledge'
@@ -179,7 +175,6 @@ export default {
     return {
       pageTitle: '',
       formColumns: FORM_COLUMNS,
-      allow_download_swtich: true,
       formData: {
         resName: '',
         catalogId: '',
@@ -187,7 +182,7 @@ export default {
         // tags: [],
         uploadType: 0, // 0本地文件 1链接文件
         resUrl: '',
-        allow_download: 0, //是否运行下载 0允许 1不允许
+        allowDownload: '0', //是否运行下载 0允许 1不允许
         introduction: '',
         attachments: []
       },
@@ -219,11 +214,6 @@ export default {
   },
 
   watch: {
-    allow_download_swtich: {
-      handler(val) {
-        this.formData.allow_download = val ? 0 : 1
-      }
-    },
     // 上传模式变化
     'formData.uploadType': {
       deep: true,
@@ -240,26 +230,20 @@ export default {
           required: false,
           span: 12
         }
-        var checkAge = (rule, value, callback) => {
-          if (!this.checkURL(value)) {
-            callback(new Error('正确的url路径'))
-          } else {
-            callback()
-          }
-        }
         const UPLOAD_INPUT = {
           itemType: 'input',
           label: '资源路径',
           prop: 'resUrl',
           required: false,
-          rules: [{ validator: checkAge, trigger: 'blur' }],
           span: 24
         }
         const allowDownload = {
-          itemType: 'slot',
+          itemType: 'switch',
           label: '是否允许下载',
-          prop: 'download',
+          prop: 'allowDownload',
           required: false,
+          activeValue: '1',
+          inactiveValue: '0',
           span: 11,
           offset: 1
         }
@@ -267,15 +251,16 @@ export default {
           return item.prop === 'uploadType'
         })
         const allowDownloadIndex = _.findIndex(this.formColumns, (item) => {
-          return item.prop === 'download'
+          return item.prop === 'allowDownload'
         })
         const providerNameIndex = _.findIndex(this.formColumns, (item) => {
           return item.prop === 'providerName'
         })
-
         if (val === 0) {
           this.formColumns[uploadTypeIndex + 1] = UPLOAD_FILE
-          this.formColumns.splice(providerNameIndex + 1, 0, allowDownload)
+          if (allowDownloadIndex === -1) {
+            this.formColumns.splice(providerNameIndex + 1, 0, allowDownload)
+          }
         } else {
           this.formColumns[uploadTypeIndex + 1] = UPLOAD_INPUT
           this.formColumns.splice(allowDownloadIndex, 1)
@@ -292,25 +277,6 @@ export default {
     this.initData()
   },
   methods: {
-    // 检测资源路径的格式
-    checkURL(URL) {
-      var sRegex =
-        '^((https|http|ftp|rtsp|mms)?://)' +
-        '?(([0-9a-z_!~*\'().&=+$%-]+: )?[0-9a-z_!~*\'().&=+$%-]+@)?' + //ftp的user@
-        '(([0-9]{1,3}.){3}[0-9]{1,3}' + // IP形式的URL- 199.194.52.184
-        '|' + // 允许IP和DOMAIN（域名）
-        '([0-9a-z_!~*\'()-]+.)*' + // 域名- www.
-        '([0-9a-z][0-9a-z-]{0,61})?[0-9a-z].' + // 二级域名
-        '[a-z]{2,6})' + // first level domain- .com or .museum
-        '(:[0-9]{1,4})?' + // 端口- :80
-        '((/?)|' + // a slash isn't required if there is no file name
-        '(/[0-9a-z_!~*\'().;?:@&=+$,%#-]+)+/?)$'
-      var re = new RegExp(sRegex)
-      if (re.test(URL)) {
-        return true
-      }
-      return false
-    },
     // 新增附件时，直接赋值
     getValue(value) {
       _.each(value, (item) => {
