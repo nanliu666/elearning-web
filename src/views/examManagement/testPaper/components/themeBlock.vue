@@ -363,6 +363,7 @@ export default {
     handleDeleteBlock() {
       this.$emit('delete', this.blockData)
     },
+
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => {
         if (it.id && row.id !== it.id) return true

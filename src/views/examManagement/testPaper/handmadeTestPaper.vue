@@ -82,7 +82,10 @@
         >
           完成
         </el-button>
-        <el-button size="medium">
+        <el-button
+          size="medium"
+          @click="handleBack"
+        >
           取消
         </el-button>
       </div>
@@ -299,6 +302,7 @@ export default {
         }
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
+          this.handleBack()
         })
       })
     },
@@ -328,6 +332,10 @@ export default {
         let scroll = this.$refs.HandmadeTestPaper
         scroll.scrollTop = scroll.scrollHeight
       })
+    },
+    handleBack() {
+      this.$router.back()
+      this.$store.commit('DEL_TAG', this.tag)
     }
   }
 }
