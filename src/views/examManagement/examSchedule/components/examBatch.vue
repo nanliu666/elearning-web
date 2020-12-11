@@ -124,7 +124,12 @@ export default {
         data.push({ batchNumber: index, examTime, examineeIds, id })
       })
       return new Promise((resolve) => {
-        resolve(data)
+        if (_.size(this.batchList) === 0) {
+          this.$message.error('考生批次至少存在一批')
+          this.$emit('jump')
+        } else {
+          resolve(data) // TODO 提交表单
+        }
       })
     },
     // 拉取公司的直属员工，在map中遍历await
