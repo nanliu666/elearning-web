@@ -375,4 +375,15 @@ export default {
 .footer {
   margin-top: 30px;
 }
+/deep/ .el-switch__label.is-active {
+  color: #606266;
+}
+
+/deep/ .el-switch__label {
+  color: #207efa;
+}
+
+/deep/ .el-table td .cell {
+  line-height: 60px !important;
+}
 </style>
