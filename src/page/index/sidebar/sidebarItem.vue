@@ -26,7 +26,10 @@
       :index="item.menuId"
     >
       <template slot="title">
-        <i :class="item[iconKey]" />
+        <i
+          v-if="item[iconKey]"
+          :class="item[iconKey]"
+        />
         <span
           slot="title"
           :class="{ 'el-menu--display': collapse && first }"

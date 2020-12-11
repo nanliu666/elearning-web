@@ -409,6 +409,9 @@ export default {
           } else {
             this.form.score = this.form.subQuestions.reduce((acc, item) => acc + item.score, 0)
           }
+          if (_.size(this.form.subQuestions) === 0) {
+            this.form.subQuestions.push(createSubQustion())
+          }
         }
         // 从多选题切换到单选题时把正确答案置空
         if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
