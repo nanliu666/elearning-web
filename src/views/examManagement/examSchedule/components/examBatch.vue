@@ -105,7 +105,7 @@ export default {
     // 判断是否存在删除按钮
     hasDelete(time) {
       // 今天在开始日期之前
-      return moment(new Date()).isSameOrBefore(time[0], 'day')
+      return moment(new Date()).isSameOrBefore(time[0])
     },
     initData() {
       if (this.$route.query.id) {
