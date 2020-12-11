@@ -509,12 +509,12 @@ const SEARCH_CONFIG = {
     }
   ]
 }
-const isTestOptions = [
+const notIsTestOptions = [
   { value: '', label: '全部' },
   { value: 1, label: '未开始' },
   { value: 2, label: '缺考' }
 ]
-const notIsTestOptions = [
+const isTestOptions = [
   { value: '', label: '全部' },
   { value: 3, label: '已通过' },
   { value: 4, label: '未通过' }
