@@ -125,7 +125,7 @@
 </template>
 
 <script>
-import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
+import { getTestPaperList, deleteTestPaper, getCreatUsers } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/examManage/category'
 const TABLE_COLUMNS = [
@@ -213,20 +213,36 @@ export default {
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '题干内容', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '考试名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
           {
-            type: 'select',
-            field: 'categoryId',
-            label: '试卷分类',
+            type: 'treeSelect',
+            // data多选是数组单选是字符串
             data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 'normal', label: '正常' },
-              { value: 'expired', label: '已过期' }
-            ]
+            label: '试卷分类',
+            field: 'categoryId',
+            config: {
+              multiple: true,
+              selectParams: {
+                placeholder: '试卷分类'
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  disabled: 'disabled',
+                  value: 'id'
+                }
+              }
+            }
           },
           {
             type: 'select',
@@ -241,14 +257,11 @@ export default {
           },
           {
             type: 'select',
-            field: 'paperMaker',
+            field: 'creatorId',
             label: '创建人',
+            config: { optionLabel: 'name', optionValue: 'userId' },
             data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
+            options: []
           },
           {
             type: 'dataPicker',
@@ -268,10 +281,27 @@ export default {
       searchParams: {}
     }
   },
+  mounted() {
+    this.getCategory()
+    this.getCreatUsers()
+  },
   activated() {
     this.loadTableData()
   },
   methods: {
+    getCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      })
+    },
+    getCreatUsers() {
+      getCreatUsers().then((res) => {
+        this.searchConfig.popoverOptions.find((it) => it.field == 'creatorId').options = res
+      })
+    },
     getTestPaperCategory() {
       let params = {
         type: '1'
@@ -310,7 +340,6 @@ export default {
     },
     handleLookUp(row) {
       this.handleCommand(row.type, row.id)
-      this.$store.dispatch('setTestPaper', row)
     },
     handleCope(row) {
       this.handleCommand(row.type, row.id, 'copy')

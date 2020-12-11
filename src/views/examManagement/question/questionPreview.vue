@@ -135,11 +135,8 @@ export default {
 
 <style lang="scss" scoped>
 .qustion {
-  &__content {
-    margin-bottom: 12px;
-  }
   &__attachments {
-    margin-bottom: 12px;
+    margin-top: 12px;
     .el-image {
       vertical-align: middle;
     }
@@ -171,6 +168,7 @@ export default {
     }
   }
   &__options {
+    margin-top: 12px;
     li {
       margin-bottom: 12px;
       // &:last-of-type {
