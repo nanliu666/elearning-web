@@ -277,6 +277,7 @@ export default {
             tableData: list[key]
           })
         }
+        this.count()
       })
     },
     onSubmit() {
@@ -287,8 +288,10 @@ export default {
         if (
           this.testPaper.filter((it) => it.tableData.filter((item) => !item.score).length).length >
           0
-        )
+        ) {
+          this.$message.warning('请检查试题设置')
           return
+        }
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
 
@@ -325,6 +328,9 @@ export default {
       this.testPaper.map((it) => {
         it.key === data.key && (it = Object.assign(it, data))
       })
+      this.count()
+    },
+    count() {
       let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
       let list = []
       scoreList.map((it) => {
