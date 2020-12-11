@@ -354,7 +354,7 @@ export default {
         span: 20,
         prop: 'orgId',
         itemType: 'treeSelect',
-        label: '请选择上级组织',
+        label: '试题来源',
         required: true,
         offset: 2,
         props: {
@@ -405,11 +405,19 @@ export default {
     }
   },
   watch: {
+    /***
+     * @author guanfenda
+     * @desc 修改了试题设置，修改分数重新计算剩余分数
+     * */
     TotalScore(val) {
       if (this.form.totalScore) {
         this.score = this.form.totalScore - val
       }
     },
+    /**
+     * @author guanfenda
+     * @desc 如果改变了计划分数 重新计算剩余分数
+     * */
     'form.totalScore'() {
       this.questionChange()
     }
@@ -417,6 +425,7 @@ export default {
   mounted() {
     this.options = []
     for (let key in QUESTION_TYPE_MAP) {
+      //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
     this.getData()
@@ -426,12 +435,21 @@ export default {
     }
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc  试题类型改变，试题来源重新请求
+     * @params data 类型的值，row 当前行改变的数据
+     * */
     handeleTestQuestions(data, row) {
       row.categoryIds = []
       row.totalQuestionNum = ''
       row.questionNum = ''
       this.getTopicCategory(data, row.column)
     },
+    /**
+     * @author fuanfenda
+     * treeSelect 属性格式化（过滤）
+     * */
     itemAttrs(column) {
       const copy = { ...defaultAttrs[column.itemType] }
       for (const key in column) {
@@ -442,6 +460,11 @@ export default {
 
       return copy
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试题来源，并绑定试题来源数据
+     * @param
+     * */
     getTopicCategory(relateType = '', column) {
       //single_choice
       let params = {
