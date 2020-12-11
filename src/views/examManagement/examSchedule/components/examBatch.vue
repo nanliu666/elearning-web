@@ -33,6 +33,7 @@
               }}（共{{ _.size(item.examList) }}人）</span>
             </div>
             <el-button
+              v-if="hasDelete(item.examTime)"
               size="medium"
               type="text"
               @click.stop="deleteBatch(index)"
@@ -53,6 +54,7 @@
               <span>手机：{{ studentItem.phoneNum || studentItem.phonenum }}</span>
               <span>部门：{{ studentItem.orgName }}</span>
               <el-button
+                v-if="hasDelete(item.examTime)"
                 size="medium"
                 type="text"
                 @click.stop="deleteBatchItem(index, studentIndex)"
@@ -100,6 +102,11 @@ export default {
     this.initData()
   },
   methods: {
+    // 判断是否存在删除按钮
+    hasDelete(time) {
+      // 今天在开始日期之前
+      return moment(new Date()).isSameOrBefore(time[0], 'day')
+    },
     initData() {
       if (this.$route.query.id) {
         getBatchexaminee({ id: this.$route.query.id }).then((res) => {
@@ -109,12 +116,15 @@ export default {
     },
     getData() {
       let data = []
-      _.each(this.batchList, ({ examList, examTime }, index) => {
+      _.each(this.batchList, ({ examList, examTime, id }, index) => {
         let examineeIds = []
         _.each(examList, (item) => {
           examineeIds.push(item.userId)
         })
-        data.push({ batchNumber: index, examTime, examineeIds })
+        examTime = _.map(examTime, (item) => {
+          return moment(item).format('YYYY-MM-DD HH:mm:ss')
+        })
+        data.push({ batchNumber: index, examTime, examineeIds, id })
       })
       return new Promise((resolve) => {
         resolve(data)

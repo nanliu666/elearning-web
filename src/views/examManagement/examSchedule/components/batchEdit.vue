@@ -42,6 +42,11 @@ const EventColumns = [
     required: true,
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     prop: 'examTime',
+    pickerOptions: {
+      disabledDate(time) {
+        return time.getTime() < Date.now()
+      }
+    },
     label: '考试时间'
   },
   {
@@ -68,8 +73,10 @@ export default {
     return {
       columns: EventColumns,
       formData: {
+        batchNumber: '',
+        id: '',
         examList: [],
-        examTime: []
+        examTime: [new Date(), new Date()]
       }
     }
   },
