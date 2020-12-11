@@ -335,6 +335,7 @@ export default {
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
+      this.score = this.form.totalScore - this.TotalScore
     },
     handleDeleteBlock(data) {
       this.$confirm('您确定要删除选中的题型吗', '提示', {
