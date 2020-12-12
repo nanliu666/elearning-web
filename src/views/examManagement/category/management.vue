@@ -53,7 +53,7 @@
           </el-button>
         </template>
         <template #status="{row}">
-          {{ row.status === 0 ? '正常' : '已停用' }}
+          {{ row.status === 1 ? '正常' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -62,7 +62,7 @@
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status === 0 ? '停用' : '启用' }}
+              {{ row.status === 1 ? '停用' : '启用' }}
             </el-button>
             <el-button
               type="text"
