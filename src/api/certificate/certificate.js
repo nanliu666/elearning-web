@@ -19,7 +19,9 @@ export const delTemplate = (params) =>
  * @param {Object} params - 参数
  * */
 export const updateStatus = (params) =>
-  put('/api/blade-manage/v1/source/certificate/updateStatus', params)
+  put(
+    `/api/blade-manage/v1/source/certificate/updateStatus?templateId=${params.templateId}&choice=${params.choice}`
+  )
 
 /**
  * 预览模板
