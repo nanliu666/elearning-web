@@ -67,6 +67,7 @@ export default {
       })
     },
     allowDrop(draggingNode, dropNode, type) {
+      if (draggingNode.data.parentId === '0') return
       let draggIndex = this.orgTypeList.indexOf(draggingNode.data.orgType)
       let dropIndex = this.orgTypeList.indexOf(dropNode.data.orgType)
       if (draggIndex < dropIndex) {
