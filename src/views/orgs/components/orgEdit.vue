@@ -251,7 +251,7 @@ export default {
   },
   methods: {
     radioDisabled(data) {
-      if (!_.isEmpty(this.form.id)) {
+      if (!_.isEmpty(this.form.id) || this.form.parentOrgId) {
         // 从小到大
         let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
         // // 当前的组织类型
@@ -397,7 +397,7 @@ export default {
       this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
-      this.form.parentOrgId = row.parentOrgId
+      this.form.parentOrgId = row.id
       this.form.parentOrgType = row.orgType
       this.$emit('changevisible', true)
     },
