@@ -90,13 +90,13 @@
           <el-button
             v-if="row.status"
             type="text"
-            @click="blockStart(row.id, 0)"
+            @click.stop="blockStart(row.id, 0)"
           >
             停用
           </el-button>
           <span
             v-else
-            @click="blockStart(row.id, 1)"
+            @click.stop="blockStart(row.id, 1)"
           >启用 &nbsp; </span>
           <!-- 预览框 -->
           <el-tooltip
@@ -342,7 +342,7 @@ export default {
     },
     // 停用&启用
     blockStart(id, i) {
-      updateStatus({ templateId: id, choice: 1 }).then(() => {
+      updateStatus({ templateId: id, choice: i }).then(() => {
         this.$message.success(`${i ? '启用' : '停用'}成功`)
         this.loadTableData()
       })
