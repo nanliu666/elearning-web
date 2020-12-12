@@ -1,6 +1,9 @@
 <template>
   <div class="Menu fill">
-    <page-header title="查看关联考卷" />
+    <page-header
+      title="查看关联考卷"
+      show-back
+    />
     <basic-container block>
       <common-table
         ref="table"
@@ -34,6 +37,9 @@
           >
             批量删除
           </el-button>
+        </template>
+        <template #name="{row}">
+          {{ row.name }}
         </template>
         <template #handler="{row}">
           <el-button
@@ -79,6 +85,7 @@ export default {
   name: 'KnowledgeManagement',
   data() {
     return {
+      examName: '',
       // 默认选中所有列
       columnsVisible: TABLE_COLUMNS,
       // 请求参数
@@ -97,33 +104,34 @@ export default {
     }
   },
   activated() {
+    this.examName = this.$route.query.examName
     // 现在手动生成
     this.loadTableData('refresh')
   },
   methods: {
     // 单个删除删除
     handleDelete(row) {
-      delExamPreview({ id: row.id }).then(() => {
+      delExamPreview({ id: row.previewId }).then(() => {
         this.$message.success('删除成功')
-        this.loadTableData('start')
+        this.loadTableData('del')
       })
     },
     // 批量删除
     multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
-        selectedIds.push(item.id)
+        selectedIds.push(item.previewId)
       })
       delExamPreview({ id: selectedIds.join(',') }).then(() => {
         this.$message.success('删除成功')
-        this.loadTableData('start')
+        this.loadTableData('del')
       })
     },
     // 预览
     handlePreview(rowData) {
       this.$router.push({
         path: '/examManagement/examSchedule/preview',
-        query: { paperId: rowData.id }
+        query: { paperId: rowData.paperId, previewSort: rowData.previewSort }
       })
     },
     // 加载表格数据
@@ -134,10 +142,13 @@ export default {
         this.tableData = []
         let { paperId, examId, maxNum } = this.$route.query
         let commomFarams = { paperId, examId }
-        const loadFun = type === 'start' ? getPreviewList : generatePreviewList
-        const params = type === 'start' ? commomFarams : _.assign(commomFarams, { maxNum })
-        let { data } = await loadFun(params)
-        this.tableData = data
+        if (type === 'refresh') {
+          await generatePreviewList(_.assign(commomFarams, { maxNum }))
+        }
+        let data = await getPreviewList(commomFarams)
+        this.tableData = _.each(data, (item) => {
+          item.name = `${this.$route.query.examName}（${item.previewSort}）`
+        })
       } catch (error) {
         window.console.log(error)
       } finally {

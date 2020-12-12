@@ -93,6 +93,7 @@
       <org-edit
         ref="orgEdit"
         :visible.sync="createOrgDailog"
+        @changevisible="changevisible"
         @refresh="loadData"
       />
     </basic-container>
@@ -172,8 +173,12 @@ export default {
         })
       })
     },
+    changevisible(data) {
+      this.createOrgDailog = data
+    },
     handleOrgEdit(row) {
       this.$refs.orgEdit.edit(row)
+      this.createOrgDailog = true
     },
     findFatherOrgName(org) {
       let fatherOrg = this.findFather(org)

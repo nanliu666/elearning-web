@@ -15,7 +15,7 @@
         :columns="columns"
       >
         <template #examineeName>
-          {{ form.examineeName }}
+          {{ form.name }}
         </template>
         <template #answerTime>
           <el-input
@@ -33,7 +33,7 @@
           <el-input
             v-model="form.score"
             placeholder="请输入成绩"
-            @input="numberInput($event, 'score')"
+            type="Number"
           >
             <i
               slot="suffix"
@@ -45,7 +45,7 @@
           <el-input
             v-model="form.totalScore"
             placeholder="请输入试卷总分"
-            @input="numberInput($event, 'totalScore')"
+            type="Number"
           >
             <i
               slot="suffix"
@@ -164,8 +164,8 @@ export default {
         required: false,
         props: {},
         options: [
-          { label: '是', value: 1 },
-          { label: '否', value: 0 }
+          { label: '是', value: true },
+          { label: '否', value: false }
         ]
       },
       {
@@ -179,11 +179,11 @@ export default {
           value: 'value'
         },
         options: [
-          { label: '已发布', value: 5 },
-          { label: '已提交', value: 4 },
-          { label: '已阅卷', value: 3 },
-          { label: '考试中', value: 2 },
-          { label: '阅卷中', value: 1 }
+          { label: '已发布', value: '5' },
+          { label: '已提交', value: '4' },
+          { label: '已阅卷', value: '3' },
+          { label: '考试中', value: '2' },
+          { label: '阅卷中', value: '1' }
         ]
       }
     ]
@@ -207,16 +207,17 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { answerTime, totalScore, examineeName, examTime, score, isPass, status, id } = {
-          ...newVal
-        }
+        let { answerTime, totalScore, name, examTime, score, isPass, status, id } = newVal
+        examTime = examTime.split('~')
+        totalScore = totalScore / 10
+        score = score / 10
         this.form = {
-          answerTime,
+          answerTime: answerTime / 60,
           totalScore,
-          examineeName,
+          name,
           examTime,
           score,
-          isPass,
+          isPass: isPass == 0 ? false : true,
           status,
           id
         }
@@ -235,8 +236,15 @@ export default {
     onsubmit() {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-        getExamineeAchievementEdit(this.form).then(() => {
+        let form = _.cloneDeep(this.form)
+        let params = {
+          ...form,
+          totalScore: form.totalScore * 10,
+          score: form.score * 10
+        }
+        getExamineeAchievementEdit(params).then(() => {
           this.$message.success('修改成功')
+          this.$emit('loadData')
           this.onClose()
         })
       })

@@ -34,6 +34,7 @@
 
 <script>
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
+import moment from 'moment'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -42,6 +43,11 @@ const EventColumns = [
     required: true,
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     prop: 'examTime',
+    pickerOptions: {
+      disabledDate(time) {
+        return moment(new Date()).isAfter(time, 'day')
+      }
+    },
     label: '考试时间'
   },
   {
@@ -68,8 +74,10 @@ export default {
     return {
       columns: EventColumns,
       formData: {
+        batchNumber: '',
+        id: '',
         examList: [],
-        examTime: []
+        examTime: [new Date(), new Date()]
       }
     }
   },

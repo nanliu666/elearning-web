@@ -23,6 +23,8 @@
               <el-switch
                 v-model="form.isMulti"
                 inactive-text="单项变为不定项选择"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -32,6 +34,8 @@
               <el-switch
                 v-model="form.isShowScore"
                 inactive-text="试卷上显示试题分数"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -78,7 +82,10 @@
         >
           完成
         </el-button>
-        <el-button size="medium">
+        <el-button
+          size="medium"
+          @click="handleBack"
+        >
           取消
         </el-button>
       </div>
@@ -89,6 +96,7 @@
 <script>
 import themeBlock from './components/themeBlock'
 import { getTestPaper, postTestPaper, putTestPaper } from '@/api/examManagement/achievement'
+import { getcategoryTree } from '@/api/examManage/category'
 
 const BASE_COLUMNS = [
   {
@@ -100,16 +108,33 @@ const BASE_COLUMNS = [
     required: true
   },
   {
-    prop: 'categoryId',
-    itemType: 'select',
+    itemType: 'treeSelect',
     label: '试卷分类',
+    prop: 'categoryId',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id',
+          disabled: true
+        },
+        required: true
+      }
+    },
+    required: false,
     span: 11,
-    offset: 2,
-    options: [
-      { label: '是', value: 1 },
-      { label: '否', value: 0 }
-    ],
-    required: false
+    offset: 2
   },
   {
     prop: 'totalScore',
@@ -117,6 +142,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
+    type: 'Number',
     required: false,
     props: {
       onlyNumber: true
@@ -153,6 +179,7 @@ const BASE_COLUMNS = [
   {
     prop: 'expiredTime',
     itemType: 'datePicker',
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
     label: '过期时间',
     type: 'datetime',
     span: 11,
@@ -184,26 +211,9 @@ export default {
       TotalScore: '',
       score: '',
       form: {},
-      typeList: [
-        {
-          label: '单选题',
-          value: '1'
-        },
-        {
-          label: '多选题',
-          value: '2'
-        },
-        {
-          label: '填空题',
-          value: '3'
-        },
-        {
-          label: '简答题',
-          value: '4'
-        }
-      ],
+      typeList: [],
       themeBlock: {
-        id: 1,
+        key: 1,
         type: '',
         title: '',
         tableData: '',
@@ -213,14 +223,60 @@ export default {
     }
   },
   mounted() {
-    this.testPaper.push(_.cloneDeep(this.themeBlock))
+    !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
+    this.getTestPaperCategory()
   },
   methods: {
+    getTestPaperCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
+      })
+    },
     getData() {
       if (!this.$route.query.id) return
-      getTestPaper().then((res) => {
-        res
+      let params = {
+        id: this.$route.query.id
+      }
+      getTestPaper(params).then((res) => {
+        let {
+          id,
+          expiredTime,
+          categoryId,
+          totalScore,
+          remark,
+          name,
+          isScore,
+          isShowScore,
+          manualSettings,
+          isMulti
+        } = res
+        totalScore = totalScore / 10
+        this.form = {
+          id,
+          name,
+          categoryId,
+          expiredTime,
+          totalScore,
+          remark,
+          isScore,
+          isShowScore,
+          isMulti
+        }
+        manualSettings = manualSettings.map((it) => ({ ...it, score: it.score / 10 }))
+        const list = _.groupBy(manualSettings, (it) => it.parentSort)
+        this.testPaper = []
+        for (let key in list) {
+          this.testPaper.push({
+            type: list[key][0].type,
+            title: list[key][0].title,
+            key: list[key][0].id,
+            tableData: list[key]
+          })
+        }
       })
     },
     onSubmit() {
@@ -235,24 +291,51 @@ export default {
           return
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+
+        let manualSettings = []
+        this.testPaper.map((it, index) => {
+          it.tableData &&
+            it.tableData.map((item, i) => {
+              manualSettings.push({
+                parentSort: index + 1,
+                questionId: item.questionId,
+                content: item.content,
+                timeLimit: item.timeLimit,
+                score: item.score * 10,
+                sort: i + 1,
+                title: it.title,
+                type: it.type
+              })
+            })
+        })
+        let form = _.cloneDeep(this.form)
+        form.totalScore = form.totalScore * 10
         let params = {
-          ...this.form,
-          tableData: this.testPaper
+          ...form,
+          manualSettings: manualSettings,
+          type: 'manual'
         }
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
+          this.handleBack()
         })
       })
     },
     update(data) {
       this.testPaper.map((it) => {
-        it.id === data.id && (it = Object.assign(it, data))
+        it.key === data.key && (it = Object.assign(it, data))
       })
-      let scoreList = _.compact(this.testPaper.map((it) => it.totalScore))
+      let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
+      let list = []
+      scoreList.map((it) => {
+        list.push(...it)
+      })
+      scoreList = list
       scoreList.length &&
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
+      this.score = this.form.totalScore - this.TotalScore
     },
     handleDeleteBlock(data) {
       this.$confirm('您确定要删除选中的题型吗', '提示', {
@@ -264,12 +347,16 @@ export default {
       })
     },
     handleAddType() {
-      this.themeBlock.id += 1
+      this.themeBlock.key += 1
       this.testPaper.push(_.cloneDeep(this.themeBlock))
       this.$nextTick(() => {
         let scroll = this.$refs.HandmadeTestPaper
         scroll.scrollTop = scroll.scrollHeight
       })
+    },
+    handleBack() {
+      this.$router.back()
+      this.$store.commit('DEL_TAG', this.tag)
     }
   }
 }
@@ -308,5 +395,16 @@ export default {
 }
 .footer {
   margin-top: 30px;
+}
+/deep/ .el-switch__label.is-active {
+  color: #606266;
+}
+
+/deep/ .el-switch__label {
+  color: #207efa;
+}
+
+/deep/ .el-table td .cell {
+  line-height: 60px !important;
 }
 </style>

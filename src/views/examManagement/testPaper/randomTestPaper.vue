@@ -20,6 +20,8 @@
               <el-switch
                 v-model="form.isMulti"
                 inactive-text="单项变为不定项选择"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -29,6 +31,8 @@
               <el-switch
                 v-model="form.isShowScore"
                 inactive-text="试卷上显示试题分数"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -65,6 +69,7 @@
             <el-select
               v-model="row.type"
               placeholder="请选择"
+              @change="handeleTestQuestions($event, row)"
             >
               <el-option
                 v-for="item in options"
@@ -76,21 +81,19 @@
             </el-select>
           </template>
           <template #categoryId="{row}">
-            <el-cascader
+            <el-tree-select
               :ref="'cascader' + row.id"
-              v-model="row.categoryId"
-              :options="cascaderOptions"
-              :props="props"
-              collapse-tags
-              :show-all-levels="false"
-              clearable
-              @change="change($event, row)"
-            ></el-cascader>
-            <div
-              v-if="
-                (Array.isArray(row.categoryId) && row.categoryId.length === 0) ||
-                  (valid && !row.categoryId)
+              v-model="row.categoryIds"
+              :select-params="row.column.props && row.column.props.selectParams"
+              :tree-params="row.column.props && row.column.props.treeParams"
+              v-bind="itemAttrs(row.column)"
+              :placeholder="
+                row.column.placeholder ? row.column.placeholder : `请选择${row.column.label}`
               "
+              @valueChange="check($event, row)"
+            />
+            <div
+              v-if="valid && row.categoryIds.length === 0"
               class="valid"
             >
               请选择
@@ -119,10 +122,10 @@
                 不能大于题库总数
               </div>
               <div
-                v-else-if="valid && !row.questionNum"
+                v-else-if="(valid && row.questionNum == 0) || (valid && !row.questionNum)"
                 class="valid"
               >
-                请输入
+                不能为小于等于0
               </div>
             </div>
           </template>
@@ -139,6 +142,12 @@
               class="valid"
             >
               请输入
+            </div>
+            <div
+              v-else-if="valid && row.score == 0"
+              class="valid"
+            >
+              不能输入为0
             </div>
           </template>
           <template #handler="{row}">
@@ -159,7 +168,10 @@
           >
             完成
           </el-button>
-          <el-button size="medium">
+          <el-button
+            size="medium"
+            @click="handleBack"
+          >
             取消
           </el-button>
         </div>
@@ -170,6 +182,9 @@
 
 <script>
 import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
+import { getcategoryTree } from '@/api/examManage/category'
+import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
+import { QUESTION_TYPE_MAP } from '@/const/examMange'
 
 const BASE_COLUMNS = [
   {
@@ -181,16 +196,33 @@ const BASE_COLUMNS = [
     required: true
   },
   {
-    prop: 'categoryId',
-    itemType: 'select',
+    itemType: 'treeSelect',
     label: '试卷分类',
+    prop: 'categoryId',
+    props: {
+      selectParams: {
+        placeholder: '请选择分类',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id',
+          disabled: true
+        },
+        required: true
+      }
+    },
+    required: false,
     span: 11,
-    offset: 2,
-    options: [
-      { label: '是', value: 1 },
-      { label: '否', value: 0 }
-    ],
-    required: false
+    offset: 2
   },
   {
     prop: 'totalScore',
@@ -198,6 +230,7 @@ const BASE_COLUMNS = [
     maxlength: 32,
     label: '计划总分',
     span: 11,
+    type: 'Number',
     required: false,
     props: {
       onlyNumber: true
@@ -234,6 +267,7 @@ const BASE_COLUMNS = [
   {
     prop: 'expiredTime',
     itemType: 'datePicker',
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
     label: '过期时间',
     type: 'datetime',
     span: 11,
@@ -258,13 +292,13 @@ const TABLE_COLUMNS = [
     label: '试题类型',
     prop: 'type',
     slot: true,
-    minWidth: 150
+    minWidth: 120
   },
   {
     label: '试题来源',
     prop: 'categoryId',
     slot: true,
-    minWidth: 200
+    minWidth: 250
   },
   {
     label: '题库试题总数',
@@ -294,72 +328,10 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 100
   }
 }
-const OPTIONS = [
-  { label: '单选题', value: 1 },
-  { label: '单选题', value: 2 },
-  { label: '简答题', value: 3 }
-]
-const cascaderOptions = [
-  {
-    value: 1,
-    label: '东南',
-    children: [
-      {
-        value: 2,
-        label: '上海',
-        children: [
-          { value: 3, label: '普陀', number: 1 },
-          { value: 4, label: '黄埔', number: 2 },
-          { value: 5, label: '徐汇', number: 4 }
-        ]
-      },
-      {
-        value: 7,
-        label: '江苏',
-        children: [
-          { value: 8, label: '南京', number: 1 },
-          { value: 9, label: '苏州', number: 2 },
-          { value: 10, label: '无锡', number: 3 }
-        ]
-      },
-      {
-        value: 12,
-        label: '浙江',
-        children: [
-          { value: 13, label: '杭州', number: 1 },
-          { value: 14, label: '宁波', number: 12 },
-          { value: 15, label: '嘉兴', number: 5 }
-        ]
-      }
-    ]
-  },
-  {
-    value: 17,
-    label: '西北',
-    children: [
-      {
-        value: 18,
-        label: '陕西',
-        children: [
-          { value: 19, label: '西安', number: 1 },
-          { value: 20, label: '延安', number: 4 }
-        ]
-      },
-      {
-        value: 21,
-        label: '新疆维吾尔族自治区',
-        children: [
-          { value: 22, label: '乌鲁木齐', number: 3 },
-          { value: 22, label: '乌鲁木齐', number: 3 },
-          { value: 23, label: '克拉玛依', number: 1 }
-        ]
-      }
-    ]
-  }
-]
+
 export default {
   name: 'RandomTestPaper',
   filters: {
@@ -367,20 +339,58 @@ export default {
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
+  components: {
+    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect')
+  },
   data() {
     return {
+      column: {
+        page: {
+          currentPage: 1,
+          pageSize: 10,
+          pageNo: 1,
+          total: 0
+        },
+        span: 20,
+        prop: 'orgId',
+        itemType: 'treeSelect',
+        label: '请选择上级组织',
+        required: true,
+        offset: 2,
+        props: {
+          selectParams: {
+            placeholder: '请选择试题来源',
+            multiple: true,
+            collapseTags: true
+          },
+          treeParams: {
+            data: [],
+            'show-checkbox': true,
+            'check-strictly': true,
+            'default-expand-all': false,
+            'expand-on-click-node': false,
+            clickParent: true,
+            multiple: true,
+            filterable: false,
+            props: {
+              children: 'children',
+              label: 'name',
+              value: 'id'
+            }
+          }
+        }
+      },
       TotalScore: 0,
       score: 0,
       valid: false,
-      options: OPTIONS,
-      cascaderOptions,
+      options: QUESTION_TYPE_MAP,
       props: { multiple: true },
       tableData: [],
       tableItem: {
         id: '1',
-        type: 1,
+        type: 'single_choice',
         expiredTime: '',
-        categoryId: '',
+        categoryIds: [],
         totalQuestionNum: '',
         questionNum: '',
         score: '',
@@ -405,15 +415,94 @@ export default {
     }
   },
   mounted() {
-    this.tableData.push(_.cloneDeep(this.tableItem))
-    this.testPaper = {}
+    this.options = []
+    for (let key in QUESTION_TYPE_MAP) {
+      this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
+    }
     this.getData()
+    this.getTestPaperCategory()
+    if (!this.$route.query.id) {
+      this.pushItem()
+    }
   },
   methods: {
+    handeleTestQuestions(data, row) {
+      row.categoryIds = []
+      row.totalQuestionNum = ''
+      row.questionNum = ''
+      this.getTopicCategory(data, row.column)
+    },
+    itemAttrs(column) {
+      const copy = { ...defaultAttrs[column.itemType] }
+      for (const key in column) {
+        if (!noneItemAttrs.includes(key)) {
+          copy[key] = column[key]
+        }
+      }
+
+      return copy
+    },
+    getTopicCategory(relateType = '', column) {
+      //single_choice
+      let params = {
+        type: '0',
+        relateType: relateType
+      }
+      getcategoryTree(params).then((res) => {
+        this.column.props.treeParams.data = res
+        column.props.treeParams.data = res
+      })
+    },
+    pushItem() {
+      let tableItem = _.cloneDeep(this.tableItem)
+      tableItem.column = _.cloneDeep(this.column)
+      this.tableData.push(tableItem)
+      this.getTopicCategory(tableItem.type, tableItem.column)
+    },
+    getTestPaperCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
+      })
+    },
     getData() {
       if (!this.$route.query.id) return
-      getTestPaper().then((res) => {
-        res
+      let params = {
+        id: this.$route.query.id
+      }
+      getTestPaper(params).then((res) => {
+        let {
+          id,
+          expiredTime,
+          categoryId,
+          totalScore,
+          remark,
+          name,
+          isScore,
+          isShowScore,
+          randomSettings,
+          isMulti
+        } = res
+        //后台要精确到一位小数，返回是乘以10
+        totalScore = totalScore / 10
+        this.form = {
+          id,
+          name,
+          categoryId,
+          expiredTime,
+          totalScore,
+          remark,
+          isScore,
+          isShowScore,
+          isMulti
+        }
+        randomSettings.map((data) => {
+          data.column = _.cloneDeep(this.column)
+          this.getTopicCategory(data.type, data.column)
+        })
+        this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
       })
     },
     handleDelete(row) {
@@ -425,17 +514,28 @@ export default {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
         if (
-          this.tableData.filter((it) => !it.categoryId || !it.questionNum || !it.score).length > 0
-        )
+          this.tableData.filter(
+            (it) =>
+              !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
+          ).length > 0
+        ) {
+          this.$message.warning('请检查试题设置')
           return
+        }
+        //后台要精确到一位小数，提交是乘以10
+        let randomSettings = this.tableData.map((it) => ({ ...it, score: it.score * 10 }))
+        let form = _.cloneDeep(this.form)
+        form.totalScore = form.totalScore * 10
+        let params = {
+          ...form,
+          randomSettings: randomSettings,
+          type: 'random'
+        }
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-        let params = {
-          ...this.form,
-          tableData: this.tableData
-        }
         testPaperMether(params).then(() => {
           this.$message.success('提交成功')
+          this.handleBack()
         })
       })
     },
@@ -446,21 +546,23 @@ export default {
         (this.TotalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
+      this.score = this.form.totalScore - this.TotalScore
     },
-    change(value, data) {
-      setTimeout(() => {
-        let obj = this.$refs['cascader' + data.id].getCheckedNodes()
-        data.totalQuestionNum = _.compact(obj.map((it) => it.data.number)).reduce((prev, cur) => {
-          return prev + cur
-        }, 0)
-        let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
-        data.questionNum = random(1, data.totalQuestionNum)
-      }, 200)
+    check(data, row) {
+      row.totalQuestionNum = _.compact(data.map((it) => it.relatedNum)).reduce((prev, cur) => {
+        return prev + cur
+      }, 0)
+      let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
+      row.questionNum = random(1, row.totalQuestionNum)
     },
     handleAddTopic() {
       this.tableItem.id += 1
       this.valid = false
-      this.tableData.push(_.cloneDeep(this.tableItem))
+      this.pushItem()
+    },
+    handleBack() {
+      this.$router.back()
+      this.$store.commit('DEL_TAG', this.tag)
     }
   }
 }
@@ -471,34 +573,42 @@ export default {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
 }
+
 .title {
   font-size: 18px;
   font-weight: 800;
   margin-bottom: 20px;
   padding-right: 30px;
+
   .tip {
     /*font-weight: 400;*/
     font-size: 14px;
   }
 }
+
 .content {
   max-width: 896px;
   margin: 0 auto;
+
   .form {
   }
+
   .table {
   }
 }
-/deep/.el-switch__label.is-active {
+
+/deep/ .el-switch__label.is-active {
   color: #606266;
 }
-/deep/.el-switch__label {
+
+/deep/ .el-switch__label {
   color: #207efa;
 }
 
-/deep/.el-table td .cell {
+/deep/ .el-table td .cell {
   line-height: 60px !important;
 }
+
 .valid {
   position: absolute;
   line-height: 18px !important;
@@ -506,6 +616,7 @@ export default {
   font-size: 12px;
   color: #f56c6c;
 }
+
 .footer {
   margin-top: 30px;
 }

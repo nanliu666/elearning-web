@@ -125,8 +125,9 @@
 </template>
 
 <script>
-import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
+import { getTestPaperList, deleteTestPaper, getCreatUsers } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
+import { getcategoryTree } from '@/api/examManage/category'
 const TABLE_COLUMNS = [
   {
     label: '考试名称',
@@ -142,32 +143,32 @@ const TABLE_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '正常',
-          '2': '禁用'
+          normal: '正常',
+          expired: '已过期'
         }[row.status] || ''
       )
     }
   },
   {
     label: '试卷分类',
-    prop: 'categoryId',
+    prop: 'categoryName',
     minWidth: 120
   },
   {
     label: '关联考试数',
-    prop: 'testNum',
+    prop: 'examNum',
     slot: true,
     minWidth: 120
   },
   {
     label: '创建人',
-    prop: 'founder',
+    prop: 'creatorName',
     minWidth: 120
   },
   {
     label: '有效时间',
     slot: true,
-    prop: 'effectiveTime',
+    prop: 'expiredTime',
     minWidth: 320
   }
 ]
@@ -195,6 +196,7 @@ export default {
       page: {
         currentPage: 1,
         pageSize: 10,
+        pageNo: 1,
         total: 0
       },
       tableLoading: false,
@@ -207,24 +209,40 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'examName',
+            field: 'name',
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '题干内容', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '考试名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
           {
-            type: 'select',
-            field: 'paperType',
-            label: '试卷分类',
+            type: 'treeSelect',
+            // data多选是数组单选是字符串
             data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
+            label: '试卷分类',
+            field: 'categoryId',
+            config: {
+              multiple: true,
+              selectParams: {
+                placeholder: '试卷分类'
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  disabled: 'disabled',
+                  value: 'id'
+                }
+              }
+            }
           },
           {
             type: 'select',
@@ -233,27 +251,28 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 'normal', label: '正常' },
+              { value: 'expired', label: '过期' }
             ]
           },
           {
             type: 'select',
-            field: 'paperMaker',
+            field: 'creatorId',
             label: '创建人',
+            config: { optionLabel: 'name', optionValue: 'userId' },
             data: '',
-            options: [
-              { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
-            ]
+            options: []
           },
           {
             type: 'dataPicker',
             label: '有效时间',
             data: '',
-            field: 'beginEntryDate,endEntryDate',
-            config: { type: 'daterange', 'range-separator': '至' }
+            field: 'beginTime,endTime',
+            config: {
+              type: 'datetimerange',
+              'range-separator': '至',
+              'value-format': 'yyyy-MM-dd HH:mm:ss'
+            }
           }
         ]
       },
@@ -262,11 +281,39 @@ export default {
       searchParams: {}
     }
   },
+  mounted() {
+    this.getCategory()
+    this.getCreatUsers()
+  },
   activated() {
     this.loadTableData()
   },
   methods: {
+    getCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      })
+    },
+    getCreatUsers() {
+      getCreatUsers().then((res) => {
+        this.searchConfig.popoverOptions.find((it) => it.field == 'creatorId').options = res
+      })
+    },
+    getTestPaperCategory() {
+      let params = {
+        type: '1'
+      }
+      getcategoryTree(params).then((res) => {
+        this.searchConfig.popoverOptions.find((it) => it.field == 'categoryId').options = res
+      })
+    },
     handleCommand(data, id, copy) {
+      if (typeof id === 'object') {
+        id = null
+      }
       if (data === 'manual') {
         this.handleManual(id, copy)
       } else {
@@ -293,7 +340,6 @@ export default {
     },
     handleLookUp(row) {
       this.handleCommand(row.type, row.id)
-      this.$store.dispatch('setTestPaper', row)
     },
     handleCope(row) {
       this.handleCommand(row.type, row.id, 'copy')
@@ -315,7 +361,7 @@ export default {
     },
 
     handleCurrentPageChange(param) {
-      this.page.currentPage = param
+      this.page.pageNo = param
       this.loadTableData()
     },
     handlePageSizeChange(param) {

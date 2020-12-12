@@ -36,7 +36,10 @@
                 konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
               }}</span>
             </li>
-            <li class="details-li">
+            <li
+              v-if="konwledgeDetail.uploadType === 0"
+              class="details-li"
+            >
               <span class="li-label">是否允许下载：</span>
               <span class="li-value">{{
                 konwledgeDetail.allowDownload === '0' ? '是' : '否'

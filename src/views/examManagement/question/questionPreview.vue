@@ -1,8 +1,8 @@
 <template>
-  <div class="qustion">
-    <div class="qustion__content">
+  <span class="qustion">
+    <span class="qustion__content">
       <span class="qustion__label">题目: </span><span v-html="data.content"></span>
-    </div>
+    </span>
     <div
       v-if="!_.isEmpty(data.attachments)"
       class="qustion__attachments"
@@ -80,7 +80,7 @@
       :visible.sync="viewing"
       :initial-index="viewIndex"
     ></image-viewer>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -91,8 +91,8 @@ import {
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
   QUESTION_TYPE_SHOER,
-  QUESTION_TYPE_BLANK
-  // QUESTION_TYPE_GROUP
+  QUESTION_TYPE_BLANK,
+  QUESTION_TYPE_GROUP
 } from '@/const/examMange'
 export default {
   name: 'QustionPreview',
@@ -120,7 +120,8 @@ export default {
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   methods: {
     handlePreviewImage(list, index = 0) {
@@ -134,11 +135,8 @@ export default {
 
 <style lang="scss" scoped>
 .qustion {
-  &__content {
-    margin-bottom: 12px;
-  }
   &__attachments {
-    margin-bottom: 12px;
+    margin-top: 12px;
     .el-image {
       vertical-align: middle;
     }
@@ -170,6 +168,7 @@ export default {
     }
   }
   &__options {
+    margin-top: 12px;
     li {
       margin-bottom: 12px;
       // &:last-of-type {
