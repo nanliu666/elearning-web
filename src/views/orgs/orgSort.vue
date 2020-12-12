@@ -13,6 +13,7 @@
           :props="{ label: 'orgName' }"
           default-expand-all
           draggable
+          :allow-drag="allowDrag"
           :allow-drop="allowDrop"
         />
       </div>
@@ -66,8 +67,10 @@ export default {
         }
       })
     },
+    allowDrag(draggingNode) {
+      if (draggingNode.data.parentId === '0') return false
+    },
     allowDrop(draggingNode, dropNode, type) {
-      if (draggingNode.data.parentId === '0') return
       let draggIndex = this.orgTypeList.indexOf(draggingNode.data.orgType)
       let dropIndex = this.orgTypeList.indexOf(dropNode.data.orgType)
       if (draggIndex < dropIndex) {

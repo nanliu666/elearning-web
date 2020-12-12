@@ -143,8 +143,20 @@ export default {
         this.orgTree = res
       })
     },
+    checkSameName() {
+      let target = this.findOrg(this.form.parentId)
+      let temp = _.isEmpty(target) ? this.orgTree : target.children
+      let hasSameName = _.some(temp, (child) => {
+        return child.name === this.form.name
+      })
+      if (hasSameName) {
+        this.$message.error('该分类已存在')
+      }
+      return hasSameName
+    },
     // 提交
     submit(to) {
+      if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -160,6 +172,7 @@ export default {
                 this.$emit('refresh')
                 this.$emit('changevisible', false)
               } else {
+                this.$emit('changevisible', false)
                 this.$router.push({
                   path: '/examManagement/question/questionEdit',
                   query: { categoryId: res.id }
