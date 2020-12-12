@@ -1,14 +1,24 @@
 <template>
   <div class="Menu fill">
-    <page-header title="证书管理">
+    <page-header title="证书发放明细">
       <template slot="rightMenu">
         <el-button
           type="primary"
           size="medium"
-          @click="toAddCertificate"
+          @click="isexportGrantExcel"
         >
-          新建模板
+          <!-- <el-button type="primary" size="small" @click="downloadTable" class="button">
+            <a :href="url" ref="file" :download="downloadName"></a>
+            <i class="el-icon-upload"></i> 导出
+          </el-button> -->
+
+          导出Excel
         </el-button>
+        <a
+          ref="file"
+          :href="downloadurl"
+          :download="downloadurl"
+        ></a>
       </template>
     </page-header>
     <basic-container block>
@@ -37,7 +47,7 @@
                 @click="loadTableData"
               >
                 <i class="el-icon-refresh-right" />
-                <span>刷新</span>
+                <span>调整排序</span>
               </div>
               <el-popover
                 placement="bottom"
@@ -81,82 +91,11 @@
           </el-button>
         </template>
 
-        <!-- 状态 -->
-        <template #status="{row}">
-          {{ row.status === 0 ? '停用' : '正常' }}
-        </template>
-
-        <template #handler="{row}">
-          <el-button
-            v-if="row.status"
-            type="text"
-            @click="blockStart(row.id, 0)"
-          >
-            停用
-          </el-button>
-          <span
-            v-else
-            @click="blockStart(row.id, 1)"
-          >启用 &nbsp; </span>
-          <!-- 预览框 -->
-          <el-tooltip
-            placement="top"
-            effect="light"
-          >
-            <div
-              slot="content"
-              class="preview"
-            >
-              <div class="previewTitle">
-                <span>预览</span> <i class="el-icon-close"></i>
-              </div>
-              <div class="previewContent">
-                <div class="preview_right_box">
-                  <img
-                    :src="preview.backUrl"
-                    alt=""
-                    class="bgimg"
-                  />
-                  <div class="name">
-                    {{ preview.name }}
-                  </div>
-                  <div class="text">
-                    {{ preview.text }}
-                  </div>
-                  <img
-                    :src="preview.logoUrl"
-                    alt=""
-                    class="logo"
-                  />
-                  <div class="studentName">
-                    张三
-                  </div>
-                  <div class="serial">
-                    <div>证书编号:</div>
-                    <div>YB-20201130-0001</div>
-                    <div>{{ preview.createTime }}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="previewBtn">
-                <el-button>取消</el-button>
-                <el-button type="primary">
-                  确定
-                </el-button>
-              </div>
-            </div>
-            <el-button type="text">
-              <span @mouseover="previewMouseOver(row.id)">预览</span>
-            </el-button>
-          </el-tooltip>
-
-          <el-button
-            type="text"
-            @click="handleRemove(row.id)"
-          >
-            删除
-          </el-button>
-        </template>
+        <!-- <template slot="resName" slot-scope="{ row }">
+          <div class="ellipsis title" @click="jumpDetail(row)">
+            {{ row.resName }}
+          </div>
+        </template> -->
       </common-table>
     </basic-container>
   </div>
@@ -165,44 +104,48 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import {
-  getCertificateList,
-  getSingleCertificate,
-  updateStatus,
-  delTemplate
+  delTemplate,
+  getCertificateGrantList,
+  delGrantDetails,
+  exportGrantExcel
 } from '@/api/certificate/certificate'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 70,
-    type: 'index'
+    label: '学员编号',
+    width: 150,
+    prop: 'stuNo'
   },
   {
-    label: '模板名称',
-    width: 180,
-    prop: 'name'
+    label: '姓名',
+    width: 100,
+    prop: 'stuName'
   },
   {
-    label: '文案',
-    prop: 'text',
-    width: 300
+    label: '部门',
+    prop: 'deptName	',
+    width: 200
   },
   {
-    label: '颁发机构',
-    prop: 'awardAgency',
-    minWidth: 100
+    label: '证书编号',
+    prop: 'certificateNo',
+    minWidth: 150
   },
   {
-    label: '状态',
-    slot: true,
-    prop: 'status',
-    minWidth: 100
+    label: '模版名称',
+    prop: 'templateName',
+    minWidth: 150
+  },
+  {
+    label: '发放时间',
+    prop: 'grantTime',
+    minWidth: 150
   }
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
-  showHandler: true,
+  //   showHandler: true,
   enableMultiSelect: true,
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
@@ -212,30 +155,28 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入模板名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入证书编号/姓名进行搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'stuName',
     label: '',
-    type: 'input'
+    type: 'input',
+    width: 300
   }
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'input',
-    field: 'agency',
-    label: '颁发机构',
-    data: ''
-    // config: { optionLabel: 'name', optionValue: 'id' }
+    type: 'dataPicker',
+    label: '日期范围',
+    data: '',
+    field: 'beginEntryDate,endEntryDate',
+    config: { type: 'daterange', 'range-separator': '至' }
   },
   {
-    type: 'select',
-    field: 'status',
-    label: '状态',
-    data: '',
-    options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
-    ]
+    placeholder: '请输入证书模版名称',
+    type: 'input',
+    field: 'templateName',
+    label: '证书模版',
+    data: ''
   }
 ]
 let SEARCH_POPOVER_CONFIG = {
@@ -283,6 +224,8 @@ export default {
   },
   data() {
     return {
+      downloadurl: '',
+      downloadName: '',
       preview: {},
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
@@ -318,6 +261,11 @@ export default {
     this.refreshTableData()
   },
   methods: {
+    //   导出证书发放列表Excel
+    async isexportGrantExcel() {
+      this.downloadurl = await exportGrantExcel(this.queryInfo)
+      this.$refs.file.click()
+    },
     // 去新建证书
     toAddCertificate() {
       this.$router.push({ path: '/certificate/addCertificate' })
@@ -328,8 +276,7 @@ export default {
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-
-      await delTemplate({ templateIds: selectedIds.join(',') })
+      await delGrantDetails({ grantIds: selectedIds.join(',') })
       this.$message.success('删除成功')
       this.loadTableData()
     },
@@ -340,20 +287,6 @@ export default {
         this.loadTableData()
       })
     },
-    // 停用&启用
-    blockStart(id, i) {
-      updateStatus({ templateId: id, choice: 1 }).then(() => {
-        this.$message.success(`${i ? '启用' : '停用'}成功`)
-        this.loadTableData()
-      })
-    },
-    //   预览Btn
-    previewMouseOver(id) {
-      getSingleCertificate({ templateId: id }).then((res) => {
-        this.preview = res
-      })
-    },
-
     /**
      * 处理页码改变
      */
@@ -372,7 +305,9 @@ export default {
      * 搜索
      */
     handleSearch(searchParams) {
-      for (let i in searchParams) {
+      let params = searchParams
+      params.dateRange = searchParams.beginEntryDate + '~' + searchParams.endEntryDate
+      for (let i in params) {
         this.queryInfo[i] = searchParams[i]
       }
       this.loadTableData()
@@ -395,11 +330,11 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getCertificateList(this.queryInfo)
+        let { totalNum, data } = await getCertificateGrantList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
-        // window.console.log(error)
+        window.console.log(error)
       } finally {
         this.tableLoading = false
       }

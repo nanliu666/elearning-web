@@ -610,6 +610,32 @@ const res = {
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
+          },
+          {
+            menuId: '1212437546742158',
+            menuName: '新建证书模版',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/certificate/addCertificate',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12679683472345158',
+            menuName: '证书发放明细',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/certificate/certificateDetail',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },
