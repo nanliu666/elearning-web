@@ -114,10 +114,10 @@
           slot-scope="{ row }"
         >
           <span
-            style="cursor: pointer"
+            class="title-class"
             @click="toOrgDetail(row)"
           >
-            <el-button type="text">{{ row.orgName }}</el-button>
+            {{ row.orgName }}
           </span>
         </template>
         <template #orgType="{row}">
@@ -179,7 +179,7 @@ const TABLE_COLUMNS = [
     label: '组织名称',
     prop: 'orgName',
     slot: true,
-    minWidth: 150
+    minWidth: 250
   },
   {
     label: '组织类型',
@@ -567,6 +567,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.title-class {
+  cursor: pointer;
+  color: $primaryColor;
+}
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
