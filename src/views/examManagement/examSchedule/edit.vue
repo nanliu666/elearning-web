@@ -84,6 +84,7 @@
         <ExamBatch
           v-show="activeStep === 1"
           ref="examBatch"
+          @jump="jumpStep(1)"
         />
       </el-col>
     </el-row>

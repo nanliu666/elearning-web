@@ -127,8 +127,20 @@ export default {
         this.orgTree = res
       })
     },
+    checkSameName() {
+      let target = this.findOrg(this.form.parentId)
+      let temp = _.isEmpty(target) ? this.orgTree : target.children
+      let hasSameName = _.some(temp, (child) => {
+        return child.name === this.form.name
+      })
+      if (hasSameName) {
+        this.$message.error('该分类已存在')
+      }
+      return hasSameName
+    },
     // 提交
     submit(type) {
+      if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -141,7 +153,6 @@ export default {
                 if (type === 'add') {
                   this.$emit('refresh')
                 } else {
-                  // TODO: 需要后端补充分类id
                   this.$router.push({
                     path: '/repository/knowledgeEdit',
                     query: { catalogId: res.id }

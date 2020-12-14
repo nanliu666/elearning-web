@@ -114,10 +114,10 @@
           slot-scope="{ row }"
         >
           <span
-            style="cursor: pointer"
+            class="title-class"
             @click="toOrgDetail(row)"
           >
-            <el-button type="text">{{ row.orgName }}</el-button>
+            {{ row.orgName }}
           </span>
         </template>
         <template #orgType="{row}">
@@ -170,7 +170,6 @@
 
 <script>
 import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader } from '@/api/org/org'
-import { tableOptions } from '@/util/constant'
 import SearchPopover from '@/components/searchPopOver/index'
 import OrgEdit from './components/orgEdit'
 
@@ -179,7 +178,7 @@ const TABLE_COLUMNS = [
     label: '组织名称',
     prop: 'orgName',
     slot: true,
-    minWidth: 150
+    minWidth: 250
   },
   {
     label: '组织类型',
@@ -329,19 +328,6 @@ export default {
       },
       data: [],
       multipleSelection: [],
-      option: {
-        ...tableOptions,
-        headerAlign: 'center',
-        align: 'center',
-        border: false,
-        menuWidth: 180,
-        selectionWidth: 60,
-        defaultExpandAll: true,
-        selection: true,
-        formHeight: 20,
-        rowKey: 'orgId',
-        column: TABLE_COLUMNS
-      },
       newOrg: {},
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
@@ -513,7 +499,7 @@ export default {
       })
     },
     columnChange() {
-      this.option.column = TABLE_COLUMNS.filter((item) => {
+      this.tableColumns = TABLE_COLUMNS.filter((item) => {
         return this.checkColumn.indexOf(item.prop) > -1
       })
     },
@@ -567,6 +553,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.title-class {
+  cursor: pointer;
+  color: $primaryColor;
+}
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);

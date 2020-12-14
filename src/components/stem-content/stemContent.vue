@@ -290,6 +290,10 @@ export default {
     this.getcategoryTree()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 批量删除选中
+     * */
     handleAllSelete(selection) {
       this.selectData = this.selectData.filter((it) => {
         let data = selection.filter((item) => item.id == it.id)
@@ -298,9 +302,18 @@ export default {
         }
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDelete(row) {
       this.selectData = this.selectData.filter((it) => it.id !== row.id)
     },
+    /**
+     * @author guanfenda
+     * @desc 添加选中
+     * */
     addTopic() {
       this.$refs.table.clearSelection()
       let selection = this.selection.filter((it) => {
@@ -315,26 +328,42 @@ export default {
       })
       this.selectData.push(...selection)
     },
+    /**
+     * @author guanfenda
+     * @desc 确认选中
+     * */
     onsubmit() {
       this.$emit('input', this.selectData)
       this.onClose()
     },
+    /**
+     * @author guanfenda
+     * @desc 选中的数据
+     * */
     select(data) {
       this.selection = data
     },
+    /**
+     * @author guanfenda
+     * @desc 获取table 数据
+     *
+     * */
     getData() {
       let params = {
-        pageNo: 1,
-        pageSize: 10,
         categoryId: this.form.category,
         search: this.form.search,
         type: this.type
       }
-      getQuestionList(params).then((res) => {
+      getQuestionList(params, this.page, { pageNo: this.page.currentPage }).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试题分类
+     *
+     * */
     getcategoryTree() {
       let params = {
         parentId: 0,
@@ -348,19 +377,32 @@ export default {
     },
     // 搜索
     handleSearch() {
+      this.page.currentPage = 1
       this.getData()
     },
-    loadTableData() {},
+    /**
+     * @author guanfenda
+     * @desc 过滤非数字
+     *
+     * */
     numberInput(value, data) {
       this.form[data] = value.replace(/[^\d]/g, '')
     },
+    /**
+     * @author guanfenda
+     * @desc 当前页加载
+     * */
     handleCurrentPageChange(param) {
-      this.page.pageNo = param
-      this.loadTableData()
+      this.page.currentPage = param
+      this.getData()
     },
+    /**
+     * @author guanfenda
+     * @desc 当前页加载多少条数据
+     * */
     handlePageSizeChange(param) {
       this.page.pageSize = param
-      this.loadTableData()
+      this.getData()
     },
     onOpened() {},
     onClose() {

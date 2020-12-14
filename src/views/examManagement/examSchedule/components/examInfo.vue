@@ -454,19 +454,20 @@ const EventColumns = [
     prop: 'publicAnswers',
     label: '允许考生查看标准答案'
   },
-  {
-    itemType: 'switch',
-    span: 11,
-    offset: 2,
-    prop: 'openEntrance',
-    label: '允许考生报名参加考试'
-  },
-  {
-    itemType: 'switch',
-    span: 11,
-    prop: 'isExamine',
-    label: '考生报名考试需要审批'
-  },
+  //TODO: 暂时隐藏
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'openEntrance',
+  //   label: '允许考生报名参加考试'
+  // },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   prop: 'isExamine',
+  //   label: '考生报名考试需要审批'
+  // },
   {
     prop: 'strategyTitle',
     itemType: 'slotout',
@@ -625,7 +626,7 @@ export default {
         openAnswerSheet: false,
         selfMarking: false,
         publicAnswers: false,
-        openEntrance: false,
+        // openEntrance: false,
         isExamine: false,
         openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
         modifyAnswer: false,

@@ -33,15 +33,15 @@ const switchConfig = [
   {
     label: '允许考生查看标准答案',
     prop: 'publicAnswers'
-  },
-  {
-    label: '允许考生报名参加考试',
-    prop: 'openEntrance'
-  },
-  {
-    label: '考生报名考试需要审批',
-    prop: 'isExamine'
   }
+  // {
+  //   label: '允许考生报名参加考试',
+  //   prop: 'openEntrance'
+  // },
+  // {
+  //   label: '考生报名考试需要审批',
+  //   prop: 'isExamine'
+  // }
 ]
 const defaultValue = {
   id: '',
@@ -50,7 +50,7 @@ const defaultValue = {
   openAnswerSheet: false,
   selfMarking: false,
   publicAnswers: false,
-  openEntrance: false,
+  // openEntrance: false,
   isExamine: false,
   openResultsValue: 0 // 默认值0，表示永久
 }
