@@ -33,6 +33,7 @@
             :props="treeProps"
             :expand-on-click-node="false"
             default-expand-all
+            :current-node-key="activeCategory ? activeCategory.id : null"
             @node-click="nodeClick"
           >
             <span
