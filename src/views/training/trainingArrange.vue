@@ -40,9 +40,9 @@
               suffix-icon="el-icon-search"
             >
             </el-input>
-            <!-- <div class="ungrouped">
-              未分类（6）
-            </div> -->
+            <div class="ungrouped">
+              未分类
+            </div>
 
             <el-tree
               ref="tree"
@@ -65,6 +65,7 @@
                   <el-input
                     v-model="inputGroupingSon"
                     placeholder="请输入内容"
+                    maxlength="20"
                   ></el-input>
                   <el-button
                     type="text"
@@ -114,6 +115,7 @@
               <el-input
                 v-model="inputGrouping"
                 placeholder="请输入内容"
+                maxlength="20"
               ></el-input>
               <span
                 class="isShowinput_yes"
@@ -217,6 +219,7 @@
                       effect="dark"
                       placement="top"
                       style="color:#acb3b8;"
+                      @click="refreshTableData"
                     >
                       <el-button
                         v-if="!status"
@@ -232,6 +235,7 @@
                     <span
                       v-if="!status"
                       class="text_refresh"
+                      @click="refreshTableData"
                     >刷新</span>
                     <el-popover
                       placement="bottom"
@@ -340,7 +344,7 @@
                   <el-button
                     type="text"
                     size="medium"
-                    @click.stop="handleConfig(scope.row, scope.index, 0)"
+                    @click.stop="handleConfig(scope.row.id)"
                   >
                     开办下一期
                   </el-button>
@@ -634,6 +638,12 @@ export default {
   },
   activated() {},
   methods: {
+    // 去开办下一期
+    handleConfig(id) {
+      this.$router.push({ path: '/training/trainingEdit?id=' + id })
+    },
+    // 去创建培训
+    toCreateTraining() {},
     goAdd() {
       this.$router.push({ path: '/training/edit' })
     },
@@ -667,7 +677,9 @@ export default {
       params.categoryId = this.idSchedule
       params = { ...params, ...this.page, ...param }
       getScheduleList(params).then((res) => {
+        // console.log(res);
         this.tableData = res.data
+        this.page.total = res.totalNum
       })
     },
 
@@ -744,7 +756,7 @@ export default {
           }
         }
         this.data = datar
-        this.idSchedule = datar[0].children[0].id
+        // this.idSchedule = datar[0].children[0].id || ''
         this.isgetScheduleList()
       })
     },
@@ -846,16 +858,21 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            let params = {
-              classifyId: '', //讲师所属分类ID
-              id: '' //讲师所属分组ID
-            }
-            if (data.btnshow) {
-              params.id = data.id
+            // console.log(data);
+            if (!data.children) {
+              let params = {
+                classifyId: '', //讲师所属分类ID
+                id: '' //讲师所属分组ID
+              }
+              if (data.btnshow) {
+                params.id = data.id
+              } else {
+                params.classifyId = data.id
+              }
+              this.isdelCatalogs(params)
             } else {
-              params.classifyId = data.id
+              this.$message.error('你选中的分类下存在数据，请先调整后再删除')
             }
-            this.isdelCatalogs(params)
           })
           .catch(() => {
             this.$message({
@@ -942,7 +959,9 @@ export default {
     },
 
     // 刷新列表数据
-    refreshTableData() {},
+    refreshTableData() {
+      this.isgetScheduleList()
+    },
 
     // 已发布&草稿nav
     showSelect(index) {
@@ -1112,6 +1131,7 @@ $color_icon: #A0A8AE
 
       /deep/ .el-icon-more {
         transform: rotate(-90deg);
+        z-index: 99999;
       }
     }
     .tree_input {
