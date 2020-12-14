@@ -39,7 +39,7 @@
               slot-scope="{ node, data }"
               class="custom-tree-node"
             >
-              <span>{{ data.name }}</span><span>{{ data.relatedNum ? ` (${data.relatedNum})` : '' }}</span>
+              <span>{{ data.name }}</span><span>{{ data.relatedNum ? ` (${data.relatedNum})` : ' (0)' }}</span>
             </span>
           </el-tree>
         </basic-container>
@@ -91,7 +91,11 @@
             <template #content="{row}">
               <div class="question-content">
                 <div class="ellipsis">
-                  {{ deleteHTMLTag(row.content) }}
+                  {{
+                    deleteHTMLTag(row.content).length > 200
+                      ? deleteHTMLTag(row.content).slice(0, 200) + '...'
+                      : deleteHTMLTag(row.content)
+                  }}
                 </div>
                 <div>
                   {{ QUESTION_TYPE_MAP[row.type] || '' }}<span class="divider">|</span>状态：{{
@@ -224,6 +228,7 @@ export default {
     },
     nodeClick(data) {
       this.activeCategory = data
+      this.page.currentPage = 1
       this.loadData()
     },
     loadTree() {
@@ -231,6 +236,9 @@ export default {
       getQuestionCategory({ parentId: '0', type: '0' })
         .then((data) => {
           this.treeData = [{ id: null, name: '未分类' }, ...data]
+          getQuestionList({ pageNo: 1, pageSize: 1 }).then((res) => {
+            this.$set(this.treeData, 0, { id: null, name: '未分类', relatedNum: res.totalNum })
+          })
         })
         .catch(() => {})
         .finally(() => {

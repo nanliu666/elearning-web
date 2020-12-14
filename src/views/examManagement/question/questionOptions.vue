@@ -17,6 +17,7 @@
           v-if="isCheckBox"
           v-model="option.isCorrect"
           :true-label="1"
+          :false-label="0"
         >
           {{ '' }}
         </el-checkbox>

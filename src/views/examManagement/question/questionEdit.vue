@@ -69,6 +69,22 @@
               >（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）</span>
             </template>
             <template
+              v-else
+              #content-label=""
+            >
+              选项
+              <el-tooltip
+                class="item"
+                effect="dark"
+                placement="top-start"
+              >
+                <div slot="content">
+                  最多插入5张图片。
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
+            <template
               v-if="form.type === QUESTION_TYPE_BLANK"
               #answer-label=""
             >
@@ -115,6 +131,7 @@
                   />
                 </template>
                 <div
+                  v-if="form.subQuestions.length < 20"
                   class="sub-questions__add"
                   @click="handleAddSub"
                 >
@@ -134,6 +151,7 @@
             </el-button>
             <!-- @click="handleSubmit(true)" -->
             <el-button
+              v-if="!id"
               v-loading="submitingAndContinue"
               size="medium"
               style="margin-left:16px;"
@@ -379,7 +397,37 @@ export default {
         /**
          * 根据试题类型切换表单内容
          */
-        if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
+        if (val === QUESTION_TYPE_SINGLE) {
+          SELECT_COLUMNS[2].rules = [
+            {
+              validator: (rule, value, callback) => {
+                if (_.some(value, (item) => !item.content && !item.url)) {
+                  return callback(new Error('选项内容请填写完整'))
+                } else if (!_.some(value, { isCorrect: 1 })) {
+                  return callback(new Error('请设置正确选项'))
+                }
+                callback()
+              },
+              trigger: 'change'
+            }
+          ]
+          this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+        } else if (QUESTION_TYPE_MULTIPLE === val) {
+          SELECT_COLUMNS[2].rules = [
+            {
+              validator: (rule, value, callback) => {
+                if (_.some(value, (item) => !item.content && !item.url)) {
+                  return callback(new Error('选项内容请填写完整'))
+                } else if (!_.some(value, { isCorrect: 1 })) {
+                  return callback(new Error('请设置正确选项'))
+                } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
+                  return callback(new Error('多选题请最少选择两个正确答案'))
+                }
+                callback()
+              },
+              trigger: 'change'
+            }
+          ]
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
         } else if (val === QUESTION_TYPE_JUDGE) {
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
