@@ -84,7 +84,7 @@
         <ExamBatch
           v-show="activeStep === 1"
           ref="examBatch"
-          @jump="jumpStep(1)"
+          @jump="jumpStepByBatch"
         />
       </el-col>
     </el-row>
@@ -137,6 +137,11 @@ export default {
     this.initData()
   },
   methods: {
+    jumpStepByBatch() {
+      if (this.activeStep === 0) {
+        this.jumpStep(1)
+      }
+    },
     jumpStep(index) {
       this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
         this.activeStep = index

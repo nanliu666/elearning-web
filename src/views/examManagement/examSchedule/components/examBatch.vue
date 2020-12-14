@@ -115,19 +115,19 @@ export default {
       }
     },
     getData() {
-      let data = []
-      _.each(this.batchList, ({ examList, examTime, id }, index) => {
-        let examineeIds = []
-        _.each(examList, (item) => {
-          examineeIds.push(item.userId)
-        })
-        data.push({ batchNumber: index, examTime, examineeIds, id })
-      })
       return new Promise((resolve) => {
         if (_.size(this.batchList) === 0) {
           this.$message.error('考生批次至少存在一批')
           this.$emit('jump')
         } else {
+          let data = []
+          _.each(this.batchList, ({ examList, examTime, id }, index) => {
+            let examineeIds = []
+            _.each(examList, (item) => {
+              examineeIds.push(item.userId)
+            })
+            data.push({ batchNumber: index, examTime, examineeIds, id })
+          })
           resolve(data) // TODO 提交表单
         }
       })
