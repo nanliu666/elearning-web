@@ -70,7 +70,7 @@ const user = {
             )
             const menu = filterTree(
               data.menuPrivileges,
-              (node) => node.isOwn === 1 && node.menuType !== 'Button'
+              (node) => node.isOwn === 1 && node.menuType !== 'Button' && node.isEnabled === 1
             )
             sortTree(menu, (a, b) => a.sort - b.sort)
             commit('SET_MENU', menu)
