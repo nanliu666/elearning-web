@@ -86,7 +86,7 @@
           <el-radio :label="false">
             不计时
           </el-radio>
-          <radioInput
+          <radio-input
             :label="true"
             :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
@@ -102,7 +102,7 @@
             <el-radio :label="false">
               不限次数
             </el-radio>
-            <radioInput
+            <radio-input
               :label="true"
               :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
@@ -238,7 +238,7 @@
 <script>
 import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
 import SwitchInput from './atomComponents/switchInput'
-import radioInput from '@/components/radioInput/radioInput'
+import RadioInput from '@/components/radio-input/radio-input'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
@@ -576,7 +576,7 @@ export default {
   components: {
     achivementRadioInput,
     SwitchInput,
-    radioInput,
+    RadioInput,
     checkboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
