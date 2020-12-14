@@ -686,7 +686,7 @@ export default {
     },
     // 去编辑
     tocompileLecturer(id) {
-      this.$router.push({ path: `/lecturer/compileLecturer?id= + ${id}` })
+      this.$router.push({ path: `/lecturer/addLecturer?id= + ${id}` })
     },
 
     // 删除讲师

@@ -4,7 +4,7 @@
       class="addLecturer_head"
       @click="toLecturer"
     >
-      <i class="el-icon-arrow-left"></i> 编辑讲师
+      <i class="el-icon-arrow-left"></i> 添加讲师
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
@@ -25,12 +25,11 @@
             <el-col :span="10">
               <el-form-item
                 label="讲师姓名"
-                prop="name"
+                prop="userId"
               >
                 <el-select
-                  v-model="ruleForm.name"
-                  placeholder="请选择所在目录"
-                  disabled
+                  v-model="ruleForm.userId"
+                  placeholder="请选择讲师姓名"
                 >
                   <el-option
                     v-for="(item, index) in Teacherlist"
@@ -50,8 +49,8 @@
               >
                 <el-input
                   v-model="ruleForm.phonenum"
-                  disabled
                   maxlength="32"
+                  :disabled="disableDdata.disabledPhonenum"
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -62,12 +61,12 @@
             <el-col :span="10">
               <el-form-item
                 label="电子邮件"
-                prop="user_email"
+                prop="userEmail"
               >
                 <el-input
-                  v-model="ruleForm.user_email"
-                  disabled
+                  v-model="ruleForm.userEmail"
                   maxlength="32"
+                  :disabled="disableDdata.disabledUserEmail"
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -81,12 +80,14 @@
                 <el-radio
                   v-model="ruleForm.sex"
                   label="1"
+                  :disabled="disableDdata.disabledSex"
                 >
                   男
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.sex"
                   label="0"
+                  :disabled="disableDdata.disabledSex"
                 >
                   女
                 </el-radio>
@@ -122,7 +123,7 @@
               <!-- data -->
               <el-form-item
                 label="所属分类"
-                prop="name"
+                prop="categoryId"
               >
                 <el-cascader
                   v-model="ruleForm.categoryId"
@@ -136,28 +137,14 @@
           <!-- 第四行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="擅长领域"
-                prop="taglds"
-              >
-                <el-select
-                  v-model="ruleForm.taglds"
-                  placeholder="请选择所在目录"
-                >
-                  <el-option
-                    label="区域一"
-                    value="1"
-                  ></el-option>
-                  <el-option
-                    label="区域二"
-                    value="2"
-                  ></el-option>
+              <!-- 目前这个不做 -->
+              <!-- <el-form-item label="擅长领域" prop="taglds">
+                <el-select v-model="ruleForm.taglds" placeholder="请选择所在目录">
+                  <el-option label="区域一" value="1"></el-option>
+                  <el-option label="区域二" value="2"></el-option>
                 </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="2">
-            </el-col>
-            <el-col :span="10">
+              </el-form-item> -->
+
               <el-form-item
                 label="讲师级别"
                 prop="teacherLevel"
@@ -168,10 +155,8 @@
                 ></el-input>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <!-- 第五行 -->
-          <el-row class="switch_box">
+            <el-col :span="2">
+            </el-col>
             <el-col :span="10">
               <el-form-item
                 label="讲师职称"
@@ -183,14 +168,16 @@
                 ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+          </el-row>
+
+          <!-- 第五行 -->
+          <el-row class="switch_box">
             <el-col :span="10">
               <el-form-item
                 prop="isRecommend"
-                label=" "
+                label="是否推荐 "
               >
-                <span style="color:#333;">是否推荐 &nbsp; &nbsp; &nbsp;</span>
+                <!-- <span style="color:#333;">是否推荐 &nbsp; &nbsp; &nbsp;</span> -->
                 <el-switch
                   v-model="ruleForm.isRecommend"
                   active-color="#198cff"
@@ -199,10 +186,8 @@
                 </el-switch>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <!-- 两个单选框 -->
-          <el-row>
+            <el-col :span="2">
+            </el-col>
             <el-col :span="10">
               <el-form-item
                 label="是否最新讲师"
@@ -222,8 +207,10 @@
                 </el-radio>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+          </el-row>
+
+          <!-- 两个单选框 -->
+          <el-row>
             <el-col :span="10">
               <el-form-item
                 label="是否热门讲师"
@@ -243,6 +230,10 @@
                 </el-radio>
               </el-form-item>
             </el-col>
+            <el-col :span="2">
+            </el-col>
+            <el-col :span="10">
+            </el-col>
           </el-row>
 
           <!-- 第六行 -->
@@ -252,14 +243,13 @@
                 label="讲师照片"
                 prop="attachments"
               >
-                <el-upload
+                <common-upload
+                  v-model="ruleForm.attachments"
                   class="upload-demo"
                   drag
-                  action=""
-                  multiple
+                  :multiple="false"
                   :show-file-list="false"
                   :before-upload="beforeAvatarUpload"
-                  :http-request="httpRequest"
                 >
                   <i class="el-icon-upload"></i>
                   <div class="el-upload__text">
@@ -268,15 +258,15 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/png文件，且不超过5M
+                      只能上传jpg/jpge/png/GIF文件，且不超过5M
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments"
-                    :src="ruleForm.attachments.url"
+                    v-if="ruleForm.attachments.length"
+                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].url"
                     class="avatar"
                   />
-                </el-upload>
+                </common-upload>
               </el-form-item>
             </el-col>
           </el-row>
@@ -297,13 +287,13 @@
       <el-button
         type="primary"
         size="medium"
-        @click="isupdate(1)"
+        @click="isAddTeacher(1)"
       >
         完成
       </el-button>
       <el-button
         size="medium"
-        @click="isupdate(0)"
+        @click="isAddTeacher(0)"
       >
         完成并继续添加
       </el-button>
@@ -312,11 +302,24 @@
 </template>
 
 <script>
-import { queryTeacherlist, listTeacherCategory, getTeacher, update } from '@/api/lecturer/lecturer'
-import { uploadQiniu } from '@/util/uploadQiniu'
+import {
+  addTeacher,
+  queryTeacherlist,
+  listTeacherCategory,
+  getTeacher
+} from '@/api/lecturer/lecturer'
+// import { uploadQiniu } from '@/util/uploadQiniu'
 export default {
+  components: {
+    commonUpload: () => import('@/components/common-upload/commonUpload')
+  },
   data() {
     return {
+      disableDdata: {
+        disabledPhonenum: false,
+        disabledUserEmail: false,
+        disabledSex: false
+      },
       Teacherlist: [], //讲师的数据
       data: [], //分类列表
       checkboxVal: [],
@@ -332,9 +335,17 @@ export default {
         }
       ],
       // 填写课程信息
-      ruleForm: { userId: '', user_email: '' },
+      ruleForm: {
+        categoryId: '',
+        userId: '',
+        userEmail: '',
+        phonenum: '',
+        sex: '',
+        attachments: [],
+        isRecommend: ''
+      },
       rules: {
-        name: [{ required: true, message: '请输入讲师名称', trigger: 'blur' }],
+        userId: [{ required: true, message: '请选择讲师', trigger: 'blur' }],
         categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }]
       }
@@ -346,8 +357,11 @@ export default {
         this.Teacherlist.forEach((item, index) => {
           if (item.userId == n) {
             this.ruleForm.phonenum = this.Teacherlist[index].phonenum
-            this.ruleForm.user_email = this.Teacherlist[index].user_email
-            this.ruleForm.userId = this.Teacherlist[index].userId
+            this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
+            this.ruleForm.userEmail = this.Teacherlist[index].userEmail
+            this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
+            this.ruleForm.sex = this.Teacherlist[index].sex
+            this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
           }
         })
       }
@@ -367,10 +381,12 @@ export default {
         id: ''
       }
       params.id = this.$route.query.id
-      params.id = params.id.trim()
-      getTeacher(params).then((res) => {
-        this.ruleForm = res.teacherInfo
-      })
+      if (params.id) {
+        params.id = params.id.trim()
+        getTeacher(params).then((res) => {
+          this.ruleForm = res.teacherInfo
+        })
+      }
     },
 
     // 点击节点
@@ -448,6 +464,7 @@ export default {
 
       queryTeacherlist(params).then((res) => {
         this.Teacherlist = res.data
+        // console.log(res)
       })
     },
     // 去讲师列表
@@ -455,80 +472,98 @@ export default {
       this.$router.push({ path: '/lecturer/lecturer' })
     },
 
-    // 上传图片
-    httpRequest(file) {
-      const that = this
-      that.uploading = true
-      uploadQiniu(file.file, {
-        // next({ total }) {
-        //     that.uploadPercent = parseInt(total.percent)
-        // },
-
-        error(err) {
-          that.uploading = false
-          if (err.code === 614) {
-            that.$message.error('上传失败，已存在相同文件')
-          } else {
-            that.$message.error('上传失败，请联系管理员')
-            // eslint-disable-next-line
-            console.error('upload err:', err)
-          }
-        },
-        complete({ url }) {
-          // complete({ url, fileName }) {
-          that.uploading = false
-          let newFile = {
-            fileUrl: url,
-            url: url, // 新增url字段，为与移动端上传回显一致
-            fileName: file.file.name
-          }
-          let newValue = newFile
-          if (that.multiple) {
-            newValue = [...that.value, newFile]
-          }
-          // that.$emit('input', newValue)
-          // // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
-          // that.$emit('getValue', newValue)
-          this.ruleForm.attachments = newValue
-        }
-      })
-    },
-
-    // 编辑讲师
-    isupdate(i) {
-      this.ruleForm.categoryId = this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
-      update(this.ruleForm).then(() => {
-        if (i) {
-          this.toLecturer()
+    // 添加讲师
+    isAddTeacher(i) {
+      // let categoryId = []
+      // categoryId.push(
+      //   this.ruleForm.categoryId
+      //     ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
+      //     : ''
+      // )
+      this.ruleForm.categoryId = this.ruleForm.categoryId
+        ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
+        : ''
+      let attachments = []
+      if (this.ruleForm.attachments.length !== 0)
+        attachments.push(
+          this.ruleForm.attachments.length !== 0
+            ? this.ruleForm.attachments[this.ruleForm.attachments.length - 1]
+            : ''
+        )
+      this.ruleForm.attachments = attachments
+      this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
+      // console.log(this.ruleForm)
+      this.$refs.ruleForm.validate((valid) => {
+        if (!valid) {
+          this.$message({
+            message: '信息填写不完整',
+            type: 'warning'
+          })
         } else {
-          this.ruleForm = {}
+          addTeacher(this.ruleForm).then(() => {
+            if (i) {
+              this.toLecturer()
+              this.ruleForm = {
+                categoryId: '',
+                userId: '',
+                userEmail: '',
+                phonenum: '',
+                sex: '',
+                attachments: [],
+                isRecommend: ''
+              }
+            } else {
+              this.ruleForm = {
+                categoryId: '',
+                userId: '',
+                userEmail: '',
+                phonenum: '',
+                sex: '',
+                attachments: [],
+                isRecommend: ''
+              }
+            }
+          })
         }
       })
     },
 
     // 图片校验
     beforeAvatarUpload(file) {
-      // (file
-      const isJPG = file.type === 'image/jpeg'
-      const isLt2M = file.size / 1024 / 1024 < 5
+      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const isLt10M = file.size / 1024 / 1024 < 5
 
-      if (!isJPG) {
-        this.$message.error('上传图片只能是 JPG 格式!')
-      }
-      if (!isLt2M) {
+      if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 5MB!')
+        return false
       }
-      return isJPG && isLt2M
-    },
-
-    setCheckboxVal() {
-      this.ruleForm.passCondition = this.checkboxVal
+      if (!regx.test(file.name)) {
+        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        return false
+      }
+      return true
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.upload-demo {
+  width: 20vw;
+  height: 20vh;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 3vh 0 0 4vw;
+  position: relative;
+  overflow: hidden;
+  .avatar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20vw;
+    height: 20vh;
+  }
+}
 .addLecturer {
   .addLecturer_head {
     height: 60px;
@@ -577,9 +612,6 @@ export default {
 /deep/ .tox-edit-area {
   height: 350px;
 }
-/deep/.el-input {
-  width: 100%;
-}
 /deep/.el-upload__tip {
   line-height: 0;
 }
@@ -587,6 +619,6 @@ export default {
   width: 350px;
 }
 /deep/.el-input {
-  width: 350px;
+  width: 20vw !important;
 }
 </style>
