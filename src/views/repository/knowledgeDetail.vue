@@ -118,25 +118,26 @@
             <div
               v-for="(item, index) in fileGroup.true"
               :key="index"
-              class="image-li"
             >
-              <el-image
-                style="width: 100px; height: 100px"
-                :src="item.url"
+              <common-image-view
+                :url="item.url"
+                :file-name="item.fileName"
                 :preview-src-list="previewSrcList"
-              >
-              </el-image>
+                @downloadFile="downloadFile"
+              />
             </div>
           </div>
           <ul
             v-for="(item, index) in fileGroup.false"
             :key="index"
           >
-            <li
-              class="file-title"
-              @click="openFile(item.url)"
-            >
-              {{ item.fileName }}
+            <li class="file-title">
+              <span>{{ item.fileName }}</span>
+              <i
+                class="el-icon-download"
+                style="margin-left: 10px; cursor: pointer"
+                @click.stop="downloadFile(item.url)"
+              ></i>
             </li>
           </ul>
         </section>
@@ -147,11 +148,15 @@
 
 <script>
 import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
+import CommonImageView from '@/components/common-image-viewer/viewer'
 export default {
   filters: {
     statusFilterer(data) {
       return data === '0' ? '已上架' : '已下架'
     }
+  },
+  components: {
+    CommonImageView
   },
   data() {
     return {
@@ -165,6 +170,9 @@ export default {
     this.initData()
   },
   methods: {
+    downloadFile(data) {
+      window.open(data)
+    },
     /**
      * 标识状态
      */
@@ -174,12 +182,6 @@ export default {
         '1': 'danger'
       }
       return TYPE_STATUS[status]
-    },
-    /**
-     * 预览除图片外的附件
-     */
-    openFile(url) {
-      window.open(url)
     },
     /**
      * 初始数据，并处理附件
@@ -280,15 +282,12 @@ export default {
 .image-ul {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 20px;
   flex-wrap: wrap;
-  .image-li {
-    margin-right: 10px;
-    border: 1px solid #ccc;
-  }
 }
 .file-title {
-  cursor: pointer;
   margin-bottom: 10px;
+  font-family: PingFangSC-Regular;
+  font-size: 14px;
+  color: #000b15;
 }
 </style>
