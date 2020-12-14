@@ -18,14 +18,17 @@
 export default {
   name: 'CommonImageView',
   props: {
+    // 文件名称
     fileName: {
       type: String,
       default: ''
     },
+    // 获取的时候预先获取预览的url路径列表
     previewSrcList: {
       type: Array,
       default: () => []
     },
+    // 当前展示的url
     url: {
       type: String,
       default: ''
