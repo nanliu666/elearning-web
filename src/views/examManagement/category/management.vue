@@ -295,15 +295,15 @@ export default {
     handleStatus(row) {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status === '0' ? '停用' : '启用'
+      const statusText = row.status === 1 ? '停用' : '启用'
       const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       // 获取到当前分类以及子分类的id集合
       let ids = this.getDeepIds(row)
-      const params = { ids, status: row.status === 0 ? 1 : 0 }
+      const params = { ids, status: row.status === 1 ? 0 : 1 }
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
-      this.$confirm(`${row.status === 0 ? stopContent : startContent}`, '提醒', {
+      this.$confirm(`${row.status === 1 ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
