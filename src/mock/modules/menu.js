@@ -482,6 +482,19 @@ const res = {
             children: []
           },
           {
+            menuId: '12590567456745635058',
+            menuName: '测试111',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/demoForm',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
             menuId: '12590562352352565562058',
             menuName: '编辑课程',
             menuType: 'Menu',

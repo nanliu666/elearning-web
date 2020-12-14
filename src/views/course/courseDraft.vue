@@ -2,20 +2,14 @@
   <div class="course">
     <!-- 头部 -->
     <page-header title="课程管理">
-      <el-dropdown slot="rightMenu">
-        <el-button
-          type="primary"
-          size="medium"
-          @click="toEstablishCourse"
-        >
-          创建课程
-        </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click="toEstablishCourse">
-            单个新建
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        type="primary"
+        @click="toEstablishCourse"
+      >
+        创建课程
+      </el-button>
     </page-header>
 
     <!-- Dialog无数据 -->
@@ -336,7 +330,7 @@ const TABLE_COLUMNS = [
     slot: true
   },
   {
-    label: '目录名称',
+    label: '课程名称',
     minWidth: 140,
     prop: 'courseName',
     slot: true
@@ -351,7 +345,7 @@ const TABLE_COLUMNS = [
     slot: true
   },
   {
-    label: '所在目录',
+    label: '所在分类',
     prop: 'catalogName'
   },
   {
@@ -405,7 +399,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入目录名称搜索' },
+    config: { placeholder: '请输入课程名称搜索' },
     data: '',
     field: 'courseName',
     label: '',
@@ -437,7 +431,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     config: { placeholder: '请选择' },
     data: '',
     field: 'catalogName',
-    label: '所在目录',
+    label: '所在分类',
     type: 'select',
     options: []
   },
@@ -724,7 +718,6 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
-            this.getInfo()
           })
         })
         .catch(() => {
@@ -733,6 +726,7 @@ export default {
             message: '已取消删除'
           })
         })
+      this.refreshTableData()
     },
 
     // 刷新列表数据
@@ -752,6 +746,8 @@ export default {
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
+
+        // console.log(this.tableData)
 
         // 下拉筛选框
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []

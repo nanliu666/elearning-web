@@ -108,3 +108,8 @@ export const getCourse = (params) => get('/api/blade-manage/v1/course/getCourse'
  * */
 export const getCourseContents = (params) =>
   get('/api/blade-manage/v1/course/getCourseContents', params)
+/**
+ *  查询讲师列表
+ * @param {Object} params - 参数
+ * */
+export const listTeacher = (params) => post('/api/blade-manage/v1/teacher/listTeacher', params)

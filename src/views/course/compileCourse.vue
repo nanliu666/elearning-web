@@ -63,7 +63,10 @@
               label="课程名称"
               prop="name"
             >
-              <el-input v-model="ruleForm.name"></el-input>
+              <el-input
+                v-model="ruleForm.name"
+                maxlength="32"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="2">
@@ -73,7 +76,20 @@
               label="讲师"
               prop="teacherId"
             >
-              <el-input v-model="ruleForm.teacherId"></el-input>
+              <!-- <el-input v-model="ruleForm.teacherId" maxlength="32"></el-input> -->
+              <el-select
+                v-model="ruleForm.teacherId"
+                placeholder="请选择课程类型"
+              >
+                <!-- <el-option label="在线课程" :value="1"></el-option> -->
+
+                <el-option
+                  v-for="(item, index) in TeacherData"
+                  :key="index"
+                  :label="item.name"
+                  :value="item.idStr"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -261,8 +277,8 @@
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl"
-                  :src="ruleForm.imageUrl.url"
+                  v-if="ruleForm.imageUrl[0]"
+                  :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                   class="avatar"
                 />
               </common-upload>
@@ -274,7 +290,7 @@
         <div class="editorTitle">
           <el-form-item
             label="课程介绍"
-            prop="editorTitle"
+            prop="introduction"
           >
             <tinymce v-model="ruleForm.introduction" />
           </el-form-item>
@@ -328,6 +344,7 @@
                   v-if="scope.row.saveOrcompile === 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
+                  maxlength="32"
                 ></el-input>
                 <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
               </template>
@@ -377,29 +394,59 @@
                   >
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 1"
+                      type="text"
                       @click="AddArticleBtntable(scope.$index)"
-                    >添加文章</el-button>
+                    >
+                      {{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '添加文章'
+                      }}
+                    </el-button>
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 2"
-                      v-model="upLoad"
+                      v-model="scope.row.upLoad"
                       :before-upload="CoursewareUpload"
                       :multiple="false"
-                    >上传课件</common-upload>
+                    >
+                      <el-button type="text">{{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '上传课件'
+                      }}</el-button>
+                    </common-upload>
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 3"
-                      v-model="upLoad"
+                      v-model="scope.row.upLoad"
                       :multiple="false"
                       :before-upload="DataUpload"
-                    >上传资料</common-upload>
+                    >
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传资料'
+                        }}
+                      </el-button>
+                    </common-upload>
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 4"
+                      type="text"
                     >关联考试</el-button>
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 5"
-                      v-model="upLoad"
+                      v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"
-                    >上传视频</common-upload>
+                    >
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传视频'
+                        }}
+                      </el-button>
+                    </common-upload>
                   </span>
                   <span
                     v-else
@@ -412,25 +459,33 @@
                 <div v-if="scope.row.saveOrcompile === 1">
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 1">
-                      <span v-if="scope.row.localName">{{ scope.row.localName }}</span>
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 2">
-                      <span v-if="upLoad">{{ upLoad[0].localName }}</span>
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 3">
-                      <span v-if="upLoad">{{ upLoad[0].localName }}</span>
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 5">
-                      <span v-if="upLoad">{{ upLoad[0].localName }}</span>
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
                     </span>
                   </span>
                 </div>
@@ -528,7 +583,8 @@ import {
   getCatalog,
   editCourseInfo,
   getCourseContents,
-  getCourse
+  getCourse,
+  listTeacher
 } from '@/api/course/course'
 export default {
   components: {
@@ -536,14 +592,8 @@ export default {
   },
   data() {
     return {
+      TeacherData: '',
       catalogIdoptions: [],
-      // 上传视频
-      UploadVideo: [],
-      // 上传课件
-      UploadCourseware: [],
-      // 上传资料
-      UploadData: [],
-
       checkboxVal: [],
       // 添加文章
       dialogVisible: false,
@@ -586,7 +636,7 @@ export default {
         url: '',
         localName: '',
         catalogId: '',
-        electiveType: '',
+        electiveType: 1,
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         tagIds: '', //标签
@@ -631,8 +681,15 @@ export default {
     this.isgetCourseTags()
     this.isgetCatalog()
     this.getInfo()
+    this.islistTeacher()
   },
   methods: {
+    islistTeacher() {
+      listTeacher({ currentPage: 1, size: 999 }).then((res) => {
+        this.TeacherData = res.teacherInfos
+      })
+    },
+
     // 编辑页面的数据前
     // 编辑页面的数据后
     getInfo() {
@@ -673,8 +730,13 @@ export default {
     },
     // 添加文章
     isAddArticle() {
-      this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
-      this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
+      let i = {
+        localName: this.addArticle.localName,
+        content: this.addArticle.content
+      }
+      // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
+      // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
+      this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
       this.addArticle.localName = ''
       this.addArticle.content = ''
       this.dialogVisible = false
@@ -690,13 +752,28 @@ export default {
     isAddCourse(status) {
       this.ruleForm.contents.map((item, index) => {
         item.sort = index
-        if (item.upLoad[0]) {
+        if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
           item.url = item.upLoad[item.upLoad.length - 1].url
         }
       })
-      this.ruleForm.localName = this.ruleForm.imageUrl.localName
-      this.ruleForm.url = this.ruleForm.imageUrl.url
+      this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
+        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].localName
+        : ''
+      this.ruleForm.url = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
+        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url
+        : ''
+
+      let params = JSON.parse(JSON.stringify(this.ruleForm))
+      delete params.imageUrl
+      params.contents.forEach((item) => {
+        delete item.upLoad
+      })
+      params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
+      params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
+      params.isRecommend = params.isRecommend === false ? 0 : 1
+      // params.tagIds = params.tagIds.join(',')
+
       // 草稿
       if (status === 2) {
         this.$confirm(
@@ -709,7 +786,9 @@ export default {
           }
         )
           .then(() => {
-            this.ruleForm.status = status
+            params.status = status
+
+            // addCourse(params).then(() => {
             editCourseInfo(this.ruleForm).then(() => {
               this.$message({
                 message: '保存成功',
@@ -738,8 +817,8 @@ export default {
               type: 'warning'
             })
           } else {
-            this.ruleForm.status = status
-            editCourseInfo(this.ruleForm).then(() => {
+            params.status = status
+            editCourseInfo(params).then(() => {
               this.$message({
                 message: '本课程已发布成功',
                 type: 'success'
@@ -984,6 +1063,8 @@ export default {
     margin: 10px 0 10px;
   }
   #upContent {
+    margin-left: -7vw;
+    width: 60vw;
     .up_head {
       display: flex;
       justify-content: space-between;
