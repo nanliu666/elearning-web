@@ -239,7 +239,7 @@
 import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 import SwitchInput from './atomComponents/switchInput'
 import RadioInput from '@/components/radio-input/radio-input'
-import checkboxInput from '@/components/checkboxInput/checkboxInput'
+import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
 import { getExamList, getCertificateList } from '@/api/examManage/schedule'
@@ -577,7 +577,7 @@ export default {
     ConditionRadioInput,
     SwitchInput,
     RadioInput,
-    checkboxInput,
+    CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {

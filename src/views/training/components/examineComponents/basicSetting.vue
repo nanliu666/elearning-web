@@ -84,7 +84,7 @@
 
 <script>
 import RadioInput from '@/components/radio-input/radio-input'
-import checkboxInput from '@/components/checkboxInput/checkboxInput'
+import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -156,7 +156,7 @@ export default {
   name: 'BasicSetting',
   components: {
     RadioInput,
-    checkboxInput,
+    CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
