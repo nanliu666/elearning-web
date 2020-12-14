@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div class="fill page">
     <div class="logo">
-      <logo />
+      <img src="../../assets/images/logo.svg" />
     </div>
-    <div class="out-container">
-      <pageHeader
-        :title="`${$route.query.mode === 'phone' ? '手机' : '邮箱'}找回密码`"
-        :show-back="true"
-      />
+    <pageHeader
+      style="padding-left:32px"
+      :title="`${$route.query.mode === 'phone' ? '手机' : '邮箱'}找回密码`"
+      show-back
+    />
+    <basic-container block>
       <div class="getback-pw">
         <keep-alive>
           <div class="contens-wrapper">
@@ -270,7 +271,7 @@
           </div>
         </keep-alive>
       </div>
-    </div>
+    </basic-container>
   </div>
 </template>
 
@@ -279,13 +280,11 @@ import { isMobile, validatePW, isEmailReg } from '@/util/validate'
 import { getCode, checkPhoneCode, checkPassword } from '@/api/personalInfo.js'
 import md5 from 'js-md5'
 import pageHeader from '@/components/page-header/pageHeader'
-import logo from '@/page/index/logo'
 import { getCaptcha } from '@/api/user'
 
 export default {
   components: {
-    pageHeader,
-    logo
+    pageHeader
   },
   data() {
     let _this = this
@@ -538,11 +537,17 @@ export default {
 .logo {
   height: 56px;
   background: #fff;
+  display: flex;
+  align-items: center;
+  padding-left: 32px;
 }
-.out-container {
-  height: calc(100vh);
-  background: #f2f5f7;
-  position: relative;
+.page {
+  background-color: #f2f5f7;
+}
+.basic-container--block {
+  margin: 0 32px;
+  height: calc(100% - 68px - 56px - 24px);
+  min-height: calc(100% - 68px - 56px - 24px);
 }
 .brad-part {
   position: absolute;
@@ -568,13 +573,6 @@ export default {
   text-indent: 5px;
   text-align: center;
   cursor: pointer !important;
-}
-.getback-pw {
-  height: calc(100vh - 68px - 56px - 32px);
-  background: #fff;
-  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-  position: relative;
 }
 
 .contens-wrapper {

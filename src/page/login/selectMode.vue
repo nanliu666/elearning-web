@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div class="fill page">
     <div class="logo">
-      <logo />
+      <img src="../../assets/images/logo.svg" />
     </div>
-    <div class="out-container">
-      <pageHeader
-        :title="'选择密码找回方式'"
-        :show-back="true"
-      />
+    <page-header
+      style="padding-left:32px"
+      :title="'选择密码找回方式'"
+      show-back
+    />
+    <basic-container block>
       <div class="select-mode-style">
         <div class="select-mode">
           <div class="page-des">
@@ -38,15 +39,13 @@
           </div>
         </div>
       </div>
-    </div>
+    </basic-container>
   </div>
 </template>
 
 <script>
 export default {
-  components: {
-    logo: () => import('@/page/index/logo')
-  },
+  components: {},
   data() {
     return {
       mode: 'phone'
@@ -65,23 +64,23 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-div {
-  box-sizing: border-box;
-}
+<style lang="scss" scoped>
 .logo {
   height: 56px;
   background: #fff;
+  display: flex;
+  align-items: center;
+  padding-left: 32px;
 }
-.out-container {
-  background: #f2f5f7;
-  position: relative;
+.page {
+  background-color: #f2f5f7;
+}
+.basic-container--block {
+  margin: 0 32px;
+  height: calc(100% - 68px - 56px - 24px);
+  min-height: calc(100% - 68px - 56px - 24px);
 }
 .select-mode-style {
-  height: calc(100vh - 68px - 56px - 32px);
-  background: #fff;
-  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
   position: relative;
   .select-mode {
     width: 400px;
