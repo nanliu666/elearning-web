@@ -5,6 +5,7 @@
       <el-menu
         :default-active="activeIndex"
         class="el-menu"
+        :active-text-color="activeColor"
         mode="horizontal"
         @select="handleSelect"
       >
@@ -155,12 +156,14 @@ const searchConfig = {
   ],
   popoverOptions: []
 }
+import styles from '@/styles/variables.scss'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover, CatalogEdit },
 
   data() {
     return {
+      activeColor: styles.primaryColor,
       activeIndex: '0',
       tableLoading: false,
       tableData: [],

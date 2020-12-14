@@ -95,6 +95,7 @@
       <el-menu
         :default-active="activeIndex"
         class="el-menu-demo"
+        :active-text-color="activeColor"
         mode="horizontal"
         @select="handleSelect"
       >
@@ -149,6 +150,7 @@
 <script>
 import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
 import CommonImageView from '@/components/common-image-viewer/viewer'
+import styles from '@/styles/variables.scss'
 export default {
   filters: {
     statusFilterer(data) {
@@ -160,6 +162,7 @@ export default {
   },
   data() {
     return {
+      activeColor: styles.primaryColor,
       fileGroup: {},
       previewSrcList: [],
       activeIndex: '1',

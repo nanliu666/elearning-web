@@ -305,6 +305,7 @@
       <el-menu
         :default-active="activeIndex"
         class="el-menu-demo"
+        :active-text-color="activeColor"
         mode="horizontal"
         @select="handleSelect"
       >
@@ -528,11 +529,13 @@ import {
   putCertificate,
   getBatchNumber
 } from '@/api/examManage/schedule'
+import styles from '@/styles/variables.scss'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
   data() {
     return {
+      activeColor: styles.primaryColor,
       isExtend: false,
       activeIndex: '0',
       page: {
