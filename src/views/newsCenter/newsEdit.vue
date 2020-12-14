@@ -221,6 +221,17 @@ export default {
       },
       {
         itemType: 'slot',
+        label: '添加封面',
+        prop: 'picUrl',
+        props: {
+          label: 'jobName',
+          value: 'id'
+        },
+        required: false,
+        span: 24
+      },
+      {
+        itemType: 'slot',
         label: '正文',
         prop: 'content',
         rules: [
@@ -230,17 +241,6 @@ export default {
             trigger: 'blur'
           }
         ],
-        span: 24
-      },
-      {
-        itemType: 'slot',
-        label: '添加封面',
-        prop: 'picUrl',
-        props: {
-          label: 'jobName',
-          value: 'id'
-        },
-        required: false,
         span: 24
       }
     ]
