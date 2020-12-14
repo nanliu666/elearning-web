@@ -207,7 +207,7 @@
           v-model="model.passType"
           style="display: flex;"
         >
-          <achivementRadioInput
+          <condition-radio-input
             v-model="model.passType"
             style="margin-right:40px"
             label-text="按成绩"
@@ -218,8 +218,8 @@
             :number.sync="passCondition[0].passScope"
             :pass-scope="model.passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
-          <achivementRadioInput
+          />
+          <condition-radio-input
             v-model="model.passType"
             label-text="按得分率"
             text-before="得分率不低于"
@@ -228,7 +228,7 @@
             :default-value="passCondition[1].passType"
             :number.sync="passCondition[1].passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
+          />
         </el-radio-group>
       </template>
     </common-form>
@@ -236,7 +236,7 @@
 </template>
 
 <script>
-import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
+import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 import SwitchInput from './atomComponents/switchInput'
 import RadioInput from '@/components/radio-input/radio-input'
 import checkboxInput from '@/components/checkboxInput/checkboxInput'
@@ -574,7 +574,7 @@ const radioList = [
 export default {
   name: 'ExamInfo',
   components: {
-    achivementRadioInput,
+    ConditionRadioInput,
     SwitchInput,
     RadioInput,
     checkboxInput,
