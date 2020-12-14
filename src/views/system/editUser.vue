@@ -40,15 +40,19 @@
                   slot="tip"
                   class="upload__tip"
                 >
-                  支持上传png、jpg、jpge格式文件，单个文件大小＜5MB，最多5个文件
+                  支持上传png、jpg、jpeg格式文件，单个文件大小＜5MB，最多5个文件
                 </div>
                 <template #default>
-                  <el-button size="medium">
+                  <el-button
+                    size="medium"
+                    :class="{ 'is-disabled': uploadFileList.length >= 5 }"
+                    @click="handleUpload($event)"
+                  >
                     上传
                   </el-button>
                   <ul
                     class="upload__files"
-                    @click.stop=""
+                    @click="handleUpload($event)"
                   >
                     <li
                       v-for="(item, index) in uploadFileList"
@@ -356,6 +360,11 @@ export default {
   },
 
   methods: {
+    handleUpload(e) {
+      if (this.uploadFileList.length >= 5) {
+        e.stopPropagation()
+      }
+    },
     resetForm() {
       this.$refs['form'].resetFields()
     },
@@ -407,7 +416,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
+        this.$message.error('上传附件只支持png、jpg、jpeg格式文件')
         return false
       }
       return true

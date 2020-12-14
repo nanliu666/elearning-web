@@ -49,7 +49,7 @@
 ├── public 静态文件
 └── src
     ├──api // 接口定义
-    ├──components // 公共组件
+    ├──components // 公共组件 (多个模块都会用到的组件)
     │    ├──treeSelect // 下拉树选择
     │    ├──base-container // 通用容器组件
     │    └──searchPopover // 弹窗筛选组件

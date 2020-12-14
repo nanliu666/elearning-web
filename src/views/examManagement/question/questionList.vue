@@ -207,6 +207,9 @@ export default {
       this.$refs.categoryTree.filter(val)
     }
   },
+  activated() {
+    this.loadData()
+  },
   mounted() {
     this.loadTree()
     this.loadData()
