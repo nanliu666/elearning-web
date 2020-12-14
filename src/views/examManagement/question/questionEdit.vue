@@ -528,7 +528,6 @@ export default {
           'categoryId',
           'score',
           'difficulty',
-          'content',
           'analysis',
           'options',
           'expiredTime',
@@ -538,6 +537,7 @@ export default {
         if (data.score) {
           data.score = parseInt(data.score * 10)
         }
+        data.content = _.escape(this.form.content)
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
         if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
           data.options = [{ content: this.form.answer, isCorrect: 1 }]
@@ -596,6 +596,7 @@ export default {
             new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
           )
           this.form.score = res.score ? res.score / 10 : res.score
+          this.form.content = _.unescape(res.content)
           this.form.options.forEach((option) => {
             option.key = createUniqueID()
             if (option.url) {

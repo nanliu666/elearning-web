@@ -92,9 +92,9 @@
               <div class="question-content">
                 <div class="ellipsis">
                   {{
-                    deleteHTMLTag(row.content).length > 200
-                      ? deleteHTMLTag(row.content).slice(0, 200) + '...'
-                      : deleteHTMLTag(row.content)
+                    deleteHTMLTag(_.unescape(row.content)).length > 200
+                      ? deleteHTMLTag(_.unescape(row.content)).slice(0, 200) + '...'
+                      : deleteHTMLTag(_.unescape(row.content))
                   }}
                 </div>
                 <div>

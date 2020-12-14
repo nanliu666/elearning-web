@@ -135,13 +135,19 @@
 import { getcategoryTree } from '@/api/examManage/category'
 import { getQuestionList } from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
+import { deleteHTMLTag } from '@/util/util'
 const TABLE_COLUMNS = [
   {
     label: '题目名称',
     prop: 'content',
     slot: true,
     fixed: true,
-    minWidth: 100
+    minWidth: 100,
+    formatter(row) {
+      return deleteHTMLTag(_.unescape(row.content)).length > 200
+        ? deleteHTMLTag(_.unescape(row.content)).slice(0, 200) + '...'
+        : deleteHTMLTag(_.unescape(row.content))
+    }
   },
 
   {
