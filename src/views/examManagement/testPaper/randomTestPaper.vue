@@ -463,7 +463,7 @@ export default {
     /**
      * @author guanfenda
      * @desc 获取试题来源，并绑定试题来源数据
-     * @param
+     * @param relateType 试题类型 column 试题来源potions
      * */
     getTopicCategory(relateType = '', column) {
       //single_choice
@@ -476,12 +476,20 @@ export default {
         column.props.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 添加试题
+     * */
     pushItem() {
       let tableItem = _.cloneDeep(this.tableItem)
       tableItem.column = _.cloneDeep(this.column)
       this.tableData.push(tableItem)
       this.getTopicCategory(tableItem.type, tableItem.column)
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试卷分类
+     * */
     getTestPaperCategory() {
       let params = {
         type: '1'
@@ -490,8 +498,12 @@ export default {
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 查找试卷详情
+     * */
     getData() {
-      if (!this.$route.query.id) return
+      if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
       let params = {
         id: this.$route.query.id
       }
@@ -528,10 +540,18 @@ export default {
         this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 试题设置里的行操作删除
+     * */
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => it.id !== row.id)
       this.questionChange()
     },
+    /***
+     * @author gaunfenda
+     * @desc 提交试卷（添加或者修改）
+     * */
     onSubmit() {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
@@ -542,6 +562,7 @@ export default {
               !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
           ).length > 0
         ) {
+          //检查行是否选择了试题来源，试卷试题是否配置，是否选择了题库试题有试题数的，是否给了分数
           this.$message.warning('请检查试题设置')
           return
         }
@@ -562,6 +583,10 @@ export default {
         })
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
+     * */
     questionChange() {
       let scoreList = _.compact(this.tableData.map((it) => it.score))
       scoreList.length === 0 && (this.score = this.form.totalScore)
@@ -571,6 +596,11 @@ export default {
         }, 0))
       this.score = this.form.totalScore - this.TotalScore
     },
+    /**
+     * @author guanfenda
+     * @desc 试题来源改变触发的事件
+     * @params row 当前触发行的数据，data 选中的节点数据
+     * */
     check(data, row) {
       row.totalQuestionNum = _.compact(data.map((it) => it.relatedNum)).reduce((prev, cur) => {
         return prev + cur
@@ -578,11 +608,19 @@ export default {
       let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
       row.questionNum = random(1, row.totalQuestionNum)
     },
+    /**
+     * @author guanfenda
+     * @desc 添加行
+     * */
     handleAddTopic() {
       this.tableItem.id += 1
       this.valid = false
       this.pushItem()
     },
+    /**
+     * @author guanfenda
+     * @desc 返回上一页
+     * */
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)
