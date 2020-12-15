@@ -422,8 +422,12 @@ export default {
       this.questionChange()
     }
   },
-  mounted() {
+  mounted() {},
+  activated() {
+    this.form = {}
+    this.tableData = []
     this.options = []
+    this.valid = false
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })

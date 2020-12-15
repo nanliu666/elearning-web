@@ -315,6 +315,14 @@ export default {
       this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
   },
+  activated() {
+    this.form = {}
+    this.typeList = []
+    this.tableData = []
+    for (let key in QUESTION_TYPE_MAP) {
+      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
+    }
+  },
   methods: {
     /**
      *  @author guenfenda

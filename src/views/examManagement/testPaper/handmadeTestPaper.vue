@@ -240,7 +240,10 @@ export default {
       this.count()
     }
   },
-  mounted() {
+  mounted() {},
+  activated() {
+    this.form = {}
+    this.testPaper = []
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
     this.getTestPaperCategory()
