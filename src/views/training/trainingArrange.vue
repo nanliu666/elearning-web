@@ -7,7 +7,7 @@
       <div>
         <el-button
           type="primary"
-          size="small"
+          size="medium"
           @click="goAdd"
         >
           &nbsp; 创建培训 &nbsp;
@@ -1059,6 +1059,8 @@ $color_icon: #A0A8AE
     display: flex;
     justify-content: space-between;
     line-height: 60px;
+    font-size: 18px;
+    font-weight: bold;
   }
   .box_content {
     background-color: #fff;
@@ -1084,6 +1086,8 @@ $color_icon: #A0A8AE
         position: relative;
         width: 20%;
         border-right: 1px solid #ccc;
+        overflow: hidden;
+        height: 620px;
         .issue_l_tree {
           padding: 0 25px;
           /deep/.el-input {
@@ -1093,6 +1097,7 @@ $color_icon: #A0A8AE
             color: #606266;
             margin: 0 0 5px 22px;
             font-size: 14px;
+            cursor: pointer;
           }
         }
         .btn_bottom {
@@ -1102,6 +1107,9 @@ $color_icon: #A0A8AE
           width: 100%;
           display: flex;
           border-top: 1px solid #ccc;
+          z-index: 999;
+          background-color: #fff;
+          cursor: pointer;
           span {
             flex: 1;
             line-height: 50px;
@@ -1115,7 +1123,7 @@ $color_icon: #A0A8AE
       }
       .issue_r {
         width: 80%;
-        padding: 0 40px;
+        // padding: 0 40px;
       }
       .istrainingArrange {
         width: 100%;

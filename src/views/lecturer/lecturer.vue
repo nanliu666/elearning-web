@@ -54,7 +54,7 @@
                   <el-input
                     v-model="dataAddCatalog.input"
                     placeholder="请输入内容"
-                    maxlength="32"
+                    maxlength="20"
                   ></el-input>
                   <el-button
                     type="text"
@@ -104,7 +104,7 @@
                 v-model="dataAddCatalog.input"
                 class="isShowinput_input"
                 placeholder="请输入内容"
-                maxlength="32"
+                maxlength="20"
               ></el-input>
               <span
                 class="isShowinput_yes"

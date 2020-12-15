@@ -337,7 +337,7 @@ export default {
       },
       rules: {
         userId: [{ required: true, message: '请选择讲师', trigger: 'blur' }],
-        categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
+        // categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }]
       }
     }
