@@ -1,6 +1,6 @@
 <template>
   <div class="mark-list">
-    <page-header title="考试安排" />
+    <page-header title="手工评卷" />
     <basic-container block>
       <common-table
         id="demo"
@@ -57,6 +57,13 @@
               </el-popover>
             </div>
           </div>
+          <el-alert
+            title="该列表将列出您被安排评卷的考试的列表;建议逐人及逐题不可同时使用"
+            type="info"
+            show-icon
+            class="tips"
+          >
+          </el-alert>
         </template>
         <template #examName="{row}">
           <div
@@ -382,21 +389,21 @@ export default {
 
 <style lang="scss" scoped>
 .mark-list {
+  /deep/ .top-menu {
+    height: 80px;
+    .tips {
+      margin-top: 10px;
+      background-color: #e7fbff;
+    }
+    .el-alert__icon {
+      color: $primaryColor;
+    }
+  }
 }
+
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
-  .el-menu {
-    margin-bottom: 20px;
-    margin-top: -10px;
-  }
-  /deep/ .el-menu--horizontal {
-    border-bottom: 1px solid #cccccc !important;
-  }
-  .title {
-    color: $primaryColor;
-    cursor: pointer;
-  }
 }
 .originColumn {
   height: 25px;
