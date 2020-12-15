@@ -7,7 +7,10 @@
       title="新建手工试卷"
       show-back
     />
-    <basic-container block>
+    <basic-container
+      v-loading="loading"
+      block
+    >
       <div class="content">
         <div class="title">
           基础信息
@@ -138,15 +141,13 @@ const BASE_COLUMNS = [
   },
   {
     prop: 'totalScore',
-    itemType: 'input',
+    itemType: 'inputNumber',
+    min: 0,
+    precision: 1,
+    step: 0.1,
     maxlength: 32,
-    label: '计划总分',
     span: 11,
-    type: 'Number',
-    required: false,
-    props: {
-      onlyNumber: true
-    }
+    label: '计划总分'
   },
   {
     prop: 'isScore',
@@ -206,6 +207,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       valid: false,
       columns: BASE_COLUMNS,
       TotalScore: '',
@@ -216,7 +218,7 @@ export default {
         key: 1,
         type: '',
         title: '',
-        tableData: '',
+        tableData: [],
         totalScore: ''
       },
       testPaper: []
@@ -270,44 +272,53 @@ export default {
       let params = {
         id: this.$route.query.id
       }
-      getTestPaper(params).then((res) => {
-        let {
-          id,
-          expiredTime,
-          categoryId,
-          totalScore,
-          remark,
-          name,
-          isScore,
-          isShowScore,
-          manualSettings,
-          isMulti
-        } = res
-        totalScore = totalScore / 10
-        this.form = {
-          id,
-          name,
-          categoryId,
-          expiredTime,
-          totalScore,
-          remark,
-          isScore,
-          isShowScore,
-          isMulti
-        }
-        manualSettings = manualSettings.map((it) => ({ ...it, score: it.score / 10 }))
-        const list = _.groupBy(manualSettings, (it) => it.parentSort)
-        this.testPaper = []
-        for (let key in list) {
-          this.testPaper.push({
-            type: list[key][0].type,
-            title: list[key][0].title,
-            key: list[key][0].id,
-            tableData: list[key]
-          })
-        }
-        this.count()
-      })
+      this.loading = true
+      getTestPaper(params)
+        .then((res) => {
+          let {
+            id,
+            expiredTime,
+            categoryId,
+            totalScore,
+            remark,
+            name,
+            isScore,
+            isShowScore,
+            manualSettings,
+            isMulti
+          } = res
+          totalScore = totalScore / 10
+          this.form = {
+            id,
+            name,
+            categoryId,
+            expiredTime,
+            totalScore,
+            remark,
+            isScore,
+            isShowScore,
+            isMulti
+          }
+          manualSettings = manualSettings.map((it) => ({
+            ...it,
+            score: it.score / 10,
+            Original: it.score / 10
+          }))
+          const list = _.groupBy(manualSettings, (it) => it.parentSort)
+          this.testPaper = []
+          for (let key in list) {
+            this.testPaper.push({
+              type: list[key][0].type,
+              title: list[key][0].title,
+              key: list[key][0].id,
+              tableData: list[key]
+            })
+          }
+          this.count()
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     /**
      * @author guenfenda
@@ -320,8 +331,9 @@ export default {
         if (!valid) return
 
         if (
-          this.testPaper.filter((it) => it.tableData.filter((item) => !item.score).length).length >
-          0
+          this.testPaper.filter(
+            (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+          ).length > 0
         ) {
           this.$message.warning('请检查试题设置')
           return
@@ -352,10 +364,15 @@ export default {
           manualSettings: manualSettings,
           type: 'manual'
         }
-        testPaperMether(params).then(() => {
-          this.$message.success('提交成功')
-          this.handleBack()
-        })
+        this.loading = true
+        testPaperMether(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.handleBack()
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
     /**

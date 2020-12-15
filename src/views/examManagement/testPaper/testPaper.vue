@@ -81,13 +81,18 @@
             </div>
           </div>
         </template>
-        <template slot="multiSelectMenu">
-          <!--          <el-button-->
-          <!--            type="text"-->
-          <!--            icon="el-icon-delete"-->
-          <!--          >-->
-          <!--            批量导出-->
-          <!--          </el-button>-->
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
+          <el-button
+            type="text"
+            size="medium"
+            icon="el-icon-delete"
+            @click="deleteSelected(selection)"
+          >
+            批量删除
+          </el-button>
         </template>
         <template #name="{row}">
           <el-link
@@ -288,6 +293,34 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 批量删除
+    deleteSelected(selection) {
+      // 批量删除
+      let params = []
+      selection.forEach((item) => {
+        params.push(item.id)
+      })
+      this.$confirm('此操作将删选中, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          deleteTestPaper({ id: params.join(',') }).then(() => {
+            this.loadTableData()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
     /**
      * @author guanfenda
      * @获取试卷分类

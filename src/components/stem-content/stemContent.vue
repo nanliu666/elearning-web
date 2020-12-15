@@ -339,6 +339,9 @@ export default {
      * @desc 确认选中
      * */
     onsubmit() {
+      this.selectData.map((it) => {
+        it.score = it.score / 10
+      })
       this.$emit('input', this.selectData)
       this.onClose()
     },
