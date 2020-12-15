@@ -286,6 +286,7 @@ export default {
     deleteFun(id) {
       deleteKnowledgeCatalog({ id }).then(() => {
         this.loadTableData()
+        this.$refs.table.clearSelection()
         this.$message({
           type: 'success',
           message: '删除成功!'
