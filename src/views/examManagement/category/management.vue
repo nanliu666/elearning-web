@@ -221,7 +221,7 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status === 1 ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status === 0 ? true : false
       return isDisabled
     },
     // 具体的删除函数
