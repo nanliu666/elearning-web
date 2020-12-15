@@ -429,8 +429,9 @@ const TABLE_COLUMNS = [
   {
     label: '培训名称',
     prop: 'trainName',
-    width: '200',
-    slot: true
+    width: '180',
+    slot: true,
+    fixed: 'left'
   },
   {
     label: '编号',

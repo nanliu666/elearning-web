@@ -270,7 +270,8 @@ export default {
   .compileLecturerr_head {
     height: 60px;
     line-height: 60px;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
     color: #333;
   }
   .compileLecturerr_head_box {

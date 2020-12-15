@@ -1,9 +1,6 @@
 <template>
   <div class="trainingArrange">
-    <div
-      title="分类管理"
-      class="box_title"
-    >
+    <div class="box_title">
       <div class="title">
         讲师管理
       </div>
@@ -31,7 +28,9 @@
             >
             </el-input>
 
-            <!-- <div class="ungrouped">未分类（6）</div> -->
+            <div class="ungrouped">
+              未分类
+            </div>
 
             <el-tree
               ref="tree"
@@ -409,8 +408,9 @@ const TABLE_COLUMNS = [
   {
     label: '讲师姓名',
     prop: 'name',
-    width: '200',
-    slot: true
+    width: '180',
+    slot: true,
+    fixed: 'left'
   },
   {
     label: '手机号码',
@@ -440,11 +440,11 @@ const TABLE_COLUMNS = [
     slot: true,
     minWidth: 80
   },
-  {
-    label: '擅长领域',
-    prop: 'lingyu',
-    minWidth: 130
-  },
+  // {
+  //   label: '擅长领域',
+  //   prop: 'lingyu',
+  //   minWidth: 130
+  // },
   {
     label: '讲师级别',
     prop: 'teacher_title',
@@ -1079,6 +1079,8 @@ $color_icon: #A0A8AE
     display: flex;
     justify-content: space-between;
     line-height: 60px;
+    font-size: 18px;
+    font-weight: bold;
   }
   .box_content {
     background-color: #fff;
@@ -1114,6 +1116,7 @@ $color_icon: #A0A8AE
             color: #606266;
             margin: 0 0 5px 22px;
             font-size: 14px;
+            cursor: pointer;
           }
         }
         .btn_bottom {

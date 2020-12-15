@@ -560,6 +560,8 @@ export default {
     line-height: 60px;
     font-size: 16px;
     color: #333;
+    font-size: 18px;
+    font-weight: bold;
   }
   .addLecturer_content {
     background-color: #fff;
