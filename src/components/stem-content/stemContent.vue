@@ -358,7 +358,8 @@ export default {
       let params = {
         categoryId: this.form.category === 0 ? null : this.form.category,
         search: this.form.search,
-        type: this.type
+        type: this.type,
+        status: 'normal'
       }
       getQuestionList(params, this.page, { pageNo: this.page.currentPage }).then((res) => {
         this.tableData = res.data

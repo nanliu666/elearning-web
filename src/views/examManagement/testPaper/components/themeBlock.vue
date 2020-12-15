@@ -300,25 +300,11 @@ export default {
       deep: true
     },
     totalScore() {
-      let block = {
-        key: this.blockData.key || this.blockData.id,
-        type: this.form.type,
-        title: this.form.title,
-        tableData: this.tableData,
-        totalScore: this.totalScore
-      }
-      this.$emit('update', _.cloneDeep(block))
+      this.newData()
     },
     form: {
       handler() {
-        let block = {
-          key: this.blockData.key,
-          type: this.form.type,
-          title: this.form.title,
-          tableData: this.tableData,
-          totalScore: this.totalScore
-        }
-        this.$emit('update', block)
+        this.newData()
       },
       deep: true
     }
@@ -378,7 +364,14 @@ export default {
      * @Desc 删除大题
      * */
     handleDeleteBlock() {
-      this.$emit('delete', this.blockData)
+      let block = {
+        key: this.blockData.key,
+        type: this.form.type,
+        title: this.form.title,
+        tableData: this.tableData,
+        totalScore: this.totalScore
+      }
+      this.$emit('delete', block)
     },
     /***
      * @author guanfenda
@@ -390,6 +383,17 @@ export default {
         if (it.id && row.id !== it.id) return true
         if (it.key && row.key !== it.key) return true
       })
+      this.newData()
+    },
+    newData() {
+      let block = {
+        key: this.blockData.key || this.blockData.id,
+        type: this.form.type,
+        title: this.form.title,
+        tableData: this.tableData,
+        totalScore: this.totalScore
+      }
+      this.$emit('update', _.cloneDeep(block))
     },
     /***
      * @author guanfenda
