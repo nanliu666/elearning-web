@@ -163,7 +163,7 @@ export default {
         enableMultiSelect: true,
         enablePagination: true,
         showIndexColumn: false,
-        rowKey: 'questionId',
+        rowKey: 'id',
         handlerColumn: {
           width: 120
         }
