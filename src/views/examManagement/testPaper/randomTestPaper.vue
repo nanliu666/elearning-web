@@ -4,7 +4,10 @@
       title="新建随机试卷"
       show-back
     />
-    <basic-container block>
+    <basic-container
+      v-loading="loading"
+      block
+    >
       <div class="content">
         <div class="title">
           基础信息
@@ -109,12 +112,14 @@
           </template>
           <template #questionNum="{row}">
             <div>
-              <el-input
+              <el-input-number
                 v-model="row.questionNum"
-                placeholder="请输入内容"
-                type="Number"
-              >
-              </el-input>
+                style="width: 120px"
+                controls-position="right"
+                :min="0"
+                :step="1"
+                :precision="0"
+              />
               <div
                 v-if="row.questionNum > row.totalQuestionNum"
                 class="valid"
@@ -130,13 +135,15 @@
             </div>
           </template>
           <template #score="{row}">
-            <el-input
+            <el-input-number
               v-model="row.score"
-              placeholder="请输入内容"
-              type="Number"
+              style="width: 120px"
+              controls-position="right"
+              :min="0"
+              :step="1"
+              :precision="1"
               @change="questionChange($event, row)"
-            >
-            </el-input>
+            />
             <div
               v-if="valid && !row.score"
               class="valid"
@@ -226,15 +233,13 @@ const BASE_COLUMNS = [
   },
   {
     prop: 'totalScore',
-    itemType: 'input',
+    itemType: 'inputNumber',
+    min: 0,
+    precision: 1,
+    step: 0.1,
     maxlength: 32,
-    label: '计划总分',
     span: 11,
-    type: 'Number',
-    required: false,
-    props: {
-      onlyNumber: true
-    }
+    label: '计划总分'
   },
   {
     prop: 'isScore',
@@ -298,7 +303,7 @@ const TABLE_COLUMNS = [
     label: '试题来源',
     prop: 'categoryId',
     slot: true,
-    minWidth: 250
+    minWidth: 220
   },
   {
     label: '题库试题总数',
@@ -311,13 +316,13 @@ const TABLE_COLUMNS = [
     label: '试卷试题数',
     prop: 'questionNum',
     slot: true,
-    minWidth: 120
+    minWidth: 145
   },
   {
     label: '单题分数',
     slot: true,
     prop: 'score',
-    minWidth: 120
+    minWidth: 145
   }
 ]
 const TABLE_CONFIG = {
@@ -344,6 +349,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       column: {
         page: {
           currentPage: 1,
@@ -511,38 +517,43 @@ export default {
       let params = {
         id: this.$route.query.id
       }
-      getTestPaper(params).then((res) => {
-        let {
-          id,
-          expiredTime,
-          categoryId,
-          totalScore,
-          remark,
-          name,
-          isScore,
-          isShowScore,
-          randomSettings,
-          isMulti
-        } = res
-        //后台要精确到一位小数，返回是乘以10
-        totalScore = totalScore / 10
-        this.form = {
-          id,
-          name,
-          categoryId,
-          expiredTime,
-          totalScore,
-          remark,
-          isScore,
-          isShowScore,
-          isMulti
-        }
-        randomSettings.map((data) => {
-          data.column = _.cloneDeep(this.column)
-          this.getTopicCategory(data.type, data.column)
+      this.loading = true
+      getTestPaper(params)
+        .then((res) => {
+          let {
+            id,
+            expiredTime,
+            categoryId,
+            totalScore,
+            remark,
+            name,
+            isScore,
+            isShowScore,
+            randomSettings,
+            isMulti
+          } = res
+          //后台要精确到一位小数，返回是乘以10
+          totalScore = totalScore / 10
+          this.form = {
+            id,
+            name,
+            categoryId,
+            expiredTime,
+            totalScore,
+            remark,
+            isScore,
+            isShowScore,
+            isMulti
+          }
+          randomSettings.map((data) => {
+            data.column = _.cloneDeep(this.column)
+            this.getTopicCategory(data.type, data.column)
+          })
+          this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
         })
-        this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
-      })
+        .finally(() => {
+          this.loading = false
+        })
     },
     /**
      * @author guanfenda
@@ -581,10 +592,15 @@ export default {
         }
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-        testPaperMether(params).then(() => {
-          this.$message.success('提交成功')
-          this.handleBack()
-        })
+        this.loading = true
+        testPaperMether(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.handleBack()
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
     /**
