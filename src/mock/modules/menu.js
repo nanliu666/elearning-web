@@ -853,6 +853,20 @@ const res = {
           },
           {
             menuId: '15674547683454620582323',
+            menuName: '试卷列表',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/ExamineeList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,

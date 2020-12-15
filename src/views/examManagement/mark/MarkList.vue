@@ -127,7 +127,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '答题时限（分钟）',
-    prop: 'createUser',
+    prop: 'createUser1',
     minWidth: 150
   },
   {
@@ -344,7 +344,7 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
+      this.$router.push({ path: '/examManagement/mark/ExamineeList', query: { id: row.id } })
     },
     // 加载函数
     async loadTableData() {
@@ -404,6 +404,10 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
+  }
 }
 .originColumn {
   height: 25px;
