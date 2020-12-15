@@ -41,6 +41,7 @@
                 编辑
               </el-button>
               <el-button
+                v-if="orgData.parentId !== '0'"
                 type="text"
                 size="medium"
                 icon="el-icon-delete"
