@@ -46,7 +46,7 @@
           v-bind="itemAttrs(column)"
           :disabled="type === 'createChild'"
           :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          @node-click="check"
+          @node-click="nodeClick"
         />
       </el-form-item>
       <el-form-item
@@ -186,7 +186,6 @@ export default {
     return {
       isrules: false,
       type: 'create',
-      orgType: '',
       // radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
       form: {
         orgType: '',
@@ -254,41 +253,23 @@ export default {
       if (!_.isEmpty(this.form.id) || this.form.parentOrgId) {
         // 从小到大
         let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
-        // // 当前的组织类型
-        // let currentIndex = _.findIndex(radioDisable, (item) => {
-        //   return item === this.form.orgType
-        // })
         // 父级的组织类型的次序
+        const parentOrg = this.findOrg(this.form.parentOrgId)
+        let parentOrgType = this.type !== 'edit' ? parentOrg.orgType : this.form.orgType
         const parentIndex = _.findIndex(radioDisable, (item) => {
-          return item === this.form.parentOrgType
+          return item === parentOrgType
         })
         let dataIndex = _.findIndex(radioDisable, (item) => {
           return item === data
         })
-        let indexList = []
-        _.each(this.form.children, (item) => {
-          let it = _.findIndex(radioDisable, (radioItem) => {
-            return radioItem === item.orgType
-          })
-          indexList.push(it)
-        })
-        let subIndex = Math.max.apply(Math, indexList)
         // 下级组织的组织类型不能大于上级组织翻译成以下意义：
         // 可选的当前组织组织类型必须比子级的最大的组织类型要大
         let isMoreThenSon = parentIndex >= dataIndex
-        // 可选的当前组织组织类型必须小于或者等于父级的组织类型
-        let isLessThenSon = subIndex <= dataIndex
-        let flag = isMoreThenSon && isLessThenSon
-        return !flag
+        return !isMoreThenSon
       }
     },
-    check(data) {
-      this.orgType = data.orgType
-      if (data.orgType !== 'Enterprise') {
-        this.form.orgType = data.orgType
-      } else {
-        this.form.orgType = 'Company'
-      }
+    nodeClick(data) {
+      this.form.parentOrgType = data.orgType
     },
     itemAttrs(column) {
       const copy = { ...defaultAttrs[column.itemType] }
