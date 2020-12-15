@@ -26,19 +26,19 @@
         </div>
       </div>
       <div class="btns">
-        <el-button size="small">
+        <el-button size="medium">
           预览
         </el-button>
         <el-button
-          size="small"
-          @click="addCourse(2)"
+          size="medium"
+          @click="isAddCourse(2)"
         >
           存草稿
         </el-button>
         <el-button
-          size="small"
+          size="medium"
           type="primary"
-          @click="addCourse(1)"
+          @click="isAddCourse(1)"
         >
           发布
         </el-button>
@@ -58,51 +58,59 @@
       >
         <!-- 第一行 -->
         <el-row>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="课程名称"
               prop="name"
             >
-              <el-input v-model="ruleForm.name"></el-input>
+              <el-input
+                v-model="ruleForm.name"
+                maxlength="32"
+              ></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="讲师"
               prop="teacherId"
             >
-              <el-input v-model="ruleForm.teacherId"></el-input>
+              <!-- <el-input v-model="ruleForm.teacherId" maxlength="32"></el-input> -->
+              <el-select
+                v-model="ruleForm.teacherId"
+                placeholder="请选择课程类型"
+              >
+                <!-- <el-option label="在线课程" :value="1"></el-option> -->
+
+                <el-option
+                  v-for="(item, index) in TeacherData"
+                  :key="index"
+                  :label="item.name"
+                  :value="item.idStr"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
 
         <!-- 第二行 -->
         <el-row>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="所在目录"
               prop="catalogId"
             >
-              <el-select
+              <el-cascader
                 v-model="ruleForm.catalogId"
-                placeholder="请选择所在目录"
-              >
-                <el-option
-                  label="区域一"
-                  value="1"
-                ></el-option>
-                <el-option
-                  label="区域二"
-                  value="2"
-                ></el-option>
-              </el-select>
+                :props="{ value: 'id', label: 'name' }"
+                :options="catalogIdoptions"
+              ></el-cascader>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="课程类型"
               prop="type"
@@ -112,16 +120,16 @@
                 placeholder="请选择课程类型"
               >
                 <el-option
-                  label="在线"
-                  value="1"
+                  label="在线课程"
+                  :value="1"
                 ></el-option>
                 <el-option
-                  label="面授"
-                  value="2"
+                  label="面授课程"
+                  :value="2"
                 ></el-option>
                 <el-option
-                  label="直播"
-                  value="3"
+                  label="直播课程"
+                  :value="3"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -134,7 +142,7 @@
           <span> 学分 </span>
         </div>
         <el-row>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item prop="period">
               <el-input-number
                 v-model="ruleForm.period"
@@ -145,9 +153,9 @@
               ></el-input-number>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item prop="credit">
               <el-input-number
                 v-model="ruleForm.credit"
@@ -162,7 +170,7 @@
 
         <!-- 第四行 -->
         <el-row>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="通过条件"
               prop="passCondition"
@@ -183,9 +191,9 @@
               </el-checkbox-group>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <el-form-item
               label="选修类型"
               prop="electiveType"
@@ -196,41 +204,42 @@
               >
                 <el-option
                   label="开放"
-                  value="1"
+                  :value="1"
                 ></el-option>
                 <el-option
                   label="通过审批"
-                  value="2"
+                  :value="2"
                 ></el-option>
                 <el-option
                   label="禁止"
-                  value="3"
+                  :value="3"
                 ></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
+
         <!-- 第五行 -->
         <span>添加标签</span>
         <el-row class="switch_box">
-          <el-col :span="10">
+          <el-col :span="11">
             <el-select
-              v-model="value1"
+              v-model="ruleForm.tagIds"
               multiple
               placeholder="请选择"
             >
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="item in tagIdsOptions"
+                :key="item.tagId"
+                :label="item.name"
+                :value="item.tagId"
               >
               </el-option>
             </el-select>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
           </el-col>
-          <el-col :span="10">
+          <el-col :span="11">
             <div>
               <span class="switch_title">是否推荐</span>
               <el-switch
@@ -253,24 +262,23 @@
                 v-model="ruleForm.imageUrl"
                 class="upload-demo"
                 drag
-                multiple
                 :show-file-list="false"
                 :before-upload="beforeAvatarUpload"
+                :multiple="false"
               >
-                >
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">
-                  将文件拖到此处，或<em>点击上传</em><br />
+                  <div>将文件拖到此处，或<em>点击上传</em><br /></div>
                   <div
                     slot="tip"
                     class="el-upload__tip"
                   >
-                    只能上传jpg/png文件，且不超过500kb
+                    只能上传jpg/png文件，且不超过10MB
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl.localName"
-                  :src="ruleForm.imageUrl.url"
+                  v-if="ruleForm.imageUrl[0]"
+                  :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                   class="avatar"
                 />
               </common-upload>
@@ -306,7 +314,8 @@
             <span>章节内容</span>
             <el-button
               type="primary"
-              size="small"
+              size="medium"
+              @click="addArticleBtn"
             >
               添加章节
             </el-button>
@@ -332,9 +341,12 @@
             >
               <template slot-scope="scope">
                 <el-input
+                  v-if="scope.row.saveOrcompile === 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
+                  maxlength="32"
                 ></el-input>
+                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -345,13 +357,26 @@
               width="185"
             >
               <template slot-scope="scope">
-                <div v-if="typeOption[scope.row.type - 1]">
-                  <span v-if="typeOption[scope.row.type - 1].value === 1">文章</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 2">课件</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 3">知识点</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 4">考试</span>
-                  <span v-if="typeOption[scope.row.type - 1].value === 5">视频</span>
-                </div>
+                <span v-if="scope.row.saveOrcompile === 0">
+                  <el-select
+                    v-model="scope.row.type"
+                    placeholder="请选择"
+                  >
+                    <el-option
+                      v-for="item in typeOption"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </span>
+
+                <span v-if="scope.row.saveOrcompile === 1">
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    {{ typeOption[scope.row.type - 1].name }}
+                  </span>
+                </span>
               </template>
             </el-table-column>
 
@@ -362,34 +387,144 @@
               width="250"
             >
               <template slot-scope="scope">
-                <span>{{ scope.row.articleContent }}</span>
+                <div v-if="scope.row.saveOrcompile === 0">
+                  <span
+                    v-if="typeOption[scope.row.type - 1]"
+                    size="medium"
+                  >
+                    <el-button
+                      v-if="typeOption[scope.row.type - 1].value === 1"
+                      type="text"
+                      @click="AddArticleBtntable(scope.$index)"
+                    >
+                      {{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '添加文章'
+                      }}
+                    </el-button>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 2"
+                      v-model="scope.row.upLoad"
+                      :before-upload="CoursewareUpload"
+                      :multiple="false"
+                    >
+                      <el-button type="text">{{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '上传课件'
+                      }}</el-button>
+                    </common-upload>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 3"
+                      v-model="scope.row.upLoad"
+                      :multiple="false"
+                      :before-upload="DataUpload"
+                    >
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传资料'
+                        }}
+                      </el-button>
+                    </common-upload>
+                    <el-button
+                      v-if="typeOption[scope.row.type - 1].value === 4"
+                      type="text"
+                    >关联考试</el-button>
+                    <common-upload
+                      v-if="typeOption[scope.row.type - 1].value === 5"
+                      v-model="scope.row.upLoad"
+                      :before-upload="VideoUpload"
+                      :multiple="false"
+                    >
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传视频'
+                        }}
+                      </el-button>
+                    </common-upload>
+                  </span>
+                  <span
+                    v-else
+                    size="medium"
+                  >
+                    请选择章节类型
+                  </span>
+                </div>
+
+                <div v-if="scope.row.saveOrcompile === 1">
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 1">
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 3">
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value === 5">
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                      }}</span>
+                    </span>
+                  </span>
+                </div>
               </template>
             </el-table-column>
 
             <!-- 第五列 -->
             <el-table-column
-              prop="address"
               label="操作"
               fixed="right"
               width="170"
             >
               <template slot-scope="scope">
                 <el-button
+                  v-if="scope.row.saveOrcompile === 1"
                   type="text"
-                  size="small"
+                  size="medium"
+                  @click="scope.row.saveOrcompile = 0"
                 >
                   编辑
                 </el-button>
                 <el-button
+                  v-if="scope.row.saveOrcompile === 0"
                   type="text"
-                  size="small"
-                  @click="deleteContent(scope.id)"
+                  size="medium"
+                  @click="scope.row.saveOrcompile = 1"
+                >
+                  保存
+                </el-button>
+                <el-button
+                  type="text"
+                  size="medium"
+                  @click="delContent(scope.$index)"
                 >
                   删除
                 </el-button>
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                   :disabled="scope.$index === 0"
                   @click="upward(scope.$index)"
                 >
@@ -397,7 +532,7 @@
                 </el-button>
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                   :disabled="scope.$index === ruleForm.contents.length - 1"
                   @click="downward(scope.$index)"
                 >
@@ -406,6 +541,36 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- 添加文章 -->
+          <el-dialog
+            title="添加文章"
+            :visible.sync="dialogVisible"
+            width="60%"
+            :modal-append-to-body="false"
+          >
+            <div class="dialog_input">
+              <span>标题</span>
+              <el-input
+                v-model="addArticle.localName"
+                placeholder="请输入标题"
+              ></el-input>
+            </div>
+            <div class="dialog_tinymce">
+              <span>内容</span>
+              <div><tinymce v-model="addArticle.content" /></div>
+            </div>
+
+            <span
+              slot="footer"
+              class="dialog-footer"
+            >
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button
+                type="primary"
+                @click="isAddArticle()"
+              >确 定</el-button>
+            </span>
+          </el-dialog>
         </div>
       </div>
     </div>
@@ -413,34 +578,31 @@
 </template>
 
 <script>
-import { getCourseList, delCourseContent, editCourseInfo } from '@/api/course/course'
+import {
+  getCourseTags,
+  getCatalog,
+  editCourseInfo,
+  getCourseContents,
+  getCourse,
+  listTeacher
+} from '@/api/course/course'
 export default {
+  components: {
+    commonUpload: () => import('@/components/common-upload/commonUpload')
+  },
   data() {
     return {
+      TeacherData: '',
+      catalogIdoptions: [],
       checkboxVal: [],
+      // 添加文章
+      dialogVisible: false,
+      addArticle: {
+        localName: '',
+        content: ''
+      },
       // 添加标签
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        },
-        {
-          value: '选项2',
-          label: '双皮奶'
-        },
-        {
-          value: '选项3',
-          label: '蚵仔煎'
-        },
-        {
-          value: '选项4',
-          label: '龙须面'
-        },
-        {
-          value: '选项5',
-          label: '北京烤鸭'
-        }
-      ],
+      tagIdsOptions: [],
       value1: [],
       // 页面切换
       headIndex: 1,
@@ -455,7 +617,7 @@ export default {
           value: 2
         },
         {
-          name: '知识点',
+          name: '资料下载',
           value: 3
         },
         {
@@ -468,37 +630,35 @@ export default {
         }
       ],
       // 填写课程信息
+      AddArticleBtntableIndex: '',
       ruleForm: {
-        status: '',
-        name: '', // 课程名称
-        teacherId: '', // 讲师
-        catalogId: '', // 所在目录
-        type: '', // 课程类型(1:在线 2:面授 3:直播)
-        period: 0, //学时
-        credit: 0, // 学分
-        passCondition: [], //通过条件（前端为多选，用a,b,c,d,...组合）
-        electiveType: '', //选修类型
-        isRecommend: '', //是否推荐(0：否   1：是)
-        cover: '', //封面
-        introduction: '', //课程介绍
+        imageUrl: [], //图片
+        url: '',
+        localName: '',
+        catalogId: '',
+        electiveType: 1,
         thinkContent: '', //课前思考内容
-        region: '', //删
-        resource: '',
-        imageUrl: [],
+        introduction: '', //课程介绍
+        tagIds: '', //标签
+        isRecommend: '', //是否推荐
+        passCondition: '', //通过条件
+        period: '', //时长
+        credit: '', //学分
+        // 所在分类现在没有
+        type: '', //课程类型
+        name: '', //课程名称
+        teacherId: '', //讲师id
         // 表格
         contents: [
           {
-            articleContent: '', // 文件内容
-            articleTitle: '', // 文章标题
-            courseWareName: '', // 课件名称
-            courseWareUrl: '', // 课件URL
-            createId: '', // 创建人帐号
-            createTime: '', // 创建时间
-            id: 1, // 章节内容ID
-            name: '', // 内容名称
-            order: '', // 内容顺序
-            type: '', //章节类型（1:文章 2:普通课件 3:知识点 4:考试 5:视频）
-            updateTime: '' //更新时间
+            url: '',
+            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+            sort: '', //序号
+            type: '', //章节类型
+            name: '', // 章节名称
+            content: '', //文章内容
+            upLoad: [], //[url,localName],  //所有上传的文件
+            saveOrcompile: 0 // 1保存&0编辑
           }
         ]
       },
@@ -509,64 +669,239 @@ export default {
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }],
         passCondition: [{ required: true, message: '请选择通过条件', trigger: 'blur' }],
         electiveType: [{ required: true, message: '请选择选修类型', trigger: 'blur' }],
-        cover: [{ required: true, message: '请选择课程封面', trigger: 'blur' }],
+        imageUrl: [{ required: true, message: '请选择课程封面', trigger: 'blur' }],
         introduction: [{ required: true, message: '请书写课程介绍', trigger: 'blur' }],
-        thinkContent: [{ required: true, message: '请书写课前思考内容', trigger: 'blur' }],
-        imageUrl: [{ required: true, message: '请上传照片', trigger: 'blur' }]
+        thinkContent: [{ required: true, message: '请书写课前思考内容', trigger: 'blur' }]
       }
     }
   },
+  watch: {},
 
   created() {
+    this.isgetCourseTags()
+    this.isgetCatalog()
     this.getInfo()
+    this.islistTeacher()
   },
   methods: {
-    setCheckboxVal() {
-      this.ruleForm.passCondition = this.checkboxVal
-    },
-    // 发布&草稿
-    addCourse(status) {
-      this.$refs.ruleForm.validate((valid) => {
-        if (!valid) {
-          this.$message({
-            message: '信息填写不完整',
-            type: 'warning'
-          })
-        } else {
-          this.ruleForm.status = status
-          editCourseInfo(this.ruleForm).then(() => {
-            this.$message({
-              message: '发送成功！！！',
-              type: 'success'
-            })
-          })
-        }
+    islistTeacher() {
+      listTeacher({ currentPage: 1, size: 999 }).then((res) => {
+        this.TeacherData = res.teacherInfos
       })
     },
 
-    // 删除
-    deleteContent(id) {
-      delCourseContent({ contentId: id })
-        .then(() => {
-          this.$message({
-            message: '该章节已成功删除',
-            type: 'success'
-          })
+    // 编辑页面的数据前
+    // 编辑页面的数据后
+    getInfo() {
+      let id = this.$route.query.id
+      getCourseContents({ courseId: id }).then((res) => {
+        // console.log('getCourseContents---------------', res)
+
+        let data = res
+        data.map((item) => {
+          item.upLoad = [{ localName: '', url: '' }]
+          item.upLoad[0].localName = item.localName
+          item.upLoad[0].url = item.url
         })
-        .catch((err) => {
-          this.$message.error(err.resMsg)
-        })
+
+        this.ruleForm.contents = data
+      })
+      getCourse({ courseId: id }).then((res) => {
+        let data = res
+        data.imageUrl = [{ localName: '', url: '' }]
+        data.imageUrl[0].localName = data.localName
+        data.imageUrl[0].url = data.url
+        data.contents = []
+        this.ruleForm = data
+        this.$forceUpdate()
+      })
     },
 
-    // 拿数据
-    getInfo() {
-      getCourseList({ courseId: 1 })
-        .then((res) => {
-          this.ruleForm = { ...this.ruleForm } = res
+    // 拿到列表数据
+    isgetCatalog() {
+      getCatalog().then((res) => {
+        this.catalogIdoptions = res
+      })
+    },
+    //添加文章tabel btn
+    AddArticleBtntable(index) {
+      this.AddArticleBtntableIndex = index
+      this.dialogVisible = true
+    },
+    // 添加文章
+    isAddArticle() {
+      let i = {
+        localName: this.addArticle.localName,
+        content: this.addArticle.content
+      }
+      // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
+      // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
+      this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
+      this.addArticle.localName = ''
+      this.addArticle.content = ''
+      this.dialogVisible = false
+    },
+    // 拿添加标签数据
+    isgetCourseTags() {
+      getCourseTags().then((res) => {
+        this.tagIdsOptions = res
+      })
+    },
+
+    // 发布&草稿
+    isAddCourse(status) {
+      this.ruleForm.contents.map((item, index) => {
+        item.sort = index
+        if (item.upLoad.length !== 0) {
+          item.localName = item.upLoad[item.upLoad.length - 1].localName
+          item.url = item.upLoad[item.upLoad.length - 1].url
+        }
+      })
+      this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
+        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].localName
+        : ''
+      this.ruleForm.url = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
+        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url
+        : ''
+
+      let params = JSON.parse(JSON.stringify(this.ruleForm))
+      delete params.imageUrl
+      params.contents.forEach((item) => {
+        delete item.upLoad
+      })
+      params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
+      params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
+      params.isRecommend = params.isRecommend === false ? 0 : 1
+      // params.tagIds = params.tagIds.join(',')
+
+      // 草稿
+      if (status === 2) {
+        this.$confirm(
+          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
+          '提示',
+          {
+            confirmButtonText: '保存',
+            cancelButtonText: '不保存',
+            type: 'warning'
+          }
+        )
+          .then(() => {
+            params.status = status
+
+            // addCourse(params).then(() => {
+            editCourseInfo(this.ruleForm).then(() => {
+              this.$message({
+                message: '保存成功',
+                type: 'success'
+              })
+              setTimeout(() => {
+                this.$router.push({ path: '/course/courseDraft' })
+              }, 2000)
+            })
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消保存'
+            })
+            setTimeout(() => {
+              this.$router.push({ path: '/course/courseDraft' })
+            }, 2000)
+          })
+      }
+      if (status === 1) {
+        this.$refs.ruleForm.validate((valid) => {
+          if (!valid) {
+            this.$message({
+              message: '信息填写不完整',
+              type: 'warning'
+            })
+          } else {
+            params.status = status
+            editCourseInfo(params).then(() => {
+              this.$message({
+                message: '本课程已发布成功',
+                type: 'success'
+              })
+              setTimeout(() => {
+                this.$router.push({ path: '/course/courseDraft' })
+              }, 2000)
+            })
+          }
         })
-        .catch((err) => {
-          window.console.log(err)
-        })
+      }
+    },
+
+    // 资料校验
+    DataUpload(file) {
+      const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传资料片大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
+        return false
+      }
+      return true
+    },
+    // 视频校验
+    VideoUpload(file) {
+      const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传视频大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
+        return false
+      }
+      return true
+    },
+
+    // 课件校验
+    CoursewareUpload(file) {
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isLt10M) {
+        this.$message.error('上传课件大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持txt,doc,wps,rtf,xls,xlsx,ppt,pptx,pdf文件')
+        return false
+      }
+      return true
+    },
+    // 1保存&0编辑btn
+    saveOrcompileBtn() {},
+    // 添加章节
+    addArticleBtn() {
+      let item = {
+        sort: '', //序号
+        type: '', //章节类型
+        name: '', // 章节名称
+        localName: '', //文章标题
+        url: '',
+        content: '', //文章内容
+        upLoad: [], //[url,localName],  //所有上传的文件
+        saveOrcompile: 0 // 1保存&0编辑
+      }
+      this.ruleForm.contents.push(item)
+    },
+    setCheckboxVal() {
+      this.ruleForm.passCondition = this.checkboxVal
+    },
+
+    // 删除
+    delContent(index) {
+      // console.log(index)
+      this.ruleForm.contents.splice(index, 1)
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
@@ -576,31 +911,30 @@ export default {
     // 向上移动
     upward(scope) {
       this.swapArray(this.ruleForm.contents, scope - 1, scope)
-      //   console.log(scope)
     },
     // 向下移动
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
-      //   console.log(scope)
     },
     // 图片
-    handleAvatarSuccess(res, file) {
-      this.ruleForm.imageUrl = URL.createObjectURL(file.raw)
-      // this.ruleForm.imageUrl
-      // res, file
-    },
+    // handleAvatarSuccess(res, file) {
+    //   this.ruleForm.imageUrl = URL.createObjectURL(file.raw)
+    //   // this.ruleForm.imageUrl
+    //   // res, file
+    // },
     beforeAvatarUpload(file) {
-      // (file
-      const isJPG = file.type === 'image/jpeg'
-      const isLt2M = file.size / 1024 / 1024 < 2
+      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const isLt10M = file.size / 1024 / 1024 < 5
 
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式!')
+      if (!isLt10M) {
+        this.$message.error('上传课件大小不能超过 10MB!')
+        return false
       }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!')
+      if (!regx.test(file.name)) {
+        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        return false
       }
-      return isJPG && isLt2M
+      return true
     },
 
     // 计数器
@@ -663,16 +997,16 @@ export default {
     margin: 20px auto;
     background-color: #fff;
     width: 80%;
-    padding: 40px 100px;
+    padding: 10vh 10vw;
     #ruleForm {
       /deep/.el-input {
-        width: 350px;
+        width: 20vw;
       }
     }
   }
 
   /deep/.el-input-number {
-    width: 350px;
+    width: 20vw;
   }
   /deep/.el-input-number .el-input__inner {
     text-align: left;
@@ -699,6 +1033,9 @@ export default {
     }
   }
   .upload-demo {
+    border: 1px solid #ccc;
+    padding: 40px 50px 20px;
+    border-radius: 7px;
     position: relative;
     .avatar {
       position: absolute;
@@ -726,6 +1063,8 @@ export default {
     margin: 10px 0 10px;
   }
   #upContent {
+    margin-left: -7vw;
+    width: 60vw;
     .up_head {
       display: flex;
       justify-content: space-between;
@@ -744,6 +1083,29 @@ export default {
   }
   /deep/.el-upload__tip {
     line-height: 0;
+  }
+  .el-upload__text {
+    width: 210px;
+  }
+  .dialog_input {
+    margin: 20px;
+    display: flex;
+    width: 70%;
+    span {
+      width: 50px;
+      line-height: 35px;
+    }
+  }
+  .dialog_tinymce {
+    margin: 20px;
+    display: flex;
+    span {
+      width: 50px;
+      line-height: 35px;
+    }
+    div {
+      width: 100%;
+    }
   }
 }
 </style>

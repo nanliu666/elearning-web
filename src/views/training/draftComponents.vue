@@ -133,7 +133,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click.stop=""
+                  @click.stop="toTrainingEdit(scope)"
                 >
                   编辑
                 </el-button>
@@ -218,7 +218,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入目录名称搜索' },
+    config: { placeholder: '请输入培训名称搜索' },
     data: '',
     field: 'trainName',
     label: '',
@@ -299,6 +299,9 @@ export default {
     // this.loadData()
   },
   methods: {
+    toTrainingEdit(scope) {
+      this.$router.push({ path: '/training/trainingEdit?id=' + scope.row.id })
+    },
     // 去培训详情
     toTrainingDetail(id) {
       this.$router.push({ path: '/training/trainingDetail?id=' + id })
@@ -324,7 +327,7 @@ export default {
       params = { ...params, ...this.page, ...param }
       getScheduleList(params).then((res) => {
         this.tableData = res.data
-        // console.log(this.tableData)
+        this.page.total = res.totalNum
       })
     },
 
@@ -340,6 +343,32 @@ export default {
 
     handleSearch(searchParams) {
       this.isgetScheduleList(searchParams)
+    },
+    handleRemoveItems(selection) {
+      this.$confirm('此操作将删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          let params = { ids: '' }
+          selection.forEach((item) => {
+            params.ids += item.id + ','
+          })
+          delTrain(params).then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.isgetScheduleList()
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   }
 }

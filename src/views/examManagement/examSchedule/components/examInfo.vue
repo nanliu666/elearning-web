@@ -86,7 +86,7 @@
           <el-radio :label="false">
             不计时
           </el-radio>
-          <radioInput
+          <radio-input
             :label="true"
             :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
@@ -102,7 +102,7 @@
             <el-radio :label="false">
               不限次数
             </el-radio>
-            <radioInput
+            <radio-input
               :label="true"
               :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
@@ -207,7 +207,7 @@
           v-model="model.passType"
           style="display: flex;"
         >
-          <achivementRadioInput
+          <condition-radio-input
             v-model="model.passType"
             style="margin-right:40px"
             label-text="按成绩"
@@ -218,8 +218,8 @@
             :number.sync="passCondition[0].passScope"
             :pass-scope="model.passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
-          <achivementRadioInput
+          />
+          <condition-radio-input
             v-model="model.passType"
             label-text="按得分率"
             text-before="得分率不低于"
@@ -228,7 +228,7 @@
             :default-value="passCondition[1].passType"
             :number.sync="passCondition[1].passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
+          />
         </el-radio-group>
       </template>
     </common-form>
@@ -236,10 +236,10 @@
 </template>
 
 <script>
-import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
+import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 import SwitchInput from './atomComponents/switchInput'
-import radioInput from '@/components/radioInput/radioInput'
-import checkboxInput from '@/components/checkboxInput/checkboxInput'
+import RadioInput from '@/components/radio-input/radio-input'
+import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
 import { getExamList, getCertificateList } from '@/api/examManage/schedule'
@@ -454,19 +454,20 @@ const EventColumns = [
     prop: 'publicAnswers',
     label: '允许考生查看标准答案'
   },
-  {
-    itemType: 'switch',
-    span: 11,
-    offset: 2,
-    prop: 'openEntrance',
-    label: '允许考生报名参加考试'
-  },
-  {
-    itemType: 'switch',
-    span: 11,
-    prop: 'isExamine',
-    label: '考生报名考试需要审批'
-  },
+  //TODO: 暂时隐藏
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'openEntrance',
+  //   label: '允许考生报名参加考试'
+  // },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   prop: 'isExamine',
+  //   label: '考生报名考试需要审批'
+  // },
   {
     prop: 'strategyTitle',
     itemType: 'slotout',
@@ -573,10 +574,10 @@ const radioList = [
 export default {
   name: 'ExamInfo',
   components: {
-    achivementRadioInput,
+    ConditionRadioInput,
     SwitchInput,
-    radioInput,
-    checkboxInput,
+    RadioInput,
+    CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
@@ -625,7 +626,7 @@ export default {
         openAnswerSheet: false,
         selfMarking: false,
         publicAnswers: false,
-        openEntrance: false,
+        // openEntrance: false,
         isExamine: false,
         openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
         modifyAnswer: false,

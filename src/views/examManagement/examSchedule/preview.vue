@@ -9,9 +9,12 @@
         <div class="preview-title-box">
           <div class="preview-title">
             {{ paperData.name }}
-            <span>（{{ $route.query.previewSort }}）</span>
+            <span v-if="$route.query.previewSort">（{{ $route.query.previewSort }}）</span>
           </div>
-          <div class="preview-subhead">
+          <div
+            v-if="paperData.totalScore"
+            class="preview-subhead"
+          >
             试卷总分：{{ paperData.totalScore / 10 }}分
           </div>
         </div>

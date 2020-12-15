@@ -10,22 +10,22 @@
         class="form"
         :columns="columns"
       >
-        <template #courseName>
+        <template #course>
           <lazy-select
-            v-model="model.courseName"
+            v-model="model.course"
             :allow-create="isCreate"
             :searchable="remote"
             :load="loadCourse"
             :option-props="{
               label: 'name',
-              value: 'name',
+              value: 'id',
               key: 'id'
             }"
           />
         </template>
-        <template #lecturerName>
+        <template #lecturerId>
           <lazy-select
-            v-model="model.lecturerName"
+            v-model="model.lecturerId"
             :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
@@ -62,8 +62,8 @@ const EventColumns = [
     label: '上课日期'
   },
   // TODO：关联课程应该用lazy-select
-  { itemType: 'slot', span: 24, required: true, prop: 'courseName', label: '关联课程' },
-  { itemType: 'slot', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'slot', span: 24, required: true, prop: 'course', label: '关联课程' },
+  { itemType: 'slot', span: 24, required: false, prop: 'lecturerId', label: '讲师' },
   {
     itemType: 'radio',
     prop: 'studyType',
@@ -95,8 +95,8 @@ export default {
       title: '添加在线课程',
       model: {
         studyType: 0,
-        courseName: '',
-        lecturerName: '',
+        course: '',
+        lecturerId: '',
         classTime: []
       }
     }

@@ -55,6 +55,7 @@
                   effect="dark"
                   placement="top"
                   style="color:#acb3b8;"
+                  @click="refreshTableData"
                 >
                   <el-button
                     class="operations__btns--item"
@@ -66,7 +67,10 @@
                     <!-- <i class="iconfont iconicon_refresh" /> -->
                   </el-button>
                 </el-tooltip>
-                <span class="text_refresh">刷新</span>
+                <span
+                  class="text_refresh"
+                  @click="refreshTableData"
+                >刷新</span>
                 <el-popover
                   placement="bottom"
                   width="40"
@@ -281,7 +285,7 @@ export default {
     // 查询培训考试安排详情
     isExamDetail() {
       // console.log('id', this.$route.query.id)
-      let id = { examId: '1332136484077338626' }
+      let id = { examId: this.$route.query.id }
       examDetail(id).then((res) => {
         // console.log(res)
         this.showExamDetail = res

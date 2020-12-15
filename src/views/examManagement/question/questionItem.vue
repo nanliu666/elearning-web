@@ -208,9 +208,52 @@ export default {
   },
   watch: {
     'value.type'(val, oldVal) {
-      if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
+      if (val === QUESTION_TYPE_SINGLE) {
+        SELECT_COLUMNS[2].rules = [
+          {
+            validator: (rule, value, callback) => {
+              if (_.some(value, (item) => !item.content && !item.url)) {
+                return callback(new Error('选项内容请填写完整'))
+              } else if (!_.some(value, { isCorrect: 1 })) {
+                return callback(new Error('请设置正确选项'))
+              }
+              callback()
+            },
+            trigger: 'change'
+          }
+        ]
+        this.contentColumns = SELECT_COLUMNS
+      } else if (QUESTION_TYPE_MULTIPLE === val) {
+        SELECT_COLUMNS[2].rules = [
+          {
+            validator: (rule, value, callback) => {
+              if (_.some(value, (item) => !item.content && !item.url)) {
+                return callback(new Error('选项内容请填写完整'))
+              } else if (!_.some(value, { isCorrect: 1 })) {
+                return callback(new Error('请设置正确选项'))
+              } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
+                return callback(new Error('多选题请最少选择两个正确答案'))
+              }
+              callback()
+            },
+            trigger: 'change'
+          }
+        ]
         this.contentColumns = SELECT_COLUMNS
       } else if (val === QUESTION_TYPE_JUDGE) {
+        SELECT_COLUMNS[2].rules = [
+          {
+            validator: (rule, value, callback) => {
+              if (_.some(value, (item) => !item.content && !item.url)) {
+                return callback(new Error('选项内容请填写完整'))
+              } else if (!_.some(value, { isCorrect: 1 })) {
+                return callback(new Error('请设置正确选项'))
+              }
+              callback()
+            },
+            trigger: 'change'
+          }
+        ]
         this.contentColumns = SELECT_COLUMNS
         this.value.options = [
           { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
@@ -221,6 +264,19 @@ export default {
       } else if (QUESTION_TYPE_BLANK === val) {
         this.contentColumns = FILL_COLUMNS
       } else {
+        SELECT_COLUMNS[2].rules = [
+          {
+            validator: (rule, value, callback) => {
+              if (_.some(value, (item) => !item.content && !item.url)) {
+                return callback(new Error('选项内容请填写完整'))
+              } else if (!_.some(value, { isCorrect: 1 })) {
+                return callback(new Error('请设置正确选项'))
+              }
+              callback()
+            },
+            trigger: 'change'
+          }
+        ]
         this.contentColumns = SELECT_COLUMNS
       }
       // 从多选题切换到单选题时把正确答案置空
@@ -232,6 +288,13 @@ export default {
     }
   },
   methods: {
+    handleRadioCheck(val, option) {
+      this.value.options.forEach((item) => {
+        if (item.key !== option.key) {
+          item.isCorrect = 0
+        }
+      })
+    },
     handleDelete() {
       this.$confirm('您确认要删除该试题吗？', '', {
         confirmButtonText: '确定',

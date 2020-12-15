@@ -9,6 +9,8 @@ export const SELECT_COLUMNS = [
     type: 'textarea',
     label: '题干',
     required: true,
+    maxlength: 1500,
+    showWordLimit: true,
     resize: 'none',
     rows: 6
   },
@@ -39,6 +41,8 @@ export const SELECT_COLUMNS = [
     itemType: 'input',
     type: 'textarea',
     label: '试题分析',
+    maxlength: 1000,
+    showWordLimit: true,
     resize: 'none',
     rows: 6
   }
@@ -61,6 +65,8 @@ export const SHORT_COLUMNS = [
     itemType: 'input',
     type: 'textarea',
     label: '试题分析',
+    maxlength: 1000,
+    showWordLimit: true,
     resize: 'none',
     rows: 6
   }
@@ -90,6 +96,8 @@ export const FILL_COLUMNS = [
     itemType: 'input',
     type: 'textarea',
     label: '试题分析',
+    maxlength: 1000,
+    showWordLimit: true,
     resize: 'none',
     rows: 6
   }
