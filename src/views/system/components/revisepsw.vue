@@ -93,7 +93,7 @@ export default {
         callback()
       }
     }
-    const validateNewPSW = function(rule, value, callback) {
+    const validateNewPSW = (rule, value, callback) => {
       if (value.length < 6 || value.length > 12) {
         callback(new Error('密码的长度需要在6到12个字符之间'))
       } else if (!validatePW(value)) {
