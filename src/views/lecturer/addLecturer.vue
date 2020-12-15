@@ -4,7 +4,7 @@
       class="addLecturer_head"
       @click="toLecturer"
     >
-      <i class="el-icon-arrow-left"></i> 添加讲师
+      <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '添加讲师' }}
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
@@ -32,8 +32,8 @@
                   placeholder="请选择讲师姓名"
                 >
                   <el-option
-                    v-for="(item, index) in Teacherlist"
-                    :key="index"
+                    v-for="item in Teacherlist"
+                    :key="item.userId"
                     :label="item.name"
                     :value="item.userId"
                   ></el-option>
@@ -50,7 +50,7 @@
                 <el-input
                   v-model="ruleForm.phonenum"
                   maxlength="32"
-                  :disabled="disableDdata.disabledPhonenum"
+                  disabled
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -66,7 +66,7 @@
                 <el-input
                   v-model="ruleForm.userEmail"
                   maxlength="32"
-                  :disabled="disableDdata.disabledUserEmail"
+                  disabled
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -79,15 +79,15 @@
               >
                 <el-radio
                   v-model="ruleForm.sex"
-                  label="1"
-                  :disabled="disableDdata.disabledSex"
+                  :label="1"
+                  disabled
                 >
                   男
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.sex"
-                  label="0"
-                  :disabled="disableDdata.disabledSex"
+                  :label="0"
+                  disabled
                 >
                   女
                 </el-radio>
@@ -108,11 +108,11 @@
                 >
                   <el-option
                     label="内训"
-                    value="1"
+                    :value="1"
                   ></el-option>
                   <el-option
                     label="外聘"
-                    value="2"
+                    :value="2"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -195,13 +195,13 @@
               >
                 <el-radio
                   v-model="ruleForm.isLatestTeacher"
-                  label="1"
+                  :label="1"
                 >
                   是
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.isLatestTeacher"
-                  label="0"
+                  :label="0"
                 >
                   否
                 </el-radio>
@@ -218,13 +218,13 @@
               >
                 <el-radio
                   v-model="ruleForm.isPopularTeacher"
-                  label="1"
+                  :label="1"
                 >
                   是
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.isPopularTeacher"
-                  label="2"
+                  :label="2"
                 >
                   否
                 </el-radio>
@@ -324,16 +324,7 @@ export default {
       data: [], //分类列表
       checkboxVal: [],
       // 添加标签
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        },
-        {
-          value: '选项2',
-          label: '双皮奶'
-        }
-      ],
+      options: [],
       // 填写课程信息
       ruleForm: {
         categoryId: '',
@@ -352,7 +343,7 @@ export default {
     }
   },
   watch: {
-    'ruleForm.name': {
+    'ruleForm.userId': {
       handler(n) {
         this.Teacherlist.forEach((item, index) => {
           if (item.userId == n) {
@@ -380,12 +371,19 @@ export default {
       let params = {
         id: ''
       }
+
       params.id = this.$route.query.id
       // console.log(params.id)
       if (params.id) {
         params.id = params.id.trim()
         getTeacher(params).then((res) => {
-          this.ruleForm = res.teacherInfo
+          let data = res.teacherInfo
+          // this.ruleForm = res.teacherInfo
+          // this.ruleForm.attachments.push({ fileUrl: res.teacherInfo.photo })
+          data.attachments = []
+          data.attachments.push({ fileUrl: res.teacherInfo.photo })
+          this.ruleForm = data
+          // console.log(this.ruleForm)
         })
       }
     },
@@ -465,7 +463,7 @@ export default {
 
       queryTeacherlist(params).then((res) => {
         this.Teacherlist = res.data
-        // console.log(res)
+        // console.log('------------', res)
       })
     },
     // 去讲师列表

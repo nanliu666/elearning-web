@@ -19,7 +19,7 @@
       <div class="head_box_content">
         <el-row>
           <el-col
-            :span="4"
+            :span="7"
             style="color:#333;"
           >
             {{ name }}
@@ -107,7 +107,7 @@
             {{ teacherData.teacherTitle }}
           </el-col>
         </el-row>
-        <el-row>
+        <!-- <el-row>
           <el-col
             :span="4"
             style="color:#333;"
@@ -117,7 +117,7 @@
           <el-col :span="8">
             <span class="box_content_icon">计算机技术</span><span class="box_content_icon">计算机技术</span>
           </el-col>
-        </el-row>
+        </el-row> -->
       </div>
       <div class="head_box_btns">
         <el-button
@@ -128,10 +128,19 @@
           编辑
         </el-button>
         <el-button
+          v-if="teacherData.status == 1"
           size="medium"
-          @click="iseditSysRulus"
+          @click="iseditSysRulus(0)"
         >
           停用
+        </el-button>
+        <el-button
+          v-else
+          size="medium"
+          type="primary"
+          @click="iseditSysRulus(1)"
+        >
+          启用
         </el-button>
         <el-button
           size="medium"
@@ -184,18 +193,19 @@ export default {
 
   methods: {
     // 启动/停用系统规则列表
-    iseditSysRulus() {
+    iseditSysRulus(status) {
       let params = {
         id: '',
         status: '' // '0 停用 1 正常',
       }
       params.id = this.$route.query.id
-      params.status = 0
+      params.status = status
       editSysRulus(params).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
         })
+        this.isgetTeacher()
       })
     },
 
@@ -216,9 +226,25 @@ export default {
 
     // 去编辑
     tocompileLecturer() {
-      let id = this.$route.query.id
-      id = id.trim()
-      this.$router.push({ path: '/lecturer/compileLecturer?id=' + id })
+      let row = {}
+      row.idStr = this.$route.query.id
+      row.name = this.$route.query.name
+      row.user_email = this.$route.query.userEmail
+      row.sex = this.$route.query.sex
+      row.phonenum = this.$route.query.phonenum
+      row.user_id_str = this.$route.query.user_id_str
+
+      this.$router.push({
+        path: '/lecturer/compileLecturer',
+        query: {
+          id: row.idStr,
+          name: row.name,
+          userEmail: row.user_email,
+          sex: row.sex,
+          phonenum: row.phonenum,
+          user_id_str: row.user_id_str
+        }
+      })
     },
     // 去讲师列表
     toLecturer() {
@@ -232,6 +258,7 @@ export default {
       this.name = this.$route.query.name
       getTeacher(params).then((res) => {
         this.teacherData = res.teacherInfo
+        // console.log(res.teacherInfo);
       })
     }
   }
@@ -254,6 +281,7 @@ export default {
       margin: 15px 0;
       position: relative;
       overflow: hidden;
+      padding-right: 55px;
       img {
         width: 400px;
         height: 220px;

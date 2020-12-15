@@ -927,7 +927,7 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {
