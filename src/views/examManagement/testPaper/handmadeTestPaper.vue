@@ -56,7 +56,7 @@
               type="primary"
               @click="handleAddType"
             >
-              添加体型
+              添加题型
             </el-button>
           </div>
         </div>
@@ -222,7 +222,28 @@ export default {
       testPaper: []
     }
   },
-  mounted() {
+  watch: {
+    /***
+     * @author guanfenda
+     * @desc 修改了试题设置，修改分数重新计算剩余分数
+     * */
+    TotalScore(val) {
+      if (this.form.totalScore) {
+        this.score = this.form.totalScore - val
+      }
+    },
+    /**
+     * @author guanfenda
+     * @desc 如果改变了计划分数 重新计算剩余分数
+     * */
+    'form.totalScore'() {
+      this.count()
+    }
+  },
+  mounted() {},
+  activated() {
+    this.form = {}
+    this.testPaper = []
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
     this.getTestPaperCategory()
@@ -352,7 +373,11 @@ export default {
      * @desc 计算剩余分数，和当前总分数
      * */
     count() {
-      let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
+      let scoreList = _.compact(
+        this.testPaper.map(
+          (it) => it.tableData && it.tableData.length > 0 && it.tableData.map((item) => item.score)
+        )
+      )
       let list = []
       scoreList.map((it) => {
         list.push(...it)
@@ -375,7 +400,9 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.testPaper = this.testPaper.filter((it) => it.id !== data.id)
+        this.testPaper = this.testPaper.filter((it) => {
+          return it.key !== data.key
+        })
       })
     },
     /**
