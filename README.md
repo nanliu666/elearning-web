@@ -88,8 +88,16 @@
 
 * 尽量使用ES6语法，[参考](https://es6.ruanyifeng.com/#docs/style)
 
-* 开发vue相关要按照vue[官方代码规范](https://cn.vuejs.org/v2/style-guide/index.html)开发，js命名规范按照[AlloyTeam规范文档](http://alloyteam.github.io/CodeGuide/#js-variable-naming)
+* 开发vue相关要按照vue[官方代码规范](https://cn.vuejs.org/v2/style-guide/index.html)开发
 
 * 开发前看一下util文件夹下的函数，常用的校验正则，cookie,store等工具函数都有，不要自己造轮子
 
 * Mock使用MockJS，注意看一下[文档](https://juejin.im/post/5cf726b5e51d454fbf5409bc) ，mock代码放在src/mock下
+
+## 命名规范
+
+* vue文件使用首字母大写的驼峰式命名，例如 `ElTreeSelect.vue`
+  
+* js文件和文件夹使用短横线命名，例如 `el-tree-select`
+
+* js命名规范按照[AlloyTeam规范文档](http://alloyteam.github.io/CodeGuide/#js-variable-naming)
