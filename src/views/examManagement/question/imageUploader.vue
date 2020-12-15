@@ -108,7 +108,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
+        this.$message.error('上传附件只支持png、jpg、jpeg格式文件')
         return false
       }
       return true

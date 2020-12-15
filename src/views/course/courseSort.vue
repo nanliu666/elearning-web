@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { getCatalog, editCatalog } from '@/api/course/course'
+import { getCatalog, updateCatalogSort } from '@/api/course/course'
 
 export default {
   name: 'Name',
@@ -142,7 +142,7 @@ export default {
       this.loadSort(this.data)
       // { orgs: this.data }
       this.loading = true
-      editCatalog(this.data).then(() => {
+      updateCatalogSort(this.data).then(() => {
         this.$message.success('保存成功')
         getCatalog({ parentOrgId: 0 }).then((res) => {
           this.data = res
