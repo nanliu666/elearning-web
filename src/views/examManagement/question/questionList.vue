@@ -225,7 +225,7 @@ export default {
     },
     filterNode(value, data) {
       if (!value) return true
-      return data.orgName.indexOf(value) !== -1
+      return data.name.indexOf(value) !== -1
     },
     nodeClick(data) {
       this.activeCategory = data
@@ -269,6 +269,7 @@ export default {
           this.$message.warning('您选中试题有正在关联的试卷，请调整后再进行删除！')
           return
         }
+        id = data.id
       }
       this.$confirm('您确定要删除选中的试题吗？', '', {
         confirmButtonText: '确定',

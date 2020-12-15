@@ -5,7 +5,7 @@
       :key="key"
     >
       <el-col :span="4">
-        {{ val['title'] }}
+        {{ val['title'] || '负责人' }}
       </el-col>
       <el-col :span="20">
         {{ val['leaderName'] }}

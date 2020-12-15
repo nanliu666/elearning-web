@@ -79,7 +79,7 @@
                 placement="top-start"
               >
                 <div slot="content">
-                  最多插入5张图片。
+                  支持上传png、jpg、jpeg格式文件，单个文件大小＜5MB，最多5个文件
                 </div>
                 <i class="el-icon-question" />
               </el-tooltip>

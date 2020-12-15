@@ -30,83 +30,58 @@
         :data="tableData"
         :loading="tableLoading"
       >
+        <template #multiSelectMenu="{selection}">
+          <el-button
+            type="text"
+            size="medium"
+            icon="el-icon-delete"
+            @click="handleDelete(selection)"
+          >
+            批量删除
+          </el-button>
+        </template>
         <template #topMenu>
-          <div class="transitionBox">
-            <transition name="el-zoom-in-center">
+          <div class="operations">
+            <SearchPopover
+              ref="searchPopover"
+              :popover-options="searchConfig.popoverOptions"
+              :require-options="searchConfig.requireOptions"
+              @submit="handleSearch"
+            />
+            <div class="operations__right">
               <div
-                v-show="multipleSelection.length === 0"
-                class="searchBox"
+                class="refresh-container btn"
+                @click="toSort"
               >
-                <div class="search-box">
-                  <search-popover
-                    ref="searchPopover"
-                    :require-options="searchConfig.requireOptions"
-                    :popover-options="searchConfig.popoverOptions"
-                    @submit="handleSearch"
-                  />
-                  <div
-                    class="search-sort-box"
-                    @click="toSort"
-                  >
-                    <i class="el-icon-sort" />
-                    <span class="sort-text">调整排序</span>
-                  </div>
-                  <el-popover
-                    placement="bottom"
-                    width="40"
-                    trigger="click"
-                    style="margin-left:10px"
-                  >
-                    <el-checkbox-group
-                      v-model="checkColumn"
-                      style="display: flex;flex-direction: column;"
-                      @change="columnChange"
-                    >
-                      <el-checkbox
-                        v-for="item in originColumn"
-                        :key="item.prop"
-                        :label="item.prop"
-                        :disabled="item.prop === 'orgName'"
-                        class="originColumn"
-                      >
-                        {{ item.label }}
-                      </el-checkbox>
-                    </el-checkbox-group>
-                    <i
-                      slot="reference"
-                      class="el-icon-setting"
-                      style="cursor: pointer;"
-                    />
-                  </el-popover>
-                </div>
+                <i class="el-icon-sort" />
+                <span>调整排序</span>
               </div>
-            </transition>
-            <transition name="el-zoom-in-center">
-              <div
-                v-show="multipleSelection.length > 0"
-                class="multipleBox"
+              <el-popover
+                placement="bottom"
+                width="80"
+                trigger="click"
               >
-                <div class="multipleLeft">
-                  <div class="multipleLength">
-                    已选中 {{ multipleSelection.length }} 项
-                  </div>
-                  <el-button
-                    type="text"
-                    size="medium"
-                    icon="el-icon-delete"
-                    @click="multipleDeleteClick"
-                  >
-                    批量删除
-                  </el-button>
-                </div>
-                <el-button
-                  size="medium"
-                  type="text"
-                  icon="el-icon-close"
-                  @click="clearMultipleSelection"
+                <i
+                  slot="reference"
+                  style="cursor: pointer;"
+                  class="el-icon-setting"
                 />
-              </div>
-            </transition>
+                <!-- 设置表格列可见性 -->
+                <div class="operations__column--visible">
+                  <el-checkbox-group v-model="columnsVisible">
+                    <el-checkbox
+                      v-for="item of originColumn"
+                      :key="item.prop"
+                      :label="item.prop"
+                      :disabled="item.prop === 'orgName'"
+                      class="operations__column--item"
+                    >
+                      {{ item.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+              </el-popover>
+            </div>
           </div>
         </template>
         <template
@@ -339,16 +314,6 @@ export default {
       searchParams: { parentOrgId: 0 }
     }
   },
-  watch: {
-    multipleSelection: {
-      handler(newVal) {
-        newVal.forEach((item) => {
-          this.$refs.avueCrud.toggleRowSelection(item, true)
-        })
-      },
-      deep: true
-    }
-  },
   created() {
     getOrgLeader({ pageNo: 1, pageSize: 100 }).then((res) => {
       this.searchConfig.popoverOptions[2].options.push(...res.data)
@@ -395,22 +360,7 @@ export default {
     changevisible(data) {
       this.createOrgDailog = data
     },
-    clearMultipleSelection() {
-      this.$refs.avueCrud.selectClear()
-      this.multipleSelection = []
-    },
-    /**
-     *  @author guanfenda
-     *  @desc 处理扁平化数组
-     * */
-    recursion(data, newData) {
-      data.filter((item) => {
-        let it = JSON.parse(JSON.stringify(item))
-        it.children && delete it.children
-        newData.push(it)
-        item.children && item.children.length > 0 && this.recursion(item.children, newData)
-      })
-    },
+
     toOrgDetail(row) {
       this.$router.push({ path: '/orgs/orgDetail?orgId=' + row.orgId })
     },
@@ -459,10 +409,10 @@ export default {
           })
       }
     },
-    multipleDeleteClick() {
+    handleDelete(selection) {
       let isError = false
       let params = {
-        ids: this.multipleSelection
+        ids: selection
           .map((item) => {
             if (item.parentId === 0) {
               this.$message.error('顶级组织不可删除')
@@ -481,9 +431,15 @@ export default {
           .join(',')
       }
       if (isError) return
-      deleteOrg(params).then(() => {
-        this.$message.success('删除成功')
-        this.loadTableData()
+      this.$confirm('您确定要删除选中的组织么？', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteOrg(params).then(() => {
+          this.$message.success('删除成功')
+          this.loadTableData()
+        })
       })
     },
     handleOrgEdit(row) {
@@ -498,53 +454,6 @@ export default {
         this.$refs.orgEdit.createChild(row)
       })
     },
-    columnChange() {
-      this.tableColumns = TABLE_COLUMNS.filter((item) => {
-        return this.checkColumn.indexOf(item.prop) > -1
-      })
-    },
-    toggleSelection(rows, flag) {
-      if (rows) {
-        rows.forEach((row) => {
-          this.$refs.avueCrud.toggleRowSelection(row, flag)
-        })
-      } else {
-        this.$refs.avueCrud.selectClear()
-      }
-    },
-    rowSelect(selection, row) {
-      this.multipleSelection = selection
-      if (selection.indexOf(row) > -1 && row.children && row.children.length > 0) {
-        // this.toggleSelection(row.children, true)
-        this.deepCheck(selection, true)
-      }
-    },
-    deepCheck(arr, check) {
-      arr.forEach((item) => {
-        if (item.children && item.children.length > 0) {
-          this.deepCheck(item.children, check)
-        }
-        if (this.multipleSelection.indexOf(item) === -1 && check) {
-          this.multipleSelection.push(item)
-        }
-        // this.toggleSelection(item.children, check)
-      })
-    },
-    selectAll(selection) {
-      var flag = false // 默认 为全不选
-      // selection.forEach((item) => {
-      if (this.multipleSelection.length === 0) {
-        flag = true
-      }
-      // })
-      this.multipleSelection = selection
-      if (!flag) {
-        this.toggleSelection()
-        this.multipleSelection = []
-      } else {
-        this.deepCheck(selection, true)
-      }
-    },
     toSort() {
       this.$router.push({ path: '/orgs/orgSort' })
     }
@@ -553,6 +462,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$color_icon: #a0a8ae;
 .title-class {
   cursor: pointer;
   color: $primaryColor;
@@ -566,37 +476,32 @@ export default {
   height: 25px;
 }
 
-.transitionBox {
-  position: relative;
-  height: 50px;
-}
-
-.searchBox {
-  position: absolute;
-  width: 100%;
-
-  i {
-    color: #a0a8ae;
-    font-size: 18px;
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &__column--item {
+    height: 25px;
   }
-
-  .search-box {
+  &__right {
+    i {
+      margin-left: 12px;
+      font-size: 18px;
+      color: #a0a8ae;
+      cursor: pointer;
+    }
     display: flex;
     align-items: center;
-
-    .search-sort-box {
+    .refresh-container {
       position: relative;
       display: flex;
       align-items: center;
+      color: #a0a8ae;
       padding: 0 10px;
       cursor: pointer;
-
-      .sort-text {
-        color: #a0a8ae;
-        margin-left: 6px;
-        font-size: 14px;
+      span {
+        padding-left: 6px;
       }
-
       &::before {
         position: absolute;
         content: '';
@@ -608,38 +513,33 @@ export default {
       }
     }
   }
-
-  > div {
+  &__column--visible {
+    height: 200px;
+    overflow: scroll;
+  }
+  &__btns {
+    align-items: center;
     display: flex;
-
-    :first-child {
-      flex: 1;
-    }
-
-    > button {
-      height: 34px;
+    height: 24px;
+    justify-content: flex-start;
+  }
+  &__btns--item {
+    margin: 0;
+    margin-right: 4px;
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    &:last-child {
+      margin: 0;
     }
   }
-}
-
-.multipleBox {
-  position: absolute;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 62px;
-
-  .multipleLeft {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-right: 20px;
-
-    .multipleLength {
-      padding: 0 20px;
-      margin-right: 20px;
-      border-right: 1px solid #999999;
-    }
+  // margin-bottom: 8px;
+  // margin-right: 8px;
+  .iconfont {
+    color: $color_icon;
+    font-weight: bold;
+    font-size: 16px;
   }
 }
 </style>

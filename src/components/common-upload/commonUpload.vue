@@ -12,6 +12,7 @@
     :http-request="httpRequest"
     :before-upload="beforeUpload"
     :file-list="value"
+    v-bind="$attrs"
   >
     <slot />
     <slot

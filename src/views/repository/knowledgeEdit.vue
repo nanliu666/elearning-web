@@ -298,7 +298,9 @@ export default {
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
       const isLt100M = file.size / 1024 / 1024 < 10
       const TYPE_LIST = ['exe', 'bat']
-      const notBatNorExe = _.some(TYPE_LIST, fileType)
+      const notBatNorExe = _.some(TYPE_LIST, (item) => {
+        return item === fileType
+      })
       const isLimitLength = _.size(this.formData.attachments) < this.limit
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')

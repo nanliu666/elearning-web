@@ -42,6 +42,7 @@
           :value="option.fileList"
           :before-upload="(file) => beforeUpload(file, option)"
           :limit="1"
+          :on-exceed="onUploadExceed"
           @input="(val) => handleUpload(val, option)"
         >
           <template #default>
@@ -124,6 +125,9 @@ export default {
     }
   },
   methods: {
+    onUploadExceed() {
+      this.$message.warning('选项图片只能上传一张')
+    },
     handleClick(e, item) {
       if (_.size(item.fileList) !== 0) {
         e.stopPropagation()

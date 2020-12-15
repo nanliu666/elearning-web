@@ -35,6 +35,8 @@
                 multiple
                 :before-upload="beforeUpload"
                 :limit="5"
+                :on-exceed="onUploadExceed"
+                :file-list="uploadFileList"
               >
                 <div
                   slot="tip"
@@ -360,6 +362,9 @@ export default {
   },
 
   methods: {
+    onUploadExceed() {
+      this.$message.warning('上传附件不能超过5个')
+    },
     handleUpload(e) {
       if (this.uploadFileList.length >= 5) {
         e.stopPropagation()
@@ -408,7 +413,7 @@ export default {
       const regx = /^.*\.(png|jpg|jpeg)$/
       const isLt5M = file.size / 1024 / 1024 < 5
       if (this.uploadFileList.length >= 5) {
-        this.$message.error('上传附件不能超过5张')
+        this.$message.error('上传附件不能超过5个')
         return false
       }
       if (!isLt5M) {

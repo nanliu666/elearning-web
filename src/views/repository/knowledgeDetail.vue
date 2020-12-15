@@ -135,6 +135,7 @@
             <li class="file-title">
               <span>{{ item.fileName }}</span>
               <i
+                v-if="konwledgeDetail.allowDownload === 1"
                 class="el-icon-download"
                 style="margin-left: 10px; cursor: pointer"
                 @click.stop="downloadFile(item.url)"
