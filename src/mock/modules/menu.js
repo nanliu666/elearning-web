@@ -868,6 +868,52 @@ const res = {
         ]
       },
       {
+        menuId: '1259467674524567872318',
+        menuName: '学分管理',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'credit',
+        alias: 'credit',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        dataPrivileges: [
+          {
+            dataId: '1',
+            scopeName: '个人可见',
+            isOwn: 1
+          }
+        ],
+        children: [
+          {
+            menuId: '125907341267456735058',
+            menuName: '学分规则管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'creditRule',
+            alias: 'creditRule',
+            path: '/creditManagement/creditRule',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735058',
+            menuName: '系统规则管理',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'systemRule',
+            alias: 'systemRule',
+            path: '/creditManagement/systemRule',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          }
+        ]
+      },
+      {
         menuId: '1590112075691',
         menuName: '审批管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
