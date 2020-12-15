@@ -52,18 +52,15 @@
             </div>
           </div>
           <div class="mainNum">
-            <div class="parent">
+            <div
+              class="parent"
+              :style="{ visibility: orgData.orgType === 'Enterprise' ? 'hidden' : 'visible' }"
+            >
               上级组织：{{ findFatherOrgName(orgData) || '' }}
-            </div>
-            <div class="numInfo">
-              在职人数 <em class="count">{{ orgData.workNum }}</em> 人
             </div>
             <div class="numInfo">
               用户人数 <em class="count">{{ orgData.userNum }}</em> 人
             </div>
-            <!--            <div class="numInfo">
-              职位 <em class="count">{{ orgData.jobNum }}</em> 个
-            </div> -->
           </div>
           <div class="baseInfo">
             <h4>基本信息</h4>
@@ -129,11 +126,9 @@ export default {
       this.$refs.tree.filter(val)
     }
   },
-  created() {
-    this.loadData()
-    this.originOrgId = this.$route.query.orgId
-  },
   activated() {
+    this.originOrgId = this.$route.query.orgId
+    this.loadData()
     if (this.$route.query.orgId !== this.originOrgId) {
       this.$refs.tree.setCurrentKey(this.$route.query.orgId)
       this.handleNodeClick(this.$refs.tree.getCurrentNode())
@@ -251,10 +246,14 @@ $color_font_label: #999999;
     }
     .mainNum {
       margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       .parent {
         color: $color_font_label;
       }
       .numInfo {
+        align-self: flex-end;
         color: $color_font_label;
         float: right;
         margin-left: 20px;
