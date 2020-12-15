@@ -26,6 +26,7 @@
       >
         <el-input
           v-model.trim="form.name"
+          maxlength="32"
           placeholder="请输入"
         />
       </el-form-item>
@@ -66,14 +67,14 @@
       class="dialog-footer"
     >
       <el-button
+        size="medium"
+        @click="handleClose"
+      >取消</el-button>
+      <el-button
         type="primary"
         size="medium"
         @click="submit('refresh')"
       >完成</el-button>
-      <el-button
-        size="medium"
-        @click="submit('create')"
-      >完成并创建试题</el-button>
     </span>
     <span
       v-else
@@ -142,8 +143,20 @@ export default {
         this.orgTree = res
       })
     },
+    checkSameName() {
+      let target = this.findOrg(this.form.parentId)
+      let temp = _.isEmpty(target) ? this.orgTree : target.children
+      let hasSameName = _.some(temp, (child) => {
+        return child.name === this.form.name
+      })
+      if (hasSameName) {
+        this.$message.error('该分类已存在')
+      }
+      return hasSameName
+    },
     // 提交
-    submit(to) {
+    submit() {
+      if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -153,17 +166,10 @@ export default {
                 { createUser: this.userId },
                 { type: this.$parent.searchParams.type }
               )
-            ).then((res) => {
+            ).then(() => {
               this.$message.success('创建成功')
-              if (to === 'refresh') {
-                this.$emit('refresh')
-                this.$emit('changevisible', false)
-              } else {
-                this.$router.push({
-                  path: '/examManagement/question/questionEdit',
-                  query: { categoryId: res.id }
-                })
-              }
+              this.$emit('refresh')
+              this.$emit('changevisible', false)
             })
           } else {
             putCategory(_.assign(this.form, { type: this.$parent.searchParams.type })).then(() => {

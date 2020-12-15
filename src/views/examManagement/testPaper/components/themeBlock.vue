@@ -330,12 +330,21 @@ export default {
     }
   },
   methods: {
+    /**
+     *  @author guenfenda
+     *  @desc 计算分数
+     *
+     * */
     countScore() {
       let scoreList = _.compact(this.tableData.map((it) => it.score))
       this.totalScore = scoreList.reduce((prev, cur) => {
         return Number(prev) + Number(cur)
       }, 0)
     },
+    /**
+     *@author guanfenda
+     * @desc 试题类型修改如果提交了试题，要给提示，并删除之前添加的试题
+     **/
     visibleChange(data) {
       if (!data) return
       this.$nextTick(() => {
@@ -356,20 +365,36 @@ export default {
         }, 300)
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 弹出试题选择框
+     * */
     handleAddTheme() {
       this.visible = true
-      this.title = '单选题'
+      this.title = ''
     },
+    /**
+     * @author guanfenda
+     * @Desc 删除大题
+     * */
     handleDeleteBlock() {
       this.$emit('delete', this.blockData)
     },
-
+    /***
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => {
         if (it.id && row.id !== it.id) return true
         if (it.key && row.key !== it.key) return true
       })
     },
+    /***
+     * @author guanfenda
+     * @desc 下移
+     * */
     handleDown(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
       let newData = _.cloneDeep(row)
@@ -381,6 +406,10 @@ export default {
         this.tableData.splice(i + 1, 0, newData)
       }
     },
+    /***
+     * @author guanfenda
+     * @desc 上移
+     * */
     handleUp(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
       let newData = _.cloneDeep(row)
@@ -392,6 +421,11 @@ export default {
         this.tableData.splice(i - 1, 0, newData)
       }
     },
+    /**
+     * @author guanfenda
+     * @desc 提示分数修改
+     *
+     * */
     scoreChange(val, row) {
       if (row.Original != val) {
         this.$confirm(

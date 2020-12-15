@@ -233,12 +233,6 @@ export default {
       },
       deep: true,
       immediate: true
-    },
-    'formData.categoryId': {
-      handler(val) {
-        this.formData.categoryId = _.isNumber(val) ? val : Number(val)
-      },
-      deep: true
     }
   },
   mounted() {

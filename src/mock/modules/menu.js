@@ -39,6 +39,7 @@ const res = {
         menuName: '系统管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
+        isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
         code: 'system',
         alias: 'system',
@@ -57,6 +58,7 @@ const res = {
             menuName: '组织管理',
             menuType: 'Dir',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_management',
             alias: 'orgManagement',
@@ -68,6 +70,7 @@ const res = {
                 menuId: '1259075153063923714',
                 menuName: '组织管理',
                 menuType: 'Menu',
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isOwn: 1,
                 isShow: 1,
                 code: 'org_management',
@@ -81,6 +84,7 @@ const res = {
                 menuId: '1260118258720522241',
                 menuName: '组织排序',
                 menuType: 'Menu',
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isOwn: 1,
                 isShow: 0,
                 code: 'org_sort',
@@ -95,6 +99,7 @@ const res = {
                 menuName: '组织详情',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'org_detail',
                 alias: 'org_detail',
@@ -110,6 +115,7 @@ const res = {
             menuName: '用户管理',
             menuType: 'Dir',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_user',
             alias: 'user',
@@ -121,6 +127,7 @@ const res = {
                 menuName: '用户管理',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 1,
                 code: 'org_user',
                 alias: 'user',
@@ -134,6 +141,7 @@ const res = {
                 menuName: '用户详情',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'user_detail',
                 alias: 'userDetail',
@@ -147,6 +155,7 @@ const res = {
                 menuName: '添加用户',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'editUser',
                 alias: 'editUser',
@@ -162,6 +171,7 @@ const res = {
             menuName: '角色管理',
             menuType: 'Dir',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'role',
             alias: '角色',
@@ -170,6 +180,7 @@ const res = {
                 menuId: '1260401852546387969',
                 menuName: '角色管理',
                 menuType: 'Menu',
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isOwn: 1,
                 isShow: 1,
                 code: 'role',
@@ -183,6 +194,7 @@ const res = {
                 menuId: '12604101852546387969',
                 menuName: '角色权限',
                 menuType: 'Menu',
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isOwn: 1,
                 isShow: 0,
                 code: 'role',
@@ -194,6 +206,7 @@ const res = {
                 menuId: '12604101852546387969',
                 menuName: '查看用户',
                 menuType: 'Menu',
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isOwn: 1,
                 isShow: 0,
                 code: 'role',
@@ -207,6 +220,7 @@ const res = {
             menuName: '菜单管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'system_menu',
             alias: 'menu',
@@ -233,6 +247,7 @@ const res = {
             menuName: '操作日志',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'system_actionLog',
             alias: 'actionLog',
@@ -259,6 +274,7 @@ const res = {
             menuName: '新闻管理',
             menuType: 'Dir',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'news_manage',
             alias: '新闻管理',
@@ -270,6 +286,7 @@ const res = {
                 menuName: '新闻管理',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 1,
                 code: 'news_manage',
                 alias: '新闻管理',
@@ -282,6 +299,7 @@ const res = {
                 menuName: '新闻发布',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'news_publish',
                 alias: '新闻发布',
@@ -295,6 +313,7 @@ const res = {
                 menuName: '新闻中心',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'news_manage',
                 alias: '新闻中心',
@@ -308,6 +327,7 @@ const res = {
                 menuName: '新闻详情',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'news_detail',
                 alias: '新闻详情',
@@ -321,6 +341,7 @@ const res = {
                 menuName: '草稿箱',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'news_drafts',
                 alias: '新闻详情',
@@ -334,6 +355,7 @@ const res = {
                 menuName: '已发布的',
                 menuType: 'Menu',
                 isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
                 isShow: 0,
                 code: 'news_published',
                 alias: 'news_published',
@@ -351,6 +373,7 @@ const res = {
         menuName: '知识库',
         menuType: 'Dir',
         isOwn: 1,
+        isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
         isShow: 1,
         code: 'repository',
         alias: 'repository',
@@ -362,6 +385,7 @@ const res = {
             menuName: '分类管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'role',
             alias: '目录管理',
@@ -375,6 +399,7 @@ const res = {
             menuType: 'Menu',
             isOwn: 1,
             isShow: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             code: 'role',
             alias: '知识管理',
             path: '/repository/knowledgeManagement'
@@ -385,6 +410,7 @@ const res = {
             menuType: 'Menu',
             isOwn: 1,
             isShow: 0,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             code: 'role',
             alias: '知识管理',
             path: '/repository/knowledgeEdit'
@@ -394,6 +420,7 @@ const res = {
             menuName: '学习情况',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'role',
             alias: '学习情况',
@@ -404,6 +431,7 @@ const res = {
             menuName: '调整排序',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'role',
             alias: '调整排序',
@@ -416,6 +444,7 @@ const res = {
         menuName: '课程中心',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
+        isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
         code: 'system',
         alias: 'system',
@@ -658,6 +687,7 @@ const res = {
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
         code: 'system',
         alias: 'system',
         path: '',
@@ -675,6 +705,7 @@ const res = {
             menuName: '分类管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_user',
             alias: 'user',
@@ -688,6 +719,7 @@ const res = {
             menuName: '试题创建',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             path: '/examManagement/question/questionEdit',
             code: 'questionEdit',
@@ -699,6 +731,7 @@ const res = {
             menuName: '题库管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             path: '/examManagement/question/questionList',
             code: 'questionList',
@@ -711,6 +744,7 @@ const res = {
             menuName: '试卷管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_user',
             alias: 'user',
@@ -724,6 +758,7 @@ const res = {
             menuName: '试卷管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -737,6 +772,7 @@ const res = {
             menuName: '新建手工试卷',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -750,6 +786,7 @@ const res = {
             menuName: '考试安排',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_user',
             alias: 'user',
@@ -763,6 +800,7 @@ const res = {
             menuName: '考试详情',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -776,6 +814,7 @@ const res = {
             menuName: '查看关联考卷',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -789,6 +828,7 @@ const res = {
             menuName: '预览试卷',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -802,6 +842,7 @@ const res = {
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'org_user',
             alias: 'user',
@@ -815,6 +856,7 @@ const res = {
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'org_user',
             alias: 'user',
@@ -841,6 +883,7 @@ const res = {
             menuName: '审批流程',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
@@ -852,6 +895,7 @@ const res = {
             menuName: '审批记录',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'approval_recordList',
             alias: '/apprProcess/recordList',
@@ -863,6 +907,7 @@ const res = {
             menuName: '审批提交',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'submit_approval',
             alias: 'submitApproval',
@@ -874,6 +919,7 @@ const res = {
             menuName: '发起申请',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 1,
             code: 'approval_launchApply',
             alias: 'launchApply',
@@ -885,6 +931,7 @@ const res = {
             menuName: '审批详情',
             menuType: 'Menu',
             isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             isShow: 0,
             code: 'approval_approval',
             alias: 'approval',

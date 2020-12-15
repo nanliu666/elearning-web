@@ -218,10 +218,10 @@
                 <span>是否允许考生查看标准答案：</span>
                 <span>{{ examDetail.publicAnswers ? '允许' : '不允许' }}</span>
               </div>
-              <div class="content">
+              <!-- <div class="content">
                 <span>考生报名考试是否需要审批：</span>
                 <span>{{ examDetail.openEntrance ? '需要' : '不需要' }}</span>
-              </div>
+              </div> -->
             </div>
           </li>
           <li class="extend-li">
@@ -305,6 +305,7 @@
       <el-menu
         :default-active="activeIndex"
         class="el-menu-demo"
+        :active-text-color="activeColor"
         mode="horizontal"
         @select="handleSelect"
       >
@@ -509,12 +510,12 @@ const SEARCH_CONFIG = {
     }
   ]
 }
-const isTestOptions = [
+const notIsTestOptions = [
   { value: '', label: '全部' },
   { value: 1, label: '未开始' },
   { value: 2, label: '缺考' }
 ]
-const notIsTestOptions = [
+const isTestOptions = [
   { value: '', label: '全部' },
   { value: 3, label: '已通过' },
   { value: 4, label: '未通过' }
@@ -528,11 +529,13 @@ import {
   putCertificate,
   getBatchNumber
 } from '@/api/examManage/schedule'
+import styles from '@/styles/variables.scss'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
   data() {
     return {
+      activeColor: styles.primaryColor,
       isExtend: false,
       activeIndex: '0',
       page: {

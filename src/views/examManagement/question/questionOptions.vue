@@ -17,6 +17,7 @@
           v-if="isCheckBox"
           v-model="option.isCorrect"
           :true-label="1"
+          :false-label="0"
         >
           {{ '' }}
         </el-checkbox>
@@ -31,7 +32,7 @@
           @click="handleRemoveOption(option)"
         ></i>
         <i
-          v-if="index === value.length - 1 && value.length <= 10"
+          v-if="index === value.length - 1 && value.length < 10"
           class="iconimage_icon_Addoptions1 iconfont"
           @click="handleAddOption"
         ></i>
@@ -144,7 +145,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传附件只支持png、jpg、jpge格式文件')
+        this.$message.error('上传附件只支持png、jpg、jpeg格式文件')
         return false
       }
       return true

@@ -228,6 +228,10 @@ export default {
     this.getTestPaperCategory()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 获取试卷分类
+     * */
     getTestPaperCategory() {
       let params = {
         type: '1'
@@ -236,6 +240,10 @@ export default {
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试卷详情
+     * */
     getData() {
       if (!this.$route.query.id) return
       let params = {
@@ -280,6 +288,11 @@ export default {
         this.count()
       })
     },
+    /**
+     * @author guenfenda
+     * @desc 提交试卷（添加或者修改）
+     *
+     * */
     onSubmit() {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
@@ -324,12 +337,20 @@ export default {
         })
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 双向数据绑定（因为for的对象它是引用类型，所以不能通过v-modle，或者$emit('update')，重新指定引用方向）
+     * */
     update(data) {
       this.testPaper.map((it) => {
         it.key === data.key && (it = Object.assign(it, data))
       })
       this.count()
     },
+    /**
+     * @author guanfenda
+     * @desc 计算剩余分数，和当前总分数
+     * */
     count() {
       let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
       let list = []
@@ -343,6 +364,11 @@ export default {
         }, 0))
       this.score = this.form.totalScore - this.TotalScore
     },
+    /**
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDeleteBlock(data) {
       this.$confirm('您确定要删除选中的题型吗', '提示', {
         confirmButtonText: '确定',
@@ -352,6 +378,11 @@ export default {
         this.testPaper = this.testPaper.filter((it) => it.id !== data.id)
       })
     },
+    /**
+     * @author guanfenda
+     * @desc  添加大题
+     *
+     * */
     handleAddType() {
       this.themeBlock.key += 1
       this.testPaper.push(_.cloneDeep(this.themeBlock))
@@ -360,6 +391,10 @@ export default {
         scroll.scrollTop = scroll.scrollHeight
       })
     },
+    /**
+     * @author guanfendad
+     * @desc 返回
+     * */
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)
