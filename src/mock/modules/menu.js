@@ -839,6 +839,20 @@ const res = {
           },
           {
             menuId: '15674547683454620582323',
+            menuName: '手工评卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/MarkList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,
