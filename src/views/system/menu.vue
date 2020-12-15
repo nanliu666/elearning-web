@@ -291,7 +291,7 @@ export default {
       }).then(() => {
         putMenuInfo({ isEnabled: row.isEnabled === 1 ? 0 : 1, menuId: row.menuId }).then(() => {
           this.refreshTableData()
-          if (this.activeIndex === 2) {
+          if (this.activeIndex === '2') {
             this.$nextTick(() => {
               this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId).then((menu) => {
                 this.$router.$avueRouter.formatRoutes(menu, true)
