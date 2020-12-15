@@ -51,13 +51,14 @@
           :data="tableData"
         >
           <template #score="{row}">
-            <el-input
+            <el-input-number
               v-model="row.score"
-              placeholder="请输入内容"
-              type="Number"
+              controls-position="right"
+              :min="0"
+              :step="1"
+              :precision="1"
               @change="scoreChange($event, row)"
-            >
-            </el-input>
+            />
             <div
               v-if="valid && !row.score"
               class="valid"
@@ -123,7 +124,7 @@ const TABLE_COLUMNS = [
     label: '分数',
     prop: 'score',
     slot: true,
-    minWidth: 120
+    minWidth: 150
   },
   {
     label: '答题限时',
@@ -316,7 +317,10 @@ export default {
     }
   },
   activated() {
-    this.form = {}
+    this.form = {
+      type: 'single_choice',
+      title: ''
+    }
     this.typeList = []
     this.tableData = []
     for (let key in QUESTION_TYPE_MAP) {
