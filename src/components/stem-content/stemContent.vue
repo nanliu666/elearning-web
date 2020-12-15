@@ -350,7 +350,7 @@ export default {
      * */
     getData() {
       let params = {
-        categoryId: this.form.category,
+        categoryId: this.form.category === 0 ? null : this.form.category,
         search: this.form.search,
         type: this.type
       }
@@ -370,7 +370,10 @@ export default {
         type: 0
       }
       getcategoryTree(params).then((res) => {
-        this.columns.find((it) => it.prop === 'category').props.treeParams.data = res
+        this.columns.find((it) => it.prop === 'category').props.treeParams.data = this.treeData = [
+          { id: 0, name: '未分类' },
+          ...res
+        ]
 
         this.form.category = res[0].id
       })

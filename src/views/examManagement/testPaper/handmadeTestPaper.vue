@@ -56,7 +56,7 @@
               type="primary"
               @click="handleAddType"
             >
-              添加体型
+              添加题型
             </el-button>
           </div>
         </div>
