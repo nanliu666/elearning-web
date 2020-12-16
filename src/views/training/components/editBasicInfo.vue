@@ -35,6 +35,7 @@
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
+import { mapGetters } from 'vuex'
 const personOptionProps = {
   label: 'name',
   value: 'name',
@@ -231,6 +232,9 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
   watch: {
     'formData.people': {
       handler(val) {
@@ -272,6 +276,8 @@ export default {
     }
   },
   mounted() {
+    this.formData.contactName = this.userInfo.nick_name
+    this.formData.contactPhone = this.userInfo.account
     this.getCatalogs()
   },
   methods: {

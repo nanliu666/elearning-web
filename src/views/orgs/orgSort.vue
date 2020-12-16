@@ -6,6 +6,9 @@
     />
     <basic-container :block="true">
       <div class="treeBox">
+        <div class="title">
+          操作提示：鼠标点击并拖拽目录调整排序
+        </div>
         <el-tree
           v-loading="loading"
           :data="data"
@@ -214,6 +217,12 @@ export default {
       display: flex;
       flex-direction: column;
       .treeBox {
+        .title {
+          font-family: PingFangSC-Regular;
+          font-size: 14px;
+          color: rgba(0, 11, 21, 0.45);
+          margin-bottom: 10px;
+        }
         flex: 1;
         width: calc (100% - 160) px;
         // padding-bottom: 40px;

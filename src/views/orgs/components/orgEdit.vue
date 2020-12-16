@@ -171,6 +171,7 @@
 <script>
 import { getOrgTreeSimple, editOrg, createOrg, getUserWorkList } from '@/api/org/org'
 import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
+const radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
 export default {
   name: 'OrgEdit',
   components: {
@@ -186,7 +187,6 @@ export default {
     return {
       isrules: false,
       type: 'create',
-      // radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
       form: {
         orgType: '',
         parentOrgId: ''
@@ -251,8 +251,6 @@ export default {
   methods: {
     radioDisabled(data) {
       if (!_.isEmpty(this.form.id) || this.form.parentOrgId) {
-        // 从小到大
-        let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
         // 父级的组织类型的次序
         const parentOrg = this.findOrg(this.form.parentOrgId)
         let parentOrgType = parentOrg.orgType
@@ -265,7 +263,22 @@ export default {
         // 下级组织的组织类型不能大于上级组织翻译成以下意义：
         // 可选的当前组织组织类型必须比子级的最大的组织类型要大
         let isMoreThenSon = parentIndex >= dataIndex
-        return !isMoreThenSon
+        let flag = !isMoreThenSon
+        if (this.type === 'edit') {
+          let indexList = []
+          _.each(this.form.children, (item) => {
+            indexList.push(
+              _.findIndex(radioDisable, (radioItem) => {
+                return radioItem === item.orgType
+              })
+            )
+          })
+          let maxNumber = Math.max(...indexList)
+          if (dataIndex < maxNumber) {
+            flag = true
+          }
+        }
+        return flag
       }
     },
     nodeClick(data) {
@@ -351,16 +364,19 @@ export default {
               this.$emit('changevisible', false)
             })
           } else {
-            editOrg(form).then(() => {
-              this.$message.success('修改成功')
-              this.$emit('refresh')
-              this.$emit('changevisible', false)
-            })
+            this.editFun(form)
           }
         } else {
           this.$message.error(obj[Object.keys(obj)[0]][0].message)
           return false
         }
+      })
+    },
+    editFun(form) {
+      editOrg(form).then(() => {
+        this.$message.success('修改成功')
+        this.$emit('refresh')
+        this.$emit('changevisible', false)
       })
     },
     create() {
