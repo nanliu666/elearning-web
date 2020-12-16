@@ -123,7 +123,7 @@ export default {
       })
     },
     goBack() {
-      this.$router.push('/orgs/orgManagement')
+      this.$router.push('/course/catalog')
     },
     close() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -147,6 +147,7 @@ export default {
         getCatalog({ parentOrgId: 0 }).then((res) => {
           this.data = res
           this.loading = false
+          this.goBack()
         })
       })
     }

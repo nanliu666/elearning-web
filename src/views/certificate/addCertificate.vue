@@ -43,10 +43,10 @@
                 </div>
               </template>
               <!-- logo -->
+
               <template slot="logo">
                 <common-upload
                   v-model="form.logo"
-                  :multiple="false"
                   :before-upload="beforeResumeUpload"
                 >
                   <div
@@ -191,7 +191,8 @@ export default {
         },
         {
           prop: 'logo',
-          itemType: 'slot',
+          itemType: 'slotout',
+          required: false,
           offset: 5
         }
       ]
@@ -214,10 +215,13 @@ export default {
               text: '',
               awardAgency: ''
             }
-            params.backName = this.form.back[this.form.back.length - 1].localName
+            params.backName = this.form.back[this.form.back.length - 1].fileName
             params.backUrl = this.form.back[this.form.back.length - 1].url
-            params.logoName = this.form.logo[this.form.logo.length - 1].localName
-            params.logoUrl = this.form.logo[this.form.logo.length - 1].url
+            if (this.form.logo.length) {
+              params.logoName = this.form.logo[this.form.logo.length - 1].fileName
+              params.logoUrl = this.form.logo[this.form.logo.length - 1].url
+            }
+
             params.name = this.form.name
             params.text = this.form.text
             params.awardAgency = this.form.awardAgency
@@ -271,7 +275,7 @@ export default {
 .content {
   overflow: hidden;
   display: flex;
-  height: 80vh;
+  height: 90vh;
   .form_left {
     box-sizing: border-box;
     flex: 1;
@@ -341,6 +345,8 @@ export default {
           font-size: 30px;
           font-weight: 700;
           transform: translateX(-50%);
+          text-align: center;
+          width: 80%;
         }
         .text {
           position: absolute;
@@ -353,6 +359,7 @@ export default {
           width: 50%;
           height: 28%;
           text-align: center;
+          word-wrap: break-word;
         }
         .logo {
           position: absolute;
@@ -372,8 +379,8 @@ export default {
         }
         .serial {
           position: absolute;
-          right: 6%;
-          bottom: 6%;
+          right: 9%;
+          bottom: 9%;
           color: #8b8a8a;
           font-size: 8px;
         }
