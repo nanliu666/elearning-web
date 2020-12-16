@@ -16,7 +16,6 @@
       </div> -->
       <el-menu
         unique-opened
-        :default-active="nowTagValue"
         mode="vertical"
         :show-timeout="200"
         :collapse="keyCollapse"
@@ -47,10 +46,7 @@ export default {
     return {}
   },
   computed: {
-    ...mapGetters(['website', 'menu', 'tag', 'keyCollapse', 'screen']),
-    nowTagValue: function() {
-      return this.$router.$avueRouter.getValue(this.$route)
-    }
+    ...mapGetters(['website', 'menu', 'tag', 'keyCollapse', 'screen'])
   },
   created() {
     // this.index.openMenu(this.menuId)
