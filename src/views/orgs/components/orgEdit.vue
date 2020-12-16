@@ -255,7 +255,7 @@ export default {
         let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
         // 父级的组织类型的次序
         const parentOrg = this.findOrg(this.form.parentOrgId)
-        let parentOrgType = this.type !== 'edit' ? parentOrg.orgType : this.form.orgType
+        let parentOrgType = parentOrg.orgType
         const parentIndex = _.findIndex(radioDisable, (item) => {
           return item === parentOrgType
         })
@@ -378,6 +378,7 @@ export default {
       this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
+      this.form = _.cloneDeep(row)
       this.form.parentOrgId = row.id
       this.form.parentOrgType = row.orgType
       this.$emit('changevisible', true)
