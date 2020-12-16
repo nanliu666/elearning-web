@@ -219,7 +219,6 @@ export default {
           }
         }
       },
-      allUserIdArr: [],
       parentOrgIdLabel: '',
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
@@ -313,22 +312,6 @@ export default {
         }
       })
     },
-    //编辑新建添加下级
-    addSubLevel(index) {
-      if (this.allUserIdArr.length >= 10) {
-        this.$message.warning('添加失败，最多只能十级负责人！')
-        return
-      }
-      this.allUserIdArr.splice(index + 1, 0, [
-        {
-          level: index + 2,
-          userId: []
-        }
-      ])
-      for (var i = index + 1; i < this.allUserIdArr.length; i++) {
-        this.allUserIdArr[i].level = this.allUserIdArr[i].level + 1
-      }
-    },
     submitAndCreate() {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
@@ -337,7 +320,6 @@ export default {
           createOrg(form).then(() => {
             this.$message.success('创建成功')
             this.form = { orgType: '' }
-            this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
             this.$refs.ruleForm.clearValidate()
             this.loadOrgTree()
             this.parentOrgIdLabel = ''
@@ -382,7 +364,6 @@ export default {
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
       this.$nextTick(() => {
@@ -391,10 +372,10 @@ export default {
     },
     async createChild(row) {
       await this.loadOrgTree()
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
       this.form = _.cloneDeep(row)
+      this.form.leaders = _.map(this.form.leaders, 'userId')
       this.form.parentOrgId = row.id
       this.form.parentOrgType = row.orgType
       this.$emit('changevisible', true)
