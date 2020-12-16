@@ -306,6 +306,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          this.$refs.table.clearSelection()
           deleteTestPaper({ id: params.join(',') }).then(() => {
             this.loadTableData()
             this.$message({
