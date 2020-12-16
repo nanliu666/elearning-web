@@ -214,7 +214,7 @@ const CourseConfig = {
 }
 const TestColumns = [
   { prop: 'examTime', label: '考试日期', slot: true, width: 220 },
-  { prop: 'testPaper', label: '关联考试', minWidth: 150 },
+  { prop: 'testPaperName', label: '关联考试', minWidth: 150 },
   { prop: 'reckonTime', slot: true, label: '考试时间(分钟)' }
 ]
 const TestConfig = {
