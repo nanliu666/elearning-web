@@ -33,6 +33,7 @@
     <user-picker
       v-model="userList"
       :visible.sync="visible"
+      :is-only-person="true"
       select-type="Org,OuterUser"
       :title="title"
     ></user-picker>
