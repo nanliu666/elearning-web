@@ -175,11 +175,7 @@ const ScheduleColumns = [
   {
     prop: 'lecturerName',
     formatter(record) {
-      if (record.type === 1) {
-        return `讲师：${_.get(record, 'lecturerName', '')}`
-      } else {
-        return `主持人：${_.get(record, 'lecturerName', '')}`
-      }
+      return `${record.type === 1 ? '讲师：' : '主持人：'}${_.get(record, 'lecturerName', '')}`
     }
   },
   {

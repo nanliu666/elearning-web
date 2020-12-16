@@ -10,22 +10,24 @@
         class="form"
         :columns="columns"
       >
-        <template #course>
+        <template #courseId>
           <lazy-select
-            v-model="model.course"
+            v-model="model.courseId"
             :allow-create="isCreate"
             :searchable="remote"
             :load="loadCourse"
             :option-props="{
-              label: 'name',
-              value: 'id',
-              key: 'id'
+              label: 'courseName',
+              value: 'courseId',
+              key: 'courseId'
             }"
+            @selectItem="selectContact"
           />
         </template>
         <template #lecturerId>
           <lazy-select
             v-model="model.lecturerId"
+            :disabled="true"
             :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
@@ -61,8 +63,7 @@ const EventColumns = [
     type: 'daterange',
     label: '上课日期'
   },
-  // TODO：关联课程应该用lazy-select
-  { itemType: 'slot', span: 24, required: true, prop: 'course', label: '关联课程' },
+  { itemType: 'slot', span: 24, required: true, prop: 'courseId', label: '关联课程' },
   { itemType: 'slot', span: 24, required: false, prop: 'lecturerId', label: '讲师' },
   {
     itemType: 'radio',
@@ -95,8 +96,10 @@ export default {
       title: '添加在线课程',
       model: {
         studyType: 0,
-        course: '',
-        lecturerId: '',
+        courseId: '',
+        courseName: '',
+        lecturerId: null,
+        lecturerName: null,
         classTime: []
       }
     }
@@ -129,6 +132,9 @@ export default {
     }
   },
   methods: {
+    selectContact(data) {
+      this.model = _.assign(this.model, data)
+    },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
     },

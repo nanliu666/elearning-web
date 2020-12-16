@@ -16,7 +16,8 @@
             :allow-create="true"
             :searchable="true"
             :load="loadCourse"
-            :option-props="{ label: 'name', value: 'id', key: 'id' }"
+            :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
+            @selectItem="selectContact"
           />
         </template>
         <template #lecturerId>
@@ -138,7 +139,6 @@ export default {
   data() {
     return {
       userList: [],
-      courseList: [],
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
@@ -180,17 +180,6 @@ export default {
         }
       }
     },
-    'model.courseId': {
-      handler(value) {
-        if (value) {
-          this.model.lecturerId = _.find(this.courseList, (item) => {
-            return item.id === value
-          }).lecturerId
-        }
-      },
-      deep: true,
-      immediate: false
-    },
     schedule(value) {
       this.model = {
         ...modelCopy,
@@ -207,6 +196,9 @@ export default {
     }
   },
   methods: {
+    selectContact(data) {
+      this.model = _.assign(this.model, data)
+    },
     loadCoordinator(params) {
       getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id })).then(
         (res) => {
@@ -216,9 +208,6 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
     },
     loadCourse(params) {
-      getTrainCource(params).then((res) => {
-        this.courseList = [...this.courseList, ...res.data]
-      })
       return getTrainCource(params)
     },
     close() {
@@ -232,11 +221,6 @@ export default {
         data.lecturerName = _.find(this.userList, (item) => {
           return item.userId === data.lecturerId
         }).name
-        if (this.model.type === 1) {
-          data.courseName = _.find(this.courseList, (item) => {
-            return item.id === data.courseId
-          }).name
-        }
         this.$emit('submit', data, this.editType)
         this.close()
       })
