@@ -10,18 +10,19 @@
         class="form"
         :columns="columns"
       >
-        <template #course>
+        <template #courseId>
           <lazy-select
-            v-model="model.course"
-            :allow-create="isCreate"
-            :searchable="remote"
+            v-model="model.courseId"
+            :allow-create="true"
+            :searchable="true"
             :load="loadCourse"
-            :option-props="personOptionProps"
+            :option-props="{ label: 'name', value: 'id', key: 'id' }"
           />
         </template>
         <template #lecturerId>
           <lazy-select
             v-model="model.lecturerId"
+            :disabled="model.type === 1"
             :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
@@ -49,11 +50,6 @@ import { getOrgUserList } from '@/api/system/user'
 import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
-const personOptionProps = {
-  label: 'name',
-  value: 'name',
-  key: 'id'
-}
 
 const EventColumns = [
   {
@@ -76,7 +72,7 @@ const EventColumns = [
     isRange: true,
     label: '活动时间'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
+  { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
   { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
@@ -114,21 +110,21 @@ const CourseColumns = [
     itemType: 'slot',
     span: 24,
     required: true,
-    prop: 'course',
+    prop: 'courseId',
     label: '关联课程'
   },
-  { itemType: 'input', span: 24, disabled: true, prop: 'lecturerId', label: '讲师' },
+  { itemType: 'slot', span: 24, prop: 'lecturerId', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
   type: 1,
   todoDate: null,
   todoTime: [moment().startOf('day'), moment().endOf('day')],
-  theme: '',
   lecturerId: null,
+  lecturerName: null,
   address: '',
   courseId: null,
-  course: null
+  courseName: null
 }
 export default {
   name: 'OfflineCourseDrawer',
@@ -141,13 +137,8 @@ export default {
   },
   data() {
     return {
-      remote: true,
-      isCreate: true,
-      personOptionProps,
-      courseParams: {
-        pageNo: 1,
-        pageSize: 10
-      },
+      userList: [],
+      courseList: [],
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
@@ -189,6 +180,17 @@ export default {
         }
       }
     },
+    'model.courseId': {
+      handler(value) {
+        if (value) {
+          this.model.lecturerId = _.find(this.courseList, (item) => {
+            return item.id === value
+          }).lecturerId
+        }
+      },
+      deep: true,
+      immediate: false
+    },
     schedule(value) {
       this.model = {
         ...modelCopy,
@@ -206,9 +208,17 @@ export default {
   },
   methods: {
     loadCoordinator(params) {
+      getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id })).then(
+        (res) => {
+          this.userList = [...this.userList, ...res.data]
+        }
+      )
       return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
     },
     loadCourse(params) {
+      getTrainCource(params).then((res) => {
+        this.courseList = [...this.courseList, ...res.data]
+      })
       return getTrainCource(params)
     },
     close() {
@@ -219,6 +229,14 @@ export default {
         const data = this.model
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
+        data.lecturerName = _.find(this.userList, (item) => {
+          return item.userId === data.lecturerId
+        }).name
+        if (this.model.type === 1) {
+          data.courseName = _.find(this.courseList, (item) => {
+            return item.id === data.courseId
+          }).name
+        }
         this.$emit('submit', data, this.editType)
         this.close()
       })

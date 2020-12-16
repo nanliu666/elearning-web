@@ -169,11 +169,7 @@ const ScheduleColumns = [
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      if (record.type === 1) {
-        return `【面授课程】${_.get(record, 'course', '')}`
-      } else {
-        return `【活动】${_.get(record, 'theme', '')}`
-      }
+      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${_.get(record, 'courseName', '')}`
     }
   },
   {
@@ -206,7 +202,7 @@ const CourseColumns = [
     width: 220
   },
   {
-    prop: 'course',
+    prop: 'courseName',
     label: '关联课程',
     minWidth: 150
   },

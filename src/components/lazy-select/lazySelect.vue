@@ -9,6 +9,7 @@
     :default-first-option="allowCreate"
     :remote-method="remoteMethod"
     :multiple="multiple"
+    :disabled="disabled"
     @change="handleChange"
     @visible-change="visibleChange"
   >
@@ -49,6 +50,12 @@ export default {
     event: 'change'
   },
   props: {
+    disabled: {
+      type: Boolean,
+      default: () => {
+        return false
+      }
+    },
     multiple: {
       type: Boolean,
       default: () => {
