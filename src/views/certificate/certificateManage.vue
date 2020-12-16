@@ -524,7 +524,7 @@ export default {
 .preview {
   z-index: 999;
   width: 422px;
-  height: 370px;
+  height: 360px;
   border-radius: 4px;
   background: #ffffff;
   box-shadow: 0 2px 12px 0;
@@ -541,13 +541,13 @@ export default {
     display: flex;
     justify-content: space-between;
     height: 40px;
-    border-bottom: 1px solid #ebeced;
+    // border-bottom: 1px solid #ebeced;
   }
   .previewContent {
     width: 374px;
     height: 280px;
     overflow: hidden;
-    margin-top: 5px;
+    margin-top: -5px;
     img {
       width: 100%;
       height: 100%;

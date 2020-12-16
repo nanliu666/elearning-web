@@ -54,11 +54,11 @@
                 width="40"
                 trigger="click"
               >
-                <i
+                <!-- <i
                   slot="reference"
                   style="cursor: pointer;"
                   class="el-icon-setting"
-                />
+                /> -->
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
