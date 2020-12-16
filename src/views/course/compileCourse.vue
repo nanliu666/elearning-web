@@ -1033,9 +1033,9 @@ export default {
     }
   }
   .upload-demo {
-    border: 1px solid #ccc;
-    padding: 40px 50px 20px;
-    border-radius: 7px;
+    // border: 1px solid #ccc;
+    // padding: 40px 50px 20px;
+    // border-radius: 7px;
     position: relative;
     .avatar {
       position: absolute;
@@ -1085,7 +1085,8 @@ export default {
     line-height: 0;
   }
   .el-upload__text {
-    width: 210px;
+    width: 100%;
+    text-align: center;
   }
   .dialog_input {
     margin: 20px;

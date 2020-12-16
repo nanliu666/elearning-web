@@ -539,13 +539,15 @@ export default {
 
 <style lang="scss" scoped>
 .upload-demo {
-  width: 20vw;
-  height: 20vh;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 3vh 0 0 4vw;
+  // width: 20vw;
+  // height: 20vh;
+  // border: 1px solid #ccc;
+  // border-radius: 4px;
+  // padding: 3vh 0 0 4vw;
+  // overflow: hidden;
+  padding-right: 10px;
   position: relative;
-  overflow: hidden;
+
   .avatar {
     position: absolute;
     top: 0;
