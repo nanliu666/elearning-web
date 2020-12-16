@@ -19,6 +19,15 @@
             :option-props="personOptionProps"
           />
         </template>
+        <template #lecturerId>
+          <lazy-select
+            v-model="model.lecturerId"
+            :allow-create="true"
+            :searchable="true"
+            :load="loadCoordinator"
+            :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
+          />
+        </template>
       </common-form>
       <div class="footer">
         <el-button
@@ -36,6 +45,7 @@
 </template>
 
 <script>
+import { getOrgUserList } from '@/api/system/user'
 import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
@@ -67,7 +77,7 @@ const EventColumns = [
     label: '活动时间'
   },
   { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
-  { itemType: 'input', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
+  { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const CourseColumns = [
@@ -107,7 +117,7 @@ const CourseColumns = [
     prop: 'course',
     label: '关联课程'
   },
-  { itemType: 'input', span: 24, disabled: true, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'input', span: 24, disabled: true, prop: 'lecturerId', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
@@ -115,14 +125,13 @@ const modelCopy = {
   todoDate: null,
   todoTime: [moment().startOf('day'), moment().endOf('day')],
   theme: '',
-  lecturerName: null,
   lecturerId: null,
   address: '',
   courseId: null,
   course: null
 }
 export default {
-  name: 'EditScheduleDrawer',
+  name: 'OfflineCourseDrawer',
   components: {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
@@ -196,11 +205,10 @@ export default {
     }
   },
   methods: {
-    loadCourse() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10
-      }
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+    },
+    loadCourse(params) {
       return getTrainCource(params)
     },
     close() {

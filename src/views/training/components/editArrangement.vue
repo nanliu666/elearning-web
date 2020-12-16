@@ -136,12 +136,12 @@
         </template>
       </common-table>
     </section>
-    <EditScheduleDrawer
+    <offline-course-drawer
       :visible.sync="schedule.drawerVisible"
       :schedule="schedule.editingRecord"
       @submit="handleSubmitSchedule($event)"
     />
-    <EditCourseDrawer
+    <online-course-drawer
       :visible.sync="course.drawerVisible"
       :course="course.editingRecord"
       @submit="courseSubmit"
@@ -155,9 +155,9 @@
 </template>
 
 <script>
-import EditScheduleDrawer from './drawerComponents/editScheduleDrawer'
-import EditCourseDrawer from './drawerComponents/editCourseDrawer'
+import OfflineCourseDrawer from './drawerComponents/OfflineCourseDrawer'
 import EditExamineDrawer from './drawerComponents/editExamineDrawer'
+import OnlineCourseDrawer from './drawerComponents/OnlineCourseDrawer'
 const ScheduleColumns = [
   {
     prop: 'todoTime',
@@ -231,7 +231,7 @@ const TestConfig = {
 }
 export default {
   name: 'EditArrangement',
-  components: { EditScheduleDrawer, EditCourseDrawer, EditExamineDrawer },
+  components: { OfflineCourseDrawer, OnlineCourseDrawer, EditExamineDrawer },
   props: {
     trainWay: {
       type: Number,

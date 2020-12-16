@@ -78,7 +78,7 @@ const EventColumns = [
 ]
 
 export default {
-  name: 'EditCourseDrawer',
+  name: 'OnlineCourseDrawer',
   components: {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
