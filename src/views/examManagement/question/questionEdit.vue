@@ -398,22 +398,10 @@ export default {
          * 根据试题类型切换表单内容
          */
         if (val === QUESTION_TYPE_SINGLE) {
-          SELECT_COLUMNS[2].rules = [
-            {
-              validator: (rule, value, callback) => {
-                if (_.some(value, (item) => !item.content && !item.url)) {
-                  return callback(new Error('选项内容请填写完整'))
-                } else if (!_.some(value, { isCorrect: 1 })) {
-                  return callback(new Error('请设置正确选项'))
-                }
-                callback()
-              },
-              trigger: 'change'
-            }
-          ]
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
         } else if (QUESTION_TYPE_MULTIPLE === val) {
-          SELECT_COLUMNS[2].rules = [
+          const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
+          _SELECT_COLUMNS[2].rules = [
             {
               validator: (rule, value, callback) => {
                 if (_.some(value, (item) => !item.content && !item.url)) {
@@ -428,7 +416,7 @@ export default {
               trigger: 'change'
             }
           ]
-          this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+          this.columns = [...BASIC_COLUMNS, ..._SELECT_COLUMNS]
         } else if (val === QUESTION_TYPE_JUDGE) {
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
           this.form.options = [
