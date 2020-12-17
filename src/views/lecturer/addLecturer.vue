@@ -79,14 +79,14 @@
               >
                 <el-radio
                   v-model="ruleForm.sex"
-                  :label="1"
+                  label="1"
                   disabled
                 >
                   男
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.sex"
-                  :label="0"
+                  label="0"
                   disabled
                 >
                   女

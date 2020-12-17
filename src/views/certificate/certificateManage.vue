@@ -154,7 +154,7 @@
 
           <el-button
             type="text"
-            @click="handleRemove(row.id)"
+            @click="handleRemove(row)"
           >
             删除
           </el-button>
@@ -331,7 +331,7 @@ export default {
         selectedIds.push(item.id)
       })
       // 提示
-      this.$confirm('您确定要删除选中的类目吗？', '提示', {
+      this.$confirm('您确定要删除选中的证书模版吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -349,18 +349,25 @@ export default {
         })
     },
     // 删除
-    handleRemove(id) {
+    handleRemove(row) {
+      let info = `${
+        row.status ? '该证书模版处于启用状态，请停用后删除。' : '您确定要删除选中的证书模版吗？'
+      }`
       // 提示
-      this.$confirm('您确定要删除选中的类目吗？', '提示', {
+      this.$confirm(info, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          delTemplate({ templateIds: id }).then(() => {
-            this.$message.success('删除成功')
-            this.loadTableData()
-          })
+          if (!row.status) {
+            delTemplate({ templateIds: row.id }).then(() => {
+              this.$message.success('删除成功')
+              this.loadTableData()
+            })
+          } else {
+            this.$message.error('删除失败!')
+          }
         })
         .catch(() => {
           this.$message({
@@ -373,8 +380,8 @@ export default {
     blockStart(id, i) {
       let info = `${
         i
-          ? '您确定要启用该学分规则吗？'
-          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+          ? '您确定要启用该证书模版吗？'
+          : '您确定要停用该证书模版吗？停用后，该证书模版将暂停使用。'
       }`
 
       this.$confirm(info, '提示', {

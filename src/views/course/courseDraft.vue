@@ -18,7 +18,7 @@
       id="isdialog_show"
     >
       <div>如何创建课程：</div>
-      <div>1.先在 <span @click="toCatalog">【课程中心-目录管理】</span> 完善展示的目录配置；</div>
+      <div>1.先在 <span @click="toCatalog">【课程中心-分类管理】</span> 完善展示的分类配置；</div>
       <div>
         2.开始创建课程。
       </div>
@@ -285,7 +285,7 @@
     >
       <p>所在原类目：Java技能课程/Java初级培训</p>
       <el-form>
-        <el-form-item label="移动到新目录">
+        <el-form-item label="移动到新分类">
           <el-cascader
             v-model="CourseNameBar"
             :options="CourseNameBarData"

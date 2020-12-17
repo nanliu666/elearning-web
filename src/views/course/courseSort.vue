@@ -5,7 +5,7 @@
       show-back
     />
     <div class="title">
-      操作提示：鼠拖点击并拖拽目录调整排序。
+      操作提示：鼠拖点击并拖拽分类调整排序。
     </div>
     <basic-container :block="true">
       <div class="treeBox">

@@ -198,7 +198,16 @@ export default {
       ]
     }
   },
-  watch: {},
+  watch: {
+    'form.back': {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.form.validateField('back', () => {})
+        })
+      },
+      immediate: false
+    }
+  },
   created() {},
   methods: {
     isAddCertificate(i) {
@@ -265,6 +274,7 @@ export default {
         this.$message.error('上传图片只支持PNG或JPG文件')
         return false
       }
+
       return true
     }
   }
