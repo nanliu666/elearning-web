@@ -18,6 +18,7 @@
             :config="tableConfig"
             :page="page"
             :data="tableData"
+            :page-config="pageConfig"
             :loading="tableLoading"
             @current-page-change="handleCurrentPageChange"
             @page-size-change="handlePageSizeChange"
@@ -43,6 +44,9 @@
                     >
                       搜索
                     </el-button>
+                  </div>
+                  <div style="position: relative;top:-10px">
+                    未选择题目
                   </div>
                 </div>
               </div>
@@ -130,8 +134,6 @@
 </template>
 
 <script>
-// import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
-// import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/examManage/category'
 import { getQuestionList } from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
@@ -191,6 +193,12 @@ export default {
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   props: {
+    data: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
     visible: {
       type: Boolean,
       default: false
@@ -251,6 +259,9 @@ export default {
       }
     ]
     return {
+      pageConfig: {
+        layout: 'prev, pager, next'
+      },
       config: {
         labelPosition: 'left',
         labelWidth: '80px'
@@ -280,6 +291,21 @@ export default {
     }
   },
   watch: {
+    data: {
+      handler(val) {
+        val = _.cloneDeep(val)
+        if (val.length > 0) {
+          val.map((it) => {
+            if (!it.id) {
+              it.id = it.key
+            }
+            it.score = it.score * 10
+          })
+          this.selectData = val
+        }
+      },
+      immediate: true
+    },
     roleVisible: {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
@@ -307,6 +333,7 @@ export default {
           return true
         }
       })
+      this.$refs.table2.clearSelection()
     },
     /**
      * @author guanfenda
@@ -364,10 +391,12 @@ export default {
         type: this.type,
         status: 'normal'
       }
-      getQuestionList(params, this.page, { pageNo: this.page.currentPage }).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
-      })
+      getQuestionList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
+        (res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+        }
+      )
     },
     /**
      * @author guanfenda

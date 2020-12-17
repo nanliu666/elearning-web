@@ -938,6 +938,32 @@ const res = {
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
+          },
+          {
+            menuId: '1259073412671256735038',
+            menuName: '学分明细',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'credit',
+            alias: 'credit',
+            path: '/creditManagement/credit',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735032',
+            menuName: '学分详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'creditDetails',
+            alias: 'creditDetails',
+            path: '/creditManagement/creditDetails',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },
