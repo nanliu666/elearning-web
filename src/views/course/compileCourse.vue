@@ -2,6 +2,10 @@
   <div class="establishCourse">
     <!-- 头部 -->
     <div class="head">
+      <i
+        class="el-icon-arrow-left  icon"
+        @click="tocourseDraft"
+      ></i>
       <div class="schedule">
         <div
           :class="{ sign: headIndex === 1 }"
@@ -98,7 +102,7 @@
         <el-row>
           <el-col :span="11">
             <el-form-item
-              label="所在目录"
+              label="所在分类"
               prop="catalogId"
             >
               <el-cascader
@@ -665,7 +669,7 @@ export default {
       rules: {
         name: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
         teacherId: [{ required: true, message: '请输入讲师名称', trigger: 'blur' }],
-        catalogId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
+        catalogId: [{ required: true, message: '请选择所在分类', trigger: 'blur' }],
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }],
         passCondition: [{ required: true, message: '请选择通过条件', trigger: 'blur' }],
         electiveType: [{ required: true, message: '请选择选修类型', trigger: 'blur' }],
@@ -684,12 +688,14 @@ export default {
     this.islistTeacher()
   },
   methods: {
+    tocourseDraft() {
+      this.$router.push({ path: '/course/courseDraft' })
+    },
     islistTeacher() {
       listTeacher({ currentPage: 1, size: 999 }).then((res) => {
         this.TeacherData = res.teacherInfos
       })
     },
-
     // 编辑页面的数据前
     // 编辑页面的数据后
     getInfo() {
@@ -927,7 +933,7 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -1033,9 +1039,9 @@ export default {
     }
   }
   .upload-demo {
-    border: 1px solid #ccc;
-    padding: 40px 50px 20px;
-    border-radius: 7px;
+    // border: 1px solid #ccc;
+    // padding: 40px 50px 20px;
+    // border-radius: 7px;
     position: relative;
     .avatar {
       position: absolute;
@@ -1085,7 +1091,8 @@ export default {
     line-height: 0;
   }
   .el-upload__text {
-    width: 210px;
+    width: 100%;
+    text-align: center;
   }
   .dialog_input {
     margin: 20px;
@@ -1107,5 +1114,12 @@ export default {
       width: 100%;
     }
   }
+}
+.icon {
+  font-size: 28px;
+  margin-left: 30px;
+  position: absolute;
+  top: 15px;
+  left: 20px;
 }
 </style>

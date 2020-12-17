@@ -46,19 +46,19 @@
                 class="refresh-container"
                 @click="loadTableData"
               >
-                <i class="el-icon-refresh-right" />
-                <span>调整排序</span>
+                <!-- <i class="el-icon-refresh-right" />
+                <span>调整排序</span> -->
               </div>
               <el-popover
                 placement="bottom"
                 width="40"
                 trigger="click"
               >
-                <i
+                <!-- <i
                   slot="reference"
                   style="cursor: pointer;"
                   class="el-icon-setting"
-                />
+                /> -->
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
@@ -172,7 +172,7 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     config: { type: 'daterange', 'range-separator': '至' }
   },
   {
-    placeholder: '请输入证书模版名称',
+    config: { placeholder: '请输入证书模版名称' },
     type: 'input',
     field: 'templateName',
     label: '证书模版',
@@ -183,35 +183,6 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -228,7 +199,6 @@ export default {
       downloadName: '',
       preview: {},
       moveKnowledgeRow: {},
-      formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
       },
@@ -306,7 +276,9 @@ export default {
      */
     handleSearch(searchParams) {
       let params = searchParams
-      params.dateRange = searchParams.beginEntryDate + '~' + searchParams.endEntryDate
+      if (searchParams.beginEntryDate) {
+        params.dateRange = searchParams.beginEntryDate + '~' + searchParams.endEntryDate
+      }
       for (let i in params) {
         this.queryInfo[i] = searchParams[i]
       }
