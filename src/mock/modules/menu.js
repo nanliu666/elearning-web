@@ -897,6 +897,63 @@ const res = {
             ]
           }
         ]
+      },
+      {
+        menuId: '1590112075692',
+        menuName: '学习计划',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'approval',
+        alias: 'approval',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        children: [
+          {
+            menuId: '15901120756921',
+            menuName: '必修课安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/requiredSchedule',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756922',
+            menuName: '选修课安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/elective',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756923',
+            menuName: '新建手工试卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/newSchedule',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756924',
+            menuName: '必修课安排详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/requiredScheduleDetail',
+            icon: 'iconfont iconicon_compile'
+          }
+        ]
       }
     ]
   },
