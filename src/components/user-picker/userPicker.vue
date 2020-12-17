@@ -182,6 +182,11 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
 export default {
   name: 'UserPicker',
   props: {
+    // 只选人，选了组织在右侧会显示人
+    isOnlyPerson: {
+      type: Boolean,
+      default: false
+    },
     value: {
       type: Array,
       default: () => []
