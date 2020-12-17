@@ -206,10 +206,14 @@ export default {
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
         let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
-        editFun(params).then(() => {
-          this.$message.success('发布成功')
-          this.$router.push({ path: '/training/trainingArrange' })
-        })
+        editFun(params)
+          .then(() => {
+            this.$message.success('发布成功')
+            this.$router.push({ path: '/training/trainingArrange' })
+          })
+          .catch((err) => {
+            window.console.error(err)
+          })
       })
     },
     // 统一处理入参

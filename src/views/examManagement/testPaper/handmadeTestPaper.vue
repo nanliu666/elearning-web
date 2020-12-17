@@ -246,6 +246,8 @@ export default {
   activated() {
     this.form = {}
     this.testPaper = []
+    this.TotalScore = ''
+    this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
     this.getTestPaperCategory()
@@ -329,13 +331,16 @@ export default {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-
-        if (
-          this.testPaper.filter(
-            (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
-          ).length > 0
-        ) {
-          this.$message.warning('请检查试题设置')
+        let list = this.testPaper.filter(
+          (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+        )
+        if (list.length > 0) {
+          let text = ''
+          list[0].tableData.length == 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+          list[0].tableData.length !== 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+          this.$message.warning(text)
           return
         }
         let testPaperMether =
@@ -412,15 +417,17 @@ export default {
      *
      * */
     handleDeleteBlock(data) {
-      this.$confirm('您确定要删除选中的题型吗', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.testPaper = this.testPaper.filter((it) => {
-          return it.key !== data.key
+      if (this.testPaper.length > 1) {
+        this.$confirm('您确定要删除选中的题型吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.testPaper = this.testPaper.filter((it) => {
+            return it.key !== data.key
+          })
         })
-      })
+      }
     },
     /**
      * @author guanfenda

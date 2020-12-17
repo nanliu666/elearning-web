@@ -93,7 +93,7 @@
               type="text"
               @click="handleIsStart(row)"
             >
-              停用
+              {{ row.status ? '停用' : '启用' }}
             </el-button>
             <el-button
               type="text"
@@ -121,62 +121,53 @@
 </template>
 
 <script>
-import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
+import { getCreditList, postCreditStartAndStop, deleteCredit } from '@/api/credit/credit'
 import SearchPopover from '@/components/searchPopOver/index'
 import ruleDialog from './components/ruleDialog'
 const TABLE_COLUMNS = [
   {
     label: '规则名称',
-    prop: 'name',
+    prop: 'stuName',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '系统规则来源',
-    prop: 'status',
-    minWidth: 150,
-    formatter: (row) => {
-      return (
-        {
-          normal: '正常',
-          expired: '已过期'
-        }[row.status] || ''
-      )
-    }
+    prop: 'sysRuleSource',
+    minWidth: 150
   },
   {
     label: '分值',
-    prop: 'categoryName',
+    prop: 'score',
     minWidth: 120
   },
   {
     label: '每日上限',
-    prop: 'examNum',
+    prop: 'dayLimit',
     slot: true,
     minWidth: 120
   },
   {
     label: '分值规则说明',
-    prop: 'creatorName',
+    prop: 'ruleState',
     minWidth: 120
   },
   {
     label: '更新时间',
     slot: true,
-    prop: 'expiredTime',
-    minWidth: 320
+    prop: 'updateTime',
+    minWidth: 200
   },
   {
     label: '状态',
-    slot: true,
-    prop: 'status1',
+    prop: 'status',
     minWidth: 100,
     formatter: (row) => {
       return (
         {
-          normal: '正常',
-          expired: '已过期'
+          0: '停用',
+          1: '正常'
         }[row.status] || ''
       )
     }
@@ -220,7 +211,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'search',
+            field: 'likeQuery',
             label: '',
             data: '',
             options: [],
@@ -259,7 +250,23 @@ export default {
      * @desc 处理停用或者启用
      *
      * */
-    handleIsStart() {},
+    handleIsStart(row) {
+      let tip = row.status == 0 ? '启用' : '停用'
+      this.$confirm(`您确定要 ${tip} 该条信息吗？`, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let params = {
+          id: row.id,
+          status: row.status == 0 ? '1' : '0'
+        }
+        postCreditStartAndStop(params).then(() => {
+          this.$message.success('修改成功')
+          this.loadTableData()
+        })
+      })
+    },
     /**
      * @author guanfenda
      * @desc 删除规则
@@ -274,7 +281,7 @@ export default {
         let params = {
           id: row.id
         }
-        deleteTestPaper(params).then(() => {
+        deleteCredit(params).then(() => {
           this.$message.success('删除成功')
           this.loadTableData()
         })
@@ -312,7 +319,7 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getTestPaperList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
+        getCreditList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
           (res) => {
             this.tableData = res.data
             this.page.total = res.totalNum
@@ -424,5 +431,8 @@ export default {
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

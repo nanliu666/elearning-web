@@ -9,7 +9,10 @@
       {{ fileName }}
     </div>
     <div class="handle-box">
-      <span @click.stop="downloadFile(url)"><i class="el-icon-download"></i></span>
+      <span
+        v-if="isDownload"
+        @click.stop="downloadFile(url)"
+      ><i class="el-icon-download"></i></span>
     </div>
   </div>
 </template>
@@ -18,6 +21,10 @@
 export default {
   name: 'CommonImageView',
   props: {
+    isDownload: {
+      type: Boolean,
+      default: true
+    },
     // 文件名称
     fileName: {
       type: String,

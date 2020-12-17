@@ -171,6 +171,7 @@
 <script>
 import { getOrgTreeSimple, editOrg, createOrg, getUserWorkList } from '@/api/org/org'
 import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
+const radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
 export default {
   name: 'OrgEdit',
   components: {
@@ -186,7 +187,6 @@ export default {
     return {
       isrules: false,
       type: 'create',
-      // radioDisable: ['Enterprise', 'Company', 'Department', 'Group'],
       form: {
         orgType: '',
         parentOrgId: ''
@@ -219,7 +219,6 @@ export default {
           }
         }
       },
-      allUserIdArr: [],
       parentOrgIdLabel: '',
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
@@ -251,11 +250,9 @@ export default {
   methods: {
     radioDisabled(data) {
       if (!_.isEmpty(this.form.id) || this.form.parentOrgId) {
-        // 从小到大
-        let radioDisable = ['Group', 'Department', 'Company', 'Enterprise']
         // 父级的组织类型的次序
         const parentOrg = this.findOrg(this.form.parentOrgId)
-        let parentOrgType = this.type !== 'edit' ? parentOrg.orgType : this.form.orgType
+        let parentOrgType = parentOrg.orgType
         const parentIndex = _.findIndex(radioDisable, (item) => {
           return item === parentOrgType
         })
@@ -265,7 +262,22 @@ export default {
         // 下级组织的组织类型不能大于上级组织翻译成以下意义：
         // 可选的当前组织组织类型必须比子级的最大的组织类型要大
         let isMoreThenSon = parentIndex >= dataIndex
-        return !isMoreThenSon
+        let flag = !isMoreThenSon
+        if (this.type === 'edit') {
+          let indexList = []
+          _.each(this.form.children, (item) => {
+            indexList.push(
+              _.findIndex(radioDisable, (radioItem) => {
+                return radioItem === item.orgType
+              })
+            )
+          })
+          let maxNumber = Math.max(...indexList)
+          if (dataIndex < maxNumber) {
+            flag = true
+          }
+        }
+        return flag
       }
     },
     nodeClick(data) {
@@ -300,22 +312,6 @@ export default {
         }
       })
     },
-    //编辑新建添加下级
-    addSubLevel(index) {
-      if (this.allUserIdArr.length >= 10) {
-        this.$message.warning('添加失败，最多只能十级负责人！')
-        return
-      }
-      this.allUserIdArr.splice(index + 1, 0, [
-        {
-          level: index + 2,
-          userId: []
-        }
-      ])
-      for (var i = index + 1; i < this.allUserIdArr.length; i++) {
-        this.allUserIdArr[i].level = this.allUserIdArr[i].level + 1
-      }
-    },
     submitAndCreate() {
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
@@ -324,7 +320,6 @@ export default {
           createOrg(form).then(() => {
             this.$message.success('创建成功')
             this.form = { orgType: '' }
-            this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
             this.$refs.ruleForm.clearValidate()
             this.loadOrgTree()
             this.parentOrgIdLabel = ''
@@ -351,11 +346,7 @@ export default {
               this.$emit('changevisible', false)
             })
           } else {
-            editOrg(form).then(() => {
-              this.$message.success('修改成功')
-              this.$emit('refresh')
-              this.$emit('changevisible', false)
-            })
+            this.editFun(form)
           }
         } else {
           this.$message.error(obj[Object.keys(obj)[0]][0].message)
@@ -363,10 +354,16 @@ export default {
         }
       })
     },
+    editFun(form) {
+      editOrg(form).then(() => {
+        this.$message.success('修改成功')
+        this.$emit('refresh')
+        this.$emit('changevisible', false)
+      })
+    },
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
       this.$nextTick(() => {
@@ -375,9 +372,10 @@ export default {
     },
     async createChild(row) {
       await this.loadOrgTree()
-      this.allUserIdArr = [{ level: 1, userId: [] }] //初始化责任人内容
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
+      this.form = _.cloneDeep(row)
+      this.form.leaders = _.map(this.form.leaders, 'userId')
       this.form.parentOrgId = row.id
       this.form.parentOrgType = row.orgType
       this.$emit('changevisible', true)

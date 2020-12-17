@@ -839,6 +839,34 @@ const res = {
           },
           {
             menuId: '15674547683454620582323',
+            menuName: '手工评卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/MarkList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '试卷列表',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/ExamineeList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,
@@ -907,6 +935,32 @@ const res = {
             code: 'systemRule',
             alias: 'systemRule',
             path: '/creditManagement/systemRule',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735038',
+            menuName: '学分明细',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'credit',
+            alias: 'credit',
+            path: '/creditManagement/credit',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735032',
+            menuName: '学分详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'creditDetails',
+            alias: 'creditDetails',
+            path: '/creditManagement/creditDetails',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []

@@ -306,6 +306,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          this.$refs.table.clearSelection()
           deleteTestPaper({ id: params.join(',') }).then(() => {
             this.loadTableData()
             this.$message({
@@ -568,5 +569,8 @@ export default {
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

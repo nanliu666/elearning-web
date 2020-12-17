@@ -90,6 +90,7 @@
         <stemContent
           v-if="visible"
           v-model="stemList"
+          :data="tableData"
           :type="form.type"
           :visible.sync="visible"
           :title="'添加' + title"
@@ -292,8 +293,8 @@ export default {
           content: it.content,
           type: it.type,
           questionId: it.id,
-          score: it.score || '0',
-          Original: it.score || '0',
+          score: it.score || undefined,
+          Original: it.score || undefined,
           timeLimit: it.timeLimit ? it.timeLimit : '0'
         }))
         this.countScore()
@@ -443,7 +444,7 @@ export default {
      *
      * */
     scoreChange(val, row) {
-      if (row.Original != val) {
+      if (row.Original != val && row.Original) {
         this.$confirm(
           '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
           '提示',
