@@ -232,8 +232,8 @@
                     <num-interval
                       v-if="item.type === 'numInterval'"
                       v-model="item.data"
-                      min-placeholder="最少人数"
-                      max-placeholder="最多人数"
+                      :max-placeholder="item.maxPlaceholder || '最大值'"
+                      :min-placeholder="item.minPlaceholder || '最小值'"
                     />
                     <el-tree-select
                       v-if="item.type === 'treeSelect'"

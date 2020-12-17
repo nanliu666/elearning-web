@@ -183,7 +183,7 @@ export default {
         // tags: [],
         uploadType: 0, // 0本地文件 1链接文件
         resUrl: '',
-        allowDownload: '0', //是否运行下载 0允许 1不允许
+        allowDownload: 0, //是否运行下载 0允许 1不允许
         introduction: '',
         attachments: []
       },
@@ -243,8 +243,8 @@ export default {
           label: '是否允许下载',
           prop: 'allowDownload',
           required: false,
-          activeValue: '1',
-          inactiveValue: '0',
+          activeValue: 1,
+          inactiveValue: 0,
           span: 11,
           offset: 1
         }
