@@ -3,14 +3,16 @@
     <page-header
       title="调整排序"
       show-back
-      :back="close"
     />
+    <div class="title">
+      操作提示：鼠拖点击并拖拽分类调整排序。
+    </div>
     <basic-container :block="true">
       <div class="treeBox">
         <el-tree
           v-loading="loading"
           :data="data"
-          node-key="id"
+          node-key="orgId"
           :props="{ label: 'name' }"
           default-expand-all
           draggable
@@ -18,14 +20,18 @@
         />
       </div>
       <div class="btnBox">
-        <el-button @click="close">
-          取消
-        </el-button>
         <el-button
           type="primary"
+          size="medium"
           @click="onSubmit"
         >
           保存
+        </el-button>
+        <el-button
+          size="medium"
+          @click="close"
+        >
+          取消
         </el-button>
       </div>
     </basic-container>
@@ -34,8 +40,9 @@
 
 <script>
 import { getCatalog, updateCatalogSort } from '@/api/course/course'
+
 export default {
-  name: 'OrgSort',
+  name: 'Name',
   data() {
     return {
       data: [],
@@ -44,6 +51,9 @@ export default {
       sameNameMessage: false
     }
   },
+  created() {
+    this.getOrgTree()
+  },
   activated() {
     this.getOrgTree()
   },
@@ -51,39 +61,22 @@ export default {
     messageFun() {
       if (this.sameNameMessage) return
       this.$message.error({
-        message: '该分类名称在分类层级已存在',
+        message: '该组织名称在目标层级已存在',
         onClose: () => {
           this.sameNameMessage = false
         }
       })
     },
-    /**
-     * draggingNode: 当前拖拽点
-     * dropNode: 目标节点
-     */
     allowDrop(draggingNode, dropNode, type) {
-      // 同级节点前后移动
       if (type === 'prev' || type === 'next') {
-        let parentOrg = this.findParentOrg(dropNode.data.id)
-        let draggingNodeParent = this.findParentOrg(draggingNode.data.id)
-        if (parentOrg.id === draggingNodeParent.id) return false
-        if (_.isEmpty(parentOrg)) {
-          let index = _.findIndex(this.data, (item) => {
-            return item.name === draggingNode.data.name
-          })
-          if (index > -1) {
-            this.messageFun()
-            this.sameNameMessage = true
-            return false
-          }
+        let parentOrg = this.findParentOrg(dropNode.data.orgId)
+        let draggingNodeParent = this.findParentOrg(draggingNode.data.orgId)
+        if (parentOrg.orgId === draggingNodeParent.orgId) {
+          return true
         }
         if (parentOrg && parentOrg.children) {
-          // 同一层级不能有两个相同的节点
           for (let i = 0; i < parentOrg.children.length; i++) {
-            if (
-              parentOrg.children[i].name === draggingNode.data.name &&
-              dropNode.data.children[i].id !== draggingNode.data.id
-            ) {
+            if (parentOrg.children[i].orgName === draggingNode.data.orgName) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -92,14 +85,9 @@ export default {
         }
         return true
       } else if (type === 'inner') {
-        // 插入节点
-        // 同一层级不能有两个相同的节点
         if (dropNode.data.children) {
           for (let i = 0; i < dropNode.data.children.length; i++) {
-            if (
-              dropNode.data.children[i].name === draggingNode.data.name &&
-              dropNode.data.children[i].id !== draggingNode.data.id
-            ) {
+            if (dropNode.data.children[i].orgName === draggingNode.data.orgName) {
               this.messageFun()
               this.sameNameMessage = true
               return false
@@ -115,7 +103,7 @@ export default {
         arr.forEach((item) => {
           if (item.children) {
             for (let i = 0; i < item.children.length; i++) {
-              if (item.children[i].id === id) {
+              if (item.children[i].orgId === id) {
                 org = item
                 return
               }
@@ -128,16 +116,19 @@ export default {
       return org
     },
     getOrgTree() {
-      getCatalog().then((res) => {
+      getCatalog({ parentOrgId: 0 }).then((res) => {
         this.data = res
-        this.oldData = _.cloneDeep(res)
+        this.oldData = JSON.parse(JSON.stringify(res))
         this.loading = false
       })
+    },
+    goBack() {
+      this.$router.push('/course/catalog')
     },
     close() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
       this.data = JSON.parse(JSON.stringify(this.oldData))
-      this.$router.push('/course/catalog')
+      this.goBack()
     },
     loadSort(arr) {
       arr.forEach((item, index) => {
@@ -149,10 +140,15 @@ export default {
     },
     onSubmit() {
       this.loadSort(this.data)
+      // { orgs: this.data }
       this.loading = true
       updateCatalogSort(this.data).then(() => {
         this.$message.success('保存成功')
-        this.close()
+        getCatalog({ parentOrgId: 0 }).then((res) => {
+          this.data = res
+          this.loading = false
+          this.goBack()
+        })
       })
     }
   }
@@ -160,6 +156,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.title {
+  color: #8e949b;
+  background-color: #fff;
+  height: 55px;
+  line-height: 55px;
+  padding-left: 25px;
+}
 .contain {
   min-height: 100%;
   display: flex;
@@ -176,12 +179,15 @@ export default {
   overflow: hidden scroll;
 }
 .btnBox {
-  text-align: center;
-  padding-top: 10px;
-  margin: 0 0 10px 100px;
-  height: 40px;
-  // position: absolute;
+  box-sizing: border-box;
+  width: 75%;
+  height: 80px;
+  position: fixed;
   bottom: 0;
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+  text-align: center;
+  padding-top: 20px;
 }
 /deep/ .el-tree-node__content {
   height: 42px;
@@ -190,7 +196,7 @@ export default {
 }
 /deep/ .basic-container {
   flex: 1;
-  height: calc(100% - 98px);
+  height: calc(100% - 58px);
   display: flex;
   flex-direction: column;
   .el-card {

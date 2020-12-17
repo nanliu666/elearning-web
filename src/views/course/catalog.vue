@@ -225,12 +225,34 @@ export default {
   },
   activated() {
     getCatalog().then((res) => {
-      // console.log('----------',res);
-      this.searchConfig.popoverOptions[1].options.push(...res)
+      let data = this.flag(res)
+      data = this.arrayUnique(data, 'creatorId')
+      this.searchConfig.popoverOptions[1].options.push(...data)
     })
     this.loadTableData()
   },
   methods: {
+    // 去重
+    arrayUnique(arr, name) {
+      var hash = {}
+      return arr.reduce(function(item, next) {
+        hash[next[name]] ? '' : (hash[next[name]] = true && item.push(next))
+        return item
+      }, [])
+    },
+    // 树状结构数组扁平化
+    flag(arr) {
+      let result = []
+      for (let item of arr) {
+        var res = JSON.parse(JSON.stringify(item))
+        delete res['children']
+        result.push(res)
+        if (item.children instanceof Array && item.children.length > 0) {
+          result = result.concat(this.flag(item.children))
+        }
+      }
+      return result
+    },
     // 如果父级停用，子级的启用按钮需要置灰处理
     getButtonDisabled(row) {
       let target = {}

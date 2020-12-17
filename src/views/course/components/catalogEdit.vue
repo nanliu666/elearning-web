@@ -22,6 +22,7 @@
         <el-input
           v-model.trim="form.name"
           placeholder="请输入"
+          maxlength="32"
         />
       </el-form-item>
       <el-form-item label="上级分类">
