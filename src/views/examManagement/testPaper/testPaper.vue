@@ -570,4 +570,7 @@ export default {
   height: 18px;
   color: #a0a8ae;
 }
+/deep/.el-table__fixed::before {
+  position: relative;
+}
 </style>
