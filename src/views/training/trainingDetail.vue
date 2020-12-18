@@ -194,11 +194,13 @@
           <span
             v-show="isShowIntroduce"
             @click="isShowIntroduce = false"
-          >收起</span>
+          >
+            <i class="el-icon-arrow-up"></i>&nbsp;收起</span>
           <span
             v-show="!isShowIntroduce"
             @click="isShowIntroduce = true"
-          >展开</span>
+          >
+            <i class="el-icon-arrow-down"></i>&nbsp;展开</span>
         </div>
       </div>
       <div
@@ -416,7 +418,9 @@
         v-show="status === 2"
         class="arrange"
       >
-        <p>线下日程</p>
+        <p class="offline_title">
+          线下日程
+        </p>
         <el-collapse
           v-model="activeNames"
           @change="handleChange"
@@ -453,7 +457,7 @@
           </el-collapse-item>
         </el-collapse>
 
-        <p class="course_title">
+        <p class="course_title offline_title">
           在线课程
         </p>
         <el-table
@@ -498,7 +502,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <p class="course_title">
+        <p class="course_title offline_title">
           考试安排
         </p>
         <el-table
@@ -1119,13 +1123,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.col_content {
+  font-family: PingFangSC-Regular;
+  font-size: 14px;
+  color: rgba(0, 11, 21, 0.85);
+  letter-spacing: 0;
+}
 .trainingDetail {
   color: #333333;
   .trainingDetail_title {
-    height: 50px;
-    line-height: 50px;
+    height: 60px;
+    line-height: 60px;
     color: #111;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
   }
   .title_box {
     background-color: #fff;
@@ -1149,8 +1160,11 @@ export default {
         }
       }
       .title_box_headline_l {
-        line-height: 20px;
+        font-family: PingFangSC-Medium;
         font-size: 18px;
+        color: rgba(0, 11, 21, 0.85);
+        letter-spacing: 0;
+        line-height: 28px;
         span {
           background-color: #cbf5e8;
           font-size: 12px;
@@ -1162,7 +1176,10 @@ export default {
     .title_box_rows {
       margin-top: 10px;
       .col_title {
-        color: #666666;
+        font-family: PingFangSC-Regular;
+        font-size: 14px;
+        color: rgba(0, 11, 21, 0.45);
+        letter-spacing: 0;
       }
       /deep/.el-row {
         margin-top: 8px;
@@ -1172,16 +1189,28 @@ export default {
   .introduce {
     color: #333333;
     background-color: #fff;
-    border-top: 1px solid #ccc;
+    margin-top: -15px;
     padding: 25px;
     .introduce_title {
+      border-top: 1px solid #ebeced;
+      padding-top: 25px;
       .introduce_title_l {
         padding-left: 25px;
+        font-family: PingFangSC-Medium;
+        font-size: 18px;
+        color: rgba(0, 11, 21, 0.85);
+        letter-spacing: 0;
       }
       display: flex;
       justify-content: space-between;
       span {
-        color: #999999;
+        font-family: PingFangSC-Regular;
+        font-size: 14px;
+        color: rgba(0, 11, 21, 0.45);
+        letter-spacing: 0;
+        i {
+          font-weight: 900;
+        }
       }
     }
     .introduce_content {
@@ -1199,21 +1228,30 @@ export default {
   .trainingDetail_nav {
     margin-top: 20px;
     background-color: #fff;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: rgba(0, 11, 21, 0.65);
+    letter-spacing: 0;
     .select_bar {
       height: 60px;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #ebeced;
       display: flex;
+      margin: 0 30px;
       span {
         height: 60px;
         line-height: 60px;
-        margin-left: 30px;
+        margin-right: 30px;
       }
       .select {
-        border-bottom: 2px solid #1677ff;
+        border-bottom: 2px solid #01aafc;
+        font-family: PingFangSC-Regular;
+        font-size: 14px;
+        color: #01aafc;
+        letter-spacing: 0;
       }
     }
     .general {
-      padding: 25px 45px;
+      // padding: 25px 45px;
       #isdialog_show {
         width: 100%;
         height: 100px;
@@ -1391,6 +1429,12 @@ export default {
       }
     }
     .arrange {
+      .offline_title {
+        font-family: PingFangSC-Medium;
+        font-size: 18px;
+        color: #000b15;
+        letter-spacing: 0;
+      }
       padding: 15px 55px;
       .arrange_schedule_i {
         height: 55px;
@@ -1421,13 +1465,22 @@ export default {
       }
     }
     .result {
-      padding: 45px 120px;
-      color: #666666;
+      padding: 25px 35px;
+      font-size: 14px;
+      color: rgba(0, 11, 21, 0.45);
+      letter-spacing: 0;
+      text-align: right;
+      /deep/ .el-rate {
+        font-size: 14px !important;
+      }
       .result_rate1 {
         display: flex;
         span {
           &:nth-child(1) {
-            width: 250px;
+            font-family: PingFangSC-Medium;
+            font-size: 18px;
+            color: rgba(0, 11, 21, 0.85);
+            letter-spacing: 0;
             text-align: right;
             font-weight: 700;
             margin-right: 10px;
@@ -1435,12 +1488,10 @@ export default {
         }
       }
       .result_rate {
-        margin-top: 8px;
+        margin-top: 15px;
         display: flex;
         span {
           &:nth-child(1) {
-            font-size: 12px;
-            width: 250px;
             text-align: right;
             margin-right: 10px;
           }
@@ -1460,7 +1511,7 @@ export default {
           display: flex;
           img {
             margin-top: 20px;
-            margin-left: 125px;
+            margin-left: 30px;
             width: 40px;
             height: 40px;
             border-radius: 50%;

@@ -1,9 +1,6 @@
 <template>
   <div class="trainingArrange">
-    <div
-      title="分类管理"
-      class="box_title"
-    >
+    <div class="box_title">
       <div class="title">
         讲师管理
       </div>
@@ -31,7 +28,9 @@
             >
             </el-input>
 
-            <!-- <div class="ungrouped">未分类（6）</div> -->
+            <div class="ungrouped">
+              未分类
+            </div>
 
             <el-tree
               ref="tree"
@@ -55,7 +54,7 @@
                   <el-input
                     v-model="dataAddCatalog.input"
                     placeholder="请输入内容"
-                    maxlength="32"
+                    maxlength="20"
                   ></el-input>
                   <el-button
                     type="text"
@@ -103,8 +102,9 @@
             >
               <el-input
                 v-model="dataAddCatalog.input"
+                class="isShowinput_input"
                 placeholder="请输入内容"
-                maxlength="32"
+                maxlength="20"
               ></el-input>
               <span
                 class="isShowinput_yes"
@@ -279,7 +279,7 @@
               >
                 <el-button
                   type="text"
-                  @click="toParticularsLecturer(row.idStr, row.name)"
+                  @click="toParticularsLecturer(row)"
                 >
                   {{ row.name }}
                 </el-button>
@@ -290,8 +290,8 @@
                 slot="status"
                 slot-scope="{ row }"
               >
-                <span v-if="row.status === 0">停用</span>
-                <span v-if="row.status === 1">正常</span>
+                <span v-if="row.status == 0">停用</span>
+                <span v-if="row.status == 1">正常</span>
               </template>
 
               <!-- 性别 -->
@@ -299,8 +299,8 @@
                 slot="sex"
                 slot-scope="{ row }"
               >
-                <span v-if="row.sex === 0">女</span>
-                <span v-if="row.sex === 1">男</span>
+                <span v-if="row.sex == 0">女</span>
+                <span v-if="row.sex == 1">男</span>
               </template>
 
               <!-- '讲师类型（1：内训，2：外聘）',-->
@@ -308,8 +308,8 @@
                 slot="type"
                 slot-scope="{ row }"
               >
-                <span v-if="row.type === 1">内训</span>
-                <span v-if="row.type === 2">外聘</span>
+                <span v-if="row.type == 1">内训</span>
+                <span v-if="row.type == 2">外聘</span>
               </template>
 
               <!--  是否推荐（1：是，0：否）',-->
@@ -317,8 +317,8 @@
                 slot="is_recommend"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_recommend === 1">是</span>
-                <span v-if="row.is_recommend === 0">否</span>
+                <span v-if="row.is_recommend == 1">是</span>
+                <span v-if="row.is_recommend == 0">否</span>
               </template>
 
               <!-- '是否最新讲师（1：是，0：否）', -->
@@ -327,16 +327,16 @@
                 slot="is_latest_teacher"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_latest_teacher === 1">是</span>
-                <span v-if="row.is_latest_teacher === 0">否</span>
+                <span v-if="row.is_latest_teacher == 1">是</span>
+                <span v-if="row.is_latest_teacher == 0">否</span>
               </template>
               <!-- '是否热门讲师（1：是，0：否）', -->
               <template
                 slot="is_popular_teacher"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_popular_teacher === 1">是</span>
-                <span v-if="row.is_popular_teacher === 0">否</span>
+                <span v-if="row.is_popular_teacher == 1">是</span>
+                <span v-if="row.is_popular_teacher == 0">否</span>
               </template>
 
               <!-- 操作 -->
@@ -366,7 +366,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click.stop="tocompileLecturer(scope.row.idStr)"
+                  @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
@@ -408,8 +408,9 @@ const TABLE_COLUMNS = [
   {
     label: '讲师姓名',
     prop: 'name',
-    width: '200',
-    slot: true
+    width: '180',
+    slot: true,
+    fixed: 'left'
   },
   {
     label: '手机号码',
@@ -439,14 +440,14 @@ const TABLE_COLUMNS = [
     slot: true,
     minWidth: 80
   },
-  {
-    label: '擅长领域',
-    prop: 'lingyu',
-    minWidth: 130
-  },
+  // {
+  //   label: '擅长领域',
+  //   prop: 'lingyu',
+  //   minWidth: 130
+  // },
   {
     label: '讲师级别',
-    prop: 'teacher_level',
+    prop: 'teacher_title',
     minWidth: 130
   },
   {
@@ -634,7 +635,8 @@ export default {
       },
       page: {
         currentPage: 1,
-        size: 10
+        size: 10,
+        total: 0
       },
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -681,12 +683,34 @@ export default {
       this.$router.push({ path: '/lecturer/addLecturer' })
     },
     // 去详情
-    toParticularsLecturer(id, name) {
-      this.$router.push({ path: `/lecturer/particularsLecturer?id= + ${id} +&name= + ${name} ` })
+    toParticularsLecturer(row) {
+      this.$router.push({
+        path: '/lecturer/particularsLecturer',
+        query: {
+          id: row.idStr,
+          name: row.name,
+          userEmail: row.user_email,
+          sex: row.sex,
+          phonenum: row.phonenum,
+          user_id_str: row.user_id_str
+        }
+      })
     },
     // 去编辑
-    tocompileLecturer(id) {
-      this.$router.push({ path: `/lecturer/addLecturer?id= + ${id}` })
+    tocompileLecturer(row) {
+      // console.log(row)
+      // this.$router.push({ path: `/lecturer/compileLecturer?id= ${row.user_id_str}&name =${row.name}&userEmail=${row.user_email}&sex=${row.sex}` })
+      this.$router.push({
+        path: '/lecturer/compileLecturer',
+        query: {
+          id: row.idStr,
+          name: row.name,
+          userEmail: row.user_email,
+          sex: row.sex,
+          phonenum: row.phonenum,
+          user_id_str: row.user_id_str
+        }
+      })
     },
 
     // 删除讲师
@@ -745,6 +769,8 @@ export default {
       let params = { ...categoryId, ...searchParams, ...this.page }
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
+        this.page.total = res.totalNum || 0
+        // console.log(res)
         // 下拉筛选框
         this.tableData.forEach((item) => {
           SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
@@ -1053,6 +1079,8 @@ $color_icon: #A0A8AE
     display: flex;
     justify-content: space-between;
     line-height: 60px;
+    font-size: 18px;
+    font-weight: bold;
   }
   .box_content {
     background-color: #fff;
@@ -1088,6 +1116,7 @@ $color_icon: #A0A8AE
             color: #606266;
             margin: 0 0 5px 22px;
             font-size: 14px;
+            cursor: pointer;
           }
         }
         .btn_bottom {
@@ -1106,6 +1135,7 @@ $color_icon: #A0A8AE
           .btn1 {
             border-right: 1px solid #ccc;
             background-color: #fff;
+            cursor: pointer;
           }
         }
       }
@@ -1152,6 +1182,9 @@ $color_icon: #A0A8AE
         .el-input {
           // width: 80%;
         }
+      }
+      .isShowinput_input {
+        width: 65%;
       }
 
       .isShowinput_yes {

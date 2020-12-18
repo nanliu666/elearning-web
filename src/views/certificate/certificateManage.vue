@@ -96,6 +96,7 @@
           </el-button>
           <span
             v-else
+            class="startBtn"
             @click.stop="blockStart(row.id, 1)"
           >启用 &nbsp; </span>
           <!-- 预览框 -->
@@ -108,7 +109,7 @@
               class="preview"
             >
               <div class="previewTitle">
-                <span>预览</span> <i class="el-icon-close"></i>
+                <span>预览</span>
               </div>
               <div class="previewContent">
                 <div class="preview_right_box">
@@ -124,6 +125,7 @@
                     {{ preview.text }}
                   </div>
                   <img
+                    v-if="preview.logoUrl"
                     :src="preview.logoUrl"
                     alt=""
                     class="logo"
@@ -138,12 +140,12 @@
                   </div>
                 </div>
               </div>
-              <div class="previewBtn">
+              <!-- <div class="previewBtn">
                 <el-button>取消</el-button>
                 <el-button type="primary">
                   确定
                 </el-button>
-              </div>
+              </div> -->
             </div>
             <el-button type="text">
               <span @mouseover="previewMouseOver(row.id)">预览</span>
@@ -152,7 +154,7 @@
 
           <el-button
             type="text"
-            @click="handleRemove(row.id)"
+            @click="handleRemove(row)"
           >
             删除
           </el-button>
@@ -323,29 +325,82 @@ export default {
       this.$router.push({ path: '/certificate/addCertificate' })
     },
     // 批量删除
-    async multipleDeleteClick(selected) {
+    multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-
-      await delTemplate({ templateIds: selectedIds.join(',') })
-      this.$message.success('删除成功')
-      this.loadTableData()
+      // 提示
+      this.$confirm('您确定要删除选中的证书模版吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          await delTemplate({ templateIds: selectedIds.join(',') })
+          this.$message.success('删除成功')
+          this.loadTableData()
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     // 删除
-    handleRemove(id) {
-      delTemplate({ templateIds: id }).then(() => {
-        this.$message.success('删除成功')
-        this.loadTableData()
+    handleRemove(row) {
+      let info = `${
+        row.status ? '该证书模版处于启用状态，请停用后删除。' : '您确定要删除选中的证书模版吗？'
+      }`
+      // 提示
+      this.$confirm(info, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          if (!row.status) {
+            delTemplate({ templateIds: row.id }).then(() => {
+              this.$message.success('删除成功')
+              this.loadTableData()
+            })
+          } else {
+            this.$message.error('删除失败!')
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     // 停用&启用
     blockStart(id, i) {
-      updateStatus({ templateId: id, choice: i }).then(() => {
-        this.$message.success(`${i ? '启用' : '停用'}成功`)
-        this.loadTableData()
+      let info = `${
+        i
+          ? '您确定要启用该证书模版吗？'
+          : '您确定要停用该证书模版吗？停用后，该证书模版将暂停使用。'
+      }`
+
+      this.$confirm(info, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          updateStatus({ templateId: id, choice: i }).then(() => {
+            this.$message.success(`${i ? '启用' : '停用'}成功`)
+            this.loadTableData()
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     //   预览Btn
     previewMouseOver(id) {
@@ -408,6 +463,11 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.startBtn {
+  color: #d7d7d7;
+  cursor: pointer;
+}
+
 .preview_right_box {
   position: relative;
   border: 1px solid #d9dbdc;
@@ -427,6 +487,8 @@ export default {
     font-size: 30px;
     font-weight: 700;
     transform: translateX(-50%);
+    text-align: center;
+    width: 85%;
   }
   .text {
     position: absolute;
@@ -439,6 +501,7 @@ export default {
     width: 50%;
     height: 28%;
     text-align: center;
+    word-wrap: break-word;
   }
   .logo {
     position: absolute;
@@ -458,16 +521,17 @@ export default {
   }
   .serial {
     position: absolute;
-    right: 6%;
-    bottom: 6%;
+    right: 9%;
+    bottom: 9%;
     color: #8b8a8a;
     font-size: 8px;
   }
 }
+
 .preview {
   z-index: 999;
   width: 422px;
-  height: 441px;
+  height: 360px;
   border-radius: 4px;
   background: #ffffff;
   box-shadow: 0 2px 12px 0;
@@ -484,13 +548,13 @@ export default {
     display: flex;
     justify-content: space-between;
     height: 40px;
-    border-bottom: 1px solid #ebeced;
+    // border-bottom: 1px solid #ebeced;
   }
   .previewContent {
     width: 374px;
     height: 280px;
     overflow: hidden;
-    margin-top: 15px;
+    margin-top: -5px;
     img {
       width: 100%;
       height: 100%;
