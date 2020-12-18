@@ -740,7 +740,11 @@ export default {
     }
   },
   created() {
-    getCategoryList().then((res) => {
+    getCategoryList({
+      parentId: 0,
+      type: '0',
+      name: ''
+    }).then((res) => {
       let categoryId = _.filter(this.columns, (item) => {
         return item.prop === 'categoryId'
       })[0]
