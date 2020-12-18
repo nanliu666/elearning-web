@@ -231,6 +231,7 @@ export default {
         Department: false,
         Group: false
       }
+      this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {
