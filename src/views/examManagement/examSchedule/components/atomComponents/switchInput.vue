@@ -7,7 +7,7 @@
     >
       {{ preText }}
       <el-input
-        v-model="innerInputValue"
+        v-model.number="innerInputValue"
         :style="`width:${inputWidth}px; display: inline-block`"
       ></el-input>
       {{ afterText }}

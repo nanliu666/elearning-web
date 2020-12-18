@@ -289,14 +289,9 @@ export default {
           copy[key] = column[key]
         }
       }
-
       return copy
     },
-    async loadOrgTree() {
-      let res = await getOrgTreeSimple({ parentOrgId: 0 })
-      this.orgTree = res
-      this.column.props.treeParams.data = res
-    },
+
     loadMoreLeader() {
       if (this.loadLeader || this.noMoreLeader) return
       this.loadLeader = true
@@ -362,27 +357,77 @@ export default {
     create() {
       this.type = 'create'
       this.$emit('changevisible', true)
-      this.orgTree[0] && this.handleOrgNodeClick()
       this.$nextTick(() => {
         this.$refs.ruleForm.clearValidate(...arguments)
       })
     },
     async createChild(row) {
-      await this.loadOrgTree()
       this.type = 'createChild'
-      this.handleOrgNodeClick(row)
+      await this.loadOrgTree()
       this.form.leaders = _.map(this.form.leaders, 'userId')
       this.form.parentOrgId = row.id
-      this.form.parentOrgType = row.orgType
+      this.form.parentOrgType = _.cloneDeep(row.orgType)
       this.$emit('changevisible', true)
     },
     async edit(row) {
-      await this.loadOrgTree()
       this.type = 'edit'
-      this.form = JSON.parse(JSON.stringify(row))
-      this.form.parentOrgType = this.findOrg(row.parentOrgId).orgType
+      this.form = _.cloneDeep(row)
+      this.form.parentOrgType = _.cloneDeep(this.findOrg(row.parentOrgId)).orgType
       this.form.leaders = _.map(this.form.leaders, 'userId')
+      await this.loadOrgTree()
       this.$emit('changevisible', true)
+    },
+    async loadOrgTree() {
+      let res = await getOrgTreeSimple({ parentOrgId: 0 })
+      this.orgTree = res
+      const treeData = this.type === 'edit' ? this.filterHeightOrg(res) : res
+      this.column.props.treeParams.data = treeData
+    },
+    // 获取到比自己要高的父组织的结构
+    filterHeightOrg(res) {
+      const currentIndex = _.findIndex(radioDisable, (item) => {
+        return item === this.form.orgType
+      })
+      let tempTree = _.cloneDeep(res)
+      // 给比自己大的每一项加一个标识
+      const loop = function(tree) {
+        _.each(tree, (item) => {
+          if (!_.isEmpty(item.children)) {
+            loop(item.children)
+          }
+          const dataIndex = _.findIndex(radioDisable, (radioItem) => {
+            return radioItem === item.orgType
+          })
+          // 父级组织类型 >= 当前组织的类型
+          if (dataIndex >= currentIndex) {
+            item.isShow = true
+          }
+          return tree
+        })
+      }
+      loop(tempTree)
+      let targetTree = this.deal(tempTree, (node) => node.isShow)
+      return targetTree
+    },
+    // 再次递归，把这些isShow为true的过滤出来
+    deal(nodes, predicate) {
+      // 如果已经没有节点了，结束递归
+      if (!(nodes && nodes.length)) {
+        return []
+      }
+      const newChildren = []
+      for (const node of nodes) {
+        if (predicate(node)) {
+          // 如果节点符合条件，直接加入新的节点集
+          newChildren.push(node)
+          node.children = this.deal(node.children, predicate)
+        } else {
+          // 如果当前节点不符合条件，递归过滤子节点，
+          // 把符合条件的子节点提升上来，并入新节点集
+          newChildren.push(...this.deal(node.children, predicate))
+        }
+      }
+      return newChildren
     },
     findOrg(id) {
       let org = {}
@@ -403,13 +448,6 @@ export default {
     handleClose() {
       this.form = { orgType: '', parentOrgId: '' }
       this.$emit('changevisible', false)
-    },
-    handleOrgNodeClick(data) {
-      if (data !== undefined) {
-        this.form.parentOrgId = data.orgId
-        this.form.parentOrgType = data.orgType
-        if (this.type !== 'createChild') this.$refs.parentOrgId && this.$refs.parentOrgId.blur()
-      }
     }
   }
 }
