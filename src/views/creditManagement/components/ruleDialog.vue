@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    :title="form.is ? '编辑学分规则' : '新建学分规则'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -68,7 +68,7 @@
         <el-button
           v-else
           size="medium"
-          @click="onClose"
+          @click="onContinue"
         >
           完成并创建规则
         </el-button>
@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import { postAddStudentsRulus, getListSysRulus } from '@/api/credit/credit'
+import { postAddStudentsRulus, getListSysRulus, editStudentsRulus } from '@/api/credit/credit'
 
 export default {
   name: 'RuleDialog',
@@ -187,7 +187,18 @@ export default {
   },
   watch: {
     row: {
-      handler: function() {},
+      handler(val) {
+        let { id_str, stu_name, sys_rule_id_str, day_limit, score, rule_state } = val
+        score = score / 10
+        this.form = {
+          id: id_str,
+          stuName: stu_name,
+          sysRuleId: sys_rule_id_str,
+          dayLimit: day_limit,
+          score,
+          ruleState: rule_state
+        }
+      },
       immediate: true,
       deep: true
     },
@@ -209,7 +220,10 @@ export default {
         this.columns.find((it) => it.prop == 'sysRuleId').options = res
       })
     },
-    onsubmit() {
+    onContinue() {
+      this.onsubmit({ isContinue: true })
+    },
+    onsubmit({ isContinue = false }) {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
         let form = _.cloneDeep(this.form)
@@ -217,10 +231,15 @@ export default {
           ...form,
           score: form.score * 10
         }
-        postAddStudentsRulus(params).then(() => {
-          this.$message.success('修改成功')
+        let rule = form.id ? editStudentsRulus : postAddStudentsRulus
+        rule(params).then(() => {
+          this.$message.success('提交成功')
           this.$emit('loadData')
-          this.onClose()
+          if (isContinue) {
+            this.$refs.form.resetFields()
+          } else {
+            this.onClose()
+          }
         })
       })
     },
@@ -262,6 +281,7 @@ export default {
 /deep/ .el-form-item {
   margin-bottom: 24px;
 }
+
 .dialog-footer {
   text-align: right;
 }
@@ -275,9 +295,11 @@ export default {
 /deep/ .el-radio {
   margin-right: 20px;
 }
+
 /deep/ .el-input__icon .el-input__validateIcon .el-icon-circle-close {
   display: none;
 }
+
 .answerTime {
   font-size: 14px;
   margin-right: 5px;
