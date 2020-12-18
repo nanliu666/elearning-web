@@ -22,7 +22,7 @@
         <template #teachAssistant>
           <lazy-select
             v-model="formData.teachAssistant"
-            :load="loadAssistant"
+            :load="loadCoordinator"
             :option-props="personOptionProps"
           />
         </template>
@@ -171,23 +171,8 @@ export default {
         return this.formData
       })
     },
-    loadCoordinator() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-      return getOrgUserList(params)
-    },
-    loadAssistant() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10,
-        search: '',
-        orgId: this.$store.getters.userInfo.org_id || 0
-      }
-      return getOrgUserList(params)
+    loadCoordinator(params) {
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadCertificate() {
       return Promise.resolve({ data: [] })

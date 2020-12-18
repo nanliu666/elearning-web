@@ -200,12 +200,10 @@ export default {
       this.model = _.assign(this.model, data)
     },
     loadCoordinator(params) {
-      getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id })).then(
-        (res) => {
-          this.userList = [...this.userList, ...res.data]
-        }
-      )
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      getOrgUserList(_.assign(params, { orgId: 0 })).then((res) => {
+        this.userList = [...this.userList, ...res.data]
+      })
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadCourse(params) {
       return getTrainCource(params)
