@@ -127,36 +127,39 @@ import ruleDialog from './components/ruleDialog'
 const TABLE_COLUMNS = [
   {
     label: '规则名称',
-    prop: 'stuName',
+    prop: 'stu_name',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '系统规则来源',
-    prop: 'sysRuleSource',
+    prop: 'sys_rule_source',
     minWidth: 150
   },
   {
     label: '分值',
     prop: 'score',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) => {
+      return row.score / 10
+    }
   },
   {
     label: '每日上限',
-    prop: 'dayLimit',
+    prop: 'day_limit',
     slot: true,
     minWidth: 120
   },
   {
     label: '分值规则说明',
-    prop: 'ruleState',
+    prop: 'rule_state',
     minWidth: 120
   },
   {
     label: '更新时间',
     slot: true,
-    prop: 'updateTime',
+    prop: 'update_time',
     minWidth: 200
   },
   {
@@ -258,7 +261,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let params = {
-          id: row.id,
+          id: row.id_str,
           status: row.status == 0 ? '1' : '0'
         }
         postCreditStartAndStop(params).then(() => {
@@ -279,7 +282,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let params = {
-          id: row.id
+          id: row.id_str
         }
         deleteCredit(params).then(() => {
           this.$message.success('删除成功')
@@ -319,13 +322,13 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getCreditList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-          (res) => {
-            this.tableData = res.data
-            this.page.total = res.totalNum
-            this.tableLoading = false
-          }
-        )
+        getCreditList(
+          _.assign(params, { currentPage: this.page.currentPage, size: this.page.pageSize })
+        ).then((res) => {
+          this.tableData = res.list
+          this.page.total = res.totalNum
+          this.tableLoading = false
+        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {

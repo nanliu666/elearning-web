@@ -81,7 +81,7 @@
               type="text"
               @click="handleIsStart(row)"
             >
-              停用
+              {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
           </div>
         </template>
@@ -188,7 +188,7 @@ export default {
       }).then(() => {
         let params = {
           id: row.id,
-          status: row.status
+          status: row.status == 0 ? '1' : '0'
         }
         putEditSysRulus(params).then(() => {
           this.$message.success('修改成功')

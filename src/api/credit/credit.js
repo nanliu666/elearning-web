@@ -21,6 +21,12 @@ export const postCreditStartAndStop = (params) =>
 export const deleteCredit = (params) => post('/manage/v1/deleteStudentsRulus', params)
 /***
  * @author guanfenda
+ * @desc 学分规则编辑
+ * @params params
+ * */
+export const editStudentsRulus = (params) => post('/manage/v1/editStudentsRulus', params)
+/***
+ * @author guanfenda
  * @desc 学分规则的新增
  * @params params
  * */
@@ -37,3 +43,15 @@ export const getListSysRulus = (params) => post('/manage/v1/listSysRulus', param
  * @params params
  * */
 export const putEditSysRulus = (params) => post('/manage/v1/editSysRulus', params)
+/***
+ * @author guanfenda
+ * @desc 学分明细列表
+ * @params params
+ * */
+export const getListScoreDetails = (params) => post('/manage/v1/listScoreDetails', params)
+/***
+ * @author guanfenda
+ * @desc 删除分数
+ * @params params
+ * */
+export const deleteScoreDetails = (params) => post('/manage/v1/deleteScoreDetails', params)

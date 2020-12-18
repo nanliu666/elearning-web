@@ -54,14 +54,7 @@
             @current-page-change="currentChange"
             @page-size-change="sizeChange"
           >
-            <template #multiSelectMenu="{ selection }">
-              <el-button
-                type="text"
-                style="margin-bottom:0;"
-                @click="handleDelete(selection)"
-              >
-                批量删除
-              </el-button>
+            <template #multiSelectMenu>
             </template>
             <template #topMenu>
               <div class="flex flex-justify-between align-center">
@@ -87,7 +80,7 @@
               <el-button
                 size="medium"
                 type="text"
-                @click="jumpEdit(row.id)"
+                @click="jumpEdit(row.user_id_str)"
               >
                 查看详情
               </el-button>
@@ -100,40 +93,49 @@
 </template>
 
 <script>
-import { getQuestionList, delQuestion } from '@/api/examManage/question'
+import { getListScoreDetails } from '@/api/credit/credit'
 import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 import { getOrganization } from '@/api/system/user'
 const COLUMNS = [
   {
-    prop: 'content1',
+    prop: 'name',
     label: '姓名',
-    slot: true
+    slot: true,
+    minWidth: 180
   },
   {
-    prop: 'content2',
+    prop: 'code',
     label: '用户编号',
-    slot: true
+    minWidth: 180
   },
   {
-    prop: 'content3',
+    prop: 'score',
     label: '学分分值',
-    slot: true
+    minWidth: 120
   },
   {
-    prop: 'content4',
+    prop: 'user_status',
     label: '状态',
-    slot: true
+    formatter: (row) => {
+      return (
+        {
+          true: '停用',
+          false: '正常'
+        }[row.user_status] || ''
+      )
+    }
   },
   {
-    prop: 'content5',
+    prop: 'dept',
     label: '所在部门',
-    slot: true
+    slot: true,
+    minWidth: 180
   },
   {
-    prop: 'content6',
+    prop: 'update_time',
     label: '更新时间',
-    slot: true
+    minWidth: 180
   }
 ]
 export default {
@@ -143,6 +145,7 @@ export default {
   },
   data() {
     return {
+      outerUserCount: 0,
       loading: false,
       treeData: [], // 组织架构数据
       treeProps: {
@@ -184,16 +187,15 @@ export default {
         ],
         popoverOptions: [
           {
-            type: 'select',
-            field: 'type',
-            label: '类型',
-            options: _.map(QUESTION_TYPE_MAP, (val, key) => ({ label: val, value: key }))
-          },
-          {
-            type: 'select',
-            field: 'status',
-            label: '状态',
-            options: _.map(QUESTION_STATUS_MAP, (val, key) => ({ label: val, value: key }))
+            type: 'dataPicker',
+            label: '日期范围',
+            data: '',
+            field: 'startTime,endTime',
+            config: {
+              type: 'datetimerange',
+              'range-separator': '至',
+              'value-format': 'yyyy-MM-dd HH:mm:ss'
+            }
           }
         ]
       }
@@ -247,40 +249,6 @@ export default {
       this.page.currentPage = currentPage
       this.loadData()
     },
-    async handleDelete(data) {
-      let id = null
-      if (Array.isArray(data)) {
-        if (_.some(data, (item) => item.examNum > 0)) {
-          await this.$confirm(
-            '你选择的数据中包含关联试卷数的试题，不能进行删除操作，是否忽略继续删除其它试题？',
-            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-          )
-          id = _.filter(data, (item) => item.examNum <= 0)
-            .map((item) => item.id)
-            .join(',')
-        } else {
-          id = _.map(data, 'id').join(',')
-        }
-      } else {
-        if (data.examNum > 0) {
-          this.$message.warning('您选中试题有正在关联的试卷，请调整后再进行删除！')
-          return
-        }
-        id = data.id
-      }
-      this.$confirm('您确定要删除选中的试题吗？', '', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          delQuestion({ id }).then(() => {
-            this.$refs.table.clearSelection()
-            this.loadData()
-          })
-        })
-        .catch()
-    },
     handleSubmitSearch(params) {
       this.query = { ...this.query, ...params }
       this.loadData()
@@ -298,19 +266,20 @@ export default {
       this.loadData()
     },
     jumpEdit(id) {
-      this.$router.push({ path: '/examManagement/question/questionEdit', query: { id } })
+      this.$router.push({ path: '/creditManagement/creditDetails', query: { id } })
     },
     loadData() {
       this.loading = true
-      getQuestionList({
-        pageNo: this.page.currentPage,
-        pageSize: this.page.size,
+      getListScoreDetails({
+        currentPage: this.page.currentPage,
+        size: this.page.size,
         orgId: this.activeCategory ? this.activeCategory.orgId : null,
+        operType: '1',
         ...this.query
       })
         .then((res) => {
           this.page.total = res.totalNum
-          this.tableData = res.data
+          this.tableData = res.list
         })
         .finally(() => {
           this.loading = false

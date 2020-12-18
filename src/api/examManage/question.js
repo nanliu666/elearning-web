@@ -39,4 +39,4 @@ export const delQuestion = (params) => del('/manage/v1/question', params)
  * 获取试题分类
  * @param {*} params
  */
-export const getQuestionCategory = (params) => get('/manage/v1/evaluation/category/tree', params)
+export const getQuestionCategory = (params) => post('/manage/v1/evaluation/category/tree', params)
