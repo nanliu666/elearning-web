@@ -278,7 +278,7 @@ const EventColumns = [
     itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [],
     prop: 'categoryId',
     label: '考试分类',
@@ -740,7 +740,11 @@ export default {
     }
   },
   created() {
-    getCategoryList().then((res) => {
+    getCategoryList({
+      parentId: 0,
+      type: '0',
+      name: ''
+    }).then((res) => {
       let categoryId = _.filter(this.columns, (item) => {
         return item.prop === 'categoryId'
       })[0]

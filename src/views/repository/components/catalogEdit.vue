@@ -21,6 +21,7 @@
       >
         <el-input
           v-model.trim="form.name"
+          maxlength="32"
           placeholder="请输入"
         />
       </el-form-item>
@@ -49,7 +50,10 @@
               />
             </el-option>
           </el-select>
-          <div class="select-tips">
+          <div
+            v-if="type !== 'createChild'"
+            class="select-tips"
+          >
             可通过选择上级分类为其构建子分类
           </div>
         </el-col>
@@ -227,6 +231,7 @@ export default {
         Department: false,
         Group: false
       }
+      this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {

@@ -219,7 +219,6 @@ export default {
           }
         }
       },
-      parentOrgIdLabel: '',
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
         parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
@@ -322,7 +321,6 @@ export default {
             this.form = { orgType: '' }
             this.$refs.ruleForm.clearValidate()
             this.loadOrgTree()
-            this.parentOrgIdLabel = ''
             this.$emit('refresh')
             this.$nextTick(() => {
               this.$refs.ruleForm.clearValidate(...arguments)
@@ -363,7 +361,6 @@ export default {
     },
     create() {
       this.type = 'create'
-      this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
       this.$nextTick(() => {
@@ -374,7 +371,6 @@ export default {
       await this.loadOrgTree()
       this.type = 'createChild'
       this.handleOrgNodeClick(row)
-      this.form = _.cloneDeep(row)
       this.form.leaders = _.map(this.form.leaders, 'userId')
       this.form.parentOrgId = row.id
       this.form.parentOrgType = row.orgType
@@ -384,7 +380,6 @@ export default {
       await this.loadOrgTree()
       this.type = 'edit'
       this.form = JSON.parse(JSON.stringify(row))
-      this.parentOrgIdLabel = this.findOrg(row.parentOrgId).orgName
       this.form.parentOrgType = this.findOrg(row.parentOrgId).orgType
       this.form.leaders = _.map(this.form.leaders, 'userId')
       this.$emit('changevisible', true)
@@ -412,7 +407,6 @@ export default {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.form.parentOrgId = data.orgId
-        this.parentOrgIdLabel = data.orgName
         this.form.parentOrgType = data.orgType
         if (this.type !== 'createChild') this.$refs.parentOrgId && this.$refs.parentOrgId.blur()
       }
