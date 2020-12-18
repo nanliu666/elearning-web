@@ -4,19 +4,16 @@
     @click="goWork"
   >
     <!-- <img :src="JSON.parse(tenantContent).logo || logo" /> -->
-    <img :src="logo" />
+    <img src="../../assets/images/logo_white.png" />
   </div>
 </template>
 
 <script>
-import defaultLogoImg from '../../assets/images/logo_icon.svg'
 import { mapGetters } from 'vuex'
 export default {
   name: 'Logo',
   data() {
-    return {
-      logo: defaultLogoImg
-    }
+    return {}
   },
   computed: {
     ...mapGetters(['website', 'keyCollapse', 'tenantContent'])

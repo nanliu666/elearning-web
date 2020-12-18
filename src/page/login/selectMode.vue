@@ -1,7 +1,7 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <img src="../../assets/images/logo.svg" />
+      <img src="../../assets/images/logo.png" />
     </div>
     <page-header
       style="padding-left:32px"

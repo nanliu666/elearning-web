@@ -8,7 +8,7 @@
       <div class="nav flex flex-flow ">
         <div class="LOGO">
           <img
-            src="../../assets/images/logo.svg"
+            src="../../assets/images/logo.png"
             alt=""
           />
         </div>
@@ -21,19 +21,17 @@
       <div class="container ">
         <div class="containers flex flex-flow">
           <!--左边-->
-          <div class="img flex flexcenter flex-flow-column">
+          <div class="img ">
             <img
               class="bg"
               src="../../assets/images/welcome.png"
               alt=""
             />
-            <div>
-              <img
-                class="welcome_logo"
-                src="../../assets/images/logo_icon.svg"
-                alt=""
-              />
-            </div>
+            <img
+              class="welcome_logo"
+              src="../../assets/images/logo_white.png"
+              alt=""
+            />
             <div>
               <img
                 class="welcome_welcome"
@@ -140,11 +138,8 @@ export default {
   .nav {
     height: 32px;
     align-items: center;
-    .LOGO {
-      /*width: 150px;*/
-      height: 32px;
-    }
     .title {
+      margin-left: 12px;
       font-size: 16px;
       color: #000b15;
       text-align: center;
@@ -167,7 +162,9 @@ export default {
     .img {
       width: 50%;
       height: 63vh;
-
+      display: flex;
+      align-items: center;
+      flex-direction: column;
       position: relative;
       z-index: 99;
       img.bg {
@@ -178,9 +175,7 @@ export default {
         height: 100%;
       }
       .welcome_logo {
-        height: 40px;
-        top: -94px;
-        position: relative;
+        margin: 40px;
       }
       .welcome_welcome {
         width: 377px;
