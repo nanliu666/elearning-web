@@ -278,7 +278,7 @@ const EventColumns = [
     itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [],
     prop: 'categoryId',
     label: '考试分类',
