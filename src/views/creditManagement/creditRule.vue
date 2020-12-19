@@ -279,19 +279,27 @@ export default {
      * @params row 规则数据
      * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let params = {
-          id: row.id_str
-        }
-        deleteCredit(params).then(() => {
-          this.$message.success('删除成功')
-          this.loadTableData()
+      if (row.status == 0) {
+        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let params = {
+            id: row.id_str
+          }
+          deleteCredit(params).then(() => {
+            this.$message.success('删除成功')
+            this.loadTableData()
+          })
         })
-      })
+      } else {
+        this.$confirm('该学分规则处于启用状态，请停用后删除。？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      }
     },
     /**
      * @author guanfenda
