@@ -113,7 +113,7 @@
       <ruleDialog
         v-if="visible"
         :visible.sync="visible"
-        :row="row"
+        :row.sync="row"
         @loadData="loadTableData"
       ></ruleDialog>
     </basic-container>
@@ -182,7 +182,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -254,8 +254,11 @@ export default {
      *
      * */
     handleIsStart(row) {
-      let tip = row.status == 0 ? '启用' : '停用'
-      this.$confirm(`您确定要 ${tip} 该条信息吗？`, '提醒', {
+      let text =
+        row.status == 0
+          ? '您确定要启用该学分规则吗？'
+          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+      this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -276,19 +279,27 @@ export default {
      * @params row 规则数据
      * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let params = {
-          id: row.id_str
-        }
-        deleteCredit(params).then(() => {
-          this.$message.success('删除成功')
-          this.loadTableData()
+      if (row.status == 0) {
+        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let params = {
+            id: row.id_str
+          }
+          deleteCredit(params).then(() => {
+            this.$message.success('删除成功')
+            this.loadTableData()
+          })
         })
-      })
+      } else {
+        this.$confirm('该学分规则处于启用状态，请停用后删除。？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      }
     },
     /**
      * @author guanfenda
@@ -428,7 +439,9 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;

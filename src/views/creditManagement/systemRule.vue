@@ -131,7 +131,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -156,7 +156,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'search',
+            field: 'sys_rule_source',
             label: '',
             data: '',
             options: [],
@@ -180,8 +180,11 @@ export default {
      * @params row 规则数据
      * */
     handleIsStart(row) {
-      let tip = row.status == 0 ? '启用' : '停用'
-      this.$confirm(`您确定要 ${tip} 该条信息吗？`, '提醒', {
+      let text =
+        row.status == 0
+          ? '您确定要启用该学分规则吗？'
+          : '您确定要停用该学分规则来源吗？停用后，该学分规则来源将暂停使用。'
+      this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -190,7 +193,7 @@ export default {
           id: row.id,
           status: row.status == 0 ? '1' : '0'
         }
-        putEditSysRulus(params).then(() => {
+        putEditSysRulus(Object.assign(params, this.searchParams)).then(() => {
           this.$message.success('修改成功')
           this.loadTableData()
         })
@@ -227,7 +230,6 @@ export default {
      * */
     handleSearch(params) {
       this.searchParams = params
-      this.page.currentPage = 1
       this.loadTableData()
     }
   }
@@ -314,6 +316,9 @@ export default {
   display: none;
 }
 
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
