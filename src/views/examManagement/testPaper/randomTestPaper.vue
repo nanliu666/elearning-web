@@ -238,16 +238,18 @@ const BASE_COLUMNS = [
     precision: 1,
     step: 0.1,
     maxlength: 32,
+    required: false,
     span: 11,
     label: '计划总分'
   },
   {
     prop: 'isScore',
     itemType: 'radio',
+    type: 'radio',
     label: '是否折算成计划分数',
     span: 11,
     offset: 2,
-    required: false,
+    required: true,
     options: [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
@@ -349,6 +351,16 @@ export default {
   },
   data() {
     return {
+      form: {
+        name: '',
+        categoryId: '',
+        expiredTime: '',
+        totalScore: '',
+        remark: '',
+        isScore: '',
+        isShowScore: '',
+        isMulti: ''
+      },
       loading: false,
       column: {
         page: {
@@ -406,8 +418,7 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      columns: BASE_COLUMNS,
-      form: {}
+      columns: BASE_COLUMNS
     }
   },
   watch: {
@@ -426,16 +437,34 @@ export default {
      * */
     'form.totalScore'() {
       this.questionChange()
+    },
+    'form.isScore'() {
+      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      if (this.form.isScore) {
+        totalScore.required = true
+      } else {
+        totalScore.required = false
+      }
     }
   },
   mounted() {},
   activated() {
-    this.form = {}
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: '',
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
     this.tableData = []
     this.options = []
     this.valid = false
     this.TotalScore = ''
     this.score = ''
+    this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
@@ -483,9 +512,33 @@ export default {
         type: '0',
         relateType: relateType
       }
-      getcategoryTree(params).then((res) => {
+      getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
-        column.props.treeParams.data = res
+
+        let children = await this.getNoCategory(relateType)
+        column.props.treeParams.data = [{ id: 0, name: '未分类', children }, ...res]
+      })
+    },
+    /***
+     * @author guanfendca
+     * @desc 获取未分类
+     *
+     * */
+    getNoCategory(relateType) {
+      let params = {
+        type: '0',
+        parentId: '-110',
+        relateType: relateType
+      }
+
+      return new Promise((resolve, reject) => {
+        getcategoryTree(params)
+          .then((res) => {
+            resolve(res)
+          })
+          .finally(() => {
+            reject()
+          })
       })
     },
     /**
@@ -610,7 +663,7 @@ export default {
      * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
      * */
     questionChange() {
-      let scoreList = _.compact(this.tableData.map((it) => it.score))
+      let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
       scoreList.length === 0 && (this.score = this.form.totalScore)
       scoreList.length &&
         (this.TotalScore = scoreList.reduce((prev, cur) => {
@@ -629,6 +682,7 @@ export default {
       }, 0)
       let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
       row.questionNum = random(1, row.totalQuestionNum)
+      this.questionChange()
     },
     /**
      * @author guanfenda

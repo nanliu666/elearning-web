@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.is ? '编辑学分规则' : '新建学分规则'"
+    :title="form.id ? '编辑学分规则' : '新建学分规则'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -154,7 +154,7 @@ export default {
         prop: 'dayLimit',
         itemType: 'inputNumber',
         min: 0,
-        precision: 1,
+        precision: 0,
         step: 1,
         maxlength: 32,
         label: '每日上限',
@@ -205,6 +205,7 @@ export default {
     roleVisible: {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
+        this.$emit('update:row', {})
       }
     }
   },

@@ -113,7 +113,7 @@
       <ruleDialog
         v-if="visible"
         :visible.sync="visible"
-        :row="row"
+        :row.sync="row"
         @loadData="loadTableData"
       ></ruleDialog>
     </basic-container>
@@ -254,8 +254,11 @@ export default {
      *
      * */
     handleIsStart(row) {
-      let tip = row.status == 0 ? '启用' : '停用'
-      this.$confirm(`您确定要 ${tip} 该条信息吗？`, '提醒', {
+      let text =
+        row.status == 0
+          ? '您确定要启用该学分规则吗？'
+          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+      this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -428,7 +431,9 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;

@@ -422,7 +422,9 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
