@@ -112,7 +112,7 @@
               v-else
               size="medium"
               type="text"
-              @click.stop="() => handleMenuUnable(row)"
+              @click.stop="() => handleMenuEnable(row)"
             >
               启用
             </el-button>
@@ -217,7 +217,6 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-
 export default {
   name: 'Menu',
   components: {
@@ -280,23 +279,25 @@ export default {
       let searchParams = { clientId: this.clientTypeList[Number(key)].type }
       this.handleSearch(searchParams)
     },
+    // 启用停用按钮
     handleMenuEnable(row) {
       let type = row.menuType === 'Button' ? '按钮' : '菜单'
-      this.$confirm(`您确定要停用该${type}吗停用后，该${type}将不能出现在系统中`, {
+      const TEXT =
+        row.isEnabled === 1
+          ? `您确定要停用该${type}吗停用后，该${type}将不能出现在系统中`
+          : `您确定要启用该${type}吗`
+      this.$confirm(TEXT, {
         type: 'warning'
       }).then(() => {
-        putMenuInfo({ isEnabled: 0, menuId: row.menuId }).then(() => {
+        putMenuInfo({ isEnabled: row.isEnabled === 1 ? 0 : 1, menuId: row.menuId }).then(() => {
           this.refreshTableData()
-        })
-      })
-    },
-    handleMenuUnable(row) {
-      let type = row.menuType === 'Button' ? '按钮' : '菜单'
-      this.$confirm(`您确定要启用该${type}吗`, {
-        type: 'warning'
-      }).then(() => {
-        putMenuInfo({ isEnabled: 1, menuId: row.menuId }).then(() => {
-          this.refreshTableData()
+          if (this.activeIndex === '2') {
+            this.$nextTick(() => {
+              this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId).then((menu) => {
+                this.$router.$avueRouter.formatRoutes(menu, true)
+              })
+            })
+          }
         })
       })
     },

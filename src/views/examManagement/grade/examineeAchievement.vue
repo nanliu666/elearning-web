@@ -326,13 +326,13 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getExamineeAchievement(_.assign(params, this.page, { id: this.$route.query.id })).then(
-          (res) => {
-            this.tableData = res.data
-            this.page.total = res.totalNum
-            this.tableLoading = false
-          }
-        )
+        getExamineeAchievement(
+          _.assign(params, this.page, { pageNo: this.page.currentPage, id: this.$route.query.id })
+        ).then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+          this.tableLoading = false
+        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -342,6 +342,7 @@ export default {
     // 搜索
     handleSearch(params) {
       this.searchParams = params
+      this.page.currentPage = 1
       this.loadTableData()
     }
   }

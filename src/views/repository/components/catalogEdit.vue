@@ -21,6 +21,7 @@
       >
         <el-input
           v-model.trim="form.name"
+          maxlength="32"
           placeholder="请输入"
         />
       </el-form-item>
@@ -49,7 +50,10 @@
               />
             </el-option>
           </el-select>
-          <div class="select-tips">
+          <div
+            v-if="type !== 'createChild'"
+            class="select-tips"
+          >
             可通过选择上级分类为其构建子分类
           </div>
         </el-col>
@@ -127,8 +131,20 @@ export default {
         this.orgTree = res
       })
     },
+    checkSameName() {
+      let target = this.findOrg(this.form.parentId)
+      let temp = _.isEmpty(target) ? this.orgTree : target.children
+      let hasSameName = _.some(temp, (child) => {
+        return child.name === this.form.name
+      })
+      if (hasSameName) {
+        this.$message.error('该分类已存在')
+      }
+      return hasSameName
+    },
     // 提交
     submit(type) {
+      if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -141,7 +157,6 @@ export default {
                 if (type === 'add') {
                   this.$emit('refresh')
                 } else {
-                  // TODO: 需要后端补充分类id
                   this.$router.push({
                     path: '/repository/knowledgeEdit',
                     query: { catalogId: res.id }
@@ -216,6 +231,7 @@ export default {
         Department: false,
         Group: false
       }
+      this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {

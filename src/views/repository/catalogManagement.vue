@@ -169,7 +169,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: true, // TODO：树无法做批量选择
   handlerColumn: {
     minWidth: 100
   }
@@ -286,14 +286,13 @@ export default {
     deleteFun(id) {
       deleteKnowledgeCatalog({ id }).then(() => {
         this.loadTableData()
+        this.$refs.table.clearSelection()
         this.$message({
           type: 'success',
           message: '删除成功!'
         })
       })
     },
-    // 删除检测
-    deleteCheck() {},
     // 单个删除
     handleDelete(row) {
       let hasChildren = !_.isEmpty(row.children)
@@ -311,11 +310,18 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
-      let selectedIds = []
-      _.each(selected, (item) => {
-        selectedIds.push(item.id)
+      let someOneHasChilren = _.some(selected, (row) => {
+        return !_.isEmpty(row.children)
       })
-      this.deleteFun(selectedIds.join(','))
+      if (someOneHasChilren) {
+        this.$message.error('很抱歉，您选中的分类下存在子分类，请先将子分类调整后再删除!')
+      } else {
+        let selectedIds = []
+        _.each(selected, (item) => {
+          selectedIds.push(item.id)
+        })
+        this.deleteFun(selectedIds.join(','))
+      }
     },
     // 加载函数
     async loadTableData() {

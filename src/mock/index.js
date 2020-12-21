@@ -28,6 +28,7 @@ import user from './modules/user'
 import knowledge from './modules/knowledge'
 import questions from './modules/examManage/question'
 import achievement from './modules/achievement'
+import credit from './modules/credit'
 /**
  * @param {boolean} enable 全局启用mock
  * @returns {void}
@@ -46,6 +47,7 @@ export default (enable) => {
     timeout: 500
   })
   menu({ mock: true })
+  credit({ mock: true })
   questions({ mock: false })
   achievement({ mock: false })
   knowledge(options)

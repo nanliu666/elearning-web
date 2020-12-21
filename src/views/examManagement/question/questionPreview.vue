@@ -31,7 +31,7 @@
       >
         <div class="wrap">
           <el-radio
-            v-if="QUESTION_TYPE_SINGLE === data.type"
+            v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_JUDGE].includes(data.type)"
             :value="option.isCorrect"
             :label="1"
             :disabled="true"
@@ -42,6 +42,7 @@
             v-if="QUESTION_TYPE_MULTIPLE === data.type"
             :value="option.isCorrect"
             :true-label="1"
+            :false-label="0"
             :disabled="true"
           >
             {{ '' }}

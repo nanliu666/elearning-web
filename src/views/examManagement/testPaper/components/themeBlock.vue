@@ -24,13 +24,23 @@
             class="add"
             @click="handleAddTheme"
           >
-            添加试题
+            <el-button
+              size="mini"
+              type="text"
+              style="font-size: 14px"
+            >
+              添加试题
+            </el-button>
           </div>
-          <div
-            :class="[length === 1 ? 'delete' : 'add']"
-            @click="handleDeleteBlock"
-          >
-            删除试题
+          <div @click="handleDeleteBlock">
+            <el-button
+              size="mini"
+              type="text"
+              :class="[length === 1 ? 'delete' : 'add']"
+              :disabled="length < 2"
+            >
+              删除试题
+            </el-button>
           </div>
         </div>
       </div>
@@ -51,13 +61,14 @@
           :data="tableData"
         >
           <template #score="{row}">
-            <el-input
+            <el-input-number
               v-model="row.score"
-              placeholder="请输入内容"
-              type="Number"
+              controls-position="right"
+              :min="0"
+              :step="1"
+              :precision="1"
               @change="scoreChange($event, row)"
-            >
-            </el-input>
+            />
             <div
               v-if="valid && !row.score"
               class="valid"
@@ -89,6 +100,7 @@
         <stemContent
           v-if="visible"
           v-model="stemList"
+          :data="tableData"
           :type="form.type"
           :visible.sync="visible"
           :title="'添加' + title"
@@ -123,7 +135,7 @@ const TABLE_COLUMNS = [
     label: '分数',
     prop: 'score',
     slot: true,
-    minWidth: 120
+    minWidth: 150
   },
   {
     label: '答题限时',
@@ -291,8 +303,8 @@ export default {
           content: it.content,
           type: it.type,
           questionId: it.id,
-          score: it.score || '0',
-          Original: it.score || '0',
+          score: it.score || undefined,
+          Original: it.score || undefined,
           timeLimit: it.timeLimit ? it.timeLimit : '0'
         }))
         this.countScore()
@@ -300,25 +312,11 @@ export default {
       deep: true
     },
     totalScore() {
-      let block = {
-        key: this.blockData.key || this.blockData.id,
-        type: this.form.type,
-        title: this.form.title,
-        tableData: this.tableData,
-        totalScore: this.totalScore
-      }
-      this.$emit('update', _.cloneDeep(block))
+      this.newData()
     },
     form: {
       handler() {
-        let block = {
-          key: this.blockData.key,
-          type: this.form.type,
-          title: this.form.title,
-          tableData: this.tableData,
-          totalScore: this.totalScore
-        }
-        this.$emit('update', block)
+        this.newData()
       },
       deep: true
     }
@@ -329,13 +327,33 @@ export default {
       this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
   },
+  activated() {
+    this.form = {
+      type: 'single_choice',
+      title: ''
+    }
+    this.typeList = []
+    this.tableData = []
+    for (let key in QUESTION_TYPE_MAP) {
+      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
+    }
+  },
   methods: {
+    /**
+     *  @author guenfenda
+     *  @desc 计算分数
+     *
+     * */
     countScore() {
       let scoreList = _.compact(this.tableData.map((it) => it.score))
       this.totalScore = scoreList.reduce((prev, cur) => {
         return Number(prev) + Number(cur)
       }, 0)
     },
+    /**
+     *@author guanfenda
+     * @desc 试题类型修改如果提交了试题，要给提示，并删除之前添加的试题
+     **/
     visibleChange(data) {
       if (!data) return
       this.$nextTick(() => {
@@ -356,20 +374,54 @@ export default {
         }, 300)
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 弹出试题选择框
+     * */
     handleAddTheme() {
       this.visible = true
-      this.title = '单选题'
+      this.title = ''
     },
+    /**
+     * @author guanfenda
+     * @Desc 删除大题
+     * */
     handleDeleteBlock() {
-      this.$emit('delete', this.blockData)
+      let block = {
+        key: this.blockData.key,
+        type: this.form.type,
+        title: this.form.title,
+        tableData: this.tableData,
+        totalScore: this.totalScore
+      }
+      this.$emit('delete', block)
     },
-
+    /***
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => {
         if (it.id && row.id !== it.id) return true
         if (it.key && row.key !== it.key) return true
       })
+      this.newData()
     },
+    newData() {
+      let block = {
+        key: this.blockData.key || this.blockData.id,
+        type: this.form.type,
+        title: this.form.title,
+        tableData: this.tableData,
+        totalScore: this.totalScore
+      }
+      this.$emit('update', _.cloneDeep(block))
+    },
+    /***
+     * @author guanfenda
+     * @desc 下移
+     * */
     handleDown(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
       let newData = _.cloneDeep(row)
@@ -381,6 +433,10 @@ export default {
         this.tableData.splice(i + 1, 0, newData)
       }
     },
+    /***
+     * @author guanfenda
+     * @desc 上移
+     * */
     handleUp(row) {
       let i = this.tableData.map((it) => it.id).indexOf(row.id)
       let newData = _.cloneDeep(row)
@@ -392,8 +448,13 @@ export default {
         this.tableData.splice(i - 1, 0, newData)
       }
     },
+    /**
+     * @author guanfenda
+     * @desc 提示分数修改
+     *
+     * */
     scoreChange(val, row) {
-      if (row.Original != val) {
+      if (row.Original != val && row.Original) {
         this.$confirm(
           '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
           '提示',
@@ -438,7 +499,7 @@ label {
   font-size: 14px;
   color: #01aafc;
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }
@@ -446,7 +507,7 @@ label {
   font-size: 14px;
   color: rgba(0, 11, 21, 0.25);
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }

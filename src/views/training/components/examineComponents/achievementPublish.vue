@@ -17,7 +17,7 @@
       >
         <template #passType>
           <el-radio-group v-model="model.passType">
-            <achivementRadioInput
+            <condition-radio-input
               v-model="model.passType"
               label-text="按成绩"
               text-before="成绩不低于"
@@ -27,8 +27,8 @@
               :number.sync="passCondition[0].passScope"
               :pass-scope="model.passScope"
               :input-props="{ maxLength: 4 }"
-            ></achivementRadioInput>
-            <achivementRadioInput
+            />
+            <condition-radio-input
               v-model="model.passType"
               label-text="按得分率"
               text-before="得分率不低于"
@@ -37,7 +37,7 @@
               :default-value="passCondition[1].passType"
               :number.sync="passCondition[1].passScope"
               :input-props="{ maxLength: 4 }"
-            ></achivementRadioInput>
+            />
           </el-radio-group>
         </template>
       </common-form>
@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
+import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 const defaultValue = {
   id: '',
   passType: 1,
@@ -58,7 +58,7 @@ const defaultValue = {
 export default {
   name: 'AchievementPublish',
   components: {
-    achivementRadioInput
+    ConditionRadioInput
   },
   data() {
     return {

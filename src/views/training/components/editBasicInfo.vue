@@ -35,10 +35,20 @@
 import lazySelect from '@/components/lazy-select/lazySelect'
 import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
+import { mapGetters } from 'vuex'
 const personOptionProps = {
   label: 'name',
   value: 'name',
   key: 'userId'
+}
+const addressConfig = {
+  itemType: 'input',
+  label: '培训地点',
+  prop: 'address',
+  maxlength: 32,
+  required: false,
+  span: 11,
+  offset: 0
 }
 export default {
   name: 'EditBasicInfo',
@@ -62,6 +72,7 @@ export default {
           prop: 'trainName',
           required: true,
           span: 11,
+          maxlength: 32,
           offset: 0
         },
         {
@@ -145,18 +156,11 @@ export default {
           offset: 2
         },
         {
-          itemType: 'input',
-          label: '培训地点',
-          prop: 'address',
-          required: false,
-          span: 11,
-          offset: 0
-        },
-        {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
           options: [],
+          maxlength: 32,
           required: true,
           span: 11,
           offset: 2
@@ -188,6 +192,7 @@ export default {
           itemType: 'input',
           label: '主办单位',
           prop: 'sponsor',
+          maxlength: 32,
           required: true,
           span: 11,
           offset: 2
@@ -196,6 +201,7 @@ export default {
           itemType: 'input',
           label: '承办单位',
           prop: 'organizer',
+          maxlength: 32,
           required: false,
           span: 11,
           offset: 0
@@ -226,22 +232,52 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters(['userInfo'])
+  },
   watch: {
-    'formData.trainWay': {
+    'formData.people': {
       handler(val) {
-        this.$emit('changeWay', val)
+        this.formData.people = Math.abs(val)
       },
       deep: true,
       immediate: true
     },
-    'formData.categoryId': {
+    'formData.trainWay': {
       handler(val) {
-        this.formData.categoryId = _.isNumber(val) ? val : Number(val)
+        this.$emit('changeWay', val)
+        let adressIndex = _.findIndex(this.infoFormColumns, (item) => {
+          return item.prop === 'address'
+        })
+        let trainWayIndex = _.findIndex(this.infoFormColumns, (item) => {
+          return item.prop === 'trainWay'
+        })
+
+        if (val === 1) {
+          if (adressIndex !== -1) {
+            this.infoFormColumns.splice(adressIndex, 1)
+          }
+        } else {
+          if (adressIndex === -1) {
+            this.infoFormColumns.splice(trainWayIndex + 1, 0, addressConfig)
+          }
+        }
+        let contactNameIndex = _.findIndex(this.infoFormColumns, (item) => {
+          return item.prop === 'contactName'
+        })
+        _.each(this.infoFormColumns, (item, index) => {
+          if (index >= contactNameIndex && index < this.infoFormColumns.length - 1) {
+            item.offset = index % 2 == 0 ? 0 : 2
+          }
+        })
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   mounted() {
+    this.formData.contactName = this.userInfo.nick_name
+    this.formData.contactPhone = this.userInfo.account
     this.getCatalogs()
   },
   methods: {
@@ -270,7 +306,7 @@ export default {
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     }
   }
 }

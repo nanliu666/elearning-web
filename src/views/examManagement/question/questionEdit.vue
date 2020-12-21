@@ -69,6 +69,22 @@
               >（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）</span>
             </template>
             <template
+              v-else
+              #content-label=""
+            >
+              选项
+              <el-tooltip
+                class="item"
+                effect="dark"
+                placement="top-start"
+              >
+                <div slot="content">
+                  支持上传png、jpg、jpeg格式文件，单个文件大小＜5MB，最多5个文件
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
+            <template
               v-if="form.type === QUESTION_TYPE_BLANK"
               #answer-label=""
             >
@@ -115,6 +131,7 @@
                   />
                 </template>
                 <div
+                  v-if="form.subQuestions.length < 20"
                   class="sub-questions__add"
                   @click="handleAddSub"
                 >
@@ -134,6 +151,7 @@
             </el-button>
             <!-- @click="handleSubmit(true)" -->
             <el-button
+              v-if="!id"
               v-loading="submitingAndContinue"
               size="medium"
               style="margin-left:16px;"
@@ -379,8 +397,26 @@ export default {
         /**
          * 根据试题类型切换表单内容
          */
-        if ([QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(val)) {
+        if (val === QUESTION_TYPE_SINGLE) {
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
+        } else if (QUESTION_TYPE_MULTIPLE === val) {
+          const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
+          _SELECT_COLUMNS[2].rules = [
+            {
+              validator: (rule, value, callback) => {
+                if (_.some(value, (item) => !item.content && !item.url)) {
+                  return callback(new Error('选项内容请填写完整'))
+                } else if (!_.some(value, { isCorrect: 1 })) {
+                  return callback(new Error('请设置正确选项'))
+                } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
+                  return callback(new Error('多选题请最少选择两个正确答案'))
+                }
+                callback()
+              },
+              trigger: 'change'
+            }
+          ]
+          this.columns = [...BASIC_COLUMNS, ..._SELECT_COLUMNS]
         } else if (val === QUESTION_TYPE_JUDGE) {
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
           this.form.options = [
@@ -480,7 +516,6 @@ export default {
           'categoryId',
           'score',
           'difficulty',
-          'content',
           'analysis',
           'options',
           'expiredTime',
@@ -490,6 +525,7 @@ export default {
         if (data.score) {
           data.score = parseInt(data.score * 10)
         }
+        data.content = _.escape(this.form.content)
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
         if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
           data.options = [{ content: this.form.answer, isCorrect: 1 }]
@@ -548,6 +584,7 @@ export default {
             new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
           )
           this.form.score = res.score ? res.score / 10 : res.score
+          this.form.content = _.unescape(res.content)
           this.form.options.forEach((option) => {
             option.key = createUniqueID()
             if (option.url) {

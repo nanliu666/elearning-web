@@ -188,3 +188,7 @@ table tr {
 .is-success .el-input-number__increase {
   right: 1px !important;
 }
+
+.el-tree-node.is-current > .el-tree-node__content {
+  background-color: #f2f5f7;
+}

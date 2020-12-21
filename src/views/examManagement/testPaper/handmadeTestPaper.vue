@@ -7,7 +7,10 @@
       title="新建手工试卷"
       show-back
     />
-    <basic-container block>
+    <basic-container
+      v-loading="loading"
+      block
+    >
       <div class="content">
         <div class="title">
           基础信息
@@ -56,7 +59,7 @@
               type="primary"
               @click="handleAddType"
             >
-              添加体型
+              添加题型
             </el-button>
           </div>
         </div>
@@ -138,15 +141,13 @@ const BASE_COLUMNS = [
   },
   {
     prop: 'totalScore',
-    itemType: 'input',
+    itemType: 'inputNumber',
+    min: 0,
+    precision: 1,
+    step: 0.1,
     maxlength: 32,
-    label: '计划总分',
     span: 11,
-    type: 'Number',
-    required: false,
-    props: {
-      onlyNumber: true
-    }
+    label: '计划总分'
   },
   {
     prop: 'isScore',
@@ -206,6 +207,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       valid: false,
       columns: BASE_COLUMNS,
       TotalScore: '',
@@ -216,18 +218,45 @@ export default {
         key: 1,
         type: '',
         title: '',
-        tableData: '',
+        tableData: [],
         totalScore: ''
       },
       testPaper: []
     }
   },
-  mounted() {
+  watch: {
+    /***
+     * @author guanfenda
+     * @desc 修改了试题设置，修改分数重新计算剩余分数
+     * */
+    TotalScore(val) {
+      if (this.form.totalScore) {
+        this.score = this.form.totalScore - val
+      }
+    },
+    /**
+     * @author guanfenda
+     * @desc 如果改变了计划分数 重新计算剩余分数
+     * */
+    'form.totalScore'() {
+      this.count()
+    }
+  },
+  mounted() {},
+  activated() {
+    this.form = {}
+    this.testPaper = []
+    this.TotalScore = ''
+    this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
     this.getTestPaperCategory()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 获取试卷分类
+     * */
     getTestPaperCategory() {
       let params = {
         type: '1'
@@ -236,59 +265,84 @@ export default {
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试卷详情
+     * */
     getData() {
       if (!this.$route.query.id) return
       let params = {
         id: this.$route.query.id
       }
-      getTestPaper(params).then((res) => {
-        let {
-          id,
-          expiredTime,
-          categoryId,
-          totalScore,
-          remark,
-          name,
-          isScore,
-          isShowScore,
-          manualSettings,
-          isMulti
-        } = res
-        totalScore = totalScore / 10
-        this.form = {
-          id,
-          name,
-          categoryId,
-          expiredTime,
-          totalScore,
-          remark,
-          isScore,
-          isShowScore,
-          isMulti
-        }
-        manualSettings = manualSettings.map((it) => ({ ...it, score: it.score / 10 }))
-        const list = _.groupBy(manualSettings, (it) => it.parentSort)
-        this.testPaper = []
-        for (let key in list) {
-          this.testPaper.push({
-            type: list[key][0].type,
-            title: list[key][0].title,
-            key: list[key][0].id,
-            tableData: list[key]
-          })
-        }
-      })
+      this.loading = true
+      getTestPaper(params)
+        .then((res) => {
+          let {
+            id,
+            expiredTime,
+            categoryId,
+            totalScore,
+            remark,
+            name,
+            isScore,
+            isShowScore,
+            manualSettings,
+            isMulti
+          } = res
+          totalScore = totalScore / 10
+          this.form = {
+            id,
+            name,
+            categoryId,
+            expiredTime,
+            totalScore,
+            remark,
+            isScore,
+            isShowScore,
+            isMulti
+          }
+          manualSettings = manualSettings.map((it) => ({
+            ...it,
+            score: it.score / 10,
+            Original: it.score / 10
+          }))
+          const list = _.groupBy(manualSettings, (it) => it.parentSort)
+          this.testPaper = []
+          for (let key in list) {
+            this.testPaper.push({
+              type: list[key][0].type,
+              title: list[key][0].title,
+              key: list[key][0].id,
+              tableData: list[key]
+            })
+          }
+          this.count()
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
+    /**
+     * @author guenfenda
+     * @desc 提交试卷（添加或者修改）
+     *
+     * */
     onSubmit() {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-
-        if (
-          this.testPaper.filter((it) => it.tableData.filter((item) => !item.score).length).length >
-          0
+        let list = this.testPaper.filter(
+          (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
         )
+        if (list.length > 0) {
+          let text = ''
+          list[0].tableData.length == 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+          list[0].tableData.length !== 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+          this.$message.warning(text)
           return
+        }
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
 
@@ -315,17 +369,37 @@ export default {
           manualSettings: manualSettings,
           type: 'manual'
         }
-        testPaperMether(params).then(() => {
-          this.$message.success('提交成功')
-          this.handleBack()
-        })
+        this.loading = true
+        testPaperMether(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.handleBack()
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 双向数据绑定（因为for的对象它是引用类型，所以不能通过v-modle，或者$emit('update')，重新指定引用方向）
+     * */
     update(data) {
       this.testPaper.map((it) => {
         it.key === data.key && (it = Object.assign(it, data))
       })
-      let scoreList = _.compact(this.testPaper.map((it) => it.tableData.map((item) => item.score)))
+      this.count()
+    },
+    /**
+     * @author guanfenda
+     * @desc 计算剩余分数，和当前总分数
+     * */
+    count() {
+      let scoreList = _.compact(
+        this.testPaper.map(
+          (it) => it.tableData && it.tableData.length > 0 && it.tableData.map((item) => item.score)
+        )
+      )
       let list = []
       scoreList.map((it) => {
         list.push(...it)
@@ -337,15 +411,29 @@ export default {
         }, 0))
       this.score = this.form.totalScore - this.TotalScore
     },
+    /**
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDeleteBlock(data) {
-      this.$confirm('您确定要删除选中的题型吗', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.testPaper = this.testPaper.filter((it) => it.id !== data.id)
-      })
+      if (this.testPaper.length > 1) {
+        this.$confirm('您确定要删除选中的题型吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.testPaper = this.testPaper.filter((it) => {
+            return it.key !== data.key
+          })
+        })
+      }
     },
+    /**
+     * @author guanfenda
+     * @desc  添加大题
+     *
+     * */
     handleAddType() {
       this.themeBlock.key += 1
       this.testPaper.push(_.cloneDeep(this.themeBlock))
@@ -354,6 +442,10 @@ export default {
         scroll.scrollTop = scroll.scrollHeight
       })
     },
+    /**
+     * @author guanfendad
+     * @desc 返回
+     * */
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)

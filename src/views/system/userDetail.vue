@@ -118,44 +118,20 @@
           class="user-attachment"
         >
           <div
-            v-for="(item, index) in userData.attachment"
+            v-for="(item, index) in userData.attachments"
             :key="index"
             class="user-attachment__item"
           >
-            <div class="user-attachment__img">
-              <img :src="item.url" />
-              <div class="user-attachment__cover">
-                <div class="user-attachment__cover--column">
-                  <span @click="viewPicture(item)">
-                    <i class="el-icon-view"></i>
-                    预览
-                  </span>
-                </div>
-                <div class="user-attachment__cover--column">
-                  <span>
-                    <a
-                      :href="item.url"
-                      :download="item.name"
-                      target="_blank"
-                    >
-                      <i class="el-icon-download"></i>
-                      下载
-                    </a>
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="user-attachment__text">
-              {{ item.name }}
-            </div>
+            <common-image-view
+              :url="item.url"
+              :file-name="item.name"
+              :preview-src-list="previewSrcList"
+              @downloadFile="downloadFile"
+            />
           </div>
         </el-tab-pane>
       </el-tabs>
     </basic-container>
-    <image-viewer
-      :visible.sync="viewing"
-      :url-list="viewingUrls"
-    />
     <user-role-edit
       ref="userRoleEdit"
       :visible.sync="editVisible"
@@ -167,24 +143,22 @@
 
 <script>
 import { getStaffBasicInfo } from '@/api/personalInfo'
+import CommonImageView from '@/components/common-image-viewer/viewer'
 import { modifyUserStatus, resetPwd, delUser } from '@/api/system/user'
-import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
   name: 'RoleUsers',
   components: {
     // 员工角色编辑
     userRoleEdit: () => import('./components/userRoleEdit'),
-    ImageViewer
+    CommonImageView
   },
   data() {
     return {
+      previewSrcList: [],
       loading: false,
       viewing: false,
-      viewingUrls: [],
       editVisible: false,
-      userData: {
-        attachment: []
-      },
+      userData: {},
       columns: [
         {
           label: '所在部门',
@@ -231,23 +205,23 @@ export default {
       return this.$route.query.userId
     }
   },
-  watch: {},
-  mounted() {},
   activated() {
     this.getData()
   },
   methods: {
+    downloadFile(data) {
+      window.open(data)
+    },
     getData() {
       if (!this.userId) {
         return
       }
       getStaffBasicInfo({ userId: this.userId }).then((res) => {
         this.userData = res
+        _.each(res.attachments, (item) => {
+          this.previewSrcList.push(item.url)
+        })
       })
-    },
-    viewPicture(item) {
-      this.viewingUrls = [item.url]
-      this.viewing = true
     },
     handleEditRole() {
       this.$refs['userRoleEdit'].init(this.userData)
@@ -444,32 +418,11 @@ export default {
   &__item {
     margin: 20px;
     border-radius: 4px;
-    width: 190px;
-    height: 124px;
     &:hover {
       .user-attachment__cover {
         display: flex;
       }
     }
-  }
-  &__img {
-    width: 190px;
-    height: 88px;
-    overflow: hidden;
-    position: relative;
-    img {
-      width: 100%;
-    }
-  }
-
-  &__text {
-    border: 1px solid #e3e7e9;
-    border-top: none;
-    height: 36px;
-    line-height: 34px;
-    padding-left: 6px;
-    background-color: #fbfdff;
-    border-radius: 0px 0px 6px 6px;
   }
 }
 </style>

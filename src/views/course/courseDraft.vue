@@ -2,19 +2,14 @@
   <div class="course">
     <!-- 头部 -->
     <page-header title="课程管理">
-      <el-dropdown slot="rightMenu">
-        <el-button
-          type="primary"
-          size="medium"
-        >
-          新建课程
-        </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item>
-            单个新建
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        type="primary"
+        @click="toEstablishCourse"
+      >
+        创建课程
+      </el-button>
     </page-header>
 
     <!-- Dialog无数据 -->
@@ -23,7 +18,7 @@
       id="isdialog_show"
     >
       <div>如何创建课程：</div>
-      <div>1.先在 <span @click="toCatalog">【课程中心-目录管理】</span> 完善展示的目录配置；</div>
+      <div>1.先在 <span @click="toCatalog">【课程中心-分类管理】</span> 完善展示的分类配置；</div>
       <div>
         2.开始创建课程。
       </div>
@@ -120,7 +115,6 @@
                           class="operations__column--item"
                         >
                           {{ item.label }}
-                          123
                         </el-checkbox>
                       </el-checkbox-group>
                     </div>
@@ -148,14 +142,14 @@
 
             <!-- 课程名称 -->
             <template
-              slot="name"
+              slot="catalogName"
               slot-scope="{ row }"
             >
               <el-button
                 type="text"
                 @click="toTrainDetail(row)"
               >
-                {{ row.name }}
+                {{ row.catalogName }}
               </el-button>
             </template>
             <!-- 课程类型 -->
@@ -187,10 +181,17 @@
             </template>
             <!-- 标签 -->
             <template
-              slot="a"
+              slot="atags"
               slot-scope="{ row }"
             >
-              {{ row }}
+              s
+              <span
+                v-for="(item, index) in row.atags"
+                :key="index"
+                class="atags_icon"
+              >{{
+                item
+              }}</span>
             </template>
             <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
             <template
@@ -200,6 +201,14 @@
               <span v-if="row.isRecommend === 0">否</span>
               <span v-if="row.isRecommend === 1">是</span>
             </template>
+            <!-- // isPutaway	是否上架 (0：下架；1：上架) -->
+            <template
+              slot="isPutaway"
+              slot-scope="{ row }"
+            >
+              <span v-if="row.isPutaway === 0">下架</span>
+              <span v-if="row.isPutaway === 1">上架</span>
+            </template>
 
             <!-- isTop: 0, //是否置顶（0：否；1：是） -->
             <template
@@ -207,7 +216,7 @@
               slot-scope="scope"
             >
               <el-button
-                v-if="scope.row.isTop === 0"
+                v-if="scope.row.isTop === 1"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
@@ -215,7 +224,7 @@
                 &nbsp;&nbsp; 置顶&nbsp;
               </el-button>
               <el-button
-                v-if="scope.row.isTop === 1"
+                v-if="scope.row.isTop === 0"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
@@ -224,7 +233,7 @@
               </el-button>
               <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-button
-                v-if="scope.row.isPutaway === 0"
+                v-if="scope.row.isPutaway === 1"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 1)"
@@ -232,7 +241,7 @@
                 下架
               </el-button>
               <el-button
-                v-if="scope.row.isPutaway === 1"
+                v-if="scope.row.isPutaway === 0"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 0)"
@@ -271,22 +280,18 @@
       title="移动"
       :visible.sync="dialogFormVisible"
       :modal-append-to-body="false"
+      width="30%"
+      style="padding:30px;"
     >
+      <p>所在原类目：Java技能课程/Java初级培训</p>
       <el-form>
-        <el-form-item label="移动到新目录">
-          <el-select
-            v-model="tableData.name"
-            placeholder="请选择"
-          >
-            <el-option
-              label="区域一"
-              value="shanghai"
-            ></el-option>
-            <el-option
-              label="区域二"
-              value="beijing"
-            ></el-option>
-          </el-select>
+        <el-form-item label="移动到新分类">
+          <el-cascader
+            v-model="CourseNameBar"
+            :options="CourseNameBarData"
+            :props="{ value: 'id', label: 'name' }"
+            @change="handleChange"
+          ></el-cascader>
         </el-form-item>
       </el-form>
       <div
@@ -298,7 +303,7 @@
         </el-button>
         <el-button
           type="primary"
-          @click="dialogFormVisible = false"
+          @click="isMoveCourse()"
         >
           确 定
         </el-button>
@@ -308,7 +313,14 @@
 </template>
 
 <script>
-import { getCourseListData, delCourseInfo, editCourseInfo } from '@/api/course/course'
+import {
+  getCourseListData,
+  delCourseInfo,
+  putawayOperate,
+  getCatalog,
+  updateCourseTop,
+  moveCourse
+} from '@/api/course/course'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -318,32 +330,32 @@ const TABLE_COLUMNS = [
     slot: true
   },
   {
-    label: '目录名称',
+    label: '课程名称',
     minWidth: 140,
-    prop: 'name',
+    prop: 'courseName',
     slot: true
   },
   {
     label: '讲师',
-    prop: 'teacherId'
+    prop: 'teacherName'
   },
   {
     label: '状态',
-    prop: 'alias'
+    prop: 'isPutaway',
+    slot: true
   },
   {
-    label: '所在目录',
-    prop: 'catalogId'
+    label: '所在分类',
+    prop: 'catalogName'
   },
   {
     label: '课程类型',
-    prop: 'courseType',
+    prop: 'type',
     slot: true
   },
   {
     label: '通过条件',
     prop: 'passCondition',
-
     slot: true
   },
   {
@@ -354,7 +366,7 @@ const TABLE_COLUMNS = [
 
   {
     label: '标签',
-    prop: 'a',
+    prop: 'atags',
     slot: true
   },
   {
@@ -364,7 +376,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'createName'
+    prop: 'creatorName'
   },
   {
     label: '更新时间',
@@ -387,7 +399,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入目录名称搜索' },
+    config: { placeholder: '请输入课程名称搜索' },
     data: '',
     field: 'courseName',
     label: '',
@@ -398,18 +410,19 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'code',
+    field: 'isPutaway',
     label: '状态',
     type: 'select',
     options: [
-      { value: true, label: '正常' },
-      { value: false, label: '停用' }
+      { value: 0, label: '下架' },
+      { value: 1, label: '上架' },
+      { value: '', label: '全部' }
     ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'teacherId',
+    field: 'teacherName',
     label: '讲师',
     type: 'select',
     options: []
@@ -417,21 +430,21 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'catalogId',
-    label: '所在目录',
+    field: 'catalogName',
+    label: '所在分类',
     type: 'select',
     options: []
   },
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'type',
+    field: 'courseType',
     label: '课程类型',
     type: 'select',
     options: [
-      { value: 1, label: '在线' },
-      { value: 2, label: '面授' },
-      { value: 3, label: '直播' }
+      { value: 1, label: '在线课程' },
+      { value: 2, label: '面授课程' },
+      { value: 3, label: '直播课程' }
     ]
   },
   {
@@ -465,14 +478,14 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '是否推荐',
     type: 'select',
     options: [
-      { value: true, label: '是' },
-      { value: false, label: '否' }
+      { value: 1, label: '是' },
+      { value: 0, label: '否' }
     ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'createId',
+    field: 'creatorName',
     label: '创建人',
     type: 'select',
     options: []
@@ -480,7 +493,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'label',
+    field: 'tags',
     label: '标签',
     type: 'select',
     options: [
@@ -507,6 +520,10 @@ export default {
 
   data() {
     return {
+      // 移动数据
+      CourseNameBarData: [], //显示
+      CourseNameBar: [],
+      moveId: '',
       // 移动dialog
       dialogFormVisible: false,
       // Dialog无数据
@@ -518,8 +535,8 @@ export default {
         name: ''
       },
       page: {
-        currentPage: 1,
-        size: 10,
+        pageNo: 1,
+        pageSize: 10,
         total: 0
       },
 
@@ -542,19 +559,6 @@ export default {
           id: 4,
           type: 2,
           createName: '小红'
-        },
-        {
-          isRecommend: 1, //是否推荐课程（0:否；1：是）
-          passCondition: 'a', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
-          catalogId: 1, //	课程目录id
-          teacherId: 1, //课程讲师id
-          isTop: 0, //是否置顶（0：否；1：是）
-          createId: 1, //创建人账号
-          name: 'aa', //	课程名称
-          electiveType: 1, //选修类型(1:开放选修 2:通过审批 3:禁止选修)
-          id: 1, //	主键id
-          type: 1, //课程类型(1:在线 2:面授 3:直播)
-          createName: '初始用户' //创建人
         }
       ],
       tablePageConfig: TABLE_PAGE_CONFIG
@@ -564,12 +568,39 @@ export default {
     this.refreshTableData()
     // this.loadData()
     this.getInfo()
+    this.isgetCatalog()
   },
   activated() {
     // this.loadData()
     this.getInfo()
   },
   methods: {
+    toEstablishCourse() {
+      this.$router.push({ path: '/course/establishCourse' })
+    },
+    // 移动
+    isMoveCourse() {
+      let params = {
+        catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
+        courseId: this.moveId //课程
+      }
+      moveCourse(params).then(() => {
+        this.dialogFormVisible = false
+      })
+    },
+    // 拿到移动数据
+    isgetCatalog() {
+      getCatalog().then((res) => {
+        // console.log(res)
+        this.CourseNameBarData = res
+      })
+    },
+    // 移动data
+    handleChange() {
+      // console.log(val)
+      // console.log(this.CourseNameBar)
+    },
+
     toTrainDetail() {
       // console.log(row)
       // this.$router.push('')
@@ -577,7 +608,7 @@ export default {
 
     // 上架&下架
     alterIsPutaway(id, i) {
-      // console.log({ id, isPutaway: i })
+      // console.log({ id })
       let lang = ''
       if (i) {
         lang = '您确定要下架该课程吗？下架后，该课程将不能访问。'
@@ -590,7 +621,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          editCourseInfo({ id, isPutaway: i }).then(() => {
+          putawayOperate({ courseIds: [id], choice: i }).then(() => {
             this.$message({
               message: '操作成功',
               type: 'success'
@@ -612,9 +643,8 @@ export default {
     },
     // isTop: 0, //是否置顶（0：否；1：是）
     handleConfig(row, i) {
-      // console.log(({id:row.id,isTop:i}));
-      editCourseInfo({ id: row.id, isTop: i }).then(() => {
-        // console.log(res)
+      // console.log({ courseId: row.id, choice: i })
+      updateCourseTop({ courseId: row.id, choice: i }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -625,7 +655,8 @@ export default {
     // 编辑&删除&移动
     handleCommand(e, row) {
       if (e === 'edit') {
-        // 编辑
+        // 去编辑
+        this.$router.push({ path: '/course/compileCourse?id=' + row.id })
       }
       if (e === 'del') {
         // 删除
@@ -635,11 +666,12 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            delCourseInfo({ courseId: row.catalogId }).then(() => {
+            delCourseInfo({ courseIds: row.id }).then(() => {
               this.$message({
                 type: 'success',
                 message: '删除成功!'
               })
+              this.getInfo()
             })
           })
           .catch(() => {
@@ -652,26 +684,49 @@ export default {
       if (e === 'move') {
         // 移动
         this.dialogFormVisible = true
+        this.moveId = row.id
       }
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
-      this.page.currentPage = param
+      this.page.pageNo = param
       this.getInfo()
     },
     handlePageSizeChange(param) {
-      this.page.size = param
+      this.page.pageSize = param
       this.getInfo()
     },
 
     handleSearch(searchParams) {
-      // this.loadTableData(_.pickBy(searchParams))
       this.getInfo(searchParams)
-      // console.log('------------', searchParams)
     },
 
-    handleRemoveItems() {
-      // console.log(selection)
+    handleRemoveItems(selection) {
+      // 批量删除
+      let params = ''
+      selection.forEach((item) => {
+        params += item.id + ','
+      })
+      this.$confirm('此操作将删选中课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delCourseInfo({ courseIds: params }).then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+      this.refreshTableData()
     },
 
     // 刷新列表数据
@@ -681,10 +736,6 @@ export default {
 
     // 拿数据
     getInfo(courseName) {
-      // currentPage	当前页	body	true
-      // size	页面显示数量	body	true
-      // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
-      // courseName	课程名称	body	false
       let params = {
         currentPage: '',
         size: '',
@@ -692,27 +743,28 @@ export default {
       }
       params = { ...this.page, ...courseName }
       params.status = this.status
-      // console.log('params', params)
       getCourseListData(params).then((res) => {
-        this.tableData = res
-        this.page.total = res.length
-        // window.console.log('+++++++++++', res)
+        this.tableData = res.data
+        this.page.total = res.totalNum
+
+        // console.log(this.tableData)
+
         // 下拉筛选框
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
         this.tableData.forEach((item) => {
           SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-            value: item.id,
-            label: item.teacherId
+            value: item.teacherName,
+            label: item.teacherName
           }) //讲师
           SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-            value: item.id,
-            label: item.catalogId
+            value: item.catalogName,
+            label: item.catalogName
           }) //所在目录
           SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
-            value: item.id,
-            label: item.createId
+            value: item.catalogName,
+            label: item.creatorName
           }) //创建人
         })
       })
@@ -722,31 +774,17 @@ export default {
       this.status = index
       this.getInfo()
     }
-
-    // 以下都是表格
-
-    // loadData() {
-    //   this.loading = true
-    //   getOrgUserList({
-    //     pageNo: this.page.currentPage,
-    //     pageSize: this.page.size,
-    //     orgId: this.activeOrg ? this.activeOrg.orgId : '0',
-    //     search: this.query.name
-    //   })
-    //     .then((res) => {
-    //       this.page.total = res.totalNum
-    //       this.data = res.data
-    //       // this.selectionClear()
-    //     })
-    //     .finally(() => {
-    //       this.loading = false
-    //     })
-    // }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.atags_icon {
+  display: inline-block;
+  padding: 5px;
+  background-color: #ccc;
+  margin-left: 10px;
+}
 #isdialog_show {
   width: 100%;
   height: 100px;

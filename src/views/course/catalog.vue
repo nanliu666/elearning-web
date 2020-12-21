@@ -7,7 +7,7 @@
         type="primary"
         @click="dialogFormVisible = true"
       >
-        新建目录
+        新建分类
       </el-button>
     </page-header>
 
@@ -32,7 +32,7 @@
             <div class="operations__btns">
               <el-tooltip
                 class="operations__btns--tooltip"
-                content="刷新"
+                content="调整排序"
                 effect="dark"
                 placement="top"
                 style="color:#acb3b8;"
@@ -40,9 +40,9 @@
                 <el-button
                   class="operations__btns--item"
                   size="mini"
-                  icon="el-icon-refresh-right"
+                  icon="el-icon-sort"
                   type="text"
-                  @click="refreshTableData"
+                  @click="toSort"
                 >
                   <!-- <i class="iconfont iconicon_refresh" /> -->
                 </el-button>
@@ -101,7 +101,7 @@
           <span v-if="row.status == 0">停用</span>
         </template>
 
-        <template #multiSelectMenu="{ selection }">
+        <template #multiSelectMenu="{ selection}">
           <el-button
             style="margin-bottom:0;"
             type="text"
@@ -123,14 +123,14 @@
             v-if="scope.row.status == 1"
             type="text"
             size="medium"
-            @click.stop="handlestatus(scope.row, 1)"
+            @click.stop="handlestatus(scope.row, 0)"
           >
             停用
           </el-button>
           <span
             v-else
             style="color:#ccc;"
-            @click.stop="handlestatus(scope.row, 0)"
+            @click.stop="handlestatus(scope.row, 1)"
           >启用</span>
           <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
           <el-button
@@ -165,18 +165,18 @@
       </common-table>
     </basic-container>
 
-    <!-- 新建目录dialog -->
+    <!-- 新建分类dialog -->
 
     <el-dialog
       id="my_dialog"
-      title="新建目录"
+      title="新建分类"
       :visible.sync="dialogFormVisible"
       :modal-append-to-body="false"
       width="30%"
     >
       <el-form :model="newForm">
         <el-form-item
-          label="目录名称"
+          label="分类名称"
           :label-width="formLabelWidth"
         >
           <el-input
@@ -185,7 +185,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="上级目录"
+          label="上级分类"
           :label-width="formLabelWidth"
         >
           <el-cascader
@@ -212,7 +212,7 @@
       </div>
     </el-dialog>
 
-    <!-- 编辑&新增目录dialog -->
+    <!-- 编辑&新增分类dialog -->
 
     <el-dialog
       id="my_dialog"
@@ -223,7 +223,7 @@
     >
       <el-form :model="newForm">
         <el-form-item
-          label="目录名称"
+          label="分类名称"
           :label-width="formLabelWidth"
         >
           <el-input
@@ -232,7 +232,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="上级目录"
+          label="上级分类"
           :label-width="formLabelWidth"
         >
           <el-cascader
@@ -350,20 +350,12 @@
 </template>
 
 <script>
-import { deleteMenuInfo } from '@/api/system/menu'
-import {
-  getCatalog,
-  addCatalog,
-  delCatalag,
-  editCatalog,
-  catalogUserList,
-  updateStatus
-} from '@/api/course/course'
+import { getCatalog, addCatalog, delCatalag, editCatalog, updateStatus } from '@/api/course/course'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '目录名称',
+    label: '分类名称',
     minWidth: 450,
     prop: 'name'
   },
@@ -410,7 +402,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入目录名称搜索' },
+    config: { placeholder: '请输入分类名称搜索' },
     data: '',
     field: 'name',
     label: '',
@@ -432,7 +424,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择创建人' },
     data: '',
-    field: 'creatorName',
+    field: 'id',
     label: '创建人',
     type: 'cascader',
     options: [{ value: '', label: '' }]
@@ -471,9 +463,9 @@ export default {
         label: 'label'
       },
 
-      // 新建目录dialog
+      // 新建分类dialog
       dialogFormVisible: false,
-      // 编辑目录dialog
+      // 编辑分类dialog
       compileDialogFormVisible: false,
       newForm: {
         newName: '',
@@ -513,29 +505,22 @@ export default {
   },
   created() {
     this.refreshTableData()
-    this.iscatalogUserList()
+    // this.iscatalogUserList()
   },
   methods: {
     toSort() {
       this.$router.push({ path: '/course/courseSort' })
     },
     // 筛选-创建人数据
-    iscatalogUserList() {
-      catalogUserList().then((res) => {
-        res.forEach((item) => {
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-            value: item.userId,
-            label: item.userName
-          })
-        })
-      })
-    },
+    // iscatalogUserList() {
+    //   getCatalog().then((res) => {
+
+    //   })
+    // },
     // 停用&启用
     handlestatus(row, i) {
-      // console.log(row.id)
-      // console.log(i)
-      updateStatus({ ids: row.id + ', ', status: i }).then(() => {
-        // console.log(res)
+      // let id = row.id + ','
+      updateStatus({ ids: [row.id], status: i }).then(() => {
         this.loadTableData()
       })
     },
@@ -546,7 +531,7 @@ export default {
         if (row.children) {
           this.$message.error('很抱歉，您选中的类目下存在子分类，请先将子分类调整后再删除!')
         } else {
-          this.$confirm('此操作将永久删除该目录, 是否继续?', '提示', {
+          this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -597,7 +582,7 @@ export default {
         }
         editCatalog(params).then(() => {
           this.$message({
-            message: '编辑目录成功!!!',
+            message: '编辑分类成功!!!',
             type: 'success'
           })
         })
@@ -620,7 +605,7 @@ export default {
       this.newForm.newValue = []
     },
 
-    //新建目录
+    //新建分类
     newCatalogue() {
       let params = {
         name: this.newForm.newName,
@@ -633,7 +618,7 @@ export default {
         this.newForm.newName = ''
         this.newForm.newValue = []
         this.$message({
-          message: '新建目录成功!!!',
+          message: '新建分类成功!!!',
           type: 'success'
         })
       })
@@ -661,10 +646,14 @@ export default {
     },
 
     handleRemoveItems(selection) {
+      // console.log(_.map(selection, ({ id }) => id).join(','));
+
+      // console.log('-------------', selection)
+
       this.$confirm('确定将选择数据删除?', {
         type: 'warning'
       })
-        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
+        .then(() => delCatalag({ id: _.map(selection, ({ id }) => id).join(',') }))
         .then(() => {
           // 删除完成后更新视图
           this.$refs.table.clearSelection()
@@ -707,6 +696,13 @@ export default {
         const tableData = await getCatalog(param || '0', query)
         this.tableData = this.getTreeData(tableData)
         // console.log(this.tableData)
+        SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        this.tableData.forEach((item) => {
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
+            value: item.id,
+            label: item.creatorName
+          })
+        })
       } finally {
         this.tableLoading = false
       }

@@ -28,7 +28,7 @@
                 slot="tip"
                 style="color: #a1a8ae; font-size:12px"
               >
-                不支持上传.exe/.bat格式文件，单个文件大小＜10MB，最多5个文件
+                不支持上传.exe/.bat格式文件，单个文件大小＜10MB，最多{{ limit }}个文件
               </div>
             </template>
           </common-upload>
@@ -173,6 +173,7 @@ export default {
     ]
 
     return {
+      limit: 5,
       pageTitle: '',
       formColumns: FORM_COLUMNS,
       formData: {
@@ -182,7 +183,7 @@ export default {
         // tags: [],
         uploadType: 0, // 0本地文件 1链接文件
         resUrl: '',
-        allowDownload: '0', //是否运行下载 0允许 1不允许
+        allowDownload: 0, //是否运行下载 0允许 1不允许
         introduction: '',
         attachments: []
       },
@@ -242,8 +243,8 @@ export default {
           label: '是否允许下载',
           prop: 'allowDownload',
           required: false,
-          activeValue: '1',
-          inactiveValue: '0',
+          activeValue: 1,
+          inactiveValue: 0,
           span: 11,
           offset: 1
         }
@@ -296,10 +297,11 @@ export default {
       const fileTypeIndex = file.name.lastIndexOf('.')
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
       const isLt100M = file.size / 1024 / 1024 < 10
-      const LIMIT = 2
       const TYPE_LIST = ['exe', 'bat']
-      const notBatNorExe = _.some(TYPE_LIST, fileType)
-      const isLimitLength = _.size(this.formData.attachments) < LIMIT
+      const notBatNorExe = _.some(TYPE_LIST, (item) => {
+        return item === fileType
+      })
+      const isLimitLength = _.size(this.formData.attachments) < this.limit
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
       }

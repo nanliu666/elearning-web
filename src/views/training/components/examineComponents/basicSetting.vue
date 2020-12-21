@@ -34,7 +34,7 @@
           <el-radio :label="false">
             不计时
           </el-radio>
-          <radioInput
+          <radio-input
             :label="true"
             :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
@@ -50,7 +50,7 @@
             <el-radio :label="0">
               不限次数
             </el-radio>
-            <radioInput
+            <radio-input
               :label="true"
               :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
@@ -83,8 +83,8 @@
 </template>
 
 <script>
-import radioInput from '@/components/radioInput/radioInput'
-import checkboxInput from '@/components/checkboxInput/checkboxInput'
+import RadioInput from '@/components/radio-input/radio-input'
+import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 const EventColumns = [
   {
     itemType: 'datePicker',
@@ -155,8 +155,8 @@ import { getExamList } from '@/api/examManage/schedule'
 export default {
   name: 'BasicSetting',
   components: {
-    radioInput,
-    checkboxInput,
+    RadioInput,
+    CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
@@ -183,7 +183,7 @@ export default {
   created() {},
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
       return getExamList(params)

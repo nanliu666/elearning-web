@@ -17,6 +17,7 @@
 
 <script>
 export default {
+  name: 'CheckboxInput',
   props: {
     value: {
       type: Number,

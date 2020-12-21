@@ -18,6 +18,7 @@
             :config="tableConfig"
             :page="page"
             :data="tableData"
+            :page-config="pageConfig"
             :loading="tableLoading"
             @current-page-change="handleCurrentPageChange"
             @page-size-change="handlePageSizeChange"
@@ -43,6 +44,9 @@
                     >
                       搜索
                     </el-button>
+                  </div>
+                  <div style="position: relative;top:-10px">
+                    未选择题目
                   </div>
                 </div>
               </div>
@@ -130,18 +134,22 @@
 </template>
 
 <script>
-// import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
-// import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/examManage/category'
 import { getQuestionList } from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
+import { deleteHTMLTag } from '@/util/util'
 const TABLE_COLUMNS = [
   {
     label: '题目名称',
     prop: 'content',
     slot: true,
     fixed: true,
-    minWidth: 100
+    minWidth: 100,
+    formatter(row) {
+      return deleteHTMLTag(_.unescape(row.content)).length > 200
+        ? deleteHTMLTag(_.unescape(row.content)).slice(0, 200) + '...'
+        : deleteHTMLTag(_.unescape(row.content))
+    }
   },
 
   {
@@ -185,6 +193,12 @@ export default {
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   props: {
+    data: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
     visible: {
       type: Boolean,
       default: false
@@ -245,6 +259,9 @@ export default {
       }
     ]
     return {
+      pageConfig: {
+        layout: 'prev, pager, next'
+      },
       config: {
         labelPosition: 'left',
         labelWidth: '80px'
@@ -274,6 +291,21 @@ export default {
     }
   },
   watch: {
+    data: {
+      handler(val) {
+        val = _.cloneDeep(val)
+        if (val.length > 0) {
+          val.map((it) => {
+            if (!it.id) {
+              it.id = it.key
+            }
+            it.score = it.score * 10
+          })
+          this.selectData = val
+        }
+      },
+      immediate: true
+    },
     roleVisible: {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
@@ -290,6 +322,10 @@ export default {
     this.getcategoryTree()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 批量删除选中
+     * */
     handleAllSelete(selection) {
       this.selectData = this.selectData.filter((it) => {
         let data = selection.filter((item) => item.id == it.id)
@@ -297,10 +333,20 @@ export default {
           return true
         }
       })
+      this.$refs.table2.clearSelection()
     },
+    /**
+     * @author guanfenda
+     * @desc 删除当前行
+     *
+     * */
     handleDelete(row) {
       this.selectData = this.selectData.filter((it) => it.id !== row.id)
     },
+    /**
+     * @author guanfenda
+     * @desc 添加选中
+     * */
     addTopic() {
       this.$refs.table.clearSelection()
       let selection = this.selection.filter((it) => {
@@ -315,52 +361,90 @@ export default {
       })
       this.selectData.push(...selection)
     },
+    /**
+     * @author guanfenda
+     * @desc 确认选中
+     * */
     onsubmit() {
+      this.selectData.map((it) => {
+        it.score = it.score / 10
+      })
       this.$emit('input', this.selectData)
       this.onClose()
     },
+    /**
+     * @author guanfenda
+     * @desc 选中的数据
+     * */
     select(data) {
       this.selection = data
     },
+    /**
+     * @author guanfenda
+     * @desc 获取table 数据
+     *
+     * */
     getData() {
       let params = {
-        pageNo: 1,
-        pageSize: 10,
-        categoryId: this.form.category,
+        categoryId: this.form.category === 0 ? null : this.form.category,
         search: this.form.search,
-        type: this.type
+        type: this.type,
+        status: 'normal'
       }
-      getQuestionList(params).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
-      })
+      getQuestionList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
+        (res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+        }
+      )
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试题分类
+     *
+     * */
     getcategoryTree() {
       let params = {
         parentId: 0,
         type: 0
       }
       getcategoryTree(params).then((res) => {
-        this.columns.find((it) => it.prop === 'category').props.treeParams.data = res
+        this.columns.find((it) => it.prop === 'category').props.treeParams.data = this.treeData = [
+          { id: 0, name: '未分类' },
+          ...res
+        ]
 
         this.form.category = res[0].id
       })
     },
     // 搜索
     handleSearch() {
+      this.page.currentPage = 1
       this.getData()
     },
-    loadTableData() {},
+    /**
+     * @author guanfenda
+     * @desc 过滤非数字
+     *
+     * */
     numberInput(value, data) {
       this.form[data] = value.replace(/[^\d]/g, '')
     },
+    /**
+     * @author guanfenda
+     * @desc 当前页加载
+     * */
     handleCurrentPageChange(param) {
-      this.page.pageNo = param
-      this.loadTableData()
+      this.page.currentPage = param
+      this.getData()
     },
+    /**
+     * @author guanfenda
+     * @desc 当前页加载多少条数据
+     * */
     handlePageSizeChange(param) {
       this.page.pageSize = param
-      this.loadTableData()
+      this.getData()
     },
     onOpened() {},
     onClose() {

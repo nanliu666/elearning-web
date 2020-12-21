@@ -5,7 +5,7 @@
       show-back
     />
     <div class="title">
-      操作提示：鼠拖点击并拖拽目录调整排序。
+      操作提示：鼠拖点击并拖拽分类调整排序。
     </div>
     <basic-container :block="true">
       <div class="treeBox">
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { getCatalog, editCatalog } from '@/api/course/course'
+import { getCatalog, updateCatalogSort } from '@/api/course/course'
 
 export default {
   name: 'Name',
@@ -123,7 +123,7 @@ export default {
       })
     },
     goBack() {
-      this.$router.push('/orgs/orgManagement')
+      this.$router.push('/course/catalog')
     },
     close() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -142,11 +142,12 @@ export default {
       this.loadSort(this.data)
       // { orgs: this.data }
       this.loading = true
-      editCatalog(this.data).then(() => {
+      updateCatalogSort(this.data).then(() => {
         this.$message.success('保存成功')
         getCatalog({ parentOrgId: 0 }).then((res) => {
           this.data = res
           this.loading = false
+          this.goBack()
         })
       })
     }

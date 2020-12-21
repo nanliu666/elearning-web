@@ -27,6 +27,7 @@
       <el-menu
         :default-active="activeIndex"
         class="el-menu"
+        :active-text-color="activeColor"
         mode="horizontal"
         @select="handleSelect"
       >
@@ -165,6 +166,7 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import { getArrangeList, delExamArrange, getExamList } from '@/api/examManage/schedule'
+import { getCategoryList } from '@/api/examManage/category'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
 const STATUS_CONFIG = {
   label: '状态',
@@ -260,11 +262,30 @@ const SEARCH_CONFIG = {
       options: STATUS_STATUS
     },
     {
-      type: 'select',
-      field: 'examPattern',
+      type: 'treeSelect',
+      field: 'categoryId',
       label: '考试分类',
       data: '',
-      options: PATTERN_TYPE
+      config: {
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'name',
+            disabled: 'disabled',
+            value: 'id'
+          }
+        }
+      }
     },
     {
       type: 'select',
@@ -317,6 +338,7 @@ const SEARCH_CONFIG = {
     }
   ]
 }
+import styles from '@/styles/variables.scss'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover },
@@ -344,6 +366,7 @@ export default {
   },
   data() {
     return {
+      activeColor: styles.primaryColor,
       activeIndex: '0',
       tableLoading: false,
       tableData: [],
@@ -362,7 +385,6 @@ export default {
       queryInfo: {
         categoryId: '', // 分类ID
         creatorId: '', //评卷人id
-        examPattern: '', //考试方式 general-普通考试 offline-线下考试
         examType: '', //考试类型 CurrencyExam-通用考试 CourseExam-课程考试 TrainExam-培训班考试
         pageNo: '',
         pageSize: '',
@@ -385,6 +407,18 @@ export default {
     }
     this.loadTableData()
     this.setConfig()
+    let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
+    getCategoryList().then((res) => {
+      categoryIdType.config.treeParams.data = _.concat(
+        [
+          {
+            name: '全部',
+            id: ''
+          }
+        ],
+        res
+      )
+    })
   },
   methods: {
     /**

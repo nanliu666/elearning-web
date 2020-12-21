@@ -4,7 +4,10 @@
       title="新建随机试卷"
       show-back
     />
-    <basic-container block>
+    <basic-container
+      v-loading="loading"
+      block
+    >
       <div class="content">
         <div class="title">
           基础信息
@@ -109,12 +112,14 @@
           </template>
           <template #questionNum="{row}">
             <div>
-              <el-input
+              <el-input-number
                 v-model="row.questionNum"
-                placeholder="请输入内容"
-                type="Number"
-              >
-              </el-input>
+                style="width: 120px"
+                controls-position="right"
+                :min="0"
+                :step="1"
+                :precision="0"
+              />
               <div
                 v-if="row.questionNum > row.totalQuestionNum"
                 class="valid"
@@ -130,13 +135,15 @@
             </div>
           </template>
           <template #score="{row}">
-            <el-input
+            <el-input-number
               v-model="row.score"
-              placeholder="请输入内容"
-              type="Number"
+              style="width: 120px"
+              controls-position="right"
+              :min="0"
+              :step="1"
+              :precision="1"
               @change="questionChange($event, row)"
-            >
-            </el-input>
+            />
             <div
               v-if="valid && !row.score"
               class="valid"
@@ -226,23 +233,23 @@ const BASE_COLUMNS = [
   },
   {
     prop: 'totalScore',
-    itemType: 'input',
+    itemType: 'inputNumber',
+    min: 0,
+    precision: 1,
+    step: 0.1,
     maxlength: 32,
-    label: '计划总分',
-    span: 11,
-    type: 'Number',
     required: false,
-    props: {
-      onlyNumber: true
-    }
+    span: 11,
+    label: '计划总分'
   },
   {
     prop: 'isScore',
     itemType: 'radio',
+    type: 'radio',
     label: '是否折算成计划分数',
     span: 11,
     offset: 2,
-    required: false,
+    required: true,
     options: [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
@@ -298,7 +305,7 @@ const TABLE_COLUMNS = [
     label: '试题来源',
     prop: 'categoryId',
     slot: true,
-    minWidth: 250
+    minWidth: 220
   },
   {
     label: '题库试题总数',
@@ -311,13 +318,13 @@ const TABLE_COLUMNS = [
     label: '试卷试题数',
     prop: 'questionNum',
     slot: true,
-    minWidth: 120
+    minWidth: 145
   },
   {
     label: '单题分数',
     slot: true,
     prop: 'score',
-    minWidth: 120
+    minWidth: 145
   }
 ]
 const TABLE_CONFIG = {
@@ -344,6 +351,17 @@ export default {
   },
   data() {
     return {
+      form: {
+        name: '',
+        categoryId: '',
+        expiredTime: '',
+        totalScore: '',
+        remark: '',
+        isScore: '',
+        isShowScore: '',
+        isMulti: ''
+      },
+      loading: false,
       column: {
         page: {
           currentPage: 1,
@@ -354,7 +372,7 @@ export default {
         span: 20,
         prop: 'orgId',
         itemType: 'treeSelect',
-        label: '请选择上级组织',
+        label: '试题来源',
         required: true,
         offset: 2,
         props: {
@@ -400,23 +418,55 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      columns: BASE_COLUMNS,
-      form: {}
+      columns: BASE_COLUMNS
     }
   },
   watch: {
+    /***
+     * @author guanfenda
+     * @desc 修改了试题设置，修改分数重新计算剩余分数
+     * */
     TotalScore(val) {
       if (this.form.totalScore) {
         this.score = this.form.totalScore - val
       }
     },
+    /**
+     * @author guanfenda
+     * @desc 如果改变了计划分数 重新计算剩余分数
+     * */
     'form.totalScore'() {
       this.questionChange()
+    },
+    'form.isScore'() {
+      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      if (this.form.isScore) {
+        totalScore.required = true
+      } else {
+        totalScore.required = false
+      }
     }
   },
-  mounted() {
+  mounted() {},
+  activated() {
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: '',
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
+    this.tableData = []
     this.options = []
+    this.valid = false
+    this.TotalScore = ''
+    this.score = ''
+    this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
+      //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
     this.getData()
@@ -426,12 +476,21 @@ export default {
     }
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc  试题类型改变，试题来源重新请求
+     * @params data 类型的值，row 当前行改变的数据
+     * */
     handeleTestQuestions(data, row) {
       row.categoryIds = []
       row.totalQuestionNum = ''
       row.questionNum = ''
       this.getTopicCategory(data, row.column)
     },
+    /**
+     * @author fuanfenda
+     * treeSelect 属性格式化（过滤）
+     * */
     itemAttrs(column) {
       const copy = { ...defaultAttrs[column.itemType] }
       for (const key in column) {
@@ -442,23 +501,60 @@ export default {
 
       return copy
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试题来源，并绑定试题来源数据
+     * @param relateType 试题类型 column 试题来源potions
+     * */
     getTopicCategory(relateType = '', column) {
       //single_choice
       let params = {
         type: '0',
         relateType: relateType
       }
-      getcategoryTree(params).then((res) => {
+      getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
-        column.props.treeParams.data = res
+
+        let children = await this.getNoCategory(relateType)
+        column.props.treeParams.data = [{ id: 0, name: '未分类', children }, ...res]
       })
     },
+    /***
+     * @author guanfendca
+     * @desc 获取未分类
+     *
+     * */
+    getNoCategory(relateType) {
+      let params = {
+        type: '0',
+        parentId: '-110',
+        relateType: relateType
+      }
+
+      return new Promise((resolve, reject) => {
+        getcategoryTree(params)
+          .then((res) => {
+            resolve(res)
+          })
+          .finally(() => {
+            reject()
+          })
+      })
+    },
+    /**
+     * @author guanfenda
+     * @desc 添加试题
+     * */
     pushItem() {
       let tableItem = _.cloneDeep(this.tableItem)
       tableItem.column = _.cloneDeep(this.column)
       this.tableData.push(tableItem)
       this.getTopicCategory(tableItem.type, tableItem.column)
     },
+    /**
+     * @author guanfenda
+     * @desc 获取试卷分类
+     * */
     getTestPaperCategory() {
       let params = {
         type: '1'
@@ -467,48 +563,65 @@ export default {
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 查找试卷详情
+     * */
     getData() {
-      if (!this.$route.query.id) return
+      if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
       let params = {
         id: this.$route.query.id
       }
-      getTestPaper(params).then((res) => {
-        let {
-          id,
-          expiredTime,
-          categoryId,
-          totalScore,
-          remark,
-          name,
-          isScore,
-          isShowScore,
-          randomSettings,
-          isMulti
-        } = res
-        //后台要精确到一位小数，返回是乘以10
-        totalScore = totalScore / 10
-        this.form = {
-          id,
-          name,
-          categoryId,
-          expiredTime,
-          totalScore,
-          remark,
-          isScore,
-          isShowScore,
-          isMulti
-        }
-        randomSettings.map((data) => {
-          data.column = _.cloneDeep(this.column)
-          this.getTopicCategory(data.type, data.column)
+      this.loading = true
+      getTestPaper(params)
+        .then((res) => {
+          let {
+            id,
+            expiredTime,
+            categoryId,
+            totalScore,
+            remark,
+            name,
+            isScore,
+            isShowScore,
+            randomSettings,
+            isMulti
+          } = res
+          //后台要精确到一位小数，返回是乘以10
+          totalScore = totalScore / 10
+          this.form = {
+            id,
+            name,
+            categoryId,
+            expiredTime,
+            totalScore,
+            remark,
+            isScore,
+            isShowScore,
+            isMulti
+          }
+          randomSettings.map((data) => {
+            data.column = _.cloneDeep(this.column)
+            this.getTopicCategory(data.type, data.column)
+          })
+          this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
         })
-        this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
-      })
+        .finally(() => {
+          this.loading = false
+        })
     },
+    /**
+     * @author guanfenda
+     * @desc 试题设置里的行操作删除
+     * */
     handleDelete(row) {
       this.tableData = this.tableData.filter((it) => it.id !== row.id)
       this.questionChange()
     },
+    /***
+     * @author gaunfenda
+     * @desc 提交试卷（添加或者修改）
+     * */
     onSubmit() {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
@@ -519,6 +632,7 @@ export default {
               !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
           ).length > 0
         ) {
+          //检查行是否选择了试题来源，试卷试题是否配置，是否选择了题库试题有试题数的，是否给了分数
           this.$message.warning('请检查试题设置')
           return
         }
@@ -533,14 +647,23 @@ export default {
         }
         let testPaperMether =
           this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-        testPaperMether(params).then(() => {
-          this.$message.success('提交成功')
-          this.handleBack()
-        })
+        this.loading = true
+        testPaperMether(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.handleBack()
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
+     * */
     questionChange() {
-      let scoreList = _.compact(this.tableData.map((it) => it.score))
+      let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
       scoreList.length === 0 && (this.score = this.form.totalScore)
       scoreList.length &&
         (this.TotalScore = scoreList.reduce((prev, cur) => {
@@ -548,18 +671,32 @@ export default {
         }, 0))
       this.score = this.form.totalScore - this.TotalScore
     },
+    /**
+     * @author guanfenda
+     * @desc 试题来源改变触发的事件
+     * @params row 当前触发行的数据，data 选中的节点数据
+     * */
     check(data, row) {
       row.totalQuestionNum = _.compact(data.map((it) => it.relatedNum)).reduce((prev, cur) => {
         return prev + cur
       }, 0)
       let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
       row.questionNum = random(1, row.totalQuestionNum)
+      this.questionChange()
     },
+    /**
+     * @author guanfenda
+     * @desc 添加行
+     * */
     handleAddTopic() {
       this.tableItem.id += 1
       this.valid = false
       this.pushItem()
     },
+    /**
+     * @author guanfenda
+     * @desc 返回上一页
+     * */
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)

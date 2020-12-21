@@ -81,18 +81,24 @@
             </div>
           </div>
         </template>
-        <template slot="multiSelectMenu">
-          <!--          <el-button-->
-          <!--            type="text"-->
-          <!--            icon="el-icon-delete"-->
-          <!--          >-->
-          <!--            批量导出-->
-          <!--          </el-button>-->
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
+          <el-button
+            type="text"
+            size="medium"
+            icon="el-icon-delete"
+            @click="deleteSelected(selection)"
+          >
+            批量删除
+          </el-button>
         </template>
         <template #name="{row}">
           <el-link
             type="primary"
             style="line-height: 22px"
+            @click="handleDetails(row)"
           >
             {{ row.name }}
           </el-link>
@@ -121,6 +127,14 @@
         </template>
       </common-table>
     </basic-container>
+    <div>
+      <tipDialog
+        v-if="visible"
+        :visible.sync="visible"
+        :table-data.sync="selectData"
+      >
+      </tipDialog>
+    </div>
   </div>
 </template>
 
@@ -128,9 +142,10 @@
 import { getTestPaperList, deleteTestPaper, getCreatUsers } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/examManage/category'
+import tipDialog from './components/tipDialog'
 const TABLE_COLUMNS = [
   {
-    label: '考试名称',
+    label: '试卷名称',
     prop: 'name',
     slot: true,
     fixed: true,
@@ -185,7 +200,7 @@ const TABLE_CONFIG = {
 }
 export default {
   name: 'TestPaper',
-  components: { SearchPopover },
+  components: { SearchPopover, tipDialog },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
@@ -193,12 +208,14 @@ export default {
   },
   data() {
     return {
+      selectData: [],
+      visible: false,
       page: {
         currentPage: 1,
         pageSize: 10,
-        pageNo: 1,
         total: 0
       },
+      dialogVisible: true,
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
@@ -209,11 +226,11 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'name',
+            field: 'search',
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '考试名称', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '试卷名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
@@ -252,7 +269,7 @@ export default {
             options: [
               { value: '', label: '全部' },
               { value: 'normal', label: '正常' },
-              { value: 'expired', label: '过期' }
+              { value: 'expired', label: '已过期' }
             ]
           },
           {
@@ -289,6 +306,59 @@ export default {
     this.loadTableData()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 跳转试卷详情
+     *
+     * */
+    handleDetails(row) {
+      let query = {
+        paperId: row.id
+      }
+      this.$router.push({
+        path: '/examManagement/examSchedule/preview',
+        query
+      })
+    },
+    // 批量删除
+    deleteSelected(selection) {
+      this.selectData = selection.filter((it) => it.examNum > 0)
+      if (this.selectData.length > 0) {
+        this.visible = true
+        return
+      }
+      // 批量删除
+      let params = []
+      selection.forEach((item) => {
+        params.push(item.id)
+      })
+      this.$confirm('此操作将删选中, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$refs.table.clearSelection()
+          deleteTestPaper({ id: params.join(',') }).then(() => {
+            this.loadTableData()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
+    /**
+     * @author guanfenda
+     * @获取试卷分类
+     *
+     * */
     getCategory() {
       let params = {
         type: '1'
@@ -297,29 +367,37 @@ export default {
         this.searchConfig.popoverOptions[0].config.treeParams.data = res
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 获取创建人
+     * */
     getCreatUsers() {
       getCreatUsers().then((res) => {
         this.searchConfig.popoverOptions.find((it) => it.field == 'creatorId').options = res
       })
     },
-    getTestPaperCategory() {
-      let params = {
-        type: '1'
-      }
-      getcategoryTree(params).then((res) => {
-        this.searchConfig.popoverOptions.find((it) => it.field == 'categoryId').options = res
-      })
-    },
+    /**
+     * @author guanfenda
+     * @desc 跳转到创建页面
+     * */
     handleCommand(data, id, copy) {
       if (typeof id === 'object') {
+        //判断是新增
         id = null
       }
       if (data === 'manual') {
+        //手工试卷
         this.handleManual(id, copy)
       } else {
+        //随机试卷
         this.handleRandom(id, copy)
       }
     },
+    /**
+     * @author guanfenda
+     * @desc 跳转到随机试卷
+     * @params  id 试卷id copy 是否复制数据
+     * */
     handleRandom(id, copy) {
       let query = {}
       id && (query.id = id)
@@ -329,6 +407,11 @@ export default {
         query
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 跳转到手工试卷
+     * @params  id 试卷id copy 是否复制数据
+     * */
     handleManual(id, copy) {
       let query = {}
       id && (query.id = id)
@@ -338,14 +421,37 @@ export default {
         query
       })
     },
+    /**
+     * @author guanfenda
+     * @desc 编辑试卷
+     * @params row 试卷数据
+     * */
     handleLookUp(row) {
       this.handleCommand(row.type, row.id)
     },
+    /**
+     * @author guanfenda
+     * @desc  复制试卷
+     * @params row 试卷数据
+     * */
     handleCope(row) {
       this.handleCommand(row.type, row.id, 'copy')
     },
+    /**
+     * @author guanfenda
+     * @desc 删除试卷
+     * @params row 试卷数据
+     * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
+      if (row.examNum > 0) {
+        this.$confirm('您选中试题有正在关联的考试，请调整后再进行删除！', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        return
+      }
+      this.$confirm('您确定要删除选中的试卷吗？', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -359,28 +465,45 @@ export default {
         })
       })
     },
-
+    /**
+     * @author guanfenda
+     * @desc 加载第几页方法
+     * @params param 页数
+     * */
     handleCurrentPageChange(param) {
-      this.page.pageNo = param
+      this.page.currentPage = param
       this.loadTableData()
     },
+    /**
+     * @author guanfenda
+     * @desc 加载数据一次多少条
+     * @params 加载一次的数量
+     * */
     handlePageSizeChange(param) {
       this.page.pageSize = param
       this.loadTableData()
     },
     // 加载函数
+    /**
+     * @author guanfenda
+     * @desc 加载table数据
+     *
+     * */
     async loadTableData() {
       if (this.tableLoading) {
+        //防抖
         return
       }
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getTestPaperList(_.assign(params, this.page)).then((res) => {
-          this.tableData = res.data
-          this.page.total = res.totalNum
-          this.tableLoading = false
-        })
+        getTestPaperList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
+          (res) => {
+            this.tableData = res.data
+            this.page.total = res.totalNum
+            this.tableLoading = false
+          }
+        )
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -388,8 +511,13 @@ export default {
       }
     },
     // 搜索
+    /**
+     * @author guanfenda
+     *@desc 搜索
+     * */
     handleSearch(params) {
       this.searchParams = params
+      this.page.currentPage = 1
       this.loadTableData()
     }
   }
@@ -481,5 +609,8 @@ export default {
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

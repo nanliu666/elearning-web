@@ -86,7 +86,7 @@
           <el-radio :label="false">
             不计时
           </el-radio>
-          <radioInput
+          <radio-input
             :label="true"
             :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
@@ -102,7 +102,7 @@
             <el-radio :label="false">
               不限次数
             </el-radio>
-            <radioInput
+            <radio-input
               :label="true"
               :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
@@ -180,8 +180,8 @@
       </template>
       <template #answerMode1>
         <el-radio-group
-          v-model="currentRadio"
-          class="radio-group"
+          v-model="model.multipleChoice"
+          class="radio-group-class"
         >
           <el-radio
             v-for="(item, index) in radioList"
@@ -199,6 +199,19 @@
             >
               <i class="el-icon-question" />
             </el-tooltip>
+            <div
+              v-if="index > 1 && model.multipleChoice === index"
+              class="multiple-text"
+            >
+              <span v-if="index === 2">得扣</span>
+              <span v-if="index === 3">扣</span>
+              <span v-if="index === 4">得</span>
+              <el-input
+                v-model.number="model.multipleChoiceValue"
+                style="width: 60px; margin: 0 4px"
+              />
+              <span>分</span>
+            </div>
           </el-radio>
         </el-radio-group>
       </template>
@@ -207,7 +220,7 @@
           v-model="model.passType"
           style="display: flex;"
         >
-          <achivementRadioInput
+          <condition-radio-input
             v-model="model.passType"
             style="margin-right:40px"
             label-text="按成绩"
@@ -218,8 +231,8 @@
             :number.sync="passCondition[0].passScope"
             :pass-scope="model.passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
-          <achivementRadioInput
+          />
+          <condition-radio-input
             v-model="model.passType"
             label-text="按得分率"
             text-before="得分率不低于"
@@ -228,7 +241,7 @@
             :default-value="passCondition[1].passType"
             :number.sync="passCondition[1].passScope"
             :input-props="{ maxLength: 4 }"
-          ></achivementRadioInput>
+          />
         </el-radio-group>
       </template>
     </common-form>
@@ -236,10 +249,10 @@
 </template>
 
 <script>
-import achivementRadioInput from '@/components/achivementRadioInput/achivementRadioInput'
+import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 import SwitchInput from './atomComponents/switchInput'
-import radioInput from '@/components/radioInput/radioInput'
-import checkboxInput from '@/components/checkboxInput/checkboxInput'
+import RadioInput from '@/components/radio-input/radio-input'
+import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
 import { getExamList, getCertificateList } from '@/api/examManage/schedule'
@@ -278,7 +291,7 @@ const EventColumns = [
     itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [],
     prop: 'categoryId',
     label: '考试分类',
@@ -454,19 +467,20 @@ const EventColumns = [
     prop: 'publicAnswers',
     label: '允许考生查看标准答案'
   },
-  {
-    itemType: 'switch',
-    span: 11,
-    offset: 2,
-    prop: 'openEntrance',
-    label: '允许考生报名参加考试'
-  },
-  {
-    itemType: 'switch',
-    span: 11,
-    prop: 'isExamine',
-    label: '考生报名考试需要审批'
-  },
+  //TODO: 暂时隐藏
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'openEntrance',
+  //   label: '允许考生报名参加考试'
+  // },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   prop: 'isExamine',
+  //   label: '考生报名考试需要审批'
+  // },
   {
     prop: 'strategyTitle',
     itemType: 'slotout',
@@ -573,15 +587,14 @@ const radioList = [
 export default {
   name: 'ExamInfo',
   components: {
-    achivementRadioInput,
+    ConditionRadioInput,
     SwitchInput,
-    radioInput,
-    checkboxInput,
+    RadioInput,
+    CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
     return {
-      currentRadio: 0,
       radioList,
       passCondition: [
         {
@@ -595,6 +608,8 @@ export default {
       ],
       columns: EventColumns,
       model: {
+        multipleChoice: 0, // 多选选哪个？
+        multipleChoiceValue: '', // 多选分值
         certificateId: '',
         certificate: true,
         categoryId: '',
@@ -625,7 +640,7 @@ export default {
         openAnswerSheet: false,
         selfMarking: false,
         publicAnswers: false,
-        openEntrance: false,
+        // openEntrance: false,
         isExamine: false,
         openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
         modifyAnswer: false,
@@ -739,7 +754,11 @@ export default {
     }
   },
   created() {
-    getCategoryList().then((res) => {
+    getCategoryList({
+      parentId: 0,
+      type: '0',
+      name: ''
+    }).then((res) => {
       let categoryId = _.filter(this.columns, (item) => {
         return item.prop === 'categoryId'
       })[0]
@@ -748,7 +767,7 @@ export default {
   },
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
       return getExamList(params)
@@ -790,14 +809,26 @@ export default {
   .multiple-title {
     color: rgba(0, 11, 21, 0.65);
   }
-  .radio-group {
+  .radio-group-class {
     display: flex;
-    // flex-direction: column;
+    flex-direction: column;
     margin-top: -20px;
+    /deep/ .el-radio__label {
+      display: flex;
+      align-items: center;
+    }
     .radio-li {
       // margin: 10px 0;
       margin-right: 30px;
+      display: flex;
+      align-items: center;
       margin-top: 10px;
+      height: 34px;
+      .multiple-text {
+        align-items: center;
+        display: flex;
+        margin-left: 10px;
+      }
     }
   }
   .title-box {

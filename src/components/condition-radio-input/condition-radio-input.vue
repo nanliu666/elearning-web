@@ -22,6 +22,7 @@
 
 <script>
 export default {
+  name: 'ConditionRadioInput',
   props: {
     value: {
       type: Number,

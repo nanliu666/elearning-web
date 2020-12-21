@@ -71,8 +71,16 @@ export default {
       if (type === 'prev' || type === 'next') {
         let parentOrg = this.findParentOrg(dropNode.data.id)
         let draggingNodeParent = this.findParentOrg(draggingNode.data.id)
-        if (parentOrg.id === draggingNodeParent.id) {
-          return true
+        if (parentOrg.id === draggingNodeParent.id) return false
+        if (_.isEmpty(parentOrg)) {
+          let index = _.findIndex(this.data, (item) => {
+            return item.name === draggingNode.data.name
+          })
+          if (index > -1) {
+            this.messageFun()
+            this.sameNameMessage = true
+            return false
+          }
         }
         if (parentOrg && parentOrg.children) {
           // 同一层级不能有两个相同的节点

@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    title="修改考生成绩"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -33,7 +33,7 @@
           <el-input
             v-model="form.score"
             placeholder="请输入成绩"
-            type="Number"
+            @input="numberInput($event, 'score')"
           >
             <i
               slot="suffix"
@@ -45,7 +45,7 @@
           <el-input
             v-model="form.totalScore"
             placeholder="请输入试卷总分"
-            type="Number"
+            @input="numberInput($event, 'totalScore')"
           >
             <i
               slot="suffix"
@@ -250,7 +250,19 @@ export default {
       })
     },
     numberInput(value, data) {
-      this.form[data] = value.replace(/[^\d]/g, '')
+      let str = (value && value.split('')) || []
+      let reg1 = /\d/
+      let reg2 = /\./
+      // 第一个字符不能为小数点
+      if (str[0] == '.') {
+        this.form[name] = ''
+        return
+      }
+      // 过滤掉除数字和小数点外的字符
+      value = str.filter((e) => reg1.test(e) || reg2.test(e))
+      // 匹配小数点后只能有一位小数
+      let valJoin = value.join('')
+      this.form[data] = valJoin.match(/^\d*(\.?\d{0,1})/g)[0] || null
     },
     onOpened() {},
     onClose() {
@@ -287,6 +299,7 @@ export default {
 /deep/ .el-form-item {
   margin-bottom: 24px;
 }
+
 .dialog-footer {
   text-align: right;
 }
@@ -300,9 +313,11 @@ export default {
 /deep/ .el-radio {
   margin-right: 20px;
 }
+
 /deep/ .el-input__icon .el-input__validateIcon .el-icon-circle-close {
   display: none;
 }
+
 .answerTime {
   font-size: 14px;
   margin-right: 5px;
