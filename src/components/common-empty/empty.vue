@@ -27,10 +27,8 @@ export default {
       default: ''
     },
     src: {
-      type: Object,
-      default: () => {
-        return nodata
-      }
+      type: String,
+      default: nodata
     },
     text: {
       type: String,

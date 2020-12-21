@@ -190,7 +190,7 @@ export default {
   .paper-card {
     margin-top: 16px;
     .card-header {
-      padding: 24px 0;
+      padding: 18px 0 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -215,6 +215,7 @@ export default {
     }
     .card-content {
       .card-li {
+        margin: 0 13.5%;
         .card-title {
           font-family: PingFangSC-Medium;
           font-size: 16px;

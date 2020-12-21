@@ -365,7 +365,7 @@ export default {
     handlePaper(row) {
       this.$router.push({
         path: '/examManagement/mark/MarkByPaper',
-        query: { id: row.id }
+        query: { id: row.id, examName: row.examName }
       })
     },
     // 逐人评卷跳转
