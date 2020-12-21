@@ -84,13 +84,13 @@
           <div class="menuClass">
             <el-button
               type="text"
-              @click="handleExaminee(row, 'examine')"
+              @click="handleExaminee(row)"
             >
               逐人评卷
             </el-button>
             <el-button
               type="text"
-              @click="handleExaminee(row, 'paper')"
+              @click="handlePaper(row)"
             >
               逐题评卷
             </el-button>
@@ -153,7 +153,7 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   handlerColumn: {
     minWidth: 150
   }
@@ -361,10 +361,18 @@ export default {
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
-    handleExaminee(row, type) {
+    // 逐题评卷跳转
+    handlePaper(row) {
+      this.$router.push({
+        path: '/examManagement/mark/MarkByPaper',
+        query: { id: row.id }
+      })
+    },
+    // 逐人评卷跳转
+    handleExaminee(row) {
       this.$router.push({
         path: '/examManagement/mark/ExamineeList',
-        query: { id: row.id, type }
+        query: { id: row.id, examName: row.examName }
       })
     }
   }

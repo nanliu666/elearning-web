@@ -6,8 +6,15 @@
     />
     <basic-container block>
       <div class="title-box">
-        <span class="title">EHS应知应会全员考试</span>
-        <span class="sub-title">（未评卷：20人，已评卷20人）</span>
+        <span class="title">{{ $route.query.examName }}</span>
+        <span
+          v-if="!_.isEmpty(evaluationCount)"
+          class="sub-title"
+        >
+          <span>（未评卷：{{ evaluationCount.notExamNum }}人，</span>
+          <span> 阅卷中：{{ evaluationCount.ExamNumIng }}人，</span>
+          <span>已评卷：{{ evaluationCount.ExamNumed }}人 ）</span>
+        </span>
       </div>
       <common-table
         id="demo"
@@ -65,7 +72,7 @@
             </div>
           </div>
         </template>
-        <template #examName>
+        <template #name>
           ******
         </template>
         <template #phone>
@@ -96,11 +103,11 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { listManualEvaluation } from '@/api/examManage/mark'
+import { listManualEvaluationOnce, listManualEvaluationOnceCount } from '@/api/examManage/mark'
 let TABLE_COLUMNS = [
   {
     label: '考生姓名',
-    prop: 'examName',
+    prop: 'name',
     slot: true,
     minWidth: 120
   },
@@ -138,7 +145,7 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   handlerColumn: {
     minWidth: 150
   }
@@ -153,7 +160,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'examName',
+      field: 'name',
       label: '',
       data: '',
       options: [],
@@ -226,6 +233,7 @@ export default {
     return {
       tableLoading: false,
       tableData: [],
+      evaluationCount: {},
       tablePageConfig: {},
       page: {
         currentPage: 0,
@@ -280,7 +288,8 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, list } = await listManualEvaluation(this.queryInfo)
+        this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
+        let { totalNum, list } = await listManualEvaluationOnce(this.queryInfo)
         this.tableLoading = false
         this.tableData = list
         this.page.total = totalNum

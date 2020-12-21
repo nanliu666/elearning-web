@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { del, get, post, put } from '@/router/axios'
+import { post, get } from '@/router/axios'
 /**
  * 获取手工评卷列表
  */
@@ -9,3 +9,8 @@ export const listManualEvaluation = (params) => post('/manage/v1/listManualEvalu
  */
 export const listManualEvaluationOnce = (params) =>
   post('/manage/v1/listManualEvaluationOnce', params)
+/**
+ * 逐人评卷列表表头的评卷数量统计
+ */
+export const listManualEvaluationOnceCount = (params) =>
+  post('/manage/v1/listManualEvaluationOnceCount', params)
