@@ -90,7 +90,15 @@
                 >
                   {{ list.name }}
                   <div class="tab_right">
-                    <span>预览</span><span>编辑</span><i class="el-icon-more"></i>
+                    <span>预览</span><span>编辑</span>
+                    <el-dropdown>
+                      <i class="el-icon-more"></i>
+                      <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item>人员列表</el-dropdown-item>
+                        <el-dropdown-item>前置条件</el-dropdown-item>
+                        <el-dropdown-item>删除</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </el-dropdown>
                   </div>
                 </div>
                 <div
@@ -146,6 +154,7 @@
 
 <script>
 export default {
+  inject: ['parentObj'],
   data() {
     return {
       dialogVisible: false, // 弹出对象值
@@ -246,6 +255,7 @@ export default {
     },
     handleChange() {},
     handleClick() {},
+    dropdownClick() {},
     tabsAddBtn(arr) {
       arr.push({ name: '信息安全考试' })
     },

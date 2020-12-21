@@ -20,6 +20,16 @@
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
+        <template #multiSelectMenu="{ selection }">
+          <el-button
+            style="margin-bottom:0;"
+            type="text"
+            @click="() => handleRemoveItems(selection)"
+          >
+            批量删除
+          </el-button>
+        </template>
+
         <template #topMenu>
           <div class="operations">
             <SearchPopover
@@ -38,12 +48,17 @@
         </template>
       </common-table>
     </basic-container>
+    <!-- <el-dialog title="人员添加"
+      :visible.sync="dialogVisible"
+      :append-to-body="true">
+
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getlearnPlanList } from '@/api/learnPlan'
+import { getUserList } from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -57,22 +72,22 @@ const TABLE_COLUMNS = [
     label: '用户编号',
     fixed: 'left',
     width: 180,
-    prop: 'name'
+    prop: 'workNo'
   },
   {
     label: '姓名',
-    prop: 'text',
+    prop: 'name',
     width: 300
   },
   {
     label: '所在部门',
-    prop: 'awardAgency',
+    prop: 'orgName',
     minWidth: 100
   },
   {
     label: '手机号码',
     slot: true,
-    prop: 'name1',
+    prop: 'phonenum',
     minWidth: 100
   },
   {
@@ -84,6 +99,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
+
+  showIndexColumn: false,
 
   enableMultiSelect: true,
   rowKey: 'id',
@@ -173,66 +190,6 @@ export default {
   },
   data() {
     return {
-      data: [
-        {
-          label: '未分类'
-        },
-        {
-          label: '一级 1',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '一级 2',
-          children: [
-            {
-              label: '二级 2-1',
-              children: [
-                {
-                  label: '三级 2-1-1'
-                }
-              ]
-            },
-            {
-              label: '二级 2-2',
-              children: [
-                {
-                  label: '三级 2-2-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '一级 3',
-          children: [
-            {
-              label: '二级 3-1',
-              children: [
-                {
-                  label: '三级 3-1-1'
-                }
-              ]
-            },
-            {
-              label: '二级 3-2',
-              children: [
-                {
-                  label: '三级 3-2-1'
-                }
-              ]
-            }
-          ]
-        }
-      ],
       preview: {},
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
@@ -250,9 +207,7 @@ export default {
       // 请求参数
       queryInfo: {
         pageNo: 1,
-        pageSize: 10,
-        participantsList: [{ phonenum: '', coursePlanName: '' }],
-        courseName: ''
+        pageSize: 10
         // courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -263,11 +218,15 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  activated() {
+  mounted() {
     // this.initSearchData()
     this.refreshTableData()
   },
   methods: {
+    handleRemoveItems() {
+      //   console.log(data)
+    },
+
     viewRate() {
       // 查看完成率
       this.$router.push({ path: '/learnPlan/requiredScheduleDetail' })
@@ -317,7 +276,7 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getlearnPlanList(this.queryInfo)
+        let { totalNum, data } = await getUserList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {

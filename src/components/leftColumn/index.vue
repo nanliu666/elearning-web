@@ -9,7 +9,7 @@
     <el-tree
       ref="tree"
       v-bind="$attrs"
-      node-key="label"
+      node-key="id"
       :filter-node-method="filterNode"
       v-on="$listeners"
       @node-click="nodeClick"
@@ -22,7 +22,7 @@
           v-if="!data.hasOwnProperty('flag')"
         >{{ data.label }} {{ data.hasOwnProperty('children') ? '' : '(' + data.num + ')' }}</span>
         <el-dropdown
-          v-if="moreMenu.length > 0 && currentNodeKey === data.label"
+          v-if="moreMenu.length > 0 && currentNodeKey === data.id"
           class="custom-tree-node-right"
           @command="(val) => commandChange(val, data, node)"
         >
@@ -82,7 +82,7 @@
     <div
       v-if="!temporaryShow"
       class="addGroup"
-      @click="addCallBack()"
+      @click="commandChange('add')"
     >
       <i class="el-icon-circle-plus-outline"></i>新建分类
     </div>
@@ -108,10 +108,10 @@
           class="block"
         >
           <el-option
-            v-for="(item, index) in upGroupList"
-            :key="index"
+            v-for="item in upGroupList"
+            :key="item.id"
             :label="item.label"
-            :value="item.label"
+            :value="item.id"
           ></el-option>
         </el-select>
       </label>
@@ -141,6 +141,18 @@ export default {
       default: function() {
         return []
       }
+    },
+    interfaceList: {
+      type: Object,
+      default: () => {
+        return {
+          addCatalog: Promise.reject(),
+          delCatalogs: Promise.reject(),
+          getCatalogs: Promise.reject(),
+          moveCatalogs: Promise.reject(),
+          updateCatalogs: Promise.reject()
+        }
+      }
     }
   },
   data() {
@@ -150,14 +162,20 @@ export default {
       searchVal: '', // 搜索框的值
       temporaryShow: false, // 是否显示临时添加选项
       classifyName: '', // 新添加的分类名称
-      treeData: '', // 树的数据
+      treeData: [], // 树的数据
       currentNodeKey: '', // 当前选中的行
       moreMenuShow: false, // 更多菜单显示
       groupName: '', // 分类名称
       upGroup: '', // 选中的上级分类组
       upGroupList: [], // 当前选中的所有上级分类组的列表
       currentData: '', // 当前选中的节点数据
-      currentNode: '' // 当前选中的节点的node
+      currentNode: '', // 当前选中的节点的node
+      options: '', // 当前的操作类型
+      addCatalog: this.interfaceList.addCatalog, // 新增树单元接口
+      delCatalogs: this.interfaceList.delCatalogs, // 删除树单元接口
+      getCatalogs: this.interfaceList.getCatalogs, // 获取树单元接口
+      moveCatalogs: this.interfaceList.moveCatalogs, // 移动树单元接口
+      updateCatalogs: this.interfaceList.updateCatalogs // 更新树单元接口
     }
   },
   watch: {
@@ -169,23 +187,50 @@ export default {
         // 如果隐藏了，则把input框数据清空
         this.classifyName = ''
       }
+    },
+    '$attrs.data'(val) {
+      this.treeData = val
+      // console.log(this.treeData)
     }
   },
   created() {
-    this.treeData = this.$attrs.data
+    // console.log(this.treeData)
   },
+  beforeCreate() {
+    // this.treeData.unshift({
+    //   id: 'weifenl',
+    //   label: '未分类'
+    // })
+    // console.log(this.treeData)
+  },
+
   methods: {
     sureBtn() {
       // 弹窗的确认按钮
-      this.recursionTarget(this.treeData)
-      this.deleteNode(this.currentData, this.currentNode)
+      let catalogsDta = {
+        id: this.currentData.id,
+        parentId: this.upGroup
+      }
+      this.moveCatalogs(catalogsDta)
+        .then(() => {
+          this.refreshTree()
+          this.$message({
+            type: 'success',
+            message: '移动成功!'
+          })
+        })
+        .catch((err) => {
+          window.console.log(err)
+        })
+      //   this.recursionTarget(this.treeData)
+      //   this.deleteNode(this.currentData, this.currentNode)
       this.dialogVisible = false
     },
     recursionTarget(data) {
       // 递归取到目标元素并且做添加处理
       let that = this
       data.forEach((item) => {
-        if (item.label == that.upGroup) {
+        if (item.id == that.upGroup) {
           item.hasOwnProperty('children')
             ? item.children.push(this.currentData)
             : this.$set(item, 'children', [this.currentData])
@@ -199,6 +244,7 @@ export default {
     commandChange(val, data, node) {
       this.currentData = data
       this.currentNode = node
+      this.options = val
       // 菜单改变
       switch (val) {
         case 'add':
@@ -223,7 +269,7 @@ export default {
       let arrays = node.level == '1' ? this.treeData : node.parent.data.children
       let index = -1
       if (data) {
-        index = arrays.findIndex((item) => item.label === data.label)
+        index = arrays.findIndex((item) => item.id === data.id)
       }
       return {
         arrays: arrays,
@@ -234,7 +280,8 @@ export default {
     addCallBack(data = '') {
       // 新增回调
       let flagTest = {
-        label: 'flag',
+        label: '',
+        id: Math.random() * 10000000,
         flag: ''
       }
       if (!data) {
@@ -248,16 +295,15 @@ export default {
     },
     moveCallBack(data = this.currentData) {
       // 移动回调
+      this.upGroup = ''
+      this.groupName = ''
       this.dialogVisible = true
 
       this.groupName = data.label
+      this.upGroupList = []
       this.recursionFn(this.treeData)
       this.upGroupList = this.upGroupList.filter((item) => {
-        return item.label != this.groupName
-      })
-      this.$message({
-        type: 'success',
-        message: '移动成功!'
+        return item.id != data.id
       })
     },
     recursionFn(data) {
@@ -270,25 +316,27 @@ export default {
         ) {
           continue
         }
-        if (tempData && tempData.hasOwnProperty('children') && tempData.children.length > 0) {
-          this.recursionFn(tempData.children)
-          delete tempData.children
-        }
+        // if (tempData && tempData.hasOwnProperty('children') && tempData.children.length > 0) {
+        //   this.recursionFn(tempData.children)
+        //   delete tempData.children
+        // }
         this.upGroupList.push(tempData)
       }
     },
     editCallBack(data = this.currentData, node = this.currentNode) {
       // 编辑回调
-      let { arrays, index } = this.getParentNode.call(this, node, data)
+      let { arrays, index } = this.getParentNode(node, data)
       let currentData = JSON.parse(JSON.stringify(data))
       currentData.flag = 'edit'
       this.classifyName = currentData.label
       arrays.splice(index, 1, currentData)
-      this.$refs.tree.filter(this.searchVal)
+      // console.log(arrays, index, currentData, this.treeData);
+      // this.$refs.tree.updateKeyChildren(node.);
+      // this.$refs.tree.filter(this.searchVal)
     },
-    deleteCallBack(data = this.currentData, node = this.currentNode) {
+    deleteCallBack(data = this.currentData) {
       // 删除回调
-      if (data.hasOwnProperty('children')) {
+      if (data.hasOwnProperty('children') && data.children.length > 0) {
         this.$message({
           message: '您选择的分类下存在数据，请先将数据调整后再删除',
           type: 'warning'
@@ -301,11 +349,21 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          this.deleteNode(data, node)
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
+          let catalogsData = {
+            id: data.id
+          }
+          this.delCatalogs(catalogsData)
+            .then(() => {
+              this.refreshTree()
+              // this.deleteNode(data, node)
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+            })
+            .catch((err) => {
+              window.console.log(err)
+            })
         })
         .catch(() => {
           this.$message({
@@ -313,16 +371,15 @@ export default {
             message: '已取消删除'
           })
         })
-      this.classifyName = ''
     },
     cancleCall(data = {}, node) {
       // 临时取消
       this.temporaryHide()
       if (data.hasOwnProperty('flag')) {
         if (data.flag === 'edit') {
-          let { arrays, index } = this.getParentNode(node, data)
+          //   let { arrays, index } = this.getParentNode(node, data)
           delete data.flag
-          arrays.splice(index, 1, data)
+          //   arrays.splice(index, 1, data)
           return
         }
         this.deleteNode(data, node)
@@ -330,8 +387,9 @@ export default {
     },
     deleteNode(data, node) {
       // 删除方法
-      let { arrays, parentData } = this.getParentNode(node, data)
-      arrays.pop()
+      let { arrays, index, parentData } = this.getParentNode(node, data)
+      //   console.log(data,node,arrays, parentData);
+      arrays.splice(index, 1)
       if (parentData.hasOwnProperty('children') && parentData.children.length <= 0) {
         delete parentData.children
       }
@@ -340,7 +398,7 @@ export default {
       // 临时添加隐藏
       this.temporaryShow = false
     },
-    temporarySure(data, node) {
+    async temporarySure(data, node) {
       // 临时添加 添加按钮回调 先判断有没有，如果存在抛出脱误，没有则添加
       let filterList = this.treeData.filter((item) => {
         return item.label === this.classifyName
@@ -351,11 +409,38 @@ export default {
           type: 'warning'
         })
       } else {
-        let { arrays } = this.getParentNode(node, data)
-        let text = data.flag === 'edit' ? '保存成功' : '新建成功'
-        delete data.flag
-        data.label = this.classifyName
-        arrays.splice(arrays.length - 1, 1, data)
+        // let { arrays, index } = this.getParentNode(node, data)
+        // let datas = JSON.parse(JSON.stringify(data))
+        if (this.options === 'add') {
+          let interfaceData = {
+            name: this.classifyName
+          }
+          node.parent ? (interfaceData.parentId = node.parent.data.id) : ''
+          await this.addCatalog(interfaceData)
+            .then(() => {
+              this.refreshTree()
+            })
+            .catch((err) => {
+              window.console.log(err)
+            })
+        } else if (this.options === 'edit') {
+          let interfaceData = {
+            id: data.id,
+            name: this.classifyName
+          }
+          node.parent ? (interfaceData.parentId = node.parent.data.id) : ''
+          await this.updateCatalogs(interfaceData)
+            .then(() => {
+              this.refreshTree()
+            })
+            .catch((err) => {
+              window.console.log(err)
+            })
+        }
+        let text = this.options === 'edit' ? '保存成功' : '新建成功'
+        // delete datas.flag
+        // datas.label = this.classifyName
+        // arrays.splice(index, 1, datas)
         this.$message({
           message: text,
           type: 'success'
@@ -365,8 +450,13 @@ export default {
     },
     nodeClick(data) {
       // 节点被点击
-      this.currentNodeKey = data.label
+      this.currentNodeKey = data.id
       this.moreMenuShow = false
+    },
+    refreshTree() {
+      // 刷新树数据
+      this.$emit('refreshTree')
+      this.classifyName = ''
     }
   }
 }
@@ -378,7 +468,7 @@ export default {
   position: relative;
   padding-bottom: 30px;
   background-color: #fff;
-  width: 300px;
+  width: 100%;
   /deep/.el-tree-node > .el-tree-node__children {
     overflow: inherit;
   }
@@ -418,7 +508,7 @@ export default {
   .temporaryNode {
     margin-top: 15px;
     .el-input {
-      width: auto;
+      width: 70%;
     }
     span {
       cursor: pointer;

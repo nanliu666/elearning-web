@@ -27,76 +27,67 @@
 
 <script>
 export default {
+  inject: ['parentObj'],
   data() {
     return {
-      form: {
-        recruitmentId: null,
-        name: null,
-        sex: null,
-        age: null,
-        email: null,
-        addressArr: [],
-        recruitment: null,
-        resume: [],
-        remark: '',
-        orgId: '',
-        date: null,
-        date1: ''
-      },
+      form: this.parentObj.formData,
       columns: [
         {
-          prop: 'recruitmentId',
+          prop: 'coursePlanNo',
           itemType: 'input',
           label: '课程安排编号',
           required: true
         },
         {
-          prop: 'name',
+          prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
           required: false,
           offset: 4
         },
         {
-          prop: 'sex',
+          prop: 'startTime',
           itemType: 'datePicker',
+          type: 'daterange',
           label: '时间范围',
           required: true
         },
         {
-          prop: 'email',
+          prop: 'automaticIntegralCount',
           itemType: 'switch',
           label: '自动计算积分',
           required: false,
           offset: 4
         },
         {
-          prop: 'addressArr',
+          prop: 'endDate',
           itemType: 'datePicker',
           label: '学习计划截止日期',
           required: false
         },
         {
-          prop: 'resume',
+          prop: 'courseCatalogId',
           itemType: 'select',
           label: '所属分类',
-          options: [],
+          options: this.parentObj.treeData,
           props: {
-            label: 'jobName',
+            label: 'label',
             value: 'id'
           },
           offset: 4,
           required: true
         },
         {
-          prop: 'date',
+          prop: 'creatorId',
           itemType: 'input',
           label: '创建者',
           required: false
         },
         {
-          prop: 'remark',
+          prop: 'createTime',
           itemType: 'datePicker',
+          type: 'datetime',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '创建时间',
           offset: 4,
           required: false
@@ -108,6 +99,11 @@ export default {
           required: false
         }
       ]
+    }
+  },
+  watch: {
+    'parentObj.treeData'(val) {
+      this.columns[5].options = val
     }
   },
   methods: {}

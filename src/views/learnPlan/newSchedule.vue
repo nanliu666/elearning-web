@@ -57,6 +57,7 @@
 import basicInfo from './scheduleSubPage/basicInfo' // 基本信息
 import addSchedule from './scheduleSubPage/addSchedule' // 添加课程
 import personInfo from './scheduleSubPage/personInfo' // 人员信息
+import { getCatalogs, addPlan, updatePlan } from '@/api/learnPlan'
 export default {
   components: {
     basicInfo,
@@ -67,18 +68,69 @@ export default {
     return {
       active: 0,
       checkAll: false, // 是否全选
-      pageArr: [basicInfo, addSchedule, personInfo]
+      treeData: [], // 所属分类
+      pageArr: [basicInfo, addSchedule, personInfo],
+      formData: {
+        // 所有的数据
+        automaticIntegralCount: false,
+        courseCatalogId: '',
+        courseCatalogName: '',
+        coursePlanName: '',
+        coursePlanNo: '',
+        endDate: '',
+        endTime: '',
+        id: '',
+        sponsor: '',
+        startTime: '',
+        participantsList: [],
+        courseList: []
+      },
+      state: 'add'
     }
+  },
+  provide() {
+    return {
+      parentObj: this
+    }
+  },
+  created() {
+    this.isgetCatalogs()
   },
   methods: {
     handleCheckAllChange() {},
     toAddCertificate() {},
-    handleSubmit() {},
+    handleSubmit() {
+      let data = JSON.parse(JSON.stringify(this.formData))
+      let [startTime, endTime] = [data.startTime[0], data.startTime[1]]
+      data.startTime = startTime
+      data.endTime = endTime
+      let filterArr = this.treeData.filter((item) => {
+        item.courseCatalogId == data.courseCatalogId
+      })
+      data.courseCatalogName = filterArr.length > 0 ? filterArr[0].name : ''
+      if (this.state === 'add') {
+        // 调用新增接口
+        addPlan(data)
+          .then(() => {
+            this.state = 'edit'
+          })
+          .catch((err) => window.console.log(err))
+      } else {
+        // 否则调用编辑接口
+        updatePlan(data).then(() => {})
+      }
+    },
     handlePre() {
       this.active != '0' ? this.active-- : '0'
     },
     handleNext() {
       this.active != '2' ? this.active++ : '2'
+    },
+    // 拿树形图数据
+    isgetCatalogs() {
+      getCatalogs().then((res) => {
+        this.treeData = res
+      })
     }
   }
 }
@@ -98,15 +150,19 @@ export default {
   .page-bottom {
     text-align: center;
     position: absolute;
-    bottom: 10px;
+    bottom: 0px;
     width: 100%;
   }
 }
-.el-card {
-  height: 100%;
-  padding-bottom: 42px;
-  box-sizing: border-box;
-  position: relative;
+/deep/.el-card {
+  //   height: 100%;
+
+  //   overflow: auto;
+  .el-card__body {
+    padding-bottom: 52px;
+    box-sizing: border-box;
+    position: relative;
+  }
 }
 .el-steps {
   width: 80%;

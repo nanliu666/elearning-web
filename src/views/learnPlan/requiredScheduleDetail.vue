@@ -38,7 +38,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getlearnPlanList } from '@/api/learnPlan'
+import { queryPercentageComplete } from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -84,32 +84,35 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
-    label: '',
+    field: 'participantName',
+    label: '菜单',
     type: 'input'
   }
 ]
+let SELECT_GROUP = JSON.parse(window.sessionStorage.requiredScheduleDetail).courseList || []
+SELECT_GROUP = SELECT_GROUP.map((item) => {
+  item.value = item.id
+  item.label = item.courseName
+  return item
+})
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'input',
-    field: 'cellPhone',
+    field: 'phonenum',
     label: '手机',
     data: ''
     // config: { optionLabel: 'name', optionValue: 'id' }
   },
   {
     type: 'select',
-    field: 'course',
+    field: 'courseId',
     label: '课程',
     data: '',
-    options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
-    ]
+    options: SELECT_GROUP
   },
   {
     type: 'numInterval',
-    field: 'percentageRate',
+    field: 'totalPrecentMin,totalPrecentMax',
     label: '完成率 （%）',
     data: { min: '', max: '' }
     // config: { optionLabel: 'name', optionValue: 'id' }
@@ -178,8 +181,11 @@ export default {
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        participantsList: [{ phonenum: '', coursePlanName: '' }],
-        courseName: ''
+        courseName: '', // 课程名字
+        id: '', // 课程id
+        phonenum: '', // 电话号码
+        totalPrecentMax: '', // 最大完成值
+        totalPrecentMin: '' // 最小完成值
         // courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -214,6 +220,7 @@ export default {
      */
     handleSearch(searchParams) {
       for (let i in searchParams) {
+        if (i == 'undefined') continue
         this.queryInfo[i] = searchParams[i]
       }
       this.loadTableData()
@@ -236,7 +243,9 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getlearnPlanList(this.queryInfo)
+        this.queryInfo.courseName = this.queryInfo.courseId == 0 ? '停用' : '启用'
+        let queryData = JSON.parse(JSON.stringify(this.queryInfo))
+        let { totalNum, data } = await queryPercentageComplete(queryData)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {

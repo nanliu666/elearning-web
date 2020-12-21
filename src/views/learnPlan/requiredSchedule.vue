@@ -25,7 +25,11 @@
       <leftColumn
         :search="true"
         :data="data"
+        :current-node-key="currentNodeKey"
         :more-menu="['edit', 'add', 'delete', 'move']"
+        :interface-list="interfaceList"
+        @node-click="nodeClick"
+        @refreshTree="isgetCatalogs"
       ></leftColumn>
       <div class="line"></div>
       <common-table
@@ -83,6 +87,9 @@
             </div>
           </div>
         </template>
+        <template #courseList="{row}">
+          <span>{{ row.courseList.map((item) => item.courseName).join(',') }}</span>
+        </template>
         <template
           slot="multiSelectMenu"
           slot-scope="{ selection }"
@@ -104,7 +111,7 @@
           >删除 &nbsp; </span>
           <span
             class="startBtn"
-            @click="viewRate"
+            @click="viewRate(row)"
           >查看完成率 &nbsp; </span>
         </template>
       </common-table>
@@ -115,41 +122,49 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import leftColumn from '@/components/leftColumn'
-import { getlearnPlanList } from '@/api/learnPlan'
+import {
+  getlearnPlanList,
+  addCatalog,
+  delCatalogs,
+  getCatalogs,
+  moveCatalogs,
+  updateCatalogs
+} from '@/api/learnPlan'
+// import { getCatalogs } from '@/api/training/training'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '编号',
     width: 180,
-    prop: 'name'
+    prop: 'courseCatalogId'
   },
   {
     label: '名称',
-    prop: 'text',
+    prop: 'coursePlanName',
     width: 300
   },
   {
     label: '分类',
-    prop: 'awardAgency',
+    prop: 'courseCatalogName',
     minWidth: 100
   },
   {
     label: '包含课程',
     slot: true,
-    prop: 'name1',
+    prop: 'courseList',
     minWidth: 100
   },
   {
     label: '开始时间',
     slot: true,
-    prop: 'name2',
+    prop: 'startTime',
     minWidth: 100
   },
   {
     label: '结束时间',
     slot: true,
-    prop: 'name3',
+    prop: 'endTime',
     minWidth: 100
   }
 ]
@@ -245,66 +260,15 @@ export default {
   },
   data() {
     return {
-      data: [
-        {
-          label: '未分类'
-        },
-        {
-          label: '一级 1',
-          children: [
-            {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '一级 2',
-          children: [
-            {
-              label: '二级 2-1',
-              children: [
-                {
-                  label: '三级 2-1-1'
-                }
-              ]
-            },
-            {
-              label: '二级 2-2',
-              children: [
-                {
-                  label: '三级 2-2-1'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          label: '一级 3',
-          children: [
-            {
-              label: '二级 3-1',
-              children: [
-                {
-                  label: '三级 3-1-1'
-                }
-              ]
-            },
-            {
-              label: '二级 3-2',
-              children: [
-                {
-                  label: '三级 3-2-1'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      currentNodeKey: '', // 默认选中的节点key
+      interfaceList: {
+        addCatalog: addCatalog,
+        delCatalogs: delCatalogs,
+        getCatalogs: getCatalogs,
+        moveCatalogs: moveCatalogs,
+        updateCatalogs: updateCatalogs
+      },
+      data: [],
       preview: {},
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
@@ -323,9 +287,12 @@ export default {
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        participantsList: [{ phonenum: '', coursePlanName: '' }],
-        courseName: ''
-        // courseCatalogId: ''
+        sponsor: '',
+        courseCatalogName: '',
+        startTime: '',
+        coursePlanName: '',
+        coursePlanNo: '',
+        courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
@@ -337,11 +304,61 @@ export default {
   },
   activated() {
     // this.initSearchData()
-    this.refreshTableData()
+    // this.refreshTableData()
+  },
+  created() {
+    this.isgetCatalogs().then(() => this.refreshTableData())
   },
   methods: {
-    viewRate() {
+    nodeClick(data) {
+      this.queryInfo.courseCatalogId = data.id
+      this.refreshTableData()
+    },
+    // 拿左侧树形图数据
+    isgetCatalogs() {
+      return getCatalogs().then((res) => {
+        let datar = []
+        for (let i = 0; i < res.length; i++) {
+          let d = {
+            id: 1,
+            label: '一级 1',
+            btnshow: 1,
+            children: []
+          }
+          d.id = res[i].id
+          d.label = res[i].name
+          d.btnshow = 1
+          d.children = []
+          datar.push(d)
+
+          for (let f = 0; f < res[i].list.length; f++) {
+            let c = {
+              id: 1,
+              label: '一级 1',
+              btnshow: 1,
+              parentId: ''
+            }
+            c.id = res[i].list[f].id
+            c.label = res[i].list[f].name
+            c.btnshow = 0
+            c.parentId = res[i].list[f].parentId
+            datar[i].children.push(c)
+          }
+        }
+        this.data = datar
+        let firstNode = this.data[0]
+        this.currentNodeKey =
+          firstNode.hasOwnProperty('children') && firstNode.children.length > 0
+            ? firstNode.children[0].id
+            : firstNode.id
+        // this.idSchedule = datar[0].children[0].id
+        this.queryInfo.courseCatalogId = this.currentNodeKey
+        // this.isgetScheduleList()
+      })
+    },
+    viewRate(row) {
       // 查看完成率
+      window.sessionStorage.setItem('requiredScheduleDetail', JSON.stringify(row))
       this.$router.push({ path: '/learnPlan/requiredScheduleDetail' })
     },
     // 去新建证书

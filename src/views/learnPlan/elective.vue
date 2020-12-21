@@ -37,33 +37,33 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getlearnPlanList } from '@/api/learnPlan'
+import { queryLog } from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '课程编号',
     width: 180,
-    prop: 'name'
+    prop: 'coursePlanNo'
   },
   {
     label: '课程名称',
-    prop: 'text',
+    prop: 'coursePlanName',
     width: 300
   },
   {
     label: '用户编号',
-    prop: 'awardAgency',
+    prop: 'workNo',
     minWidth: 100
   },
   {
     label: '用户名称',
-    prop: 'name1',
+    prop: 'userName',
     minWidth: 100
   },
   {
     label: '组织架构',
-    prop: 'name2',
+    prop: 'department',
     minWidth: 100
   },
   {
@@ -87,7 +87,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'name1',
     label: '',
     type: 'input'
   }
@@ -95,15 +95,15 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'input',
-    field: 'cellPhone',
-    label: '手机',
+    field: 'name',
+    label: '用户姓名',
     data: ''
     // config: { optionLabel: 'name', optionValue: 'id' }
   },
   {
     type: 'select',
-    field: 'course',
-    label: '课程',
+    field: 'courseId',
+    label: '组织名称',
     data: '',
     options: [
       { value: 0, label: '停用' },
@@ -111,10 +111,10 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    type: 'numInterval',
-    field: 'percentageRate',
-    label: '完成率 （%）',
-    data: { min: '', max: '' }
+    type: 'input',
+    field: 'phonenum',
+    label: '手机号',
+    data: ''
     // config: { optionLabel: 'name', optionValue: 'id' }
   }
 ]
@@ -181,8 +181,10 @@ export default {
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        participantsList: [{ phonenum: '', coursePlanName: '' }],
-        courseName: ''
+        courseName: '',
+        courseId: '',
+        phonenum: '',
+        name: ''
         // courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -239,7 +241,7 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getlearnPlanList(this.queryInfo)
+        let { totalNum, data } = await queryLog(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
