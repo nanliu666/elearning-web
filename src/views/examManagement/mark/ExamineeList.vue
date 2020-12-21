@@ -74,6 +74,10 @@
         <template #status="{row}">
           {{ row.status | statusFilterer }}
         </template>
+        <template #effectiveTime="{row}">
+          {{ row.examBeginTime }} - {{ row.finishTime }}
+        </template>
+
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
@@ -91,8 +95,8 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList } from '@/api/examManage/schedule'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { listManualEvaluation } from '@/api/examManage/mark'
 let TABLE_COLUMNS = [
   {
     label: '考生姓名',
@@ -108,7 +112,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '所属组织',
-    prop: 'category',
+    prop: 'dept',
     minWidth: 120
   },
   {
@@ -120,11 +124,12 @@ let TABLE_COLUMNS = [
   {
     label: '考试时间',
     prop: 'effectiveTime',
+    slot: true,
     minWidth: 120
   },
   {
     label: '得分',
-    prop: 'createUser',
+    prop: 'totalScore',
     minWidth: 120
   }
 ]
@@ -140,9 +145,9 @@ const TABLE_CONFIG = {
 }
 const STATUS_STATUS = [
   { value: '', label: '全部' },
-  { value: '1', label: '待评卷' },
-  { value: '2', label: '阅卷中' },
-  { value: '3', label: '已评卷' }
+  { value: '3', label: '已提交' },
+  { value: '4', label: '阅卷中' },
+  { value: '5', label: '已阅卷' }
 ]
 const SEARCH_CONFIG = {
   requireOptions: [
@@ -167,13 +172,13 @@ const SEARCH_CONFIG = {
       type: 'numInterval',
       data: { min: '', max: '' },
       label: '得分',
-      field: 'minPeriod,maxPeriod'
+      field: 'scoreMin,scoreMax'
     },
     {
       type: 'numInterval',
       data: { min: '', max: '' },
       label: '正确率',
-      field: 'minRenewNum,maxRenewNum'
+      field: 'accuracyMin,accuracyMax'
     },
     {
       type: 'select',
@@ -209,7 +214,7 @@ export default {
     statusFilterer(data) {
       if (data) {
         return _.filter(STATUS_STATUS, (item) => {
-          return item.value === data
+          return item.value === data + ''
         })[0].label
       }
     },
@@ -223,7 +228,7 @@ export default {
       tableData: [],
       tablePageConfig: {},
       page: {
-        currentPage: 1,
+        currentPage: 0,
         size: 10,
         total: 0
       },
@@ -234,11 +239,8 @@ export default {
       data: [],
       createOrgDailog: false,
       queryInfo: {
-        creatorId: '', //评卷人id
-        pageNo: '',
-        pageSize: '',
-        status: '', //状态: 未开始-1, 进行中-2, 已结束-3
-        type: 0 //状态:0-已发布，1-草稿箱
+        currentPage: 0,
+        size: 10
       }
     }
   },
@@ -260,14 +262,14 @@ export default {
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo.currentPage = param
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo.size = param
       this.loadTableData()
     },
     // 加载函数
@@ -278,9 +280,9 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getArrangeList(this.queryInfo)
+        let { totalNum, list } = await listManualEvaluation(this.queryInfo)
         this.tableLoading = false
-        this.tableData = data
+        this.tableData = list
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
