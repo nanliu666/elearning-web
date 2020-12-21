@@ -3,6 +3,7 @@
 </template>
 
 <script>
+// 逐题评卷
 export default {
   name: 'MarkByPaper'
 }

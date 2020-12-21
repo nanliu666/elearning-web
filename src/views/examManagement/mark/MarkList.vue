@@ -84,13 +84,13 @@
           <div class="menuClass">
             <el-button
               type="text"
-              @click="handleExaminee(row)"
+              @click="handleExaminee(row, 'examine')"
             >
               逐人评卷
             </el-button>
             <el-button
               type="text"
-              @click="handleByPaper(row)"
+              @click="handleExaminee(row, 'paper')"
             >
               逐题评卷
             </el-button>
@@ -361,16 +361,10 @@ export default {
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
-    handleExaminee(row) {
+    handleExaminee(row, type) {
       this.$router.push({
         path: '/examManagement/mark/ExamineeList',
-        query: { id: row.id, type: 'paper' }
-      })
-    },
-    handleByPaper(row) {
-      this.$router.push({
-        path: '/examManagement/mark/ExamineeList',
-        query: { id: row.id, type: 'examinee' }
+        query: { id: row.id, type }
       })
     }
   }
