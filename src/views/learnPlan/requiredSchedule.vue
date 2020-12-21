@@ -420,7 +420,12 @@ export default {
 </script>
 <style lang="scss" scoped>
 .requiredSchedule {
+  .startBtn {
+    cursor: pointer;
+    color: #01aafc;
+  }
   .leftColumn {
+    width: 300px;
     float: left;
   }
   .commonTable {
