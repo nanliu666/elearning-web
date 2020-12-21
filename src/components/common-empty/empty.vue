@@ -4,15 +4,15 @@
     style="border: 0"
   >
     <div
-      :style="{ height: emptyHeight }"
+      :style="{ height: height }"
       class="empty-class"
     >
       <el-image
         class="empty-image"
-        :src="emptyOption.src"
+        :src="src"
         fit="fill"
       />
-      <div v-text="emptyOption.text" />
+      <div v-text="text" />
     </div>
   </el-card>
 </template>
@@ -22,26 +22,27 @@ import nodata from '@/assets/images/nodata.png'
 export default {
   name: 'ComEmpty',
   props: {
-    emptyOption: {
+    height: {
+      type: String,
+      default: ''
+    },
+    src: {
       type: Object,
-      default: function() {
-        return {
-          visibile: true,
-          src: nodata,
-          text: '暂无数据~'
-        }
+      default: () => {
+        return nodata
       }
-    }
-  },
-  data() {
-    return {
-      emptyHeight: ''
+    },
+    text: {
+      type: String,
+      default: '暂无数据~'
     }
   },
   mounted() {
     // 因为element的card组件默认padding为24px，经过多次测试，估摸着4.6倍是最佳显示比例
     const elCardPadding = 24
-    this.emptyHeight = `${this.$parent.$el.offsetHeight - elCardPadding * 4.6}px`
+    if (!this.height) {
+      this.height = `${this.$parent.$el.offsetHeight - elCardPadding * 4.6}px`
+    }
   }
 }
 </script>
