@@ -183,7 +183,7 @@ export default {
   created() {},
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
       return getExamList(params)

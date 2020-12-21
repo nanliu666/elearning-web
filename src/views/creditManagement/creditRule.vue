@@ -113,7 +113,7 @@
       <ruleDialog
         v-if="visible"
         :visible.sync="visible"
-        :row="row"
+        :row.sync="row"
         @loadData="loadTableData"
       ></ruleDialog>
     </basic-container>
@@ -127,36 +127,39 @@ import ruleDialog from './components/ruleDialog'
 const TABLE_COLUMNS = [
   {
     label: '规则名称',
-    prop: 'stuName',
+    prop: 'stu_name',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '系统规则来源',
-    prop: 'sysRuleSource',
+    prop: 'sys_rule_source',
     minWidth: 150
   },
   {
     label: '分值',
     prop: 'score',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) => {
+      return row.score / 10
+    }
   },
   {
     label: '每日上限',
-    prop: 'dayLimit',
+    prop: 'day_limit',
     slot: true,
     minWidth: 120
   },
   {
     label: '分值规则说明',
-    prop: 'ruleState',
+    prop: 'rule_state',
     minWidth: 120
   },
   {
     label: '更新时间',
     slot: true,
-    prop: 'updateTime',
+    prop: 'update_time',
     minWidth: 200
   },
   {
@@ -179,7 +182,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -251,14 +254,17 @@ export default {
      *
      * */
     handleIsStart(row) {
-      let tip = row.status == 0 ? '启用' : '停用'
-      this.$confirm(`您确定要 ${tip} 该条信息吗？`, '提醒', {
+      let text =
+        row.status == 0
+          ? '您确定要启用该学分规则吗？'
+          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+      this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         let params = {
-          id: row.id,
+          id: row.id_str,
           status: row.status == 0 ? '1' : '0'
         }
         postCreditStartAndStop(params).then(() => {
@@ -273,19 +279,27 @@ export default {
      * @params row 规则数据
      * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let params = {
-          id: row.id
-        }
-        deleteCredit(params).then(() => {
-          this.$message.success('删除成功')
-          this.loadTableData()
+      if (row.status == 0) {
+        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let params = {
+            id: row.id_str
+          }
+          deleteCredit(params).then(() => {
+            this.$message.success('删除成功')
+            this.loadTableData()
+          })
         })
-      })
+      } else {
+        this.$confirm('该学分规则处于启用状态，请停用后删除。？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      }
     },
     /**
      * @author guanfenda
@@ -319,13 +333,13 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getCreditList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-          (res) => {
-            this.tableData = res.data
-            this.page.total = res.totalNum
-            this.tableLoading = false
-          }
-        )
+        getCreditList(
+          _.assign(params, { currentPage: this.page.currentPage, size: this.page.pageSize })
+        ).then((res) => {
+          this.tableData = res.list
+          this.page.total = res.totalNum
+          this.tableLoading = false
+        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -425,7 +439,9 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
