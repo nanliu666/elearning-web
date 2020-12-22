@@ -322,9 +322,13 @@ export default {
     },
     // 批量删除
     deleteSelected(selection) {
-      this.selectData = selection.filter((it) => it.examNum > 0)
-      if (this.selectData.length > 0) {
-        this.visible = true
+      let selectData = selection.filter((it) => it.examNum > 0)
+      if (selectData.length > 0) {
+        this.$confirm('您选中试卷有正在关联的考试，请调整后再进行删除！', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
         return
       }
       // 批量删除
@@ -443,12 +447,10 @@ export default {
      * @params row 试卷数据
      * */
     handleDelete(row) {
+      this.selectData = []
+      this.selectData.push(row)
       if (row.examNum > 0) {
-        this.$confirm('您选中试题有正在关联的考试，请调整后再进行删除！', '提醒', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
+        this.visible = true
         return
       }
       this.$confirm('您确定要删除选中的试卷吗？', '提醒', {

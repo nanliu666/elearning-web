@@ -244,9 +244,21 @@ export default {
   },
   mounted() {},
   activated() {
-    this.form = {}
-    this.testPaper = []
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: '',
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
     this.TotalScore = ''
+    this.score = ''
+    this.form.isScore = 0
+
+    this.testPaper = []
     this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.getData()
@@ -402,7 +414,8 @@ export default {
       )
       let list = []
       scoreList.map((it) => {
-        list.push(...it)
+        let newData = _.compact(it)
+        list.push(...newData)
       })
       scoreList = list
       scoreList.length &&
