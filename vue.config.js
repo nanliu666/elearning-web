@@ -102,6 +102,8 @@ module.exports = {
         // 开发环境
         // target: 'http://122.112.183.186/',
         // target: 'http://apidev.epro.com.cn/',
+        // 李宁
+        // target: 'http://139.159.141.248',
 
         // 测试环境
         // target: 'http://139.159.141.248:8081',
