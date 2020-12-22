@@ -328,7 +328,7 @@ export default {
     handleExaminee(row) {
       this.$router.push({
         path: '/examManagement/mark/MarkByExaminee',
-        query: { id: row.id, type: 'edit' }
+        query: { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
       })
     }
   }

@@ -4,14 +4,17 @@
       title="评卷详情"
       show-back
     />
-    <el-card class="examinee-card">
+    <el-card
+      v-if="!_.isEmpty(paperData.examineeAchievementDO)"
+      class="examinee-card"
+    >
       <div class="heder">
-        <span>{{ markDetails.name }}</span>
+        <span>{{ paperData.examineeAchievementDO.examName }}</span>
         <el-tag
-          type="success"
+          :type="getTag(paperData.examineeAchievementDO.status).type"
           style="margin-left: 10px"
         >
-          标签二
+          {{ getTag(paperData.examineeAchievementDO.status).label }}
         </el-tag>
       </div>
       <ul class="card-ul">
@@ -25,34 +28,51 @@
         </li>
         <li class="card-li">
           <span class="li-label">归属组织：</span>
-          <span class="li-value">{{ markDetails.orgName }}</span>
+          <span class="li-value">{{ paperData.examineeAchievementDO.dept }}</span>
         </li>
         <li class="card-li">
           <span class="li-label">考试用卷：</span>
-          <span class="li-value">{{ markDetails.testPaper }}</span>
+          <span class="li-value">{{ paperData.examineeAchievementDO.paperName }}</span>
         </li>
         <li class="card-li">
           <span class="li-label">考试时间：</span>
-          <span class="li-value">{{ markDetails.time }}</span>
+          <span class="li-value">
+            <span>{{ paperData.examineeAchievementDO.examBeginTime }}</span>
+            <span>~</span>
+            <span>{{ paperData.examineeAchievementDO.examEndTime }}</span>
+          </span>
         </li>
         <li class="card-li">
           <span class="li-label">考试用时：</span>
-          <span class="li-value">{{ markDetails.useTime }}</span>
+          <span class="li-value">
+            {{
+              moment(paperData.examineeAchievementDO.examEndTime).diff(
+                moment(paperData.examineeAchievementDO.examBeginTime),
+                'minutes'
+              )
+            }}
+          </span>
         </li>
         <li class="card-li">
           <span class="li-label">试卷总分：</span>
-          <span class="li-value">{{ markDetails.totalScore }}</span>
+          <span class="li-value">{{ paperData.examineeAchievementDO.totalScore }}</span>
         </li>
       </ul>
     </el-card>
-    <el-card class="paper-card">
+    <el-card
+      v-if="paperData.keguan"
+      class="paper-card"
+    >
       <div
         slot="header"
         class="card-header"
       >
         <div class="card-left">
           <span class="title">客观题部分</span>
-          <span class="sub-title">（共20题，共60分）</span>
+          <span class="sub-title">
+            <span>（共{{ paperData.keguan }}题</span>
+            <span>共{{ paperData.scoreKeguan }}分）</span>
+          </span>
         </div>
         <div class="card-right">
           <i class="el-icon-arrow-down" />
@@ -103,6 +123,14 @@
 const nzhcn = require('nzh/cn')
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
 import MarkCom from './components/MarkCom'
+import { getExamineePaperDetail, getExamineePaperDetailist } from '@/api/examManage/mark'
+import { mapGetters } from 'vuex'
+import moment from 'moment'
+const STATUS_STATUS = [
+  { value: '3', label: '待评卷', type: 'success' },
+  { value: '4', label: '阅卷中', type: 'danger' },
+  { value: '5', label: '已评卷', type: 'info' }
+]
 export default {
   name: 'MarkByExaminee',
   components: {
@@ -118,6 +146,7 @@ export default {
   },
   data() {
     return {
+      paperData: {},
       markDetails: {
         name: 'EHS全员硬质考试',
         examName: '',
@@ -139,6 +168,29 @@ export default {
           }
         ]
       }
+    }
+  },
+  computed: {
+    ...mapGetters(['userId'])
+  },
+  activated() {
+    this.initData()
+  },
+  methods: {
+    getTag(status) {
+      return _.find(STATUS_STATUS, (item) => {
+        return item.value === status
+      })
+    },
+    moment,
+    async initData() {
+      this.paperData = await getExamineePaperDetail({ id: this.$route.query.id })
+      this.examData = await getExamineePaperDetailist({
+        userId: this.userId,
+        examineeBatchId: this.$route.query.examineeBatchId,
+        examId: this.$route.query.examId
+      })
+      // console.log('paperData, examData', this.paperData, examData)
     }
   }
 }
