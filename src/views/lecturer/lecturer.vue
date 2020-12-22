@@ -477,7 +477,7 @@ export default {
   // 搜索组件
   components: {
     SeachPopover: () => import('@/components/searchPopOver'),
-    leftColumn: () => import('./components/index')
+    leftColumn: () => import('./components/leftColumn')
   },
   filters: {
     // 过滤不可见的列
