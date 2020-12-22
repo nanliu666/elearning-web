@@ -252,11 +252,11 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/jpge/png/GIF文件，且不超过5M
+                      只能上传jpg/jpge/png/gif文件，且不超过5M
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments && ruleForm.attachments.length"
+                    v-if="ruleForm.attachments.length > 0 && ruleForm.attachments[0].fileUrl"
                     :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
                     class="avatar"
                   />
@@ -520,7 +520,7 @@ export default {
 
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const regx = /^.*\.(jpg|jpge|png|gif)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -528,7 +528,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        this.$message.error('上传图片只支持jpg|jpge|png|gif文件')
         return false
       }
       return true
@@ -552,8 +552,8 @@ export default {
     position: absolute;
     top: 0;
     left: 0;
-    width: 20vw;
-    height: 20vh;
+    width: 100%;
+    height: 100%;
   }
 }
 .addLecturer {

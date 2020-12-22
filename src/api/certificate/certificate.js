@@ -5,14 +5,13 @@ import { del, get, post, put } from '@/router/axios'
  * @param {Object} params - 参数
  * */
 export const getCertificateList = (params) =>
-  get('/api/blade-manage/v1/source/certificate/getCertificateList', params)
+  get('/api/manage/v1/source/certificate/getCertificateList', params)
 
 /**
  * 删除证书模板
  * @param {Object} params - 参数
  * */
-export const delTemplate = (params) =>
-  del('/api/blade-manage/v1/source/certificate/delTemplate', params)
+export const delTemplate = (params) => del('/api/manage/v1/source/certificate/delTemplate', params)
 
 /**
  * 修改证书模板状态
@@ -20,7 +19,7 @@ export const delTemplate = (params) =>
  * */
 export const updateStatus = (params) =>
   put(
-    `/api/blade-manage/v1/source/certificate/updateStatus?templateId=${params.templateId}&choice=${params.choice}`
+    `/api/manage/v1/source/certificate/updateStatus?templateId=${params.templateId}&choice=${params.choice}`
   )
 
 /**
@@ -28,31 +27,31 @@ export const updateStatus = (params) =>
  * @param {Object} params - 参数
  * */
 export const getSingleCertificate = (params) =>
-  get('/api/blade-manage/v1/source/certificate/getSingleCertificate', params)
+  get('/api/manage/v1/source/certificate/getSingleCertificate', params)
 
 /**
  * 添加证书模板
  * @param {Object} params - 参数
  * */
 export const addCertificate = (params) =>
-  post('/api/blade-manage/v1/source/certificate/addCertificate', params)
+  post('/api/manage/v1/source/certificate/addCertificate', params)
 /**
  * 查询证书发放列表
  * @param {Object} params - 参数
  * */
 export const getCertificateGrantList = (params) =>
-  get('/api/blade-manage/v1/source/certificate/getCertificateGrantList', params)
+  get('/api/manage/v1/source/certificate/getCertificateGrantList', params)
 
 /**
  * 删除证书发放明细
  * @param {Object} params - 参数
  * */
 export const delGrantDetails = (params) =>
-  del('/api/blade-manage/v1/source/certificate/delGrantDetails', params)
+  del('/api/manage/v1/source/certificate/delGrantDetails', params)
 
 /**
  * 导出证书发放列表Excel
  * @param {Object} params - 参数
  * */
 export const exportGrantExcel = (params) =>
-  get('/api/blade-manage/v1/source/certificate/exportGrantExcel', params)
+  get('/api/manage/v1/source/certificate/exportGrantExcel', params)
