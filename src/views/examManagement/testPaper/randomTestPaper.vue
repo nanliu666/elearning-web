@@ -119,6 +119,7 @@
                 :min="0"
                 :step="1"
                 :precision="0"
+                @change="questionChange($event, row)"
               />
               <div
                 v-if="row.questionNum > row.totalQuestionNum"
@@ -190,6 +191,7 @@
 <script>
 import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
 import { getcategoryTree } from '@/api/examManage/category'
+import { getQuestionList } from '@/api/examManage/question'
 import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
 
@@ -515,8 +517,11 @@ export default {
       getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
 
-        let children = await this.getNoCategory(relateType)
-        column.props.treeParams.data = [{ id: 0, name: '未分类', children }, ...res]
+        let categoryObject = await this.category(relateType)
+        column.props.treeParams.data = [
+          { id: 0, name: '未分类', relatedNum: categoryObject.totalNum },
+          ...res
+        ]
       })
     },
     /***
@@ -524,15 +529,16 @@ export default {
      * @desc 获取未分类
      *
      * */
-    getNoCategory(relateType) {
+    category(relateType) {
       let params = {
-        type: '0',
-        parentId: '-110',
-        relateType: relateType
+        status: 'normal',
+        pageNo: 1,
+        pageSize: 1,
+        type: relateType
       }
 
       return new Promise((resolve, reject) => {
-        getcategoryTree(params)
+        getQuestionList(params)
           .then((res) => {
             resolve(res)
           })
