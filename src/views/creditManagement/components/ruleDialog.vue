@@ -159,7 +159,13 @@ export default {
         maxlength: 32,
         label: '每日上限',
         span: 24,
-        required: true
+        rules: [
+          {
+            required: true,
+            message: '请输入每日上限',
+            trigger: 'blur'
+          }
+        ]
       },
       {
         prop: 'ruleState',
@@ -178,7 +184,7 @@ export default {
       form: {
         stuName: '',
         sysRuleId: '',
-        dayLimit: undefined,
+        dayLimit: '',
         score: undefined,
         ruleState: ''
       },
