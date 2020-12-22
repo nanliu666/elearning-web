@@ -719,21 +719,15 @@ export default {
       }
     },
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
+        this.tableData = []
         this.tableLoading = true
         let { totalNum, data } = await getBatchList(
           _.assign(this.queryInfo, { id: this.$route.query.id })
         )
         this.tableData = data
         this.page.total = totalNum
-        // let batchNumber = _.find(this.searchConfig.popoverOptions, { field: 'batchNumber' })
-        //  batchNumber.options = []
-        // _.each(data, item => {
-        //   batchNumber.options.push({ value: item.batchNumber, label: `第${Number(item.batchNumber) + 1}批` })
-        // })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -750,7 +744,7 @@ export default {
       this.tableColumns = key === '0' ? ALL_COLUMNS : TABLE_COLUMNS
       this.queryInfo.isTested = key
       let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
-      examSituation.options = this.tableColumns = key === '0' ? isTestOptions : notIsTestOptions
+      examSituation.options = key === '0' ? isTestOptions : notIsTestOptions
       this.loadTableData()
     }
   }
