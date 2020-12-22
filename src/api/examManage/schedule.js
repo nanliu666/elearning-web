@@ -40,9 +40,13 @@ export const getBatchList = (params) => get('/manage/v1/examinee/batch', params)
  */
 export const getBatchexaminee = (params) => get('/manage/v1/exam/arrange/examinee', params)
 /**
- * 获取考生批次
+ * 手工试卷预览
  */
 export const getManualPreview = (params) => get('/manage/v1/exam/preview/manual', params)
+/**
+ * 随机试卷预览
+ */
+export const getRandomPreview = (params) => get('/manage/v1/exam/preview/random', params)
 /**
  * 预生成试卷列表
  */

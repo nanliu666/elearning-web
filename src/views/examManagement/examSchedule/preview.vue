@@ -3,7 +3,16 @@
     <page-header
       title="预览试卷"
       show-back
-    />
+    >
+      <el-button
+        v-if="$route.query.paperType !== 'manual' && !$route.query.isManaged"
+        slot="rightMenu"
+        size="medium"
+        @click="deletePreview"
+      >
+        删除
+      </el-button>
+    </page-header>
     <basic-container>
       <div class="preview-container">
         <div class="preview-title-box">
@@ -72,7 +81,7 @@
 
 <script>
 import QustionPreview from '../question/questionPreview'
-import { getManualPreview } from '@/api/examManage/schedule'
+import { getManualPreview, getRandomPreview, delExamPreview } from '@/api/examManage/schedule'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -117,8 +126,20 @@ export default {
     this.initData()
   },
   methods: {
+    deletePreview() {
+      delExamPreview({ id: this.$route.query.paperId }).then(() => {
+        this.$message.success('删除成功')
+        this.loadTableData('del')
+      })
+    },
     initData() {
-      getManualPreview({ paperId: this.$route.query.paperId }).then((res) => {
+      const loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
+      const basicParams = { paperId: this.$route.query.paperId }
+      const parmas =
+        this.$route.query.paperType === 'manual'
+          ? basicParams
+          : _.assign(basicParams, { previewId: this.$route.query.previewId })
+      loadFun(parmas).then((res) => {
         const data = _.chain(res.questions)
           .groupBy('parentSort')
           .sortBy('parentSort')

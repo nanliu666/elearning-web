@@ -770,7 +770,7 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
-      return getExamList(params)
+      return getExamList(_.assign(params, { status: 'normal' }))
     },
     loadCertificateList(params) {
       return getCertificateList(params)

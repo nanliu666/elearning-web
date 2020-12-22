@@ -52,10 +52,10 @@ const EventColumns = [
   },
   {
     itemType: 'slot',
-    label: '考试安排',
+    label: '考生安排',
     prop: 'examList',
+    rules: [{ required: true, message: '请选择人员', trigger: 'blur' }],
     options: [],
-    required: true,
     span: 24
   }
 ]
