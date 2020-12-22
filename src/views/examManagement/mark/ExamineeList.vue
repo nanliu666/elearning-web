@@ -82,16 +82,23 @@
           {{ row.status | statusFilterer }}
         </template>
         <template #effectiveTime="{row}">
-          {{ row.examBeginTime }} - {{ row.finishTime }}
+          <span v-if="row.answerBeginTime">
+            {{ row.answerBeginTime }} ~ {{ row.answerEndTime }}
+          </span>
+          <span v-else>
+            暂无
+          </span>
         </template>
-
+        <template #score="{row}">
+          {{ row.score != 0 ? row.score : '--' }}
+        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
               type="text"
               @click="handleExaminee(row)"
             >
-              {{ true ? '查看答案' : '开始评卷' }}
+              {{ getHandleButtonText(row) }}
             </el-button>
           </div>
         </template>
@@ -104,6 +111,7 @@
 import SearchPopover from '@/components/searchPopOver/index'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
 import { listManualEvaluationOnce, listManualEvaluationOnceCount } from '@/api/examManage/mark'
+import { mapGetters } from 'vuex'
 let TABLE_COLUMNS = [
   {
     label: '考生姓名',
@@ -136,7 +144,8 @@ let TABLE_COLUMNS = [
   },
   {
     label: '得分',
-    prop: 'totalScore',
+    prop: 'score',
+    slot: true,
     minWidth: 120
   }
 ]
@@ -152,9 +161,9 @@ const TABLE_CONFIG = {
 }
 const STATUS_STATUS = [
   { value: '', label: '全部' },
-  { value: '3', label: '已提交' },
+  { value: '3', label: '待评卷' },
   { value: '4', label: '阅卷中' },
-  { value: '5', label: '已阅卷' }
+  { value: '5', label: '已评卷' }
 ]
 const SEARCH_CONFIG = {
   requireOptions: [
@@ -189,7 +198,7 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'select',
-      field: 'creatorId',
+      field: 'reviewer',
       data: '',
       label: '评卷人',
       options: [],
@@ -252,20 +261,33 @@ export default {
       }
     }
   },
-  activated() {
-    let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
-      return item.field === 'creatorId'
+  computed: {
+    ...mapGetters(['userId'])
+  },
+  async activated() {
+    this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
+    this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })
+    let reviewer = _.filter(this.searchConfig.popoverOptions, (item) => {
+      return item.field === 'reviewer'
     })[0]
-    if (_.size(creatorId.options) === 0) {
+    if (_.size(reviewer.options) === 0) {
       getCreatUsers().then((res) => {
-        if (creatorId) {
-          creatorId.options.push(...res)
+        if (reviewer) {
+          reviewer.options.push(...res)
         }
       })
     }
     this.loadTableData()
   },
   methods: {
+    getHandleButtonText(row) {
+      const STATUS_DICTS = {
+        3: '开始评卷',
+        4: row.currentId === this.userId ? '继续评卷' : '查看答卷',
+        5: '查看答卷'
+      }
+      return STATUS_DICTS[row.status]
+    },
     /**
      * 处理页码改变
      */
@@ -282,13 +304,10 @@ export default {
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
         this.tableData = []
         this.tableLoading = true
-        this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
         let { totalNum, list } = await listManualEvaluationOnce(this.queryInfo)
         this.tableLoading = false
         this.tableData = list
