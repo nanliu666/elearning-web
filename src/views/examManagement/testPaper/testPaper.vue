@@ -311,9 +311,11 @@ export default {
      * @desc 跳转试卷详情
      *
      * */
-    handleDetails(row) {
+    async handleDetails(row) {
       let query = {
-        paperId: row.id
+        paperId: row.id,
+        paperType: row.type,
+        isManaged: true // 从此处进去预览不显示删除
       }
       this.$router.push({
         path: '/examManagement/examSchedule/preview',

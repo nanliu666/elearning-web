@@ -98,6 +98,7 @@ import {
   addKnowledgeCatalog,
   getKnowledgeCatalogList
 } from '@/api/knowledge/knowledge'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -125,6 +126,9 @@ export default {
       loading: false
     }
   },
+  computed: {
+    ...mapGetters(['userId'])
+  },
   methods: {
     loadOrgTree() {
       getKnowledgeCatalogList().then((res) => {
@@ -149,7 +153,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addKnowledgeCatalog(this.form)
+            addKnowledgeCatalog(_.assign(this.form, { creatorId: this.userId }))
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
