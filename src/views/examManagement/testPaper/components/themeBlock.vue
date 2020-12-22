@@ -24,13 +24,23 @@
             class="add"
             @click="handleAddTheme"
           >
-            添加试题
+            <el-button
+              size="mini"
+              type="text"
+              style="font-size: 14px"
+            >
+              添加试题
+            </el-button>
           </div>
-          <div
-            :class="[length === 1 ? 'delete' : 'add']"
-            @click="handleDeleteBlock"
-          >
-            删除试题
+          <div @click="handleDeleteBlock">
+            <el-button
+              size="mini"
+              type="text"
+              :class="[length === 1 ? 'delete' : 'add']"
+              :disabled="length < 2"
+            >
+              删除试题
+            </el-button>
           </div>
         </div>
       </div>
@@ -489,7 +499,7 @@ label {
   font-size: 14px;
   color: #01aafc;
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }
@@ -497,7 +507,7 @@ label {
   font-size: 14px;
   color: rgba(0, 11, 21, 0.25);
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }

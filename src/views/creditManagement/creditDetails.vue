@@ -146,7 +146,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -422,7 +422,9 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
