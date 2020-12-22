@@ -4,7 +4,7 @@
     style="border: 0"
   >
     <div
-      :style="{ height: height }"
+      :style="{ height: innderHeight }"
       class="empty-class"
     >
       <el-image
@@ -35,11 +35,18 @@ export default {
       default: '暂无数据~'
     }
   },
-  mounted() {
-    // 因为element的card组件默认padding为24px，经过多次测试，估摸着4.6倍是最佳显示比例
-    const elCardPadding = 24
-    if (!this.height) {
-      this.height = `${this.$parent.$el.offsetHeight - elCardPadding * 4.6}px`
+  computed: {
+    innderHeight: {
+      get() {
+        return this.height
+      },
+      set() {
+        // 因为element的card组件默认padding为24px，经过多次测试，估摸着4.6倍是最佳显示比例
+        const elCardPadding = 24
+        if (!this.height) {
+          this.height = `${this.$parent.$el.offsetHeight - elCardPadding * 4.6}px`
+        }
+      }
     }
   }
 }
