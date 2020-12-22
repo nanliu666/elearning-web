@@ -1,7 +1,7 @@
 <template>
   <div
     class="approval-index-style fill"
-    :class="{ 'empty-box': emptyOption.visibile }"
+    :class="{ 'empty-box': emptyVisibile }"
     @click="hideVersion"
   >
     <basic-container
@@ -56,10 +56,12 @@
         </div>
       </section>
       <com-empty
-        v-if="emptyOption.visibile"
-        :empty-option="emptyOption"
+        v-if="emptyVisibile"
+        :src="emptySrc"
+        :visibile="emptyVisibile"
+        :text="emptyText"
       />
-      <div v-if="!emptyOption.visibile">
+      <div v-if="!emptyVisibile">
         <section
           v-if="!dragOptions.sortVisible"
           class="approval-section"
@@ -308,11 +310,9 @@ export default {
     return {
       isCurrentProcess: {},
       apprVersionList: [], // 版本暂存
-      emptyOption: {
-        visibile: false,
-        src: fix,
-        text: '暂无数据，请前往设置审批流程 ~'
-      },
+      emptySrc: fix,
+      emptyVisibile: false,
+      emptyText: '暂无数据，请前往设置审批流程 ~',
       isHideList: [],
       loading: true,
       symbolKey: 'xlink:href',
@@ -383,7 +383,7 @@ export default {
         this.loading = false
         const conditionList = [resData.length === 0, res.length === 0]
         if (_.every(conditionList, Boolean)) {
-          this.emptyOption.visibile = true
+          this.emptyVisibile = true
         } else {
           // 因接口返回数据不同，故专门写成如审批列表结构
           let resetData = [

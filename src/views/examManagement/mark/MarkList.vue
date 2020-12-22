@@ -73,8 +73,12 @@
             {{ row.examName }}
           </div>
         </template>
-        <template #status="{row}">
-          {{ row.status | statusFilterer }}
+        <template #createUser1="{row}">
+          {{ moment(row.examBeginTime).diff(moment(row.examEndTime), 'minutes') }}
+        </template>
+
+        <template #completeStatus="{row}">
+          {{ row.completeStatus | statusFilterer }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -86,7 +90,7 @@
             </el-button>
             <el-button
               type="text"
-              @click="handleByPaper(row)"
+              @click="handlePaper(row)"
             >
               逐题评卷
             </el-button>
@@ -99,9 +103,11 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList, getExamList } from '@/api/examManage/schedule'
+import { listManualEvaluation } from '@/api/examManage/mark'
+import { getExamList } from '@/api/examManage/schedule'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
 import { getCategoryList } from '@/api/examManage/category'
+import moment from 'moment'
 let TABLE_COLUMNS = [
   {
     label: '考试名称',
@@ -111,33 +117,34 @@ let TABLE_COLUMNS = [
   },
   {
     label: '状态',
-    prop: 'status',
+    prop: 'completeStatus',
     slot: true,
     minWidth: 120
   },
   {
     label: '考试分类',
-    prop: 'category',
+    prop: 'categoryName',
     minWidth: 120
   },
   {
     label: '关联试卷',
-    prop: 'testPaper',
+    prop: 'testPaperName',
     minWidth: 120
   },
   {
     label: '答题时限（分钟）',
     prop: 'createUser1',
+    slot: true,
     minWidth: 150
   },
   {
     label: '创建人',
-    prop: 'createUser',
+    prop: 'createName',
     minWidth: 120
   },
   {
     label: '有效时间',
-    prop: 'effectiveTime',
+    prop: 'examEndTime',
     minWidth: 120
   }
 ]
@@ -146,24 +153,18 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   handlerColumn: {
     minWidth: 150
   }
 }
 const STATUS_STATUS = [
   { value: '', label: '全部' },
-  { value: '1', label: '未开始' },
-  { value: '2', label: '进行中' },
-  { value: '3', label: '已结束' }
+  { value: '0', label: '未评卷' },
+  { value: '1', label: '评卷中' },
+  { value: '2', label: '已评卷' }
 ]
 
-const TYPE_STATUS = [
-  { value: '', label: '全部' },
-  { value: 'CurrencyExam', label: '通用考试' },
-  { value: 'CourseExam', label: '课程考试' },
-  { value: 'TrainExam', label: '培训班考试' }
-]
 const SEARCH_CONFIG = {
   requireOptions: [
     {
@@ -178,7 +179,7 @@ const SEARCH_CONFIG = {
   popoverOptions: [
     {
       type: 'select',
-      field: 'status',
+      field: 'completeStatus',
       label: '状态',
       data: '',
       options: STATUS_STATUS
@@ -261,15 +262,9 @@ export default {
     statusFilterer(data) {
       if (data) {
         return _.filter(STATUS_STATUS, (item) => {
-          return item.value === data
+          return item.value === data + ''
         })[0].label
       }
-    },
-
-    typeFilterer(data) {
-      return _.filter(TYPE_STATUS, (item) => {
-        return item.value === data
-      })[0].label
     },
     // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
@@ -292,13 +287,10 @@ export default {
       data: [],
       createOrgDailog: false,
       queryInfo: {
+        currentPage: 0,
+        size: 10,
         categoryId: '', // 分类ID
-        creatorId: '', //评卷人id
-        pageNo: '',
-        pageSize: '',
-        status: '', //状态: 未开始-1, 进行中-2, 已结束-3
-        testPaper: '', //关联考卷id
-        type: 0 //状态:0-已发布，1-草稿箱
+        completeStatus: ''
       }
     }
   },
@@ -328,18 +320,19 @@ export default {
     })
   },
   methods: {
+    moment,
     /**
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo.currentPage = param
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo.size = param
       this.loadTableData()
     },
     // 跳转详情
@@ -354,9 +347,9 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getArrangeList(this.queryInfo)
+        let { totalNum, list } = await listManualEvaluation(this.queryInfo)
         this.tableLoading = false
-        this.tableData = data
+        this.tableData = list
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
@@ -368,19 +361,18 @@ export default {
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
-    /**
-     * 编辑
-     */
-    handleExaminee(row) {
-      this.$router.push({
-        path: '/examManagement/mark/MarkByExaminee',
-        query: { id: row.id, type: 'edit' }
-      })
-    },
-    handleByPaper(row) {
+    // 逐题评卷跳转
+    handlePaper(row) {
       this.$router.push({
         path: '/examManagement/mark/MarkByPaper',
-        query: { id: row.id, type: 'edit' }
+        query: { id: row.id, examName: row.examName }
+      })
+    },
+    // 逐人评卷跳转
+    handleExaminee(row) {
+      this.$router.push({
+        path: '/examManagement/mark/ExamineeList',
+        query: { id: row.id, examName: row.examName }
       })
     }
   }
