@@ -93,6 +93,7 @@ export default {
   },
   data() {
     return {
+      testPaperExpiredTime: '',
       dialogVisible: false,
       currentExpand: -1,
       batchList: []
@@ -207,6 +208,7 @@ export default {
         .value()
     },
     addBatch() {
+      this.testPaperExpiredTime = this.$parent.$children[0].testPaperExpiredTime
       this.dialogVisible = true
     },
     collapseExpand(index) {

@@ -35,7 +35,7 @@
 <script>
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import moment from 'moment'
-const EventColumns = [
+const COLUMNS = [
   {
     itemType: 'datePicker',
     span: 24,
@@ -72,7 +72,7 @@ export default {
   },
   data() {
     return {
-      columns: EventColumns,
+      columns: COLUMNS,
       formData: {
         batchNumber: '',
         id: '',
@@ -88,6 +88,19 @@ export default {
       },
       set: function(value) {
         this.$emit('update:visible', value)
+      }
+    }
+  },
+  mounted() {
+    let testPaperExpiredTime = this.$parent.testPaperExpiredTime
+    if (testPaperExpiredTime) {
+      this.columns[0].pickerOptions = {
+        disabledDate(time) {
+          return (
+            moment(new Date()).isAfter(time, 'day') ||
+            moment(testPaperExpiredTime).isSameOrBefore(time, 'day')
+          )
+        }
       }
     }
   },

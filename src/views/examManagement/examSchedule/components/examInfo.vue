@@ -43,6 +43,7 @@
       </template>
       <template #testPaper>
         <lazy-select
+          ref="testPaperRef"
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
@@ -595,6 +596,7 @@ export default {
   },
   data() {
     return {
+      testPaperExpiredTime: '',
       radioList,
       passCondition: [
         {
@@ -658,6 +660,15 @@ export default {
     }
   },
   watch: {
+    'model.testPaper': {
+      handler(value) {
+        const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {
+          return item.id === value
+        })
+        this.testPaperExpiredTime = paper.expiredTime
+      },
+      deep: true
+    },
     'model.passType': {
       handler(value) {
         this.model.passScope = this.passCondition[value - 1].passScope
