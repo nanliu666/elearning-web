@@ -162,7 +162,7 @@ export default {
      * */
     handleNextStep() {
       this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
+        this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
       })
     },
     initData() {
@@ -170,6 +170,9 @@ export default {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
           this.$refs.examInfo.model = res
+          if (res.status === '2') {
+            this.activeStep = 1
+          }
         })
       }
     },
