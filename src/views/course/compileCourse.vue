@@ -207,7 +207,7 @@
                 placeholder="请选择选修类型"
               >
                 <el-option
-                  label="开放"
+                  label="开放选修"
                   :value="1"
                 ></el-option>
                 <el-option
@@ -215,7 +215,7 @@
                   :value="2"
                 ></el-option>
                 <el-option
-                  label="禁止"
+                  label="禁止选修"
                   :value="3"
                 ></el-option>
               </el-select>
@@ -224,9 +224,9 @@
         </el-row>
 
         <!-- 第五行 -->
-        <span>添加标签</span>
+        <!-- <span>添加标签</span> -->
         <el-row class="switch_box">
-          <el-col :span="11">
+          <!-- <el-col :span="11">
             <el-select
               v-model="ruleForm.tagIds"
               multiple
@@ -242,7 +242,7 @@
             </el-select>
           </el-col>
           <el-col :span="2">
-          </el-col>
+          </el-col> -->
           <el-col :span="11">
             <div>
               <span class="switch_title">是否推荐</span>
@@ -996,6 +996,11 @@ export default {
       width: 60%;
       display: flex;
       justify-content: space-around;
+      .schedule1,
+      .schedule2,
+      .schedule3 {
+        cursor: pointer;
+      }
     }
   }
   .content {
@@ -1121,5 +1126,6 @@ export default {
   position: absolute;
   top: 15px;
   left: 20px;
+  cursor: pointer;
 }
 </style>
