@@ -311,6 +311,8 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
+      // console.log(selected)
+
       let someOneHasChilren = _.some(selected, (row) => {
         return !_.isEmpty(row.children)
       })

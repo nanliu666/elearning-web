@@ -83,7 +83,7 @@
               <!-- <el-input v-model="ruleForm.teacherId" maxlength="32"></el-input> -->
               <el-select
                 v-model="ruleForm.teacherId"
-                placeholder="请选择课程类型"
+                placeholder="请选择讲师"
               >
                 <!-- <el-option label="在线课程" :value="1"></el-option> -->
 

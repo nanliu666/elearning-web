@@ -216,7 +216,7 @@
               slot-scope="scope"
             >
               <el-button
-                v-if="scope.row.isTop === 1"
+                v-if="scope.row.isTop == 0"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
@@ -224,7 +224,7 @@
                 &nbsp;&nbsp; 置顶&nbsp;
               </el-button>
               <el-button
-                v-if="scope.row.isTop === 0"
+                v-if="scope.row.isTop == 1"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
@@ -275,37 +275,33 @@
       </div>
     </div>
 
-    <!-- 移动dialog -->
     <el-dialog
-      title="移动"
+      title="移动目录"
       :visible.sync="dialogFormVisible"
-      :modal-append-to-body="false"
-      width="30%"
-      style="padding:30px;"
+      append-to-body
+      width="500px"
     >
-      <p>所在原类目：Java技能课程/Java初级培训</p>
-      <el-form>
-        <el-form-item label="移动到新分类">
-          <el-cascader
-            v-model="CourseNameBar"
-            :options="CourseNameBarData"
-            :props="{ value: 'id', label: 'name' }"
-            @change="handleChange"
-          ></el-cascader>
-        </el-form-item>
-      </el-form>
+      <div style="margin-bottom: 15px">
+        所在目录：{{ moveKnowledgeRow.catalogName }}
+      </div>
+      <common-form
+        ref="form"
+        :columns="formColumns"
+        :model="formData"
+      >
+      </common-form>
       <div
         slot="footer"
         class="dialog-footer"
       >
         <el-button @click="dialogFormVisible = false">
-          取 消
+          取消
         </el-button>
         <el-button
           type="primary"
-          @click="isMoveCourse()"
+          @click="isMoveCourse"
         >
-          确 定
+          保存
         </el-button>
       </div>
     </el-dialog>
@@ -321,6 +317,7 @@ import {
   updateCourseTop,
   moveCourse
 } from '@/api/course/course'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -507,6 +504,35 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+const FORM_COLUMNS = [
+  {
+    label: '移动到新目录',
+    itemType: 'treeSelect',
+    prop: 'catalogId',
+    required: true,
+    span: 24,
+    props: {
+      selectParams: {
+        placeholder: '请选择所在目录',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        },
+        required: true
+      }
+    }
+  }
+]
 export default {
   // 搜索组件
   components: {
@@ -520,6 +546,11 @@ export default {
 
   data() {
     return {
+      formData: {
+        catalogId: ''
+      },
+      formColumns: FORM_COLUMNS,
+      moveKnowledgeRow: {},
       // 移动数据
       CourseNameBarData: [], //显示
       CourseNameBar: [],
@@ -575,25 +606,84 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 打开移动弹窗
+    moveFun(row) {
+      this.dialogFormVisible = true
+      this.moveKnowledgeRow = row
+    },
+
     toEstablishCourse() {
       this.$router.push({ path: '/course/establishCourse' })
     },
     // 移动
-    isMoveCourse() {
-      let params = {
-        catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
-        courseId: this.moveId //课程
-      }
-      moveCourse(params).then(() => {
-        this.dialogFormVisible = false
+    // isMoveCourse() {
+    //   let params = {
+    //     catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
+    //     courseId: this.moveId //课程
+    //   }
+    //   moveCourse(params).then(() => {
+    //     this.dialogFormVisible = false
+    //   })
+    // },
+    // 保存移动
+    async isMoveCourse() {
+      this.$refs.form.validate().then((data) => {
+        if (data) {
+          this.dialogFormVisible = false
+          moveCourse({
+            courseId: this.moveKnowledgeRow.id,
+            catalogId: this.formData.catalogId
+          }).then(() => {
+            this.$message.success('移动成功')
+            this.getInfo()
+          })
+        }
       })
     },
     // 拿到移动数据
-    isgetCatalog() {
-      getCatalog().then((res) => {
-        // console.log(res)
-        this.CourseNameBarData = res
+    getCategoryList() {
+      return getCatalog().then((res) => {
+        return _.concat(
+          [
+            {
+              id: '',
+              name: '全部'
+            }
+          ],
+          res
+        )
       })
+    },
+    async isgetCatalog() {
+      // getCatalog().then((res) => {
+      //   // console.log(res)
+      //   this.CourseNameBarData = res
+      // })
+
+      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
+      let moveCatalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
+      // if (tagId) {
+      //   getKnowledgeManageTaglist().then(
+      //     (res) =>
+      //       (tagId.options = _.concat(
+      //         [
+      //           {
+      //             id: '',
+      //             name: '全部'
+      //           }
+      //         ],
+      //         res
+      //       ))
+      //   )
+      // }
+      let catalogList = await this.getCategoryList()
+      if (catalogId) {
+        catalogId.config.treeParams.data = catalogList
+      }
+      if (moveCatalogId) {
+        moveCatalogId.props.treeParams.data = _.drop(catalogList)
+      }
     },
     // 移动data
     handleChange() {
@@ -683,8 +773,9 @@ export default {
       }
       if (e === 'move') {
         // 移动
-        this.dialogFormVisible = true
-        this.moveId = row.id
+        // this.dialogFormVisible = true
+        // this.moveId = row.id
+        this.moveFun(row)
       }
     },
     //  处理页码改变
