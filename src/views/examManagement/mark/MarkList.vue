@@ -260,7 +260,7 @@ export default {
   components: { SearchPopover },
   filters: {
     statusFilterer(data) {
-      if (data) {
+      if (data !== '') {
         return _.filter(STATUS_STATUS, (item) => {
           return item.value === data + ''
         })[0].label
@@ -337,7 +337,7 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/examManagement/mark/ExamineeList', query: { id: row.id } })
+      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
     },
     // 加载函数
     async loadTableData() {

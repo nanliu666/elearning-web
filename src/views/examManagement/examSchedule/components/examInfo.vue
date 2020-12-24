@@ -4,6 +4,9 @@
       ref="form"
       :model="model"
       :columns="columns"
+      :config="{
+        disabled: model.status && model.status !== '1'
+      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -665,7 +668,9 @@ export default {
         const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {
           return item.id === value
         })
-        this.testPaperExpiredTime = paper.expiredTime
+        if (paper) {
+          this.testPaperExpiredTime = paper.expiredTime
+        }
       },
       deep: true
     },
