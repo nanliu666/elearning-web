@@ -236,7 +236,7 @@
                 v-if="scope.row.isPutaway === 1"
                 type="text"
                 size="medium"
-                @click="alterIsPutaway(scope.row.id, 1)"
+                @click="alterIsPutaway(scope.row.id, 0)"
               >
                 下架
               </el-button>
@@ -244,7 +244,7 @@
                 v-if="scope.row.isPutaway === 0"
                 type="text"
                 size="medium"
-                @click="alterIsPutaway(scope.row.id, 0)"
+                @click="alterIsPutaway(scope.row.id, 1)"
               >
                 上架
               </el-button>
@@ -700,7 +700,7 @@ export default {
     alterIsPutaway(id, i) {
       // console.log({ id })
       let lang = ''
-      if (i) {
+      if (!i) {
         lang = '您确定要下架该课程吗？下架后，该课程将不能访问。'
       } else {
         lang = '您确定要上架该课程吗？'
@@ -809,6 +809,8 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
+
+            this.getInfo()
           })
         })
         .catch(() => {
@@ -936,6 +938,7 @@ export default {
       height: 50px;
       line-height: 50px;
       margin-left: 30px;
+      cursor: pointer;
     }
     .select {
       border-bottom: 2px solid #1677ff;

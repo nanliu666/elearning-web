@@ -153,6 +153,7 @@
                 v-model="ruleForm.period"
                 controls-position="right"
                 :min="0"
+                :max="100"
                 :step="0.5"
                 @change="handleChange"
               ></el-input-number>
@@ -167,6 +168,7 @@
                 controls-position="right"
                 :min="0"
                 :step="0.5"
+                :max="100"
                 @change="handleChange"
               ></el-input-number>
             </el-form-item>
@@ -644,7 +646,7 @@ export default {
         electiveType: 1,
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
-        tagIds: '', //标签
+        // tagIds: [], //标签
         isRecommend: '', //是否推荐
         passCondition: '', //通过条件
         period: '', //时长

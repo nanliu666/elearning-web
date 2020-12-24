@@ -324,6 +324,7 @@ export default {
           selectedIds.push(item.id)
         })
         this.deleteFun(selectedIds.join(','))
+        // console.log(selectedIds);
       }
     },
     // 加载函数
