@@ -9,13 +9,10 @@
         ref="table"
         :columns="columnsVisible | columnsFilter"
         :config="tableConfig"
-        :page="page"
         :data="tableData"
         :loading="tableLoading"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
       >
-        <template #topMenu>
+        <template slot="topMenu">
           <div class="transitionBox">
             <div class="searchBox">
               <div class="search-box">
@@ -84,7 +81,7 @@
               type="text"
               @click="handleIsStart(row)"
             >
-              停用
+              {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
           </div>
         </template>
@@ -94,39 +91,38 @@
 </template>
 
 <script>
-import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
+import { getListSysRulus, putEditSysRulus } from '@/api/credit/credit'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '系统规则来源',
-    prop: 'name',
+    prop: 'sysRuleSource',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '规则来源说明',
-    prop: 'status',
-    minWidth: 150,
-    formatter: (row) => {
-      return (
-        {
-          normal: '正常',
-          expired: '已过期'
-        }[row.status] || ''
-      )
-    }
+    prop: 'ruleState',
+    minWidth: 150
   },
   {
     label: '更新时间',
-    prop: 'expiredTime',
+    prop: 'updateTime',
     minWidth: 120
   },
   {
     label: '状态',
-    slot: true,
-    prop: 'expiredwTime',
-    minWidth: 320
+    prop: 'status',
+    minWidth: 120,
+    formatter: (row) => {
+      return (
+        {
+          0: '停用',
+          1: '正常'
+        }[row.status] || ''
+      )
+    }
   }
 ]
 const TABLE_CONFIG = {
@@ -135,7 +131,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -150,11 +146,6 @@ export default {
   },
   data() {
     return {
-      page: {
-        currentPage: 1,
-        pageSize: 10,
-        total: 0
-      },
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
@@ -165,7 +156,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'search',
+            field: 'sys_rule_source',
             label: '',
             data: '',
             options: [],
@@ -189,37 +180,24 @@ export default {
      * @params row 规则数据
      * */
     handleIsStart(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
+      let text =
+        row.status == 0
+          ? '您确定要启用该系统规则吗？'
+          : '您确定要停用该系统规则来源吗？停用后，该系统规则来源将暂停使用。'
+      this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         let params = {
-          id: row.id
+          id: row.id,
+          status: row.status == 0 ? '1' : '0'
         }
-        deleteTestPaper(params).then(() => {
+        putEditSysRulus(Object.assign(params, this.searchParams)).then(() => {
           this.$message.success('修改成功')
           this.loadTableData()
         })
       })
-    },
-    /**
-     * @author guanfenda
-     * @desc 加载第几页方法
-     * @params param 页数
-     * */
-    handleCurrentPageChange(param) {
-      this.page.currentPage = param
-      this.loadTableData()
-    },
-    /**
-     * @author guanfenda
-     * @desc 加载数据一次多少条
-     * @params 加载一次的数量
-     * */
-    handlePageSizeChange(param) {
-      this.page.pageSize = param
-      this.loadTableData()
     },
     // 加载函数
     /**
@@ -235,13 +213,10 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getTestPaperList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-          (res) => {
-            this.tableData = res.data
-            this.page.total = res.totalNum
-            this.tableLoading = false
-          }
-        )
+        getListSysRulus(_.assign(params)).then((res) => {
+          this.tableData = res
+          this.tableLoading = false
+        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -255,7 +230,6 @@ export default {
      * */
     handleSearch(params) {
       this.searchParams = params
-      this.page.currentPage = 1
       this.loadTableData()
     }
   }
@@ -342,10 +316,16 @@ export default {
   display: none;
 }
 
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

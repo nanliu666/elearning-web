@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header
-      title="新建随机试卷"
+      :title="form.id && !copy ? '编辑随机试卷' : '新建随机试卷'"
       show-back
     />
     <basic-container
@@ -46,9 +46,9 @@
             试题设置:
             <span
               class="tip"
-            >（当前总分数{{ TotalScore }}分<span
+            >（当前总分数{{ totalScore }}分<span
               v-if="form.totalScore"
-            >，剩余分数：{{ score }}分</span>）</span>
+            >，剩余分数：{{ surplusScore }}分</span>）</span>
           </div>
           <div>
             <el-button
@@ -119,6 +119,7 @@
                 :min="0"
                 :step="1"
                 :precision="0"
+                @change="questionChange($event, row)"
               />
               <div
                 v-if="row.questionNum > row.totalQuestionNum"
@@ -190,6 +191,7 @@
 <script>
 import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
 import { getcategoryTree } from '@/api/examManage/category'
+import { getQuestionList } from '@/api/examManage/question'
 import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
 
@@ -238,16 +240,18 @@ const BASE_COLUMNS = [
     precision: 1,
     step: 0.1,
     maxlength: 32,
+    required: false,
     span: 11,
     label: '计划总分'
   },
   {
     prop: 'isScore',
     itemType: 'radio',
+    type: 'radio',
     label: '是否折算成计划分数',
     span: 11,
     offset: 2,
-    required: false,
+    required: true,
     options: [
       { label: '是', value: 1 },
       { label: '否', value: 0 }
@@ -349,6 +353,17 @@ export default {
   },
   data() {
     return {
+      copy: '',
+      form: {
+        name: '',
+        categoryId: '',
+        expiredTime: '',
+        totalScore: '',
+        remark: '',
+        isScore: '',
+        isShowScore: '',
+        isMulti: ''
+      },
       loading: false,
       column: {
         page: {
@@ -386,8 +401,8 @@ export default {
           }
         }
       },
-      TotalScore: 0,
-      score: 0,
+      totalScore: 0,
+      surplusScore: 0,
       valid: false,
       options: QUESTION_TYPE_MAP,
       props: { multiple: true },
@@ -406,38 +421,49 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      columns: BASE_COLUMNS,
-      form: {}
+      columns: BASE_COLUMNS
     }
   },
   watch: {
-    /***
-     * @author guanfenda
-     * @desc 修改了试题设置，修改分数重新计算剩余分数
-     * */
-    TotalScore(val) {
-      if (this.form.totalScore) {
-        this.score = this.form.totalScore - val
-      }
-    },
     /**
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
     'form.totalScore'() {
       this.questionChange()
+    },
+    'form.isScore'() {
+      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      if (this.form.isScore) {
+        totalScore.required = true
+      } else {
+        totalScore.required = false
+      }
     }
   },
   mounted() {},
   activated() {
-    this.form = {}
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: '',
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
     this.tableData = []
     this.options = []
     this.valid = false
+    this.totalScore = ''
+    this.surplusScore = ''
+    this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
+    this.copy = this.$route.query.copy
     this.getData()
     this.getTestPaperCategory()
     if (!this.$route.query.id) {
@@ -481,9 +507,37 @@ export default {
         type: '0',
         relateType: relateType
       }
-      getcategoryTree(params).then((res) => {
+      getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
-        column.props.treeParams.data = res
+
+        let categoryObject = await this.category(relateType)
+        column.props.treeParams.data = [
+          { id: 0, name: '未分类', relatedNum: categoryObject.totalNum },
+          ...res
+        ]
+      })
+    },
+    /***
+     * @author guanfendca
+     * @desc 获取未分类
+     *
+     * */
+    category(relateType) {
+      let params = {
+        status: 'normal',
+        pageNo: 1,
+        pageSize: 1,
+        type: relateType
+      }
+
+      return new Promise((resolve, reject) => {
+        getQuestionList(params)
+          .then((res) => {
+            resolve(res)
+          })
+          .finally(() => {
+            reject()
+          })
       })
     },
     /**
@@ -513,6 +567,7 @@ export default {
      * @desc 查找试卷详情
      * */
     getData() {
+      this.columns.find((it) => it.prop === 'name').disabled = false
       if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
       let params = {
         id: this.$route.query.id
@@ -550,6 +605,7 @@ export default {
             this.getTopicCategory(data.type, data.column)
           })
           this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
+          !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
         })
         .finally(() => {
           this.loading = false
@@ -608,13 +664,17 @@ export default {
      * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
      * */
     questionChange() {
-      let scoreList = _.compact(this.tableData.map((it) => it.score))
-      scoreList.length === 0 && (this.score = this.form.totalScore)
+      let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
+      scoreList.length === 0 && (this.surplusScore = this.form.totalScore)
+      let totalScore = 0
       scoreList.length &&
-        (this.TotalScore = scoreList.reduce((prev, cur) => {
+        (totalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.score = this.form.totalScore - this.TotalScore
+      this.totalScore = totalScore.toFixed(1).toString()
+
+      let score = (this.form.totalScore - this.totalScore) * 10
+      this.surplusScore = (Math.round(score) / 10).toString()
     },
     /**
      * @author guanfenda
@@ -627,6 +687,7 @@ export default {
       }, 0)
       let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
       row.questionNum = random(1, row.totalQuestionNum)
+      this.questionChange()
     },
     /**
      * @author guanfenda

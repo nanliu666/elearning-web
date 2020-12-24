@@ -4,7 +4,7 @@
       class="addLecturer_head"
       @click="toLecturer"
     >
-      <i class="el-icon-arrow-left"></i> 添加讲师
+      <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '添加讲师' }}
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
@@ -27,17 +27,11 @@
                 label="讲师姓名"
                 prop="userId"
               >
-                <el-select
+                <el-input
                   v-model="ruleForm.userId"
-                  placeholder="请选择讲师姓名"
-                >
-                  <el-option
-                    v-for="(item, index) in Teacherlist"
-                    :key="index"
-                    :label="item.name"
-                    :value="item.userId"
-                  ></el-option>
-                </el-select>
+                  maxlength="32"
+                  disabled
+                ></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="2">
@@ -50,7 +44,7 @@
                 <el-input
                   v-model="ruleForm.phonenum"
                   maxlength="32"
-                  :disabled="disableDdata.disabledPhonenum"
+                  disabled
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -66,7 +60,7 @@
                 <el-input
                   v-model="ruleForm.userEmail"
                   maxlength="32"
-                  :disabled="disableDdata.disabledUserEmail"
+                  disabled
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -79,15 +73,15 @@
               >
                 <el-radio
                   v-model="ruleForm.sex"
-                  label="1"
-                  :disabled="disableDdata.disabledSex"
+                  :label="1"
+                  disabled
                 >
                   男
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.sex"
-                  label="0"
-                  :disabled="disableDdata.disabledSex"
+                  :label="0"
+                  disabled
                 >
                   女
                 </el-radio>
@@ -195,13 +189,13 @@
               >
                 <el-radio
                   v-model="ruleForm.isLatestTeacher"
-                  label="1"
+                  :label="1"
                 >
                   是
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.isLatestTeacher"
-                  label="0"
+                  :label="0"
                 >
                   否
                 </el-radio>
@@ -218,13 +212,13 @@
               >
                 <el-radio
                   v-model="ruleForm.isPopularTeacher"
-                  label="1"
+                  :label="1"
                 >
                   是
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.isPopularTeacher"
-                  label="2"
+                  :label="0"
                 >
                   否
                 </el-radio>
@@ -258,12 +252,12 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/jpge/png/GIF文件，且不超过5M
+                      只能上传jpg/jpge/png/gif文件，且不超过5M
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments.length"
-                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].url"
+                    v-if="ruleForm.attachments.length > 0 && ruleForm.attachments[0].fileUrl"
+                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
                     class="avatar"
                   />
                 </common-upload>
@@ -302,12 +296,7 @@
 </template>
 
 <script>
-import {
-  addTeacher,
-  queryTeacherlist,
-  listTeacherCategory,
-  getTeacher
-} from '@/api/lecturer/lecturer'
+import { queryTeacherlist, listTeacherCategory, getTeacher, update } from '@/api/lecturer/lecturer'
 // import { uploadQiniu } from '@/util/uploadQiniu'
 export default {
   components: {
@@ -315,11 +304,7 @@ export default {
   },
   data() {
     return {
-      disableDdata: {
-        disabledPhonenum: false,
-        disabledUserEmail: false,
-        disabledSex: false
-      },
+      userIdData: '',
       Teacherlist: [], //讲师的数据
       data: [], //分类列表
       checkboxVal: [],
@@ -342,51 +327,54 @@ export default {
         phonenum: '',
         sex: '',
         attachments: [],
-        isRecommend: ''
+        isRecommend: 0,
+        isLatestTeacher: 0,
+        isPopularTeacher: 0
       },
       rules: {
         userId: [{ required: true, message: '请选择讲师', trigger: 'blur' }],
-        categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
+        // categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
         type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }]
       }
     }
   },
   watch: {
-    'ruleForm.name': {
-      handler(n) {
-        this.Teacherlist.forEach((item, index) => {
-          if (item.userId == n) {
-            this.ruleForm.phonenum = this.Teacherlist[index].phonenum
-            this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
-            this.ruleForm.userEmail = this.Teacherlist[index].userEmail
-            this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
-            this.ruleForm.sex = this.Teacherlist[index].sex
-            this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
-          }
-        })
-      }
-      // immediate: true,  //刷新加载 立马触发一次handler
-      // deep: true  // 可以深度检测到 person 对象的属性值的变化
-    }
+    // 'ruleForm.name': {
+    //   handler(n) {
+    //     this.Teacherlist.forEach((item, index) => {
+    //       if (item.userId == n) {
+    //         this.ruleForm.phonenum = this.Teacherlist[index].phonenum
+    //         this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
+    //         this.ruleForm.userEmail = this.Teacherlist[index].userEmail
+    //         this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
+    //         this.ruleForm.sex = this.Teacherlist[index].sex
+    //         this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
+    //       }
+    //     })
+    //   }
+    // immediate: true,  //刷新加载 立马触发一次handler
+    // deep: true  // 可以深度检测到 person 对象的属性值的变化
+    // }
   },
   created() {
+    this.isgetTeacher()
     this.isqueryTeacherlist()
     this.islistTeacherCategory()
-    this.isgetTeacher()
   },
   methods: {
     // 拿到数据
-    isgetTeacher() {
-      let params = {
-        id: ''
-      }
-      params.id = this.$route.query.id
-      if (params.id) {
-        params.id = params.id.trim()
-        getTeacher(params).then((res) => {
-          this.ruleForm = res.teacherInfo
-        })
-      }
+    async isgetTeacher() {
+      let data = await getTeacher({ id: this.$route.query.id })
+      // 存userId
+      // console.log(data.teacherInfo)
+      this.userIdData = data.teacherInfo.userId
+      data.teacherInfo.attachments = []
+      data.teacherInfo.attachments.push({ fileUrl: data.teacherInfo.photo })
+      data.teacherInfo.userId = this.$route.query.name
+      data.teacherInfo.userEmail = this.$route.query.userEmail
+      data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
+      data.teacherInfo.phonenum = this.$route.query.phonenum
+      this.ruleForm = data.teacherInfo
     },
 
     // 点击节点
@@ -500,7 +488,9 @@ export default {
             type: 'warning'
           })
         } else {
-          addTeacher(this.ruleForm).then(() => {
+          this.ruleForm.teacherId = this.$route.query.id
+          this.ruleForm.userId = this.userIdData
+          update(this.ruleForm).then(() => {
             if (i) {
               this.toLecturer()
               this.ruleForm = {
@@ -530,7 +520,7 @@ export default {
 
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const regx = /^.*\.(jpg|jpge|png|gif)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -538,7 +528,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        this.$message.error('上传图片只支持jpg|jpge|png|gif文件')
         return false
       }
       return true
@@ -549,19 +539,21 @@ export default {
 
 <style lang="scss" scoped>
 .upload-demo {
-  width: 20vw;
-  height: 20vh;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 3vh 0 0 4vw;
+  // width: 20vw;
+  // height: 20vh;
+  // border: 1px solid #ccc;
+  // border-radius: 4px;
+  // padding: 3vh 0 0 4vw;
+  // overflow: hidden;
+  padding-right: 10px;
   position: relative;
-  overflow: hidden;
+
   .avatar {
     position: absolute;
     top: 0;
     left: 0;
-    width: 20vw;
-    height: 20vh;
+    width: 100%;
+    height: 100%;
   }
 }
 .addLecturer {
@@ -570,6 +562,8 @@ export default {
     line-height: 60px;
     font-size: 16px;
     color: #333;
+    font-size: 18px;
+    font-weight: bold;
   }
   .addLecturer_content {
     background-color: #fff;

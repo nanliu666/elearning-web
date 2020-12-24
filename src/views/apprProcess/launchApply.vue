@@ -1,7 +1,7 @@
 <template>
   <div class="launch-style fill">
     <basicContainer block>
-      <div v-if="!emptyOption.visibile">
+      <div v-if="!emptyVisibile">
         <ul
           v-for="(item, index) in processListData"
           :key="index"
@@ -63,8 +63,10 @@
         </ul>
       </div>
       <com-empty
-        v-if="emptyOption.visibile"
-        :empty-option="emptyOption"
+        v-if="emptyVisibile"
+        :src="emptySrc"
+        :visibile="emptyVisibile"
+        :text="emptyText"
       />
     </basicContainer>
   </div>
@@ -82,11 +84,9 @@ export default {
   },
   data() {
     return {
-      emptyOption: {
-        visibile: false,
-        src: fix,
-        text: '暂无数据，请前往设置审批流程 ~'
-      },
+      emptySrc: fix,
+      emptyVisibile: false,
+      emptyText: '暂无数据，请前往设置审批流程 ~',
       symbolKey: 'xlink:href',
       processListData: [],
       currentIndexList: []
@@ -109,7 +109,7 @@ export default {
       }
       getUserProcessList(parmas).then((res) => {
         if (res.length === 0) {
-          this.emptyOption.visibile = true
+          this.emptyVisibile = true
         } else {
           this.processListData = res
         }

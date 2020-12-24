@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    :title="form.id ? '编辑学分规则' : '新建学分规则'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -68,7 +68,7 @@
         <el-button
           v-else
           size="medium"
-          @click="onClose"
+          @click="onContinue"
         >
           完成并创建规则
         </el-button>
@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
+import { postAddStudentsRulus, getListSysRulus, editStudentsRulus } from '@/api/credit/credit'
 
 export default {
   name: 'RuleDialog',
@@ -119,48 +119,56 @@ export default {
     }
     const BASE_COLUMNS = [
       {
-        prop: '学分规则名称',
+        prop: 'stuName',
         itemType: 'input',
-        label: '考生姓名',
+        label: '学分规则名称',
+        maxlength: 10,
+        minlength: 2,
         span: 24,
         required: true
       },
       {
-        prop: 'examTime',
+        prop: 'sysRuleId',
         itemType: 'select',
         label: '规则来源',
         span: 24,
         required: true,
         props: {
-          label: 'label',
-          value: 'value'
+          label: 'sysRuleSource',
+          value: 'id'
         },
-        options: [
-          { label: '已发布', value: '5' },
-          { label: '已提交', value: '4' },
-          { label: '已阅卷', value: '3' },
-          { label: '考试中', value: '2' },
-          { label: '阅卷中', value: '1' }
-        ]
+        options: []
       },
       {
-        prop: 'answerTime',
-        itemType: 'input',
-        type: 'Number',
+        prop: 'score',
+        itemType: 'inputNumber',
+        min: 0,
+        precision: 1,
+        step: 0.1,
+        maxlength: 32,
         label: '学分分值',
         span: 24,
         required: true
       },
       {
-        prop: 'score',
-        itemType: 'input',
-        type: 'Number',
+        prop: 'dayLimit',
+        itemType: 'inputNumber',
+        min: 0,
+        precision: 0,
+        step: 1,
+        maxlength: 32,
         label: '每日上限',
         span: 24,
-        required: true
+        rules: [
+          {
+            required: true,
+            message: '请输入每日上限',
+            trigger: 'blur'
+          }
+        ]
       },
       {
-        prop: 'status',
+        prop: 'ruleState',
         itemType: 'input',
         type: 'textarea',
         label: '分值规则说明',
@@ -174,33 +182,27 @@ export default {
       loading: false,
       roleVisible: true,
       form: {
-        answerTime: '',
-        totalScore: '',
-        examineeName: '',
-        examTime: '',
-        score: '',
-        isPass: '',
-        status: ''
+        stuName: '',
+        sysRuleId: '',
+        dayLimit: '',
+        score: undefined,
+        ruleState: ''
       },
       jobDicData: []
     }
   },
   watch: {
     row: {
-      handler: function(newVal) {
-        let { answerTime, totalScore, name, examTime, score, isPass, status, id } = newVal
-        examTime = examTime.split('~')
-        totalScore = totalScore / 10
+      handler(val) {
+        let { id_str, stu_name, sys_rule_id_str, day_limit, score, rule_state } = val
         score = score / 10
         this.form = {
-          answerTime: answerTime / 60,
-          totalScore,
-          name,
-          examTime,
+          id: id_str,
+          stuName: stu_name,
+          sysRuleId: sys_rule_id_str,
+          dayLimit: day_limit,
           score,
-          isPass: isPass == 0 ? false : true,
-          status,
-          id
+          ruleState: rule_state
         }
       },
       immediate: true,
@@ -209,24 +211,42 @@ export default {
     roleVisible: {
       handler: function() {
         this.$emit('update:visible', this.roleVisible)
+        this.$emit('update:row', {})
       }
     }
   },
-  mounted() {},
+  mounted() {
+    this.getsysRule()
+  },
   methods: {
-    onsubmit() {
+    getsysRule() {
+      let params = {
+        status: '1'
+      }
+      getListSysRulus(params).then((res) => {
+        this.columns.find((it) => it.prop == 'sysRuleId').options = res
+      })
+    },
+    onContinue() {
+      this.onsubmit({ isContinue: true })
+    },
+    onsubmit({ isContinue = false }) {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
         let form = _.cloneDeep(this.form)
         let params = {
           ...form,
-          totalScore: form.totalScore * 10,
           score: form.score * 10
         }
-        getExamineeAchievementEdit(params).then(() => {
-          this.$message.success('修改成功')
+        let rule = form.id ? editStudentsRulus : postAddStudentsRulus
+        rule(params).then(() => {
+          this.$message.success('提交成功')
           this.$emit('loadData')
-          this.onClose()
+          if (isContinue) {
+            this.$refs.form.resetFields()
+          } else {
+            this.onClose()
+          }
         })
       })
     },
@@ -268,6 +288,7 @@ export default {
 /deep/ .el-form-item {
   margin-bottom: 24px;
 }
+
 .dialog-footer {
   text-align: right;
 }
@@ -281,9 +302,11 @@ export default {
 /deep/ .el-radio {
   margin-right: 20px;
 }
+
 /deep/ .el-input__icon .el-input__validateIcon .el-icon-circle-close {
   display: none;
 }
+
 .answerTime {
   font-size: 14px;
   margin-right: 5px;

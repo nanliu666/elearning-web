@@ -4,6 +4,9 @@
       ref="form"
       :model="model"
       :columns="columns"
+      :config="{
+        disabled: model.status && model.status !== '1'
+      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -43,6 +46,7 @@
       </template>
       <template #testPaper>
         <lazy-select
+          ref="testPaperRef"
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
@@ -180,8 +184,8 @@
       </template>
       <template #answerMode1>
         <el-radio-group
-          v-model="currentRadio"
-          class="radio-group"
+          v-model="model.multipleChoice"
+          class="radio-group-class"
         >
           <el-radio
             v-for="(item, index) in radioList"
@@ -199,6 +203,19 @@
             >
               <i class="el-icon-question" />
             </el-tooltip>
+            <div
+              v-if="index > 1 && model.multipleChoice === index"
+              class="multiple-text"
+            >
+              <span v-if="index === 2">得扣</span>
+              <span v-if="index === 3">扣</span>
+              <span v-if="index === 4">得</span>
+              <el-input
+                v-model.number="model.multipleChoiceValue"
+                style="width: 60px; margin: 0 4px"
+              />
+              <span>分</span>
+            </div>
           </el-radio>
         </el-radio-group>
       </template>
@@ -278,7 +295,7 @@ const EventColumns = [
     itemType: 'treeSelect',
     span: 11,
     offset: 2,
-    required: true,
+    required: false,
     options: [],
     prop: 'categoryId',
     label: '考试分类',
@@ -582,7 +599,7 @@ export default {
   },
   data() {
     return {
-      currentRadio: 0,
+      testPaperExpiredTime: '',
       radioList,
       passCondition: [
         {
@@ -596,6 +613,8 @@ export default {
       ],
       columns: EventColumns,
       model: {
+        multipleChoice: 0, // 多选选哪个？
+        multipleChoiceValue: '', // 多选分值
         certificateId: '',
         certificate: true,
         categoryId: '',
@@ -644,6 +663,17 @@ export default {
     }
   },
   watch: {
+    'model.testPaper': {
+      handler(value) {
+        const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {
+          return item.id === value
+        })
+        if (paper) {
+          this.testPaperExpiredTime = paper.expiredTime
+        }
+      },
+      deep: true
+    },
     'model.passType': {
       handler(value) {
         this.model.passScope = this.passCondition[value - 1].passScope
@@ -740,7 +770,11 @@ export default {
     }
   },
   created() {
-    getCategoryList().then((res) => {
+    getCategoryList({
+      parentId: 0,
+      type: '0',
+      name: ''
+    }).then((res) => {
       let categoryId = _.filter(this.columns, (item) => {
         return item.prop === 'categoryId'
       })[0]
@@ -749,10 +783,10 @@ export default {
   },
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: this.$store.getters.userInfo.org_id }))
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
-      return getExamList(params)
+      return getExamList(_.assign(params, { status: 'normal' }))
     },
     loadCertificateList(params) {
       return getCertificateList(params)
@@ -791,14 +825,26 @@ export default {
   .multiple-title {
     color: rgba(0, 11, 21, 0.65);
   }
-  .radio-group {
+  .radio-group-class {
     display: flex;
-    // flex-direction: column;
+    flex-direction: column;
     margin-top: -20px;
+    /deep/ .el-radio__label {
+      display: flex;
+      align-items: center;
+    }
     .radio-li {
       // margin: 10px 0;
       margin-right: 30px;
+      display: flex;
+      align-items: center;
       margin-top: 10px;
+      height: 34px;
+      .multiple-text {
+        align-items: center;
+        display: flex;
+        margin-left: 10px;
+      }
     }
   }
   .title-box {

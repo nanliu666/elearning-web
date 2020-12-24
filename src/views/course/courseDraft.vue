@@ -18,7 +18,7 @@
       id="isdialog_show"
     >
       <div>如何创建课程：</div>
-      <div>1.先在 <span @click="toCatalog">【课程中心-目录管理】</span> 完善展示的目录配置；</div>
+      <div>1.先在 <span @click="toCatalog">【课程中心-分类管理】</span> 完善展示的分类配置；</div>
       <div>
         2.开始创建课程。
       </div>
@@ -285,7 +285,7 @@
     >
       <p>所在原类目：Java技能课程/Java初级培训</p>
       <el-form>
-        <el-form-item label="移动到新目录">
+        <el-form-item label="移动到新分类">
           <el-cascader
             v-model="CourseNameBar"
             :options="CourseNameBarData"
@@ -420,20 +420,20 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    config: { placeholder: '请选择' },
     data: '',
     field: 'teacherName',
     label: '讲师',
     type: 'select',
-    options: []
+    options: [],
+    config: { optionLabel: 'teacherName', optionValue: 'teacherName', placeholder: '请选择' }
   },
   {
-    config: { placeholder: '请选择' },
     data: '',
     field: 'catalogName',
     label: '所在分类',
     type: 'select',
-    options: []
+    options: [],
+    config: { optionLabel: 'catalogName', optionValue: 'catalogName', placeholder: '请选择' }
   },
   {
     config: { placeholder: '请选择' },
@@ -483,25 +483,25 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    config: { placeholder: '请选择' },
     data: '',
     field: 'creatorName',
     label: '创建人',
     type: 'select',
-    options: []
-  },
-  {
-    config: { placeholder: '请选择' },
-    data: '',
-    field: 'tags',
-    label: '标签',
-    type: 'select',
-    options: [
-      { value: 1, label: '标签1' },
-      { value: 2, label: '标签2' },
-      { value: 3, label: '标签3' }
-    ]
+    options: [],
+    config: { optionLabel: 'creatorName', optionValue: 'creatorName', placeholder: '请选择' }
   }
+  // {
+  //   config: { placeholder: '请选择' },
+  //   data: '',
+  //   field: 'tags',
+  //   label: '标签',
+  //   type: 'select',
+  //   options: [
+  //     { value: 1, label: '标签1' },
+  //     { value: 2, label: '标签2' },
+  //     { value: 3, label: '标签3' }
+  //   ]
+  // }
 ]
 const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -734,6 +734,15 @@ export default {
       this.getInfo()
     },
 
+    // 去重
+    arrayUnique(arr, name) {
+      var hash = {}
+      return arr.reduce(function(item, next) {
+        hash[next[name]] ? '' : (hash[next[name]] = true && item.push(next))
+        return item
+      }, [])
+    },
+
     // 拿数据
     getInfo(courseName) {
       let params = {
@@ -746,27 +755,33 @@ export default {
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
-
-        // console.log(this.tableData)
-
         // 下拉筛选框
+        let data1 = JSON.parse(JSON.stringify(res.data))
+        data1 = this.arrayUnique(data1, 'teacherName')
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        let data2 = JSON.parse(JSON.stringify(res.data))
+        data2 = this.arrayUnique(data2, 'catalogName')
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+        let data7 = JSON.parse(JSON.stringify(res.data))
+        data7 = this.arrayUnique(data7, 'creatorName')
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        this.tableData.forEach((item) => {
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-            value: item.teacherName,
-            label: item.teacherName
-          }) //讲师
-          SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-            value: item.catalogName,
-            label: item.catalogName
-          }) //所在目录
-          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
-            value: item.catalogName,
-            label: item.creatorName
-          }) //创建人
-        })
+        SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
+        SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+        // this.tableData.forEach((item) => {
+        //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
+        //     value: item.teacherName,
+        //     label: item.teacherName
+        //   }) //讲师
+        //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
+        //     value: item.catalogName,
+        //     label: item.catalogName
+        //   }) //所在目录
+        //   SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
+        //     value: item.creatorName,
+        //     label: item.creatorName
+        //   }) //创建人
+        // })
       })
     },
     // 导航

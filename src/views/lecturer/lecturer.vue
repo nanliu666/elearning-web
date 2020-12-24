@@ -1,9 +1,6 @@
 <template>
   <div class="trainingArrange">
-    <div
-      title="分类管理"
-      class="box_title"
-    >
+    <div class="box_title">
       <div class="title">
         讲师管理
       </div>
@@ -22,158 +19,45 @@
       <!-- 内容 -->
       <div class="draft_issue">
         <div class="issue_l">
-          <div class="issue_l_tree">
-            <el-input
-              v-model="filterText"
-              placeholder="分类名称"
-              suffix-icon="el-icon-search"
-              maxlength="32"
-            >
-            </el-input>
-
-            <!-- <div class="ungrouped">未分类（6）</div> -->
-
-            <el-tree
-              ref="tree"
-              :data="data"
-              node-key="id"
-              default-expand-all
-              :expand-on-click-node="false"
-              :filter-node-method="filterNode"
-              :props="props"
-              @node-click="treeClickNode"
-            >
-              <span
-                slot-scope="{ node, data }"
-                class="custom-tree-node"
-              >
-                <span v-show="!isEdit || data.id !== isEditId">{{ node.label }}</span>
-                <span
-                  v-show="isEdit && data.id === isEditId"
-                  class="tree_input"
-                >
-                  <el-input
-                    v-model="dataAddCatalog.input"
-                    placeholder="请输入内容"
-                    maxlength="32"
-                  ></el-input>
-                  <el-button
-                    type="text"
-                    @click="isaddCatalog(data)"
-                  >确认</el-button>&nbsp;
-                  <span @click="isEdit = false"> 取消</span>
-                </span>
-                <span>
-                  <!-- 编辑&删除 -->
-                  <el-dropdown
-                    style="color: #a0a8ae;"
-                    @command="handleCommandSide($event, data)"
-                  >
-                    <span class="el-dropdown-link">
-                      <i class="el-icon-more" />
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item
-                        v-show="data.btnshow"
-                        command="add"
-                      >
-                        新增分类
-                      </el-dropdown-item>
-                      <el-dropdown-item
-                        v-show="!data.btnshow"
-                        command="move"
-                      >
-                        移动
-                      </el-dropdown-item>
-                      <el-dropdown-item command="edit">
-                        编辑
-                      </el-dropdown-item>
-                      <el-dropdown-item command="del">
-                        删除
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </span>
-              </span>
-            </el-tree>
-
-            <div
-              v-show="isShowinput"
-              class="isShowinput"
-            >
-              <el-input
-                v-model="dataAddCatalog.input"
-                placeholder="请输入内容"
-                maxlength="32"
-              ></el-input>
-              <span
-                class="isShowinput_yes"
-                @click="isaddCatalog(node)"
-              >确认</span>
-              <span @click="isShowinput = false"> 取消</span>
-            </div>
-          </div>
-          <div class="btn_bottom">
-            <span
-              class="btn1"
-              @click="adddata"
-            >新建分组</span>
-            <!-- <span class="btn2">新建分类</span> -->
-          </div>
+          <leftColumn
+            :search="true"
+            :data="data"
+            :current-node-key="currentNodeKey"
+            :more-menu="['edit', 'add', 'delete', 'move']"
+            :interface-list="interfaceList"
+            lazy
+            :load="loadNode"
+            @refreshTree="islistTeacherCategory"
+            @node-click="nodeClick"
+          ></leftColumn>
         </div>
 
         <!-- 移动选择框 -->
-        <el-dialog
-          title="收货地址"
-          :visible.sync="dialogFormVisible"
-          :modal-append-to-body="false"
-        >
+        <!-- <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :modal-append-to-body="false">
           <el-form :model="form">
-            <el-form-item
-              label="分类名称"
-              label-width="120px"
-            >
-              <el-input
-                v-model="form.name"
-                autocomplete="off"
-                maxlength="32"
-                disabled
-              ></el-input>
+            <el-form-item label="分类名称" label-width="120px">
+              <el-input v-model="form.name" autocomplete="off" maxlength="32" disabled></el-input>
             </el-form-item>
-            <el-form-item
-              label="上级分类组"
-              label-width="120px"
-            >
-              <el-select
-                v-model="form.region"
-                placeholder="请选择"
-              >
+            <el-form-item label="上级分类组" label-width="120px">
+              <el-select v-model="form.region" placeholder="请选择">
                 <el-option
                   v-for="(item, index) in data"
                   :key="index"
                   :label="item.label"
                   :value="item.id"
                 ></el-option>
-
-                <!-- <el-option label="区域二" value="beijing"></el-option> -->
               </el-select>
             </el-form-item>
           </el-form>
-          <div
-            slot="footer"
-            class="dialog-footer"
-          >
+          <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">
               取 消
             </el-button>
-            <el-button
-              type="primary"
-              @click="ismove"
-            >
+            <el-button type="primary" @click="ismove">
               确 定
             </el-button>
           </div>
-        </el-dialog>
+        </el-dialog> -->
 
         <div class="issue_r">
           <!-- 表格内容 -->
@@ -279,7 +163,7 @@
               >
                 <el-button
                   type="text"
-                  @click="toParticularsLecturer(row.idStr, row.name)"
+                  @click="toParticularsLecturer(row)"
                 >
                   {{ row.name }}
                 </el-button>
@@ -290,8 +174,8 @@
                 slot="status"
                 slot-scope="{ row }"
               >
-                <span v-if="row.status === 0">停用</span>
-                <span v-if="row.status === 1">正常</span>
+                <span v-if="row.status == 0">停用</span>
+                <span v-if="row.status == 1">正常</span>
               </template>
 
               <!-- 性别 -->
@@ -299,8 +183,8 @@
                 slot="sex"
                 slot-scope="{ row }"
               >
-                <span v-if="row.sex === 0">女</span>
-                <span v-if="row.sex === 1">男</span>
+                <span v-if="row.sex == 0">女</span>
+                <span v-if="row.sex == 1">男</span>
               </template>
 
               <!-- '讲师类型（1：内训，2：外聘）',-->
@@ -308,8 +192,8 @@
                 slot="type"
                 slot-scope="{ row }"
               >
-                <span v-if="row.type === 1">内训</span>
-                <span v-if="row.type === 2">外聘</span>
+                <span v-if="row.type == 1">内训</span>
+                <span v-if="row.type == 2">外聘</span>
               </template>
 
               <!--  是否推荐（1：是，0：否）',-->
@@ -317,8 +201,8 @@
                 slot="is_recommend"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_recommend === 1">是</span>
-                <span v-if="row.is_recommend === 0">否</span>
+                <span v-if="row.is_recommend == 1">是</span>
+                <span v-if="row.is_recommend == 0">否</span>
               </template>
 
               <!-- '是否最新讲师（1：是，0：否）', -->
@@ -327,16 +211,16 @@
                 slot="is_latest_teacher"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_latest_teacher === 1">是</span>
-                <span v-if="row.is_latest_teacher === 0">否</span>
+                <span v-if="row.is_latest_teacher == 1">是</span>
+                <span v-if="row.is_latest_teacher == 0">否</span>
               </template>
               <!-- '是否热门讲师（1：是，0：否）', -->
               <template
                 slot="is_popular_teacher"
                 slot-scope="{ row }"
               >
-                <span v-if="row.is_popular_teacher === 1">是</span>
-                <span v-if="row.is_popular_teacher === 0">否</span>
+                <span v-if="row.is_popular_teacher == 1">是</span>
+                <span v-if="row.is_popular_teacher == 0">否</span>
               </template>
 
               <!-- 操作 -->
@@ -366,7 +250,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click.stop="tocompileLecturer(scope.row.idStr)"
+                  @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
@@ -408,8 +292,9 @@ const TABLE_COLUMNS = [
   {
     label: '讲师姓名',
     prop: 'name',
-    width: '200',
-    slot: true
+    width: '180',
+    slot: true,
+    fixed: 'left'
   },
   {
     label: '手机号码',
@@ -439,14 +324,14 @@ const TABLE_COLUMNS = [
     slot: true,
     minWidth: 80
   },
-  {
-    label: '擅长领域',
-    prop: 'lingyu',
-    minWidth: 130
-  },
+  // {
+  //   label: '擅长领域',
+  //   prop: 'lingyu',
+  //   minWidth: 130
+  // },
   {
     label: '讲师级别',
-    prop: 'teacher_level',
+    prop: 'teacher_title',
     minWidth: 130
   },
   {
@@ -591,7 +476,8 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    leftColumn: () => import('./components/leftColumn')
   },
   filters: {
     // 过滤不可见的列
@@ -600,6 +486,15 @@ export default {
   },
   data() {
     return {
+      interfaceList: {
+        addCatalog: addCatalog, //新增树单元接口
+        delCatalogs: deleteTeacherCatalog, //删除树单元接口
+        getCatalogs: listTeacherCategory, //获取树单元接口
+        moveCatalogs: move, //移动树单元接口
+        updateCatalogs: listTeacherCategory //更新树单元接口
+      },
+      currentNodeKey: '',
+
       compileNewly: '',
       // 保存左栏点过的的id或者默认id
       clickId: '',
@@ -634,7 +529,8 @@ export default {
       },
       page: {
         currentPage: 1,
-        size: 10
+        size: 10,
+        total: 0
       },
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -657,6 +553,44 @@ export default {
   },
   activated() {},
   methods: {
+    nodeClick(data) {
+      // if (data.hasOwnProperty('children') && data.children.length > 0) return
+      // this.islistTeacherCategory(data.id)
+      this.islistTeacher(data.id)
+    },
+    isgetCatalogs() {},
+    async loadNode(node, resolve) {
+      // 树数据懒加载
+      // if (node.level > 1) return;
+      // this.islistTeacherCategory().then((res) => {
+      //   resolve([
+      //     {
+      //       id: '123123',
+      //       label: '123123'
+      //     }
+      //   ])
+      // })
+
+      if (node.level === 0) {
+        return resolve([{ name: 'region' }])
+      }
+      if (node.level > 1) return resolve([])
+      // console.log(node);
+      let res = await listTeacherCategory({ parentId: node.data.id })
+      let filterArr = res.son.map((item) => {
+        return {
+          id: item.idStr,
+          parent_id: item.parentStr,
+          label: item.name,
+          btnshow: 0
+        }
+      })
+
+      node.data.children = filterArr
+      // console.log(node);
+
+      resolve(filterArr)
+    },
     // 移动
     ismove() {
       this.dialogFormVisible = false
@@ -681,12 +615,34 @@ export default {
       this.$router.push({ path: '/lecturer/addLecturer' })
     },
     // 去详情
-    toParticularsLecturer(id, name) {
-      this.$router.push({ path: `/lecturer/particularsLecturer?id= + ${id} +&name= + ${name} ` })
+    toParticularsLecturer(row) {
+      this.$router.push({
+        path: '/lecturer/particularsLecturer',
+        query: {
+          id: row.idStr,
+          name: row.name,
+          userEmail: row.user_email,
+          sex: row.sex,
+          phonenum: row.phonenum,
+          user_id_str: row.user_id_str
+        }
+      })
     },
     // 去编辑
-    tocompileLecturer(id) {
-      this.$router.push({ path: `/lecturer/addLecturer?id= + ${id}` })
+    tocompileLecturer(row) {
+      // console.log(row)
+      // this.$router.push({ path: `/lecturer/compileLecturer?id= ${row.user_id_str}&name =${row.name}&userEmail=${row.user_email}&sex=${row.sex}` })
+      this.$router.push({
+        path: '/lecturer/compileLecturer',
+        query: {
+          id: row.idStr,
+          name: row.name,
+          userEmail: row.user_email,
+          sex: row.sex,
+          phonenum: row.phonenum,
+          user_id_str: row.user_id_str
+        }
+      })
     },
 
     // 删除讲师
@@ -745,6 +701,8 @@ export default {
       let params = { ...categoryId, ...searchParams, ...this.page }
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
+        this.page.total = res.totalNum || 0
+        // console.log(res)
         // 下拉筛选框
         this.tableData.forEach((item) => {
           SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
@@ -802,47 +760,52 @@ export default {
           test: '123'
         }
       }
-      listTeacherCategory(params).then((res) => {
+      return listTeacherCategory(params).then((res) => {
         this.data = []
-        for (let key in res) {
-          if (key == 'group') {
-            res[key].forEach((item) => {
-              let i = {
-                id: 1,
-                label: '一级 1',
-                btnshow: 1,
-                children: [],
-                num: 1
-              }
-              i.id = item.idStr
-              i.label = item.name
-              i.btnshow = 1
-              i.children = []
-              this.data.push(i)
-            })
+        res.group.forEach((item) => {
+          let i = {
+            id: 1,
+            label: '一级 1',
+            btnshow: 1,
+            children: [],
+            num: 1
           }
-        }
+          i.id = item.idStr
+          i.label = item.name
+          i.btnshow = 1
+          i.children = []
+          this.data.push(i)
+        })
 
-        for (let key in res) {
-          if (key == 'son') {
-            this.data.forEach((item, index) => {
-              res[key].forEach((istem) => {
-                if (item.id == istem.parentStr) {
-                  let i = {
-                    id: 1,
-                    label: '一级 1',
-                    btnshow: 1
-                  }
-                  i.id = istem.idStr
-                  i.parent_id = istem.parentStr
-                  i.label = istem.name
-                  i.btnshow = 0
-                  this.data[index].children.push(i)
-                }
-              })
-            })
-          }
-        }
+        // this.data.forEach((item, index) => {
+        //   res.son.forEach((istem) => {
+        //     if (item.id == istem.parentStr) {
+        //       let i = {
+        //         id: 1,
+        //         label: '一级 1',
+        //         btnshow: 1
+        //       }
+        //       i.id = istem.idStr
+        //       i.parent_id = istem.parentStr
+        //       i.label = istem.name
+        //       i.btnshow = 0
+        //       this.data[index].children.push(i)
+        //     }
+        //   })
+        // })
+        this.data.forEach((item) => {
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+          filterArr = filterArr.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
+
         this.clickId = this.data[0].id
         this.islistTeacher(this.data[0].id)
       })
@@ -1053,6 +1016,8 @@ $color_icon: #A0A8AE
     display: flex;
     justify-content: space-between;
     line-height: 60px;
+    font-size: 18px;
+    font-weight: bold;
   }
   .box_content {
     background-color: #fff;
@@ -1079,6 +1044,7 @@ $color_icon: #A0A8AE
         width: 20%;
         border-right: 1px solid #ccc;
         overflow: hidden;
+        padding: 20px;
         .issue_l_tree {
           padding: 0 25px;
           /deep/.el-input {
@@ -1088,6 +1054,7 @@ $color_icon: #A0A8AE
             color: #606266;
             margin: 0 0 5px 22px;
             font-size: 14px;
+            cursor: pointer;
           }
         }
         .btn_bottom {
@@ -1106,11 +1073,12 @@ $color_icon: #A0A8AE
           .btn1 {
             border-right: 1px solid #ccc;
             background-color: #fff;
+            cursor: pointer;
           }
         }
       }
       .issue_r {
-        width: 80%;
+        width: 75%;
         padding: 0 40px;
       }
       .istrainingArrange {
@@ -1152,6 +1120,9 @@ $color_icon: #A0A8AE
         .el-input {
           // width: 80%;
         }
+      }
+      .isShowinput_input {
+        width: 65%;
       }
 
       .isShowinput_yes {

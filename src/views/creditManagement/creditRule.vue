@@ -24,7 +24,7 @@
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
-        <template #topMenu>
+        <template slot="topMenu">
           <div class="transitionBox">
             <div class="searchBox">
               <div class="search-box">
@@ -93,7 +93,7 @@
               type="text"
               @click="handleIsStart(row)"
             >
-              停用
+              {{ row.status ? '停用' : '启用' }}
             </el-button>
             <el-button
               type="text"
@@ -113,7 +113,7 @@
       <ruleDialog
         v-if="visible"
         :visible.sync="visible"
-        :row="row"
+        :row.sync="row"
         @loadData="loadTableData"
       ></ruleDialog>
     </basic-container>
@@ -121,62 +121,56 @@
 </template>
 
 <script>
-import { getTestPaperList, deleteTestPaper } from '@/api/examManagement/achievement'
+import { getCreditList, postCreditStartAndStop, deleteCredit } from '@/api/credit/credit'
 import SearchPopover from '@/components/searchPopOver/index'
 import ruleDialog from './components/ruleDialog'
 const TABLE_COLUMNS = [
   {
     label: '规则名称',
-    prop: 'name',
+    prop: 'stu_name',
     slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '系统规则来源',
-    prop: 'status',
-    minWidth: 150,
-    formatter: (row) => {
-      return (
-        {
-          normal: '正常',
-          expired: '已过期'
-        }[row.status] || ''
-      )
-    }
+    prop: 'sys_rule_source',
+    minWidth: 150
   },
   {
     label: '分值',
-    prop: 'categoryName',
-    minWidth: 120
+    prop: 'score',
+    minWidth: 120,
+    formatter: (row) => {
+      return row.score / 10
+    }
   },
   {
     label: '每日上限',
-    prop: 'examNum',
+    prop: 'day_limit',
     slot: true,
     minWidth: 120
   },
   {
     label: '分值规则说明',
-    prop: 'creatorName',
+    prop: 'rule_state',
     minWidth: 120
   },
   {
     label: '更新时间',
     slot: true,
-    prop: 'expiredTime',
-    minWidth: 320
+    prop: 'update_time',
+    minWidth: 200
   },
   {
     label: '状态',
-    slot: true,
-    prop: 'status1',
+    prop: 'status',
     minWidth: 100,
     formatter: (row) => {
       return (
         {
-          normal: '正常',
-          expired: '已过期'
+          0: '停用',
+          1: '正常'
         }[row.status] || ''
       )
     }
@@ -188,7 +182,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
@@ -220,7 +214,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'search',
+            field: 'likeQuery',
             label: '',
             data: '',
             options: [],
@@ -259,26 +253,53 @@ export default {
      * @desc 处理停用或者启用
      *
      * */
-    handleIsStart() {},
+    handleIsStart(row) {
+      let text =
+        row.status == 0
+          ? '您确定要启用该学分规则吗？'
+          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+      this.$confirm(text, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let params = {
+          id: row.id_str,
+          status: row.status == 0 ? '1' : '0'
+        }
+        postCreditStartAndStop(params).then(() => {
+          this.$message.success('修改成功')
+          this.loadTableData()
+        })
+      })
+    },
     /**
      * @author guanfenda
      * @desc 删除规则
      * @params row 规则数据
      * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let params = {
-          id: row.id
-        }
-        deleteTestPaper(params).then(() => {
-          this.$message.success('删除成功')
-          this.loadTableData()
+      if (row.status == 0) {
+        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let params = {
+            id: row.id_str
+          }
+          deleteCredit(params).then(() => {
+            this.$message.success('删除成功')
+            this.loadTableData()
+          })
         })
-      })
+      } else {
+        this.$confirm('该学分规则处于启用状态，请停用后删除。', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      }
     },
     /**
      * @author guanfenda
@@ -312,13 +333,13 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getTestPaperList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-          (res) => {
-            this.tableData = res.data
-            this.page.total = res.totalNum
-            this.tableLoading = false
-          }
-        )
+        getCreditList(
+          _.assign(params, { currentPage: this.page.currentPage, size: this.page.pageSize })
+        ).then((res) => {
+          this.tableData = res.list
+          this.page.total = res.totalNum
+          this.tableLoading = false
+        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -418,11 +439,16 @@ export default {
 /deep/ .avue-crud__pagination {
   display: none;
 }
-
+.refresh-container {
+  cursor: pointer;
+}
 .refresh-text {
   padding-left: 6px;
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

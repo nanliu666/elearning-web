@@ -24,13 +24,23 @@
             class="add"
             @click="handleAddTheme"
           >
-            添加试题
+            <el-button
+              size="mini"
+              type="text"
+              style="font-size: 14px"
+            >
+              添加试题
+            </el-button>
           </div>
-          <div
-            :class="[length === 1 ? 'delete' : 'add']"
-            @click="handleDeleteBlock"
-          >
-            删除试题
+          <div @click="handleDeleteBlock">
+            <el-button
+              size="mini"
+              type="text"
+              :class="[length === 1 ? 'delete' : 'add']"
+              :disabled="length < 2"
+            >
+              删除试题
+            </el-button>
           </div>
         </div>
       </div>
@@ -90,6 +100,7 @@
         <stemContent
           v-if="visible"
           v-model="stemList"
+          :data="tableData"
           :type="form.type"
           :visible.sync="visible"
           :title="'添加' + title"
@@ -292,8 +303,8 @@ export default {
           content: it.content,
           type: it.type,
           questionId: it.id,
-          score: it.score || '0',
-          Original: it.score || '0',
+          score: it.score || undefined,
+          Original: it.score || undefined,
           timeLimit: it.timeLimit ? it.timeLimit : '0'
         }))
         this.countScore()
@@ -443,7 +454,7 @@ export default {
      *
      * */
     scoreChange(val, row) {
-      if (row.Original != val) {
+      if (row.Original != val && row.Original) {
         this.$confirm(
           '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
           '提示',
@@ -453,13 +464,12 @@ export default {
             type: 'warning'
           }
         )
-          .then(() => {
-            this.countScore()
-          })
+          .then(() => {})
           .catch(() => {
             row.score = row.Original
           })
       }
+      this.countScore()
     }
   }
 }
@@ -488,7 +498,7 @@ label {
   font-size: 14px;
   color: #01aafc;
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }
@@ -496,7 +506,7 @@ label {
   font-size: 14px;
   color: rgba(0, 11, 21, 0.25);
   letter-spacing: 0;
-  line-height: 22px;
+  /*line-height: 22px;*/
   cursor: pointer;
   margin-left: 17px;
 }

@@ -98,6 +98,7 @@
           <el-link
             type="primary"
             style="line-height: 22px"
+            @click="handleDetails(row)"
           >
             {{ row.name }}
           </el-link>
@@ -126,6 +127,14 @@
         </template>
       </common-table>
     </basic-container>
+    <div>
+      <tipDialog
+        v-if="visible"
+        :visible.sync="visible"
+        :table-data.sync="selectData"
+      >
+      </tipDialog>
+    </div>
   </div>
 </template>
 
@@ -133,9 +142,10 @@
 import { getTestPaperList, deleteTestPaper, getCreatUsers } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/examManage/category'
+import tipDialog from './components/tipDialog'
 const TABLE_COLUMNS = [
   {
-    label: '考试名称',
+    label: '试卷名称',
     prop: 'name',
     slot: true,
     fixed: true,
@@ -190,7 +200,7 @@ const TABLE_CONFIG = {
 }
 export default {
   name: 'TestPaper',
-  components: { SearchPopover },
+  components: { SearchPopover, tipDialog },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
@@ -198,11 +208,14 @@ export default {
   },
   data() {
     return {
+      selectData: [],
+      visible: false,
       page: {
         currentPage: 1,
         pageSize: 10,
         total: 0
       },
+      dialogVisible: true,
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
@@ -217,7 +230,7 @@ export default {
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '考试名称', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '试卷名称', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
@@ -293,8 +306,33 @@ export default {
     this.loadTableData()
   },
   methods: {
+    /**
+     * @author guanfenda
+     * @desc 跳转试卷详情
+     *
+     * */
+    async handleDetails(row) {
+      let query = {
+        paperId: row.id,
+        paperType: row.type,
+        isManaged: true // 从此处进去预览不显示删除
+      }
+      this.$router.push({
+        path: '/examManagement/examSchedule/preview',
+        query
+      })
+    },
     // 批量删除
     deleteSelected(selection) {
+      let selectData = selection.filter((it) => it.examNum > 0)
+      if (selectData.length > 0) {
+        this.$confirm('您选中试卷有正在关联的考试，请调整后再进行删除！', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        return
+      }
       // 批量删除
       let params = []
       selection.forEach((item) => {
@@ -306,6 +344,7 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          this.$refs.table.clearSelection()
           deleteTestPaper({ id: params.join(',') }).then(() => {
             this.loadTableData()
             this.$message({
@@ -410,7 +449,13 @@ export default {
      * @params row 试卷数据
      * */
     handleDelete(row) {
-      this.$confirm('您确定要删除该条信息吗？', '提醒', {
+      this.selectData = []
+      this.selectData.push(row)
+      if (row.examNum > 0) {
+        this.visible = true
+        return
+      }
+      this.$confirm('您确定要删除选中的试卷吗？', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -568,5 +613,8 @@ export default {
   display: inline-block;
   height: 18px;
   color: #a0a8ae;
+}
+/deep/.el-table__fixed::before {
+  position: relative;
 }
 </style>

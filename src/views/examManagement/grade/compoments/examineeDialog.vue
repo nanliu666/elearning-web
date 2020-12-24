@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    title="修改考生成绩"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"

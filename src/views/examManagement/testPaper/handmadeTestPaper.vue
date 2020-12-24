@@ -4,7 +4,7 @@
     class="HandmadeTestPaper"
   >
     <page-header
-      title="新建手工试卷"
+      :title="form.id && !copy ? '编辑手工试卷' : '新建手工试卷'"
       show-back
     />
     <basic-container
@@ -49,9 +49,9 @@
             试题设置:
             <span
               class="tip"
-            >（当前总分数{{ TotalScore }}分<span
+            >（当前总分数{{ totalScore }}分<span
               v-if="form.totalScore"
-            >，剩余分数：{{ score }}分</span>）</span>
+            >，剩余分数：{{ surplusScore }}分</span>）</span>
           </div>
           <div>
             <el-button
@@ -207,11 +207,12 @@ export default {
   },
   data() {
     return {
+      copy: '',
       loading: false,
       valid: false,
       columns: BASE_COLUMNS,
-      TotalScore: '',
-      score: '',
+      totalScore: '',
+      surplusScore: '',
       form: {},
       typeList: [],
       themeBlock: {
@@ -225,15 +226,6 @@ export default {
     }
   },
   watch: {
-    /***
-     * @author guanfenda
-     * @desc 修改了试题设置，修改分数重新计算剩余分数
-     * */
-    TotalScore(val) {
-      if (this.form.totalScore) {
-        this.score = this.form.totalScore - val
-      }
-    },
     /**
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
@@ -244,9 +236,24 @@ export default {
   },
   mounted() {},
   activated() {
-    this.form = {}
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: '',
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
+    this.totalScore = ''
+    this.surplusScore = ''
+    this.form.isScore = 0
+
     this.testPaper = []
+    this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
+    this.copy = this.$route.query.copy
     this.getData()
     this.getTestPaperCategory()
   },
@@ -268,6 +275,7 @@ export default {
      * @desc 获取试卷详情
      * */
     getData() {
+      this.columns.find((it) => it.prop === 'name').disabled = false
       if (!this.$route.query.id) return
       let params = {
         id: this.$route.query.id
@@ -314,6 +322,8 @@ export default {
               tableData: list[key]
             })
           }
+          !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
+
           this.count()
         })
         .finally(() => {
@@ -329,13 +339,16 @@ export default {
       this.valid = true
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-
-        if (
-          this.testPaper.filter(
-            (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
-          ).length > 0
-        ) {
-          this.$message.warning('请检查试题设置')
+        let list = this.testPaper.filter(
+          (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+        )
+        if (list.length > 0) {
+          let text = ''
+          list[0].tableData.length == 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+          list[0].tableData.length !== 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+          this.$message.warning(text)
           return
         }
         let testPaperMether =
@@ -397,14 +410,19 @@ export default {
       )
       let list = []
       scoreList.map((it) => {
-        list.push(...it)
+        let newData = _.compact(it)
+        list.push(...newData)
       })
+      let totalScore = 0
       scoreList = list
       scoreList.length &&
-        (this.TotalScore = scoreList.reduce((prev, cur) => {
+        (totalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.score = this.form.totalScore - this.TotalScore
+      this.totalScore = totalScore.toFixed(1).toString()
+
+      let score = (this.form.totalScore - this.totalScore) * 10
+      this.surplusScore = (Math.round(score) / 10).toString()
     },
     /**
      * @author guanfenda
@@ -412,15 +430,17 @@ export default {
      *
      * */
     handleDeleteBlock(data) {
-      this.$confirm('您确定要删除选中的题型吗', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.testPaper = this.testPaper.filter((it) => {
-          return it.key !== data.key
+      if (this.testPaper.length > 1) {
+        this.$confirm('您确定要删除选中的题型吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.testPaper = this.testPaper.filter((it) => {
+            return it.key !== data.key
+          })
         })
-      })
+      }
     },
     /**
      * @author guanfenda

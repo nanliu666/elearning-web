@@ -476,7 +476,7 @@ const res = {
             menuName: '调整排序',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/course/courseSort',
@@ -502,23 +502,10 @@ const res = {
             menuName: '创建课程',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/course/establishCourse',
-            icon: 'iconfont iconicon_boss',
-            dataPrivileges: [],
-            children: []
-          },
-          {
-            menuId: '12590567456745635058',
-            menuName: '测试111',
-            menuType: 'Menu',
-            isOwn: 1,
-            isShow: 1,
-            code: 'org_user',
-            alias: 'user',
-            path: '/course/demoForm',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
@@ -528,7 +515,7 @@ const res = {
             menuName: '编辑课程',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/course/compileCourse',
@@ -541,7 +528,7 @@ const res = {
             menuName: '培训详情',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/training/trainingDetail',
@@ -557,6 +544,7 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             path: '/training/trainingArrange',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
@@ -567,7 +555,7 @@ const res = {
             menuName: '考试详情',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/training/examination',
@@ -593,7 +581,7 @@ const res = {
             menuName: '添加讲师',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/lecturer/addLecturer',
@@ -606,7 +594,7 @@ const res = {
             menuName: '编辑讲师',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/lecturer/compileLecturer',
@@ -619,7 +607,7 @@ const res = {
             menuName: '讲师详情',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/lecturer/particularsLecturer',
@@ -632,7 +620,7 @@ const res = {
             menuName: '编辑页面',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/training/trainingEdit',
@@ -658,7 +646,7 @@ const res = {
             menuName: '新建证书模版',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/certificate/addCertificate',
@@ -671,7 +659,7 @@ const res = {
             menuName: '证书发放明细',
             menuType: 'Menu',
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/certificate/certificateDetail',
@@ -839,6 +827,62 @@ const res = {
           },
           {
             menuId: '15674547683454620582323',
+            menuName: '手工评卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/MarkList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '试卷列表',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/ExamineeList',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '试卷详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/MarkByExaminee',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
+            menuName: '逐题评卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            code: 'org_user',
+            alias: 'user',
+            path: '/examManagement/mark/MarkByPaper',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '15674547683454620582323',
             menuName: '成绩管理',
             menuType: 'Menu',
             isOwn: 1,
@@ -907,6 +951,32 @@ const res = {
             code: 'systemRule',
             alias: 'systemRule',
             path: '/creditManagement/systemRule',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735038',
+            menuName: '学分明细',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'credit',
+            alias: 'credit',
+            path: '/creditManagement/credit',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259073412671256735032',
+            menuName: '学分详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'creditDetails',
+            alias: 'creditDetails',
+            path: '/creditManagement/creditDetails',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
@@ -1040,6 +1110,63 @@ const res = {
                 icon: 'iconfont iconicon_compile'
               }
             ]
+          }
+        ]
+      },
+      {
+        menuId: '1590112075692',
+        menuName: '学习计划',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        code: 'approval',
+        alias: 'approval',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        children: [
+          {
+            menuId: '15901120756921',
+            menuName: '必修课安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/requiredSchedule',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756922',
+            menuName: '选修课安排',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/elective',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756923',
+            menuName: '新建手工试卷',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/newSchedule',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '15901120756924',
+            menuName: '必修课安排详情',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/requiredScheduleDetail',
+            icon: 'iconfont iconicon_compile'
           }
         ]
       }

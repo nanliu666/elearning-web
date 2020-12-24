@@ -21,6 +21,7 @@
       >
         <el-input
           v-model.trim="form.name"
+          maxlength="32"
           placeholder="请输入"
         />
       </el-form-item>
@@ -49,7 +50,10 @@
               />
             </el-option>
           </el-select>
-          <div class="select-tips">
+          <div
+            v-if="type !== 'createChild'"
+            class="select-tips"
+          >
             可通过选择上级分类为其构建子分类
           </div>
         </el-col>
@@ -94,6 +98,7 @@ import {
   addKnowledgeCatalog,
   getKnowledgeCatalogList
 } from '@/api/knowledge/knowledge'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
   props: {
@@ -121,6 +126,9 @@ export default {
       loading: false
     }
   },
+  computed: {
+    ...mapGetters(['userId'])
+  },
   methods: {
     loadOrgTree() {
       getKnowledgeCatalogList().then((res) => {
@@ -145,7 +153,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addKnowledgeCatalog(this.form)
+            addKnowledgeCatalog(_.assign(this.form, { creatorId: this.userId }))
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -227,6 +235,7 @@ export default {
         Department: false,
         Group: false
       }
+      this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {

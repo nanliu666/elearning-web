@@ -10,13 +10,24 @@
         class="form"
         :columns="columns"
       >
-        <template #course>
+        <template #courseId>
           <lazy-select
-            v-model="model.course"
-            :allow-create="isCreate"
-            :searchable="remote"
+            v-model="model.courseId"
+            :allow-create="true"
+            :searchable="true"
             :load="loadCourse"
-            :option-props="personOptionProps"
+            :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
+            @selectItem="selectContact"
+          />
+        </template>
+        <template #lecturerId>
+          <lazy-select
+            v-model="model.lecturerId"
+            :disabled="model.type === 1"
+            :allow-create="true"
+            :searchable="true"
+            :load="loadCoordinator"
+            :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
           />
         </template>
       </common-form>
@@ -36,14 +47,10 @@
 </template>
 
 <script>
+import { getOrgUserList } from '@/api/system/user'
 import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
-const personOptionProps = {
-  label: 'name',
-  value: 'name',
-  key: 'id'
-}
 
 const EventColumns = [
   {
@@ -66,8 +73,8 @@ const EventColumns = [
     isRange: true,
     label: '活动时间'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
-  { itemType: 'input', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
+  { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
+  { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const CourseColumns = [
@@ -104,25 +111,24 @@ const CourseColumns = [
     itemType: 'slot',
     span: 24,
     required: true,
-    prop: 'course',
+    prop: 'courseId',
     label: '关联课程'
   },
-  { itemType: 'input', span: 24, disabled: true, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'slot', span: 24, prop: 'lecturerId', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
   type: 1,
   todoDate: null,
   todoTime: [moment().startOf('day'), moment().endOf('day')],
-  theme: '',
-  lecturerName: null,
   lecturerId: null,
+  lecturerName: null,
   address: '',
   courseId: null,
-  course: null
+  courseName: null
 }
 export default {
-  name: 'EditScheduleDrawer',
+  name: 'OfflineCourseDrawer',
   components: {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
@@ -132,13 +138,7 @@ export default {
   },
   data() {
     return {
-      remote: true,
-      isCreate: true,
-      personOptionProps,
-      courseParams: {
-        pageNo: 1,
-        pageSize: 10
-      },
+      userList: [],
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
@@ -196,11 +196,16 @@ export default {
     }
   },
   methods: {
-    loadCourse() {
-      let params = {
-        pageNo: 1,
-        pageSize: 10
-      }
+    selectContact(data) {
+      this.model = _.assign(this.model, data)
+    },
+    loadCoordinator(params) {
+      getOrgUserList(_.assign(params, { orgId: 0 })).then((res) => {
+        this.userList = [...this.userList, ...res.data]
+      })
+      return getOrgUserList(_.assign(params, { orgId: 0 }))
+    },
+    loadCourse(params) {
       return getTrainCource(params)
     },
     close() {
@@ -211,6 +216,9 @@ export default {
         const data = this.model
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
+        data.lecturerName = _.find(this.userList, (item) => {
+          return item.userId === data.lecturerId
+        }).name
         this.$emit('submit', data, this.editType)
         this.close()
       })

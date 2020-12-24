@@ -74,7 +74,7 @@ export default {
         if (parentOrg.id === draggingNodeParent.id) return false
         if (_.isEmpty(parentOrg)) {
           let index = _.findIndex(this.data, (item) => {
-            return item.name === dropNode.data.name
+            return item.name === draggingNode.data.name
           })
           if (index > -1) {
             this.messageFun()

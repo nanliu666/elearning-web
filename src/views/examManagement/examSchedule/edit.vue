@@ -162,7 +162,7 @@ export default {
      * */
     handleNextStep() {
       this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
+        this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
       })
     },
     initData() {
@@ -170,6 +170,9 @@ export default {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
           this.$refs.examInfo.model = res
+          if (res.status === '2') {
+            this.activeStep = 1
+          }
         })
       }
     },
@@ -190,7 +193,8 @@ export default {
         }
         editFun(params)
           .then(() => {
-            this.$message.success('已成功创建考试，1秒后将自动返回考试列表')
+            const tips = type === 'draft' ? '已发布草稿' : '已成功创建考试'
+            this.$message.success(`${tips}，1秒后将自动返回考试列表`)
             setTimeout(() => {
               this.$router.push({ path: '/examManagement/examSchedule/list' })
             }, 1000)
