@@ -251,8 +251,8 @@
               <span class="switch_title">是否推荐</span>
               <el-switch
                 v-model="ruleForm.isRecommend"
-                active-color="#13ce66"
-                inactive-color="#ff4949"
+                active-color="#198cff"
+                inactive-color="#a0a8ae"
               >
               </el-switch>
             </div>
@@ -649,7 +649,7 @@ export default {
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
-        isRecommend: '', //是否推荐
+        isRecommend: false, //是否推荐
         passCondition: '', //通过条件
         period: '', //时长
         credit: '', //学分
