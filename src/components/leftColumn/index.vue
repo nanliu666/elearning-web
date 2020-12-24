@@ -419,7 +419,7 @@ export default {
           let interfaceData = {
             name: this.classifyName
           }
-          node.parent ? (interfaceData.parentId = node.parent.data.id) : ''
+          node.parent ? (interfaceData.id = node.parent.data.id) : ''
           await this.addCatalog(interfaceData)
             .then(() => {
               this.refreshTree()
