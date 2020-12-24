@@ -73,6 +73,9 @@
             {{ row.examName }}
           </div>
         </template>
+        <template #categoryName="{row}">
+          {{ row.categoryName ? row.categoryName : '未分类' }}
+        </template>
         <template #createUser1="{row}">
           {{ moment(row.examBeginTime).diff(moment(row.examEndTime), 'minutes') }}
         </template>
@@ -124,6 +127,7 @@ let TABLE_COLUMNS = [
   {
     label: '考试分类',
     prop: 'categoryName',
+    slot: true,
     minWidth: 120
   },
   {

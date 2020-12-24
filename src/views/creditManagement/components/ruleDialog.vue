@@ -239,15 +239,20 @@ export default {
           score: form.score * 10
         }
         let rule = form.id ? editStudentsRulus : postAddStudentsRulus
-        rule(params).then(() => {
-          this.$message.success('提交成功')
-          this.$emit('loadData')
-          if (isContinue) {
-            this.$refs.form.resetFields()
-          } else {
-            this.onClose()
-          }
-        })
+        this.loading = true
+        rule(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.$emit('loadData')
+            if (isContinue) {
+              this.$refs.form.resetFields()
+            } else {
+              this.onClose()
+            }
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
     numberInput(value, data) {
