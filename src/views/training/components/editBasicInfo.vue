@@ -119,8 +119,8 @@ export default {
           label: '计划人数',
           prop: 'people',
           type: 'Number',
+          required: false,
           min: 0,
-          rules: [{ required: true, validator: this.validatePeople, trigger: blur }],
           span: 11,
           offset: 2
         },
@@ -132,7 +132,7 @@ export default {
           options: [],
           rules: [
             { required: true, message: '请选择培训对象', trigger: blur },
-            { required: true, validator: this.validateTrain, trigger: blur }
+            { required: true, validator: this.validateTrain, trigger: ['blur', 'change'] }
           ],
           span: 11,
           offset: 0
@@ -321,19 +321,14 @@ export default {
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
-      if (this.formData.people < _.size(this.userList)) {
-        callback(new Error(`超过计划${_.size(this.userList) - this.formData.people}人，请酌量删除`))
-      } else {
-        callback()
-      }
-    },
-    // 计划人数最少为1的校验
-    validatePeople(rule, value, callback) {
-      if (this.formData.people === 0) {
-        callback(new Error('计划人数不能为0'))
-      } else {
-        callback()
-      }
+      const moreThan = _.size(this.userList) - this.formData.people
+      this.$nextTick(() => {
+        if (_.size(this.userList) > 0 && moreThan) {
+          callback(new Error(`超过计划${moreThan}人，请酌量删除`))
+        } else {
+          callback()
+        }
+      })
     },
     getCatalogs() {
       getTrainGetCatalogs().then((res) => {
