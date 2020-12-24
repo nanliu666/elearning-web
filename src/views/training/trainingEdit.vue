@@ -91,7 +91,7 @@
         <EditDetail
           v-show="activeStep === 2"
           ref="editDetail"
-          @jump="jumpStep(2)"
+          @jump="jumpDetail"
         />
       </el-col>
     </el-row>
@@ -147,6 +147,11 @@ export default {
     this.initData()
   },
   methods: {
+    jumpDetail() {
+      if (this.activeStep !== 2) {
+        this.jumpStep(2)
+      }
+    },
     jumpStep(index) {
       this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
         this.activeStep = index
