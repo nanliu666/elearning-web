@@ -214,6 +214,7 @@ export default {
   },
   activated() {
     this.loadData()
+    this.loadTree()
   },
   mounted() {
     this.loadTree()
@@ -271,6 +272,10 @@ export default {
         }
         id = data.id
       }
+      if (id === '') {
+        this.$message.warning('您选择的试题中没有无关联的试卷，请调整后再进行删除！')
+        return
+      }
       this.$confirm('您确定要删除选中的试题吗？', '', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -279,6 +284,7 @@ export default {
         .then(() => {
           delQuestion({ id }).then(() => {
             this.$refs.table.clearSelection()
+            this.loadTree()
             this.loadData()
           })
         })

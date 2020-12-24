@@ -1,7 +1,7 @@
 <template>
   <div class="avue-sidebar">
     <logo style="margin:20px 0 20px 20px;" />
-    <el-scrollbar style="height:100%">
+    <el-scrollbar style="height:calc(100% - 104px)">
       <div
         v-if="validatenull(menu) && validatenull(menu.children)"
         class="avue-sidebar--tip"
