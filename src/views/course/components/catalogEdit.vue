@@ -51,7 +51,7 @@
             </el-option>
           </el-select>
           <div class="select-tips">
-            可通过选择上级分类为其构建子分类
+            <!-- 可通过选择上级分类为其构建子分类 -->
           </div>
         </el-col>
       </el-form-item>

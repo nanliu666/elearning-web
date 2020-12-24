@@ -106,4 +106,4 @@ export const getCourseContents = (params) => get('/api/manage/v1/course/getCours
  *  查询讲师列表
  * @param {Object} params - 参数
  * */
-export const listTeacher = (params) => post('/api/manage/v1/teacher/listTeacher', params)
+export const listTeacher = (params) => get('/api/manage/v1/teacher/listTeacherComboBox', params)

@@ -125,11 +125,17 @@
                 label="所属分类"
                 prop="categoryId"
               >
-                <el-cascader
+                <!-- <el-cascader
                   v-model="ruleForm.categoryId"
                   :props="{ value: 'id' }"
-                  :options="data"
+                  
                   @change="treeClickNode"
+                ></el-cascader> -->
+
+                <el-cascader
+                  v-model="ruleForm.categoryId"
+                  :options="data"
+                  :props="props"
                 ></el-cascader>
               </el-form-item>
             </el-col>
@@ -309,12 +315,39 @@ import {
   getTeacher
 } from '@/api/lecturer/lecturer'
 // import { uploadQiniu } from '@/util/uploadQiniu'
+
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   data() {
     return {
+      props: {
+        lazy: true,
+        value: 'id',
+        async lazyLoad(node, resolve) {
+          if (node.level === 0) {
+            return resolve([{ name: 'region' }])
+          }
+          if (node.level > 1) return resolve([])
+          // console.log(node);
+          let res = await listTeacherCategory({ parentId: node.data.id })
+          let filterArr = res.son.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0
+            }
+          })
+
+          node.data.children = filterArr
+          // console.log(node);
+
+          resolve(filterArr)
+        }
+      },
+
       disableDdata: {
         disabledPhonenum: false,
         disabledUserEmail: false,
@@ -501,6 +534,8 @@ export default {
             type: 'warning'
           })
         } else {
+          // console.log(this.ruleForm)
+
           addTeacher(this.ruleForm).then(() => {
             if (i) {
               this.toLecturer()
