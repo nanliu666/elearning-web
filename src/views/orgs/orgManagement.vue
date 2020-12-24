@@ -188,7 +188,6 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
   handlerColumn: {
     width: 160
   }

@@ -138,7 +138,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  // enableMultiSelect: true, // TODO: 以后添加多选
   handlerColumn: {
     minWidth: 100
   }

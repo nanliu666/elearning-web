@@ -10405,10 +10405,10 @@ vue-axios@^2.1.2:
   resolved "https://registry.npm.taobao.org/vue-axios/download/vue-axios-2.1.5.tgz?cache=0&sync_timestamp=1603685979536&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue-axios%2Fdownload%2Fvue-axios-2.1.5.tgz#1af4bf1218ed71309c76afb38d0f683e312c24a7"
   integrity sha1-GvS/EhjtcTCcdq+zjQ9oPjEsJKc=
 
-vue-common-table@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.npm.taobao.org/vue-common-table/download/vue-common-table-1.0.10.tgz#3935775a38abe19cb7ad6c38ac9f4601872d8a9d"
-  integrity sha1-OTV3Wjir4Zy3rWw4rJ9GAYctip0=
+vue-common-table@^1.0.13:
+  version "1.0.13"
+  resolved "https://registry.npm.taobao.org/vue-common-table/download/vue-common-table-1.0.13.tgz?cache=0&sync_timestamp=1608190144497&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue-common-table%2Fdownload%2Fvue-common-table-1.0.13.tgz#46958d4258acede4537ac5e7a35fcf936b081a81"
+  integrity sha1-RpWNQlis7eRTesXno1/Pk2sIGoE=
   dependencies:
     core-js "^3.6.4"
     element-ui "^2.13.1"

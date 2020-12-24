@@ -69,7 +69,7 @@
         class="qustion__correct-answer"
       >
         <span class="qustion__label">标准答案：</span>
-        <span class="qustion__text">{{ (_.head(data.options) || {}).content }}</span>
+        <span class="qustion__text">{{ data.answer }}</span>
       </div>
       <div class="qustion__analysis">
         <span class="qustion__label">试题分析：</span>
