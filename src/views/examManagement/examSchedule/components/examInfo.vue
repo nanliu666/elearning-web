@@ -4,6 +4,9 @@
       ref="form"
       :model="model"
       :columns="columns"
+      :config="{
+        disabled: model.status && model.status !== '1'
+      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -43,6 +46,7 @@
       </template>
       <template #testPaper>
         <lazy-select
+          ref="testPaperRef"
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
@@ -595,6 +599,7 @@ export default {
   },
   data() {
     return {
+      testPaperExpiredTime: '',
       radioList,
       passCondition: [
         {
@@ -658,6 +663,17 @@ export default {
     }
   },
   watch: {
+    'model.testPaper': {
+      handler(value) {
+        const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {
+          return item.id === value
+        })
+        if (paper) {
+          this.testPaperExpiredTime = paper.expiredTime
+        }
+      },
+      deep: true
+    },
     'model.passType': {
       handler(value) {
         this.model.passScope = this.passCondition[value - 1].passScope
@@ -770,7 +786,7 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
-      return getExamList(params)
+      return getExamList(_.assign(params, { status: 'normal' }))
     },
     loadCertificateList(params) {
       return getCertificateList(params)

@@ -464,13 +464,12 @@ export default {
             type: 'warning'
           }
         )
-          .then(() => {
-            this.countScore()
-          })
+          .then(() => {})
           .catch(() => {
             row.score = row.Original
           })
       }
+      this.countScore()
     }
   }
 }

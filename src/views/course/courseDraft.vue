@@ -142,14 +142,14 @@
 
             <!-- 课程名称 -->
             <template
-              slot="catalogName"
+              slot="courseName"
               slot-scope="{ row }"
             >
               <el-button
                 type="text"
-                @click="toTrainDetail(row)"
+                @click="todetail(row)"
               >
-                {{ row.catalogName }}
+                {{ row.courseName }}
               </el-button>
             </template>
             <!-- 课程类型 -->
@@ -170,29 +170,22 @@
               <span v-if="row.passCondition === 'b'">考试通过</span>
               <span v-if="row.passCondition === 'c'">达到课程学时</span>
             </template>
-            <!-- electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修) -->
+            <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
             <template
               slot="electiveType"
               slot-scope="{ row }"
             >
-              <span v-if="row.electiveType === 1">开发选修</span>
+              <span v-if="row.electiveType === 1">开放选修</span>
               <span v-if="row.electiveType === 2">通过审批</span>
               <span v-if="row.electiveType === 3">禁止选修</span>
             </template>
             <!-- 标签 -->
-            <template
-              slot="atags"
-              slot-scope="{ row }"
-            >
+            <!-- <template slot="atags" slot-scope="{ row }">
               s
-              <span
-                v-for="(item, index) in row.atags"
-                :key="index"
-                class="atags_icon"
-              >{{
+              <span v-for="(item, index) in row.atags" :key="index" class="atags_icon">{{
                 item
               }}</span>
-            </template>
+            </template> -->
             <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
             <template
               slot="isRecommend"
@@ -216,7 +209,7 @@
               slot-scope="scope"
             >
               <el-button
-                v-if="scope.row.isTop === 1"
+                v-if="scope.row.isTop == 0"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
@@ -224,7 +217,7 @@
                 &nbsp;&nbsp; 置顶&nbsp;
               </el-button>
               <el-button
-                v-if="scope.row.isTop === 0"
+                v-if="scope.row.isTop == 1"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
@@ -236,7 +229,7 @@
                 v-if="scope.row.isPutaway === 1"
                 type="text"
                 size="medium"
-                @click="alterIsPutaway(scope.row.id, 1)"
+                @click="alterIsPutaway(scope.row.id, 0)"
               >
                 下架
               </el-button>
@@ -244,7 +237,7 @@
                 v-if="scope.row.isPutaway === 0"
                 type="text"
                 size="medium"
-                @click="alterIsPutaway(scope.row.id, 0)"
+                @click="alterIsPutaway(scope.row.id, 1)"
               >
                 上架
               </el-button>
@@ -275,37 +268,33 @@
       </div>
     </div>
 
-    <!-- 移动dialog -->
     <el-dialog
-      title="移动"
+      title="移动目录"
       :visible.sync="dialogFormVisible"
-      :modal-append-to-body="false"
-      width="30%"
-      style="padding:30px;"
+      append-to-body
+      width="500px"
     >
-      <p>所在原类目：Java技能课程/Java初级培训</p>
-      <el-form>
-        <el-form-item label="移动到新分类">
-          <el-cascader
-            v-model="CourseNameBar"
-            :options="CourseNameBarData"
-            :props="{ value: 'id', label: 'name' }"
-            @change="handleChange"
-          ></el-cascader>
-        </el-form-item>
-      </el-form>
+      <div style="margin-bottom: 15px">
+        所在目录：{{ moveKnowledgeRow.catalogName }}
+      </div>
+      <common-form
+        ref="form"
+        :columns="formColumns"
+        :model="formData"
+      >
+      </common-form>
       <div
         slot="footer"
         class="dialog-footer"
       >
         <el-button @click="dialogFormVisible = false">
-          取 消
+          取消
         </el-button>
         <el-button
           type="primary"
-          @click="isMoveCourse()"
+          @click="isMoveCourse"
         >
-          确 定
+          保存
         </el-button>
       </div>
     </el-dialog>
@@ -321,6 +310,7 @@ import {
   updateCourseTop,
   moveCourse
 } from '@/api/course/course'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -364,11 +354,11 @@ const TABLE_COLUMNS = [
     slot: true
   },
 
-  {
-    label: '标签',
-    prop: 'atags',
-    slot: true
-  },
+  // {
+  //   label: '标签',
+  //   prop: 'atags',
+  //   slot: true
+  // },
   {
     label: '是否推荐',
     prop: 'isRecommend',
@@ -507,6 +497,35 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+const FORM_COLUMNS = [
+  {
+    label: '移动到新目录',
+    itemType: 'treeSelect',
+    prop: 'catalogId',
+    required: true,
+    span: 24,
+    props: {
+      selectParams: {
+        placeholder: '请选择所在目录',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        },
+        required: true
+      }
+    }
+  }
+]
 export default {
   // 搜索组件
   components: {
@@ -520,6 +539,11 @@ export default {
 
   data() {
     return {
+      formData: {
+        catalogId: ''
+      },
+      formColumns: FORM_COLUMNS,
+      moveKnowledgeRow: {},
       // 移动数据
       CourseNameBarData: [], //显示
       CourseNameBar: [],
@@ -575,25 +599,90 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 去详情
+    todetail() {
+      // console.log(row)
+      this.$router.push({ path: '/course/detail' })
+    },
+
+    // 打开移动弹窗
+    moveFun(row) {
+      this.dialogFormVisible = true
+      this.moveKnowledgeRow = row
+    },
+
     toEstablishCourse() {
       this.$router.push({ path: '/course/establishCourse' })
     },
     // 移动
-    isMoveCourse() {
-      let params = {
-        catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
-        courseId: this.moveId //课程
-      }
-      moveCourse(params).then(() => {
-        this.dialogFormVisible = false
+    // isMoveCourse() {
+    //   let params = {
+    //     catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
+    //     courseId: this.moveId //课程
+    //   }
+    //   moveCourse(params).then(() => {
+    //     this.dialogFormVisible = false
+    //   })
+    // },
+    // 保存移动
+    async isMoveCourse() {
+      this.$refs.form.validate().then((data) => {
+        if (data) {
+          this.dialogFormVisible = false
+          moveCourse({
+            courseId: this.moveKnowledgeRow.id,
+            catalogId: this.formData.catalogId
+          }).then(() => {
+            this.$message.success('移动成功')
+            this.getInfo()
+          })
+        }
       })
     },
     // 拿到移动数据
-    isgetCatalog() {
-      getCatalog().then((res) => {
-        // console.log(res)
-        this.CourseNameBarData = res
+    getCategoryList() {
+      return getCatalog().then((res) => {
+        return _.concat(
+          [
+            {
+              id: '',
+              name: '全部'
+            }
+          ],
+          res
+        )
       })
+    },
+    async isgetCatalog() {
+      // getCatalog().then((res) => {
+      //   // console.log(res)
+      //   this.CourseNameBarData = res
+      // })
+
+      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
+      let moveCatalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
+      // if (tagId) {
+      //   getKnowledgeManageTaglist().then(
+      //     (res) =>
+      //       (tagId.options = _.concat(
+      //         [
+      //           {
+      //             id: '',
+      //             name: '全部'
+      //           }
+      //         ],
+      //         res
+      //       ))
+      //   )
+      // }
+      let catalogList = await this.getCategoryList()
+      if (catalogId) {
+        catalogId.config.treeParams.data = catalogList
+      }
+      if (moveCatalogId) {
+        moveCatalogId.props.treeParams.data = _.drop(catalogList)
+      }
     },
     // 移动data
     handleChange() {
@@ -610,7 +699,7 @@ export default {
     alterIsPutaway(id, i) {
       // console.log({ id })
       let lang = ''
-      if (i) {
+      if (!i) {
         lang = '您确定要下架该课程吗？下架后，该课程将不能访问。'
       } else {
         lang = '您确定要上架该课程吗？'
@@ -683,8 +772,9 @@ export default {
       }
       if (e === 'move') {
         // 移动
-        this.dialogFormVisible = true
-        this.moveId = row.id
+        // this.dialogFormVisible = true
+        // this.moveId = row.id
+        this.moveFun(row)
       }
     },
     //  处理页码改变
@@ -718,6 +808,8 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
+            this.$refs.table.clearSelection()
+            this.getInfo()
           })
         })
         .catch(() => {
@@ -845,6 +937,7 @@ export default {
       height: 50px;
       line-height: 50px;
       margin-left: 30px;
+      cursor: pointer;
     }
     .select {
       border-bottom: 2px solid #1677ff;

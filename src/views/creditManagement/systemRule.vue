@@ -12,7 +12,7 @@
         :data="tableData"
         :loading="tableLoading"
       >
-        <template #topMenu>
+        <template slot="topMenu">
           <div class="transitionBox">
             <div class="searchBox">
               <div class="search-box">
@@ -182,8 +182,8 @@ export default {
     handleIsStart(row) {
       let text =
         row.status == 0
-          ? '您确定要启用该学分规则吗？'
-          : '您确定要停用该学分规则来源吗？停用后，该学分规则来源将暂停使用。'
+          ? '您确定要启用该系统规则吗？'
+          : '您确定要停用该系统规则来源吗？停用后，该系统规则来源将暂停使用。'
       this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

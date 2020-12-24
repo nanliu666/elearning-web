@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header
-      title="新建随机试卷"
+      :title="form.id && !copy ? '编辑随机试卷' : '新建随机试卷'"
       show-back
     />
     <basic-container
@@ -46,9 +46,8 @@
             试题设置:
             <span
               class="tip"
-            >（当前总分数{{ TotalScore }}分<span
-              v-if="form.totalScore"
-            >，剩余分数：{{ score }}分</span>）</span>
+            >（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分
+              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）</span>
           </div>
           <div>
             <el-button
@@ -119,6 +118,7 @@
                 :min="0"
                 :step="1"
                 :precision="0"
+                @change="questionChange($event, row)"
               />
               <div
                 v-if="row.questionNum > row.totalQuestionNum"
@@ -190,6 +190,7 @@
 <script>
 import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
 import { getcategoryTree } from '@/api/examManage/category'
+import { getQuestionList } from '@/api/examManage/question'
 import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
 
@@ -351,11 +352,12 @@ export default {
   },
   data() {
     return {
+      copy: '',
       form: {
         name: '',
         categoryId: '',
         expiredTime: '',
-        totalScore: '',
+        totalScore: undefined,
         remark: '',
         isScore: '',
         isShowScore: '',
@@ -398,8 +400,8 @@ export default {
           }
         }
       },
-      TotalScore: 0,
-      score: 0,
+      totalScore: 0,
+      surplusScore: 0,
       valid: false,
       options: QUESTION_TYPE_MAP,
       props: { multiple: true },
@@ -422,15 +424,6 @@ export default {
     }
   },
   watch: {
-    /***
-     * @author guanfenda
-     * @desc 修改了试题设置，修改分数重新计算剩余分数
-     * */
-    TotalScore(val) {
-      if (this.form.totalScore) {
-        this.score = this.form.totalScore - val
-      }
-    },
     /**
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
@@ -453,7 +446,7 @@ export default {
       name: '',
       categoryId: '',
       expiredTime: '',
-      totalScore: '',
+      totalScore: undefined,
       remark: '',
       isScore: '',
       isShowScore: '',
@@ -462,13 +455,14 @@ export default {
     this.tableData = []
     this.options = []
     this.valid = false
-    this.TotalScore = ''
-    this.score = ''
+    this.totalScore = 0
+    this.surplusScore = 0
     this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
+    this.copy = this.$route.query.copy
     this.getData()
     this.getTestPaperCategory()
     if (!this.$route.query.id) {
@@ -515,8 +509,11 @@ export default {
       getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
 
-        let children = await this.getNoCategory(relateType)
-        column.props.treeParams.data = [{ id: 0, name: '未分类', children }, ...res]
+        let categoryObject = await this.category(relateType)
+        column.props.treeParams.data = [
+          { id: 0, name: '未分类', relatedNum: categoryObject.totalNum },
+          ...res
+        ]
       })
     },
     /***
@@ -524,15 +521,16 @@ export default {
      * @desc 获取未分类
      *
      * */
-    getNoCategory(relateType) {
+    category(relateType) {
       let params = {
-        type: '0',
-        parentId: '-110',
-        relateType: relateType
+        status: 'normal',
+        pageNo: 1,
+        pageSize: 1,
+        type: relateType
       }
 
       return new Promise((resolve, reject) => {
-        getcategoryTree(params)
+        getQuestionList(params)
           .then((res) => {
             resolve(res)
           })
@@ -568,6 +566,7 @@ export default {
      * @desc 查找试卷详情
      * */
     getData() {
+      this.columns.find((it) => it.prop === 'name').disabled = false
       if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
       let params = {
         id: this.$route.query.id
@@ -605,6 +604,7 @@ export default {
             this.getTopicCategory(data.type, data.column)
           })
           this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
+          !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
         })
         .finally(() => {
           this.loading = false
@@ -664,12 +664,16 @@ export default {
      * */
     questionChange() {
       let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
-      scoreList.length === 0 && (this.score = this.form.totalScore)
+      scoreList.length === 0 && (this.surplusScore = this.form.totalScore)
+      let totalScore = 0
       scoreList.length &&
-        (this.TotalScore = scoreList.reduce((prev, cur) => {
+        (totalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.score = this.form.totalScore - this.TotalScore
+      this.totalScore = totalScore.toFixed(1)
+
+      let score = (this.form.totalScore - this.totalScore) * 10
+      this.surplusScore = (Math.round(score) / 10).toString()
     },
     /**
      * @author guanfenda

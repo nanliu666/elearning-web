@@ -6,8 +6,15 @@
     />
     <basic-container block>
       <div class="title-box">
-        <span class="title">EHS应知应会全员考试</span>
-        <span class="sub-title">（未评卷：20人，已评卷20人）</span>
+        <span class="title">{{ $route.query.examName }}</span>
+        <span
+          v-if="!_.isEmpty(evaluationCount)"
+          class="sub-title"
+        >
+          <span>（未评卷：{{ evaluationCount.notExamNum }}人，</span>
+          <span> 阅卷中：{{ evaluationCount.ExamNumIng }}人，</span>
+          <span>已评卷：{{ evaluationCount.ExamNumed }}人 ）</span>
+        </span>
       </div>
       <common-table
         id="demo"
@@ -65,7 +72,7 @@
             </div>
           </div>
         </template>
-        <template #examName>
+        <template #name>
           ******
         </template>
         <template #phone>
@@ -74,13 +81,24 @@
         <template #status="{row}">
           {{ row.status | statusFilterer }}
         </template>
+        <template #effectiveTime="{row}">
+          <span v-if="row.answerBeginTime">
+            {{ row.answerBeginTime }} ~ {{ row.answerEndTime }}
+          </span>
+          <span v-else>
+            暂无
+          </span>
+        </template>
+        <template #score="{row}">
+          {{ row.score != 0 ? row.score : '--' }}
+        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
               type="text"
               @click="handleExaminee(row)"
             >
-              {{ true ? '查看答案' : '开始评卷' }}
+              {{ getHandleButtonText(row) }}
             </el-button>
           </div>
         </template>
@@ -91,12 +109,13 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList } from '@/api/examManage/schedule'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { listManualEvaluationOnce, listManualEvaluationOnceCount } from '@/api/examManage/mark'
+import { mapGetters } from 'vuex'
 let TABLE_COLUMNS = [
   {
     label: '考生姓名',
-    prop: 'examName',
+    prop: 'name',
     slot: true,
     minWidth: 120
   },
@@ -108,7 +127,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '所属组织',
-    prop: 'category',
+    prop: 'dept',
     minWidth: 120
   },
   {
@@ -120,11 +139,13 @@ let TABLE_COLUMNS = [
   {
     label: '考试时间',
     prop: 'effectiveTime',
+    slot: true,
     minWidth: 120
   },
   {
     label: '得分',
-    prop: 'createUser',
+    prop: 'score',
+    slot: true,
     minWidth: 120
   }
 ]
@@ -133,22 +154,22 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
+  enableMultiSelect: false,
   handlerColumn: {
     minWidth: 150
   }
 }
 const STATUS_STATUS = [
   { value: '', label: '全部' },
-  { value: '1', label: '待评卷' },
-  { value: '2', label: '阅卷中' },
-  { value: '3', label: '已评卷' }
+  { value: '3', label: '待评卷' },
+  { value: '4', label: '阅卷中' },
+  { value: '5', label: '已评卷' }
 ]
 const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'examName',
+      field: 'name',
       label: '',
       data: '',
       options: [],
@@ -167,17 +188,17 @@ const SEARCH_CONFIG = {
       type: 'numInterval',
       data: { min: '', max: '' },
       label: '得分',
-      field: 'minPeriod,maxPeriod'
+      field: 'scoreMin,scoreMax'
     },
     {
       type: 'numInterval',
       data: { min: '', max: '' },
       label: '正确率',
-      field: 'minRenewNum,maxRenewNum'
+      field: 'accuracyMin,accuracyMax'
     },
     {
       type: 'select',
-      field: 'creatorId',
+      field: 'reviewer',
       data: '',
       label: '评卷人',
       options: [],
@@ -209,7 +230,7 @@ export default {
     statusFilterer(data) {
       if (data) {
         return _.filter(STATUS_STATUS, (item) => {
-          return item.value === data
+          return item.value === data + ''
         })[0].label
       }
     },
@@ -221,9 +242,10 @@ export default {
     return {
       tableLoading: false,
       tableData: [],
+      evaluationCount: {},
       tablePageConfig: {},
       page: {
-        currentPage: 1,
+        currentPage: 0,
         size: 10,
         total: 0
       },
@@ -234,53 +256,61 @@ export default {
       data: [],
       createOrgDailog: false,
       queryInfo: {
-        creatorId: '', //评卷人id
-        pageNo: '',
-        pageSize: '',
-        status: '', //状态: 未开始-1, 进行中-2, 已结束-3
-        type: 0 //状态:0-已发布，1-草稿箱
+        currentPage: 0,
+        size: 10
       }
     }
   },
-  activated() {
-    let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
-      return item.field === 'creatorId'
+  computed: {
+    ...mapGetters(['userId'])
+  },
+  async activated() {
+    this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
+    this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })
+    let reviewer = _.filter(this.searchConfig.popoverOptions, (item) => {
+      return item.field === 'reviewer'
     })[0]
-    if (_.size(creatorId.options) === 0) {
+    if (_.size(reviewer.options) === 0) {
       getCreatUsers().then((res) => {
-        if (creatorId) {
-          creatorId.options.push(...res)
+        if (reviewer) {
+          reviewer.options.push(...res)
         }
       })
     }
     this.loadTableData()
   },
   methods: {
+    getHandleButtonText(row) {
+      const STATUS_DICTS = {
+        3: '开始评卷',
+        4: row.currentId === this.userId ? '继续评卷' : '查看答卷',
+        5: '查看答卷'
+      }
+      return STATUS_DICTS[row.status]
+    },
     /**
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo.currentPage = param
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo.size = param
       this.loadTableData()
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getArrangeList(this.queryInfo)
+        let { totalNum, list } = await listManualEvaluationOnce(this.queryInfo)
         this.tableLoading = false
-        this.tableData = data
+        this.tableData = list
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
@@ -298,7 +328,7 @@ export default {
     handleExaminee(row) {
       this.$router.push({
         path: '/examManagement/mark/MarkByExaminee',
-        query: { id: row.id, type: 'edit' }
+        query: { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
       })
     }
   }

@@ -72,7 +72,7 @@
               v-else
               #content-label=""
             >
-              选项
+              题干
               <el-tooltip
                 class="item"
                 effect="dark"
@@ -358,6 +358,7 @@ export default {
         expiredTime: null,
         content: null,
         analysis: null,
+        answer: null,
         attachments: [],
         timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
         options: createOptions(),
@@ -537,6 +538,16 @@ export default {
 
         if (data.type === QUESTION_TYPE_GROUP) {
           data.subQuestions = this.form.subQuestions
+          _.forEach(data.subQuestions, (question) => {
+            if (question.answer && question.type === QUESTION_TYPE_BLANK) {
+              question.options = [{ content: question.answer, isCorrect: 1 }]
+            } else {
+              question.options.forEach((item, index) => {
+                item.sort = index
+              })
+            }
+            question.content = _.escape(question.content)
+          })
         }
         data.id = this.id
         if (!isContinue) {
@@ -596,6 +607,12 @@ export default {
           if (res.type == QUESTION_TYPE_BLANK) {
             this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
           }
+          _.forEach(this.form.subQuestions, (question) => {
+            if (question.type == QUESTION_TYPE_BLANK) {
+              this.$set(question, 'answer', _.get(_.head(question.options), 'content', ''))
+            }
+            question.content = _.unescape(question.content)
+          })
         })
         .finally(() => {
           this.loading = false

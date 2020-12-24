@@ -117,8 +117,8 @@
         <template #examTime="{row}">
           {{ row.examTime[0] }} 至 {{ row.examTime[1] }}
         </template>
-        <template #reckonTime="{row}">
-          {{ !row.reckonTime ? '不计时' : row.reckonTime }}
+        <template #reckonTimeValue="{row}">
+          {{ !row.reckonTimeValue ? '不计时' : row.reckonTimeValue }}
         </template>
         <template #handler="{row}">
           <el-button
@@ -214,8 +214,8 @@ const CourseConfig = {
 }
 const TestColumns = [
   { prop: 'examTime', label: '考试日期', slot: true, width: 220 },
-  { prop: 'testPaperName', label: '关联考试', minWidth: 150 },
-  { prop: 'reckonTime', slot: true, label: '考试时间(分钟)' }
+  { prop: 'examName', label: '关联考卷', minWidth: 150 },
+  { prop: 'reckonTimeValue', slot: true, label: '考试时间(分钟)' }
 ]
 const TestConfig = {
   showHandler: true,

@@ -4,7 +4,7 @@
     class="HandmadeTestPaper"
   >
     <page-header
-      title="新建手工试卷"
+      :title="form.id && !copy ? '编辑手工试卷' : '新建手工试卷'"
       show-back
     />
     <basic-container
@@ -49,9 +49,9 @@
             试题设置:
             <span
               class="tip"
-            >（当前总分数{{ TotalScore }}分<span
+            >（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分<span
               v-if="form.totalScore"
-            >，剩余分数：{{ score }}分</span>）</span>
+            >，剩余分数：{{ surplusScore }}分</span>）</span>
           </div>
           <div>
             <el-button
@@ -207,11 +207,12 @@ export default {
   },
   data() {
     return {
+      copy: '',
       loading: false,
       valid: false,
       columns: BASE_COLUMNS,
-      TotalScore: '',
-      score: '',
+      totalScore: '',
+      surplusScore: '',
       form: {},
       typeList: [],
       themeBlock: {
@@ -225,30 +226,42 @@ export default {
     }
   },
   watch: {
-    /***
-     * @author guanfenda
-     * @desc 修改了试题设置，修改分数重新计算剩余分数
-     * */
-    TotalScore(val) {
-      if (this.form.totalScore) {
-        this.score = this.form.totalScore - val
-      }
-    },
     /**
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
     'form.totalScore'() {
       this.count()
+    },
+    'form.isScore'() {
+      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      if (this.form.isScore) {
+        totalScore.required = true
+      } else {
+        totalScore.required = false
+      }
     }
   },
   mounted() {},
   activated() {
-    this.form = {}
+    this.form = {
+      name: '',
+      categoryId: '',
+      expiredTime: '',
+      totalScore: undefined,
+      remark: '',
+      isScore: '',
+      isShowScore: '',
+      isMulti: ''
+    }
+    this.totalScore = 0
+    this.surplusScore = ''
+    this.form.isScore = 0
+
     this.testPaper = []
-    this.TotalScore = ''
     this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
+    this.copy = this.$route.query.copy
     this.getData()
     this.getTestPaperCategory()
   },
@@ -270,6 +283,7 @@ export default {
      * @desc 获取试卷详情
      * */
     getData() {
+      this.columns.find((it) => it.prop === 'name').disabled = false
       if (!this.$route.query.id) return
       let params = {
         id: this.$route.query.id
@@ -316,6 +330,8 @@ export default {
               tableData: list[key]
             })
           }
+          !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
+
           this.count()
         })
         .finally(() => {
@@ -402,14 +418,18 @@ export default {
       )
       let list = []
       scoreList.map((it) => {
-        list.push(...it)
+        let newData = _.compact(it)
+        list.push(...newData)
       })
+      let totalScore = 0
       scoreList = list
       scoreList.length &&
-        (this.TotalScore = scoreList.reduce((prev, cur) => {
+        (totalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.score = this.form.totalScore - this.TotalScore
+      this.totalScore = totalScore.toFixed(1)
+      let score = (this.form.totalScore - this.totalScore) * 10
+      this.surplusScore = (Math.round(score) / 10).toString()
     },
     /**
      * @author guanfenda
