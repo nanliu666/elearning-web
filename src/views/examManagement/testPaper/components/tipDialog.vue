@@ -86,7 +86,7 @@ export default {
   },
   computed: {
     listData() {
-      return this.tableData[0].examname.split(',')
+      return this.tableData[0].examName ? this.tableData[0].examName.split(',') : ''
     }
   },
   watch: {
