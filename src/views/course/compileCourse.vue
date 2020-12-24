@@ -30,9 +30,9 @@
         </div>
       </div>
       <div class="btns">
-        <el-button size="medium">
+        <!-- <el-button size="medium">
           预览
-        </el-button>
+        </el-button> -->
         <el-button
           size="medium"
           @click="isAddCourse(2)"
@@ -42,6 +42,7 @@
         <el-button
           size="medium"
           type="primary"
+          :disabled="disabledBtn"
           @click="isAddCourse(1)"
         >
           发布
@@ -559,6 +560,7 @@
               <el-input
                 v-model="addArticle.localName"
                 placeholder="请输入标题"
+                maxlength="32"
               ></el-input>
             </div>
             <div class="dialog_tinymce">
@@ -598,6 +600,7 @@ export default {
   },
   data() {
     return {
+      disabledBtn: false,
       TeacherData: '',
       catalogIdoptions: [],
       checkboxVal: [],
@@ -669,19 +672,34 @@ export default {
         ]
       },
       rules: {
-        name: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
-        teacherId: [{ required: true, message: '请输入讲师名称', trigger: 'blur' }],
-        catalogId: [{ required: true, message: '请选择所在分类', trigger: 'blur' }],
-        type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }],
-        passCondition: [{ required: true, message: '请选择通过条件', trigger: 'blur' }],
-        electiveType: [{ required: true, message: '请选择选修类型', trigger: 'blur' }],
-        imageUrl: [{ required: true, message: '请选择课程封面', trigger: 'blur' }],
-        introduction: [{ required: true, message: '请书写课程介绍', trigger: 'blur' }],
-        thinkContent: [{ required: true, message: '请书写课前思考内容', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入课程名称', trigger: ['blur', 'change'] }],
+        teacherId: [{ required: true, message: '请输入讲师名称', trigger: ['blur', 'change'] }],
+        catalogId: [{ required: true, message: '请选择所在分类', trigger: ['blur', 'change'] }],
+        type: [{ required: true, message: '请选择课程类型', trigger: ['blur', 'change'] }],
+        passCondition: [
+          { type: 'array', required: true, message: '请选择通过条件', trigger: ['blur', 'change'] }
+        ],
+        electiveType: [{ required: true, message: '请选择选修类型', trigger: ['blur', 'change'] }],
+        imageUrl: [
+          { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
+        ],
+        introduction: [{ required: true, message: '请书写课程介绍', trigger: ['blur', 'change'] }],
+        thinkContent: [
+          { required: true, message: '请书写课前思考内容', trigger: ['blur', 'change'] }
+        ]
       }
     }
   },
-  watch: {},
+  watch: {
+    'ruleForm.imageUrl': {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.ruleForm.validateField('imageUrl', () => {})
+        })
+      },
+      immediate: false
+    }
+  },
 
   created() {
     this.isgetCourseTags()
@@ -694,8 +712,8 @@ export default {
       this.$router.push({ path: '/course/courseDraft' })
     },
     islistTeacher() {
-      listTeacher({ currentPage: 1, size: 999 }).then((res) => {
-        this.TeacherData = res.teacherInfos
+      listTeacher().then((res) => {
+        this.TeacherData = res
       })
     },
     // 编辑页面的数据前
@@ -777,7 +795,8 @@ export default {
       params.contents.forEach((item) => {
         delete item.upLoad
       })
-      params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
+      // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
+      params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
       // params.tagIds = params.tagIds.join(',')
@@ -803,6 +822,7 @@ export default {
                 type: 'success'
               })
               setTimeout(() => {
+                this.isdeleteData()
                 this.$router.push({ path: '/course/courseDraft' })
               }, 2000)
             })
@@ -813,6 +833,7 @@ export default {
               message: '已取消保存'
             })
             setTimeout(() => {
+              this.isdeleteData()
               this.$router.push({ path: '/course/courseDraft' })
             }, 2000)
           })
@@ -825,6 +846,7 @@ export default {
               type: 'warning'
             })
           } else {
+            this.disabledBtn = true
             params.status = status
             editCourseInfo(params).then(() => {
               this.$message({
@@ -832,11 +854,46 @@ export default {
                 type: 'success'
               })
               setTimeout(() => {
+                this.isdeleteData()
                 this.$router.push({ path: '/course/courseDraft' })
               }, 2000)
             })
           }
         })
+      }
+    },
+    // 清空数据
+    isdeleteData() {
+      this.ruleForm = {
+        imageUrl: [], //图片
+        url: '',
+        localName: '',
+        catalogId: '',
+        electiveType: 1,
+        thinkContent: '', //课前思考内容
+        introduction: '', //课程介绍
+        // tagIds: [], //标签
+        isRecommend: '', //是否推荐
+        passCondition: '', //通过条件
+        period: '', //时长
+        credit: '', //学分
+        // 所在分类现在没有
+        type: '', //课程类型
+        name: '', //课程名称
+        teacherId: '', //讲师id
+        // 表格
+        contents: [
+          {
+            url: '',
+            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+            sort: '', //序号
+            type: '', //章节类型
+            name: '', // 章节名称
+            content: '', //文章内容
+            upLoad: [], //[url,localName],  //所有上传的文件
+            saveOrcompile: 0 // 1保存&0编辑
+          }
+        ]
       }
     },
 

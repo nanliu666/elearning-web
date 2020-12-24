@@ -142,14 +142,14 @@
 
             <!-- 课程名称 -->
             <template
-              slot="catalogName"
+              slot="courseName"
               slot-scope="{ row }"
             >
               <el-button
                 type="text"
-                @click="toTrainDetail(row)"
+                @click="todetail(row)"
               >
-                {{ row.catalogName }}
+                {{ row.courseName }}
               </el-button>
             </template>
             <!-- 课程类型 -->
@@ -170,29 +170,22 @@
               <span v-if="row.passCondition === 'b'">考试通过</span>
               <span v-if="row.passCondition === 'c'">达到课程学时</span>
             </template>
-            <!-- electiveType: 2, //选修类型 (1:开发选修 2:通过审批 3:禁止选修) -->
+            <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
             <template
               slot="electiveType"
               slot-scope="{ row }"
             >
-              <span v-if="row.electiveType === 1">开发选修</span>
+              <span v-if="row.electiveType === 1">开放选修</span>
               <span v-if="row.electiveType === 2">通过审批</span>
               <span v-if="row.electiveType === 3">禁止选修</span>
             </template>
             <!-- 标签 -->
-            <template
-              slot="atags"
-              slot-scope="{ row }"
-            >
+            <!-- <template slot="atags" slot-scope="{ row }">
               s
-              <span
-                v-for="(item, index) in row.atags"
-                :key="index"
-                class="atags_icon"
-              >{{
+              <span v-for="(item, index) in row.atags" :key="index" class="atags_icon">{{
                 item
               }}</span>
-            </template>
+            </template> -->
             <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
             <template
               slot="isRecommend"
@@ -361,11 +354,11 @@ const TABLE_COLUMNS = [
     slot: true
   },
 
-  {
-    label: '标签',
-    prop: 'atags',
-    slot: true
-  },
+  // {
+  //   label: '标签',
+  //   prop: 'atags',
+  //   slot: true
+  // },
   {
     label: '是否推荐',
     prop: 'isRecommend',
@@ -606,6 +599,12 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 去详情
+    todetail() {
+      // console.log(row)
+      this.$router.push({ path: '/course/detail' })
+    },
+
     // 打开移动弹窗
     moveFun(row) {
       this.dialogFormVisible = true
@@ -809,7 +808,7 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
-
+            this.$refs.table.clearSelection()
             this.getInfo()
           })
         })

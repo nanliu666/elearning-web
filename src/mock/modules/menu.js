@@ -498,6 +498,19 @@ const res = {
             children: []
           },
           {
+            menuId: '125123412355342345058',
+            menuName: '学习情况',
+            menuType: 'Menu',
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/course/detail',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
             menuId: '12590567456745635058',
             menuName: '创建课程',
             menuType: 'Menu',

@@ -67,7 +67,7 @@
             </div>
           </div>
         </template>
-        <template
+        <!-- <template
           slot="multiSelectMenu"
           slot-scope="{ selection }"
         >
@@ -78,7 +78,7 @@
           >
             批量删除
           </el-button>
-        </template>
+        </template> -->
         <template #status="{row}">
           {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
@@ -164,7 +164,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true, // TODO：树无法做批量选择
+  // enableMultiSelect: true, // TODO：树无法做批量选择   //先不做批量删除
   handlerColumn: {
     minWidth: 100
   }
