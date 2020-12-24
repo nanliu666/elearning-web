@@ -70,3 +70,9 @@ export const queryPercentageComplete = (params) =>
  * @param {Object} params - 参数
  * */
 export const queryLog = (params) => get('/api/blade-manage/v1/study/plan/course/queryLog', params)
+
+/**
+ * 删除学习计划
+ * @param {Object} params - 参数
+ * */
+export const deletePlan = (params) => del('/api/blade-manage/v1/study/plan/deletePlan', params)

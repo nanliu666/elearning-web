@@ -20,9 +20,12 @@
       >
         <span
           v-if="!data.hasOwnProperty('flag')"
-        >{{ data.label }} {{ data.hasOwnProperty('children') ? '' : '(' + data.num + ')' }}</span>
+        >{{ data.label }}
+          {{
+            data.hasOwnProperty('children') || data.label === '未分类' ? '' : '(' + data.num + ')'
+          }}</span>
         <el-dropdown
-          v-if="moreMenu.length > 0 && currentNodeKey === data.id"
+          v-if="moreMenu.length > 0 && currentNodeKey === data.id && data.label != '未分类'"
           class="custom-tree-node-right"
           @command="(val) => commandChange(val, data, node)"
         >
@@ -62,6 +65,7 @@
         <div
           v-if="data.hasOwnProperty('flag')"
           class="temporaryNode"
+          @click.stop
         >
           <el-input
             v-model="classifyName"
@@ -84,7 +88,7 @@
       class="addGroup"
       @click="commandChange('add')"
     >
-      <i class="el-icon-circle-plus-outline"></i>新建分类
+      <i class="el-icon-circle-plus-outline"></i>新建分组
     </div>
 
     <el-dialog
@@ -457,6 +461,7 @@ export default {
       // 刷新树数据
       this.$emit('refreshTree')
       this.classifyName = ''
+      this.temporaryHide()
     }
   }
 }
@@ -506,9 +511,13 @@ export default {
     }
   }
   .temporaryNode {
-    margin-top: 15px;
-    .el-input {
+    // margin-top: 15px;
+    /deep/.el-input {
       width: 70%;
+      height: 26px;
+      .el-input__inner {
+        height: 26px;
+      }
     }
     span {
       cursor: pointer;
