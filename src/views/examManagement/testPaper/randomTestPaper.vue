@@ -46,9 +46,8 @@
             试题设置:
             <span
               class="tip"
-            >（当前总分数{{ totalScore }}分<span
-              v-if="form.totalScore"
-            >，剩余分数：{{ surplusScore }}分</span>）</span>
+            >（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分
+              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）</span>
           </div>
           <div>
             <el-button
@@ -358,7 +357,7 @@ export default {
         name: '',
         categoryId: '',
         expiredTime: '',
-        totalScore: '',
+        totalScore: undefined,
         remark: '',
         isScore: '',
         isShowScore: '',
@@ -447,7 +446,7 @@ export default {
       name: '',
       categoryId: '',
       expiredTime: '',
-      totalScore: '',
+      totalScore: undefined,
       remark: '',
       isScore: '',
       isShowScore: '',
@@ -456,8 +455,8 @@ export default {
     this.tableData = []
     this.options = []
     this.valid = false
-    this.totalScore = ''
-    this.surplusScore = ''
+    this.totalScore = 0
+    this.surplusScore = 0
     this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
@@ -671,7 +670,7 @@ export default {
         (totalScore = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.totalScore = totalScore.toFixed(1).toString()
+      this.totalScore = totalScore.toFixed(1)
 
       let score = (this.form.totalScore - this.totalScore) * 10
       this.surplusScore = (Math.round(score) / 10).toString()

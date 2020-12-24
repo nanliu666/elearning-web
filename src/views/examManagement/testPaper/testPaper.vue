@@ -405,9 +405,11 @@ export default {
      * @params  id 试卷id copy 是否复制数据
      * */
     handleRandom(id, copy) {
-      let query = {}
-      id && (query.id = id)
-      copy && (query.copy = copy)
+      let query = {
+        tagName: '新建随机试卷'
+      }
+      id && ((query.id = id), (query.tagName = '编辑随机试卷'))
+      copy && ((query.copy = copy), (query.tagName = '新建随机试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/randomTestPaper',
         query
@@ -419,9 +421,11 @@ export default {
      * @params  id 试卷id copy 是否复制数据
      * */
     handleManual(id, copy) {
-      let query = {}
-      id && (query.id = id)
-      copy && (query.copy = copy)
+      let query = {
+        tagName: '新建手工试卷'
+      }
+      id && ((query.id = id), (query.tagName = '编辑手工试卷'))
+      copy && ((query.copy = copy), (query.tagName = '新建手工试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/handmadeTestPaper',
         query
