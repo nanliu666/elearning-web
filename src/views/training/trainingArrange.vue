@@ -1072,6 +1072,7 @@ $color_icon: #A0A8AE
         height: 50px;
         line-height: 50px;
         margin-left: 30px;
+        cursor: pointer;
       }
       .select {
         border-bottom: 3px solid #1677ff;

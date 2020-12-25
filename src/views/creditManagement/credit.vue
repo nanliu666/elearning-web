@@ -160,7 +160,7 @@ export default {
       treeLoading: false,
       tableConfig: {
         showHandler: true,
-        enableMultiSelect: true,
+        enableMultiSelect: false,
         enablePagination: true,
         showIndexColumn: false,
         rowKey: 'id',

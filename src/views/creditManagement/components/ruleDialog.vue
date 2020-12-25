@@ -159,7 +159,13 @@ export default {
         maxlength: 32,
         label: '每日上限',
         span: 24,
-        required: true
+        rules: [
+          {
+            required: true,
+            message: '请输入每日上限',
+            trigger: 'blur'
+          }
+        ]
       },
       {
         prop: 'ruleState',
@@ -178,7 +184,7 @@ export default {
       form: {
         stuName: '',
         sysRuleId: '',
-        dayLimit: undefined,
+        dayLimit: '',
         score: undefined,
         ruleState: ''
       },
@@ -233,15 +239,20 @@ export default {
           score: form.score * 10
         }
         let rule = form.id ? editStudentsRulus : postAddStudentsRulus
-        rule(params).then(() => {
-          this.$message.success('提交成功')
-          this.$emit('loadData')
-          if (isContinue) {
-            this.$refs.form.resetFields()
-          } else {
-            this.onClose()
-          }
-        })
+        this.loading = true
+        rule(params)
+          .then(() => {
+            this.$message.success('提交成功')
+            this.$emit('loadData')
+            if (isContinue) {
+              this.$refs.form.resetFields()
+            } else {
+              this.onClose()
+            }
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     },
     numberInput(value, data) {

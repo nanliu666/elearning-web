@@ -18,6 +18,7 @@
             type="primary"
             size="mini"
             :disabled="issueStatus"
+            @click="handleConfig"
           >
             开办下一期
           </el-button>
@@ -913,6 +914,10 @@ export default {
     // this.getInfo()
   },
   methods: {
+    // 去开办下一期
+    handleConfig() {
+      this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
+    },
     // 结办
     isstopSchedule() {
       let id = this.$route.query.id
@@ -1137,6 +1142,7 @@ export default {
     color: #111;
     font-size: 18px;
     font-weight: bold;
+    cursor: pointer;
   }
   .title_box {
     background-color: #fff;

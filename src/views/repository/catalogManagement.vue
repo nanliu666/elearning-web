@@ -169,7 +169,7 @@ const TABLE_CONFIG = {
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true, // TODO：树无法做批量选择
+  // enableMultiSelect: true, // TODO：树无法做批量选择,暂时关闭多选
   handlerColumn: {
     minWidth: 100
   }

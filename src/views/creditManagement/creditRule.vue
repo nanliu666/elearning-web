@@ -24,7 +24,7 @@
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
-        <template #topMenu>
+        <template slot="topMenu">
           <div class="transitionBox">
             <div class="searchBox">
               <div class="search-box">
@@ -294,7 +294,7 @@ export default {
           })
         })
       } else {
-        this.$confirm('该学分规则处于启用状态，请停用后删除。？', '提醒', {
+        this.$confirm('该学分规则处于启用状态，请停用后删除。', '提醒', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'

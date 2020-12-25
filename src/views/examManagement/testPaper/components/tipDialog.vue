@@ -10,7 +10,7 @@
   >
     <div v-loading="loading">
       <div>
-        您选中试题有正在关联的考试，请调整后再进行删除！
+        您选中试卷有正在关联的考试，请调整后再进行删除！
       </div>
       <div
         class="test"
@@ -31,10 +31,10 @@
           class="content"
         >
           <div
-            v-for="(item, i) in tableData"
+            v-for="(item, i) in listData"
             :key="i"
           >
-            {{ item.name }}
+            {{ item }}
           </div>
         </div>
       </div>
@@ -52,8 +52,9 @@
         <el-button
           type="primary"
           size="medium"
+          @click="onClose"
         >
-          保存
+          确定
         </el-button>
       </div>
     </div>
@@ -81,6 +82,11 @@ export default {
       loading: false,
       Visible: true,
       ishide: false
+    }
+  },
+  computed: {
+    listData() {
+      return this.tableData[0].examName ? this.tableData[0].examName.split(',') : ''
     }
   },
   watch: {
