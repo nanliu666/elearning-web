@@ -44,6 +44,11 @@ export const getBatchexaminee = (params) => get('/manage/v1/exam/arrange/examine
  */
 export const getManualPreview = (params) => get('/manage/v1/exam/preview/manual', params)
 /**
+ * 试卷管理查看详情预览随机试卷接口
+ */
+export const createRandomPaper = (params) =>
+  get('/manage/v1/exam/preview/createRandomPaper', params)
+/**
  * 随机试卷预览
  */
 export const getRandomPreview = (params) => get('/manage/v1/exam/preview/random', params)
