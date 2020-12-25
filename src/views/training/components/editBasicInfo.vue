@@ -119,7 +119,7 @@ export default {
           label: '计划人数',
           prop: 'people',
           type: 'Number',
-          required: false,
+          rules: [{ required: false, validator: this.validatePeople, trigger: ['blur', 'change'] }],
           min: 0,
           span: 11,
           offset: 2
@@ -319,11 +319,15 @@ export default {
       }
       this.userList = data
     },
+    // 计划人数的变动
+    validatePeople() {
+      this.$refs.form.validateField('trainObjectsList')
+    },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
       const moreThan = _.size(this.userList) - this.formData.people
       this.$nextTick(() => {
-        if (_.size(this.userList) > 0 && moreThan) {
+        if (_.size(this.userList) > 0 && moreThan > 0) {
           callback(new Error(`超过计划${moreThan}人，请酌量删除`))
         } else {
           callback()
