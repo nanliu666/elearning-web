@@ -320,14 +320,17 @@ export default {
       this.userList = data
     },
     // 计划人数的变动
-    validatePeople() {
-      this.$refs.form.validateField('trainObjectsList')
+    validatePeople(rule, value, callback) {
+      if (value !== 0) {
+        this.$refs.form.validateField('trainObjectsList')
+      }
+      callback()
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
       const moreThan = _.size(this.userList) - this.formData.people
       this.$nextTick(() => {
-        if (_.size(this.userList) > 0 && moreThan > 0) {
+        if (_.size(this.userList) > 0 && moreThan > 0 && this.formData.people !== 0) {
           callback(new Error(`超过计划${moreThan}人，请酌量删除`))
         } else {
           callback()

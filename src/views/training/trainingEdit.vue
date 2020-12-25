@@ -114,7 +114,6 @@ export default {
   },
   data() {
     return {
-      refsList: REFS_LIST,
       trainWay: 0,
       loading: false,
       activeStep: 0,
