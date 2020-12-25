@@ -44,6 +44,7 @@
           size="medium"
           type="primary"
           :disabled="disabledBtn"
+          style="cursor:pointer; "
           @click="isAddCourse(1)"
         >
           发布
@@ -279,7 +280,7 @@
                     slot="tip"
                     class="el-upload__tip"
                   >
-                    只能上传jpg/png文件，且不超过10MB
+                    只能上传jpg/jpeg/png文件，且不超过10MB
                   </div>
                 </div>
                 <img
@@ -644,7 +645,7 @@ export default {
         url: '',
         localName: '',
         catalogId: '',
-        electiveType: 1,
+        electiveType: '',
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
@@ -676,11 +677,11 @@ export default {
         catalogId: [{ required: true, message: '请选择所在分类', trigger: ['blur', 'change'] }],
         type: [{ required: true, message: '请选择课程类型', trigger: ['blur', 'change'] }],
         passCondition: [
-          { type: 'array', required: true, message: '请选择通过条件', trigger: ['blur', 'change'] }
+          { required: false, message: '请选择通过条件', trigger: ['blur', 'change'] }
         ],
         electiveType: [{ required: true, message: '请选择选修类型', trigger: ['blur', 'change'] }],
         imageUrl: [
-          { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
+          { type: 'array', required: false, message: '请选择课程封面', trigger: ['change'] }
         ],
         introduction: [{ required: true, message: '请书写课程介绍', trigger: ['blur', 'change'] }],
         thinkContent: [
@@ -690,25 +691,42 @@ export default {
     }
   },
   watch: {
+    $route: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.ruleForm.resetFields()
+        })
+      },
+      immediate: true,
+      deep: true,
+      return: true
+    },
     'ruleForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
           this.$refs.ruleForm.validateField('imageUrl', () => {})
         })
       },
-      immediate: false
+      immediate: false,
+      deep: true
     }
   },
 
-  created() {
+  created() {},
+  activated() {
+    this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
     // this.getInfo()
     this.islistTeacher()
+    this.$refs.ruleForm.resetFields()
   },
   methods: {
     tocourseDraft() {
-      this.$router.push({ path: '/course/courseDraft' })
+      // this.$router.push({ path: '/course/courseDraft' })
+      this.$router.go(-1)
+      // this.isdeleteData()
+      this.$refs.ruleForm.resetFields()
     },
 
     islistTeacher() {
@@ -777,6 +795,8 @@ export default {
 
     // 发布&草稿
     isAddCourse(status) {
+      this.rules.imageUrl[0].required = true
+      this.rules.passCondition[0].required = true
       this.ruleForm.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
@@ -823,7 +843,9 @@ export default {
               })
               setTimeout(() => {
                 this.isdeleteData()
-                this.$router.push({ path: '/course/courseDraft' })
+                // this.$router.push({ path: '/course/courseDraft' })
+                this.disabledBtn = false
+                this.$router.go(-1)
               }, 2000)
             })
           })
@@ -855,7 +877,9 @@ export default {
               })
               setTimeout(() => {
                 this.isdeleteData()
-                this.$router.push({ path: '/course/courseDraft' })
+                this.disabledBtn = false
+                // this.$router.push({ path: '/course/courseDraft' })
+                this.$router.go(-1)
               }, 2000)
             })
           }
@@ -870,12 +894,12 @@ export default {
         url: '',
         localName: '',
         catalogId: '',
-        electiveType: 1,
+        electiveType: '',
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
-        passCondition: '', //通过条件
+        passCondition: [], //通过条件
         period: '', //时长
         credit: '', //学分
         // 所在分类现在没有
@@ -987,7 +1011,7 @@ export default {
     //   // res, file
     // },
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -995,7 +1019,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        this.$message.error('上传图片只支持jpg|jpeg|png文件')
         return false
       }
       return true

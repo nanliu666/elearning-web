@@ -797,7 +797,7 @@ export default {
       selection.forEach((item) => {
         params += item.id + ','
       })
-      this.$confirm('此操作将删选中课程, 是否继续?', '提示', {
+      this.$confirm('此操作将删除选中课程, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

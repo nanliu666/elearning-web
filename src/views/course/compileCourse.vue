@@ -43,6 +43,7 @@
           size="medium"
           type="primary"
           :disabled="disabledBtn"
+          style="cursor:pointer; "
           @click="isAddCourse(1)"
         >
           发布
@@ -183,7 +184,7 @@
               prop="passCondition"
             >
               <el-checkbox-group
-                v-model="checkboxVal"
+                v-model="ruleForm.passCondition"
                 @change="setCheckboxVal"
               >
                 <el-checkbox label="a">
@@ -225,7 +226,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第五行 -->
         <!-- <span>添加标签</span> -->
         <el-row class="switch_box">
@@ -645,12 +645,12 @@ export default {
         url: '',
         localName: '',
         catalogId: '',
-        electiveType: 1,
+        electiveType: '',
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
-        passCondition: '', //通过条件
+        passCondition: [], //通过条件
         period: '', //时长
         credit: '', //学分
         // 所在分类现在没有
@@ -676,9 +676,7 @@ export default {
         teacherId: [{ required: true, message: '请输入讲师名称', trigger: ['blur', 'change'] }],
         catalogId: [{ required: true, message: '请选择所在分类', trigger: ['blur', 'change'] }],
         type: [{ required: true, message: '请选择课程类型', trigger: ['blur', 'change'] }],
-        passCondition: [
-          { type: 'array', required: true, message: '请选择通过条件', trigger: ['blur', 'change'] }
-        ],
+        passCondition: [{ required: true, message: '请选择通过条件', trigger: ['blur', 'change'] }],
         electiveType: [{ required: true, message: '请选择选修类型', trigger: ['blur', 'change'] }],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
@@ -691,17 +689,29 @@ export default {
     }
   },
   watch: {
+    $route: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.ruleForm.resetFields()
+        })
+      },
+      immediate: true,
+      deep: true,
+      return: true
+    },
     'ruleForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
           this.$refs.ruleForm.validateField('imageUrl', () => {})
         })
       },
-      immediate: false
+      immediate: false,
+      deep: true
     }
   },
 
-  created() {
+  activated() {
+    this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
     this.getInfo()
@@ -734,6 +744,9 @@ export default {
       })
       getCourse({ courseId: id }).then((res) => {
         let data = res
+
+        data.passCondition = data.passCondition.split(',')
+        // console.log(data);
         data.imageUrl = [{ localName: '', url: '' }]
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
@@ -814,7 +827,6 @@ export default {
         )
           .then(() => {
             params.status = status
-
             // addCourse(params).then(() => {
             editCourseInfo(this.ruleForm).then(() => {
               this.$message({
@@ -823,7 +835,9 @@ export default {
               })
               setTimeout(() => {
                 this.isdeleteData()
-                this.$router.push({ path: '/course/courseDraft' })
+                // this.$router.push({ path: '/course/courseDraft' })
+                this.disabledBtn = false
+                this.$router.go(-1)
               }, 2000)
             })
           })
@@ -832,10 +846,10 @@ export default {
               type: 'info',
               message: '已取消保存'
             })
-            setTimeout(() => {
-              this.isdeleteData()
-              this.$router.push({ path: '/course/courseDraft' })
-            }, 2000)
+            // setTimeout(() => {
+            //   this.isdeleteData()
+            //   this.$router.push({ path: '/course/courseDraft' })
+            // }, 2000)
           })
       }
       if (status === 1) {
@@ -855,7 +869,9 @@ export default {
               })
               setTimeout(() => {
                 this.isdeleteData()
-                this.$router.push({ path: '/course/courseDraft' })
+                this.disabledBtn = false
+                // this.$router.push({ path: '/course/courseDraft' })
+                this.$router.go(-1)
               }, 2000)
             })
           }
@@ -869,12 +885,12 @@ export default {
         url: '',
         localName: '',
         catalogId: '',
-        electiveType: 1,
+        electiveType: '',
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
-        isRecommend: '', //是否推荐
-        passCondition: '', //通过条件
+        isRecommend: false, //是否推荐
+        passCondition: [], //通过条件
         period: '', //时长
         credit: '', //学分
         // 所在分类现在没有
@@ -960,7 +976,7 @@ export default {
       this.ruleForm.contents.push(item)
     },
     setCheckboxVal() {
-      this.ruleForm.passCondition = this.checkboxVal
+      // this.ruleForm.passCondition = this.checkboxVal
     },
 
     // 删除
