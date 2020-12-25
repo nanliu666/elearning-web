@@ -44,10 +44,10 @@
         <div class="title flex flex-justify-between">
           <div>
             试题设置:
-            <span
-              class="tip"
-            >（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分
-              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）</span>
+            <span class="tip">
+              <span>（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分</span>
+              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
+            </span>
           </div>
           <div>
             <el-button
@@ -624,39 +624,43 @@ export default {
      * */
     onSubmit() {
       this.valid = true
-      this.$refs.form.validate().then((valid) => {
-        if (!valid) return
-        if (
-          this.tableData.filter(
-            (it) =>
-              !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
-          ).length > 0
-        ) {
-          //检查行是否选择了试题来源，试卷试题是否配置，是否选择了题库试题有试题数的，是否给了分数
-          this.$message.warning('请检查试题设置')
-          return
-        }
-        //后台要精确到一位小数，提交是乘以10
-        let randomSettings = this.tableData.map((it) => ({ ...it, score: it.score * 10 }))
-        let form = _.cloneDeep(this.form)
-        form.totalScore = form.totalScore * 10
-        let params = {
-          ...form,
-          randomSettings: randomSettings,
-          type: 'random'
-        }
-        let testPaperMether =
-          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-        this.loading = true
-        testPaperMether(params)
-          .then(() => {
-            this.$message.success('提交成功')
-            this.handleBack()
-          })
-          .finally(() => {
-            this.loading = false
-          })
-      })
+      if (!this.surplusScore || this.surplusScore == '0') {
+        this.$refs.form.validate().then((valid) => {
+          if (!valid) return
+          if (
+            this.tableData.filter(
+              (it) =>
+                !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
+            ).length > 0
+          ) {
+            //检查行是否选择了试题来源，试卷试题是否配置，是否选择了题库试题有试题数的，是否给了分数
+            this.$message.warning('请检查试题设置')
+            return
+          }
+          //后台要精确到一位小数，提交是乘以10
+          let randomSettings = this.tableData.map((it) => ({ ...it, score: it.score * 10 }))
+          let form = _.cloneDeep(this.form)
+          form.totalScore = form.totalScore * 10
+          let params = {
+            ...form,
+            randomSettings: randomSettings,
+            type: 'random'
+          }
+          let testPaperMether =
+            this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+          this.loading = true
+          testPaperMether(params)
+            .then(() => {
+              this.$message.success('提交成功')
+              this.handleBack()
+            })
+            .finally(() => {
+              this.loading = false
+            })
+        })
+      } else {
+        this.$message.error('请正确分配剩余分数')
+      }
     },
     /**
      * @author guanfenda
@@ -671,9 +675,10 @@ export default {
           return Number(prev) + Number(cur)
         }, 0))
       this.totalScore = totalScore.toFixed(1)
-
-      let score = (this.form.totalScore - this.totalScore) * 10
-      this.surplusScore = (Math.round(score) / 10).toString()
+      if (this.form.totalScore) {
+        let score = (this.form.totalScore - this.totalScore) * 10
+        this.surplusScore = (Math.round(score) / 10).toString()
+      }
     },
     /**
      * @author guanfenda
