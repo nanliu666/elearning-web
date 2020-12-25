@@ -106,7 +106,10 @@
           </el-button>
         </template>
         <template #handler="{row}">
-          <span class="startBtn">编辑 &nbsp; </span>
+          <span
+            class="startBtn"
+            @click="toEditCertificate()"
+          >编辑 &nbsp; </span>
           <span
             class="startBtn"
             :title="row.title"
@@ -430,7 +433,10 @@ export default {
     },
     // 去新建证书
     toAddCertificate() {
-      this.$router.push({ path: '/learnPlan/newSchedule' })
+      this.$router.push({ path: '/learnPlan/newSchedule', query: { type: 'add' } })
+    },
+    toEditCertificate() {
+      this.$router.push({ path: '/learnPlan/newSchedule', query: { type: 'edit' } })
     },
     /**
      * 处理页码改变
