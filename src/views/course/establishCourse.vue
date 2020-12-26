@@ -106,7 +106,7 @@
             >
               <el-cascader
                 v-model="ruleForm.catalogId"
-                :props="{ value: 'id', label: 'name' }"
+                :props="{ value: 'id', label: 'name', checkStrictly: true }"
                 :options="catalogIdoptions"
               ></el-cascader>
             </el-form-item>
@@ -467,7 +467,9 @@
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 1">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
@@ -475,7 +477,9 @@
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 2">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
@@ -483,7 +487,9 @@
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 3">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
@@ -491,7 +497,9 @@
                   <span v-if="typeOption[scope.row.type - 1]">
                     <span v-if="typeOption[scope.row.type - 1].value === 5">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
@@ -600,6 +608,7 @@ export default {
   },
   data() {
     return {
+      remember: true,
       disabledBtn: false,
       TeacherData: '',
       catalogIdoptions: [],
@@ -641,7 +650,7 @@ export default {
       // 填写课程信息
       AddArticleBtntableIndex: '',
       ruleForm: {
-        imageUrl: [], //图片
+        imageUrl: [{}], //图片
         url: '',
         localName: '',
         catalogId: '',
@@ -677,11 +686,11 @@ export default {
         catalogId: [{ required: true, message: '请选择所在分类', trigger: ['blur', 'change'] }],
         type: [{ required: true, message: '请选择课程类型', trigger: ['blur', 'change'] }],
         passCondition: [
-          { required: false, message: '请选择通过条件', trigger: ['blur', 'change'] }
+          { type: 'array', required: true, message: '请选择通过条件', trigger: ['blur'] }
         ],
         electiveType: [{ required: true, message: '请选择选修类型', trigger: ['blur', 'change'] }],
         imageUrl: [
-          { type: 'array', required: false, message: '请选择课程封面', trigger: ['change'] }
+          { type: 'array', required: true, message: '请选择课程封面', trigger: ['change'] }
         ],
         introduction: [{ required: true, message: '请书写课程介绍', trigger: ['blur', 'change'] }],
         thinkContent: [
@@ -694,7 +703,8 @@ export default {
     $route: {
       handler() {
         this.$nextTick(() => {
-          this.$refs.ruleForm.resetFields()
+          this.$refs.ruleForm.clearValidate()
+          // this.$refs.ruleForm.resetFields()
         })
       },
       immediate: true,
@@ -719,14 +729,14 @@ export default {
     this.isgetCatalog()
     // this.getInfo()
     this.islistTeacher()
-    this.$refs.ruleForm.resetFields()
+    this.$refs.ruleForm.clearValidate()
   },
   methods: {
     tocourseDraft() {
       // this.$router.push({ path: '/course/courseDraft' })
       this.$router.go(-1)
       // this.isdeleteData()
-      this.$refs.ruleForm.resetFields()
+      this.$refs.ruleForm.clearValidate()
     },
 
     islistTeacher() {
@@ -795,8 +805,10 @@ export default {
 
     // 发布&草稿
     isAddCourse(status) {
-      this.rules.imageUrl[0].required = true
-      this.rules.passCondition[0].required = true
+      if (this.remember) {
+        this.ruleForm.imageUrl = this.ruleForm.imageUrl.splice(1, 1)
+      }
+      this.remember = false
       this.ruleForm.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
@@ -890,7 +902,7 @@ export default {
     // 清空数据
     isdeleteData() {
       this.ruleForm = {
-        imageUrl: [], //图片
+        imageUrl: [{}], //图片
         url: '',
         localName: '',
         catalogId: '',
