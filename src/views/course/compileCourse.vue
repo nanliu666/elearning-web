@@ -1042,6 +1042,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/.tox-tinymce {
+  height: 480px !important;
+}
 .establishCourse {
   color: #666666;
   width: 100%;

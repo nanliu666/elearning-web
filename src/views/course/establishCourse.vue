@@ -299,7 +299,10 @@
             label="课程介绍"
             prop="introduction"
           >
-            <tinymce v-model="ruleForm.introduction" />
+            <tinymce
+              v-model="ruleForm.introduction"
+              :init="{ height: 100 }"
+            />
           </el-form-item>
         </div>
       </el-form>
@@ -573,7 +576,12 @@
             </div>
             <div class="dialog_tinymce">
               <span>内容</span>
-              <div><tinymce v-model="addArticle.content" /></div>
+              <div>
+                <tinymce
+                  id="tinymceId"
+                  v-model="addArticle.content"
+                />
+              </div>
             </div>
 
             <span
@@ -731,6 +739,7 @@ export default {
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
   },
+
   methods: {
     tocourseDraft() {
       // this.$router.push({ path: '/course/courseDraft' })
@@ -1061,6 +1070,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/.tox-tinymce {
+  height: 480px !important;
+}
 .establishCourse {
   color: #666666;
   width: 100%;
