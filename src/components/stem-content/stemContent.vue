@@ -45,7 +45,7 @@
                       搜索
                     </el-button>
                   </div>
-                  <div style="position: relative;top:-10px">
+                  <div style="position: relative;top:-10px; left: 10px">
                     未选择题目
                   </div>
                 </div>
@@ -146,9 +146,8 @@ const TABLE_COLUMNS = [
     fixed: true,
     minWidth: 100,
     formatter(row) {
-      return deleteHTMLTag(_.unescape(row.content)).length > 200
-        ? deleteHTMLTag(_.unescape(row.content)).slice(0, 200) + '...'
-        : deleteHTMLTag(_.unescape(row.content))
+      const contentText = deleteHTMLTag(_.unescape(row.content))
+      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
     }
   },
 
@@ -455,6 +454,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.table {
+  /deep/ .top-menu {
+    margin-bottom: 20px;
+  }
+}
 /deep/ .el-dialog__header {
   padding: 16px 0;
   margin: 0 24px;
