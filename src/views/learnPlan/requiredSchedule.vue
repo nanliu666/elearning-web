@@ -108,7 +108,7 @@
         <template #handler="{row}">
           <span
             class="startBtn"
-            @click="toEditCertificate()"
+            @click="toEditCertificate(row)"
           >编辑 &nbsp; </span>
           <span
             class="startBtn"
@@ -435,8 +435,11 @@ export default {
     toAddCertificate() {
       this.$router.push({ path: '/learnPlan/newSchedule', query: { type: 'add' } })
     },
-    toEditCertificate() {
-      this.$router.push({ path: '/learnPlan/newSchedule', query: { type: 'edit' } })
+    toEditCertificate(row) {
+      this.$router.push({
+        path: '/learnPlan/newSchedule',
+        query: { type: 'edit', currentItemData: JSON.stringify(row) }
+      })
     },
     /**
      * 处理页码改变

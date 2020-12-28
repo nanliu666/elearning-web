@@ -123,6 +123,8 @@
         </el-collapse-item>
       </el-collapse>
     </el-checkbox-group>
+
+    <!-- 批量修改的弹窗 -->
     <el-dialog
       title="批量修改"
       :visible.sync="dialogVisible"
@@ -149,15 +151,130 @@
         >确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 课程列表的弹窗 -->
+    <el-dialog
+      title="课程列表"
+      :visible.sync="courseListDialog"
+      :append-to-body="true"
+    >
+      <common-table
+        ref="table"
+        class="commonTable"
+        :columns="columnsVisible | columnsFilter"
+        :config="tableConfig"
+        :data="tableData"
+        :loading="tableLoading"
+        :page-config="tablePageConfig"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
+      >
+        <template #topMenu>
+          <SearchPopover
+            ref="searchPopover"
+            :popover-options="searchPopoverConfig.popoverOptions"
+            :require-options="searchPopoverConfig.requireOptions"
+            @submit="handleSearch"
+          />
+        </template>
+      </common-table>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="courseListDialog = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="courseSureBtn"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import SearchPopover from '@/components/searchPopOver/index'
+import { getCourseList } from '@/api/learnPlan'
+
+// 表格属性
+const TABLE_COLUMNS = [
+  {
+    label: '课程名称',
+    width: 180,
+    prop: 'courseName'
+  },
+  {
+    label: '讲师',
+    prop: 'teacherName',
+    width: 200
+  },
+  {
+    label: '所在类目',
+    prop: 'catalogName',
+    minWidth: 150
+  }
+]
 export default {
   inject: ['parentObj'],
+  components: {
+    SearchPopover
+  },
+  filters: {
+    // 过滤不可见的列
+    columnsFilter: (visibleColProps) =>
+      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+  },
   data() {
+    const TABLE_CONFIG = {
+      enablePagination: true,
+
+      enableMultiSelect: true,
+      rowKey: 'id',
+      showHandler: false,
+      treeProps: { hasChildren: 'hasChildren', children: 'children' }
+    }
+    const TABLE_PAGE_CONFIG = {}
+    // 搜索配置
+    const SEARCH_POPOVER_REQUIRE_OPTIONS = [
+      {
+        config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
+        data: '',
+        field: 'courseName',
+        label: '',
+        type: 'input'
+      },
+      {
+        config: { placeholder: '请选择', 'suffix-icon': 'el-icon-search' },
+        data: '',
+        field: 'catalogId',
+        label: '',
+        options: this.parentObj.treeData.map((item) => {
+          return { value: item.id, label: item.name }
+        }),
+        type: 'select'
+      }
+    ]
+    let SEARCH_POPOVER_POPOVER_OPTIONS = []
+    let SEARCH_POPOVER_CONFIG = {
+      popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
+      requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
+    }
     return {
       dialogVisible: false, // 弹出对象值
+      courseListDialog: false, // 课程列表的弹窗标记
+      queryInfo: {
+        // 课程列表的请求参数
+        pageNo: 1,
+        pageSize: 10,
+        catalogId: '',
+        courseName: ''
+      },
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
       datePick1: '',
       datePick2: '',
       datePick3: '',
@@ -166,24 +283,7 @@ export default {
       activeNames: '',
       checkboxGroup: [],
       indeterminate: true,
-      treeData: [
-        {
-          label: '课程一',
-          id: 1,
-          checkbox: false,
-          form: {
-            recruitmentId: '',
-            text: '',
-            time1: '',
-            selectVal: '',
-            time2: '',
-            time3: ''
-          },
-          arr1: [],
-          arr2: [],
-          arr3: []
-        }
-      ],
+      treeData: [],
       checkboxArr: [{ val: '' }],
       columns: [
         {
@@ -195,51 +295,76 @@ export default {
         {
           prop: 'text',
           itemType: 'radio',
-          label: '文本内容',
+          label: '通过条件',
           options: [
-            { label: '教师评定', value: '0' },
-            { label: '考试通过', value: '1' },
-            { label: '达到课程学时', value: '2' }
+            { label: '教师评定', value: '1' },
+            { label: '考试通过', value: '2' },
+            { label: '达到课程学时', value: '3' }
           ],
           offset: 4,
           required: true
         },
         {
+          prop: 'begainTime',
+          itemType: 'daterange',
+          label: '开课时间',
+          required: true
+        },
+        {
           prop: 'time1',
           itemType: 'daterange',
-          label: '开放时间范围',
+          label: '前置条件关系',
           required: true
         },
         {
-          prop: 'selectVal',
+          prop: 'timeList',
           itemType: 'select',
-          label: '开放时间范围',
-          options: [],
-          offset: 4,
-          props: {
-            label: 'jobName',
-            value: 'id'
-          },
-          required: true
+          label: '允许时间段',
+          slot: true
         },
         {
-          prop: 'time2',
+          prop: 'beforeCourse',
           itemType: 'daterange',
-          label: '开放时间范围',
-          required: true
-        },
-        {
-          prop: 'time3',
-          itemType: 'daterange',
-          label: '开放时间范围',
-          offset: 4,
+          label: '前置课程',
           required: true
         }
       ],
-      activeName: 'first'
+      activeName: 'first',
+      searchPopoverConfig: SEARCH_POPOVER_CONFIG,
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      tableColumns: TABLE_COLUMNS,
+      tableConfig: TABLE_CONFIG,
+      tableData: [],
+      tableLoading: false,
+      tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
   methods: {
+    handleSearch(searchParams) {
+      for (let i in searchParams) {
+        this.queryInfo[i] = searchParams[i]
+      }
+      this.getCourseData()
+    },
+    /**
+     * 处理页码改变
+     */
+    handleCurrentPageChange(param) {
+      this.queryInfo.pageNo = param
+      this.getCourseData()
+    },
+    /**
+     * 处理页码大小更改
+     */
+    handlePageSizeChange(param) {
+      this.queryInfo.pageSize = param
+      this.getCourseData()
+    },
+    loadTableData() {},
+    courseSureBtn() {
+      // 课程列表弹窗确认回调
+      // this.treeData
+    },
     handleCheckAllChange(val) {
       // 全选回调
       this.checkboxGroup = val ? this.treeData.map((item) => item.id) : []
@@ -272,25 +397,39 @@ export default {
       this.checkboxGroupChange(this.checkboxGroup)
     },
     addScheduleBtn() {
-      // 添加课程按钮回调
-      let id = this.treeData[this.treeData.length - 1].id + 1
-      this.treeData.push({
-        label: '课程一',
-        id: id,
-        form: {
-          recruitmentId: '',
-          text: '',
-          time1: '',
-          selectVal: '',
-          time2: '',
-          time3: ''
-        },
-        checkbox: false,
-        arr1: [],
-        arr2: [],
-        arr3: []
-      })
-      this.checkboxGroupChange(this.checkboxGroup)
+      this.courseListDialog = true
+      this.getCourseData()
+      // this.$router.push({path: '/course/courseDraft'});
+      //   添加课程按钮回调
+      //   let id =  1 || this.treeData[this.treeData.length - 1].id + 1
+      //   this.treeData.push({
+      //     label: '课程一',
+      //     id: id,
+      //     form: {
+      //       recruitmentId: '',
+      //       text: '',
+      //       time1: '',
+      //       selectVal: '',
+      //       time2: '',
+      //       time3: ''
+      //     },
+      //     checkbox: false,
+      //     arr1: [],
+      //     arr2: [],
+      //     arr3: []
+      //   })
+      //   this.checkboxGroupChange(this.checkboxGroup)
+    },
+    getCourseData() {
+      let data = this.queryInfo
+      getCourseList(data)
+        .then((res) => {
+          this.page.total = res.totalNum
+          this.tableData = res.data
+        })
+        .catch((err) => {
+          window.console.log(err)
+        })
     }
   }
 }
@@ -390,10 +529,17 @@ export default {
   content: '';
 }
 /deep/.el-dialog {
-  max-width: 420px;
+  //   max-width: 420px;
   .el-date-editor {
     width: 100%;
     margin-bottom: 8px;
+  }
+  width: 80%;
+  max-width: 600px;
+}
+.commonTable {
+  /deep/.el-form-item {
+    width: 45%;
   }
 }
 </style>

@@ -46,7 +46,7 @@ export default {
           offset: 4
         },
         {
-          prop: 'startTime',
+          prop: 'timeRange',
           itemType: 'datePicker',
           type: 'daterange',
           label: '时间范围',
@@ -71,7 +71,7 @@ export default {
           label: '所属分类',
           options: this.parentObj.treeData,
           props: {
-            label: 'label',
+            label: 'name',
             value: 'id'
           },
           offset: 4,

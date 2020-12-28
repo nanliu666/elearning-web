@@ -57,7 +57,7 @@
 import basicInfo from './scheduleSubPage/basicInfo' // 基本信息
 import addSchedule from './scheduleSubPage/addSchedule' // 添加课程
 import personInfo from './scheduleSubPage/personInfo' // 人员信息
-import { getCatalogs, addPlan, updatePlan } from '@/api/learnPlan'
+import { getCatalogs, addPlan, updatePlan, planDetail, courseDetail } from '@/api/learnPlan'
 export default {
   components: {
     basicInfo,
@@ -83,9 +83,12 @@ export default {
         sponsor: '',
         startTime: '',
         participantsList: [],
-        courseList: []
+        courseList: [],
+        timeRange: '' // 时间范围
       },
-      state: 'add'
+      type: 'add', // 从必修课程页面进来的类型,看是新增还是编辑
+      currentItemData: '', // 从必修课程页面进来的当前行数据
+      state: 'addIterface' // 如果从必须课程页面进来的类型是新增,那么第一次点保存是add调新增接口,第二次点保存是edit调保存接口
     }
   },
   provide() {
@@ -94,25 +97,31 @@ export default {
     }
   },
   created() {
+    this.currentItemData =
+      this.$route.query.currentItemData && JSON.parse(this.$route.query.currentItemData)
+    this.type = this.$route.query.type
     this.isgetCatalogs()
+    if (this.type === 'add') return
+    this.getPlanDetail()
+    this.getCourseDetail()
   },
   methods: {
     handleCheckAllChange() {},
     toAddCertificate() {},
     handleSubmit() {
       let data = JSON.parse(JSON.stringify(this.formData))
-      let [startTime, endTime] = [data.startTime[0], data.startTime[1]]
+      let [startTime, endTime] = data.timeRange
       data.startTime = startTime
       data.endTime = endTime
       let filterArr = this.treeData.filter((item) => {
         item.courseCatalogId == data.courseCatalogId
       })
       data.courseCatalogName = filterArr.length > 0 ? filterArr[0].name : ''
-      if (this.state === 'add') {
+      if (this.state === 'addIterface' && this.type === 'add') {
         // 调用新增接口
         addPlan(data)
           .then(() => {
-            this.state = 'edit'
+            this.state = 'editIterface'
           })
           .catch((err) => window.console.log(err))
       } else {
@@ -125,6 +134,42 @@ export default {
     },
     handleNext() {
       this.active != '2' ? this.active++ : '2'
+    },
+    getPlanDetail() {
+      // 获取学习计划详情
+      let data = { id: this.currentItemData.id }
+      planDetail(data)
+        .then((res) => {
+          let formData = this.formData
+          ;({
+            id: formData.id,
+            coursePlanNo: formData.coursePlanNo,
+            coursePlanName: formData.coursePlanName,
+            startTime: formData.startTime,
+            endTime: formData.endTime,
+            courseCatalogId: formData.courseCatalogId,
+            courseCatalogName: formData.courseCatalogName,
+            sponsor: formData.sponsor,
+            automaticIntegralCount: formData.automaticIntegralCount,
+            endDate: formData.endDate,
+            creatorId: formData.creatorId,
+            createTime: formData.createTime,
+            courseList: formData.courseList
+          } = res)
+          formData.timeRange = [formData.startTime, formData.endTime]
+        })
+        .catch((err) => {
+          window.console.log(err)
+        })
+    },
+    getCourseDetail() {
+      // 获取课程详情
+      let data = { id: this.currentItemData.id }
+      courseDetail(data)
+        .then(() => {})
+        .catch((err) => {
+          window.console.log(err)
+        })
     },
     // 拿树形图数据
     isgetCatalogs() {
