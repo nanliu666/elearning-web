@@ -51,7 +51,8 @@
                 </div>
               </div>
             </template>
-            <template #multiSelectMenu>
+            <template #content="{row}">
+              {{ getContent(row.content) }}
             </template>
           </common-table>
         </div>
@@ -89,6 +90,9 @@
                   </div>
                 </div>
               </div>
+            </template>
+            <template #content="{row}">
+              {{ getContent(row.content) }}
             </template>
             <template #multiSelectMenu="{selection}">
               <el-button
@@ -144,13 +148,8 @@ const TABLE_COLUMNS = [
     prop: 'content',
     slot: true,
     fixed: true,
-    minWidth: 100,
-    formatter(row) {
-      const contentText = deleteHTMLTag(_.unescape(row.content))
-      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
-    }
+    minWidth: 100
   },
-
   {
     label: '题目类型',
     prop: 'type',
@@ -321,6 +320,10 @@ export default {
     this.getcategoryTree()
   },
   methods: {
+    getContent(data) {
+      const contentText = deleteHTMLTag(_.unescape(data))
+      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
+    },
     /**
      * @author guanfenda
      * @desc 批量删除选中
