@@ -38,7 +38,7 @@
         @change="handleChange"
       >
         <el-collapse-item
-          v-for="(item, index) in treeData"
+          v-for="(item, index) in courseList"
           :key="index"
           :name="item.id"
         >
@@ -70,9 +70,49 @@
                 :xs="22"
               >
                 <common-form
-                  :model="item.form"
+                  :model="item"
                   :columns="columns"
-                ></common-form>
+                >
+                  <template slot="courseName">
+                    <el-input v-model="item.courseName"></el-input><span
+                      class="precondition"
+                      @click="setPrecondition"
+                    >设置前置条件</span>
+                  </template>
+                  <template slot="studyFrequency">
+                    <el-input-number
+                      v-model="item.studyFrequency"
+                      controls-position="right"
+                      :min="0"
+                    ></el-input-number>
+                  </template>
+                  <template slot="timeList">
+                    <el-date-picker
+                      v-model="item.timeList[0]"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始月份"
+                      end-placeholder="结束月份"
+                    >
+                    </el-date-picker>
+                    <el-date-picker
+                      v-model="item.timeList[1]"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始月份"
+                      end-placeholder="结束月份"
+                    >
+                    </el-date-picker>
+                    <el-date-picker
+                      v-model="item.timeList[2]"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始月份"
+                      end-placeholder="结束月份"
+                    >
+                    </el-date-picker>
+                  </template>
+                </common-form>
               </el-col>
             </el-row>
             <el-tabs
@@ -91,12 +131,18 @@
                   {{ list.name }}
                   <div class="tab_right">
                     <span>预览</span><span>编辑</span>
-                    <el-dropdown>
+                    <el-dropdown @command="commandClick">
                       <i class="el-icon-more"></i>
                       <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>人员列表</el-dropdown-item>
-                        <el-dropdown-item>前置条件</el-dropdown-item>
-                        <el-dropdown-item>删除</el-dropdown-item>
+                        <el-dropdown-item command="a">
+                          人员列表
+                        </el-dropdown-item>
+                        <el-dropdown-item command="b">
+                          前置条件
+                        </el-dropdown-item>
+                        <el-dropdown-item command="c">
+                          删除
+                        </el-dropdown-item>
                       </el-dropdown-menu>
                     </el-dropdown>
                   </div>
@@ -137,9 +183,53 @@
       <el-date-picker v-model="datePick2"></el-date-picker>
       <el-date-picker v-model="datePick3"></el-date-picker>
       <div class="batch_label">
-        允许输入的时间段
+        允许学习次数
       </div>
-      <el-input v-model="iputSearch"></el-input>
+      <el-input-number
+        v-model="learnNumber"
+        controls-position="right"
+        :min="0"
+        placeholder="请输入"
+      ></el-input-number>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 前置条件的弹窗 -->
+    <el-dialog
+      title="前置条件"
+      class="preconditionDialog"
+      :visible.sync="precondDialogShow"
+      :append-to-body="true"
+    >
+      <div class="precondition_label">
+        当前课程：AAA
+      </div>
+      <ul class="precondition_container">
+        <li class="container_title">
+          <span class="precondition_left">当前课程</span>
+          <span class="precondition_right">是否必须通过</span>
+        </li>
+        <li
+          v-for="(item, idx) in preconditionList"
+          :key="idx"
+        >
+          <el-select class="precondition_left">
+            <el-option label="社区的分类与定位"></el-option>
+          </el-select>
+          <el-select class="precondition_right">
+            <el-option label="是"></el-option>
+          </el-select>
+        </li>
+      </ul>
       <span
         slot="footer"
         class="dialog-footer"
@@ -169,6 +259,7 @@
         :page="page"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
+        @selection-change="selectionChange"
       >
         <template #topMenu>
           <SearchPopover
@@ -278,18 +369,19 @@ export default {
       datePick1: '',
       datePick2: '',
       datePick3: '',
+      learnNumber: '', // 允许学习次数
       iputSearch: '',
       checkAll: true,
       activeNames: '',
       checkboxGroup: [],
       indeterminate: true,
-      treeData: [],
+      courseList: this.parentObj.formData.courseList, // 选中的课程列表
       checkboxArr: [{ val: '' }],
       columns: [
         {
-          prop: 'recruitmentId',
-          itemType: 'datePicker',
+          prop: 'courseName',
           label: '课程名称',
+          itemType: 'slot',
           required: true
         },
         {
@@ -305,28 +397,23 @@ export default {
           required: true
         },
         {
-          prop: 'begainTime',
-          itemType: 'daterange',
+          prop: 'startTime',
+          itemType: 'datePicker',
           label: '开课时间',
+          type: 'daterange',
           required: true
         },
         {
-          prop: 'time1',
-          itemType: 'daterange',
-          label: '前置条件关系',
+          prop: 'studyFrequency',
+          itemType: 'slot',
+          label: '允许学习次数',
           required: true
         },
         {
           prop: 'timeList',
-          itemType: 'select',
           label: '允许时间段',
-          slot: true
-        },
-        {
-          prop: 'beforeCourse',
-          itemType: 'daterange',
-          label: '前置课程',
-          required: true
+          itemType: 'slot',
+          required: false
         }
       ],
       activeName: 'first',
@@ -334,9 +421,12 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [],
+      tableData: [{}],
       tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG
+      tablePageConfig: TABLE_PAGE_CONFIG,
+      preconditionList: [], // 前置条件数组
+      precondDialogShow: false, // 前置条件弹窗隐藏和显示
+      selectionArr: [] // 前置条件弹窗选择数组
     }
   },
   methods: {
@@ -363,20 +453,59 @@ export default {
     loadTableData() {},
     courseSureBtn() {
       // 课程列表弹窗确认回调
+      this.courseListDialog = false
+      let idArr = this.courseList.map((item) => item.id)
+      let filterArr = this.selectionArr.filter((item) => {
+        return !idArr.includes(item.id)
+      })
+      this.courseList = this.courseList.concat(
+        filterArr.map((item) => {
+          item.timeList = [[], [], []]
+          return item
+        })
+      )
       // this.treeData
     },
     handleCheckAllChange(val) {
       // 全选回调
-      this.checkboxGroup = val ? this.treeData.map((item) => item.id) : []
+      this.checkboxGroup = val ? this.courseList.map((item) => item.id) : []
       this.indeterminate = false
+    },
+    selectionChange(selectArr) {
+      // table多选框选择后
+      //    this.courseList = selectArr;
+      this.selectionArr = selectArr
+    },
+    commandClick(val) {
+      // 关联开始删除
+      switch (val) {
+        case 'a':
+          break
+        case 'b':
+          break
+        case 'c': // 删除
+          this.$confirm('您确定要删除当前课程吗?', '提醒', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            center: true
+          })
+            .then(() => {})
+            .catch(() => {})
+          break
+      }
     },
     bulkEdit() {
       // 批量修改
       this.dialogVisible = true
     },
     checkboxGroupChange(val) {
-      this.checkAll = val.length == this.treeData.length ? true : false
-      this.indeterminate = val.length < this.treeData.length ? true : false
+      this.checkAll = val.length == this.courseList.length ? true : false
+      this.indeterminate = val.length < this.courseList.length ? true : false
+    },
+    setPrecondition() {
+      // 设置前置条件
+      this.precondDialogShow = true
     },
     handleChange() {},
     handleClick() {},
@@ -386,7 +515,7 @@ export default {
     },
     deleteTableData() {
       // 删除列表数据
-      this.treeData.forEach((item, index, arr) => {
+      this.courseList.forEach((item, index, arr) => {
         if (this.checkboxGroup.includes(item.id)) {
           let that = this
           let ids = that.checkboxGroup.indexOf(item.id)
@@ -437,6 +566,13 @@ export default {
 
 <style lang="scss" scoped>
 .addSchedule {
+  /deep/.el-input-number {
+    width: 100%;
+  }
+  .precondition {
+    color: #01aafc;
+    cursor: pointer;
+  }
   .layout_header {
     margin-top: 54px;
     &::after {
@@ -540,6 +676,37 @@ export default {
 .commonTable {
   /deep/.el-form-item {
     width: 45%;
+  }
+}
+.preconditionDialog {
+  /deep/.el-dialog {
+    .precondition_label {
+      line-height: 40px;
+    }
+    .precondition_container {
+      .container_title {
+        text-align: center;
+        background-color: rgb(207, 201, 201);
+        // color: #fff;
+        line-height: 40px;
+      }
+      .precondition_left,
+      .precondition_right {
+        display: inline-block;
+      }
+      .precondition_left {
+        width: 60%;
+        .el-select {
+          width: 100%;
+        }
+      }
+      .precondition_right {
+        width: 40%;
+        .el-select {
+          width: 150px;
+        }
+      }
+    }
   }
 }
 </style>

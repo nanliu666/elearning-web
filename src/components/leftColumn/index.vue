@@ -17,6 +17,7 @@
       <div
         slot-scope="{ node, data }"
         class="custom-tree-node"
+        @click="stopBubbling(data, $event)"
       >
         <span
           v-if="!data.hasOwnProperty('flag')"
@@ -25,7 +26,12 @@
             data.hasOwnProperty('children') || data.label === '未分类' ? '' : '(' + data.num + ')'
           }}</span>
         <el-dropdown
-          v-if="moreMenu.length > 0 && currentNodeKey === data.id && data.label != '未分类'"
+          v-if="
+            moreMenu.length > 0 &&
+              currentNodeKey === data.id &&
+              data.label != '未分类' &&
+              !data.hasOwnProperty('flag')
+          "
           class="custom-tree-node-right"
           @command="(val) => commandChange(val, data, node)"
         >
@@ -209,6 +215,11 @@ export default {
   },
 
   methods: {
+    stopBubbling(data, event) {
+      if (data.hasOwnProperty('flag')) {
+        event.stopPropagation()
+      }
+    },
     sureBtn() {
       // 弹窗的确认按钮
       let catalogsDta = {
@@ -441,6 +452,7 @@ export default {
               window.console.log(err)
             })
         }
+        this.$refs.tree.setCurrentKey(data.id)
         let text = this.options === 'edit' ? '保存成功' : '新建成功'
         // delete datas.flag
         // datas.label = this.classifyName
