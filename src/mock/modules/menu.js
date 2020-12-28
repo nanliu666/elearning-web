@@ -1162,6 +1162,7 @@ const res = {
         isOwn: 1, // 是否拥有 0：否，1：是
         isEnabled: 1,
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        isEnable: 1,
         code: 'approval',
         alias: 'approval',
         path: '',

@@ -451,12 +451,19 @@ export default {
     },
     // 上架与下架
     handleStatus(rowData) {
-      updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === '0' ? 1 : 0 }).then(
-        () => {
-          this.$message.success(`${rowData.status === '0' ? '下架' : '上架'}成功`)
-          this.loadTableData()
-        }
-      )
+      const statusTips = rowData.status === '0' ? '下架' : '上架'
+      this.$confirm(`是否${statusTips}当前资源`, '提示', {
+        confirmButtonText: statusTips,
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === '0' ? 1 : 0 }).then(
+          () => {
+            this.$message.success(`${statusTips}成功`)
+            this.loadTableData()
+          }
+        )
+      })
     },
     // 多种操作
     async handleCommand($event, row) {
