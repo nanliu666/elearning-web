@@ -6,7 +6,6 @@
     :close-on-click-modal="false"
     :modal-append-to-body="false"
     :before-close="onClose"
-    @opened="onOpened"
   >
     <div v-loading="loading">
       <div class="flex flex-flow">
@@ -426,14 +425,6 @@ export default {
     },
     /**
      * @author guanfenda
-     * @desc 过滤非数字
-     *
-     * */
-    numberInput(value, data) {
-      this.form[data] = value.replace(/[^\d]/g, '')
-    },
-    /**
-     * @author guanfenda
      * @desc 当前页加载
      * */
     handleCurrentPageChange(param) {
@@ -448,7 +439,6 @@ export default {
       this.page.pageSize = param
       this.getData()
     },
-    onOpened() {},
     onClose() {
       this.roleVisible = false
     }

@@ -79,12 +79,14 @@
           <template #handler="{row}">
             <el-button
               type="text"
+              :disabled="getUpDisabled(row)"
               @click="handleUp(row)"
             >
               上移
             </el-button>
             <el-button
               type="text"
+              :disabled="getDowmDisabled(row)"
               @click="handleDown(row)"
             >
               下移
@@ -356,6 +358,7 @@ export default {
               }
             ).then(() => {
               this.tableData = []
+              this.countScore()
             })
           }
         }, 300)
@@ -405,19 +408,28 @@ export default {
       }
       this.$emit('update', _.cloneDeep(block))
     },
+    getUpDisabled(row) {
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      return index === 0
+    },
+    getDowmDisabled(row) {
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      return _.size(this.tableData) === index + 1
+    },
     /***
      * @author guanfenda
      * @desc 下移
      * */
     handleDown(row) {
-      let i = this.tableData.map((it) => it.id).indexOf(row.id)
-      let newData = _.cloneDeep(row)
-      this.tableData.splice(i, 1)
-      let length = this.tableData.length
-      if (i === length) {
-        this.tableData.splice(0, 0, newData)
-      } else {
-        this.tableData.splice(i + 1, 0, newData)
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      if (index !== this.tableData.length - 1) {
+        this.tableData[index] = this.tableData.splice(index + 1, 1, this.tableData[index])[0]
       }
     },
     /***
@@ -425,14 +437,11 @@ export default {
      * @desc 上移
      * */
     handleUp(row) {
-      let i = this.tableData.map((it) => it.id).indexOf(row.id)
-      let newData = _.cloneDeep(row)
-      let length = this.tableData.length
-      this.tableData.splice(i, 1)
-      if (i === 0) {
-        this.tableData.splice(length - 1, 0, newData)
-      } else {
-        this.tableData.splice(i - 1, 0, newData)
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      if (index !== 0) {
+        this.tableData[index] = this.tableData.splice(index - 1, 1, this.tableData[index])[0]
       }
     },
     /**
