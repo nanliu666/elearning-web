@@ -55,6 +55,7 @@
                     <el-checkbox
                       v-for="item of tableColumns"
                       :key="item.prop"
+                      :disabled="item.prop === 'resName'"
                       :label="item.prop"
                       class="operations__column--item"
                     >
@@ -125,7 +126,10 @@
             {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
 
-          <el-dropdown @command="handleCommand($event, row)">
+          <el-dropdown
+            style="margin-left: 4px"
+            @command="handleCommand($event, row)"
+          >
             <el-button
               type="text"
               style="margin-left: 10px"

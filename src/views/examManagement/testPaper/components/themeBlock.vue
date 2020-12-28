@@ -99,6 +99,21 @@
             </el-button>
           </template>
         </common-table>
+        <div
+          v-if="hasFix"
+          class="score-origin-tips"
+        >
+          <i class="el-icon-warning" />
+          <span
+            style="padding-left: 6px"
+          >检测到你添加试题的分数与原分数值不一致（该分数只对本试卷有效），可</span>
+          <el-button
+            type="text"
+            @click="resetOrigin"
+          >
+            点击恢复原分值
+          </el-button>
+        </div>
         <stemContent
           v-if="visible"
           v-model="stemList"
@@ -257,6 +272,7 @@ export default {
 
   data() {
     return {
+      hasFix: false,
       totalScore: '',
       title: '',
       visible: false,
@@ -450,28 +466,24 @@ export default {
      *
      * */
     scoreChange(val, row) {
-      if (row.Original != val && row.Original) {
-        this.$confirm(
-          '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
-          '提示',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '恢复原分值',
-            type: 'warning'
-          }
-        )
-          .then(() => {})
-          .catch(() => {
-            row.score = row.Original
-          })
-      }
+      this.hasFix = row.Original != val && row.Original
       this.countScore()
+    },
+    // 将表格中的所有的值恢复成原值
+    resetOrigin() {
+      _.each(this.tableData, (item) => {
+        item.score = item.Original
+      })
+      this.hasFix = false
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.score-origin-tips {
+  color: #7a7a7a;
+}
 .formContent {
   background: #fafafa;
   padding: 24px;
