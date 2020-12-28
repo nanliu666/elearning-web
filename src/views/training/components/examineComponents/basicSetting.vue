@@ -216,9 +216,9 @@ export default {
         moment(this.model.examTime[1])
       )
       if (!isLegalBeginTime) {
-        callback(new Error('培训开始日期要在考试开始日期之前'))
+        callback(new Error(`考试开始日期要在培训开始日期（${this.trainTimeInVuex[0]}）之后`))
       } else if (!isLegalEndTime) {
-        callback(new Error('培训结束日期要在考试结束日期之后'))
+        callback(new Error(`考试结束日期要在培训结束日期（${this.trainTimeInVuex[1]}）之前`))
       } else {
         callback()
       }
