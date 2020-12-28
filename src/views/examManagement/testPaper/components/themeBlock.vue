@@ -280,6 +280,7 @@ export default {
   watch: {
     blockData: {
       handler(val) {
+        val.type && (this.form.type = _.cloneDeep(val.type))
         val.title && (this.form.title = _.cloneDeep(val.title))
         val.tableData && (this.tableData = _.cloneDeep(val.tableData))
       },
@@ -322,16 +323,6 @@ export default {
     }
   },
   mounted() {
-    this.typeList = []
-    for (let key in QUESTION_TYPE_MAP) {
-      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
-    }
-  },
-  activated() {
-    this.form = {
-      type: 'single_choice',
-      title: ''
-    }
     this.typeList = []
     this.tableData = []
     for (let key in QUESTION_TYPE_MAP) {
