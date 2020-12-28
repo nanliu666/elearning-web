@@ -85,7 +85,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
     config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
     field: 'participantName',
-    label: '菜单',
+    label: '',
     type: 'input'
   }
 ]
