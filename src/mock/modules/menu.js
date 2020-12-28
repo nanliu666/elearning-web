@@ -1132,6 +1132,7 @@ const res = {
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        isEnable: 1,
         code: 'approval',
         alias: 'approval',
         path: '',

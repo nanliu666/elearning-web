@@ -7,6 +7,7 @@ import logs from './modules/logs'
 import dict from './modules/dict'
 import process from './modules/process'
 import notice from './modules/notice'
+import train from './modules/train'
 import getters from './getters'
 
 Vue.use(Vuex)
@@ -18,7 +19,8 @@ const store = new Vuex.Store({
     tags,
     dict,
     process,
-    notice
+    notice,
+    train
   },
   getters
 })

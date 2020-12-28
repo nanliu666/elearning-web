@@ -241,6 +241,12 @@ export default {
     ...mapGetters(['userInfo'])
   },
   watch: {
+    'formData.trainTime': {
+      handler(data) {
+        this.$store.commit('SET_TRAIN_TIME', data)
+      },
+      deep: true
+    },
     'formData.trainObjectsList': {
       handler(data) {
         this.handlerData(_.cloneDeep(data))
