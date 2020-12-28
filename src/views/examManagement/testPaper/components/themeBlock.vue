@@ -56,7 +56,7 @@
           id="demo"
           ref="table"
           class="table"
-          :columns="columnsVisible | columnsFilter"
+          :columns="columnsVisible"
           :config="tableConfig"
           :data="tableData"
         >
@@ -128,7 +128,6 @@ const TABLE_COLUMNS = [
   {
     label: '题目列表',
     prop: 'content',
-    slot: true,
     minWidth: 150
   },
   {
@@ -235,11 +234,6 @@ export default {
   components: {
     stemContent
   },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
   props: {
     blockData: {
       type: Object,
@@ -271,8 +265,7 @@ export default {
       stemList: [],
       typeList: [],
       tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: TABLE_COLUMNS,
       columns: BASE_COLUMNS,
       tableData: []
     }
@@ -280,9 +273,12 @@ export default {
   watch: {
     blockData: {
       handler(val) {
-        val.type && (this.form.type = _.cloneDeep(val.type))
-        val.title && (this.form.title = _.cloneDeep(val.title))
-        val.tableData && (this.tableData = _.cloneDeep(val.tableData))
+        const { tableData, type, title } = val
+        this.$nextTick(() => {
+          this.tableData = tableData
+          this.form.type = type
+          this.form.title = title
+        })
       },
       deep: true,
       immediate: true
