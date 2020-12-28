@@ -195,6 +195,7 @@ import SearchPopover from '@/components/searchPopOver/index'
 
 // 表格属性
 const TABLE_COLUMNS = [
+  { type: 'index', label: '序号' },
   {
     label: '资源名称',
     minWidth: 150,
@@ -239,7 +240,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   enableMultiSelect: true,
-  showIndexColumn: true,
+  showIndexColumn: false,
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
