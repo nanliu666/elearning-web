@@ -412,19 +412,19 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   },
   {
     data: '',
-    field: 'teacherName',
+    field: 'teacherId',
     label: '讲师',
     type: 'select',
     options: [],
-    config: { optionLabel: 'teacherName', optionValue: 'teacherName', placeholder: '请选择' }
+    config: { optionLabel: 'teacherName', optionValue: 'teacherId', placeholder: '请选择' }
   },
   {
     data: '',
-    field: 'catalogName',
+    field: 'catalogId',
     label: '所在分类',
     type: 'select',
     options: [],
-    config: { optionLabel: 'catalogName', optionValue: 'catalogName', placeholder: '请选择' }
+    config: { optionLabel: 'catalogName', optionValue: 'catalogId', placeholder: '请选择' }
   },
   {
     config: { placeholder: '请选择' },

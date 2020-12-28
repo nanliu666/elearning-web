@@ -43,7 +43,6 @@
           size="medium"
           type="primary"
           :disabled="disabledBtn"
-          style="cursor:pointer; "
           @click="isAddCourse(1)"
         >
           发布
@@ -586,16 +585,41 @@
             :modal-append-to-body="false"
           >
             <div class="dialog_input">
-              <span>标题</span>
+              <!-- <span>标题</span>
               <el-input
                 v-model="addArticle.localName"
                 placeholder="请输入标题"
                 maxlength="32"
-              ></el-input>
+              ></el-input> -->
+
+              <el-form
+                ref="ruleFormDialog"
+                :model="addArticle"
+                :rules="rulesDialog"
+                label-width="60px"
+                class="demo-ruleForm"
+              >
+                <el-form-item
+                  label="标题"
+                  prop="localName"
+                >
+                  <el-input
+                    v-model="addArticle.localName"
+                    placeholder="请输入标题"
+                    maxlength="32"
+                    style="width:480px; margin-left: -15px"
+                  ></el-input>
+                </el-form-item>
+              </el-form>
             </div>
             <div class="dialog_tinymce">
               <span>内容</span>
-              <div><tinymce v-model="addArticle.content" /></div>
+              <div>
+                <tinymce
+                  id="tinymceId"
+                  v-model="addArticle.content"
+                />
+              </div>
             </div>
 
             <span
@@ -640,6 +664,9 @@ export default {
       addArticle: {
         localName: '',
         content: ''
+      },
+      rulesDialog: {
+        localName: [{ required: true, message: '请输入标题', trigger: ['blur'] }]
       },
       // 添加标签
       tagIdsOptions: [],
@@ -690,16 +717,16 @@ export default {
         teacherId: '', //讲师id
         // 表格
         contents: [
-          {
-            url: '',
-            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-            sort: '', //序号
-            type: '', //章节类型
-            name: '', // 章节名称
-            content: '', //文章内容
-            upLoad: [], //[url,localName],  //所有上传的文件
-            saveOrcompile: 0 // 1保存&0编辑
-          }
+          // {
+          //   url: '',
+          //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          //   sort: '', //序号
+          //   type: '', //章节类型
+          //   name: '', // 章节名称
+          //   content: '', //文章内容
+          //   upLoad: [], //[url,localName],  //所有上传的文件
+          //   saveOrcompile: 0 // 1保存&0编辑
+          // }
         ]
       },
       rules: {
@@ -786,32 +813,55 @@ export default {
         this.$forceUpdate()
       })
     },
-
     // 拿到列表数据
     isgetCatalog() {
       getCatalog().then((res) => {
-        this.catalogIdoptions = res
+        let resList = this.ListData(res)
+        this.catalogIdoptions = resList
       })
     },
+
+    // 递归过滤数据
+    ListData(arr) {
+      if (arr.length > 0) {
+        for (let i = arr.length - 1; i >= 0; i--) {
+          if (arr[i].status == 1) {
+            arr.splice(i, 1)
+          } else if (arr[i].children) {
+            this.ListData(arr[i].children)
+          }
+        }
+      }
+      return arr
+    },
+
     //添加文章tabel btn
     AddArticleBtntable(index, row) {
+      this.addArticle.localName = row.upLoad[row.upLoad.length - 1]
+        ? row.upLoad[row.upLoad.length - 1].localName
+        : ''
+      this.addArticle.content = row.upLoad[row.upLoad.length - 1]
+        ? row.upLoad[row.upLoad.length - 1].content
+        : ''
       this.AddArticleBtntableIndex = index
       this.dialogVisible = true
-      this.addArticle = row
-      // console.log(row);
     },
     // 添加文章
     isAddArticle() {
-      let i = {
-        localName: this.addArticle.localName,
-        content: this.addArticle.content
-      }
-      // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
-      // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
-      this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
-      this.addArticle.localName = ''
-      this.addArticle.content = ''
-      this.dialogVisible = false
+      this.$refs.ruleFormDialog.validate((valid) => {
+        if (valid) {
+          let i = {
+            localName: this.addArticle.localName,
+            content: this.addArticle.content
+          }
+          // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
+          // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
+          this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
+          this.addArticle.localName = ''
+          this.addArticle.content = ''
+          this.dialogVisible = false
+        }
+      })
     },
     // 拿添加标签数据
     isgetCourseTags() {
