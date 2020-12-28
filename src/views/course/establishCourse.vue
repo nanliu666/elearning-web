@@ -104,11 +104,35 @@
               label="所在分类"
               prop="catalogId"
             >
-              <el-cascader
+              <!-- <el-cascader
                 v-model="ruleForm.catalogId"
                 :props="{ value: 'id', label: 'name', checkStrictly: true }"
                 :options="catalogIdoptions"
-              ></el-cascader>
+              ></el-cascader> -->
+
+              <el-select
+                v-model="ruleForm.catalogId"
+                :multiple-limit="10"
+                placeholder="请选择"
+              >
+                <el-option
+                  style="height: auto;padding:0"
+                  :value="ruleForm.catalogId"
+                  :label="parentOrgIdLabel"
+                >
+                  <el-tree
+                    ref="orgTree"
+                    :data="catalogIdoptions"
+                    node-key="catalogId"
+                    :props="{
+                      children: 'children',
+                      label: 'name',
+                      value: 'id'
+                    }"
+                    @node-click="handleOrgNodeClick"
+                  />
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="2">
@@ -138,7 +162,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
@@ -616,6 +639,7 @@ export default {
   },
   data() {
     return {
+      parentOrgIdLabel: '',
       remember: true,
       disabledBtn: false,
       TeacherData: '',
@@ -741,6 +765,12 @@ export default {
   },
 
   methods: {
+    handleOrgNodeClick(data) {
+      if (data !== undefined) {
+        this.ruleForm.catalogId = data.id
+        this.parentOrgIdLabel = data.name
+      }
+    },
     tocourseDraft() {
       // this.$router.push({ path: '/course/courseDraft' })
       this.$router.go(-1)
@@ -838,7 +868,7 @@ export default {
         delete item.upLoad
       })
       // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
-      params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
+      // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
       // params.tagIds = params.tagIds.join(',')
@@ -856,6 +886,7 @@ export default {
         )
           .then(() => {
             params.status = status
+
             addCourse(params).then(() => {
               // editCourseInfo(this.ruleForm).then(() => {
               this.$message({
@@ -864,9 +895,9 @@ export default {
               })
               setTimeout(() => {
                 this.isdeleteData()
-                // this.$router.push({ path: '/course/courseDraft' })
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
-                this.$router.go(-1)
+                // this.$router.go(-1)
               }, 2000)
             })
           })
@@ -899,8 +930,8 @@ export default {
               setTimeout(() => {
                 this.isdeleteData()
                 this.disabledBtn = false
-                // this.$router.push({ path: '/course/courseDraft' })
-                this.$router.go(-1)
+                // this.$router.go(-1)
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
               }, 2000)
             })
           }

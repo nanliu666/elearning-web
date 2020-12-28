@@ -107,11 +107,33 @@
               label="所在分类"
               prop="catalogId"
             >
-              <el-cascader
+              <!-- <el-cascader
                 v-model="ruleForm.catalogId"
                 :props="{ value: 'id', label: 'name' }"
                 :options="catalogIdoptions"
-              ></el-cascader>
+              ></el-cascader> -->
+              <el-select
+                v-model="ruleForm.catalogId"
+                :multiple-limit="10"
+                placeholder="请选择"
+              >
+                <el-option
+                  style="height: auto;padding:0"
+                  :value="ruleForm.catalogId"
+                  :label="parentOrgIdLabel"
+                >
+                  <el-tree
+                    ref="orgTree"
+                    :data="catalogIdoptions"
+                    node-key="catalogId"
+                    :props="{
+                      children: 'children',
+                      label: 'name'
+                    }"
+                    @node-click="handleOrgNodeClick"
+                  />
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="2">
@@ -305,7 +327,7 @@
       </el-form>
 
       <!-- 填写课前思考内容 -->
-      <div v-show="headIndex === 2">
+      <div v-show="headIndex == 2">
         <div class="editorTitle">
           <div class="reflectTitle">
             课前思考
@@ -315,7 +337,7 @@
       </div>
 
       <!-- 上传课程内容 -->
-      <div v-show="headIndex === 3">
+      <div v-show="headIndex == 3">
         <div id="upContent">
           <div class="up_head">
             <span>章节内容</span>
@@ -348,12 +370,12 @@
             >
               <template slot-scope="scope">
                 <el-input
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="scope.row.saveOrcompile == 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -364,7 +386,7 @@
               width="185"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.saveOrcompile === 0">
+                <span v-if="scope.row.saveOrcompile == 0">
                   <el-select
                     v-model="scope.row.type"
                     placeholder="请选择"
@@ -379,7 +401,7 @@
                   </el-select>
                 </span>
 
-                <span v-if="scope.row.saveOrcompile === 1">
+                <span v-if="scope.row.saveOrcompile == 1">
                   <span v-if="typeOption[scope.row.type - 1]">
                     {{ typeOption[scope.row.type - 1].name }}
                   </span>
@@ -394,15 +416,15 @@
               width="250"
             >
               <template slot-scope="scope">
-                <div v-if="scope.row.saveOrcompile === 0">
+                <div v-if="scope.row.saveOrcompile == 0">
                   <span
                     v-if="typeOption[scope.row.type - 1]"
                     size="medium"
                   >
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 1"
+                      v-if="typeOption[scope.row.type - 1].value == 1"
                       type="text"
-                      @click="AddArticleBtntable(scope.$index)"
+                      @click="AddArticleBtntable(scope.$index, scope.row)"
                     >
                       {{
                         scope.row.upLoad[0]
@@ -411,7 +433,7 @@
                       }}
                     </el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 2"
+                      v-if="typeOption[scope.row.type - 1].value == 2"
                       v-model="scope.row.upLoad"
                       :before-upload="CoursewareUpload"
                       :multiple="false"
@@ -423,7 +445,7 @@
                       }}</el-button>
                     </common-upload>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 3"
+                      v-if="typeOption[scope.row.type - 1].value == 3"
                       v-model="scope.row.upLoad"
                       :multiple="false"
                       :before-upload="DataUpload"
@@ -437,11 +459,11 @@
                       </el-button>
                     </common-upload>
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 4"
+                      v-if="typeOption[scope.row.type - 1].value == 4"
                       type="text"
                     >关联考试</el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 5"
+                      v-if="typeOption[scope.row.type - 1].value == 5"
                       v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"
@@ -463,35 +485,43 @@
                   </span>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile === 1">
+                <div v-if="scope.row.saveOrcompile == 1">
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 1">
+                    <span v-if="typeOption[scope.row.type - 1].value == 1">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                    <span v-if="typeOption[scope.row.type - 1].value == 2">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 3">
+                    <span v-if="typeOption[scope.row.type - 1].value == 3">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 5">
+                    <span v-if="typeOption[scope.row.type - 1].value == 5">
                       <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
                       }}</span>
                     </span>
                   </span>
@@ -507,7 +537,7 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="scope.row.saveOrcompile === 1"
+                  v-if="scope.row.saveOrcompile == 1"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -515,7 +545,7 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="scope.row.saveOrcompile == 0"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
@@ -532,7 +562,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index === 0"
+                  :disabled="scope.$index == 0"
                   @click="upward(scope.$index)"
                 >
                   上移
@@ -540,7 +570,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index === ruleForm.contents.length - 1"
+                  :disabled="scope.$index == ruleForm.contents.length - 1"
                   @click="downward(scope.$index)"
                 >
                   下移
@@ -590,7 +620,6 @@ import {
   getCourseTags,
   getCatalog,
   editCourseInfo,
-  getCourseContents,
   getCourse,
   listTeacher
 } from '@/api/course/course'
@@ -600,6 +629,8 @@ export default {
   },
   data() {
     return {
+      catalogName: '',
+      parentOrgIdLabel: '',
       disabledBtn: false,
       TeacherData: '',
       catalogIdoptions: [],
@@ -619,23 +650,23 @@ export default {
       typeOption: [
         {
           name: '文章',
-          value: 1
+          value: '1'
         },
         {
           name: '普通课件',
-          value: 2
+          value: '2'
         },
         {
           name: '资料下载',
-          value: 3
+          value: '3'
         },
         {
           name: '考试',
-          value: 4
+          value: '4'
         },
         {
           name: '视频',
-          value: 5
+          value: '5'
         }
       ],
       // 填写课程信息
@@ -718,6 +749,12 @@ export default {
     this.islistTeacher()
   },
   methods: {
+    handleOrgNodeClick(data) {
+      if (data !== undefined) {
+        this.ruleForm.catalogId = data.id
+        this.parentOrgIdLabel = data.name
+      }
+    },
     tocourseDraft() {
       this.$router.push({ path: '/course/courseDraft' })
     },
@@ -730,27 +767,21 @@ export default {
     // 编辑页面的数据后
     getInfo() {
       let id = this.$route.query.id
-      getCourseContents({ courseId: id }).then((res) => {
-        // console.log('getCourseContents---------------', res)
-
+      getCourse({ courseId: id }).then((res) => {
         let data = res
-        data.map((item) => {
+        data.passCondition = data.passCondition.split(',')
+        data.content.map((item) => {
           item.upLoad = [{ localName: '', url: '' }]
           item.upLoad[0].localName = item.localName
           item.upLoad[0].url = item.url
+          item.saveOrcompile = 1
         })
-
-        this.ruleForm.contents = data
-      })
-      getCourse({ courseId: id }).then((res) => {
-        let data = res
-
-        data.passCondition = data.passCondition.split(',')
-        // console.log(data);
         data.imageUrl = [{ localName: '', url: '' }]
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
-        data.contents = []
+        data.contents = data.content
+        this.catalogName = data.catalogId
+        data.catalogId = this.$route.query.catalogName
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -763,9 +794,11 @@ export default {
       })
     },
     //添加文章tabel btn
-    AddArticleBtntable(index) {
+    AddArticleBtntable(index, row) {
       this.AddArticleBtntableIndex = index
       this.dialogVisible = true
+      this.addArticle = row
+      // console.log(row);
     },
     // 添加文章
     isAddArticle() {
@@ -790,10 +823,14 @@ export default {
     // 发布&草稿
     isAddCourse(status) {
       this.ruleForm.contents.map((item, index) => {
+        // console.log(item)
         item.sort = index
         if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
           item.url = item.upLoad[item.upLoad.length - 1].url
+          if (item.type == 1) {
+            item.content = item.upLoad[item.upLoad.length - 1].content
+          }
         }
       })
       this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
@@ -809,10 +846,11 @@ export default {
         delete item.upLoad
       })
       // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
-      params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
+      // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
-      // params.tagIds = params.tagIds.join(',')
+      params.catalogId =
+        this.$route.query.catalogName == params.catalogId ? this.catalogName : params.catalogId
 
       // 草稿
       if (status === 2) {
@@ -828,16 +866,17 @@ export default {
           .then(() => {
             params.status = status
             // addCourse(params).then(() => {
-            editCourseInfo(this.ruleForm).then(() => {
+
+            editCourseInfo(params).then(() => {
               this.$message({
                 message: '保存成功',
                 type: 'success'
               })
               setTimeout(() => {
                 this.isdeleteData()
-                // this.$router.push({ path: '/course/courseDraft' })
                 this.disabledBtn = false
-                this.$router.go(-1)
+                // this.$router.go(-1)
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
               }, 2000)
             })
           })
@@ -870,8 +909,8 @@ export default {
               setTimeout(() => {
                 this.isdeleteData()
                 this.disabledBtn = false
-                // this.$router.push({ path: '/course/courseDraft' })
-                this.$router.go(-1)
+                // this.$router.go(-1)
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
               }, 2000)
             })
           }
