@@ -85,6 +85,7 @@
               <el-select
                 v-model="ruleForm.teacherId"
                 placeholder="请选择讲师"
+                filterable
               >
                 <el-option
                   v-for="(item, index) in TeacherData"

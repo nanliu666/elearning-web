@@ -160,6 +160,7 @@
                 </el-tooltip>
                 <span
                   class="text_refresh"
+                  style="cursor:pointer;"
                   @click="refreshTableData"
                 >刷新</span>
                 <el-popover

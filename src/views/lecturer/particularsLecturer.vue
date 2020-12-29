@@ -19,8 +19,8 @@
       <div class="head_box_content">
         <el-row>
           <el-col
-            :span="7"
-            style="color:#333;"
+            :span="5"
+            style="color:#333;font-size: 18px;"
           >
             {{ name }}
           </el-col>
@@ -47,70 +47,70 @@
 
         <el-row>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             手机号码：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             {{ teacherData.phonenum }}
           </el-col>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             电子邮箱：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             {{ teacherData.userEmail }}
           </el-col>
         </el-row>
         <el-row>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             性别：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             <span v-if="teacherData.sex == 1">男</span>
             <span v-if="teacherData.sex == 0">女</span>
           </el-col>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             讲师类型：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             <span v-if="teacherData.type == 1">内训</span>
             <span v-if="teacherData.type == 2">外聘</span>
           </el-col>
         </el-row>
         <el-row>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             讲师级别：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             {{ teacherData.teacherLevel }}
           </el-col>
           <el-col
-            :span="4"
-            style="color:#333;"
+            :span="5"
+            style="color:#898989;"
           >
             讲师职称：
           </el-col>
-          <el-col :span="8">
+          <el-col :span="7">
             {{ teacherData.teacherTitle }}
           </el-col>
         </el-row>
         <!-- <el-row>
           <el-col
             :span="4"
-            style="color:#333;"
+            style="color:#898989;"
           >
             擅长领域：
           </el-col>
@@ -283,9 +283,11 @@ export default {
       position: relative;
       overflow: hidden;
       padding-right: 55px;
+      width: 400px;
+      height: 220px;
       img {
-        width: 400px;
-        height: 220px;
+        width: 100%;
+        height: 100%;
       }
       .in_img_icon {
         position: absolute;

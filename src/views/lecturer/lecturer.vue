@@ -80,9 +80,9 @@
                     @submit="handleSearch"
                   />
                   <div class="operations__btns">
-                    <i class="el-icon-upload2"></i>
+                    <!-- <i class="el-icon-upload2"></i>
                     &nbsp; &nbsp;
-                    <span>导出</span>
+                    <span>导出</span> -->
                     &nbsp; &nbsp;
                     <el-tooltip
                       class="operations__btns--tooltip"
@@ -238,7 +238,7 @@
                 </el-button>
                 <span
                   v-else
-                  type="text"
+                  style=" cursor:pointer; "
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row.idStr, 0)"
                 >

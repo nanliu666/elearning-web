@@ -78,6 +78,7 @@
                   </el-tooltip>
                   <span
                     class="text_refresh"
+                    style="cursor:pointer;"
                     @click="refreshTableData"
                   >刷新</span>
                   <el-popover
@@ -271,13 +272,13 @@
     </div>
 
     <el-dialog
-      title="移动目录"
+      title="移动"
       :visible.sync="dialogFormVisible"
       append-to-body
       width="500px"
     >
       <div style="margin-bottom: 15px">
-        所在目录：{{ moveKnowledgeRow.catalogName }}
+        所在分类：{{ moveKnowledgeRow.catalogName }}
       </div>
       <common-form
         ref="form"
@@ -405,9 +406,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 0, label: '下架' },
-      { value: 1, label: '上架' },
-      { value: '', label: '全部' }
+      { value: '0', label: '下架' },
+      { value: '1', label: '上架' },
+      { value: '2', label: '全部' }
     ]
   },
   {
@@ -469,8 +470,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '是否推荐',
     type: 'select',
     options: [
-      { value: 1, label: '是' },
-      { value: 0, label: '否' }
+      { value: '1', label: '是' },
+      { value: '0', label: '否' }
     ]
   },
   {
@@ -500,14 +501,14 @@ const SEARCH_POPOVER_CONFIG = {
 }
 const FORM_COLUMNS = [
   {
-    label: '移动到新目录',
+    label: '移动到新分类',
     itemType: 'treeSelect',
     prop: 'catalogId',
     required: true,
     span: 24,
     props: {
       selectParams: {
-        placeholder: '请选择所在目录',
+        placeholder: '请选择所在分类',
         multiple: false
       },
       treeParams: {
@@ -601,6 +602,7 @@ export default {
     this.status = this.$route.query.status ? this.$route.query.status : 1
 
     this.getInfo()
+    this.getScreenInfo()
   },
   methods: {
     // 去详情
@@ -682,11 +684,25 @@ export default {
       // }
       let catalogList = await this.getCategoryList()
       if (catalogId) {
-        catalogId.config.treeParams.data = catalogList
+        // catalogId.config.treeParams.data = catalogList
+        FORM_COLUMNS[0].props.treeParams.data = this.ListData(catalogList)
       }
       if (moveCatalogId) {
         moveCatalogId.props.treeParams.data = _.drop(catalogList)
       }
+    },
+    // 递归过滤数据
+    ListData(arr) {
+      if (arr.length > 0) {
+        for (let i = arr.length - 1; i >= 0; i--) {
+          if (arr[i].status == 1) {
+            arr.splice(i, 1)
+          } else if (arr[i].children) {
+            this.ListData(arr[i].children)
+          }
+        }
+      }
+      return arr
     },
     // 移动data
     handleChange() {
@@ -840,19 +856,22 @@ export default {
         return item
       }, [])
     },
+    // 给筛选拿数据
 
-    // 拿数据
-    getInfo(courseName) {
+    getScreenInfo() {
       let params = {
         currentPage: '',
         size: '',
         status: ''
       }
-      params = { ...this.page, ...courseName }
+      params = { ...this.page }
       params.status = this.status
+
+      if (params.isPutaway == 2) {
+        delete params.isPutaway
+      }
+
       getCourseListData(params).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
         // 下拉筛选框
         let data1 = JSON.parse(JSON.stringify(res.data))
         data1 = this.arrayUnique(data1, 'teacherName')
@@ -866,6 +885,40 @@ export default {
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+      })
+    },
+
+    // 拿数据
+    getInfo(courseName) {
+      let params = {
+        currentPage: '',
+        size: '',
+        status: ''
+      }
+      params = { ...this.page, ...courseName }
+      params.status = this.status
+
+      if (params.isPutaway == 2) {
+        delete params.isPutaway
+      }
+
+      getCourseListData(params).then((res) => {
+        this.tableData = res.data
+        this.page.total = res.totalNum
+        // 下拉筛选框
+        // let data1 = JSON.parse(JSON.stringify(res.data))
+        // data1 = this.arrayUnique(data1, 'teacherName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        // let data2 = JSON.parse(JSON.stringify(res.data))
+        // data2 = this.arrayUnique(data2, 'catalogName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+        // let data7 = JSON.parse(JSON.stringify(res.data))
+        // data7 = this.arrayUnique(data7, 'creatorName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
+        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+
         // this.tableData.forEach((item) => {
         //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
         //     value: item.teacherName,

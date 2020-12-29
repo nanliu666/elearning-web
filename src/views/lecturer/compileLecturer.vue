@@ -98,15 +98,15 @@
               >
                 <el-select
                   v-model="ruleForm.type"
-                  placeholder="请选择所在目录"
+                  placeholder="请选择讲师类型"
                 >
                   <el-option
                     label="内训"
-                    value="1"
+                    :value="1"
                   ></el-option>
                   <el-option
                     label="外聘"
-                    value="2"
+                    :value="2"
                   ></el-option>
                 </el-select>
               </el-form-item>
