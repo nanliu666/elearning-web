@@ -150,7 +150,7 @@
             >
               <el-button
                 type="text"
-                @click="todetail(row)"
+                @click="todetail(row.id)"
               >
                 {{ row.courseName }}
               </el-button>
@@ -606,9 +606,8 @@ export default {
   },
   methods: {
     // 去详情
-    todetail() {
-      // console.log(row)
-      this.$router.push({ path: '/course/detail' })
+    todetail(id) {
+      this.$router.push({ path: '/course/detail?id=' + id })
     },
 
     // 打开移动弹窗

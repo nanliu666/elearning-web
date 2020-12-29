@@ -442,11 +442,13 @@
                       :before-upload="CoursewareUpload"
                       :multiple="false"
                     >
-                      <el-button type="text">{{
-                        scope.row.upLoad[0]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : '上传课件'
-                      }}</el-button>
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传课件'
+                        }}
+                      </el-button>
                     </common-upload>
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 3"
@@ -467,7 +469,7 @@
                       type="text"
                     >关联考试</el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 5"
+                      v-if="typeOption[scope.row.type - 1].value == 5"
                       v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"

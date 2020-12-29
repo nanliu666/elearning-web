@@ -8,10 +8,13 @@
     <div class="compileLecturerr_head_box">
       <div class="imgBox">
         <img
-          :src="imgUrl"
+          :src="userData.url"
           alt=""
         />
-        <div class="icon">
+        <div
+          v-show="userData.isRecommend"
+          class="icon"
+        >
           推荐
         </div>
       </div>
@@ -19,8 +22,8 @@
         <el-row>
           <el-col :span="12">
             <div>
-              <span class="rBox_title">Java函数式编程</span>
-              <span class="myicon">已上架</span>
+              <span class="rBox_title">{{ userData.name }}</span>
+              <span class="myicon">{{ userData.isRecommend ? '已上架' : '已上架' }}</span>
             </div>
           </el-col>
         </el-row>
@@ -28,13 +31,13 @@
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">讲师：</span>
-              <span class="text">李文</span>
+              <span class="text">{{ userData.teacherName }}</span>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">所在目录：</span>
-              <span class="text">Java技能课程/高级培训</span>
+              <span class="text">{{ userData.catalogName }}</span>
             </div>
           </el-col>
         </el-row>
@@ -42,13 +45,24 @@
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">课程类型：</span>
-              <span class="text">李文</span>
+              <span
+                v-show="userData.type == 1"
+                class="text"
+              >在线课程</span>
+              <span
+                v-show="userData.type == 2"
+                class="text"
+              >面授课程</span>
+              <span
+                v-show="userData.type == 3"
+                class="text"
+              >直播课程</span>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">学时（小时）：</span>
-              <span class="text">Java技能课程/高级培训</span>
+              <span class="text">{{ userData.period }}</span>
             </div>
           </el-col>
         </el-row>
@@ -56,13 +70,24 @@
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">学分：</span>
-              <span class="text">李文</span>
+              <span class="text">{{ userData.credit }}</span>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">通过条件：</span>
-              <span class="text">Java技能课程/高级培训</span>
+              <span
+                v-show="userData.passCondition == 'a'"
+                class="text"
+              >教师评定</span>
+              <span
+                v-show="userData.passCondition == 'b'"
+                class="text"
+              >考试通过</span>
+              <span
+                v-show="userData.passCondition == 'c'"
+                class="text"
+              >达到课程学时</span>
             </div>
           </el-col>
         </el-row>
@@ -70,7 +95,18 @@
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">选修类型：</span>
-              <span class="text">李文</span>
+              <span
+                v-show="userData.electiveType == 1"
+                class="text"
+              >开放选修</span>
+              <span
+                v-show="userData.electiveType == 2"
+                class="text"
+              >通过审批</span>
+              <span
+                v-show="userData.electiveType == 3"
+                class="text"
+              >禁止选修</span>
             </div>
           </el-col>
         </el-row>
@@ -83,7 +119,7 @@
             学习人数
           </div>
           <div class="item_bottom">
-            123123
+            {{ userData.studyPeople }}
           </div>
         </div>
         <div class="bar_item">
@@ -91,7 +127,7 @@
             完成人数
           </div>
           <div class="item_bottom">
-            123123
+            {{ userData.finishPeople }}
           </div>
         </div>
         <div class="bar_item">
@@ -99,7 +135,7 @@
             收藏人数
           </div>
           <div class="item_bottom">
-            123123
+            {{ userData.collectedPeople }}
           </div>
         </div>
         <div class="bar_item">
@@ -107,7 +143,7 @@
             评论人数
           </div>
           <div class="item_bottom">
-            123123
+            {{ userData.commentPeople }}
           </div>
         </div>
         <div class="bar_item">
@@ -115,7 +151,7 @@
             评分
           </div>
           <div class="item_bottom">
-            123123
+            {{ userData.scope }}
           </div>
         </div>
       </div>
@@ -226,18 +262,16 @@
 </template>
 
 <script>
-// import { getCourseListData } from '@/api/course/course'
-// import { examDetail, examResult } from '@/api/training/training'
-
+import { getCourseStudyDetail, getStudyList } from '@/api/course/course'
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '姓名',
-    prop: 'stuName'
+    prop: 'name'
   },
   {
     label: '手机号',
-    prop: 'phone'
+    prop: 'phonenum'
   },
   {
     label: '所属部门',
@@ -245,7 +279,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '学习进度',
-    prop: 'examStatus',
+    prop: 'progress',
     slot: true
   }
 ]
@@ -271,8 +305,6 @@ export default {
 
   data() {
     return {
-      imgUrl:
-        'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1488358307,1563074004&fm=26&gp=0.jpg',
       showExamDetail: [],
       // Dialog无数据
       dialogVisible: false,
@@ -283,97 +315,57 @@ export default {
         name: ''
       },
       page: {
-        currentPage: 1,
-        size: 10,
+        pageNo: 1,
+        pageSize: 10,
         total: 0
       },
-
+      userData: {},
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       // query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [
-        {
-          stuName: 1,
-          phone: 2,
-          deptName: 3,
-          examStatus: 80
-        },
-        {
-          stuName: 1,
-          phone: 2,
-          deptName: 3,
-          examStatus: 80
-        },
-        {
-          stuName: 1,
-          phone: 2,
-          deptName: 3,
-          examStatus: 80
-        },
-
-        {
-          stuName: 1,
-          phone: 2,
-          deptName: 3,
-          examStatus: 80
-        }
-      ],
+      tableData: [],
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
   created() {
-    this.getInfo()
+    this.getUserList()
   },
   activated() {
+    this.getUserList()
     this.getInfo()
   },
   methods: {
-    isExamDetail() {
-      // console.log('id', this.$route.query.id)
-      //   let id = { examId: this.$route.query.id }
-      //   examDetail(id).then((res) => {
-      //     // console.log(res)
-      //     this.showExamDetail = res
-      //   })
+    async getInfo() {
+      this.userData = await getCourseStudyDetail({ courseId: this.$route.query.id })
     },
 
     //  处理页码改变
     handleCurrentPageChange(param) {
-      this.page.currentPage = param
-      this.getInfo()
+      this.page.pageNo = param
+      this.getUserList()
     },
     handlePageSizeChange(param) {
-      this.page.size = param
-      this.getInfo()
+      this.page.pageSize = param
+      this.getUserList()
     },
 
     handleSearch(searchParams) {
-      // this.loadTableData(_.pickBy(searchParams))
-      this.getInfo(searchParams)
-      // console.log(searchParams)
+      this.getUserList(searchParams)
     },
 
     // 刷新列表数据
     refreshTableData() {
-      this.getInfo()
+      this.getUserList()
     },
 
     // 拿数据
-    getInfo(courseName) {
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
-      }
-      params = { ...this.page, ...courseName }
-      params.status = this.status
-      // console.log('params', params)
-      //   getCourseListData(params).then((res) => {
-      //     this.tableData = res
-      //     this.page.total = res.length
-      //   })
+
+    async getUserList() {
+      let res = await getStudyList({ courseId: this.$route.query.id, ...this.page })
+      this.tableData = res.data
+      this.page.total = res.totalNum
     }
   }
 }
