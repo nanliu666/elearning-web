@@ -1,5 +1,5 @@
 <template>
-  <div class="out-container">
+  <div class="reset-phone">
     <page-header
       :title="`修改${$parent.isEmail ? '新邮箱' : '新手机号码'}`"
       show-back
@@ -38,6 +38,7 @@
               label-position="top"
               class="form-containner"
               status-icon
+              size="medium"
               :rules="password.rules"
               :model="password.form"
               :label-width="labelWidth"
@@ -69,6 +70,7 @@
               :label-position="'top'"
               class="form-containner"
               status-icon
+              size="medium"
               :rules="identity.rules"
               :model="identity.form"
               :label-width="labelWidth"
@@ -134,6 +136,7 @@
                     v-show="!identity.msgKey"
                     class="get-test-code"
                     :loading="isSending"
+                    size="medium"
                     @click="handleSend"
                   >
                     <span>获取验证码</span>
@@ -141,6 +144,7 @@
                   <el-button
                     v-show="identity.msgKey"
                     class="count-down-time"
+                    size="medium"
                   >
                     {{ identity.msgText }}
                   </el-button>
@@ -168,6 +172,7 @@
             <el-button
               type="primary"
               :disabled="buttonDisabled"
+              size="medium"
               @click="next"
             >
               下一步
@@ -179,6 +184,7 @@
           >
             <el-button
               class="goback-login"
+              size="medium"
               @click="goback()"
             >
               <span>返回安全设置</span>
@@ -473,10 +479,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.reset-phone {
+  /deep/ .el-card__body {
+    height: 100%;
+    overflow: auto;
+    padding: 0;
+  }
+}
 .login-code-img {
-  width: 100px;
+  width: 110px;
   height: 34px;
-  margin-right: 4px;
   background-color: #fdfdfd;
   border: 1px solid #f0f0f0;
   color: #333;
@@ -487,19 +499,6 @@ export default {
   text-indent: 5px;
   text-align: center;
   cursor: pointer !important;
-}
-.brad-part {
-  position: absolute;
-  height: 68px;
-  top: 0;
-  font-family: 'PingFangSC-Semibold';
-  font-size: 18px;
-  color: #545b66;
-  line-height: 68px;
-  .el-icon-arrow-left {
-    padding: 8px;
-    cursor: pointer;
-  }
 }
 
 .getback-pw {
@@ -512,10 +511,9 @@ export default {
 
 .contens-wrapper {
   width: 40%;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
-  padding-top: 78px;
+  margin: 0 auto;
+  margin-top: 7vh;
+  padding-bottom: 24px;
 }
 .progress-bar {
   /deep/ .el-step__icon {
@@ -526,40 +524,26 @@ export default {
 .identity-test,
 .reset-password {
   width: 78%;
-  position: relative;
-  left: 50%;
-  -webkit-transform: translate(-50%, 0);
-  transform: translate(-50%, 0);
-  padding-top: 78px;
+  margin: 0 auto;
+  padding-top: 7vh;
 }
 
-.identity-test .identity-title,
-.reset-password .resetPW-title {
+.identity-title,
+.resetPW-title {
   font-family: 'PingFangSC-Regular';
   font-size: 14px;
   color: #202940;
   line-height: 14px;
+  margin-bottom: 8px;
 }
 .identity-test .test-code-input {
   width: calc(100% - 117px);
-  margin-right: 5px;
-}
-.form-containner {
-  /deep/ .el-input__inner {
-    height: 34px !important;
-    line-height: 34px !important;
-  }
+  margin-right: 7px;
 }
 
 .get-test-code,
 .count-down-time {
-  height: 34px !important;
-  line-height: 34px !important;
-}
-.get-test-code,
-.count-down-time {
   width: 112px;
-  padding: 0 !important;
   font-size: 14px;
 }
 .get-test-code {
@@ -567,7 +551,7 @@ export default {
   border: 1px solid $primaryColor;
 }
 .count-down-time {
-  width: 100px;
+  margin-left: 0;
   color: #fff;
   background: #cecece;
 }
@@ -582,19 +566,9 @@ export default {
 }
 .next-button {
   width: 78%;
-  position: relative;
-  left: 50%;
-  transform: translate(-50%, 0);
-  top: 24px;
+  margin: 0 auto;
+  margin-top: 24px;
 }
-// .next-button .el-button {
-//   width: 94px;
-//   height: 42px;
-//   background: $primaryColor;
-//   border-radius: 4px;
-//   border-radius: 4px;
-//   color: #fff;
-// }
 .success-icon {
   height: 72px;
   text-align: center;
