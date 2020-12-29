@@ -728,6 +728,18 @@ const res = {
             icon: 'iconfont iconicon_boss'
           },
           {
+            menuId: '125907334589',
+            menuName: '试题导入',
+            menuType: 'Menu',
+            isOwn: 1,
+            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+            isShow: 0,
+            path: '/examManagement/question/questionImport',
+            code: 'questionImport',
+            alias: 'questionImport',
+            icon: 'iconfont iconicon_boss'
+          },
+          {
             menuId: '125907345674589',
             menuName: '题库管理',
             menuType: 'Menu',

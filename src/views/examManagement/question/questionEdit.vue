@@ -604,6 +604,9 @@ export default {
               option.fileList = []
             }
           })
+          _.forEach(this.form.subQuestions, (q) => {
+            q.content = _.unescape(q.content)
+          })
           if (res.type == QUESTION_TYPE_BLANK) {
             this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
           }

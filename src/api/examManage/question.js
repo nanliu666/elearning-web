@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { del, get, post, put } from '@/router/axios'
+import axios from 'axios'
 /**
  * 获取题库列表
  * @param {Object} params - 参数
@@ -40,3 +41,20 @@ export const delQuestion = (params) => del('/manage/v1/question', params)
  * @param {*} params
  */
 export const getQuestionCategory = (params) => get('/manage/v1/evaluation/category/tree', params)
+
+/**
+ * 题库预导入
+ * @param {*} params
+ */
+export const uploadQuestionFile = (params) => post('/manage/v1/question/read', params)
+
+/**
+ * 错误的题库导出
+ * @param {*} params
+ */
+export const exportErrorReport = (params) =>
+  axios.get('/api/manage/v1/errorQuestionExcelImport', {
+    responseType: 'blob',
+    // headers: { 'Content-Type': 'application/vnd.ms-excel;charset=UTF-8' },
+    params
+  })

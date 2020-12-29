@@ -154,8 +154,6 @@ const user = {
         commit('SET_MENU', [])
         commit('SET_USER_INFO', null)
         commit('SET_ROLES', [])
-        commit('DEL_ALL_TAG')
-        commit('CLEAR_LOCK')
         removeToken()
         removeRefreshToken()
         resolve()
