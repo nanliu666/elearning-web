@@ -56,7 +56,7 @@
           id="demo"
           ref="table"
           class="table"
-          :columns="columnsVisible | columnsFilter"
+          :columns="columnsVisible"
           :config="tableConfig"
           :data="tableData"
         >
@@ -79,12 +79,14 @@
           <template #handler="{row}">
             <el-button
               type="text"
+              :disabled="getUpDisabled(row)"
               @click="handleUp(row)"
             >
               上移
             </el-button>
             <el-button
               type="text"
+              :disabled="getDowmDisabled(row)"
               @click="handleDown(row)"
             >
               下移
@@ -97,6 +99,21 @@
             </el-button>
           </template>
         </common-table>
+        <div
+          v-if="hasFix"
+          class="score-origin-tips"
+        >
+          <i class="el-icon-warning" />
+          <span
+            style="padding-left: 6px"
+          >检测到你添加试题的分数与原分数值不一致（该分数只对本试卷有效），可</span>
+          <el-button
+            type="text"
+            @click="resetOrigin"
+          >
+            点击恢复原分值
+          </el-button>
+        </div>
         <stemContent
           v-if="visible"
           v-model="stemList"
@@ -128,7 +145,6 @@ const TABLE_COLUMNS = [
   {
     label: '题目列表',
     prop: 'content',
-    slot: true,
     minWidth: 150
   },
   {
@@ -235,11 +251,6 @@ export default {
   components: {
     stemContent
   },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
   props: {
     blockData: {
       type: Object,
@@ -261,6 +272,7 @@ export default {
 
   data() {
     return {
+      hasFix: false,
       totalScore: '',
       title: '',
       visible: false,
@@ -271,8 +283,7 @@ export default {
       stemList: [],
       typeList: [],
       tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: TABLE_COLUMNS,
       columns: BASE_COLUMNS,
       tableData: []
     }
@@ -280,8 +291,12 @@ export default {
   watch: {
     blockData: {
       handler(val) {
-        val.title && (this.form.title = _.cloneDeep(val.title))
-        val.tableData && (this.tableData = _.cloneDeep(val.tableData))
+        const { tableData, type, title } = val
+        this.$nextTick(() => {
+          this.tableData = tableData
+          this.form.type = type
+          this.form.title = title
+        })
       },
       deep: true,
       immediate: true
@@ -323,16 +338,6 @@ export default {
   },
   mounted() {
     this.typeList = []
-    for (let key in QUESTION_TYPE_MAP) {
-      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
-    }
-  },
-  activated() {
-    this.form = {
-      type: 'single_choice',
-      title: ''
-    }
-    this.typeList = []
     this.tableData = []
     for (let key in QUESTION_TYPE_MAP) {
       this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
@@ -369,6 +374,7 @@ export default {
               }
             ).then(() => {
               this.tableData = []
+              this.countScore()
             })
           }
         }, 300)
@@ -418,19 +424,28 @@ export default {
       }
       this.$emit('update', _.cloneDeep(block))
     },
+    getUpDisabled(row) {
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      return index === 0
+    },
+    getDowmDisabled(row) {
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      return _.size(this.tableData) === index + 1
+    },
     /***
      * @author guanfenda
      * @desc 下移
      * */
     handleDown(row) {
-      let i = this.tableData.map((it) => it.id).indexOf(row.id)
-      let newData = _.cloneDeep(row)
-      this.tableData.splice(i, 1)
-      let length = this.tableData.length
-      if (i === length) {
-        this.tableData.splice(0, 0, newData)
-      } else {
-        this.tableData.splice(i + 1, 0, newData)
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      if (index !== this.tableData.length - 1) {
+        this.tableData[index] = this.tableData.splice(index + 1, 1, this.tableData[index])[0]
       }
     },
     /***
@@ -438,14 +453,11 @@ export default {
      * @desc 上移
      * */
     handleUp(row) {
-      let i = this.tableData.map((it) => it.id).indexOf(row.id)
-      let newData = _.cloneDeep(row)
-      let length = this.tableData.length
-      this.tableData.splice(i, 1)
-      if (i === 0) {
-        this.tableData.splice(length - 1, 0, newData)
-      } else {
-        this.tableData.splice(i - 1, 0, newData)
+      let index = _.findIndex(this.tableData, (item) => {
+        return item.key === row.key
+      })
+      if (index !== 0) {
+        this.tableData[index] = this.tableData.splice(index - 1, 1, this.tableData[index])[0]
       }
     },
     /**
@@ -454,28 +466,24 @@ export default {
      *
      * */
     scoreChange(val, row) {
-      if (row.Original != val && row.Original) {
-        this.$confirm(
-          '系统检测到你所添加的试题分数与原试题分数不一致，是否继续应用当前设置的分数（该分数只对本试卷有效）？',
-          '提示',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '恢复原分值',
-            type: 'warning'
-          }
-        )
-          .then(() => {})
-          .catch(() => {
-            row.score = row.Original
-          })
-      }
+      this.hasFix = row.Original != val && row.Original
       this.countScore()
+    },
+    // 将表格中的所有的值恢复成原值
+    resetOrigin() {
+      _.each(this.tableData, (item) => {
+        item.score = item.Original
+      })
+      this.hasFix = false
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.score-origin-tips {
+  color: #7a7a7a;
+}
 .formContent {
   background: #fafafa;
   padding: 24px;

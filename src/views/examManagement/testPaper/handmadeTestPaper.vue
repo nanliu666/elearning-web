@@ -241,7 +241,6 @@ export default {
       }
     }
   },
-  mounted() {},
   activated() {
     this.form = {
       name: '',
