@@ -6,7 +6,6 @@
     :close-on-click-modal="false"
     :modal-append-to-body="false"
     :before-close="onClose"
-    @opened="onOpened"
   >
     <div v-loading="loading">
       <div class="flex flex-flow">
@@ -45,13 +44,14 @@
                       搜索
                     </el-button>
                   </div>
-                  <div style="position: relative;top:-10px">
+                  <div style="position: relative;top:-10px; left: 10px">
                     未选择题目
                   </div>
                 </div>
               </div>
             </template>
-            <template #multiSelectMenu>
+            <template #content="{row}">
+              {{ getContent(row.content) }}
             </template>
           </common-table>
         </div>
@@ -89,6 +89,9 @@
                   </div>
                 </div>
               </div>
+            </template>
+            <template #content="{row}">
+              {{ getContent(row.content) }}
             </template>
             <template #multiSelectMenu="{selection}">
               <el-button
@@ -144,14 +147,8 @@ const TABLE_COLUMNS = [
     prop: 'content',
     slot: true,
     fixed: true,
-    minWidth: 100,
-    formatter(row) {
-      return deleteHTMLTag(_.unescape(row.content)).length > 200
-        ? deleteHTMLTag(_.unescape(row.content)).slice(0, 200) + '...'
-        : deleteHTMLTag(_.unescape(row.content))
-    }
+    minWidth: 100
   },
-
   {
     label: '题目类型',
     prop: 'type',
@@ -322,6 +319,10 @@ export default {
     this.getcategoryTree()
   },
   methods: {
+    getContent(data) {
+      const contentText = deleteHTMLTag(_.unescape(data))
+      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
+    },
     /**
      * @author guanfenda
      * @desc 批量删除选中
@@ -424,14 +425,6 @@ export default {
     },
     /**
      * @author guanfenda
-     * @desc 过滤非数字
-     *
-     * */
-    numberInput(value, data) {
-      this.form[data] = value.replace(/[^\d]/g, '')
-    },
-    /**
-     * @author guanfenda
      * @desc 当前页加载
      * */
     handleCurrentPageChange(param) {
@@ -446,7 +439,6 @@ export default {
       this.page.pageSize = param
       this.getData()
     },
-    onOpened() {},
     onClose() {
       this.roleVisible = false
     }
@@ -455,6 +447,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.table {
+  /deep/ .top-menu {
+    margin-bottom: 20px;
+  }
+}
 /deep/ .el-dialog__header {
   padding: 16px 0;
   margin: 0 24px;
