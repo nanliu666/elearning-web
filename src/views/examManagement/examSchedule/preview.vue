@@ -81,7 +81,12 @@
 
 <script>
 import QustionPreview from '../question/questionPreview'
-import { getManualPreview, getRandomPreview, delExamPreview } from '@/api/examManage/schedule'
+import {
+  getManualPreview,
+  getRandomPreview,
+  delExamPreview,
+  createRandomPaper
+} from '@/api/examManage/schedule'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -133,10 +138,13 @@ export default {
       })
     },
     initData() {
-      const loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
+      let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
+      if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
+        loadFun = createRandomPaper
+      }
       const basicParams = { paperId: this.$route.query.paperId }
       const parmas =
-        this.$route.query.paperType === 'manual'
+        this.$route.query.paperType === 'manual' || this.$route.query.isManaged
           ? basicParams
           : _.assign(basicParams, { previewId: this.$route.query.previewId })
       loadFun(parmas).then((res) => {

@@ -8,6 +8,7 @@
     >
       <template #testPaper>
         <lazy-select
+          ref="testPaperRef"
           v-model="model.testPaper"
           :allow-create="true"
           :searchable="true"
@@ -85,73 +86,10 @@
 <script>
 import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
-const EventColumns = [
-  {
-    itemType: 'datePicker',
-    span: 24,
-    type: 'datetimerange',
-    required: true,
-    valueFormat: 'yyyy-MM-dd HH:mm:ss',
-    prop: 'examTime',
-    label: '考试日期'
-  },
-  {
-    itemType: 'input',
-    span: 24,
-    required: true,
-    prop: 'examName',
-    label: '考试名称'
-  },
-  { itemType: 'slot', span: 24, required: true, prop: 'testPaper', label: '关联用卷' },
-  { itemType: 'slot', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
-  {
-    itemType: 'radio',
-    prop: 'answerMode',
-    label: '答题模式',
-    span: 24,
-    options: [
-      { label: '整卷模式', value: 1 },
-      { label: '逐卷模式', value: 2 }
-    ]
-  },
-  {
-    itemType: 'slot',
-    prop: 'reckonTime',
-    label: '考试时长',
-    span: 24
-  },
-  {
-    itemType: 'slot',
-    prop: 'joinNum',
-    label: '参加次数',
-    span: 24
-  },
-  {
-    itemType: 'radio',
-    prop: 'strategy',
-    label: '考试时间策略',
-    span: 24,
-    options: [
-      { label: '允许进入考试的时间', value: 0 },
-      { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
-    ]
-  },
-  {
-    itemType: 'slot',
-    prop: 'integral',
-    label: '积分',
-    span: 24
-  },
-  {
-    itemType: 'slot',
-    prop: 'publishTime',
-    label: '发布考试',
-    span: 24
-  }
-]
 import { getOrgUserList } from '@/api/system/user'
 import { getExamList } from '@/api/examManage/schedule'
-
+import moment from 'moment'
+import { mapGetters } from 'vuex'
 export default {
   name: 'BasicSetting',
   components: {
@@ -162,10 +100,93 @@ export default {
   data() {
     return {
       input: '',
-      columns: EventColumns,
+      columns: [
+        {
+          itemType: 'datePicker',
+          span: 24,
+          type: 'datetimerange',
+          rules: [
+            {
+              required: true,
+              message: '请选择考试日期',
+              trigger: 'blur'
+            },
+            { required: true, validator: this.validateExamTime, trigger: ['change'] }
+          ],
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
+          prop: 'examTime',
+          label: '考试日期'
+        },
+        {
+          itemType: 'input',
+          span: 24,
+          required: true,
+          prop: 'examName',
+          label: '考试名称'
+        },
+        {
+          itemType: 'slot',
+          span: 24,
+          rules: [
+            {
+              required: true,
+              message: '请选择关联用卷',
+              trigger: 'blur'
+            },
+            { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
+          ],
+          prop: 'testPaper',
+          label: '关联用卷'
+        },
+        { itemType: 'slot', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
+        {
+          itemType: 'radio',
+          prop: 'answerMode',
+          label: '答题模式',
+          span: 24,
+          options: [
+            { label: '整卷模式', value: 1 },
+            { label: '逐卷模式', value: 2 }
+          ]
+        },
+        {
+          itemType: 'slot',
+          prop: 'reckonTime',
+          label: '考试时长',
+          span: 24
+        },
+        {
+          itemType: 'slot',
+          prop: 'joinNum',
+          label: '参加次数',
+          span: 24
+        },
+        {
+          itemType: 'radio',
+          prop: 'strategy',
+          label: '考试时间策略',
+          span: 24,
+          options: [
+            { label: '允许进入考试的时间', value: 0 },
+            { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
+          ]
+        },
+        {
+          itemType: 'slot',
+          prop: 'integral',
+          label: '积分',
+          span: 24
+        },
+        {
+          itemType: 'slot',
+          prop: 'publishTime',
+          label: '发布考试',
+          span: 24
+        }
+      ],
       model: {
         id: '',
-        examTime: '',
+        examTime: [],
         examName: '',
         testPaper: '',
         reviewer: null,
@@ -180,8 +201,41 @@ export default {
       }
     }
   },
-  created() {},
+  computed: {
+    ...mapGetters(['trainTimeInVuex'])
+  },
   methods: {
+    // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间
+    validateExamTime(rule, value, callback) {
+      // 培训开始时间要在考试时间之前
+      const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
+        moment(this.model.examTime[0])
+      )
+      // 培训结束时间要在考试结束时间之后
+      const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
+        moment(this.model.examTime[1])
+      )
+      if (!isLegalBeginTime) {
+        callback(new Error(`考试开始日期要在培训开始日期（${this.trainTimeInVuex[0]}）之后`))
+      } else if (!isLegalEndTime) {
+        callback(new Error(`考试结束日期要在培训结束日期（${this.trainTimeInVuex[1]}）之前`))
+      } else {
+        callback()
+      }
+    },
+    // 培训结束日期在试卷有效期之前
+    validateTestPaper(rule, value, callback) {
+      const paperExpiredTime = _.find(this.$refs.testPaperRef.optionList, (item) => {
+        return item.id === value
+      }).expiredTime
+      // 培训结束日期在卷子有效期之前
+      const isLegalExpiredTime = moment(this.trainTimeInVuex[1]).isSameOrBefore(paperExpiredTime)
+      if (paperExpiredTime && !isLegalExpiredTime) {
+        callback(new Error(`此卷在培训结束日时（${this.trainTimeInVuex[1]}）已过期`))
+      } else {
+        callback()
+      }
+    },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },

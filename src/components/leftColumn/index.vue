@@ -17,12 +17,21 @@
       <div
         slot-scope="{ node, data }"
         class="custom-tree-node"
+        @click="stopBubbling(data, $event)"
       >
         <span
           v-if="!data.hasOwnProperty('flag')"
-        >{{ data.label }} {{ data.hasOwnProperty('children') ? '' : '(' + data.num + ')' }}</span>
+        >{{ data.label }}
+          {{
+            data.hasOwnProperty('children') || data.label === '未分类' ? '' : '(' + data.num + ')'
+          }}</span>
         <el-dropdown
-          v-if="moreMenu.length > 0 && currentNodeKey === data.id"
+          v-if="
+            moreMenu.length > 0 &&
+              currentNodeKey === data.id &&
+              data.label != '未分类' &&
+              !data.hasOwnProperty('flag')
+          "
           class="custom-tree-node-right"
           @command="(val) => commandChange(val, data, node)"
         >
@@ -62,6 +71,7 @@
         <div
           v-if="data.hasOwnProperty('flag')"
           class="temporaryNode"
+          @click.stop
         >
           <el-input
             v-model="classifyName"
@@ -84,7 +94,7 @@
       class="addGroup"
       @click="commandChange('add')"
     >
-      <i class="el-icon-circle-plus-outline"></i>新建分类
+      <i class="el-icon-circle-plus-outline"></i>新建分组
     </div>
 
     <el-dialog
@@ -205,6 +215,11 @@ export default {
   },
 
   methods: {
+    stopBubbling(data, event) {
+      if (data.hasOwnProperty('flag')) {
+        event.stopPropagation()
+      }
+    },
     sureBtn() {
       // 弹窗的确认按钮
       let catalogsDta = {
@@ -415,7 +430,7 @@ export default {
           let interfaceData = {
             name: this.classifyName
           }
-          node.parent ? (interfaceData.parentId = node.parent.data.id) : ''
+          node.parent ? (interfaceData.id = node.parent.data.id) : ''
           await this.addCatalog(interfaceData)
             .then(() => {
               this.refreshTree()
@@ -437,6 +452,7 @@ export default {
               window.console.log(err)
             })
         }
+        this.$refs.tree.setCurrentKey(data.id)
         let text = this.options === 'edit' ? '保存成功' : '新建成功'
         // delete datas.flag
         // datas.label = this.classifyName
@@ -457,6 +473,7 @@ export default {
       // 刷新树数据
       this.$emit('refreshTree')
       this.classifyName = ''
+      this.temporaryHide()
     }
   }
 }
@@ -506,9 +523,13 @@ export default {
     }
   }
   .temporaryNode {
-    margin-top: 15px;
-    .el-input {
+    // margin-top: 15px;
+    /deep/.el-input {
       width: 70%;
+      height: 26px;
+      .el-input__inner {
+        height: 26px;
+      }
     }
     span {
       cursor: pointer;

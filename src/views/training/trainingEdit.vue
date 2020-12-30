@@ -114,7 +114,6 @@ export default {
   },
   data() {
     return {
-      refsList: REFS_LIST,
       trainWay: 0,
       loading: false,
       activeStep: 0,
@@ -163,7 +162,9 @@ export default {
      *
      * */
     handlePreviousStep() {
-      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
+      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+        this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
+      })
     },
     /***
      * @author guanfenda

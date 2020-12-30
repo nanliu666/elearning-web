@@ -47,11 +47,10 @@
         <div class="title flex flex-justify-between">
           <div>
             试题设置:
-            <span
-              class="tip"
-            >（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分<span
-              v-if="form.totalScore"
-            >，剩余分数：{{ surplusScore }}分</span>）</span>
+            <span class="tip">
+              <span>（当前总分：{{ totalScore == 0 ? 0 : totalScore }}分</span>
+              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
+            </span>
           </div>
           <div>
             <el-button
@@ -242,7 +241,6 @@ export default {
       }
     }
   },
-  mounted() {},
   activated() {
     this.form = {
       name: '',
@@ -345,56 +343,60 @@ export default {
      * */
     onSubmit() {
       this.valid = true
-      this.$refs.form.validate().then((valid) => {
-        if (!valid) return
-        let list = this.testPaper.filter(
-          (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
-        )
-        if (list.length > 0) {
-          let text = ''
-          list[0].tableData.length == 0 &&
-            (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
-          list[0].tableData.length !== 0 &&
-            (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
-          this.$message.warning(text)
-          return
-        }
-        let testPaperMether =
-          this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+      if (this.surplusScore === '' || this.surplusScore === '0') {
+        this.$refs.form.validate().then((valid) => {
+          if (!valid) return
+          let list = this.testPaper.filter(
+            (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+          )
+          if (list.length > 0) {
+            let text = ''
+            list[0].tableData.length == 0 &&
+              (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+            list[0].tableData.length !== 0 &&
+              (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+            this.$message.warning(text)
+            return
+          }
+          let testPaperMether =
+            this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
 
-        let manualSettings = []
-        this.testPaper.map((it, index) => {
-          it.tableData &&
-            it.tableData.map((item, i) => {
-              manualSettings.push({
-                parentSort: index + 1,
-                questionId: item.questionId,
-                content: item.content,
-                timeLimit: item.timeLimit,
-                score: item.score * 10,
-                sort: i + 1,
-                title: it.title,
-                type: it.type
+          let manualSettings = []
+          this.testPaper.map((it, index) => {
+            it.tableData &&
+              it.tableData.map((item, i) => {
+                manualSettings.push({
+                  parentSort: index + 1,
+                  questionId: item.questionId,
+                  content: item.content,
+                  timeLimit: item.timeLimit,
+                  score: item.score * 10,
+                  sort: i + 1,
+                  title: it.title,
+                  type: it.type
+                })
               })
+          })
+          let form = _.cloneDeep(this.form)
+          form.totalScore = form.totalScore * 10
+          let params = {
+            ...form,
+            manualSettings: manualSettings,
+            type: 'manual'
+          }
+          this.loading = true
+          testPaperMether(params)
+            .then(() => {
+              this.$message.success('提交成功')
+              this.handleBack()
+            })
+            .finally(() => {
+              this.loading = false
             })
         })
-        let form = _.cloneDeep(this.form)
-        form.totalScore = form.totalScore * 10
-        let params = {
-          ...form,
-          manualSettings: manualSettings,
-          type: 'manual'
-        }
-        this.loading = true
-        testPaperMether(params)
-          .then(() => {
-            this.$message.success('提交成功')
-            this.handleBack()
-          })
-          .finally(() => {
-            this.loading = false
-          })
-      })
+      } else {
+        this.$message.error('请正确分配剩余分数')
+      }
     },
     /**
      * @author guanfenda
@@ -428,8 +430,10 @@ export default {
           return Number(prev) + Number(cur)
         }, 0))
       this.totalScore = totalScore.toFixed(1)
-      let score = (this.form.totalScore - this.totalScore) * 10
-      this.surplusScore = (Math.round(score) / 10).toString()
+      if (this.form.totalScore) {
+        let score = (this.form.totalScore - this.totalScore) * 10
+        this.surplusScore = (Math.round(score) / 10).toString()
+      }
     },
     /**
      * @author guanfenda

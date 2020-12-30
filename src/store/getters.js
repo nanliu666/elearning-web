@@ -31,6 +31,7 @@ const getters = {
   logsFlag: (state, getters) => getters.logsLen === 0,
   flowRoutes: (state) => state.dict.flowRoutes,
   fieldList: (state) => state.process.fieldList,
+  trainTimeInVuex: (state) => state.train.trainTimeInVuex,
   processData: (state) => state.process.processData
 }
 export default getters

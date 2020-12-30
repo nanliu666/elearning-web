@@ -29,15 +29,14 @@
       <!-- 导航 -->
       <div class="select_bar">
         <span
-          :class="{ select: status === 1 }"
+          :class="{ select: status == 1 }"
           @click="showSelect(1)"
         >已发布</span>
         <span
-          :class="{ select: status === 2 }"
+          :class="{ select: status == 2 }"
           @click="showSelect(2)"
         >草稿</span>
       </div>
-
       <!-- 内容 -->
       <div class="draft">
         <!-- 表格内容 -->
@@ -93,15 +92,18 @@
                       effect="dark"
                       placement="top"
                     >
-                      <el-button
+                      <i
+                        class="el-icon-setting"
+                        style="color:#acb3b8;font-size: 16px;margin-left: -7px; "
+                      />
+                      <!-- <el-button
                         class="operations__btns--item"
                         size="mini"
                         type="text"
                         icon="el-icon-setting"
-                        style="color:#acb3b8;"
+                        
                       >
-                        <!-- <i class="iconfont iconicon_setting" /> -->
-                      </el-button>
+                      </el-button> -->
                     </el-tooltip>
 
                     <!-- 设置表格列可见性 -->
@@ -154,12 +156,12 @@
             </template>
             <!-- 课程类型 -->
             <template
-              slot="courseType"
+              slot="type"
               slot-scope="{ row }"
             >
-              <span v-if="row.courseType === 1">在线课程</span>
-              <span v-if="row.courseType === 2">面授课程</span>
-              <span v-if="row.courseType === 3">直播课程</span>
+              <span v-if="row.type == 1">在线课程</span>
+              <span v-if="row.type == 2">面授课程</span>
+              <span v-if="row.type == 3">直播课程</span>
             </template>
             <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
             <template
@@ -381,7 +383,6 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false
-
   // 树形结构懒加载
 }
 const TABLE_PAGE_CONFIG = {}
@@ -411,19 +412,19 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   },
   {
     data: '',
-    field: 'teacherName',
+    field: 'teacherId',
     label: '讲师',
     type: 'select',
     options: [],
-    config: { optionLabel: 'teacherName', optionValue: 'teacherName', placeholder: '请选择' }
+    config: { optionLabel: 'teacherName', optionValue: 'teacherId', placeholder: '请选择' }
   },
   {
     data: '',
-    field: 'catalogName',
+    field: 'catalogId',
     label: '所在分类',
     type: 'select',
     options: [],
-    config: { optionLabel: 'catalogName', optionValue: 'catalogName', placeholder: '请选择' }
+    config: { optionLabel: 'catalogName', optionValue: 'catalogId', placeholder: '请选择' }
   },
   {
     config: { placeholder: '请选择' },
@@ -589,6 +590,7 @@ export default {
     }
   },
   created() {
+    this.status = this.$route.query.status ? this.$route.query.status : 1
     this.refreshTableData()
     // this.loadData()
     this.getInfo()
@@ -596,6 +598,8 @@ export default {
   },
   activated() {
     // this.loadData()
+    this.status = this.$route.query.status ? this.$route.query.status : 1
+
     this.getInfo()
   },
   methods: {
@@ -745,7 +749,9 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 去编辑
-        this.$router.push({ path: '/course/compileCourse?id=' + row.id })
+        this.$router.push({
+          path: '/course/compileCourse?id=' + row.id + '&catalogName=' + row.catalogName
+        })
       }
       if (e === 'del') {
         // 删除
@@ -797,7 +803,7 @@ export default {
       selection.forEach((item) => {
         params += item.id + ','
       })
-      this.$confirm('此操作将删选中课程, 是否继续?', '提示', {
+      this.$confirm('此操作将删除选中课程, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -1070,6 +1076,9 @@ export default {
 }
 /deep/.page-wrap[data-v-793409ea] {
   margin-right: 70px;
+}
+/deep/.el-card {
+  border: none !important;
 }
 </style>
 <style lang="sass" scoped>

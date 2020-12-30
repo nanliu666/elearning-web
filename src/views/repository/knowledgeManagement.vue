@@ -55,6 +55,7 @@
                     <el-checkbox
                       v-for="item of tableColumns"
                       :key="item.prop"
+                      :disabled="item.prop === 'resName'"
                       :label="item.prop"
                       class="operations__column--item"
                     >
@@ -125,7 +126,10 @@
             {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
 
-          <el-dropdown @command="handleCommand($event, row)">
+          <el-dropdown
+            style="margin-left: 4px"
+            @command="handleCommand($event, row)"
+          >
             <el-button
               type="text"
               style="margin-left: 10px"
@@ -188,7 +192,7 @@ import {
   topingKnowledge,
   updateStatusKnowledgeList,
   getKnowledgeCatalogList,
-  getKnowledgeManageTaglist,
+  // getKnowledgeManageTaglist,
   moveKnowledge
 } from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
@@ -304,15 +308,15 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: 0, label: '本地文件' },
       { value: 1, label: '链接文件' }
     ]
-  },
-  {
-    type: 'select',
-    field: 'tagId',
-    label: '标签',
-    data: '',
-    options: [],
-    config: { optionLabel: 'name', optionValue: 'id' }
   }
+  // {
+  //   type: 'select',
+  //   field: 'tagId',
+  //   label: '标签',
+  //   data: '',
+  //   options: [],
+  //   config: { optionLabel: 'name', optionValue: 'id' }
+  // }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -379,7 +383,7 @@ export default {
         resName: '',
         catalogId: '',
         uploadType: '',
-        tagId: '',
+        // tagId: '',
         status: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -411,21 +415,21 @@ export default {
     async initSearchData() {
       let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
       let moveCatalogId = _.find(this.formColumns, { prop: 'catalogId' })
-      let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
-      if (tagId) {
-        getKnowledgeManageTaglist().then(
-          (res) =>
-            (tagId.options = _.concat(
-              [
-                {
-                  id: '',
-                  name: '全部'
-                }
-              ],
-              res
-            ))
-        )
-      }
+      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
+      // if (tagId) {
+      //   getKnowledgeManageTaglist().then(
+      //     (res) =>
+      //       (tagId.options = _.concat(
+      //         [
+      //           {
+      //             id: '',
+      //             name: '全部'
+      //           }
+      //         ],
+      //         res
+      //       ))
+      //   )
+      // }
       let catalogList = await this.getCategoryList()
       if (catalogId) {
         catalogId.config.treeParams.data = catalogList
@@ -452,12 +456,19 @@ export default {
     },
     // 上架与下架
     handleStatus(rowData) {
-      updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === '0' ? 1 : 0 }).then(
-        () => {
-          this.$message.success(`${rowData.status === '0' ? '下架' : '上架'}成功`)
-          this.loadTableData()
-        }
-      )
+      const statusTips = rowData.status === '0' ? '下架' : '上架'
+      this.$confirm(`是否${statusTips}当前资源`, '提示', {
+        confirmButtonText: statusTips,
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        updateStatusKnowledgeList({ id: rowData.id, status: rowData.status === '0' ? 1 : 0 }).then(
+          () => {
+            this.$message.success(`${statusTips}成功`)
+            this.loadTableData()
+          }
+        )
+      })
     },
     // 多种操作
     async handleCommand($event, row) {

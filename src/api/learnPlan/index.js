@@ -70,3 +70,27 @@ export const queryPercentageComplete = (params) =>
  * @param {Object} params - 参数
  * */
 export const queryLog = (params) => get('/api/blade-manage/v1/study/plan/course/queryLog', params)
+
+/**
+ * 删除学习计划
+ * @param {Object} params - 参数
+ * */
+export const deletePlan = (params) => del('/api/blade-manage/v1/study/plan/deletePlan', params)
+
+/**
+ * 查询学习计划详情
+ * @param {Object} params - 参数
+ * */
+export const planDetail = (params) => get('/api/blade-manage/v1/study/plan/planDetail', params)
+
+/**
+ * 查询课程详情
+ * @param {Object} params - 参数
+ * */
+export const courseDetail = (params) => get('/api/blade-manage/v1/study/plan/courseDetail', params)
+
+/**
+ * 查询课程信息列表
+ * @param {Object} params - 参数
+ * */
+export const getCourseList = (params) => get('/api/blade-manage/v1/course/getCourseList', params)

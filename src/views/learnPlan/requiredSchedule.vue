@@ -6,7 +6,7 @@
     <!-- 必修课安排 页面 -->
     <page-header>
       <template slot="title">
-        <span class="header_title">必修课程安排</span>学员完成率
+        必修课程安排
       </template>
       <template slot="rightMenu">
         <el-button
@@ -14,7 +14,7 @@
           size="medium"
           @click="toAddCertificate"
         >
-          新建模板
+          新建课程安排
         </el-button>
       </template>
     </page-header>
@@ -88,7 +88,9 @@
           </div>
         </template>
         <template #courseList="{row}">
-          <span>{{ row.courseList.map((item) => item.courseName).join(',') }}</span>
+          <span>{{
+            row.courseList && row.courseList.map((item) => item.courseName).join(',')
+          }}</span>
         </template>
         <template
           slot="multiSelectMenu"
@@ -104,10 +106,14 @@
           </el-button>
         </template>
         <template #handler="{row}">
-          <span class="startBtn">编辑 &nbsp; </span>
+          <span
+            class="startBtn"
+            @click="toEditCertificate(row)"
+          >编辑 &nbsp; </span>
           <span
             class="startBtn"
             :title="row.title"
+            @click="deleteCallback(row)"
           >删除 &nbsp; </span>
           <span
             class="startBtn"
@@ -128,7 +134,8 @@ import {
   delCatalogs,
   getCatalogs,
   moveCatalogs,
-  updateCatalogs
+  updateCatalogs,
+  deletePlan
 } from '@/api/learnPlan'
 // import { getCatalogs } from '@/api/training/training'
 
@@ -174,7 +181,8 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   rowKey: 'id',
   showHandler: true,
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  treeProps: { hasChildren: 'hasChildren', children: 'children' },
+  handlerColumn: { label: '操作', minWidth: 200, fixed: 'right' }
 }
 const TABLE_PAGE_CONFIG = {}
 
@@ -345,7 +353,13 @@ export default {
             datar[i].children.push(c)
           }
         }
-        this.data = datar
+        this.data = [
+          {
+            id: '',
+            label: '未分类',
+            name: '未分类'
+          }
+        ].concat(datar)
         let firstNode = this.data[0]
         this.currentNodeKey =
           firstNode.hasOwnProperty('children') && firstNode.children.length > 0
@@ -356,6 +370,62 @@ export default {
         // this.isgetScheduleList()
       })
     },
+    multipleDeleteClick(selection) {
+      // 批量删除
+      if (selection.length <= 0) {
+        this.$confirm('请先选中一个课程安排', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            this.$alert('改课程安排正在进行中，无法进行删除操作。', {
+              confirmButtonText: '关闭',
+              callback: () => {}
+            })
+          })
+          .catch(() => {})
+        return
+      }
+      this.deletePlanFn(selection)
+    },
+    deleteCallback(row) {
+      // 删除回调
+      this.deletePlanFn([row])
+    },
+    deletePlanFn(arr) {
+      // 删除学习计划
+      this.$confirm(
+        '批量删除/删除时，将删除此学习安排下面的学员学习记录，您确定还要批量删除/删除选中的学习安排吗？',
+        '提醒',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          let data = {
+            ids: arr
+              .map((item) => {
+                return item.id
+              })
+              .join(',')
+          }
+          deletePlan(data)
+            .then(() => {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+              this.loadTableData()
+            })
+            .catch((err) => {
+              window.console.log(err)
+            })
+        })
+        .catch(() => {})
+    },
     viewRate(row) {
       // 查看完成率
       window.sessionStorage.setItem('requiredScheduleDetail', JSON.stringify(row))
@@ -363,7 +433,13 @@ export default {
     },
     // 去新建证书
     toAddCertificate() {
-      this.$router.push({ path: '/learnPlan/newSchedule' })
+      this.$router.push({ path: '/learnPlan/newSchedule', query: { type: 'add' } })
+    },
+    toEditCertificate(row) {
+      this.$router.push({
+        path: '/learnPlan/newSchedule',
+        query: { type: 'edit', currentItemData: JSON.stringify(row) }
+      })
     },
     /**
      * 处理页码改变

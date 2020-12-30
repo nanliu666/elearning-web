@@ -53,7 +53,10 @@
             @keyup.enter.native="handleLogin"
           />
         </el-col>
-        <el-col :span="8">
+        <el-col
+          :offset="2"
+          :span="6"
+        >
           <div class="login-code">
             <img
               :src="loginForm.image"
