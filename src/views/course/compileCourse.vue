@@ -85,6 +85,7 @@
               <el-select
                 v-model="ruleForm.teacherId"
                 placeholder="请选择讲师"
+                filterable
               >
                 <!-- <el-option label="在线课程" :value="1"></el-option> -->
 
@@ -274,6 +275,8 @@
                 v-model="ruleForm.isRecommend"
                 active-color="#198cff"
                 inactive-color="#a0a8ae"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>

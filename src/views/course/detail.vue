@@ -12,7 +12,7 @@
           alt=""
         />
         <div
-          v-show="userData.isRecommend"
+          v-show="userData.isRecommend == 1"
           class="icon"
         >
           推荐
@@ -23,7 +23,14 @@
           <el-col :span="12">
             <div>
               <span class="rBox_title">{{ userData.name }}</span>
-              <span class="myicon">{{ userData.isRecommend ? '已上架' : '已上架' }}</span>
+              <span
+                v-if="userData.isPutaway"
+                class="myicon"
+              >已上架</span>
+              <span
+                v-else
+                class="myicon"
+              >已下架</span>
             </div>
           </el-col>
         </el-row>

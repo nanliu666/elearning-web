@@ -313,6 +313,7 @@ import {
   updateCourseTop,
   moveCourse
 } from '@/api/course/course'
+// import { delete } from 'vue/types/umd'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -703,17 +704,6 @@ export default {
       }
       return arr
     },
-    // 移动data
-    handleChange() {
-      // console.log(val)
-      // console.log(this.CourseNameBar)
-    },
-
-    toTrainDetail() {
-      // console.log(row)
-      // this.$router.push('')
-    },
-
     // 上架&下架
     alterIsPutaway(id, i) {
       // console.log({ id })
@@ -855,6 +845,17 @@ export default {
         return item
       }, [])
     },
+
+    // 去空数据
+    arrClearBlank(arr, name) {
+      arr.map((item, index) => {
+        if (item[name] == '') {
+          arr.splice(index, 1)
+        }
+      })
+      return arr
+    },
+
     // 给筛选拿数据
 
     getScreenInfo() {
@@ -869,17 +870,19 @@ export default {
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
-
       getCourseListData(params).then((res) => {
         // 下拉筛选框
         let data1 = JSON.parse(JSON.stringify(res.data))
         data1 = this.arrayUnique(data1, 'teacherName')
+        data1 = this.arrClearBlank(data1, 'teacherName')
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
         let data2 = JSON.parse(JSON.stringify(res.data))
         data2 = this.arrayUnique(data2, 'catalogName')
+        data2 = this.arrClearBlank(data2, 'catalogName')
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
         let data7 = JSON.parse(JSON.stringify(res.data))
         data7 = this.arrayUnique(data7, 'creatorName')
+        data7 = this.arrClearBlank(data7, 'creatorName')
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
@@ -938,6 +941,7 @@ export default {
     showSelect(index) {
       this.status = index
       this.getInfo()
+      this.getScreenInfo()
     }
   }
 }

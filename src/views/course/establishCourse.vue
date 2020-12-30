@@ -307,7 +307,7 @@
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl[0]"
+                  v-if="ruleForm.imageUrl[1]"
                   :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                   class="avatar"
                 />
@@ -761,7 +761,6 @@ export default {
       handler() {
         this.$nextTick(() => {
           this.$refs.ruleForm.clearValidate()
-          // this.$refs.ruleForm.resetFields()
         })
       },
       immediate: true,
@@ -779,7 +778,9 @@ export default {
     }
   },
 
-  created() {},
+  created() {
+    this.isdeleteData()
+  },
   activated() {
     this.isdeleteData()
     this.isgetCourseTags()
@@ -991,14 +992,15 @@ export default {
 
     // 清空数据
     isdeleteData() {
+      this.resetForm()
       this.ruleForm = {
         imageUrl: [{}], //图片
-        url: '',
+        url: null,
         localName: '',
-        catalogId: '',
+        catalogId: null,
         electiveType: '',
         thinkContent: '', //课前思考内容
-        introduction: '', //课程介绍
+        introduction: ' ', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
@@ -1022,6 +1024,14 @@ export default {
           }
         ]
       }
+    },
+    resetForm() {
+      // this.$refs['ruleForm'].resetField()
+      this.parentOrgIdLabel = ''
+      this.$nextTick(() => {
+        this.$refs['ruleForm'].resetFields()
+        this.$refs['ruleForm'].clearValidate()
+      })
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
@@ -1142,9 +1152,6 @@ export default {
           return false
         }
       })
-    },
-    resetForm(formName) {
-      this.$refs[formName].resetFields()
     }
   }
 }
