@@ -450,6 +450,7 @@ export default {
           this.testPaper = this.testPaper.filter((it) => {
             return it.key !== data.key
           })
+          this.$message.success('已成功删除改题型')
         })
       }
     },

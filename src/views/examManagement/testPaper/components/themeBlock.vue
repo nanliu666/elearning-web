@@ -412,6 +412,7 @@ export default {
         if (it.id && row.id !== it.id) return true
         if (it.key && row.key !== it.key) return true
       })
+      this.$message.success('删除成功')
       this.newData()
     },
     newData() {
