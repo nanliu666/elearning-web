@@ -133,15 +133,32 @@ export default {
   },
   methods: {
     // 当主页面修改后，编辑页面的加载函数修改
-    loadOrgTree() {
+    async loadOrgTree() {
       let paramsform = {
         parentId: '0',
         name: '',
         type: this.$parent.searchParams.type
       }
-      getCategoryList(paramsform).then((res) => {
-        this.orgTree = res
-      })
+      let res = await getCategoryList(paramsform)
+      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+    },
+    // 过滤当前选择编辑的分类的子类
+    clearCurrentChildren(res) {
+      let tempTree = _.cloneDeep(res)
+      const loop = (tree) => {
+        _.each(tree, (item) => {
+          if (!_.isEmpty(item.children)) {
+            loop(item.children)
+          }
+          // 父级组织类型 ==== 当前组织的类型
+          if (this.form.id === item.id) {
+            item.children = []
+          }
+          return tree
+        })
+      }
+      loop(tempTree)
+      return tempTree
     },
     checkSameName() {
       let target = this.findOrg(this.form.parentId)
