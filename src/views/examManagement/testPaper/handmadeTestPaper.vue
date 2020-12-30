@@ -195,7 +195,7 @@ const BASE_COLUMNS = [
     label: '备注',
     type: 'textarea',
     span: 24,
-    maxlength: 32,
+    maxlength: 200,
     required: false
   }
 ]

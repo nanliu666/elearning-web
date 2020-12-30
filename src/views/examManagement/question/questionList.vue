@@ -135,7 +135,7 @@ import { deleteHTMLTag } from '@/util/util'
 const COLUMNS = [
   {
     prop: 'content',
-    label: '题目列表',
+    label: '题目名称',
     slot: true
   }
 ]
