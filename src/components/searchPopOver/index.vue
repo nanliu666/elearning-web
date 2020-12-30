@@ -277,7 +277,6 @@
           </div>
           <el-button
             slot="reference"
-            type="primary"
             size="medium"
             icon="icon-basics-filter-outlined"
             class="select-btn"

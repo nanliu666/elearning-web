@@ -189,7 +189,7 @@ const COLUMNS = [
   },
   {
     label: '邮箱',
-    prop: 'email'
+    prop: 'userEmail'
   },
 
   {
