@@ -440,7 +440,6 @@ export default {
       }
     }
   },
-  mounted() {},
   activated() {
     this.form = {
       name: '',
@@ -468,6 +467,10 @@ export default {
     if (!this.$route.query.id) {
       this.pushItem()
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
   },
   methods: {
     /**

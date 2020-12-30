@@ -241,6 +241,10 @@ export default {
       }
     }
   },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
+  },
   activated() {
     this.form = {
       name: '',

@@ -64,6 +64,9 @@
           <template #index="{$index}">
             {{ $index + 1 }}
           </template>
+          <template #content="{row}">
+            {{ getContent(row.content) }}
+          </template>
           <template #score="{row}">
             <el-input-number
               v-model="row.score"
@@ -71,7 +74,7 @@
               :min="0"
               :step="1"
               :precision="1"
-              @change="scoreChange($event, row)"
+              @change="scoreChange"
             />
             <div
               v-if="valid && !row.score"
@@ -157,6 +160,7 @@ const TABLE_COLUMNS = [
   {
     label: '题目名称',
     prop: 'content',
+    slot: true,
     minWidth: 120
   },
   {
@@ -259,7 +263,7 @@ const BASE_COLUMNS = [
     required: false
   }
 ]
-
+import { deleteHTMLTag } from '@/util/util'
 export default {
   name: 'ThemeBlock',
   components: {
@@ -358,6 +362,10 @@ export default {
     }
   },
   methods: {
+    getContent(data) {
+      const contentText = deleteHTMLTag(_.unescape(data))
+      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
+    },
     /**
      *  @author guenfenda
      *  @desc 计算分数
@@ -480,9 +488,11 @@ export default {
      * @desc 提示分数修改
      *
      * */
-    scoreChange(val, row) {
-      this.hasFix = row.Original != val && row.Original
+    scoreChange() {
       this.countScore()
+      this.hasFix = _.some(this.tableData, (item) => {
+        return item.Original !== item.score
+      })
     },
     // 将表格中的所有的值恢复成原值
     resetOrigin() {
