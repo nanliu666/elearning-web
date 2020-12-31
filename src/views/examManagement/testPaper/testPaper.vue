@@ -103,6 +103,12 @@
             {{ row.name }}
           </el-link>
         </template>
+        <template #categoryName="{row}">
+          {{ row.categoryName ? row.categoryName : '--' }}
+        </template>
+        <template #expiredTime="{row}">
+          {{ row.expiredTime ? row.expiredTime : '--' }}
+        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
@@ -167,6 +173,8 @@ const TABLE_COLUMNS = [
   {
     label: '试卷分类',
     prop: 'categoryName',
+    slot: true,
+    align: 'center',
     minWidth: 120
   },
   {

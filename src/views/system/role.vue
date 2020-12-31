@@ -24,6 +24,7 @@
             class="main-wrap"
           >
             <commonTable
+              ref="table"
               :data="filterList"
               :config="tableConfig"
               :columns="columns"
@@ -261,6 +262,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
+          this.$refs.table.clearSelection()
         })
       })
     },

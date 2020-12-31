@@ -29,12 +29,13 @@
             class="custom-tree-node"
             @click.prevent="onClickNode(node, data)"
           >
-            <span>
+            <span class="label-name-box">
               <i
                 v-if="node.level === 1 && showFolder"
                 class="el-icon-folder"
                 style="margin-right: 5px;"
-              />{{ data[props.label] }}
+              />
+              <span class="label-name ellipsis">{{ data[props.label] }}</span>
               <span>{{ `(${data.roleNum})` }}</span>
             </span>
             <el-dropdown
@@ -172,13 +173,23 @@ export default {
 }
 
 .custom-tree-node {
-  flex: 1;
+  margin-left: -20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
-  padding-right: 8px;
-
+  width: 92%;
+  .label-name-box {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    .label-name {
+      width: 150px;
+      display: inline;
+      white-space: nowrap;
+      // min-width: 50px;
+    }
+  }
   .right-content {
     display: none;
   }

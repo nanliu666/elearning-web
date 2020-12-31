@@ -55,7 +55,7 @@
               <div v-else>
                 <span>{{ sonindex + 1 }}.</span>
                 <span>
-                  <span v-html="sonitem.content"></span>
+                  <span v-html="_.unescape(sonitem.content)"></span>
                   <ul>
                     <li
                       v-for="(paperItem, paperIndex) in sonitem.subQuestions"

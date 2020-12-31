@@ -59,25 +59,17 @@
         class="dialog-footer"
       >
         <el-button
-          v-if="row.id"
-          size="medium"
-          @click="onClose"
-        >
-          取消
-        </el-button>
-        <el-button
-          v-else
-          size="medium"
-          @click="onContinue"
-        >
-          完成并创建规则
-        </el-button>
-        <el-button
           type="primary"
           size="medium"
           @click="onsubmit"
         >
           保存
+        </el-button>
+        <el-button
+          size="medium"
+          @click="onClose"
+        >
+          取消
         </el-button>
       </div>
     </div>
@@ -226,9 +218,6 @@ export default {
       getListSysRulus(params).then((res) => {
         this.columns.find((it) => it.prop == 'sysRuleId').options = res
       })
-    },
-    onContinue() {
-      this.onsubmit({ isContinue: true })
     },
     onsubmit({ isContinue = false }) {
       this.$refs.form.validate().then((valid) => {

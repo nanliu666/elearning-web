@@ -18,6 +18,7 @@
       <div>
         <div style="margin-top: 20px">
           <common-table
+            ref="table"
             style="width: 100%"
             :data="data"
             :config="tableConfig"
@@ -54,7 +55,6 @@
                 <span
                   @click="handlerDeleteAll(selection)"
                 ><i class="el-icon-delete" /> 批量删除</span>
-                <!--                <span><i class="el-icon-folder" /> 批量导出</span>-->
               </span>
             </template>
             <template
@@ -119,7 +119,7 @@ export default {
       tableConfig: {
         showHandler: true,
         showIndexColumn: false,
-        rowKey: 'id',
+        rowKey: 'userId',
         enableMultiSelect: true,
         handlerColumn: {
           width: 80
@@ -215,6 +215,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
+          this.$refs.table.clearSelection()
         })
       })
     },
