@@ -136,17 +136,19 @@
               <span @click="isShowinputFn"> 取消</span>
               <!-- <span @click="isShowinput = false"> 取消</span> -->
             </div>
-          </div>
-          <div
-            v-show="!isShowinput"
-            class="btn_bottom"
-          >
-            <a
-              class="btn1"
-              href="#/lecturer/lecturer"
-              @click="adddata"
-            >新建分组</a>
-            <!-- <span class="btn2">新建分类</span> -->
+            <div class="btn_bottom_box">
+              <div
+                v-show="!isShowinput"
+                class="btn_bottom"
+              >
+                <a
+                  class="btn1"
+                  href="#/lecturer/lecturer"
+                  @click="adddata"
+                >新建分组</a>
+                <!-- <span class="btn2">新建分类</span> -->
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1251,14 +1253,14 @@ $color_icon: #A0A8AE
     .draft_issue {
       padding-top: 25px;
       display: flex;
-      height: 600px;
-      overflow: hidden;
+      height: 700px;
+      // overflow: hidden;
       .issue_l {
         position: relative;
         width: 20%;
         border-right: 1px solid #ccc;
         padding: 20px;
-        height: 600px;
+        height: 100%;
         .issue_l_tree {
           // padding: 0 25px;
           width: 100%;
@@ -1278,22 +1280,28 @@ $color_icon: #A0A8AE
             cursor: pointer;
           }
         }
-        .btn_bottom {
+        .btn_bottom_box {
           position: absolute;
+          width: 100%;
           bottom: 0;
           left: 0;
-          height: 50px;
-          width: 100%;
-          border-top: 1px solid #ccc;
-          .btn1 {
-            display: block;
-            background-color: #fff;
-            cursor: pointer;
-            line-height: 50px;
-            height: 100%;
+          .btn_bottom {
+            position: relative;
+            bottom: 0;
+            left: 0;
+            height: 50px;
             width: 100%;
-            text-align: center;
-            color: #1677ff;
+            border-top: 1px solid #ccc;
+            .btn1 {
+              display: block;
+              background-color: #fff;
+              cursor: pointer;
+              line-height: 50px;
+              height: 100%;
+              width: 100%;
+              text-align: center;
+              color: #1677ff;
+            }
           }
         }
       }

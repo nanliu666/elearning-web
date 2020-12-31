@@ -387,7 +387,13 @@ const TABLE_CONFIG = {
   showIndexColumn: false
   // 树形结构懒加载
 }
-const TABLE_PAGE_CONFIG = {}
+const TABLE_PAGE_CONFIG = {
+  page: {
+    pageNo: 1,
+    pageSize: 10,
+    total: 0
+  }
+}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
@@ -892,11 +898,16 @@ export default {
 
     // 拿数据
     getInfo(courseName) {
+      if (courseName) {
+        this.page.pageNo = 1
+        this.page.pageSize = 10
+      }
       let params = {
         currentPage: '',
         size: '',
         status: ''
       }
+
       params = { ...this.page, ...courseName }
       params.status = this.status
 

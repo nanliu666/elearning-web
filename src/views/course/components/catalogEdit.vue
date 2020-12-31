@@ -119,11 +119,29 @@ export default {
     }
   },
   methods: {
-    loadOrgTree() {
-      getCatalog().then((res) => {
-        this.orgTree = res
-      })
+    async loadOrgTree() {
+      let res = await getCatalog()
+      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
     },
+    // 过滤当前选择编辑的分类的子类
+    clearCurrentChildren(res) {
+      let tempTree = _.cloneDeep(res)
+      const loop = (tree) => {
+        _.each(tree, (item) => {
+          if (!_.isEmpty(item.children)) {
+            loop(item.children)
+          }
+          // 父级组织类型 === 当前组织的类型
+          if (this.form.id === item.id) {
+            item.children = []
+          }
+          return tree
+        })
+      }
+      loop(tempTree)
+      return tempTree
+    },
+
     checkSameName() {
       let target = this.findOrg(this.form.parentId)
       let temp = _.isEmpty(target) ? this.orgTree : target.children
