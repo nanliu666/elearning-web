@@ -49,6 +49,11 @@
             </li>
           </ul>
         </template>
+        <template #basicTitle>
+          <div style="height: 85px; color: transparent;">
+            基础信息
+          </div>
+        </template>
       </common-form>
 
       <div class="container__editor">
@@ -131,21 +136,28 @@ const FORM_COLUMNS = [
     span: 11
   },
   {
-    itemType: 'select',
-    label: '添加标签',
-    prop: 'tags',
-    required: false,
-    filterable: true,
-    multiple: true,
-    disabled: true,
-    props: {
-      label: 'name',
-      value: 'id'
-    },
-    options: [],
+    prop: 'basicTitle',
+    itemType: 'slotout',
     span: 11,
-    offset: 1
+    offset: 1,
+    label: ''
   },
+  // {
+  //   itemType: 'select',
+  //   label: '添加标签',
+  //   prop: 'tags',
+  //   required: false,
+  //   filterable: true,
+  //   multiple: true,
+  //   disabled: true,
+  //   props: {
+  //     label: 'name',
+  //     value: 'id'
+  //   },
+  //   options: [],
+  //   span: 11,
+  //   offset: 1
+  // },
   {
     itemType: 'radio',
     label: '上传模式',
