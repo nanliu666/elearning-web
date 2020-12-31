@@ -507,7 +507,8 @@ export default {
       //single_choice
       let params = {
         type: '0',
-        relateType: relateType
+        relateType: relateType,
+        expireStatus: '1'
       }
       getcategoryTree(params).then(async (res) => {
         this.column.props.treeParams.data = res
@@ -558,7 +559,8 @@ export default {
      * */
     getTestPaperCategory() {
       let params = {
-        type: '1'
+        type: '1',
+        expireStatus: '1'
       }
       getcategoryTree(params).then((res) => {
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
