@@ -195,7 +195,7 @@ const BASE_COLUMNS = [
     label: '备注',
     type: 'textarea',
     span: 24,
-    maxlength: 32,
+    maxlength: 200,
     required: false
   }
 ]
@@ -240,6 +240,10 @@ export default {
         totalScore.required = false
       }
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
   },
   activated() {
     this.form = {
@@ -450,6 +454,7 @@ export default {
           this.testPaper = this.testPaper.filter((it) => {
             return it.key !== data.key
           })
+          this.$message.success('已成功删除改题型')
         })
       }
     },

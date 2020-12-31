@@ -48,6 +48,7 @@
         <label class="label">大题标题</label>
         <el-input
           v-model="form.title"
+          maxlength="200"
           placeholder="请填写大题标题"
         ></el-input>
       </div>
@@ -60,6 +61,12 @@
           :config="tableConfig"
           :data="tableData"
         >
+          <template #index="{$index}">
+            {{ $index + 1 }}
+          </template>
+          <template #content="{row}">
+            {{ getContent(row.content) }}
+          </template>
           <template #score="{row}">
             <el-input-number
               v-model="row.score"
@@ -67,7 +74,7 @@
               :min="0"
               :step="1"
               :precision="1"
-              @change="scoreChange($event, row)"
+              @change="scoreChange"
             />
             <div
               v-if="valid && !row.score"
@@ -134,23 +141,34 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
   defaultExpandAll: false,
-  showIndexColumn: true,
+  showIndexColumn: false,
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    headerAlign: 'center',
+    align: 'center',
+    minWidth: 100
   }
 }
 const TABLE_COLUMNS = [
   {
-    label: '题目列表',
+    label: '序号',
+    prop: 'index',
+    slot: true,
+    minWidth: 50
+  },
+  {
+    label: '题目名称',
     prop: 'content',
-    minWidth: 150
+    slot: true,
+    minWidth: 120
   },
   {
     label: '分数',
     prop: 'score',
     slot: true,
+    headerAlign: 'center',
+    align: 'center',
     minWidth: 150
   },
   {
@@ -241,11 +259,11 @@ const BASE_COLUMNS = [
     label: '备注',
     type: 'textarea',
     span: 24,
-    maxlength: 32,
+    maxlength: 200,
     required: false
   }
 ]
-
+import { deleteHTMLTag } from '@/util/util'
 export default {
   name: 'ThemeBlock',
   components: {
@@ -344,6 +362,10 @@ export default {
     }
   },
   methods: {
+    getContent(data) {
+      const contentText = deleteHTMLTag(_.unescape(data))
+      return contentText.length > 200 ? `${contentText.slice(0, 200)}...` : contentText
+    },
     /**
      *  @author guenfenda
      *  @desc 计算分数
@@ -412,6 +434,7 @@ export default {
         if (it.id && row.id !== it.id) return true
         if (it.key && row.key !== it.key) return true
       })
+      this.$message.success('删除成功')
       this.newData()
     },
     newData() {
@@ -465,9 +488,11 @@ export default {
      * @desc 提示分数修改
      *
      * */
-    scoreChange(val, row) {
-      this.hasFix = row.Original != val && row.Original
+    scoreChange() {
       this.countScore()
+      this.hasFix = _.some(this.tableData, (item) => {
+        return item.Original !== item.score
+      })
     },
     // 将表格中的所有的值恢复成原值
     resetOrigin() {
