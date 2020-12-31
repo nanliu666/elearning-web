@@ -107,3 +107,14 @@ export const getCourseContents = (params) => get('/api/manage/v1/course/getCours
  * @param {Object} params - 参数
  * */
 export const listTeacher = (params) => get('/api/manage/v1/teacher/listTeacherComboBox', params)
+/**
+ *  学习详情
+ * @param {Object} params - 参数
+ * */
+export const getCourseStudyDetail = (params) =>
+  get('/api/manage//v1/course/getCourseStudyDetail', params)
+/**
+ *  学习人员列表
+ * @param {Object} params - 参数
+ * */
+export const getStudyList = (params) => get('/api/manage//v1/course/getStudyList', params)

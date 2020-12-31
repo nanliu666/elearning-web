@@ -78,6 +78,7 @@
                   </el-tooltip>
                   <span
                     class="text_refresh"
+                    style="cursor:pointer;"
                     @click="refreshTableData"
                   >刷新</span>
                   <el-popover
@@ -149,7 +150,7 @@
             >
               <el-button
                 type="text"
-                @click="todetail(row)"
+                @click="todetail(row.id)"
               >
                 {{ row.courseName }}
               </el-button>
@@ -193,8 +194,8 @@
               slot="isRecommend"
               slot-scope="{ row }"
             >
-              <span v-if="row.isRecommend === 0">否</span>
-              <span v-if="row.isRecommend === 1">是</span>
+              <span v-if="row.isRecommend == 0">否</span>
+              <span v-if="row.isRecommend == 1">是</span>
             </template>
             <!-- // isPutaway	是否上架 (0：下架；1：上架) -->
             <template
@@ -271,13 +272,13 @@
     </div>
 
     <el-dialog
-      title="移动目录"
+      title="移动"
       :visible.sync="dialogFormVisible"
       append-to-body
       width="500px"
     >
       <div style="margin-bottom: 15px">
-        所在目录：{{ moveKnowledgeRow.catalogName }}
+        所在分类：{{ moveKnowledgeRow.catalogName }}
       </div>
       <common-form
         ref="form"
@@ -312,6 +313,7 @@ import {
   updateCourseTop,
   moveCourse
 } from '@/api/course/course'
+// import { delete } from 'vue/types/umd'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -385,7 +387,13 @@ const TABLE_CONFIG = {
   showIndexColumn: false
   // 树形结构懒加载
 }
-const TABLE_PAGE_CONFIG = {}
+const TABLE_PAGE_CONFIG = {
+  page: {
+    pageNo: 1,
+    pageSize: 10,
+    total: 0
+  }
+}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
@@ -405,9 +413,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 0, label: '下架' },
-      { value: 1, label: '上架' },
-      { value: '', label: '全部' }
+      { value: '0', label: '下架' },
+      { value: '1', label: '上架' },
+      { value: '2', label: '全部' }
     ]
   },
   {
@@ -469,8 +477,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '是否推荐',
     type: 'select',
     options: [
-      { value: 1, label: '是' },
-      { value: 0, label: '否' }
+      { value: '1', label: '是' },
+      { value: '0', label: '否' }
     ]
   },
   {
@@ -500,14 +508,14 @@ const SEARCH_POPOVER_CONFIG = {
 }
 const FORM_COLUMNS = [
   {
-    label: '移动到新目录',
+    label: '移动到新分类',
     itemType: 'treeSelect',
     prop: 'catalogId',
     required: true,
     span: 24,
     props: {
       selectParams: {
-        placeholder: '请选择所在目录',
+        placeholder: '请选择所在分类',
         multiple: false
       },
       treeParams: {
@@ -601,12 +609,12 @@ export default {
     this.status = this.$route.query.status ? this.$route.query.status : 1
 
     this.getInfo()
+    this.getScreenInfo()
   },
   methods: {
     // 去详情
-    todetail() {
-      // console.log(row)
-      this.$router.push({ path: '/course/detail' })
+    todetail(id) {
+      this.$router.push({ path: '/course/detail?id=' + id })
     },
 
     // 打开移动弹窗
@@ -682,23 +690,26 @@ export default {
       // }
       let catalogList = await this.getCategoryList()
       if (catalogId) {
-        catalogId.config.treeParams.data = catalogList
+        // catalogId.config.treeParams.data = catalogList
+        FORM_COLUMNS[0].props.treeParams.data = this.ListData(catalogList)
       }
       if (moveCatalogId) {
         moveCatalogId.props.treeParams.data = _.drop(catalogList)
       }
     },
-    // 移动data
-    handleChange() {
-      // console.log(val)
-      // console.log(this.CourseNameBar)
+    // 递归过滤数据
+    ListData(arr) {
+      if (arr.length > 0) {
+        for (let i = arr.length - 1; i >= 0; i--) {
+          if (arr[i].status == 1) {
+            arr.splice(i, 1)
+          } else if (arr[i].children) {
+            this.ListData(arr[i].children)
+          }
+        }
+      }
+      return arr
     },
-
-    toTrainDetail() {
-      // console.log(row)
-      // this.$router.push('')
-    },
-
     // 上架&下架
     alterIsPutaway(id, i) {
       // console.log({ id })
@@ -841,31 +852,86 @@ export default {
       }, [])
     },
 
-    // 拿数据
-    getInfo(courseName) {
+    // 去空数据
+    arrClearBlank(arr, name) {
+      arr.map((item, index) => {
+        if (item[name] == '') {
+          arr.splice(index, 1)
+        }
+      })
+      return arr
+    },
+
+    // 给筛选拿数据
+
+    getScreenInfo() {
       let params = {
         currentPage: '',
         size: '',
         status: ''
       }
-      params = { ...this.page, ...courseName }
+      params = { ...this.page }
       params.status = this.status
+
+      if (params.isPutaway == 2) {
+        delete params.isPutaway
+      }
       getCourseListData(params).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
         // 下拉筛选框
         let data1 = JSON.parse(JSON.stringify(res.data))
         data1 = this.arrayUnique(data1, 'teacherName')
+        data1 = this.arrClearBlank(data1, 'teacherName')
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
         let data2 = JSON.parse(JSON.stringify(res.data))
         data2 = this.arrayUnique(data2, 'catalogName')
+        data2 = this.arrClearBlank(data2, 'catalogName')
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
         let data7 = JSON.parse(JSON.stringify(res.data))
         data7 = this.arrayUnique(data7, 'creatorName')
+        data7 = this.arrClearBlank(data7, 'creatorName')
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+      })
+    },
+
+    // 拿数据
+    getInfo(courseName) {
+      if (courseName) {
+        this.page.pageNo = 1
+        this.page.pageSize = 10
+      }
+      let params = {
+        currentPage: '',
+        size: '',
+        status: ''
+      }
+
+      params = { ...this.page, ...courseName }
+      params.status = this.status
+
+      if (params.isPutaway == 2) {
+        delete params.isPutaway
+      }
+
+      getCourseListData(params).then((res) => {
+        this.tableData = res.data
+        this.page.total = res.totalNum
+        // 下拉筛选框
+        // let data1 = JSON.parse(JSON.stringify(res.data))
+        // data1 = this.arrayUnique(data1, 'teacherName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+        // let data2 = JSON.parse(JSON.stringify(res.data))
+        // data2 = this.arrayUnique(data2, 'catalogName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+        // let data7 = JSON.parse(JSON.stringify(res.data))
+        // data7 = this.arrayUnique(data7, 'creatorName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
+        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+
         // this.tableData.forEach((item) => {
         //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
         //     value: item.teacherName,
@@ -886,6 +952,7 @@ export default {
     showSelect(index) {
       this.status = index
       this.getInfo()
+      this.getScreenInfo()
     }
   }
 }

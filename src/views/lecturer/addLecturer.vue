@@ -121,22 +121,44 @@
             </el-col>
             <el-col :span="10">
               <!-- data -->
-              <el-form-item
+              <!-- <el-form-item
                 label="所属分类"
                 prop="categoryId"
               >
-                <!-- <el-cascader
-                  v-model="ruleForm.categoryId"
-                  :props="{ value: 'id' }"
-                  
-                  @change="treeClickNode"
-                ></el-cascader> -->
-
                 <el-cascader
                   v-model="ruleForm.categoryId"
                   :options="data"
                   :props="props"
                 ></el-cascader>
+
+              </el-form-item> -->
+
+              <!-- 移过来的tree -->
+              <el-form-item
+                label="所属分类"
+                prop="categoryId"
+              >
+                <el-select
+                  v-model="ruleForm.categoryId"
+                  :multiple-limit="10"
+                  placeholder="请选择"
+                >
+                  <el-option
+                    style="height: auto;padding:0"
+                    :value="ruleForm.categoryId"
+                    :label="parentOrgIdLabel"
+                  >
+                    <el-tree
+                      ref="orgTree"
+                      :data="data"
+                      node-key="categoryId"
+                      :props="props"
+                      lazy
+                      :load="loadNode"
+                      @node-click="handleOrgNodeClick"
+                    />
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -322,29 +344,13 @@ export default {
   },
   data() {
     return {
+      parentOrgIdLabel: '',
       props: {
-        lazy: true,
         value: 'id',
-        async lazyLoad(node, resolve) {
-          if (node.level === 0) {
-            return resolve([{ name: 'region' }])
+        isLeaf: (data, node) => {
+          if (node.level === 2 || data.label == '未分类') {
+            return true
           }
-          if (node.level > 1) return resolve([])
-          // console.log(node);
-          let res = await listTeacherCategory({ parentId: node.data.id })
-          let filterArr = res.son.map((item) => {
-            return {
-              id: item.idStr,
-              parent_id: item.parentStr,
-              label: item.name,
-              btnshow: 0
-            }
-          })
-
-          node.data.children = filterArr
-          // console.log(node);
-
-          resolve(filterArr)
         }
       },
 
@@ -401,6 +407,35 @@ export default {
     this.islistTeacherCategory()
   },
   methods: {
+    handleOrgNodeClick(data) {
+      if (data !== undefined) {
+        this.ruleForm.catalogId = data.id
+        this.parentOrgIdLabel = data.label
+      }
+    },
+
+    async loadNode(node, resolve) {
+      if (node.level === 0) {
+        return resolve([{ name: 'region' }])
+      }
+      if (node.level > 1) return resolve([])
+      // console.log(node);
+      let res = await listTeacherCategory({ parentId: node.data.id })
+      let filterArr = res.son.map((item) => {
+        return {
+          id: item.idStr,
+          parent_id: item.parentStr,
+          label: item.name,
+          btnshow: 0
+        }
+      })
+
+      node.data.children = filterArr
+      // console.log(node);
+
+      resolve(filterArr)
+    },
+
     // 拿到数据
     isgetTeacher() {
       let params = {

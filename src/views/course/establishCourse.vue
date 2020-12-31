@@ -85,6 +85,7 @@
               <el-select
                 v-model="ruleForm.teacherId"
                 placeholder="请选择讲师"
+                filterable
               >
                 <el-option
                   v-for="(item, index) in TeacherData"
@@ -306,7 +307,7 @@
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl[0]"
+                  v-if="ruleForm.imageUrl[1]"
                   :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                   class="avatar"
                 />
@@ -441,11 +442,13 @@
                       :before-upload="CoursewareUpload"
                       :multiple="false"
                     >
-                      <el-button type="text">{{
-                        scope.row.upLoad[0]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : '上传课件'
-                      }}</el-button>
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传课件'
+                        }}
+                      </el-button>
                     </common-upload>
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 3"
@@ -466,7 +469,7 @@
                       type="text"
                     >关联考试</el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 5"
+                      v-if="typeOption[scope.row.type - 1].value == 5"
                       v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"
@@ -758,7 +761,6 @@ export default {
       handler() {
         this.$nextTick(() => {
           this.$refs.ruleForm.clearValidate()
-          // this.$refs.ruleForm.resetFields()
         })
       },
       immediate: true,
@@ -776,7 +778,9 @@ export default {
     }
   },
 
-  created() {},
+  created() {
+    this.isdeleteData()
+  },
   activated() {
     this.isdeleteData()
     this.isgetCourseTags()
@@ -922,15 +926,11 @@ export default {
 
       // 草稿
       if (status === 2) {
-        this.$confirm(
-          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
-          '提示',
-          {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'warning'
-          }
-        )
+        this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
+          confirmButtonText: '保存',
+          cancelButtonText: '不保存',
+          type: 'warning'
+        })
           .then(() => {
             params.status = status
 
@@ -988,14 +988,15 @@ export default {
 
     // 清空数据
     isdeleteData() {
+      this.resetForm()
       this.ruleForm = {
         imageUrl: [{}], //图片
-        url: '',
+        url: null,
         localName: '',
-        catalogId: '',
+        catalogId: null,
         electiveType: '',
         thinkContent: '', //课前思考内容
-        introduction: '', //课程介绍
+        introduction: ' ', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
@@ -1019,6 +1020,14 @@ export default {
           }
         ]
       }
+    },
+    resetForm() {
+      // this.$refs['ruleForm'].resetField()
+      this.parentOrgIdLabel = ''
+      this.$nextTick(() => {
+        this.$refs['ruleForm'].resetFields()
+        this.$refs['ruleForm'].clearValidate()
+      })
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
@@ -1139,9 +1148,6 @@ export default {
           return false
         }
       })
-    },
-    resetForm(formName) {
-      this.$refs[formName].resetFields()
     }
   }
 }

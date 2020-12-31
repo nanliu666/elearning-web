@@ -8,21 +8,42 @@
     />
     <el-tree
       ref="tree"
+      class="tree"
       v-bind="$attrs"
       node-key="id"
       :filter-node-method="filterNode"
+      :expand-on-click-node="false"
+      :default-expanded-keys="expandedKeys"
       v-on="$listeners"
-      @node-click="nodeClick"
+      @mouseleave="currentNodeKey = ''"
     >
       <div
         slot-scope="{ node, data }"
         class="custom-tree-node"
+        @click="stopBubbling(data, $event)"
+        @mouseover="nodeClick(data)"
       >
+        <!-- <span
+          v-if="!data.hasOwnProperty('flag')"
+        >{{ data.label }}
+          {{
+            data.hasOwnProperty('children') || data.label === '未分类' ? '' : '(' + data.num + ')'
+          }}</span> -->
         <span
           v-if="!data.hasOwnProperty('flag')"
-        >{{ data.label }} {{ data.hasOwnProperty('children') ? '' : '(' + data.num + ')' }}</span>
+        >{{ data.label }}
+          {{
+            !data.hasOwnProperty('num') || data.label === '未分类'
+              ? '（0）'
+              : '(' + data.num + ')' || '(' + 0 + ')'
+          }}</span>
         <el-dropdown
-          v-if="moreMenu.length > 0 && currentNodeKey === data.id"
+          v-if="
+            moreMenu.length > 0 &&
+              currentNodeKey === data.id &&
+              data.label != '未分类' &&
+              !data.hasOwnProperty('flag')
+          "
           class="custom-tree-node-right"
           @command="(val) => commandChange(val, data, node)"
         >
@@ -34,13 +55,13 @@
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item
-              v-if="moreMenu.includes('add')"
+              v-if="moreMenu.includes('add') && node.level == 1"
               command="add"
             >
               新增分类
             </el-dropdown-item>
             <el-dropdown-item
-              v-if="moreMenu.includes('move')"
+              v-if="moreMenu.includes('move') && node.level == 2"
               command="move"
             >
               移动
@@ -62,17 +83,19 @@
         <div
           v-if="data.hasOwnProperty('flag')"
           class="temporaryNode"
+          @click.stop
         >
           <el-input
-            v-model="classifyName"
+            v-model.trim="classifyName"
             maxlength="20"
+            :placeholder="node.level == 1 ? '请输入分组名称' : '请输入分类名称'"
           />
           <span
             class="sureBtn textStyle"
             @click="temporarySure(data, node)"
           >确定</span>
           <span
-            class="cancleBtn"
+            class="cancleBtn textStyle"
             @click="cancleCall(data, node)"
           >取消</span>
         </div>
@@ -84,7 +107,7 @@
       class="addGroup"
       @click="commandChange('add')"
     >
-      <i class="el-icon-circle-plus-outline"></i>新建分类
+      <i class="el-icon-circle-plus-outline"></i>新建分组
     </div>
 
     <el-dialog
@@ -102,7 +125,7 @@
         />
       </label>
       <label class="dialog_label">
-        <i class="requiredStart">*</i>上级分类组
+        <i class="requiredStart">*</i>上级分组
         <el-select
           v-model="upGroup"
           class="block"
@@ -157,6 +180,7 @@ export default {
   },
   data() {
     return {
+      expandedKeys: [], //点击展开
       dialogVisible: false, // 弹窗是否显示
       searchShow: this.search,
       searchVal: '', // 搜索框的值
@@ -205,6 +229,11 @@ export default {
   },
 
   methods: {
+    stopBubbling(data, event) {
+      if (data.hasOwnProperty('flag')) {
+        event.stopPropagation()
+      }
+    },
     sureBtn() {
       // 弹窗的确认按钮
       let catalogsDta = {
@@ -266,6 +295,7 @@ export default {
       return data.label.indexOf(value) !== -1
     },
     getParentNode(node, data = '') {
+      // console.log(data)
       let arrays = node.level == '1' ? this.treeData : node.parent.data.children
       let index = -1
       if (data) {
@@ -284,13 +314,26 @@ export default {
         id: Math.random() * 10000000,
         flag: ''
       }
+
       if (!data) {
         this.treeData.push(flagTest)
       } else {
+        this.expandedKeys = []
+        this.expandedKeys.push(data.id)
+
         data.hasOwnProperty('children')
-          ? data.children.push(flagTest)
+          ? data.children
+            ? data.children.push(flagTest)
+            : this.$set(data, 'children', [flagTest])
           : this.$set(data, 'children', [flagTest])
       }
+      this.$nextTick(() => {
+        // this.$refs.tree.setCheckedKeys(arr);//获取已经设置的资源后渲染
+        let id = this.currentData ? this.currentData.id : ''
+        this.$refs.tree.setCurrentKey(id)
+      })
+      let id = this.currentData ? this.currentData.id : ''
+      this.$refs.tree.setChecked(id, true, true)
       this.temporaryShow = true
     },
     moveCallBack(data = this.currentData) {
@@ -303,18 +346,18 @@ export default {
       this.upGroupList = []
       this.recursionFn(this.treeData)
       this.upGroupList = this.upGroupList.filter((item) => {
-        return item.id != data.id
+        return item.id != data.id && item.label != '未分类'
       })
     },
     recursionFn(data) {
       // 写个递归方法来把所有的label拿到
       for (let i in data) {
         let tempData = JSON.parse(JSON.stringify(data[i]))
-        if (
-          tempData.label === this.groupName ||
-          tempData.label === this.currentNode.parent.data.label
-        ) {
+        if (tempData.label === this.groupName) {
           continue
+        }
+        if (tempData.label === this.currentNode.parent.data.label) {
+          this.upGroup = this.currentNode.parent.data.id
         }
         // if (tempData && tempData.hasOwnProperty('children') && tempData.children.length > 0) {
         //   this.recursionFn(tempData.children)
@@ -336,10 +379,17 @@ export default {
     },
     deleteCallBack(data = this.currentData) {
       // 删除回调
-      if (data.hasOwnProperty('children') && data.children.length > 0) {
+      if (data.hasOwnProperty('children') && data.children.length > 1) {
         this.$message({
-          message: '您选择的分类下存在数据，请先将数据调整后再删除',
-          type: 'warning'
+          message: '很抱歉，您选中的分组下存在分类，请先将分类调整后再删除！',
+          type: 'error'
+        })
+        return
+      }
+      if (data.num && data.num > 1) {
+        this.$message({
+          message: '您选择的分组下存在数据，请调整后再删除！',
+          type: 'error'
         })
         return
       }
@@ -374,12 +424,13 @@ export default {
     },
     cancleCall(data = {}, node) {
       // 临时取消
+      this.temporaryShow = false
       this.temporaryHide()
       if (data.hasOwnProperty('flag')) {
         if (data.flag === 'edit') {
-          //   let { arrays, index } = this.getParentNode(node, data)
+          let { arrays, index } = this.getParentNode(node, data)
           delete data.flag
-          //   arrays.splice(index, 1, data)
+          arrays.splice(index, 1, data)
           return
         }
         this.deleteNode(data, node)
@@ -391,7 +442,7 @@ export default {
       //   console.log(data,node,arrays, parentData);
       arrays.splice(index, 1)
       if (parentData.hasOwnProperty('children') && parentData.children.length <= 0) {
-        delete parentData.children
+        parentData.children = null
       }
     },
     temporaryHide() {
@@ -400,9 +451,17 @@ export default {
     },
     async temporarySure(data, node) {
       // 临时添加 添加按钮回调 先判断有没有，如果存在抛出脱误，没有则添加
-      let filterList = this.treeData.filter((item) => {
+      let { arrays } = this.getParentNode(node, data)
+      let filterList = arrays.filter((item) => {
         return item.label === this.classifyName
       })
+      if (!this.classifyName) {
+        this.$message({
+          message: `${node.level == 1 ? '分组' : '分类'}名称不能为空`,
+          type: 'warning'
+        })
+        return
+      }
       if (filterList.length > 0) {
         this.$message({
           message: '该分类已存在',
@@ -415,7 +474,7 @@ export default {
           let interfaceData = {
             name: this.classifyName
           }
-          node.parent ? (interfaceData.parentId = node.parent.data.id) : ''
+          node.parent ? (interfaceData.creatorId = node.parent.data.id) : ''
           await this.addCatalog(interfaceData)
             .then(() => {
               this.refreshTree()
@@ -437,10 +496,10 @@ export default {
               window.console.log(err)
             })
         }
+        this.$nextTick(() => {
+          this.$refs.tree.setCurrentKey(data.id)
+        })
         let text = this.options === 'edit' ? '保存成功' : '新建成功'
-        // delete datas.flag
-        // datas.label = this.classifyName
-        // arrays.splice(index, 1, datas)
         this.$message({
           message: text,
           type: 'success'
@@ -457,6 +516,7 @@ export default {
       // 刷新树数据
       this.$emit('refreshTree')
       this.classifyName = ''
+      this.temporaryHide()
     }
   }
 }
@@ -464,11 +524,19 @@ export default {
 
 <style lang="scss" scoped>
 .leftColumn {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  .tree {
+    margin-bottom: 100px;
+  }
   min-height: 500px;
-  position: relative;
   padding-bottom: 30px;
   background-color: #fff;
   width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
   /deep/.el-tree-node > .el-tree-node__children {
     overflow: inherit;
   }
@@ -506,9 +574,13 @@ export default {
     }
   }
   .temporaryNode {
-    margin-top: 15px;
-    .el-input {
+    // margin-top: 15px;
+    /deep/.el-input {
       width: 70%;
+      height: 26px;
+      .el-input__inner {
+        height: 26px;
+      }
     }
     span {
       cursor: pointer;
@@ -520,9 +592,10 @@ export default {
     position: absolute;
     color: #409eff;
     bottom: 0;
-    line-height: 30px;
-    left: 50%;
-    transform: translateX(-50%);
+    line-height: 50px;
+    width: 80%;
+    background-color: #fff;
+    text-align: center;
     cursor: pointer;
     .el-icon-circle-plus-outline {
       font-size: 16px;
