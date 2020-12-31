@@ -901,21 +901,17 @@ export default {
       // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
       // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
-      params.isRecommend = params.isRecommend === false ? 0 : 1
+      // params.isRecommend = params.isRecommend === false ? 0 : 1
       params.catalogId =
         this.$route.query.catalogName == params.catalogId ? this.catalogName : params.catalogId
 
       // 草稿
       if (status === 2) {
-        this.$confirm(
-          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
-          '提示',
-          {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'warning'
-          }
-        )
+        this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
+          confirmButtonText: '保存',
+          cancelButtonText: '不保存',
+          type: 'warning'
+        })
           .then(() => {
             params.status = status
             // addCourse(params).then(() => {
@@ -981,7 +977,7 @@ export default {
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
-        isRecommend: false, //是否推荐
+        isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
         period: '', //时长
         credit: '', //学分

@@ -194,8 +194,8 @@
               slot="isRecommend"
               slot-scope="{ row }"
             >
-              <span v-if="row.isRecommend === 0">否</span>
-              <span v-if="row.isRecommend === 1">是</span>
+              <span v-if="row.isRecommend == 0">否</span>
+              <span v-if="row.isRecommend == 1">是</span>
             </template>
             <!-- // isPutaway	是否上架 (0：下架；1：上架) -->
             <template

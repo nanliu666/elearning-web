@@ -926,15 +926,11 @@ export default {
 
       // 草稿
       if (status === 2) {
-        this.$confirm(
-          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
-          '提示',
-          {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'warning'
-          }
-        )
+        this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
+          confirmButtonText: '保存',
+          cancelButtonText: '不保存',
+          type: 'warning'
+        })
           .then(() => {
             params.status = status
 
