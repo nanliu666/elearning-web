@@ -228,9 +228,6 @@ export default {
     },
     handlerAdd() {
       this.editVisible = true
-      //   this.isEdit = false
-      //   this.title = '新建岗位'
-      //   this.row = {}
     },
     close() {
       this.show = false

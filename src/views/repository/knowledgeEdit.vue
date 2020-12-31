@@ -28,7 +28,7 @@
                 slot="tip"
                 style="color: #a1a8ae; font-size:12px"
               >
-                不支持上传.exe/.bat格式文件，单个文件大小＜10MB，最多{{ limit }}个文件
+                单个文件大小＜10MB，最多{{ limit }}个文件
               </div>
             </template>
           </common-upload>
@@ -48,6 +48,11 @@
               />
             </li>
           </ul>
+        </template>
+        <template #basicTitle>
+          <div style="height: 85px; color: transparent;">
+            基础信息
+          </div>
         </template>
       </common-form>
 
@@ -87,95 +92,134 @@ import {
 } from '@/api/knowledge/knowledge'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
-
+const FORM_COLUMNS = [
+  {
+    itemType: 'input',
+    label: '资源名称',
+    prop: 'resName',
+    required: true,
+    span: 11,
+    offset: 0
+  },
+  {
+    label: '所在分类',
+    itemType: 'treeSelect',
+    prop: 'catalogId',
+    required: true,
+    span: 11,
+    offset: 1,
+    props: {
+      selectParams: {
+        placeholder: '请选择所在目录',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        },
+        required: true
+      }
+    }
+  },
+  {
+    itemType: 'input',
+    label: '提供人',
+    prop: 'providerName',
+    span: 11
+  },
+  {
+    prop: 'basicTitle',
+    itemType: 'slotout',
+    span: 11,
+    offset: 1,
+    label: ''
+  },
+  // {
+  //   itemType: 'select',
+  //   label: '添加标签',
+  //   prop: 'tags',
+  //   required: false,
+  //   filterable: true,
+  //   multiple: true,
+  //   disabled: true,
+  //   props: {
+  //     label: 'name',
+  //     value: 'id'
+  //   },
+  //   options: [],
+  //   span: 11,
+  //   offset: 1
+  // },
+  {
+    itemType: 'radio',
+    label: '上传模式',
+    prop: 'uploadType',
+    required: true,
+    span: 11,
+    options: [
+      {
+        label: '本地文件',
+        value: 0
+      },
+      {
+        label: '链接文件',
+        value: 1
+      }
+    ]
+  }
+]
+const uploadConfigList = [
+  {
+    itemType: 'switch',
+    label: '是否允许下载',
+    prop: 'allowDownload',
+    required: false,
+    activeValue: 1,
+    inactiveValue: 0,
+    span: 11,
+    offset: 1
+  },
+  {
+    itemType: 'slot',
+    label: '附件',
+    prop: 'attachments',
+    props: {
+      label: 'jobName',
+      value: 'id'
+    },
+    required: false,
+    span: 24
+  }
+]
+const UPLOAD_ONLINE = [
+  {
+    itemType: 'input',
+    label: '资源路径',
+    prop: 'resUrl',
+    required: true,
+    span: 24
+  }
+]
 export default {
   name: 'KnowledgeEdit',
   components: {
     CommonUpload
   },
   data() {
-    const FORM_COLUMNS = [
-      {
-        itemType: 'input',
-        label: '资源名称',
-        prop: 'resName',
-        required: true,
-        span: 11,
-        offset: 0
-      },
-      {
-        label: '所在分类',
-        itemType: 'treeSelect',
-        prop: 'catalogId',
-        required: true,
-        span: 11,
-        offset: 1,
-        props: {
-          selectParams: {
-            placeholder: '请选择所在目录',
-            multiple: false
-          },
-          treeParams: {
-            'check-strictly': true,
-            'default-expand-all': false,
-            'expand-on-click-node': false,
-            clickParent: true,
-            data: [],
-            filterable: false,
-            props: {
-              children: 'children',
-              label: 'name',
-              value: 'id'
-            },
-            required: true
-          }
-        }
-      },
-      {
-        itemType: 'input',
-        label: '提供人',
-        prop: 'providerName',
-        span: 11,
-        offset: 0
-      },
-      // {
-      //   itemType: 'select',
-      //   label: '添加标签',
-      //   prop: 'tags',
-      //   required: false,
-      //   filterable: true,
-      //   multiple: true,
-      //   props: {
-      //     label: 'name',
-      //     value: 'id'
-      //   },
-      //   options: [],
-      //   span: 11,
-      //   offset: 1
-      // },
-      {
-        itemType: 'radio',
-        label: '上传模式',
-        prop: 'uploadType',
-        required: true,
-        span: 24,
-        options: [
-          {
-            label: '本地文件',
-            value: 0
-          },
-          {
-            label: '链接文件',
-            value: 1
-          }
-        ]
-      }
-    ]
-
     return {
       limit: 5,
       pageTitle: '',
       formColumns: FORM_COLUMNS,
+      localColumns: [...FORM_COLUMNS, ...uploadConfigList],
+      onlineColumns: [...FORM_COLUMNS, ...UPLOAD_ONLINE],
       formData: {
         resName: '',
         catalogId: '',
@@ -220,52 +264,8 @@ export default {
       deep: true,
       immediate: true,
       handler(val) {
-        const UPLOAD_FILE = {
-          itemType: 'slot',
-          label: '附件',
-          prop: 'attachments',
-          props: {
-            label: 'jobName',
-            value: 'id'
-          },
-          required: false,
-          span: 12
-        }
-        const UPLOAD_INPUT = {
-          itemType: 'input',
-          label: '资源路径',
-          prop: 'resUrl',
-          required: false,
-          span: 24
-        }
-        const allowDownload = {
-          itemType: 'switch',
-          label: '是否允许下载',
-          prop: 'allowDownload',
-          required: false,
-          activeValue: 1,
-          inactiveValue: 0,
-          span: 11,
-          offset: 1
-        }
-        let uploadTypeIndex = _.findIndex(this.formColumns, (item) => {
-          return item.prop === 'uploadType'
-        })
-        const allowDownloadIndex = _.findIndex(this.formColumns, (item) => {
-          return item.prop === 'allowDownload'
-        })
-        const providerNameIndex = _.findIndex(this.formColumns, (item) => {
-          return item.prop === 'providerName'
-        })
-        if (val === 0) {
-          this.formColumns[uploadTypeIndex + 1] = UPLOAD_FILE
-          if (allowDownloadIndex === -1) {
-            this.formColumns.splice(providerNameIndex + 1, 0, allowDownload)
-          }
-        } else {
-          this.formColumns[uploadTypeIndex + 1] = UPLOAD_INPUT
-          this.formColumns.splice(allowDownloadIndex, 1)
-        }
+        // 本地文件（是否下载+附件），资源文件（资源路径）
+        this.formColumns = val === 0 ? this.localColumns : this.onlineColumns
       }
     }
   },

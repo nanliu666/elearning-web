@@ -1,14 +1,33 @@
 <template>
   <div class="question-list  fill">
     <page-header title="题库管理">
-      <el-button
+      <el-dropdown
+        slot="rightMenu"
+        @command="handleCommand"
+      >
+        <el-button
+          type="primary"
+          size="medium"
+        >
+          创建试题<i class="el-icon-arrow-down el-icon--right"></i>
+        </el-button>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="single">
+            单个创建
+          </el-dropdown-item>
+          <el-dropdown-item command="batch">
+            批量导入
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <!-- <el-button
         slot="rightMenu"
         type="primary"
         size="medium"
         @click="jumpEdit()"
       >
         创建试题
-      </el-button>
+      </el-button> -->
     </page-header>
     <el-row
       style="height: calc(100% - 92px);"
@@ -109,7 +128,7 @@
               <el-button
                 size="medium"
                 type="text"
-                @click="jumpEdit(row.id)"
+                @click="handleEdit(row.id)"
               >
                 编辑
               </el-button>
@@ -135,7 +154,7 @@ import { deleteHTMLTag } from '@/util/util'
 const COLUMNS = [
   {
     prop: 'content',
-    label: '题目列表',
+    label: '题目名称',
     slot: true
   }
 ]
@@ -306,7 +325,16 @@ export default {
       this.page.size = pageSize
       this.loadData()
     },
-    jumpEdit(id) {
+    handleCommand(data) {
+      if (data === 'single') {
+        //单个创建
+        this.$router.push({ path: '/examManagement/question/questionEdit' })
+      } else {
+        //批量创建
+        this.$router.push({ path: '/examManagement/question/questionImport' })
+      }
+    },
+    handleEdit(id) {
       this.$router.push({ path: '/examManagement/question/questionEdit', query: { id } })
     },
     loadData() {

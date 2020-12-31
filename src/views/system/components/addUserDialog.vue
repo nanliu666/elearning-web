@@ -1,6 +1,5 @@
 <template>
   <el-dialog
-    v-loading="loading"
     title="添加用户"
     :visible="visible"
     width="800px"
