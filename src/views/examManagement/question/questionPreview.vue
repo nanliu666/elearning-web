@@ -1,7 +1,7 @@
 <template>
   <span class="qustion">
     <span class="qustion__content">
-      <span class="qustion__label">题目: </span><span v-html="data.content"></span>
+      <span class="qustion__label">题目: </span><span v-html="_.unescape(data.content)"></span>
     </span>
     <div
       v-if="!_.isEmpty(data.attachments)"
@@ -47,7 +47,7 @@
           >
             {{ '' }}
           </el-checkbox>
-          <span>{{ option.content }}</span>
+          <span>{{ _.unescape(option.content) }}</span>
           <div
             v-if="option.url"
             class="qustion__options-image"
