@@ -39,7 +39,7 @@
               :label="parentOrgIdLabel"
             >
               <el-tree
-                ref="orgTree"
+                ref="orgTreeRef"
                 :data="orgTree"
                 node-key="orgId"
                 :props="{
@@ -130,10 +130,27 @@ export default {
     ...mapGetters(['userId'])
   },
   methods: {
-    loadOrgTree() {
-      getKnowledgeCatalogList().then((res) => {
-        this.orgTree = res
-      })
+    async loadOrgTree() {
+      let res = await getKnowledgeCatalogList()
+      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+    },
+    // 过滤当前选择编辑的分类的子类
+    clearCurrentChildren(res) {
+      let tempTree = _.cloneDeep(res)
+      const loop = (tree) => {
+        _.each(tree, (item) => {
+          if (!_.isEmpty(item.children)) {
+            loop(item.children)
+          }
+          // 父级组织类型 === 当前组织的类型
+          if (this.form.id === item.id) {
+            item.children = []
+          }
+          return tree
+        })
+      }
+      loop(tempTree)
+      return tempTree
     },
     checkSameName() {
       let target = this.findOrg(this.form.parentId)
