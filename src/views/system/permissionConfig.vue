@@ -29,6 +29,7 @@
           />
         </el-tab-pane>
         <el-tab-pane
+          v-if="false"
           label="Mobile端权限"
           name="mobilePermission"
         />
