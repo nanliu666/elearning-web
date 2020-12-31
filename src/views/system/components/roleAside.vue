@@ -31,17 +31,12 @@
       append-to-body
     >
       <div style="padding: 0 40px">
-        <el-form
+        <commonForm
           ref="form"
           :model="cateForm"
-        >
-          <el-form-item>
-            <el-input
-              v-model="cateForm.categoryName"
-              placeholder="请输入分类名称"
-            ></el-input>
-          </el-form-item>
-        </el-form>
+          :columns="columns"
+          :config="{ inline: true, labelPosition: 'left' }"
+        />
       </div>
       <div
         slot="footer"
@@ -70,7 +65,17 @@
 <script>
 import asideTree from './roleAsideTree'
 import { createCate, updateCate, delCate } from '../../../api/system/role'
-
+const BASE_COLUMNS = [
+  {
+    prop: 'categoryName',
+    itemType: 'input',
+    placeholder: '请输入分类名称',
+    label: '',
+    span: 24,
+    maxlength: 32,
+    required: true
+  }
+]
 export default {
   name: 'RoleAside',
   components: {
@@ -95,6 +100,7 @@ export default {
 
   data() {
     return {
+      columns: BASE_COLUMNS,
       cateId: '',
       loading: false,
       cateVisible: false,
@@ -162,7 +168,10 @@ export default {
     },
     // 删除分类提示
     delCate(node, data) {
-      this.$confirm('您确定要删除该分类吗？<br/> 删除后，该分类下的角色也会同步清除', '提示', {
+      const baseTips = '您确定要删除该分类吗？'
+      const roleTips = '<br/> 删除后，该分类下的角色也会同步清除'
+      const tips = data.roleNum === 0 ? baseTips : `${baseTips}${roleTips}`
+      this.$confirm(tips, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
@@ -191,11 +200,13 @@ export default {
 
     //保存分类
     onCatSave() {
-      if (this.cateForm.categoryId) {
-        this.updateCateFunc()
-      } else {
-        this.createCateFunc()
-      }
+      this.$refs.form.validate().then(() => {
+        if (this.cateForm.categoryId) {
+          this.updateCateFunc()
+        } else {
+          this.createCateFunc()
+        }
+      })
     },
     createNew() {
       this.initCatform()
@@ -257,6 +268,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/ .el-form-item__content {
+  width: 380px;
+}
 /deep/ .el-dialog__header {
   padding: 16px 0;
   margin: 0 24px;

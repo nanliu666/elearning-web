@@ -126,14 +126,30 @@ export default {
         itemType: 'input',
         label: '角色名称',
         span: 24,
-        maxlength: 32,
-        required: true
+        placeholder: '请输入角色名称，建议不超过10个字',
+        maxlength: 10,
+        rules: [
+          {
+            required: true,
+            validator: (rule, value, callback) => {
+              if (!value || value.trim() === '') {
+                return callback(new Error('角色名称不能为空'))
+              }
+              callback()
+            },
+            trigger: 'blur'
+          }
+        ]
+        // required: true
       },
       {
         prop: 'remark',
-        itemType: 'slot',
+        itemType: 'input',
+        type: 'textarea',
+        autosize: { minRows: 4 },
+        placeholder: '请输入角色描述，建议不超过100个字',
         label: '描述',
-        maxlength: 200,
+        maxlength: 100,
         span: 24
       }
     ]
