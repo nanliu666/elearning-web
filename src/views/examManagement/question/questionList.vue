@@ -52,7 +52,7 @@
             :props="treeProps"
             :expand-on-click-node="false"
             default-expand-all
-            :current-node-key="activeCategory ? activeCategory.id : null"
+            :current-node-key="activeCategory.id"
             @node-click="nodeClick"
           >
             <span
@@ -173,7 +173,7 @@ export default {
         value: 'id',
         children: 'children'
       },
-      activeCategory: null,
+      activeCategory: { id: null },
       parentOrgId: 0,
       treeSearch: '',
       treeLoading: false,
@@ -259,6 +259,7 @@ export default {
           this.treeData = [{ id: null, name: '未分类' }, ...data]
           getQuestionList({ pageNo: 1, pageSize: 1 }).then((res) => {
             this.$set(this.treeData, 0, { id: null, name: '未分类', relatedNum: res.totalNum })
+            // this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
           })
         })
         .catch(() => {})
@@ -311,6 +312,7 @@ export default {
     },
     handleSubmitSearch(params) {
       this.query = { ...this.query, ...params }
+      this.page.currentPage = 1
       this.loadData()
     },
     handleResetSearch() {
@@ -342,7 +344,7 @@ export default {
       getQuestionList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        categoryId: this.activeCategory ? this.activeCategory.id : null,
+        categoryId: this.activeCategory.id,
         ...this.query
       })
         .then((res) => {

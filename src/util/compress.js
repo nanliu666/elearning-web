@@ -5,7 +5,7 @@ const path = require('path')
 const rimraf = require('rimraf')
 const chalk = require('chalk')
 
-const p = path.resolve(__dirname, '../../elearning.zip')
+const p = path.resolve(__dirname, '../../elearning-management.zip')
 // create a file to stream archive data to.
 rimraf(p, () => {
   const output = fs.createWriteStream(p)
