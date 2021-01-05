@@ -189,7 +189,7 @@ const TABLE_COLUMNS = [
     minWidth: 120
   },
   {
-    label: '有效时间',
+    label: '过期时间',
     slot: true,
     prop: 'expiredTime',
     minWidth: 320
@@ -290,12 +290,12 @@ export default {
           },
           {
             type: 'dataPicker',
-            label: '有效时间',
+            label: '过期时间',
             data: '',
-            field: 'beginTime,endTime',
+            field: 'endTime',
+            placeholder: '过期时间',
             config: {
-              type: 'datetimerange',
-              'range-separator': '至',
+              type: 'datetime',
               'value-format': 'yyyy-MM-dd HH:mm:ss'
             }
           }
