@@ -715,8 +715,8 @@ export default {
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
-        period: '', //时长
-        credit: '', //学分
+        period: undefined, //时长
+        credit: undefined, //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -985,24 +985,24 @@ export default {
         // tagIds: [], //标签
         isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
-        period: '', //时长
-        credit: '', //学分
+        period: undefined, //时长
+        credit: undefined, //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
         teacherId: '', //讲师id
         // 表格
         contents: [
-          {
-            url: '',
-            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-            sort: '', //序号
-            type: '', //章节类型
-            name: '', // 章节名称
-            content: '', //文章内容
-            upLoad: [], //[url,localName],  //所有上传的文件
-            saveOrcompile: 0 // 1保存&0编辑
-          }
+          // {
+          //   url: '',
+          //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          //   sort: '', //序号
+          //   type: '', //章节类型
+          //   name: '', // 章节名称
+          //   content: '', //文章内容
+          //   upLoad: [], //[url,localName],  //所有上传的文件
+          //   saveOrcompile: 0 // 1保存&0编辑
+          // }
         ]
       }
     },
