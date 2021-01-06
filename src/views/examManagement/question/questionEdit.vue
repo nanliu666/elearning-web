@@ -538,7 +538,7 @@ export default {
 
         if (data.type === QUESTION_TYPE_GROUP) {
           data.subQuestions = this.form.subQuestions
-          _.forEach(data.subQuestions, (question) => {
+          _.forEach(data.subQuestions, (question, index) => {
             if (question.answer && question.type === QUESTION_TYPE_BLANK) {
               question.options = [{ content: question.answer, isCorrect: 1 }]
             } else {
@@ -547,6 +547,7 @@ export default {
               })
             }
             question.content = _.escape(question.content)
+            question.sort = index
           })
         }
         data.id = this.id
@@ -604,9 +605,6 @@ export default {
               option.fileList = []
             }
           })
-          _.forEach(this.form.subQuestions, (q) => {
-            q.content = _.unescape(q.content)
-          })
           if (res.type == QUESTION_TYPE_BLANK) {
             this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
           }
@@ -616,6 +614,9 @@ export default {
             }
             question.content = _.unescape(question.content)
           })
+          if (!_.isEmpty(this.form.subQuestions)) {
+            this.form.subQuestions = _.sortBy(this.form.subQuestions, 'sort')
+          }
         })
         .finally(() => {
           this.loading = false

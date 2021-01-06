@@ -138,28 +138,7 @@ const BASE_COLUMNS = [
     span: 11,
     offset: 2
   },
-  {
-    prop: 'totalScore',
-    itemType: 'inputNumber',
-    min: 0,
-    precision: 1,
-    step: 0.1,
-    maxlength: 32,
-    span: 11,
-    label: '计划总分'
-  },
-  {
-    prop: 'isScore',
-    itemType: 'radio',
-    label: '是否折算成计划分数',
-    span: 11,
-    offset: 2,
-    required: false,
-    options: [
-      { label: '是', value: 1 },
-      { label: '否', value: 0 }
-    ]
-  },
+
   {
     prop: 'isMulti',
     itemType: 'slot',
@@ -177,12 +156,23 @@ const BASE_COLUMNS = [
     props: {}
   },
   {
+    prop: 'totalScore',
+    itemType: 'inputNumber',
+    min: 0,
+    precision: 1,
+    step: 0.1,
+    maxlength: 32,
+    span: 11,
+    label: '计划总分'
+  },
+  {
     prop: 'expiredTime',
     itemType: 'datePicker',
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     label: '过期时间',
     type: 'datetime',
     span: 11,
+    offset: 2,
     required: false,
     props: {
       label: 'label',
@@ -340,6 +330,55 @@ export default {
           this.loading = false
         })
     },
+    handleSubmit() {
+      let list = this.testPaper.filter(
+        (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+      )
+      if (list.length > 0) {
+        let text = ''
+        list[0].tableData.length == 0 &&
+          (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+        list[0].tableData.length !== 0 &&
+          (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+        this.$message.warning(text)
+        return
+      }
+      let testPaperMether =
+        this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
+
+      let manualSettings = []
+      this.testPaper.map((it, index) => {
+        it.tableData &&
+          it.tableData.map((item, i) => {
+            manualSettings.push({
+              parentSort: index + 1,
+              questionId: item.questionId,
+              content: item.content,
+              timeLimit: item.timeLimit,
+              score: item.score * 10,
+              sort: i + 1,
+              title: it.title,
+              type: it.type
+            })
+          })
+      })
+      let form = _.cloneDeep(this.form)
+      form.totalScore = form.totalScore * 10
+      let params = {
+        ...form,
+        manualSettings: manualSettings,
+        type: 'manual'
+      }
+      this.loading = true
+      testPaperMether(params)
+        .then(() => {
+          this.$message.success('提交成功')
+          this.handleBack()
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
     /**
      * @author guenfenda
      * @desc 提交试卷（添加或者修改）
@@ -347,60 +386,24 @@ export default {
      * */
     onSubmit() {
       this.valid = true
-      if (this.surplusScore === '' || this.surplusScore === '0') {
-        this.$refs.form.validate().then((valid) => {
-          if (!valid) return
-          let list = this.testPaper.filter(
-            (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
-          )
-          if (list.length > 0) {
-            let text = ''
-            list[0].tableData.length == 0 &&
-              (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
-            list[0].tableData.length !== 0 &&
-              (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
-            this.$message.warning(text)
-            return
-          }
-          let testPaperMether =
-            this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-
-          let manualSettings = []
-          this.testPaper.map((it, index) => {
-            it.tableData &&
-              it.tableData.map((item, i) => {
-                manualSettings.push({
-                  parentSort: index + 1,
-                  questionId: item.questionId,
-                  content: item.content,
-                  timeLimit: item.timeLimit,
-                  score: item.score * 10,
-                  sort: i + 1,
-                  title: it.title,
-                  type: it.type
-                })
-              })
+      this.$refs.form.validate().then((valid) => {
+        if (!valid) return
+        if (this.surplusScore === '' || this.surplusScore === '0') {
+          this.handleSubmit()
+        } else {
+          this.$confirm(
+            '您设置试卷的当前总分与计划分数不一致，试卷创建后以当前设置的分数为准。是否继续创建试卷？',
+            '提示',
+            {
+              confirmButtonText: '继续创建',
+              cancelButtonText: '返回修改',
+              type: 'warning'
+            }
+          ).then(() => {
+            this.handleSubmit()
           })
-          let form = _.cloneDeep(this.form)
-          form.totalScore = form.totalScore * 10
-          let params = {
-            ...form,
-            manualSettings: manualSettings,
-            type: 'manual'
-          }
-          this.loading = true
-          testPaperMether(params)
-            .then(() => {
-              this.$message.success('提交成功')
-              this.handleBack()
-            })
-            .finally(() => {
-              this.loading = false
-            })
-        })
-      } else {
-        this.$message.error('请正确分配剩余分数')
-      }
+        }
+      })
     },
     /**
      * @author guanfenda
