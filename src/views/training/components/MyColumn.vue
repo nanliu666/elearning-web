@@ -93,7 +93,7 @@
           class="isShowinput"
         >
           <el-input
-            id="/lecturer/lecturer"
+            id="/training/trainingArrange"
             v-model="dataAddCatalog.input"
             class="isShowinput_input"
             placeholder="请输入分组名称"
@@ -116,7 +116,7 @@
           >
             <a
               class="btn1"
-              href="#/lecturer/lecturer"
+              href="#/training/trainingArrange"
               @click="adddata"
             >新建分组</a>
             <!-- <span class="btn2">新建分类</span> -->
@@ -474,13 +474,13 @@ export default {
       let params = {}
       if (id) {
         params = {
-          test: '123',
+          // test: '123',
           parentId: '' // 父ID
         }
         params.parentId = id
       } else {
         params = {
-          test: '123'
+          // test: '123'
         }
       }
       return this.columnInterface.listTeacherCategory(params).then((res) => {

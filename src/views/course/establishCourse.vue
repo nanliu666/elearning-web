@@ -692,15 +692,15 @@ export default {
         {
           name: '资料下载',
           value: 3
-        },
-        {
-          name: '考试',
-          value: 4
-        },
-        {
-          name: '视频',
-          value: 5
         }
+        // {
+        //   name: '考试',
+        //   value: 4
+        // },
+        // {
+        //   name: '视频',
+        //   value: 5
+        // }
       ],
       // 填写课程信息
       AddArticleBtntableIndex: '',

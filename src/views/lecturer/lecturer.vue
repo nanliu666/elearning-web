@@ -338,7 +338,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'creator_id',
+    prop: 'createName',
     minWidth: 200
   },
   {

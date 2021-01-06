@@ -922,8 +922,11 @@ export default {
     isstopSchedule() {
       let id = this.$route.query.id
       stopSchedule(id).then(() => {
-        this.isgetScheduleList()
         this.issueStatus = false
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
       })
     },
     // 去列表页
