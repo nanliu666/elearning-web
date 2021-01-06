@@ -410,6 +410,7 @@ export default {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
+        this.ruleForm.categoryId = data.id
         this.parentOrgIdLabel = data.label
       }
     },
@@ -419,7 +420,6 @@ export default {
         return resolve([{ name: 'region' }])
       }
       if (node.level > 1) return resolve([])
-      // console.log(node);
       let res = await listTeacherCategory({ parentId: node.data.id })
       let filterArr = res.son.map((item) => {
         return {
@@ -431,8 +431,6 @@ export default {
       })
 
       node.data.children = filterArr
-      // console.log(node);
-
       resolve(filterArr)
     },
 
@@ -443,7 +441,6 @@ export default {
       }
 
       params.id = this.$route.query.id
-      // console.log(params.id)
       if (params.id) {
         params.id = params.id.trim()
         getTeacher(params).then((res) => {
@@ -453,7 +450,6 @@ export default {
           data.attachments = []
           data.attachments.push({ fileUrl: res.teacherInfo.photo })
           this.ruleForm = data
-          // console.log(this.ruleForm)
         })
       }
     },
@@ -533,7 +529,6 @@ export default {
 
       queryTeacherlist(params).then((res) => {
         this.Teacherlist = res.data
-        // console.log('------------', res)
       })
     },
     // 去讲师列表
@@ -549,9 +544,6 @@ export default {
       //     ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
       //     : ''
       // )
-      this.ruleForm.categoryId = this.ruleForm.categoryId
-        ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
-        : ''
       let attachments = []
       if (this.ruleForm.attachments.length !== 0)
         attachments.push(
@@ -561,7 +553,6 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      // console.log(this.ruleForm)
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {
           this.$message({
@@ -569,8 +560,6 @@ export default {
             type: 'warning'
           })
         } else {
-          // console.log(this.ruleForm)
-
           addTeacher(this.ruleForm).then(() => {
             if (i) {
               this.toLecturer()
@@ -583,7 +572,9 @@ export default {
                 attachments: [],
                 isRecommend: ''
               }
+              this.parentOrgIdLabel = ''
             } else {
+              this.parentOrgIdLabel = ''
               this.ruleForm = {
                 categoryId: '',
                 userId: '',

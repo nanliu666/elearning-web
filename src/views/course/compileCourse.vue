@@ -372,12 +372,12 @@
             >
               <template slot-scope="scope">
                 <el-input
-                  v-if="scope.row.saveOrcompile == 0"
+                  v-if="scope.row.saveOrcompile === 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -388,7 +388,7 @@
               width="185"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.saveOrcompile == 0">
+                <span v-if="scope.row.saveOrcompile === 0">
                   <el-select
                     v-model="scope.row.type"
                     placeholder="请选择"
@@ -403,7 +403,7 @@
                   </el-select>
                 </span>
 
-                <span v-if="scope.row.saveOrcompile == 1">
+                <span v-if="scope.row.saveOrcompile === 1">
                   <span v-if="typeOption[scope.row.type - 1]">
                     {{ typeOption[scope.row.type - 1].name }}
                   </span>
@@ -418,13 +418,13 @@
               width="250"
             >
               <template slot-scope="scope">
-                <div v-if="scope.row.saveOrcompile == 0">
+                <div v-if="scope.row.saveOrcompile === 0">
                   <span
                     v-if="typeOption[scope.row.type - 1]"
                     size="medium"
                   >
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value == 1"
+                      v-if="typeOption[scope.row.type - 1].value === 1"
                       type="text"
                       @click="AddArticleBtntable(scope.$index, scope.row)"
                     >
@@ -435,19 +435,21 @@
                       }}
                     </el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value == 2"
+                      v-if="typeOption[scope.row.type - 1].value === 2"
                       v-model="scope.row.upLoad"
                       :before-upload="CoursewareUpload"
                       :multiple="false"
                     >
-                      <el-button type="text">{{
-                        scope.row.upLoad[0]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : '上传课件'
-                      }}</el-button>
+                      <el-button type="text">
+                        {{
+                          scope.row.upLoad[0]
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                            : '上传课件'
+                        }}
+                      </el-button>
                     </common-upload>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value == 3"
+                      v-if="typeOption[scope.row.type - 1].value === 3"
                       v-model="scope.row.upLoad"
                       :multiple="false"
                       :before-upload="DataUpload"
@@ -461,7 +463,7 @@
                       </el-button>
                     </common-upload>
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value == 4"
+                      v-if="typeOption[scope.row.type - 1].value === 4"
                       type="text"
                     >关联考试</el-button>
                     <common-upload
@@ -487,9 +489,9 @@
                   </span>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile == 1">
+                <div v-if="scope.row.saveOrcompile === 1">
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value == 1">
+                    <span v-if="typeOption[scope.row.type - 1].value === 1">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -499,7 +501,7 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value == 2">
+                    <span v-if="typeOption[scope.row.type - 1].value === 2">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -509,7 +511,7 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value == 3">
+                    <span v-if="typeOption[scope.row.type - 1].value === 3">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -519,7 +521,7 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value == 5">
+                    <span v-if="typeOption[scope.row.type - 1].value === 5">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -539,7 +541,7 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="scope.row.saveOrcompile == 1"
+                  v-if="scope.row.saveOrcompile === 1"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -547,7 +549,7 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile == 0"
+                  v-if="scope.row.saveOrcompile === 0"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
@@ -564,7 +566,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index == 0"
+                  :disabled="scope.$index === 0"
                   @click="upward(scope.$index)"
                 >
                   上移
@@ -572,7 +574,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index == ruleForm.contents.length - 1"
+                  :disabled="scope.$index === ruleForm.contents.length - 1"
                   @click="downward(scope.$index)"
                 >
                   下移
@@ -580,6 +582,7 @@
               </template>
             </el-table-column>
           </el-table>
+
           <!-- 添加文章 -->
           <el-dialog
             title="添加文章"
@@ -712,8 +715,8 @@ export default {
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
-        period: '', //时长
-        credit: '', //学分
+        period: undefined, //时长
+        credit: undefined, //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -905,6 +908,9 @@ export default {
       params.catalogId =
         this.$route.query.catalogName == params.catalogId ? this.catalogName : params.catalogId
 
+      // 富文本要转换传后端
+      params.introduction = _.escape(params.introduction)
+      params.thinkContent = _.escape(params.thinkContent)
       // 草稿
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
@@ -979,24 +985,24 @@ export default {
         // tagIds: [], //标签
         isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
-        period: '', //时长
-        credit: '', //学分
+        period: undefined, //时长
+        credit: undefined, //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
         teacherId: '', //讲师id
         // 表格
         contents: [
-          {
-            url: '',
-            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-            sort: '', //序号
-            type: '', //章节类型
-            name: '', // 章节名称
-            content: '', //文章内容
-            upLoad: [], //[url,localName],  //所有上传的文件
-            saveOrcompile: 0 // 1保存&0编辑
-          }
+          // {
+          //   url: '',
+          //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          //   sort: '', //序号
+          //   type: '', //章节类型
+          //   name: '', // 章节名称
+          //   content: '', //文章内容
+          //   upLoad: [], //[url,localName],  //所有上传的文件
+          //   saveOrcompile: 0 // 1保存&0编辑
+          // }
         ]
       }
     },

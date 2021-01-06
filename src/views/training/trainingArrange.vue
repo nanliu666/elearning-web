@@ -33,7 +33,12 @@
           v-show="status === 0"
           class="issue_l"
         >
-          <div class="issue_l_tree">
+          <my-column
+            :column-interface="columnInterface"
+            @treeClick="treeClick"
+          ></my-column>
+
+          <!-- <div class="issue_l_tree">
             <el-input
               v-model="filterText"
               placeholder="分类名称"
@@ -74,7 +79,6 @@
                   <span @click="isEdit = false"> 取消</span>
                 </span>
                 <span>
-                  <!-- 编辑&删除 -->
                   <el-dropdown
                     trigger="hover"
                     style="color: #a0a8ae;"
@@ -129,12 +133,11 @@
               class="btn1"
               @click="adddata"
             >新建分组</span>
-            <!-- <span class="btn2">新建分类</span> -->
-          </div>
+          </div> -->
         </div>
 
         <!-- 移动选择框 -->
-        <el-dialog
+        <!-- <el-dialog
           title="收货地址"
           :visible.sync="dialogFormVisible"
           :modal-append-to-body="false"
@@ -165,8 +168,6 @@
                   :label="item.label"
                   :value="item.id"
                 ></el-option>
-
-                <!-- <el-option label="区域二" value="beijing"></el-option> -->
               </el-select>
             </el-form-item>
           </el-form>
@@ -184,7 +185,7 @@
               确 定
             </el-button>
           </div>
-        </el-dialog>
+        </el-dialog> -->
 
         <!-- 已发布 -->
         <div
@@ -559,7 +560,8 @@ export default {
   components: {
     SeachPopover: () => import('@/components/searchPopOver'),
     // 草稿
-    draftComponents: () => import('./draftComponents')
+    draftComponents: () => import('./draftComponents'),
+    MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
@@ -568,6 +570,14 @@ export default {
   },
   data() {
     return {
+      // 接口
+      columnInterface: {
+        listTeacherCategory: getCatalogs, //查询讲师分类列表
+        addCatalog: addCatalog, //新增分组/分类
+        deleteTeacherCatalog: delCatalogs, //删除分组/分类
+        move: move, //移动
+        editTeacherCatalog: updateCatalogs //编辑
+      },
       idSchedule: '',
       compileNewly: '',
       addId: '',
@@ -639,6 +649,10 @@ export default {
   },
   activated() {},
   methods: {
+    treeClick(val) {
+      this.idSchedule = val
+      this.isgetScheduleList()
+    },
     // 去开办下一期
     handleConfig(id) {
       this.$router.push({ path: '/training/trainingEdit?id=' + id })
