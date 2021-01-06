@@ -584,6 +584,7 @@
               </template>
             </el-table-column>
           </el-table>
+
           <!-- 添加文章 -->
           <el-dialog
             title="添加文章"
@@ -918,11 +919,11 @@ export default {
       params.contents.forEach((item) => {
         delete item.upLoad
       })
-      // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
-      // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
-      // params.tagIds = params.tagIds.join(',')
+      // 富文本要转换传后端
+      params.introduction = _.escape(params.introduction)
+      params.thinkContent = _.escape(params.thinkContent)
 
       // 草稿
       if (status === 2) {
@@ -1009,14 +1010,14 @@ export default {
         // 表格
         contents: [
           {
-            url: '',
-            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-            sort: '', //序号
-            type: '', //章节类型
-            name: '', // 章节名称
-            content: '', //文章内容
-            upLoad: [], //[url,localName],  //所有上传的文件
-            saveOrcompile: 0 // 1保存&0编辑
+            // url: '',
+            // localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+            // sort: '', //序号
+            // type: '', //章节类型
+            // name: '', // 章节名称
+            // content: '', //文章内容
+            upLoad: [] //[url,localName],  //所有上传的文件
+            // saveOrcompile: 0 // 1保存&0编辑
           }
         ]
       }
