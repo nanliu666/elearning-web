@@ -156,11 +156,11 @@ export default {
       type: Object,
       default: () => {
         return {
-          addCatalog: Promise.reject(),
-          delCatalogs: Promise.reject(),
-          getCatalogs: Promise.reject(),
-          moveCatalogs: Promise.reject(),
-          updateCatalogs: Promise.reject()
+          addCatalog: Promise.resolve(),
+          delCatalogs: Promise.resolve(),
+          getCatalogs: Promise.resolve(),
+          moveCatalogs: Promise.resolve(),
+          updateCatalogs: Promise.resolve()
         }
       }
     }
@@ -486,6 +486,8 @@ export default {
   padding-bottom: 30px;
   background-color: #fff;
   width: 100%;
+  min-width: 300px;
+  height: 100%;
   /deep/.el-tree-node > .el-tree-node__children {
     overflow: inherit;
   }

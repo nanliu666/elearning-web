@@ -1,36 +1,39 @@
 <template>
-  <div class="basicInfo">
-    <!-- 基本信息页面 -->
-    <basic-container>
-      <el-row
-        type="flex"
-        justify="center"
-        style="padding-top:40px;"
+  <!-- 基本信息页面 -->
+  <basic-container block>
+    <el-row
+      type="flex"
+      justify="center"
+      style="padding-top:40px;"
+    >
+      <el-col
+        :xl="16"
+        :lg="16"
+        :md="18"
+        :sm="20"
+        :xs="22"
       >
-        <el-col
-          :xl="16"
-          :lg="16"
-          :md="18"
-          :sm="20"
-          :xs="22"
-        >
-          <common-form
-            ref="form"
-            :model="form"
-            :columns="columns"
-          ></common-form>
-        </el-col>
-      </el-row>
-    </basic-container>
-  </div>
+        <common-form
+          ref="form"
+          :model="model"
+          :columns="columns"
+        ></common-form>
+      </el-col>
+    </el-row>
+  </basic-container>
 </template>
 
 <script>
+import { getCatalogs } from '@/api/learnPlan'
 export default {
-  inject: ['parentObj'],
+  props: {
+    model: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
-      form: this.parentObj.formData,
       columns: [
         {
           prop: 'coursePlanNo',
@@ -69,7 +72,7 @@ export default {
           prop: 'courseCatalogId',
           itemType: 'select',
           label: '所属分类',
-          options: this.parentObj.treeData,
+          options: [],
           props: {
             label: 'name',
             value: 'id'
@@ -78,7 +81,7 @@ export default {
           required: true
         },
         {
-          prop: 'creatorId',
+          prop: 'creatorName',
           itemType: 'input',
           label: '创建者',
           required: false
@@ -98,19 +101,35 @@ export default {
           label: '主办单位',
           required: false
         }
-      ]
+      ],
+      categoryData: []
     }
   },
-  watch: {
-    'parentObj.treeData'(val) {
-      this.columns[5].options = val
-    }
+  created() {
+    this.getCategoryData()
   },
-  methods: {}
+
+  methods: {
+    getData() {
+      return new Promise((resolve, reject) => {
+        this.$refs['form']
+          .validate()
+          .then(() => {
+            resolve() // TODO 提交表单
+          })
+          .catch(() => {
+            reject()
+          })
+      })
+    },
+    getCategoryData() {
+      getCatalogs().then((res) => {
+        this.categoryData = res
+        this.columns[5].options = res
+      })
+    }
+  }
 }
 </script>
 
-<style lang="scss" scoped>
-.basicInfo {
-}
-</style>
+<style lang="scss" scoped></style>
