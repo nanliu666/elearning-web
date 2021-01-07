@@ -40,13 +40,18 @@
         class="content published"
       >
         <div class="left-container">
-          <leftColumn
+          <!-- <leftColumn
             :search="true"
             :current-node-key="currentNodeKey"
             :more-menu="['edit', 'add', 'delete', 'move']"
             @node-click="nodeClick"
             @refreshTree="getCategoryData"
-          ></leftColumn>
+          ></leftColumn> -->
+
+          <my-column
+            :column-interface="columnInterface"
+            @treeClick="treeClick"
+          ></my-column>
         </div>
         <div class="divider"></div>
         <common-table
@@ -234,8 +239,16 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import leftColumn from '@/components/leftColumn'
-import { getlearnPlanList, getCatalogs, deletePlan } from '@/api/learnPlan'
+// import leftColumn from '@/components/leftColumn'
+import {
+  getlearnPlanList,
+  getCatalogs,
+  deletePlan,
+  addCatalog,
+  delCatalogs,
+  updateCatalogs,
+  moveCatalogs
+} from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -332,7 +345,8 @@ export default {
   name: 'CoursePlanList',
   components: {
     SearchPopover,
-    leftColumn
+    // leftColumn,
+    MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
@@ -341,6 +355,14 @@ export default {
   },
   data() {
     return {
+      // 左侧栏接口
+      columnInterface: {
+        listTeacherCategory: getCatalogs, //查询列表
+        addCatalog: addCatalog, //新增分组/分类
+        deleteTeacherCatalog: delCatalogs, //删除分组/分类
+        move: moveCatalogs, //移动
+        editTeacherCatalog: updateCatalogs //编辑
+      },
       data: [],
       currentNodeKey: '', // 默认选中的节点key
       activeTab: 'published',
@@ -358,7 +380,8 @@ export default {
           courseCatalogName: '',
           startTime: '',
           coursePlanName: '',
-          coursePlanNo: ''
+          coursePlanNo: '',
+          id: ''
         },
         columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
         page: {
@@ -402,6 +425,12 @@ export default {
   },
   created() {},
   methods: {
+    // 点击左侧档返回数据
+    treeClick(id) {
+      this.published.queryInfo.categoryId = id
+      this.loadPublishedData()
+    },
+
     nodeClick(data) {
       this.queryInfo.courseCatalogId = data.id
       this.loadPublishedData()
