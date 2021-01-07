@@ -86,7 +86,6 @@
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
-          :course-list.sync="formData.courseList"
         />
         <EditPerson
           v-show="activeStep === 2"
