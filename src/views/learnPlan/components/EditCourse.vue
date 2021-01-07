@@ -1,12 +1,15 @@
 <template>
-  <div class="addSchedule">
+  <basicContainer
+    block
+    class="addSchedule"
+  >
     <!-- 添加课程页面 -->
     <div class="layout_header">
       <ul class="header_left">
         <li>
           <el-checkbox
             v-model="checkAll"
-            :indeterminate="indeterminate"
+            :indeterminate="isIndeterminate"
             @change="handleCheckAllChange"
           >
             全选
@@ -29,7 +32,7 @@
       </el-button>
     </div>
     <el-checkbox-group
-      v-model="checkboxGroup"
+      v-model="checkedCourseIds"
       @change="checkboxGroupChange"
     >
       <el-collapse
@@ -38,8 +41,8 @@
         @change="handleChange"
       >
         <el-collapse-item
-          v-for="(item, index) in courseList"
-          :key="index"
+          v-for="item in courseList"
+          :key="item.id"
           :name="item.id"
         >
           <template slot="title">
@@ -57,64 +60,53 @@
             </div>
           </template>
           <div class="layout_content_detail">
-            <el-row
-              type="flex"
-              justify="center"
-              style="padding-top:40px;"
+            <common-form
+              :model="item"
+              :columns="columns"
             >
-              <el-col
-                :xl="16"
-                :lg="16"
-                :md="18"
-                :sm="20"
-                :xs="22"
+              <div
+                slot="courseName"
+                class="course-name-input"
               >
-                <common-form
-                  :model="item"
-                  :columns="columns"
+                <el-input v-model="item.courseName"></el-input><span
+                  class="precondition"
+                  @click="setPrecondition"
+                >设置前置条件</span>
+              </div>
+              <template slot="studyFrequency">
+                <el-input-number
+                  v-model="item.studyFrequency"
+                  controls-position="right"
+                  :min="0"
+                ></el-input-number>
+              </template>
+              <template slot="timeList">
+                <el-date-picker
+                  v-model="item.timeList[0]"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始月份"
+                  end-placeholder="结束月份"
                 >
-                  <template slot="courseName">
-                    <el-input v-model="item.courseName"></el-input><span
-                      class="precondition"
-                      @click="setPrecondition"
-                    >设置前置条件</span>
-                  </template>
-                  <template slot="studyFrequency">
-                    <el-input-number
-                      v-model="item.studyFrequency"
-                      controls-position="right"
-                      :min="0"
-                    ></el-input-number>
-                  </template>
-                  <template slot="timeList">
-                    <el-date-picker
-                      v-model="item.timeList[0]"
-                      type="daterange"
-                      range-separator="至"
-                      start-placeholder="开始月份"
-                      end-placeholder="结束月份"
-                    >
-                    </el-date-picker>
-                    <el-date-picker
-                      v-model="item.timeList[1]"
-                      type="daterange"
-                      range-separator="至"
-                      start-placeholder="开始月份"
-                      end-placeholder="结束月份"
-                    >
-                    </el-date-picker>
-                    <el-date-picker
-                      v-model="item.timeList[2]"
-                      type="daterange"
-                      range-separator="至"
-                      start-placeholder="开始月份"
-                      end-placeholder="结束月份"
-                    >
-                    </el-date-picker>
-                  </template>
-                </common-form>
-              </el-col>
-            </el-row>
+                </el-date-picker>
+                <el-date-picker
+                  v-model="item.timeList[1]"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始月份"
+                  end-placeholder="结束月份"
+                >
+                </el-date-picker>
+                <el-date-picker
+                  v-model="item.timeList[2]"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始月份"
+                  end-placeholder="结束月份"
+                >
+                </el-date-picker>
+              </template>
+            </common-form>
             <el-tabs
               v-model="activeName"
               @tab-click="handleClick"
@@ -243,129 +235,31 @@
     </el-dialog>
 
     <!-- 课程列表的弹窗 -->
-    <el-dialog
-      title="课程列表"
-      :visible.sync="courseListDialog"
-      :append-to-body="true"
-    >
-      <common-table
-        ref="table"
-        class="commonTable"
-        :columns="columnsVisible | columnsFilter"
-        :config="tableConfig"
-        :data="tableData"
-        :loading="tableLoading"
-        :page-config="tablePageConfig"
-        :page="page"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
-        @selection-change="selectionChange"
-      >
-        <template #topMenu>
-          <SearchPopover
-            ref="searchPopover"
-            :popover-options="searchPopoverConfig.popoverOptions"
-            :require-options="searchPopoverConfig.requireOptions"
-            @submit="handleSearch"
-          />
-        </template>
-      </common-table>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button @click="courseListDialog = false">取 消</el-button>
-        <el-button
-          type="primary"
-          @click="courseSureBtn"
-        >确 定</el-button>
-      </span>
-    </el-dialog>
-  </div>
+    <CourseSelectDialog
+      :visible.sync="courseDialogVisible"
+      @submit="handleCourseSelectSubmit"
+    />
+  </basicContainer>
 </template>
 
 <script>
-import SearchPopover from '@/components/searchPopOver/index'
-import { getCourseList } from '@/api/learnPlan'
-
-// 表格属性
-const TABLE_COLUMNS = [
-  {
-    label: '课程名称',
-    width: 180,
-    prop: 'courseName'
-  },
-  {
-    label: '讲师',
-    prop: 'teacherName',
-    width: 200
-  },
-  {
-    label: '所在类目',
-    prop: 'catalogName',
-    minWidth: 150
-  }
-]
+import CourseSelectDialog from './CourseSelectDialog'
 export default {
   inject: ['parentObj'],
   components: {
-    SearchPopover
+    CourseSelectDialog
   },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+  props: {
+    courseList: {
+      type: Array,
+      default: () => []
+    }
   },
   data() {
-    const TABLE_CONFIG = {
-      enablePagination: true,
-
-      enableMultiSelect: true,
-      rowKey: 'id',
-      showHandler: false,
-      treeProps: { hasChildren: 'hasChildren', children: 'children' }
-    }
-    const TABLE_PAGE_CONFIG = {}
-    // 搜索配置
-    const SEARCH_POPOVER_REQUIRE_OPTIONS = [
-      {
-        config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
-        data: '',
-        field: 'courseName',
-        label: '',
-        type: 'input'
-      },
-      {
-        config: { placeholder: '请选择', 'suffix-icon': 'el-icon-search' },
-        data: '',
-        field: 'catalogId',
-        label: '',
-        options: this.parentObj.treeData.map((item) => {
-          return { value: item.id, label: item.name }
-        }),
-        type: 'select'
-      }
-    ]
-    let SEARCH_POPOVER_POPOVER_OPTIONS = []
-    let SEARCH_POPOVER_CONFIG = {
-      popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-      requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
-    }
     return {
       dialogVisible: false, // 弹出对象值
-      courseListDialog: false, // 课程列表的弹窗标记
-      queryInfo: {
-        // 课程列表的请求参数
-        pageNo: 1,
-        pageSize: 10,
-        catalogId: '',
-        courseName: ''
-      },
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
+      courseDialogVisible: false, // 课程列表的弹窗标记
+
       datePick1: '',
       datePick2: '',
       datePick3: '',
@@ -373,10 +267,8 @@ export default {
       iputSearch: '',
       checkAll: true,
       activeNames: '',
-      checkboxGroup: [],
-      indeterminate: true,
-      courseList: this.parentObj.formData.courseList, // 选中的课程列表
-      checkboxArr: [{ val: '' }],
+      checkedCourseIds: [],
+      isIndeterminate: true,
       columns: [
         {
           prop: 'courseName',
@@ -386,7 +278,7 @@ export default {
         },
         {
           prop: 'text',
-          itemType: 'radio',
+          itemType: 'checkbox',
           label: '通过条件',
           options: [
             { label: '教师评定', value: '1' },
@@ -407,6 +299,7 @@ export default {
           prop: 'studyFrequency',
           itemType: 'slot',
           label: '允许学习次数',
+          offset: 4,
           required: true
         },
         {
@@ -417,65 +310,31 @@ export default {
         }
       ],
       activeName: 'first',
-      searchPopoverConfig: SEARCH_POPOVER_CONFIG,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      tableColumns: TABLE_COLUMNS,
-      tableConfig: TABLE_CONFIG,
-      tableData: [{}],
-      tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG,
+
       preconditionList: [], // 前置条件数组
-      precondDialogShow: false, // 前置条件弹窗隐藏和显示
-      selectionArr: [] // 前置条件弹窗选择数组
+      precondDialogShow: false // 前置条件弹窗隐藏和显示
     }
   },
   methods: {
-    handleSearch(searchParams) {
-      for (let i in searchParams) {
-        this.queryInfo[i] = searchParams[i]
-      }
-      this.getCourseData()
-    },
-    /**
-     * 处理页码改变
-     */
-    handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
-      this.getCourseData()
-    },
-    /**
-     * 处理页码大小更改
-     */
-    handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
-      this.getCourseData()
-    },
-    loadTableData() {},
-    courseSureBtn() {
+    handleCourseSelectSubmit(selected) {
       // 课程列表弹窗确认回调
-      this.courseListDialog = false
       let idArr = this.courseList.map((item) => item.id)
-      let filterArr = this.selectionArr.filter((item) => {
+      let filterArr = selected.filter((item) => {
         return !idArr.includes(item.id)
       })
-      this.courseList = this.courseList.concat(
-        filterArr.map((item) => {
-          item.timeList = [[], [], []]
-          return item
-        })
-      )
+      filterArr.forEach((item) => {
+        item.timeList = [[], [], []]
+        return item
+      })
+      this.courseList.push(...filterArr)
       // this.treeData
     },
     handleCheckAllChange(val) {
       // 全选回调
-      this.checkboxGroup = val ? this.courseList.map((item) => item.id) : []
+      this.checkedCourseIds = val ? this.courseList.map((item) => item.id) : []
       this.indeterminate = false
     },
-    selectionChange(selectArr) {
-      // table多选框选择后
-      //    this.courseList = selectArr;
-      this.selectionArr = selectArr
-    },
+
     commandClick(val) {
       // 关联开始删除
       switch (val) {
@@ -516,11 +375,11 @@ export default {
     deleteTableData() {
       // 删除列表数据
       this.courseList.forEach((item, index, arr) => {
-        if (this.checkboxGroup.includes(item.id)) {
+        if (this.checkedCourseIds.includes(item.id)) {
           let that = this
-          let ids = that.checkboxGroup.indexOf(item.id)
+          let ids = that.checkedCourseIds.indexOf(item.id)
           arr.splice(index, 1)
-          this.checkboxGroup.splice(ids, 1)
+          this.checkedCourseIds.splice(ids, 1)
         }
       })
       this.checkboxGroupChange(this.checkboxGroup)
@@ -548,17 +407,6 @@ export default {
       //     arr3: []
       //   })
       //   this.checkboxGroupChange(this.checkboxGroup)
-    },
-    getCourseData() {
-      let data = this.queryInfo
-      getCourseList(data)
-        .then((res) => {
-          this.page.total = res.totalNum
-          this.tableData = res.data
-        })
-        .catch((err) => {
-          window.console.log(err)
-        })
     }
   }
 }
@@ -569,12 +417,17 @@ export default {
   /deep/.el-input-number {
     width: 100%;
   }
-  .precondition {
-    color: #01aafc;
-    cursor: pointer;
+  .course-name-input {
+    position: relative;
+    .precondition {
+      color: #01aafc;
+      cursor: pointer;
+      position: absolute;
+      right: -90px;
+      top: 0;
+    }
   }
   .layout_header {
-    margin-top: 54px;
     &::after {
       content: '';
       clear: both;

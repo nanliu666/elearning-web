@@ -17,6 +17,7 @@
           :type="item.config && item.config.type ? item.config.type : 'text'"
           :placeholder="item.config.placeholder || '请输入' + item.label"
           class="elInput"
+          :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
           @input="search"
         />
@@ -157,6 +158,7 @@
                       :suffix-icon="item.config && item.config['suffix-icon']"
                       class="elInput"
                     />
+
                     <el-select
                       v-if="item.type === 'select'"
                       v-model="item.data"

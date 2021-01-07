@@ -561,7 +561,6 @@ const res = {
             menuId: '12590123136834562058',
             menuName: '培训安排',
             menuType: 'Menu',
-            isEnabled: 1,
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
@@ -1189,7 +1188,7 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/requiredSchedule',
+            path: '/learnPlan/CoursePlanList',
             icon: 'iconfont iconicon_compile'
           },
           {
@@ -1201,31 +1200,19 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/elective',
-            icon: 'iconfont iconicon_compile'
-          },
-          {
-            menuId: '15956747645635423113',
-            menuName: '新建手工试卷',
-            menuType: 'Menu',
-            isEnabled: 1,
-            isOwn: 1,
-            isShow: 0,
-            code: 'approval_approval',
-            alias: 'approval',
-            path: '/learnPlan/newSchedule',
+            path: '/learnPlan/ElectivePlanList',
             icon: 'iconfont iconicon_compile'
           },
           {
             menuId: '15901120756924',
-            menuName: '必修课安排详情',
+            menuName: '必修课完成率',
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
             isShow: 0,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/requiredScheduleDetail',
+            path: '/learnPlan/CourseUserList',
             icon: 'iconfont iconicon_compile'
           }
         ]

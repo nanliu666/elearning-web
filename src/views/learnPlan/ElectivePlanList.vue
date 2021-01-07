@@ -1,14 +1,9 @@
 <template>
   <div
-    id="requiredScheduleDetail"
-    class="requiredSchedule Menu fill"
+    id="elective"
+    class="elective Menu fill"
   >
-    <!-- 必修课安排 详情页面 -->
-    <page-header>
-      <template slot="title">
-        <span class="header_title">必修课程安排</span>学员完成率
-      </template>
-    </page-header>
+    <!-- 选修课安排 详情页面 -->
     <basic-container block>
       <common-table
         ref="table"
@@ -31,6 +26,22 @@
             />
           </div>
         </template>
+        <template #oparetion>
+          <el-button
+            type="text"
+            size="medium"
+            @click="jumpDetail(row)"
+          >
+            查看
+          </el-button>
+          <el-button
+            type="text"
+            size="medium"
+            @click="handleDelete(row)"
+          >
+            删除
+          </el-button>
+        </template>
       </common-table>
     </basic-container>
   </div>
@@ -38,35 +49,39 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { queryPercentageComplete } from '@/api/learnPlan'
+import { queryLog } from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '姓名',
+    label: '课程编号',
     width: 180,
-    prop: 'name'
-  },
-  {
-    label: '手机',
-    prop: 'text',
-    width: 300
-  },
-  {
-    label: '部门名称',
-    prop: 'awardAgency',
-    minWidth: 100
+    prop: 'coursePlanNo'
   },
   {
     label: '课程名称',
-    slot: true,
-    prop: 'name1',
+    prop: 'coursePlanName',
+    width: 300
+  },
+  {
+    label: '用户编号',
+    prop: 'workNo',
     minWidth: 100
   },
   {
-    label: '完成率',
+    label: '用户名称',
+    prop: 'userName',
+    minWidth: 100
+  },
+  {
+    label: '组织架构',
+    prop: 'department',
+    minWidth: 100
+  },
+  {
+    label: '操作',
     slot: true,
-    prop: 'name2',
+    prop: 'oparetion',
     minWidth: 100
   }
 ]
@@ -74,8 +89,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
 
   enableMultiSelect: true,
-  rowKey: 'id',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  rowKey: 'id'
 }
 const TABLE_PAGE_CONFIG = {}
 
@@ -84,75 +98,42 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'participantName',
+    field: 'name1',
     label: '',
     type: 'input'
   }
 ]
-let SELECT_GROUP = JSON.parse(window.sessionStorage.requiredScheduleDetail).courseList || []
-SELECT_GROUP = SELECT_GROUP.map((item) => {
-  item.value = item.id
-  item.label = item.courseName
-  return item
-})
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'input',
-    field: 'phonenum',
-    label: '手机',
+    field: 'name',
+    label: '用户姓名',
     data: ''
-    // config: { optionLabel: 'name', optionValue: 'id' }
   },
   {
     type: 'select',
     field: 'courseId',
-    label: '课程',
+    label: '组织名称',
     data: '',
-    options: SELECT_GROUP
+    options: [
+      { value: 0, label: '停用' },
+      { value: 1, label: '正常' }
+    ]
   },
   {
-    type: 'numInterval',
-    field: 'totalPrecentMin,totalPrecentMax',
-    label: '完成率 （%）',
-    data: { min: '', max: '' }
-    // config: { optionLabel: 'name', optionValue: 'id' }
+    type: 'input',
+    field: 'phonenum',
+    label: '手机号',
+    data: ''
   }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
+
 export default {
-  name: 'KnowledgeManagement',
+  name: 'ElectivePlanList',
   components: {
     SearchPopover
   },
@@ -165,7 +146,6 @@ export default {
     return {
       preview: {},
       moveKnowledgeRow: {},
-      formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
       },
@@ -179,13 +159,10 @@ export default {
       },
       // 请求参数
       queryInfo: {
-        pageNo: 1,
-        pageSize: 10,
-        courseName: '', // 课程名字
-        id: '', // 课程id
-        phonenum: '', // 电话号码
-        totalPrecentMax: '', // 最大完成值
-        totalPrecentMin: '' // 最小完成值
+        courseName: '',
+        courseId: '',
+        phonenum: '',
+        name: ''
         // courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -198,7 +175,7 @@ export default {
   },
   activated() {
     // this.initSearchData()
-    this.refreshTableData()
+    this.loadTableData()
   },
   methods: {
     /**
@@ -219,10 +196,8 @@ export default {
      * 搜索
      */
     handleSearch(searchParams) {
-      for (let i in searchParams) {
-        if (i == 'undefined') continue
-        this.queryInfo[i] = searchParams[i]
-      }
+      this.queryInfo = _.assign(this.queryInfo, searchParams)
+      this.page.currentPage = 1
       this.loadTableData()
     },
     // 跳去详情
@@ -232,20 +207,16 @@ export default {
         query: { id }
       })
     },
-    // 刷新列表数据
-    refreshTableData() {
-      //  因为只加载了最外层的数据，children仍然是旧的，清空数据
-      this.tableData = []
-      this.loadTableData()
-    },
     // 加载表格数据
     async loadTableData() {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        this.queryInfo.courseName = this.queryInfo.courseId == 0 ? '停用' : '启用'
-        let queryData = JSON.parse(JSON.stringify(this.queryInfo))
-        let { totalNum, data } = await queryPercentageComplete(queryData)
+        let { totalNum, data } = await queryLog({
+          ...this.queryInfo,
+          pageNo: this.page.currentPage,
+          pageSize: this.page.size
+        })
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
@@ -258,6 +229,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.elective {
+  padding-top: 20px;
+}
 .preview_right_box {
   position: relative;
   border: 1px solid #d9dbdc;
