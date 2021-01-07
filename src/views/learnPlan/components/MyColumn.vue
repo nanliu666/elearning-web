@@ -93,7 +93,7 @@
           class="isShowinput"
         >
           <el-input
-            id="/lecturer/lecturer"
+            id="/learnPlan/CoursePlanList"
             v-model="dataAddCatalog.input"
             class="isShowinput_input"
             placeholder="请输入分组名称"
@@ -116,7 +116,7 @@
           >
             <a
               class="btn1"
-              href="#/lecturer/lecturer"
+              href="#/learnPlan/CoursePlanList"
               @click="adddata"
             >新建分组</a>
             <!-- <span class="btn2">新建分类</span> -->
@@ -474,13 +474,13 @@ export default {
       let params = {}
       if (id) {
         params = {
-          test: '123',
+          // test: '123',
           parentId: '' // 父ID
         }
         params.parentId = id
       } else {
         params = {
-          test: '123'
+          // test: '123'
         }
       }
       return this.columnInterface.listTeacherCategory(params).then((res) => {
@@ -539,9 +539,9 @@ export default {
 <style lang="scss" scoped>
 .issue_l {
   position: relative;
-  width: 100%;
-  border-right: 1px solid #ccc;
-  height: 680px;
+  width: 318px;
+  // border-right: 1px solid #ccc;
+  height: 650px;
   .issue_l_tree {
     padding: 20px;
     // padding: 0 25px;
@@ -573,7 +573,7 @@ export default {
       left: 0;
       height: 50px;
       width: 100%;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid #ebeced;
       .btn1 {
         display: block;
         background-color: #fff;

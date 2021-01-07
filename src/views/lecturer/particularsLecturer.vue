@@ -128,14 +128,14 @@
           编辑
         </el-button>
         <el-button
-          v-if="teacherData.status == 1"
+          v-show="teacherData.status == 1"
           size="medium"
           @click="iseditSysRulus(0)"
         >
           停用
         </el-button>
         <el-button
-          v-else
+          v-show="teacherData.status == 0"
           size="medium"
           type="primary"
           @click="iseditSysRulus(1)"
@@ -164,14 +164,80 @@
         />
       </div> -->
     </div>
+
+    <!-- 停用弹框 -->
+    <el-dialog
+      title="提醒"
+      :visible.sync="blockDialogVisible"
+      append-to-body
+      width="420px"
+    >
+      <div class="dialog_box">
+        <i class="el-icon-warning dialog_box_icon-warning"></i>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训， 停用后需尽快对课程进行调整。
+          你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <div>
+          <div
+            class="showBtn"
+            @click="showBtnData = !showBtnData"
+          >
+            查看关联课程 <i
+              v-show="!showBtnData"
+              class="el-icon-arrow-down"
+            ></i>
+            <i
+              v-show="showBtnData"
+              class="el-icon-arrow-up"
+            ></i>
+          </div>
+          <div
+            v-for="(item, index) in CourseList"
+            v-show="showBtnData"
+            :key="index"
+            class="item_box"
+          >
+            {{ item.catalogName }}
+          </div>
+        </div>
+      </div>
+
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="blockDialogVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          v-show="!showBtnDel"
+          type="primary"
+          @click="RulusFn(0)"
+        >
+          确 定
+        </el-button>
+        <el-button
+          v-show="showBtnDel"
+          type="primary"
+          @click="TeacherdeleteFn()"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { getCourseListData } from '@/api/course/course'
 import { getTeacher, Teacherdelete, editSysRulus } from '@/api/lecturer/lecturer'
 export default {
   data() {
     return {
+      CourseList: '',
+      blockDialogVisible: false,
+      showBtnData: false,
+      showBtnDel: false,
+
       teacherData: {
         photo: '',
         status: '',
@@ -190,38 +256,157 @@ export default {
   created() {
     this.isgetTeacher()
   },
+  activated() {
+    this.isgetTeacher()
+  },
 
   methods: {
-    // 启动/停用系统规则列表
-    iseditSysRulus(status) {
+    // // 启动/停用系统规则列表
+    // iseditSysRulus(status) {
+    //   let params = {
+    //     id: '',
+    //     status: '' // '0 停用 1 正常',
+    //   }
+    //   params.id = this.$route.query.id
+    //   params.status = status
+    //   editSysRulus(params).then(() => {
+    //     this.$message({
+    //       message: '操作成功',
+    //       type: 'success'
+    //     })
+    //     this.isgetTeacher()
+    //   })
+    // },
+
+    // // 删除讲师
+    // isTeacherdelete(id) {
+    //   let params = {
+    //     ids: id
+    //   }
+    //   params.ids = this.$route.query.id
+    //   Teacherdelete(params).then(() => {
+    //     this.$message({
+    //       message: '操作成功',
+    //       type: 'success'
+    //     })
+    //     this.toLecturer()
+    //   })
+    // },
+
+    // 删除讲师fn
+    TeacherdeleteFn() {
+      let params = {
+        ids: this.$route.query.id
+      }
+      Teacherdelete(params).then(() => {
+        this.$message({
+          message: '删除成功',
+          type: 'success'
+        })
+        this.toLecturer()
+        this.blockDialogVisible = false
+      })
+    },
+
+    // 删除讲师按钮
+    isTeacherdelete(id) {
+      getCourseListData({ teacherId: this.teacherData.userId, pageNo: 1, pageSize: 999 }).then(
+        (res) => {
+          // 如果没有课程
+          if (res.data.length === 0) {
+            this.$confirm('您确定要删除该讲师吗？', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(() => {
+                this.TeacherdeleteFn(id)
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          } else {
+            // 如果有课程
+            this.blockDialogVisible = true
+            // teacherId
+            this.CourseList = res.data
+            this.showBtnDel = true
+          }
+        }
+      )
+    },
+    // 启动/停用方法
+    RulusFn(i) {
       let params = {
         id: '',
         status: '' // '0 停用 1 正常',
       }
       params.id = this.$route.query.id
-      params.status = status
+      params.status = i
       editSysRulus(params).then(() => {
         this.$message({
-          message: '操作成功',
+          message: `${i ? '启用' : '停用'}成功`,
           type: 'success'
         })
+        //刷新
         this.isgetTeacher()
+        this.blockDialogVisible = false
       })
     },
 
-    // 删除讲师
-    isTeacherdelete(id) {
-      let params = {
-        ids: id
-      }
-      params.ids = this.$route.query.id
-      Teacherdelete(params).then(() => {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
+    // 启动/停用按钮
+    iseditSysRulus(i) {
+      // 启用弹框
+      if (i) {
+        this.$confirm('您确定要启用该讲师吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-        this.toLecturer()
-      })
+          .then(() => {
+            this.RulusFn(i)
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+      } else {
+        // 停用弹框
+        // 先查讲师下面有没有课程
+        // 再弹框
+
+        getCourseListData({ teacherId: this.teacherData.userId, pageNo: 1, pageSize: 999 }).then(
+          (res) => {
+            // 如果没有课程
+            if (res.data.length === 0) {
+              this.$confirm('您确定要启用该讲师吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              })
+                .then(() => {
+                  this.RulusFn(i)
+                })
+                .catch(() => {
+                  this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                  })
+                })
+            } else {
+              // 如果有课程
+              this.blockDialogVisible = true
+              this.CourseList = res.data
+              this.showBtnDel = false
+            }
+          }
+        )
+      }
     },
 
     // 去编辑
@@ -258,7 +443,7 @@ export default {
       this.name = this.$route.query.name
       getTeacher(params).then((res) => {
         this.teacherData = res.teacherInfo
-        // console.log(res.teacherInfo);
+        this.teacherData.introduction = _.unescape(this.teacherData.introduction)
       })
     }
   }
@@ -266,6 +451,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dialog-footer {
+  display: flex;
+  padding-left: 25%;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+.dialog_box {
+  padding: 0 10px;
+  color: #606266;
+  font-size: 14px;
+  .dialog_box_icon-warning {
+    color: #e6a23c;
+    font-size: 24px !important;
+    margin-right: 12px;
+  }
+  .showBtn {
+    color: #227ffa;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .item_box {
+    color: #606266;
+    margin-top: 5px;
+  }
+}
 .compileLecturer {
   .compileLecturerr_head {
     height: 60px;

@@ -424,7 +424,6 @@ import {
   delTrain,
   stopSchedule
 } from '@/api/training/training'
-
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -1095,14 +1094,12 @@ $color_icon: #A0A8AE
     .draft_issue {
       padding-top: 25px;
       display: flex;
-      height: 600px;
-
+      height: 700px;
       .issue_l {
         position: relative;
         width: 20%;
-        border-right: 1px solid #ccc;
         overflow: hidden;
-        height: 620px;
+        height: 700px;
         .issue_l_tree {
           padding: 0 25px;
           /deep/.el-input {
