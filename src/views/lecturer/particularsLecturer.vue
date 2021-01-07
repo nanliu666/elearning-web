@@ -190,6 +190,9 @@ export default {
   created() {
     this.isgetTeacher()
   },
+  activated() {
+    this.isgetTeacher()
+  },
 
   methods: {
     // 启动/停用系统规则列表
@@ -258,6 +261,7 @@ export default {
       this.name = this.$route.query.name
       getTeacher(params).then((res) => {
         this.teacherData = res.teacherInfo
+        this.teacherData.introduction = _.unescape(this.teacherData.introduction)
         // console.log(res.teacherInfo);
       })
     }

@@ -401,6 +401,11 @@ export default {
     this.isqueryTeacherlist()
     this.islistTeacherCategory()
   },
+  activated() {
+    this.isgetTeacher()
+    this.isqueryTeacherlist()
+    this.islistTeacherCategory()
+  },
   methods: {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
@@ -550,7 +555,7 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
+
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {
           this.$message({
@@ -560,6 +565,7 @@ export default {
         } else {
           this.ruleForm.teacherId = this.$route.query.id
           this.ruleForm.userId = this.userIdData
+          this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
           update(this.ruleForm).then(() => {
             if (i) {
               this.toLecturer()

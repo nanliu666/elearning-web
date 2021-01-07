@@ -310,12 +310,12 @@ const TABLE_COLUMNS = [
   // },
   {
     label: '讲师级别',
-    prop: 'teacher_title',
+    prop: 'teacher_level',
     minWidth: 130
   },
   {
     label: '讲师职称',
-    prop: 'organizer',
+    prop: 'teacher_title',
     minWidth: 130
   },
   {
@@ -606,20 +606,38 @@ export default {
     },
     // 启动/停用系统规则列表
     iseditSysRulus(id, i) {
-      let params = {
-        id: '',
-        status: '' // '0 停用 1 正常',
-      }
-      params.id = id
-      params.status = i
-      editSysRulus(params).then(() => {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
+      // 启用弹框
+      if (i) {
+        this.$confirm('您确定要启用该讲师吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-        //刷新
-        this.islistTeacherCategory()
-      })
+          .then(() => {
+            let params = {
+              id: '',
+              status: '' // '0 停用 1 正常',
+            }
+            params.id = id
+            params.status = i
+            editSysRulus(params).then(() => {
+              this.$message({
+                message: `${i ? '停用' : '启动'}成功`,
+                type: 'success'
+              })
+              //刷新
+              this.islistTeacherCategory()
+            })
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+      } else {
+        // 停用弹框
+      }
     },
 
     // 查询讲师列表

@@ -529,7 +529,7 @@ export default {
         })
         this.islistTeacherCategory()
         this.expandedKeysData = []
-        this.expandedKeysData.push(data.parent_id)
+        if (data.parent_id) this.expandedKeysData.push(data.parent_id)
       })
     }
   }

@@ -569,7 +569,7 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
+
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {
           this.$message({
@@ -577,6 +577,7 @@ export default {
             type: 'warning'
           })
         } else {
+          this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
           addTeacher(this.ruleForm).then(() => {
             this.$message({
               message: '添加成功',
