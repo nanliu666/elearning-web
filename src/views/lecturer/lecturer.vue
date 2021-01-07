@@ -207,10 +207,10 @@
                 slot-scope="scope"
               >
                 <el-button
-                  v-if="scope.row.status == false"
+                  v-if="scope.row.status == 1"
                   type="text"
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row.idStr, 1)"
+                  @click.stop="iseditSysRulus(scope.row, 0)"
                 >
                   停用
                 </el-button>
@@ -218,7 +218,7 @@
                   v-else
                   style=" cursor:pointer; "
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row.idStr, 0)"
+                  @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
@@ -238,7 +238,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click.stop="isTeacherdelete(scope.row.idStr)"
+                  @click.stop="isTeacherdelete(scope.row)"
                 >
                   删除
                 </el-button>
@@ -248,11 +248,71 @@
         </div>
       </div>
     </div>
+
+    <!-- 停用弹框 -->
+    <el-dialog
+      title="提醒"
+      :visible.sync="blockDialogVisible"
+      append-to-body
+      width="420px"
+    >
+      <div class="dialog_box">
+        <i class="el-icon-warning dialog_box_icon-warning"></i>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训， 停用后需尽快对课程进行调整。
+          你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <div>
+          <div
+            class="showBtn"
+            @click="showBtnData = !showBtnData"
+          >
+            查看关联课程 <i
+              v-show="!showBtnData"
+              class="el-icon-arrow-down"
+            ></i>
+            <i
+              v-show="showBtnData"
+              class="el-icon-arrow-up"
+            ></i>
+          </div>
+          <div
+            v-for="(item, index) in CourseList"
+            v-show="showBtnData"
+            :key="index"
+            class="item_box"
+          >
+            {{ item.catalogName }}
+          </div>
+        </div>
+      </div>
+
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="blockDialogVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          v-show="!showBtnDel"
+          type="primary"
+          @click="RulusFn(rowData, 1)"
+        >
+          确 定
+        </el-button>
+        <el-button
+          v-show="showBtnDel"
+          type="primary"
+          @click="TeacherdeleteFn(rowData)"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { delCourseInfo } from '@/api/course/course'
+import { getCourseListData } from '@/api/course/course'
 import {
   listTeacherCategory,
   addCatalog,
@@ -465,6 +525,11 @@ export default {
   },
   data() {
     return {
+      CourseList: '',
+      blockDialogVisible: false,
+      showBtnData: false,
+      showBtnDel: false,
+      rowData: '',
       // 接口
       columnInterface: {
         listTeacherCategory, //查询讲师分类列表
@@ -591,10 +656,10 @@ export default {
       })
     },
 
-    // 删除讲师
-    isTeacherdelete(id) {
+    // 删除讲师fn
+    TeacherdeleteFn(id) {
       let params = {
-        ids: id
+        ids: id.idStr || id.teacherId
       }
       Teacherdelete(params).then(() => {
         this.$message({
@@ -602,9 +667,59 @@ export default {
           type: 'success'
         })
         this.islistTeacherCategory()
+        this.blockDialogVisible = false
       })
     },
-    // 启动/停用系统规则列表
+
+    // 删除讲师按钮
+    isTeacherdelete(id) {
+      getCourseListData({ teacherId: id.user_id_str, pageNo: 1, pageSize: 999 }).then((res) => {
+        // 如果没有课程
+        if (res.data.length === 0) {
+          this.$confirm('您确定要删除该讲师吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              this.TeacherdeleteFn(id)
+            })
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
+              })
+            })
+        } else {
+          // 如果有课程
+          this.blockDialogVisible = true
+          // teacherId
+          this.CourseList = res.data
+          this.showBtnDel = true
+          this.rowData = id
+        }
+      })
+    },
+    // 启动/停用方法
+    RulusFn(id, i) {
+      let params = {
+        id: '',
+        status: '' // '0 停用 1 正常',
+      }
+      params.id = id.idStr || id.teacherId
+      params.status = i
+      editSysRulus(params).then(() => {
+        this.$message({
+          message: `${i ? '停用' : '启动'}成功`,
+          type: 'success'
+        })
+        //刷新
+        this.islistTeacherCategory()
+        this.blockDialogVisible = false
+      })
+    },
+
+    // 启动/停用按钮
     iseditSysRulus(id, i) {
       // 启用弹框
       if (i) {
@@ -614,20 +729,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            let params = {
-              id: '',
-              status: '' // '0 停用 1 正常',
-            }
-            params.id = id
-            params.status = i
-            editSysRulus(params).then(() => {
-              this.$message({
-                message: `${i ? '停用' : '启动'}成功`,
-                type: 'success'
-              })
-              //刷新
-              this.islistTeacherCategory()
-            })
+            this.RulusFn(id, i)
           })
           .catch(() => {
             this.$message({
@@ -637,6 +739,34 @@ export default {
           })
       } else {
         // 停用弹框
+        // 先查讲师下面有没有课程
+        // 再弹框
+
+        getCourseListData({ teacherId: id.user_id_str, pageNo: 1, pageSize: 999 }).then((res) => {
+          // 如果没有课程
+          if (res.data.length === 0) {
+            this.$confirm('您确定要启用该讲师吗？', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(() => {
+                this.RulusFn(id, i)
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          } else {
+            // 如果有课程
+            this.blockDialogVisible = true
+            this.CourseList = res.data
+            this.showBtnDel = false
+            this.rowData = id
+          }
+        })
       }
     },
 
@@ -713,37 +843,7 @@ export default {
         this.islistTeacher(this.data[0].id)
       })
     },
-    // 编辑&删除&移动
-    handleCommand(e, row) {
-      if (e === 'edit') {
-        // 编辑
-      }
-      if (e === 'del') {
-        // 删除
-        this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            delCourseInfo({ courseId: row.catalogId }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-            })
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-      }
-      if (e === 'move') {
-        // 移动
-      }
-    },
+
     //  处理页码改变
     handleCurrentPageChange(param) {
       this.page.currentPage = param
@@ -861,6 +961,33 @@ $color_icon: #A0A8AE
         width: 1px
 </style>
 <style lang="scss" scoped>
+.dialog-footer {
+  display: flex;
+  padding-left: 25%;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+.dialog_box {
+  padding: 0 10px;
+  color: #606266;
+  font-size: 14px;
+  .dialog_box_icon-warning {
+    color: #e6a23c;
+    font-size: 24px !important;
+    margin-right: 12px;
+  }
+  .showBtn {
+    color: #227ffa;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .item_box {
+    color: #606266;
+    margin-top: 5px;
+  }
+}
+
 .trainingArrange {
   .box_title {
     height: 60px;
