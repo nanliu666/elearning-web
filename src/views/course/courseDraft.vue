@@ -169,9 +169,14 @@
               slot="passCondition"
               slot-scope="{ row }"
             >
-              <span v-if="row.passCondition === 'a'">教师评定</span>
-              <span v-if="row.passCondition === 'b'">考试通过</span>
-              <span v-if="row.passCondition === 'c'">达到课程学时</span>
+              <span
+                v-for="(item, index) in row.passCondition.split(',')"
+                :key="index"
+              >
+                <span v-if="item == 'a'">教师评定,</span>
+                <span v-if="item == 'b'">考试通过,</span>
+                <span v-if="item == 'c'">达到课程学时</span>
+              </span>
             </template>
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
             <template

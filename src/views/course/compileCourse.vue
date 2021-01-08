@@ -815,6 +815,9 @@ export default {
         data.contents = data.content
         this.catalogName = data.catalogId
         data.catalogId = this.$route.query.catalogName
+        // 富方本回显
+        data.introduction = _.unescape(data.introduction)
+        data.thinkContent = _.unescape(data.thinkContent)
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -858,7 +861,7 @@ export default {
         if (valid) {
           let i = {
             localName: this.addArticle.localName,
-            content: this.addArticle.content
+            content: _.escape(this.addArticle.content)
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
