@@ -610,6 +610,9 @@ export default {
                 isLatestTeacher: 0,
                 isPopularTeacher: 0
               }
+              setTimeout(() => {
+                this.$refs.ruleForm.clearValidate()
+              }, 100)
             }
           })
         }

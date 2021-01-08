@@ -32,6 +32,7 @@
           ></leftColumn> -->
 
           <my-column
+            v-if="myColumnShow"
             :column-interface="columnInterface"
             @treeClick="treeClick"
           ></my-column>
@@ -530,6 +531,7 @@ export default {
       showBtnData: false,
       showBtnDel: false,
       rowData: '',
+      myColumnShow: true,
       // 接口
       columnInterface: {
         listTeacherCategory, //查询讲师分类列表
@@ -611,7 +613,9 @@ export default {
   created() {
     this.islistTeacherCategory()
   },
-  activated() {},
+  activated() {
+    this.islistTeacherCategory()
+  },
   methods: {
     treeClick(val) {
       this.islistTeacher(val)
@@ -658,6 +662,7 @@ export default {
 
     // 删除讲师fn
     TeacherdeleteFn(id) {
+      this.myColumnShow = false
       let params = {
         ids: id.idStr || id.teacherId
       }
@@ -668,6 +673,7 @@ export default {
         })
         this.islistTeacherCategory()
         this.blockDialogVisible = false
+        this.myColumnShow = true
       })
     },
 
@@ -745,7 +751,7 @@ export default {
         getCourseListData({ teacherId: id.user_id_str, pageNo: 1, pageSize: 999 }).then((res) => {
           // 如果没有课程
           if (res.data.length === 0) {
-            this.$confirm('您确定要启用该讲师吗？', '提示', {
+            this.$confirm('您确定要停用该讲师吗？', '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
               type: 'warning'

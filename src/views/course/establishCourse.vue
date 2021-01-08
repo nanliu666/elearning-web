@@ -876,7 +876,7 @@ export default {
         if (valid) {
           let i = {
             localName: this.addArticle.localName,
-            content: this.addArticle.content
+            content: _.escape(this.addArticle.content)
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
