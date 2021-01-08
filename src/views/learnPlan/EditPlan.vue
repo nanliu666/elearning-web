@@ -114,12 +114,14 @@ const defaultFormData = {
   endTime: '',
   sponsor: '',
   creatorName: '',
+  createTime: null,
   startTime: '',
   participantsList: [],
   courseList: [],
   timeRange: '' // 时间范围
 }
 export default {
+  name: 'EditPlan',
   components: {
     EditBasicInfo,
     EditCourse,
@@ -143,6 +145,7 @@ export default {
           icon: 'icon-approval-flow-outlined'
         }
       ],
+      timer: null,
       formData: _.cloneDeep(defaultFormData)
     }
   },
@@ -168,10 +171,19 @@ export default {
       this.setupDefaultFields()
     }
   },
+  destroyed() {
+    clearInterval(this.timer)
+  },
   methods: {
     setupDefaultFields() {
       this.formData.creatorName = this.userInfo.user_name
-      this.formData.coursePlanNo = moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id
+      this.formData.coursePlanNo =
+        moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
+      let that = this
+      this.timer = setInterval(() => {
+        if (that.id) return
+        that.formData.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
+      }, 1000)
     },
     exit() {
       this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {

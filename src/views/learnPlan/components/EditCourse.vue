@@ -211,9 +211,9 @@ export default {
           required: true
         },
         {
-          prop: 'startTime',
+          prop: 'timeRange',
           itemType: 'datePicker',
-          type: 'dateRange',
+          type: 'daterange',
           label: '开课时间',
           required: true
         },
@@ -354,6 +354,9 @@ export default {
       top: 0;
     }
   }
+  /deep/.el-collapse {
+    border-bottom: none;
+  }
   .layout_header {
     &::after {
       content: '';
@@ -377,7 +380,12 @@ export default {
     }
   }
   .layout_content {
+    /deep/.el-collapse-item {
+      margin-bottom: 4px;
+    }
     .layout_content_label {
+      background: #fafafa;
+      border-bottom: 1px solid #ebeced;
       width: 100%;
       position: relative;
       /deep/.el-checkbox {
@@ -402,6 +410,7 @@ export default {
       }
     }
     .layout_content_detail {
+      padding-top: 16px;
       /deep/.el-tabs {
         .tab_list {
           height: 40px;

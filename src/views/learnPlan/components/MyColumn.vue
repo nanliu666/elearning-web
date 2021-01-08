@@ -39,7 +39,6 @@
               class="tree_input"
             >
               <el-input
-                id="addSon"
                 v-model="dataAddCatalog.input"
                 placeholder="请输入分类名称"
                 maxlength="20"

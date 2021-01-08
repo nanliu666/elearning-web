@@ -45,7 +45,7 @@ export default {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
-          required: false,
+          required: true,
           offset: 4
         },
         {
@@ -70,13 +70,14 @@ export default {
         },
         {
           prop: 'courseCatalogId',
-          itemType: 'select',
+          itemType: 'cascader',
           label: '所属分类',
           options: [],
           props: {
-            label: 'name',
-            value: 'id'
+            value: 'id',
+            emitPath: false
           },
+          showAllLevels: false,
           offset: 4,
           required: true
         },
@@ -124,8 +125,34 @@ export default {
     },
     getCategoryData() {
       getCatalogs().then((res) => {
-        this.categoryData = res
-        this.columns[5].options = res
+        let data = []
+        res.group.forEach((item) => {
+          if (!item.id) {
+            return
+          }
+          data.push({
+            id: item.idStr,
+            label: item.name,
+            btnshow: 1,
+            children: [],
+            count: item.count
+          })
+        })
+        data.forEach((item) => {
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+          filterArr = filterArr.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0,
+              count: item.count
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
+        this.categoryData = data
+        this.columns[5].options = data
       })
     }
   }
