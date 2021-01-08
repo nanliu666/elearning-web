@@ -85,7 +85,6 @@
               <el-select
                 v-model="ruleForm.teacherId"
                 placeholder="请选择讲师"
-                filterable
               >
                 <el-option
                   v-for="(item, index) in TeacherData"
@@ -307,7 +306,7 @@
                   </div>
                 </div>
                 <img
-                  v-if="ruleForm.imageUrl[1]"
+                  v-if="ruleForm.imageUrl[0]"
                   :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                   class="avatar"
                 />
@@ -345,13 +344,20 @@
         <div id="upContent">
           <div class="up_head">
             <span>章节内容</span>
-            <el-button
-              type="primary"
-              size="medium"
-              @click="addArticleBtn"
-            >
-              添加章节
-            </el-button>
+            <div>
+              <common-upload class="upload-more" multiple @on-error="onBUError" @on-progress="onBUProgress">
+                <el-button size="medium">
+                  批量上传课件
+                </el-button>
+              </common-upload>
+                <el-button
+                  type="primary"
+                  size="medium"
+                  @click="addArticleBtn"
+                >
+                  添加章节
+                </el-button>
+            </div>
           </div>
 
           <!-- 表格 -->
@@ -442,14 +448,13 @@
                       :before-upload="CoursewareUpload"
                       :multiple="false"
                     >
-                      <el-button type="text">
-                        {{
-                          scope.row.upLoad[0]
-                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : '上传课件'
-                        }}
-                      </el-button>
+                      <el-button type="text">{{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '上传课件'
+                      }}</el-button>
                     </common-upload>
+
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value === 3"
                       v-model="scope.row.upLoad"
@@ -461,7 +466,7 @@
                           scope.row.upLoad[0]
                             ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
                             : '上传资料'
-                        }}
+                        }} 
                       </el-button>
                     </common-upload>
                     <el-button
@@ -469,7 +474,7 @@
                       type="text"
                     >关联考试</el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value == 5"
+                      v-if="typeOption[scope.row.type - 1].value === 5"
                       v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"
@@ -503,12 +508,17 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                    <span v-if="typeOption[scope.row.type - 1].value === 2 && isNaN(scope.row.upLoad[0].percent)">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
                           : ''
                       }}</span>
+                    </span>
+
+                    <span v-if="typeOption[scope.row.type - 1].value === 2 && !isNaN(scope.row.upLoad[0].percent)">
+                      <el-progress :percentage="scope.row.upLoad[0].percent" v-if="scope.row.upLoad[0].percent < 100" :format="() => progressFormat(scope.row.upLoad[0].percent)"></el-progress>
+                      <span v-else>{{scope.row.upLoad[0].localName}}</span>
                     </span>
                   </span>
 
@@ -584,7 +594,6 @@
               </template>
             </el-table-column>
           </el-table>
-
           <!-- 添加文章 -->
           <el-dialog
             title="添加文章"
@@ -693,14 +702,6 @@ export default {
           name: '资料下载',
           value: 3
         }
-        // {
-        //   name: '考试',
-        //   value: 4
-        // },
-        // {
-        //   name: '视频',
-        //   value: 5
-        // }
       ],
       // 填写课程信息
       AddArticleBtntableIndex: '',
@@ -715,8 +716,8 @@ export default {
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
-        period: undefined, //时长
-        credit: undefined, //学分
+        period: '', //时长
+        credit: '', //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -762,6 +763,7 @@ export default {
       handler() {
         this.$nextTick(() => {
           this.$refs.ruleForm.clearValidate()
+          // this.$refs.ruleForm.resetFields()
         })
       },
       immediate: true,
@@ -779,9 +781,7 @@ export default {
     }
   },
 
-  created() {
-    this.isdeleteData()
-  },
+  created() {},
   activated() {
     this.isdeleteData()
     this.isgetCourseTags()
@@ -792,6 +792,56 @@ export default {
   },
 
   methods: {
+    progressFormat(percentage) {
+      return `已上传 ${percentage}%`;
+    },
+    onBUError(file) {
+      const { name, uid } = file
+      const contents = this.ruleForm.contents
+      if (!contents.find(item => item.uid === uid)) {
+        contents.push({
+          url: '',
+          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          sort: '', //序号
+          type: 2, //章节类型
+          name: '社区的商业模式', // 章节名称
+          content: '', //文章内容
+          upLoad: [{
+            localName: name,
+            uid,
+            percent: 0
+          }], //[url,localName],  //所有上传的文件
+          saveOrcompile: 1, // 1保存&0编辑
+          uid
+        })
+      }
+      this.$forceUpdate()
+    },
+    onBUProgress(file) {
+      const { percent, name, uid } = file
+      const contents = this.ruleForm.contents
+      let cur
+      if (cur = contents.find(item => item.uid === uid)) {
+        cur.upLoad[0].percent = percent
+      } else {
+        contents.push({
+          url: '',
+          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          sort: '', //序号
+          type: 2, //章节类型
+          name: '社区的商业模式', // 章节名称
+          content: '', //文章内容
+          upLoad: [{
+            localName: name,
+            uid,
+            percent
+          }], //[url,localName],  //所有上传的文件
+          saveOrcompile: 1, // 1保存&0编辑
+          uid
+        })
+      }
+      this.$forceUpdate()
+    },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
@@ -876,7 +926,7 @@ export default {
         if (valid) {
           let i = {
             localName: this.addArticle.localName,
-            content: _.escape(this.addArticle.content)
+            content: this.addArticle.content
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
@@ -919,19 +969,23 @@ export default {
       params.contents.forEach((item) => {
         delete item.upLoad
       })
+      // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
+      // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
-      // 富文本要转换传后端
-      params.introduction = _.escape(params.introduction)
-      params.thinkContent = _.escape(params.thinkContent)
+      // params.tagIds = params.tagIds.join(',')
 
       // 草稿
       if (status === 2) {
-        this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
-          confirmButtonText: '保存',
-          cancelButtonText: '不保存',
-          type: 'warning'
-        })
+        this.$confirm(
+          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
+          '提示',
+          {
+            confirmButtonText: '保存',
+            cancelButtonText: '不保存',
+            type: 'warning'
+          }
+        )
           .then(() => {
             params.status = status
 
@@ -989,46 +1043,37 @@ export default {
 
     // 清空数据
     isdeleteData() {
-      this.resetForm()
       this.ruleForm = {
         imageUrl: [{}], //图片
-        url: null,
+        url: '',
         localName: '',
-        catalogId: null,
+        catalogId: '',
         electiveType: '',
         thinkContent: '', //课前思考内容
-        introduction: ' ', //课程介绍
+        introduction: '', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
-        period: undefined, //时长
-        credit: undefined, //学分
+        period: '', //时长
+        credit: '', //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
         teacherId: '', //讲师id
         // 表格
         contents: [
-          // {
-          //   // url: '',
-          //   // localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-          //   // sort: '', //序号
-          //   // type: '', //章节类型
-          //   // name: '', // 章节名称
-          //   // content: '', //文章内容
-          //   upLoad: [] //[url,localName],  //所有上传的文件
-          //   // saveOrcompile: 0 // 1保存&0编辑
-          // }
+          {
+            url: '',
+            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+            sort: '', //序号
+            type: '', //章节类型
+            name: '', // 章节名称
+            content: '', //文章内容
+            upLoad: [], //[url,localName],  //所有上传的文件
+            saveOrcompile: 0 // 1保存&0编辑
+          }
         ]
       }
-    },
-    resetForm() {
-      // this.$refs['ruleForm'].resetField()
-      this.parentOrgIdLabel = ''
-      this.$nextTick(() => {
-        this.$refs['ruleForm'].resetFields()
-        this.$refs['ruleForm'].clearValidate()
-      })
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
@@ -1149,6 +1194,9 @@ export default {
           return false
         }
       })
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
     }
   }
 }
@@ -1270,6 +1318,11 @@ export default {
     .up_head {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 12px;;
+      .upload-more {
+        margin-right: 5px;
+        display: inline-block;
+      }
     }
 
     #type_select {
