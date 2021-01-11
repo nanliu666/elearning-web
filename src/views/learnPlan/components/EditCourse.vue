@@ -82,6 +82,7 @@
                   :key="index"
                   v-model="time.list"
                   type="daterange"
+                  value-format="yyyy-MM-dd HH:mm:ss"
                   range-separator="至"
                   start-placeholder="开始时间"
                   end-placeholder="结束时间"
@@ -95,30 +96,28 @@
                 name="first"
               >
                 <div
-                  v-for="(list, indexs) in course.examList"
+                  v-for="(exam, indexs) in course.examList"
                   :key="indexs"
                   class="tab_list clearfix"
                 >
-                  {{ list.name }}
+                  {{ exam.examName }}
                   <div class="tab_right">
-                    <span>预览</span><span>编辑</span>
-                    <el-dropdown @command="commandClick">
+                    <span @click="handleViewTextPaper(course, exam)">预览</span>
+                    <span @click="handleExamEdit(course, exam)">编辑</span>
+                    <el-dropdown @command="handleExamCommand(course, indexs, $event)">
                       <i class="el-icon-more"></i>
                       <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="a">
-                          人员列表
-                        </el-dropdown-item>
-                        <el-dropdown-item command="b">
-                          前置条件
-                        </el-dropdown-item>
-                        <el-dropdown-item command="c">
+                        <el-dropdown-item command="del">
                           删除
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </el-dropdown>
                   </div>
                 </div>
-                <div class="tabsAddBtn">
+                <div
+                  class="exam-add"
+                  @click="handleExamEdit(course)"
+                >
                   添加
                 </div>
               </el-tab-pane>
@@ -159,6 +158,11 @@
       :visible.sync="courseDialogVisible"
       @submit="handleCourseSelectSubmit"
     />
+    <EditExamineDrawer
+      :visible.sync="examDrawerVisible"
+      :examine="editingExam"
+      @submit="handleExamineSubmit"
+    />
   </basicContainer>
 </template>
 
@@ -166,6 +170,7 @@
 import CourseSelectDialog from './CourseSelectDialog'
 import CoursePreCourseDialog from './CoursePreCourseDialog'
 import CourseBatchEditDialog from './CourseBatchEditDialog'
+import EditExamineDrawer from '@/views/training/components/drawerComponents/editExamineDrawer'
 const COURSE_TEMPLATE = {
   timeRange: [], //开课日期
   passRule: [], // 通过条件
@@ -175,10 +180,18 @@ const COURSE_TEMPLATE = {
   timeList: [{ list: [] }, { list: [] }, { list: [] }]
 }
 export default {
+  name: 'EditCourse',
   components: {
     CourseSelectDialog,
     CoursePreCourseDialog,
-    CourseBatchEditDialog
+    CourseBatchEditDialog,
+    EditExamineDrawer
+  },
+  props: {
+    planId: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
@@ -187,6 +200,9 @@ export default {
       batchDialogVisible: false, // 批量操作的弹窗标记
       precondDialogVisible: false, // 前置条件弹窗隐藏和显示
       settingPreCourse: null, // 当前要设置前置条件的课程
+      examDrawerVisible: false, // 考试编辑弹窗编辑
+      editingExamCourse: null, // 当前要编辑考试的课程
+      editingExam: null, // 当前要编辑考试
       courseList: [],
       checkAll: false,
       checkedCourseIds: [],
@@ -214,6 +230,7 @@ export default {
           prop: 'timeRange',
           itemType: 'datePicker',
           type: 'daterange',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '开课时间',
           required: true
         },
@@ -236,12 +253,72 @@ export default {
   },
   computed: {},
   methods: {
+    // 考试安排提交后
+    handleExamineSubmit(data, type) {
+      if (type == 'add') {
+        this.editingExamCourse.examList.push(data)
+        this.editingExamCourse = null
+      } else {
+        let index = _.findIndex(this.editingExamCourse.examList, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.editingExamCourse.examList, index, data)
+        this.editingExamCourse = null
+        this.editingExam = null
+      }
+    },
+    // handleViewTextPaper(course, exam) {},
+    handleExamEdit(course, exam) {
+      this.editingExamCourse = course
+      this.editingExam = exam || null
+      this.examDrawerVisible = true
+    },
+    handleExamCommand(course, index, command) {
+      if (command === 'del') {
+        course.examList.splice(index, 1)
+      }
+    },
     replaceCourse(course) {
       this.replacingCourse = course
       this.courseDialogVisible = true
     },
     setCourseList(list) {
-      this.courseList = list
+      const res = _.map(list, (course) => {
+        let _course = {
+          ...course,
+          timeRange: [course.startTime, course.endTime],
+          timeList: _.map(course.timeList, (time) => ({
+            ...time,
+            list: [time.startTime, time.endTime]
+          })),
+          beforeCourse: _.map(course.beforeCourse, (c) => ({ courseId: c.courseId, required: 1 }))
+        }
+        return _course
+      })
+      this.courseList = res
+    },
+    getData() {
+      const data = _.map(this.courseList, (course) => {
+        let _course = {
+          id: course.id,
+          studyFrequency: course.studyFrequency,
+          passRule: course.passRule,
+          studyPlanId: this.planId,
+          startTime: course.timeRange[0],
+          endTime: course.timeRange[1],
+          examList: _.map(course.examList, (exam) => ({ ...exam, studyPlanCourseId: course.id })),
+          timeList: _.map(course.timeList, (time) => ({
+            startTime: time.list[0],
+            endTime: time.list[1],
+            id: time.id,
+            studyPlanCourseId: course.id
+          })),
+          beforeCourse: _.map(course.beforeCourse, 'courseId'),
+          beforeCourseName: _.map(course.beforeCourse, 'courseName')
+        }
+        return _course
+      })
+      return data
     },
     handleCourseSelectSubmit(selected) {
       if (this.replacingCourse) {
@@ -432,7 +509,7 @@ export default {
             }
           }
         }
-        .tabsAddBtn {
+        .exam-add {
           width: 100%;
           height: 42px;
           line-height: 42px;

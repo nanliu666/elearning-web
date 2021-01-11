@@ -25,6 +25,7 @@
 
 <script>
 import { getCatalogs } from '@/api/learnPlan'
+import { filterTree } from '@/util/util'
 export default {
   props: {
     model: {
@@ -51,6 +52,7 @@ export default {
         {
           prop: 'timeRange',
           itemType: 'datePicker',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           type: 'daterange',
           label: '时间范围',
           required: true
@@ -69,7 +71,7 @@ export default {
           required: false
         },
         {
-          prop: 'courseCatalogId',
+          prop: 'categoryId',
           itemType: 'cascader',
           label: '所属分类',
           options: [],
@@ -97,7 +99,7 @@ export default {
           required: false
         },
         {
-          prop: 'date1',
+          prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
           required: false
@@ -106,10 +108,20 @@ export default {
       categoryData: []
     }
   },
+  watch: {
+    'model.courseCatalogId': {
+      immediate: true,
+      handler(val) {
+        const node = filterTree(this.categoryData, (node) => node.id === val, true)[0]
+        if (node) {
+          this.$set(this.model, 'courseCatalogName', node.label)
+        }
+      }
+    }
+  },
   created() {
     this.getCategoryData()
   },
-
   methods: {
     getData() {
       return new Promise((resolve, reject) => {

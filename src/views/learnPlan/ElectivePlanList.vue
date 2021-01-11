@@ -37,7 +37,7 @@
           <el-button
             type="text"
             size="medium"
-            @click="handleDelete(row)"
+            @click="handleDelete([row])"
           >
             删除
           </el-button>
@@ -49,8 +49,9 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { queryLog } from '@/api/learnPlan'
+import { queryLog, delLog } from '@/api/learnPlan'
 
+import { getOrgTreeSimple } from '../../api/org/org'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -96,9 +97,9 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入课程名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name1',
+    field: 'coursePlanName',
     label: '',
     type: 'input'
   }
@@ -106,19 +107,35 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'input',
-    field: 'name',
+    field: 'userName',
     label: '用户姓名',
     data: ''
   },
   {
-    type: 'select',
-    field: 'courseId',
+    type: 'treeSelect',
+    field: 'departmentId',
     label: '组织名称',
     data: '',
-    options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
-    ]
+    config: {
+      selectParams: {
+        placeholder: '请输入内容',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'orgName',
+          disabled: 'disabled',
+          value: 'orgId'
+        }
+      }
+    }
   },
   {
     type: 'input',
@@ -158,13 +175,7 @@ export default {
         total: 0
       },
       // 请求参数
-      queryInfo: {
-        courseName: '',
-        courseId: '',
-        phonenum: '',
-        name: ''
-        // courseCatalogId: ''
-      },
+      queryInfo: {},
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
@@ -177,19 +188,36 @@ export default {
     // this.initSearchData()
     this.loadTableData()
   },
+  created() {
+    this.loadOrgData()
+  },
   methods: {
+    loadOrgData() {
+      getOrgTreeSimple({ parentOrgId: 0 }).then(
+        (res) =>
+          (this.searchPopoverConfig.popoverOptions[1].config.treeParams.data = _.concat(
+            [
+              {
+                orgName: '全部',
+                orgId: ''
+              }
+            ],
+            res
+          ))
+      )
+    },
     /**
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.page.currentPage = param
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.page.size = param
       this.loadTableData()
     },
     /**
@@ -201,11 +229,23 @@ export default {
       this.loadTableData()
     },
     // 跳去详情
-    jumpDetail({ id }) {
+    jumpDetail(row) {
       this.$router.push({
-        path: '/repository/knowledgeDetail',
-        query: { id }
+        path: '/course/detail',
+        query: { id: row.coursePlanNo }
       })
+    },
+    handleDelete(selection) {
+      // 删除学习计划
+      delLog({ ids: _.map(selection, 'id').join(',') })
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.loadTableData()
+        })
+        .catch()
     },
     // 加载表格数据
     async loadTableData() {

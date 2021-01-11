@@ -35,7 +35,7 @@
         <el-button
           v-if="!id"
           size="medium"
-          @click="publish('draft')"
+          @click="handleSubmit(1)"
         >
           存草稿
         </el-button>
@@ -58,7 +58,7 @@
           v-if="activeStep === 2"
           size="medium"
           type="primary"
-          @click="publish(0)"
+          @click="handleSubmit(0)"
         >
           发布
         </el-button>
@@ -86,10 +86,13 @@
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
+          :plan-id="id"
         />
         <EditPerson
           v-show="activeStep === 2"
           ref="editPerson"
+          :plan-id="id"
+          :user-list.sync="formData.participantsList"
         />
       </el-col>
     </el-row>
@@ -118,7 +121,7 @@ const defaultFormData = {
   startTime: '',
   participantsList: [],
   courseList: [],
-  timeRange: '' // 时间范围
+  timeRange: [] // 时间范围
 }
 export default {
   name: 'EditPlan',
@@ -164,6 +167,14 @@ export default {
       parentObj: this
     }
   },
+  watch: {
+    'formData.timeRange': {
+      handler(data) {
+        this.$store.commit('SET_TRAIN_TIME', data)
+      },
+      deep: true
+    }
+  },
   created() {
     if (this.id) {
       this.getPlanDetail()
@@ -198,21 +209,26 @@ export default {
         .catch(() => {})
     },
     handlePreviousStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
-      })
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
 
     handleNextStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      if (this.activeStep === 0) {
+        this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+          this.activeStep = 1
+        })
+      } else {
         this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
-      })
+      }
     },
+    // 0-发布，1-草稿箱
     handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
       let [startTime, endTime] = data.timeRange
       data.startTime = startTime
       data.endTime = endTime
+      data.type = type
+      data.courseList = this.$refs['editCourse'].getData()
       let func
       if (this.id) {
         func = updatePlan
@@ -228,7 +244,7 @@ export default {
             this.resetData()
           }, 1000)
         })
-        .catch((err) => window.console.log(err))
+        .catch()
     },
     resetData() {
       this.formData = _.cloneDeep(defaultFormData)
@@ -238,13 +254,11 @@ export default {
       // 获取学习计划详情
       planDetail({ id: this.id })
         .then((res) => {
+          res.timeRange = [res.startTime, res.endTime]
           this.formData = res
-          let formData = this.formData
-          formData.timeRange = [formData.startTime, formData.endTime]
+          this.$refs.editCourse.setCourseList(res.courseList)
         })
-        .catch((err) => {
-          window.console.log(err)
-        })
+        .catch()
         .finally(() => {
           this.loading = false
         })

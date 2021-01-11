@@ -122,7 +122,7 @@ export default {
     .precondition_container {
       .container_title {
         text-align: center;
-        background-color: rgb(207, 201, 201);
+        background: #fafafa;
         // color: #fff;
         line-height: 40px;
       }

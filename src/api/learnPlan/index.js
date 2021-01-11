@@ -69,10 +69,27 @@ export const queryPercentageComplete = (params) =>
 export const queryLog = (params) => get('/api/manage/v1/study/plan/course/queryLog', params)
 
 /**
+ * 选修课删除
+ * @param {Object} params - 参数
+ * */
+export const delLog = (params) => del('/api/manage/v1/study/plan/course/delLog', params)
+
+/**
+ * 选修课浏览记录添加
+ * @param {Object} params - 参数
+ * */
+export const addLog = (params) => del('/api/manage/v1/study/plan/course/addLog', params)
+
+/**
  * 删除学习计划
  * @param {Object} params - 参数
  * */
 export const deletePlan = (params) => del('/api/manage/v1/study/plan/deletePlan', params)
+/**
+ * 发布学习计划
+ * @param {Object} params - 参数
+ * */
+export const releasePlan = (params) => del('/api/manage/v1/study/plan/release', params)
 
 /**
  * 查询学习计划详情

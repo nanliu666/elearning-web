@@ -257,6 +257,7 @@
                       :option-list.sync="item.optionList"
                       :placeholder="item.placeholder"
                       :option-props="item.optionProps"
+                      :searchable="item.searchable"
                     />
                   </el-form-item>
                 </el-col>
