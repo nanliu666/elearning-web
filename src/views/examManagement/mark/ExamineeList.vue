@@ -264,6 +264,10 @@ export default {
   computed: {
     ...mapGetters(['userId'])
   },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
+  },
   async activated() {
     this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
     this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })

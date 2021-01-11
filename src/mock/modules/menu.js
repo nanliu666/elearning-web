@@ -566,7 +566,6 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             path: '/training/trainingArrange',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],

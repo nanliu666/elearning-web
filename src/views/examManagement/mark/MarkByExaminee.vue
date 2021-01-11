@@ -5,16 +5,16 @@
       show-back
     />
     <el-card
-      v-if="!_.isEmpty(paperData.examineeAchievementDO)"
+      v-if="!_.isEmpty(examineeAchievementDO)"
       class="examinee-card"
     >
       <div class="heder">
-        <span>{{ paperData.examineeAchievementDO.examName }}</span>
+        <span>{{ examineeAchievementDO.examName }}</span>
         <el-tag
-          :type="getTag(paperData.examineeAchievementDO.status).type"
+          :type="getTag(examineeAchievementDO.status).type"
           style="margin-left: 10px"
         >
-          {{ getTag(paperData.examineeAchievementDO.status).label }}
+          {{ getTag(examineeAchievementDO.status).label }}
         </el-tag>
       </div>
       <ul class="card-ul">
@@ -28,90 +28,158 @@
         </li>
         <li class="card-li">
           <span class="li-label">归属组织：</span>
-          <span class="li-value">{{ paperData.examineeAchievementDO.dept }}</span>
+          <span class="li-value">{{ examineeAchievementDO.dept }}</span>
         </li>
         <li class="card-li">
           <span class="li-label">考试用卷：</span>
-          <span class="li-value">{{ paperData.examineeAchievementDO.paperName }}</span>
+          <span class="li-value">{{ examineeAchievementDO.paperName }}</span>
         </li>
         <li class="card-li">
           <span class="li-label">考试时间：</span>
           <span class="li-value">
-            <span>{{ paperData.examineeAchievementDO.examBeginTime }}</span>
+            <span>{{ examineeAchievementDO.examBeginTime }}</span>
             <span>~</span>
-            <span>{{ paperData.examineeAchievementDO.examEndTime }}</span>
+            <span>{{ examineeAchievementDO.examEndTime }}</span>
           </span>
         </li>
         <li class="card-li">
           <span class="li-label">考试用时：</span>
           <span class="li-value">
-            {{
-              moment(paperData.examineeAchievementDO.examEndTime).diff(
-                moment(paperData.examineeAchievementDO.examBeginTime),
-                'minutes'
-              )
-            }}
+            {{ getExamUseTime() }}
           </span>
         </li>
         <li class="card-li">
           <span class="li-label">试卷总分：</span>
-          <span class="li-value">{{ paperData.examineeAchievementDO.totalScore }}</span>
+          <span class="li-value">{{ examineeAchievementDO.totalScore }}</span>
         </li>
       </ul>
     </el-card>
     <el-card
-      v-if="paperData.keguan"
+      v-if="examData.keguan"
       class="paper-card"
     >
       <div
-        slot="header"
         class="card-header"
+        :style="{ 'padding-bottom': isShowImpersonality ? '16px' : '' }"
       >
         <div class="card-left">
           <span class="title">客观题部分</span>
           <span class="sub-title">
-            <span>（共{{ paperData.keguan }}题</span>
-            <span>共{{ paperData.scoreKeguan }}分）</span>
+            <span>（共{{ examData.keguan }}题</span>
+            <span v-if="examData.scoreKeguan">共{{ examData.scoreKeguan }}分）</span>
           </span>
         </div>
-        <div class="card-right">
-          <i class="el-icon-arrow-down" />
-          <span style="margin-left:8px">展开</span>
+        <div
+          class="card-right"
+          @click="isShowImpersonality = !isShowImpersonality"
+        >
+          <i :class="`el-icon-arrow-${isShowImpersonality ? 'up' : 'down'}`" />
+          <span
+            class="expand-text"
+            style="margin-left:8px"
+          >{{
+            isShowImpersonality ? '收起' : '展开'
+          }}</span>
         </div>
       </div>
-      <ul class="card-content">
+      <ul
+        v-if="isShowImpersonality"
+        class="card-content"
+      >
         <li
-          v-for="(item, index) in markDetails.qustionList"
+          v-for="(item, index) in impersonalityList"
           :key="index"
           class="card-li"
         >
           <div class="card-title">
             <span>{{ (index + 1) | number2zhcn }}、</span>
-            <span>{{ item.type | typeFilter }}</span>
-            <span>（每题{{ item.score / 10 }}分，共{{ item.length }}题）</span>
+            <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
+            <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
           </div>
           <div class="card-sub-title">
-            {{ item.subTitle }}
+            {{ _.get(item, '[0].title', null) }}
           </div>
-          <div class="stem-main">
-            <span>{{ index + 1 }}.</span>
-            <span v-html="item.qustionStem" />
-            <el-tooltip
-              class="item"
-              effect="dark"
-              :content="`试题分析：${item.tips || '暂无'}`"
-              placement="top-start"
+          <ul class="content-box">
+            <li
+              v-for="(conItem, conIndex) in item"
+              :key="conItem.id"
+              class="content-li"
             >
-              <el-button type="text">
-                [查看试题分析]
-              </el-button>
-            </el-tooltip>
+              <span>{{ conIndex + 1 }}.</span>
+              <span>（{{ conItem.scoreQuestion }}分）</span>
+              <QustionPreview
+                :data="conItem"
+                type="view"
+              />
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </el-card>
+    <el-card
+      v-if="examData.zhuguan"
+      class="paper-card"
+    >
+      <div
+        class="card-header"
+        :style="{ 'padding-bottom': '16px' }"
+      >
+        <div class="card-left">
+          <span class="title">主观题部分</span>
+          <span class="sub-title">
+            <span>（共{{ examData.zhuguan }}题</span>
+            <span v-if="examData.scoreZhuguan">共{{ examData.scoreZhuguan }}分）</span>
+          </span>
+        </div>
+      </div>
+      <ul class="card-content">
+        <li
+          v-for="(item, index) in subjectivityList"
+          :key="index"
+          class="card-li"
+        >
+          <div class="card-title">
+            <span>{{ (index + 1) | number2zhcn }}、</span>
+            <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
+            <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
           </div>
-          <div class="standard-class">
-            <span class="standard-label"> 标准答案：</span>
-            <span class="standard-value">{{ item.standard }}</span>
+          <div class="card-sub-title">
+            {{ _.get(item, '[0].title', null) }}
           </div>
-          <mark-com :answer="item.answer" />
+          <ul class="content-box">
+            <li
+              v-for="(conItem, conIndex) in item"
+              :key="conItem.id"
+              class="content-li"
+            >
+              <span>{{ conIndex + 1 }}.</span>
+              <span>（{{ conItem.scoreQuestion }}分）</span>
+              <QustionPreview
+                v-if="QUESTION_TYPE_GROUP !== conItem.type"
+                :data="conItem"
+                type="view"
+              />
+              <span v-else>
+                <span
+                  class="right-title"
+                  v-html="_.unescape(conItem.content)"
+                ></span>
+                <ul>
+                  <li
+                    v-for="(paperItem, paperIndex) in conItem.subQuestions"
+                    :key="paperIndex"
+                    class=""
+                  >
+                    <span>{{ paperIndex + 1 }}.</span>
+                    <QustionPreview
+                      :data="paperItem"
+                      type="view"
+                    />
+                  </li>
+                </ul>
+              </span>
+            </li>
+          </ul>
         </li>
       </ul>
     </el-card>
@@ -121,20 +189,28 @@
 <script>
 // 逐人评卷
 const nzhcn = require('nzh/cn')
-import { QUESTION_TYPE_MAP } from '@/const/examMange'
-import MarkCom from './components/MarkCom'
 import { getExamineePaperDetail, getExamineePaperDetailist } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
 import moment from 'moment'
+import QustionPreview from './components/questionPreview'
 const STATUS_STATUS = [
   { value: '3', label: '待评卷', type: 'success' },
   { value: '4', label: '阅卷中', type: 'danger' },
   { value: '5', label: '已评卷', type: 'info' }
 ]
+import {
+  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MULTIPLE,
+  QUESTION_TYPE_SINGLE,
+  QUESTION_TYPE_JUDGE,
+  QUESTION_TYPE_SHOER,
+  QUESTION_TYPE_BLANK,
+  QUESTION_TYPE_GROUP
+} from '@/const/examMange'
 export default {
   name: 'MarkByExaminee',
   components: {
-    MarkCom
+    QustionPreview
   },
   filters: {
     typeFilter(data) {
@@ -146,37 +222,67 @@ export default {
   },
   data() {
     return {
-      paperData: {},
-      markDetails: {
-        name: 'EHS全员硬质考试',
-        examName: '',
-        status: '0',
-        orgName: '广州分公司',
-        testPaper: 'EHS用卷',
-        time: '2010-10-10 12:13',
-        useTime: 52,
-        totalScore: 120,
-        qustionList: [
-          {
-            type: 'blank',
-            score: 50,
-            subTitle: '大题副标题',
-            standard: '春秋|战国',
-            qustionStem:
-              '____时期出现了老子、孔子、孙子等为代表的学派。 ______时期形成了墨家、儒家、道家、法家等学派的“百家争鸣”。',
-            tips: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-          }
-        ]
-      }
+      isShowImpersonality: false,
+      examData: {},
+      examineeAchievementDO: {},
+      impersonalityList: [], //客观题
+      subjectivityList: [] // 主观题
     }
   },
   computed: {
-    ...mapGetters(['userId'])
+    ...mapGetters(['userId']),
+    QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
+    QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
+    QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
+    QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
+    QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {
     this.initData()
   },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
+  },
   methods: {
+    getItemTotalScore(data) {
+      const addScore = (args) => {
+        return args.reduce((prev, curr) => {
+          return prev + curr
+        })
+      }
+      const scoreList = _.map(data, (item) => {
+        return Number(item.scoreQuestion)
+      })
+      const totalScore = addScore(scoreList)
+
+      return totalScore
+    },
+    // 获取考试用时
+    getExamUseTime() {
+      const diffTime = moment(this.examineeAchievementDO.answerEndTime).diff(
+        moment(this.examineeAchievementDO.answerBeginTime),
+        'ms'
+      )
+      return this.createCountdown(diffTime)
+    },
+    /**
+     * 入参：差异时间
+     * 返回：倒计时
+     * 作用：创建一个倒计时
+     */
+    createCountdown(diffTime) {
+      const hoursTime = moment.duration(diffTime).hours()
+      const minutesTime = moment.duration(diffTime).minutes()
+      const secondsTime = moment.duration(diffTime).seconds()
+      const formatHours = `${hoursTime < 10 ? `0${hoursTime}` : hoursTime}`
+      const formatMinutes = `${minutesTime < 10 ? `0${minutesTime}` : minutesTime}`
+      const formatSeconds = `${secondsTime < 10 ? `0${secondsTime}` : secondsTime}`
+      const targetTime = `${formatHours} : ${formatMinutes} : ${formatSeconds}`
+      return targetTime
+    },
     getTag(status) {
       return _.find(STATUS_STATUS, (item) => {
         return item.value === status
@@ -184,13 +290,38 @@ export default {
     },
     moment,
     async initData() {
-      this.paperData = await getExamineePaperDetail({ id: this.$route.query.id })
-      this.examData = await getExamineePaperDetailist({
-        userId: this.userId,
-        examineeBatchId: this.$route.query.examineeBatchId,
-        examId: this.$route.query.examId
+      const examData = await getExamineePaperDetail({ id: this.$route.query.id })
+      this.handleExamData(examData)
+      this.getPaperData()
+    },
+    handleExamData(examData) {
+      this.examData = examData
+      const { examineeAchievementDO } = examData
+      this.examineeAchievementDO = examineeAchievementDO
+    },
+    async getPaperData() {
+      const paperData = await getExamineePaperDetailist({
+        userId: this.examineeAchievementDO.examineeId,
+        type: '',
+        id: this.$route.query.id
       })
-      // console.log('paperData, examData', this.paperData, examData)
+      const tempPaperData = _.groupBy(paperData, 'state')
+      _.forIn(tempPaperData, (value, key) => {
+        if (key === '0') {
+          this.impersonalityList = this.initQuestionList(value)
+        } else {
+          this.subjectivityList = this.initQuestionList(value)
+        }
+      })
+    },
+    initQuestionList(data) {
+      return _.chain(_.cloneDeep(data))
+        .groupBy('parentSort')
+        .sortBy('parentSort')
+        .map((item) => {
+          return _.sortBy(item, 'sort')
+        })
+        .value()
     }
   }
 }
@@ -235,6 +366,10 @@ export default {
           font-family: PingFangSC-Regular;
           font-size: 14px;
           color: rgba(0, 11, 21, 0.85);
+          max-width: 350px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
@@ -242,7 +377,6 @@ export default {
   .paper-card {
     margin-top: 16px;
     .card-header {
-      padding: 18px 0 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -263,9 +397,15 @@ export default {
       }
       .card-right {
         cursor: pointer;
+        .expand-text {
+          color: #000b15;
+          opacity: 0.65;
+        }
       }
     }
     .card-content {
+      padding-top: 16px;
+      border-top: 1px solid #ebeced;
       .card-li {
         margin: 0 13.5%;
         .card-title {
@@ -308,6 +448,11 @@ export default {
           }
         }
       }
+    }
+  }
+  .content-box {
+    .content-li {
+      margin-bottom: 32px;
     }
   }
 }
