@@ -24,3 +24,7 @@ export const getExamineePaperDetail = (params) => get('/manage/v1/getExamineePap
  */
 export const getExamineePaperDetailist = (params) =>
   get('/manage/v1/getExamineePaperDetailist', params)
+/**
+ * 逐人评卷提交
+ */
+export const postSubmitByOne = (params) => post('/manage/v1/actionExamineePaperIng', params)

@@ -23,10 +23,7 @@
           </li>
         </ul>
       </div>
-      <div
-        v-if="correctContent"
-        class="correct-answer-box"
-      >
+      <div class="correct-answer-box">
         <span class="label">正确答案：</span>
         <span class="value is-correct">{{ getCorrect() }}</span>
       </div>
@@ -36,7 +33,9 @@
         <span class="label">考生答案：</span>
         <span
           class="value"
-          :class="[data.scoreUser === data.scoreQuestion ? 'is-correct' : 'is-fault']"
+          :class="[
+            Number(data.scoreUser) === Number(data.scoreQuestion) ? 'is-correct' : 'is-fault'
+          ]"
         >{{ getAnswerValue() }}</span>
       </div>
       <div class="answer">
@@ -72,11 +71,11 @@ export default {
     },
     // 获取正确答案
     getCorrect() {
-      const target = _.chain(this.data.options)
+      const target = _.chain(this.data.examinationPaperUserOptionREQS)
         .filter((item) => {
-          return item.isCorrect
+          return item.isCorrect === 1
         })
-        .map('isCorrect')
+        .map('contentOption')
         .join(' ')
         .value()
       this.correctContent = target
@@ -86,7 +85,7 @@ export default {
     getAnswerValue() {
       const target = _.chain(this.data.examinationPaperUserOptionREQS)
         .find((item) => {
-          return item.optionId === this.data.answerUser
+          return item.optionId === this.data.answerQuestion
         })
         .get('contentOption', '考生未作答')
         .value()

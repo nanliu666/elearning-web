@@ -13,7 +13,7 @@
       <div class="answer-li">
         <div class="li-left">
           <span class="answer-label">考生答案：</span>
-          <span class="answer-value">传奇</span>
+          <span class="answer-value">{{ data.answerUser }}</span>
         </div>
         <el-button type="text">
           编辑
@@ -24,7 +24,7 @@
         ref="form"
         :model="formData"
         :columns="columns"
-        :config="{ labelPosition: 'left', labelWidth: '90px' }"
+        :config="{ labelPosition: 'left', labelWidth: '100px', labelPosition: 'right' }"
       >
       </common-form>
     </div>
@@ -35,7 +35,7 @@
 const EventColumns = [
   {
     itemType: 'radio',
-    span: 11,
+    span: 14,
     required: false,
     options: [
       {
@@ -56,18 +56,20 @@ const EventColumns = [
   },
   {
     itemType: 'input',
-    span: 8,
-    offset: 5,
+    span: 10,
     required: false,
     prop: 'score',
-    label: '得分：'
+    label: '得分：',
+    placeholder: '请输入得分'
   },
   {
     itemType: 'input',
     span: 24,
+    offset: 0,
     required: false,
     prop: 'comment',
-    label: '评语：'
+    label: '考试评语：',
+    placeholder: '请输入评语'
   }
 ]
 export default {
@@ -80,7 +82,7 @@ export default {
   },
   data() {
     return {
-      columns: EventColumns,
+      columns: _.cloneDeep(EventColumns),
       formData: {
         result: '',
         score: '',
@@ -104,7 +106,7 @@ export default {
     // 获取正确答案
     getCorrect() {
       // TODO: 填空题的标准答案获取
-      return _.get(this.data, 'options[0].content', '未设置标椎答案')
+      return _.get(this.data, 'answerQuestion', '未设置标椎答案')
     },
     // 获取考生答案
     getAnswerValue() {

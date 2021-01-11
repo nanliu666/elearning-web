@@ -123,6 +123,7 @@
       />
       <gap-and-short
         v-if="[QUESTION_TYPE_BLANK, QUESTION_TYPE_SHOER].includes(data.type)"
+        ref="gapAndShorRef"
         :data="data"
       />
     </div>
