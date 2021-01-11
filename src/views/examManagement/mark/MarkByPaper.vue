@@ -104,7 +104,6 @@
             <span class="standard-label"> 标准答案：</span>
             <span class="standard-value">{{ item.standard }}</span>
           </div>
-          <mark-com :answer="item.answer" />
         </li>
       </ul>
       <com-empty
@@ -197,11 +196,9 @@ const EventColumns = [
   }
 ]
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
-import MarkCom from './components/MarkCom'
 export default {
   name: 'MarkByPaper',
   components: {
-    MarkCom,
     ComEmpty
   },
   filters: {
