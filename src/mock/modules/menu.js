@@ -229,20 +229,20 @@ const res = {
             dataPrivileges: [],
             children: []
           },
-          {
-            menuId: '125907843471874',
-            menuName: '原始菜单管理',
-            menuType: 'Menu',
-            isEnabled: 1,
-            isOwn: 1,
-            isShow: 0,
-            code: 'system_menu_all',
-            alias: 'menuAll ',
-            path: '/system/menuAll',
-            icon: 'iconfont iconicon_compile',
-            dataPrivileges: [],
-            children: []
-          },
+          // {
+          //   menuId: '125907843471874',
+          //   menuName: '原始菜单管理',
+          //   menuType: 'Menu',
+          //   isEnabled: 1,
+          //   isOwn: 1,
+          //   isShow: 0,
+          //   code: 'system_menu_all',
+          //   alias: 'menuAll ',
+          //   path: '/system/menuAll',
+          //   icon: 'iconfont iconicon_compile',
+          //   dataPrivileges: [],
+          //   children: []
+          // },
           {
             menuId: '1259071409534308354',
             menuName: '操作日志',

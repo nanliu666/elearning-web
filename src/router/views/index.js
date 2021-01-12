@@ -3,6 +3,7 @@ import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
 import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
+import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
 import todo from './todo'
 export default [
@@ -10,6 +11,7 @@ export default [
     path: '/',
     redirect: '/wel'
   },
+
   {
     path: '/process/design',
     name: '流程设计器',
@@ -50,6 +52,12 @@ export default [
     path: '/wel',
     component: Layout,
     children: [
+      {
+        path: '/menuAll',
+        name: '平台后台菜单管理',
+        component: MenuAll,
+        meta: {}
+      },
       {
         path: '',
         name: '工作台',
