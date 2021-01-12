@@ -330,23 +330,11 @@ export default {
      * 逐人评卷
      */
     handleExaminee(row) {
-      const currentIndex = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      const nextIndex = currentIndex + 1
-      let nextId = Object.create(null)
-      // 当前不是最后一个
-      if (_.size(this.tableData) !== nextIndex) {
-        this.tableData[nextIndex].id
-        nextId = _.get(this.tableData, `[${nextIndex}].id`, null)
-      }
       const basicQuery = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
       //兼容评价下一个
-      const nextQuery = { nextId: nextId }
-      const targetQuery = _.isEmpty(nextId) ? basicQuery : _.assign(basicQuery, nextQuery)
       this.$router.push({
         path: '/examManagement/mark/MarkByExaminee',
-        query: targetQuery
+        query: basicQuery
       })
     }
   }

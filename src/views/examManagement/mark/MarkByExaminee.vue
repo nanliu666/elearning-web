@@ -194,7 +194,6 @@
             提交评分
           </el-button>
           <el-button
-            v-if="_.get($route, 'query.nextId', null)"
             size="medium"
             @click="submitAndNext"
           >
