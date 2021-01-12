@@ -290,9 +290,10 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {})
+      }).then(() => {
+        this.clearMarkForm()
+      })
     },
-
     // 保存
     save() {
       this.submit()
@@ -305,7 +306,9 @@ export default {
     submit() {
       this.checkRequired()
     },
+    // 具体提交函数
     submitFun() {
+      this.getFormData()
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
@@ -328,14 +331,9 @@ export default {
           })
       }
     },
-
+    // 检测提交前的逻辑
     async checkRequired() {
-      const targetRefs = {}
-      _.forIn(this.$refs, (value, key) => {
-        if (_.includes(key, 'refSelect')) {
-          _.assign(targetRefs, { [key]: value })
-        }
-      })
+      const targetRefs = this.getTargetRefs()
       let checkList = await this.asyncGetValidate(targetRefs)
       let finalList = []
       _.each(checkList, (item) => {
@@ -349,6 +347,44 @@ export default {
         })
       })
     },
+    // 获取当前所有的refs
+    getTargetRefs() {
+      let targetRefs = {}
+      _.forIn(this.$refs, (value, key) => {
+        if (_.includes(key, 'refSelect')) {
+          _.assign(targetRefs, { [key]: value })
+        }
+      })
+      return targetRefs
+    },
+    // 获取表格的数据
+    getFormData() {
+      const targetRefs = this.getTargetRefs()
+      this.formDataList = this.getFormDataFun(targetRefs)
+    },
+    //清空所有的表格校验以及表格数据
+    clearMarkForm() {
+      const targetRefs = this.getTargetRefs()
+      _.forIn(targetRefs, (value) => {
+        _.each(value, (item) => {
+          // 清空
+          const tempRef = _.get(item, '$refs.gapAndShorRef.$refs.form', null)
+          tempRef && tempRef.resetFields()
+        })
+      })
+    },
+    // 获取表格数据的具体处理函数
+    getFormDataFun(targetRefs) {
+      let temp = []
+      _.forIn(targetRefs, (value) => {
+        _.each(value, (item) => {
+          const tempFormData = _.get(item, '$refs.gapAndShorRef.formData', null)
+          temp.push(_.assign(tempFormData, { id: _.get(item, 'data.id', null) }))
+        })
+      })
+      return temp
+    },
+    // 异步验证表格
     asyncGetValidate(targetRefs) {
       this.formDataList = []
       let checkList = []
@@ -356,10 +392,6 @@ export default {
         _.forIn(targetRefs, (value) => {
           _.each(value, (item) => {
             const tempRef = _.get(item, '$refs.gapAndShorRef.$refs.form', null)
-            const tempFormData = _.get(item, '$refs.gapAndShorRef.formData', null)
-            if (tempFormData) {
-              this.formDataList.push(_.assign(tempFormData, { id: _.get(item, 'data.id', null) }))
-            }
             if (tempRef) {
               checkList.push(this.validateByOne(tempRef))
             }
@@ -368,6 +400,7 @@ export default {
         resolve(checkList)
       })
     },
+    // 一个接一个验证表格
     validateByOne(tempRef) {
       return new Promise((resolve) => {
         tempRef
