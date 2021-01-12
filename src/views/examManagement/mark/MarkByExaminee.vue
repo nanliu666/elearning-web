@@ -156,7 +156,7 @@
               <span>（{{ conItem.scoreQuestion }}分）</span>
               <QustionPreview
                 v-if="QUESTION_TYPE_GROUP !== conItem.type"
-                ref="ref-select"
+                ref="refSelect"
                 :data="conItem"
                 type="view"
               />
@@ -173,7 +173,7 @@
                   >
                     <span>{{ paperIndex + 1 }}.</span>
                     <QustionPreview
-                      :ref="`ref-select-${paperIndex}`"
+                      :ref="`refSelect${paperIndex}${conIndex}`"
                       :data="paperItem"
                       type="view"
                     />
@@ -194,6 +194,7 @@
             提交评分
           </el-button>
           <el-button
+            v-if="_.get($route, 'query.nextId', null)"
             size="medium"
             @click="submitAndNext"
           >
@@ -260,6 +261,7 @@ export default {
       isShowImpersonality: false,
       examData: {},
       examineeAchievementDO: {},
+      formDataList: [],
       impersonalityList: [], //客观题
       subjectivityList: [] // 主观题
     }
@@ -282,11 +284,102 @@ export default {
     next()
   },
   methods: {
-    refreshSubmit() {},
-    save() {},
-    submitAndNext() {},
+    // 重新评分
+    refreshSubmit() {
+      this.$confirm('您确定重新对该考卷进行评分吗？确定后考卷的所有评分信息将会被清空！', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {})
+    },
+
+    // 保存
+    save() {
+      this.submit()
+    },
+    // 提交且评下一个
+    submitAndNext() {
+      this.isNext = true
+    },
+    // 提交
     submit() {
-      postSubmitByOne
+      this.checkRequired()
+    },
+    submitFun() {
+      const list = _.chain(this.formDataList)
+        .cloneDeep()
+        .filter((item) => {
+          return item.result
+        })
+        .value()
+      if (_.isEmpty(list)) {
+        this.$message.error('您未对该考卷进行评分，请评分后再提交！')
+      } else {
+        const params = {
+          id: this.examineeAchievementDO.id,
+          list
+        }
+        postSubmitByOne(params)
+          .then(() => {
+            this.$router.go(-1)
+          })
+          .catch(() => {
+            window.console.error(JSON.stringify(params))
+          })
+      }
+    },
+
+    async checkRequired() {
+      const targetRefs = {}
+      _.forIn(this.$refs, (value, key) => {
+        if (_.includes(key, 'refSelect')) {
+          _.assign(targetRefs, { [key]: value })
+        }
+      })
+      let checkList = await this.asyncGetValidate(targetRefs)
+      let finalList = []
+      _.each(checkList, (item) => {
+        item.then((value) => {
+          finalList.push(value)
+          if (_.size(checkList) === _.size(finalList)) {
+            if (_.every(finalList, Boolean)) {
+              this.submitFun()
+            }
+          }
+        })
+      })
+    },
+    asyncGetValidate(targetRefs) {
+      this.formDataList = []
+      let checkList = []
+      return new Promise((resolve) => {
+        _.forIn(targetRefs, (value) => {
+          _.each(value, (item) => {
+            const tempRef = _.get(item, '$refs.gapAndShorRef.$refs.form', null)
+            const tempFormData = _.get(item, '$refs.gapAndShorRef.formData', null)
+            if (tempFormData) {
+              this.formDataList.push(_.assign(tempFormData, { id: _.get(item, 'data.id', null) }))
+            }
+            if (tempRef) {
+              checkList.push(this.validateByOne(tempRef))
+            }
+          })
+        })
+        resolve(checkList)
+      })
+    },
+    validateByOne(tempRef) {
+      return new Promise((resolve) => {
+        tempRef
+          .validate()
+          .then(() => {
+            resolve(true)
+          })
+          .catch(() => {
+            this.$message.error('请为所有已评出结果的试题输入得分！')
+            resolve(false)
+          })
+      })
     },
     getItemTotalScore(data) {
       const addScore = (args) => {

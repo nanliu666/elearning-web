@@ -13,7 +13,7 @@
       <div class="answer-li">
         <div class="li-left">
           <span class="answer-label">考生答案：</span>
-          <span class="answer-value">{{ data.answerUser }}</span>
+          <span class="answer-value">{{ data.answerUser || '--' }}</span>
         </div>
         <el-button type="text">
           编辑
@@ -57,18 +57,19 @@ const EventColumns = [
   {
     itemType: 'input',
     span: 10,
-    required: false,
-    prop: 'score',
+    prop: 'scoreUser',
     label: '得分：',
-    placeholder: '请输入得分'
+    placeholder: '请输入得分',
+    rules: [{ required: false, message: '请输入得分', trigger: 'blur' }]
   },
   {
     itemType: 'input',
     span: 24,
     offset: 0,
     required: false,
-    prop: 'comment',
+    prop: 'reviewRemark',
     label: '考试评语：',
+    rules: [{ required: false, message: '请输入评语', trigger: 'blur' }],
     placeholder: '请输入评语'
   }
 ]
@@ -85,8 +86,8 @@ export default {
       columns: _.cloneDeep(EventColumns),
       formData: {
         result: '',
-        score: '',
-        comment: ''
+        scoreUser: '',
+        reviewRemark: ''
       }
     }
   },
@@ -94,8 +95,8 @@ export default {
     'formData.result': {
       handler(value) {
         if (value) {
-          this.columns[1].required = true
-          this.columns[2].required = true
+          this.columns[1].rules[0].required = true
+          this.columns[2].rules[0].required = true
         }
       },
       deep: true
