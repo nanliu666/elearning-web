@@ -194,13 +194,13 @@ const TABLE_COLUMNS = [
     label: '承办单位',
     prop: 'organizer',
     minWidth: 130
-  },
-  {
-    label: '标签',
-    prop: 'trainTagList',
-    slot: true,
-    minWidth: 200
   }
+  // {
+  //   label: '标签',
+  //   prop: 'trainTagList',
+  //   slot: true,
+  //   minWidth: 200
+  // }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {

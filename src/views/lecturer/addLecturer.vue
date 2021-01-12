@@ -289,7 +289,7 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/jpge/png/gif文件，且不超过5M
+                      只能上传jpg/jpge/png文件，且不超过5M
                     </div>
                   </div>
                   <img
@@ -610,6 +610,9 @@ export default {
                 isLatestTeacher: 0,
                 isPopularTeacher: 0
               }
+              setTimeout(() => {
+                this.$refs.ruleForm.clearValidate()
+              }, 100)
             }
           })
         }

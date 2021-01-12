@@ -339,17 +339,30 @@
       </div>
 
       <!-- 上传课程内容 -->
-      <div v-show="headIndex == 3">
+      <div v-show="headIndex === 3">
         <div id="upContent">
           <div class="up_head">
             <span>章节内容</span>
-            <el-button
-              type="primary"
-              size="medium"
-              @click="addArticleBtn"
-            >
-              添加章节
-            </el-button>
+            <div>
+              <common-upload
+                class="upload-more"
+                multiple
+                :before-upload="CoursewareUpload"
+                @on-error="onBUError"
+                @on-progress="onBUProgress"
+              >
+                <el-button size="medium">
+                  批量上传课件
+                </el-button>
+              </common-upload>
+              <el-button
+                type="primary"
+                size="medium"
+                @click="addArticleBtn"
+              >
+                添加章节
+              </el-button>
+            </div>
           </div>
 
           <!-- 表格 -->
@@ -372,12 +385,12 @@
             >
               <template slot-scope="scope">
                 <el-input
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="scope.row.saveOrcompile == 0"
                   v-model="scope.row.name"
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -388,7 +401,7 @@
               width="185"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.saveOrcompile === 0">
+                <span v-if="scope.row.saveOrcompile == 0">
                   <el-select
                     v-model="scope.row.type"
                     placeholder="请选择"
@@ -403,7 +416,7 @@
                   </el-select>
                 </span>
 
-                <span v-if="scope.row.saveOrcompile === 1">
+                <span v-if="scope.row.saveOrcompile == 1">
                   <span v-if="typeOption[scope.row.type - 1]">
                     {{ typeOption[scope.row.type - 1].name }}
                   </span>
@@ -418,13 +431,14 @@
               width="250"
             >
               <template slot-scope="scope">
-                <div v-if="scope.row.saveOrcompile === 0">
+                <!-- {{typeOption[scope.row.type - 1]}} -->
+                <div v-if="scope.row.saveOrcompile == 0">
                   <span
                     v-if="typeOption[scope.row.type - 1]"
                     size="medium"
                   >
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 1"
+                      v-if="typeOption[scope.row.type - 1].value == 1"
                       type="text"
                       @click="AddArticleBtntable(scope.$index, scope.row)"
                     >
@@ -435,21 +449,20 @@
                       }}
                     </el-button>
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 2"
+                      v-if="typeOption[scope.row.type - 1].value == 2"
                       v-model="scope.row.upLoad"
                       :before-upload="CoursewareUpload"
                       :multiple="false"
                     >
-                      <el-button type="text">
-                        {{
-                          scope.row.upLoad[0]
-                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : '上传课件'
-                        }}
-                      </el-button>
+                      <el-button type="text">{{
+                        scope.row.upLoad[0]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : '上传课件'
+                      }}</el-button>
                     </common-upload>
+
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 3"
+                      v-if="typeOption[scope.row.type - 1].value == 3"
                       v-model="scope.row.upLoad"
                       :multiple="false"
                       :before-upload="DataUpload"
@@ -463,7 +476,7 @@
                       </el-button>
                     </common-upload>
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 4"
+                      v-if="typeOption[scope.row.type - 1].value == 4"
                       type="text"
                     >关联考试</el-button>
                     <common-upload
@@ -489,9 +502,9 @@
                   </span>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile === 1">
+                <div v-if="scope.row.saveOrcompile == 1">
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 1">
+                    <span v-if="typeOption[scope.row.type - 1].value == 1">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -501,7 +514,36 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 2">
+                    <span
+                      v-if="
+                        typeOption[scope.row.type - 1].value == 2 &&
+                          isNaN(scope.row.upLoad[0].percent)
+                      "
+                    >
+                      <span v-if="scope.row.upLoad">{{
+                        scope.row.upLoad[scope.row.upLoad.length - 1]
+                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                          : ''
+                      }}</span>
+                    </span>
+
+                    <span
+                      v-if="
+                        typeOption[scope.row.type - 1].value == 2 &&
+                          !isNaN(scope.row.upLoad[0].percent)
+                      "
+                    >
+                      <el-progress
+                        v-if="scope.row.upLoad[0].percent < 100"
+                        :percentage="scope.row.upLoad[0].percent"
+                        :format="() => progressFormat(scope.row.upLoad[0].percent)"
+                      ></el-progress>
+                      <span v-else>{{ scope.row.upLoad[0].localName }}</span>
+                    </span>
+                  </span>
+
+                  <span v-if="typeOption[scope.row.type - 1]">
+                    <span v-if="typeOption[scope.row.type - 1].value == 3">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -511,17 +553,7 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 3">
-                      <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : ''
-                      }}</span>
-                    </span>
-                  </span>
-
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 5">
+                    <span v-if="typeOption[scope.row.type - 1].value == 5">
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -541,7 +573,7 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="scope.row.saveOrcompile === 1"
+                  v-if="scope.row.saveOrcompile == 1"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -549,7 +581,7 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="scope.row.saveOrcompile == 0"
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
@@ -566,7 +598,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index === 0"
+                  :disabled="scope.$index == 0"
                   @click="upward(scope.$index)"
                 >
                   上移
@@ -574,7 +606,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  :disabled="scope.$index === ruleForm.contents.length - 1"
+                  :disabled="scope.$index == ruleForm.contents.length - 1"
                   @click="downward(scope.$index)"
                 >
                   下移
@@ -582,7 +614,6 @@
               </template>
             </el-table-column>
           </el-table>
-
           <!-- 添加文章 -->
           <el-dialog
             title="添加文章"
@@ -653,6 +684,7 @@ import {
   getCourse,
   listTeacher
 } from '@/api/course/course'
+// import { delete } from 'vue/types/umd'
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
@@ -692,14 +724,6 @@ export default {
         {
           name: '资料下载',
           value: '3'
-        },
-        {
-          name: '考试',
-          value: '4'
-        },
-        {
-          name: '视频',
-          value: '5'
         }
       ],
       // 填写课程信息
@@ -782,6 +806,61 @@ export default {
     this.islistTeacher()
   },
   methods: {
+    progressFormat(percentage) {
+      return `已上传 ${percentage}%`
+    },
+    onBUError(file) {
+      const { name, uid } = file
+      const contents = this.ruleForm.contents
+      if (!contents.find((item) => item.uid === uid)) {
+        contents.push({
+          url: '',
+          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          sort: '', //序号
+          type: 2, //章节类型
+          name: '社区的商业模式', // 章节名称
+          content: '', //文章内容
+          upLoad: [
+            {
+              localName: name,
+              uid,
+              percent: 0
+            }
+          ], //[url,localName],  //所有上传的文件
+          saveOrcompile: 1, // 1保存&0编辑
+          uid
+        })
+      }
+      this.$forceUpdate()
+    },
+    onBUProgress(file) {
+      const { percent, name, uid } = file
+      const contents = this.ruleForm.contents
+      let cur
+      if ((cur = contents.find((item) => item.uid === uid))) {
+        cur.upLoad[0].percent = percent
+      } else {
+        contents.push({
+          url: '',
+          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          sort: '', //序号
+          type: 2, //章节类型
+          name: '社区的商业模式', // 章节名称
+          content: '', //文章内容
+          upLoad: [
+            {
+              localName: name,
+              uid,
+              percent
+            }
+          ], //[url,localName],  //所有上传的文件
+          saveOrcompile: 1, // 1保存&0编辑
+          uid
+        })
+      }
+      this.$forceUpdate()
+    },
+
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
@@ -804,9 +883,9 @@ export default {
         let data = res
         data.passCondition = data.passCondition.split(',')
         data.content.map((item) => {
-          item.upLoad = [{ localName: '', url: '' }]
+          item.upLoad = [{ localName: '', content: '' }]
           item.upLoad[0].localName = item.localName
-          item.upLoad[0].url = item.url
+          item.upLoad[0].content = _.unescape(item.content)
           item.saveOrcompile = 1
         })
         data.imageUrl = [{ localName: '', url: '' }]
@@ -815,6 +894,9 @@ export default {
         data.contents = data.content
         this.catalogName = data.catalogId
         data.catalogId = this.$route.query.catalogName
+        // 富方本回显
+        data.introduction = _.unescape(data.introduction)
+        data.thinkContent = _.unescape(data.thinkContent)
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -847,7 +929,7 @@ export default {
         ? row.upLoad[row.upLoad.length - 1].localName
         : ''
       this.addArticle.content = row.upLoad[row.upLoad.length - 1]
-        ? row.upLoad[row.upLoad.length - 1].content
+        ? _.unescape(row.upLoad[row.upLoad.length - 1].content)
         : ''
       this.AddArticleBtntableIndex = index
       this.dialogVisible = true
@@ -858,7 +940,7 @@ export default {
         if (valid) {
           let i = {
             localName: this.addArticle.localName,
-            content: this.addArticle.content
+            content: _.escape(this.addArticle.content)
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
@@ -883,10 +965,9 @@ export default {
         item.sort = index
         if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
-          item.url = item.upLoad[item.upLoad.length - 1].url
-          if (item.type == 1) {
-            item.content = item.upLoad[item.upLoad.length - 1].content
-          }
+          item.content =
+            item.upLoad[item.upLoad.length - 1].url ||
+            _.escape(item.upLoad[item.upLoad.length - 1].content)
         }
       })
       this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
@@ -911,6 +992,12 @@ export default {
       // 富文本要转换传后端
       params.introduction = _.escape(params.introduction)
       params.thinkContent = _.escape(params.thinkContent)
+
+      delete params.content
+      delete params.tags
+      delete params.record
+      delete params.exam
+      delete params.trainCenterexam
       // 草稿
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
@@ -932,7 +1019,7 @@ export default {
                 this.disabledBtn = false
                 // this.$router.go(-1)
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
-              }, 2000)
+              }, 3000)
             })
           })
           .catch(() => {
@@ -966,7 +1053,7 @@ export default {
                 this.disabledBtn = false
                 // this.$router.go(-1)
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
-              }, 2000)
+              }, 3000)
             })
           }
         })
@@ -1006,14 +1093,12 @@ export default {
         ]
       }
     },
-
-    // 资料校验
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
+      const isLt10M = file.size / 1024 / 1024 < 2048
 
       if (!isLt10M) {
-        this.$message.error('上传资料片大小不能超过 10MB!')
+        this.$message.error('上传资料大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -1025,10 +1110,10 @@ export default {
     // 视频校验
     VideoUpload(file) {
       const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
+      const isLt10M = file.size / 1024 / 1024 < 2048
 
       if (!isLt10M) {
-        this.$message.error('上传视频大小不能超过 10MB!')
+        this.$message.error('上传视频大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -1040,16 +1125,25 @@ export default {
 
     // 课件校验
     CoursewareUpload(file) {
-      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
-
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|jpeg|png)$/
+      const regxImg = /^.*\.(jpg|jpeg|png)$/
+      const isLt10M = file.size / 1024 / 1024 < 2048
+      const isLtImg = file.size / 1024 / 1024 < 5
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传课件大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传资料只支持txt,doc,wps,rtf,xls,xlsx,ppt,pptx,pdf文件')
+        this.$message.error('上传资料仅支持上传视频、文档、ppt、pdf、图片五种类型的课件')
         return false
+      }
+      if (regxImg.test(file.name)) {
+        if (!isLtImg) {
+          this.$message.error('上传图片大小不能超过 5MB!')
+          return false
+        }
+
+        return true
       }
       return true
     },
@@ -1098,7 +1192,7 @@ export default {
     //   // res, file
     // },
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png|GIF)$/
+      const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -1106,7 +1200,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png|GIF文件')
+        this.$message.error('上传图片只支持jpg,jpeg,png文件')
         return false
       }
       return true
@@ -1251,6 +1345,11 @@ export default {
     .up_head {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 12px;
+      .upload-more {
+        margin-right: 5px;
+        display: inline-block;
+      }
     }
 
     #type_select {
