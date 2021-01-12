@@ -345,18 +345,24 @@
           <div class="up_head">
             <span>章节内容</span>
             <div>
-              <common-upload class="upload-more" multiple @on-error="onBUError" @on-progress="onBUProgress">
+              <common-upload
+                class="upload-more"
+                multiple
+                :before-upload="CoursewareUpload"
+                @on-error="onBUError"
+                @on-progress="onBUProgress"
+              >
                 <el-button size="medium">
                   批量上传课件
                 </el-button>
               </common-upload>
-                <el-button
-                  type="primary"
-                  size="medium"
-                  @click="addArticleBtn"
-                >
-                  添加章节
-                </el-button>
+              <el-button
+                type="primary"
+                size="medium"
+                @click="addArticleBtn"
+              >
+                添加章节
+              </el-button>
             </div>
           </div>
 
@@ -466,7 +472,7 @@
                           scope.row.upLoad[0]
                             ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
                             : '上传资料'
-                        }} 
+                        }}
                       </el-button>
                     </common-upload>
                     <el-button
@@ -508,7 +514,12 @@
                   </span>
 
                   <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 2 && isNaN(scope.row.upLoad[0].percent)">
+                    <span
+                      v-if="
+                        typeOption[scope.row.type - 1].value === 2 &&
+                          isNaN(scope.row.upLoad[0].percent)
+                      "
+                    >
                       <span v-if="scope.row.upLoad">{{
                         scope.row.upLoad[scope.row.upLoad.length - 1]
                           ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
@@ -516,9 +527,18 @@
                       }}</span>
                     </span>
 
-                    <span v-if="typeOption[scope.row.type - 1].value === 2 && !isNaN(scope.row.upLoad[0].percent)">
-                      <el-progress :percentage="scope.row.upLoad[0].percent" v-if="scope.row.upLoad[0].percent < 100" :format="() => progressFormat(scope.row.upLoad[0].percent)"></el-progress>
-                      <span v-else>{{scope.row.upLoad[0].localName}}</span>
+                    <span
+                      v-if="
+                        typeOption[scope.row.type - 1].value === 2 &&
+                          !isNaN(scope.row.upLoad[0].percent)
+                      "
+                    >
+                      <el-progress
+                        v-if="scope.row.upLoad[0].percent < 100"
+                        :percentage="scope.row.upLoad[0].percent"
+                        :format="() => progressFormat(scope.row.upLoad[0].percent)"
+                      ></el-progress>
+                      <span v-else>{{ scope.row.upLoad[0].localName }}</span>
                     </span>
                   </span>
 
@@ -793,12 +813,12 @@ export default {
 
   methods: {
     progressFormat(percentage) {
-      return `已上传 ${percentage}%`;
+      return `已上传 ${percentage}%`
     },
     onBUError(file) {
       const { name, uid } = file
       const contents = this.ruleForm.contents
-      if (!contents.find(item => item.uid === uid)) {
+      if (!contents.find((item) => item.uid === uid)) {
         contents.push({
           url: '',
           localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
@@ -806,11 +826,13 @@ export default {
           type: 2, //章节类型
           name: '社区的商业模式', // 章节名称
           content: '', //文章内容
-          upLoad: [{
-            localName: name,
-            uid,
-            percent: 0
-          }], //[url,localName],  //所有上传的文件
+          upLoad: [
+            {
+              localName: name,
+              uid,
+              percent: 0
+            }
+          ], //[url,localName],  //所有上传的文件
           saveOrcompile: 1, // 1保存&0编辑
           uid
         })
@@ -821,7 +843,7 @@ export default {
       const { percent, name, uid } = file
       const contents = this.ruleForm.contents
       let cur
-      if (cur = contents.find(item => item.uid === uid)) {
+      if ((cur = contents.find((item) => item.uid === uid))) {
         cur.upLoad[0].percent = percent
       } else {
         contents.push({
@@ -831,11 +853,13 @@ export default {
           type: 2, //章节类型
           name: '社区的商业模式', // 章节名称
           content: '', //文章内容
-          upLoad: [{
-            localName: name,
-            uid,
-            percent
-          }], //[url,localName],  //所有上传的文件
+          upLoad: [
+            {
+              localName: name,
+              uid,
+              percent
+            }
+          ], //[url,localName],  //所有上传的文件
           saveOrcompile: 1, // 1保存&0编辑
           uid
         })
@@ -866,7 +890,6 @@ export default {
     getInfo() {
       let id = this.$route.query.id
       getCourseContents({ courseId: id }).then((res) => {
-        // console.log('getCourseContents---------------', res)
         let data = res
         data.map((item) => {
           item.upLoad = [{ localName: '', url: '' }]
@@ -915,7 +938,7 @@ export default {
         ? row.upLoad[row.upLoad.length - 1].localName
         : ''
       this.addArticle.content = row.upLoad[row.upLoad.length - 1]
-        ? row.upLoad[row.upLoad.length - 1].content
+        ? _.unescape(row.upLoad[row.upLoad.length - 1].content)
         : ''
       this.AddArticleBtntableIndex = index
       this.dialogVisible = true
@@ -926,7 +949,7 @@ export default {
         if (valid) {
           let i = {
             localName: this.addArticle.localName,
-            content: this.addArticle.content
+            content: _.escape(this.addArticle.content)
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
@@ -954,7 +977,8 @@ export default {
         item.sort = index
         if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
-          item.url = item.upLoad[item.upLoad.length - 1].url
+          item.content =
+            item.upLoad[item.upLoad.length - 1].url || item.upLoad[item.upLoad.length - 1].content
         }
       })
       this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
@@ -974,18 +998,17 @@ export default {
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
       // params.tagIds = params.tagIds.join(',')
+      // 富文本要转换传后端
+      params.introduction = _.escape(params.introduction)
+      params.thinkContent = _.escape(params.thinkContent)
 
       // 草稿
       if (status === 2) {
-        this.$confirm(
-          '您有内容未保存，返回将丢失。您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?',
-          '提示',
-          {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'warning'
-          }
-        )
+        this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
+          confirmButtonText: '保存',
+          cancelButtonText: '不保存',
+          type: 'warning'
+        })
           .then(() => {
             params.status = status
 
@@ -1000,7 +1023,7 @@ export default {
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
                 // this.$router.go(-1)
-              }, 2000)
+              }, 3000)
             })
           })
           .catch(() => {
@@ -1034,7 +1057,7 @@ export default {
                 this.disabledBtn = false
                 // this.$router.go(-1)
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
-              }, 2000)
+              }, 3000)
             })
           }
         })
@@ -1054,33 +1077,33 @@ export default {
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
-        period: '', //时长
-        credit: '', //学分
+        period: undefined, //时长
+        credit: undefined, //学分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
         teacherId: '', //讲师id
         // 表格
         contents: [
-          {
-            url: '',
-            localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-            sort: '', //序号
-            type: '', //章节类型
-            name: '', // 章节名称
-            content: '', //文章内容
-            upLoad: [], //[url,localName],  //所有上传的文件
-            saveOrcompile: 0 // 1保存&0编辑
-          }
+          // {
+          //   url: '',
+          //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+          //   sort: '', //序号
+          //   type: '', //章节类型
+          //   name: '', // 章节名称
+          //   content: '', //文章内容
+          //   upLoad: [], //[url,localName],  //所有上传的文件
+          //   saveOrcompile: 0 // 1保存&0编辑
+          // }
         ]
       }
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
+      const isLt10M = file.size / 1024 / 1024 < 2048
 
       if (!isLt10M) {
-        this.$message.error('上传资料片大小不能超过 10MB!')
+        this.$message.error('上传资料大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -1092,10 +1115,10 @@ export default {
     // 视频校验
     VideoUpload(file) {
       const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
+      const isLt10M = file.size / 1024 / 1024 < 2048
 
       if (!isLt10M) {
-        this.$message.error('上传视频大小不能超过 10MB!')
+        this.$message.error('上传视频大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -1107,16 +1130,25 @@ export default {
 
     // 课件校验
     CoursewareUpload(file) {
-      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
-
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|jpeg|png)$/
+      const regxImg = /^.*\.(jpg|jpeg|png)$/
+      const isLt10M = file.size / 1024 / 1024 < 2048
+      const isLtImg = file.size / 1024 / 1024 < 5
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传课件大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传资料只支持txt,doc,wps,rtf,xls,xlsx,ppt,pptx,pdf文件')
+        this.$message.error('上传资料仅支持上传视频、文档、ppt、pdf、图片五种类型的课件')
         return false
+      }
+      if (regxImg.test(file.name)) {
+        if (!isLtImg) {
+          this.$message.error('上传图片大小不能超过 5MB!')
+          return false
+        }
+
+        return true
       }
       return true
     },
@@ -1169,11 +1201,11 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpeg|png文件')
+        this.$message.error('上传图片只支持jpg,jpeg,png文件')
         return false
       }
       return true
@@ -1318,7 +1350,7 @@ export default {
     .up_head {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 12px;;
+      margin-bottom: 12px;
       .upload-more {
         margin-right: 5px;
         display: inline-block;

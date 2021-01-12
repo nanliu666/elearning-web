@@ -474,13 +474,13 @@ const TABLE_COLUMNS = [
     label: '评分',
     prop: 'composite',
     minWidth: 130
-  },
-  {
-    label: '标签',
-    prop: 'trainTagList',
-    slot: true,
-    minWidth: 200
   }
+  // {
+  //   label: '标签',
+  //   prop: 'trainTagList',
+  //   slot: true,
+  //   minWidth: 200
+  // }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
@@ -962,6 +962,8 @@ export default {
               message: '删除成功!'
             })
             this.isgetCatalogs()
+            this.isgetScheduleList()
+            this.$refs.table.clearSelection()
           })
         })
         .catch(() => {
