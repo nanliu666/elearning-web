@@ -226,7 +226,7 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
+      this.$router.push({ path: '/live/statisticsDetails', query: { id: row.id } })
     },
     // 切换nav
     handleSelect(key) {
