@@ -148,6 +148,7 @@ export default {
   },
   created() {
     this.getCourseData()
+    this.loadCategoryData()
   },
   methods: {
     handleSelect(selection, row) {

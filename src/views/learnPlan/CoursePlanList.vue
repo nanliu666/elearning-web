@@ -297,7 +297,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'coursePlanName',
     label: '',
     type: 'input'
   }
@@ -309,12 +309,12 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程编号',
     data: ''
   },
-  {
-    type: 'input',
-    field: 'coursePlanName',
-    label: '课程安排名称',
-    data: ''
-  },
+  // {
+  //   type: 'input',
+  //   field: 'coursePlanName',
+  //   label: '课程安排名称',
+  //   data: ''
+  // },
   {
     type: 'select',
     field: 'status',
@@ -443,25 +443,12 @@ export default {
       })
     },
     refreshPublished() {
-      this.getCategoryData()
       this.loadPublishedData()
     },
-    // 拿左侧树形图数据
-    getCategoryData() {
-      return getCatalogs().then((res) => {
-        this.data = [
-          {
-            id: null,
-            name: '未分类'
-          }
-        ].concat(res)
-        // this.idSchedule = datar[0].children[0].id
-        // this.isgetScheduleList()
-      })
-    },
+
     handleDelete(selection) {
       if (Array.isArray(selection)) {
-        if (_.some(selection, { status: 1 })) {
+        if (_.some(selection, { status: 2 })) {
           this.$alert(
             '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
@@ -475,7 +462,7 @@ export default {
         }
         this.deletePlanFn(selection)
       } else {
-        if (selection.status === 1) {
+        if (selection.status === 2) {
           this.$alert('选中的课程安排正在进行中，无法进行删除操作。', {
             confirmButtonText: '关闭',
             callback: () => {}

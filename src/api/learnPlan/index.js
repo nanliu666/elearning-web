@@ -108,3 +108,11 @@ export const courseDetail = (params) => get('/api/manage/v1/study/plan/courseDet
  * @param {Object} params - 参数
  * */
 export const getCourseList = (params) => get('/api/manage/v1/course/getCourseList', params)
+
+/**
+ * 查询课程下的考试
+ * @param {Object} params - 参数
+ * @param {String} params.id - 课程ID
+ * */
+export const getCourseExam = (params) =>
+  get('/api/manage/v1/study/plan/queryCourseRelatedExam', params)

@@ -15,7 +15,6 @@
           :key="index"
           class="step"
           :class="[activeStep === index ? 'active' : '']"
-          @click="jumpStep(index)"
         >
           <span class="step-index">
             <i
@@ -65,12 +64,12 @@
       </div>
     </header>
     <el-row
-      v-loading="loading"
       type="flex"
       justify="center"
       class="page__content"
     >
       <el-col
+        v-loading="loading"
         :xl="16"
         :lg="16"
         :md="18"
@@ -103,14 +102,14 @@
 import EditBasicInfo from './components/EditBasicInfo' // 基本信息
 import EditCourse from './components/EditCourse' // 添加课程
 import EditPerson from './components/EditPerson' // 人员信息
-import { addPlan, updatePlan, planDetail, courseDetail } from '@/api/learnPlan'
+import { addPlan, updatePlan, planDetail } from '@/api/learnPlan'
 import { mapGetters } from 'vuex'
 import moment from 'moment'
 const REFS_LIST = ['editBasicInfo', 'editCourse', 'editPerson']
 const defaultFormData = {
   automaticIntegralCount: false,
-  courseCatalogId: '',
-  courseCatalogName: '',
+  categoryId: null,
+  categoryName: null,
   coursePlanName: '',
   coursePlanNo: '',
   endDate: '',
@@ -211,36 +210,45 @@ export default {
     handlePreviousStep() {
       this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
-
     handleNextStep() {
-      if (this.activeStep === 0) {
-        this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-          this.activeStep = 1
-        })
+      if (this.activeStep !== 2) {
+        this.$refs[REFS_LIST[this.activeStep]]
+          .getData()
+          .then(() => {
+            this.activeStep++
+          })
+          .catch((err) => {
+            console.error(err)
+            if (this.activeStep === 1) {
+              this.$message.error('请先完善课程信息')
+            }
+          })
       } else {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
+        this.activeStep = 0
       }
     },
     // 0-发布，1-草稿箱
-    handleSubmit(type) {
+    async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
       let [startTime, endTime] = data.timeRange
       data.startTime = startTime
       data.endTime = endTime
       data.type = type
-      data.courseList = this.$refs['editCourse'].getData()
+      data.courseList = await this.$refs['editCourse'].getData()
       let func
       if (this.id) {
         func = updatePlan
       } else {
+        data.creatorId = this.userInfo.user_id
+        data.creatorName = this.userInfo.user_name
         func = addPlan
       }
       func(data)
         .then(() => {
-          const tips = type === 'draft' ? '已发布草稿' : '已成功发布课程安排'
+          const tips = type === 1 ? '已发布草稿' : '已成功发布课程安排'
           this.$message.success(`${tips}，1秒后将自动返回课程安排列表`)
           setTimeout(() => {
-            this.$router.push({ path: '/examManagement/examSchedule/list' })
+            this.$router.push({ path: '/learnPlan/CoursePlanList' })
             this.resetData()
           }, 1000)
         })
@@ -261,15 +269,6 @@ export default {
         .catch()
         .finally(() => {
           this.loading = false
-        })
-    },
-    getCourseDetail() {
-      // 获取课程详情
-      let data = { id: this.id }
-      courseDetail(data)
-        .then(() => {})
-        .catch((err) => {
-          window.console.log(err)
         })
     }
   }

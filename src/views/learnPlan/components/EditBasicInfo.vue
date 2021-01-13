@@ -40,12 +40,14 @@ export default {
           prop: 'coursePlanNo',
           itemType: 'input',
           label: '课程安排编号',
+          maxlength: 32,
           required: true
         },
         {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
+          maxlength: 32,
           required: true,
           offset: 4
         },
@@ -102,6 +104,7 @@ export default {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
+          maxlength: 32,
           required: false
         }
       ],
@@ -109,12 +112,12 @@ export default {
     }
   },
   watch: {
-    'model.courseCatalogId': {
+    'model.categoryId': {
       immediate: true,
       handler(val) {
         const node = filterTree(this.categoryData, (node) => node.id === val, true)[0]
         if (node) {
-          this.$set(this.model, 'courseCatalogName', node.label)
+          this.$set(this.model, 'categoryName', node.label)
         }
       }
     }

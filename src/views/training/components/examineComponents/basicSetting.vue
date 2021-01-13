@@ -13,6 +13,7 @@
           :allow-create="true"
           :searchable="true"
           :load="loadTestPaper"
+          :option-list.sync="testPaperList"
           :option-props="{
             label: 'name',
             value: 'id',
@@ -205,6 +206,14 @@ export default {
         integral: 0,
         strategy: 0,
         publishTime: 0
+      },
+      testPaperList: []
+    }
+  },
+  watch: {
+    'model.testPaper': {
+      handler(val) {
+        this.$set(this.model, 'testPaperType', _.find(this.testPaperList, { id: val }).type)
       }
     }
   },

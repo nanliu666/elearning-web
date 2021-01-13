@@ -24,9 +24,18 @@
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
             />
+            <div class="operations-right">
+              <div
+                class="refresh-container"
+                @click="loadTableData"
+              >
+                <i class="el-icon-refresh-right" />
+                <span>刷新</span>
+              </div>
+            </div>
           </div>
         </template>
-        <template #oparetion>
+        <template #oparetion="{row}">
           <el-button
             type="text"
             size="medium"
@@ -82,6 +91,7 @@ const TABLE_COLUMNS = [
   {
     label: '操作',
     slot: true,
+    fixed: 'right',
     prop: 'oparetion',
     minWidth: 100
   }
@@ -380,65 +390,38 @@ export default {
 .top-button {
   width: 40px;
 }
-</style>
-<style lang="sass" scoped>
-$color_icon: #A0A8AE
-.status-span
-    padding: 4px;
-    border-radius: 2px;
-.basic-container--block
-  height: calc(100% - 92px)
-  min-height: calc(100% - 92px)
-.title
-  color: $primaryColor
-  cursor: pointer
-.operations
-  align-items: center
-  display: flex
-  justify-content: space-between
-  &__column--item
-    height: 25px
-  &__column--visible
-    height: 200px
-    overflow: scroll
-  &__btns
-    align-items: center
-    display: flex
-    height: 24px
-    justify-content: flex-start
-  &__btns--item
-    margin: 0
-    margin-right: 4px
-    padding: 0
-    height: 24px
-    width: 24px
-    line-height: 24px
-    &:last-child
-      margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-  .iconfont
-    color: $color_icon
-    font-weight: bold
-    font-size: 16px
-
-.Menu
-  // 添加一个分隔号 "｜"
-  .table__handler
-    display: flex
-    justify-content: flex-end
-    > .el-button--text
-      text-align: center
-      padding: 0 8px
-      margin-left: 0px
-      position: relative
-      &:not(:last-child)::after
-        background-color: #e3e7e9
-        content: ''
-        height: 10px
-        position: absolute
-        right: 0
-        top: 50%
-        transform: translateY(-50%)
-        width: 1px
+.operations {
+  display: flex;
+  justify-content: space-between;
+}
+.operations-right {
+  i {
+    margin-left: 12px;
+    font-size: 18px;
+    color: #a0a8ae;
+    cursor: pointer;
+  }
+  display: flex;
+  align-items: center;
+  .refresh-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: #a0a8ae;
+    padding: 0 10px;
+    cursor: pointer;
+    span {
+      padding-left: 6px;
+    }
+    // &::before {
+    //   position: absolute;
+    //   content: '';
+    //   top: 3px;
+    //   right: 0px;
+    //   width: 0.5px;
+    //   height: 80%;
+    //   background-color: #a0a8ae;
+    // }
+  }
+}
 </style>

@@ -6,7 +6,7 @@
     @close="handleClose"
   >
     <div class="precondition_label">
-      {{ course && course.courseName }}
+      当前课程:{{ course && course.courseName }}
     </div>
     <ul class="precondition_container">
       <li class="container_title">
@@ -15,7 +15,7 @@
       </li>
       <li
         v-for="item in list"
-        :key="item.courseId"
+        :key="item.id"
       >
         <div class="precondition_left">
           {{ item.courseName }}
@@ -93,7 +93,7 @@ export default {
           _list.push({
             courseId: course.courseId,
             courseName: course.courseName,
-            required: requiredIdMap[course.courseId] || 0
+            required: requiredIdMap[course.id] || 0
           })
         }
       })
@@ -117,9 +117,14 @@ export default {
 .coursePreCourseDialog {
   /deep/.el-dialog {
     .precondition_label {
-      line-height: 40px;
+      margin-bottom: 16px;
+      margin-top: 16px;
+      line-height: 22px;
     }
     .precondition_container {
+      li {
+        margin-bottom: 16px;
+      }
       .container_title {
         text-align: center;
         background: #fafafa;
