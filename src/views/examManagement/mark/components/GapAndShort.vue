@@ -85,7 +85,7 @@ export default {
     return {
       columns: _.cloneDeep(EventColumns),
       formData: {
-        id: this.data.id,
+        id: '',
         result: '',
         scoreUser: '',
         reviewRemark: ''
@@ -101,6 +101,15 @@ export default {
         }
       },
       deep: true
+    },
+    data: {
+      handler(value) {
+        if (value) {
+          _.assign(this.formData, _.pick(this.data, _.keys(this.formData)))
+        }
+      },
+      deep: true,
+      immediate: true
     }
   },
   created() {},

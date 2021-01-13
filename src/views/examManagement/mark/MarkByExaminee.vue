@@ -425,12 +425,23 @@ export default {
         type: '',
         id: this.$route.query.id
       })
-      const tempPaperData = _.groupBy(paperData, 'state')
-      _.forIn(tempPaperData, (value, key) => {
-        if (key === '0') {
-          this.impersonalityList = this.initQuestionList(value)
+      let targetList = []
+      _.each(paperData, (item) => {
+        if (!_.isEmpty(item.subQuestions)) {
+          targetList.push(...item.subQuestions)
         } else {
-          this.subjectivityList = this.initQuestionList(value)
+          targetList.push(item)
+        }
+      })
+      const tempPaperData = _.groupBy(targetList, 'state')
+      _.forIn(tempPaperData, (value, key) => {
+        switch (key) {
+          case '0':
+            this.impersonalityList = this.initQuestionList(value)
+            break
+          case '1':
+            this.subjectivityList = this.initQuestionList(value)
+            break
         }
       })
     },
