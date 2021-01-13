@@ -288,6 +288,7 @@ const EventColumns = [
     itemType: 'input',
     span: 11,
     required: true,
+    maxLength: 50,
     prop: 'examName',
     label: '考试名称'
   },

@@ -264,6 +264,10 @@ export default {
   computed: {
     ...mapGetters(['userId'])
   },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
+  },
   async activated() {
     this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
     this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })
@@ -323,12 +327,14 @@ export default {
       this.loadTableData()
     },
     /**
-     * 编辑
+     * 逐人评卷
      */
     handleExaminee(row) {
+      const basicQuery = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
+      //兼容评价下一个
       this.$router.push({
         path: '/examManagement/mark/MarkByExaminee',
-        query: { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
+        query: basicQuery
       })
     }
   }

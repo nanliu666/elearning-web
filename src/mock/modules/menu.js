@@ -565,7 +565,6 @@ const res = {
             isShow: 1,
             code: 'org_user',
             alias: 'user',
-            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
             path: '/training/trainingArrange',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
@@ -1213,6 +1212,81 @@ const res = {
             code: 'approval_approval',
             alias: 'approval',
             path: '/learnPlan/CourseUserList',
+            icon: 'iconfont iconicon_compile'
+          }
+        ]
+      },
+      {
+        menuId: '1590112075699',
+        menuName: '直播管理',
+        menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
+        isOwn: 1, // 是否拥有 0：否，1：是
+        isEnabled: 1,
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        isEnable: 1,
+        code: 'approval',
+        alias: 'approval',
+        path: '',
+        icon: 'iconfont iconicon_setting',
+        children: [
+          {
+            menuId: '1590112075692666',
+            menuName: '直播列表',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/live/list',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '1590112075692666',
+            menuName: '直播安排',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/CoursePlanList',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '1590112075692666',
+            menuName: '直播回放',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/learnPlan/CoursePlanList',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '1590112075692666',
+            menuName: '数据统计',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/live/statistics',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '1590112075692666',
+            menuName: '人员统计详情',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/live/statisticsDetails',
             icon: 'iconfont iconicon_compile'
           }
         ]
