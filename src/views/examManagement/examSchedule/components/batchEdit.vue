@@ -77,7 +77,7 @@ export default {
         batchNumber: '',
         id: '',
         examList: [],
-        examTime: [new Date(), new Date()]
+        examTime: [new Date(), new Date(moment(new Date()).add(1.5, 'hours'))]
       }
     }
   },
