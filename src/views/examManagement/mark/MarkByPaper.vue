@@ -315,7 +315,8 @@ export default {
       this.loadData()
     },
     pageChange() {
-      this.getFormData()
+      const targetRefs = this.getTargetRefs()
+      this.formDataList = _.map(targetRefs, 'model')
       const isAllPass = _.every(this.formDataList, (item) => {
         return _.get(item, 'result') && _.get(item, 'scoreUser') && _.get(item, 'reviewRemark')
       })
@@ -339,17 +340,23 @@ export default {
     },
     // 检测提交前的逻辑
     checkRequired() {
-      const targetRefs = this.getTargetRefs()
-      let checkList = this.getValidateList(targetRefs)
-      Promise.all(checkList).then((res) => {
-        if (_.every(res, Boolean)) {
+      const checkList = this.getTargetRefs()
+      Promise.all(
+        _.map(checkList, (item) => {
+          return item.validate()
+        })
+      )
+        .then(() => {
           this.submitFun()
-        }
-      })
+        })
+        .catch(() => {
+          this.$message.error('请为所有已评出结果的试题输入得分！')
+        })
     },
     // 具体提交函数
     submitFun() {
-      this.getFormData()
+      const targetRefs = this.getTargetRefs()
+      this.formDataList = _.map(targetRefs, 'model')
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
@@ -368,59 +375,18 @@ export default {
           })
       }
     },
-    // 获取表格的数据
-    getFormData() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = this.getFormDataFun(targetRefs)
-    },
-    // 获取表格数据的具体处理函数
-    getFormDataFun(targetRefs) {
-      let temp = []
-      _.forIn(targetRefs, (value) => {
-        _.each(value, (item) => {
-          const tempFormData = _.get(item, 'formData', null)
-          temp.push(_.assign(tempFormData, { id: _.get(item, 'data.id', null) }))
-        })
-      })
-      return temp
-    },
     // 获取当前所有的refs
     getTargetRefs() {
-      let targetRefs = {}
-      _.forIn(this.$refs, (value, key) => {
-        if (_.includes(key, 'refSelect')) {
-          _.assign(targetRefs, { [key]: value })
-        }
-      })
-      return targetRefs
-    },
-    // 异步验证表格
-    getValidateList(targetRefs) {
-      this.formDataList = []
-      let checkList = []
-      _.forIn(targetRefs, (value) => {
-        _.each(value, (item) => {
-          const tempRef = _.get(item, '$refs.form', null)
-          if (tempRef) {
-            checkList.push(this.validateByOne(tempRef))
-          }
+      const targetRefs = _.chain(this.$refs.refSelect)
+        .map('$refs')
+        .filter((item) => {
+          return !_.isEmpty(item)
         })
-      })
-      return checkList
-    },
-    // 一个接一个验证表格
-    validateByOne(tempRef) {
-      return new Promise((resolve) => {
-        tempRef
-          .validate()
-          .then(() => {
-            resolve(true)
-          })
-          .catch(() => {
-            this.$message.error('请为所有已评出结果的试题输入得分！')
-            resolve(false)
-          })
-      })
+        .map((item) => {
+          return item.gapAndShorRef.$refs.form
+        })
+        .value()
+      return targetRefs
     },
     goback() {
       this.$router.go(-1)

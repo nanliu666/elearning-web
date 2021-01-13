@@ -173,7 +173,7 @@
                   >
                     <span>{{ paperIndex + 1 }}.</span>
                     <QustionPreview
-                      :ref="`refSelect${paperIndex}${conIndex}`"
+                      :ref="`refSelect`"
                       :data="paperItem"
                       type="view"
                     />
@@ -307,7 +307,8 @@ export default {
     },
     // 具体提交函数
     submitFun() {
-      this.getFormData()
+      const targetRefs = this.getTargetRefs()
+      this.formDataList = _.map(targetRefs, 'model')
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
@@ -332,77 +333,37 @@ export default {
     },
     // 检测提交前的逻辑
     checkRequired() {
-      const targetRefs = this.getTargetRefs()
-      let checkList = this.getValidateList(targetRefs)
-      Promise.all(checkList).then((res) => {
-        if (_.every(res, Boolean)) {
+      const checkList = this.getTargetRefs()
+      Promise.all(
+        _.map(checkList, (item) => {
+          return item.validate()
+        })
+      )
+        .then(() => {
           this.submitFun()
-        }
-      })
+        })
+        .catch(() => {
+          this.$message.error('请为所有已评出结果的试题输入得分！')
+        })
     },
     // 获取当前所有的refs
     getTargetRefs() {
-      let targetRefs = {}
-      _.forIn(this.$refs, (value, key) => {
-        if (_.includes(key, 'refSelect')) {
-          _.assign(targetRefs, { [key]: value })
-        }
-      })
+      const targetRefs = _.chain(this.$refs.refSelect)
+        .map('$refs')
+        .filter((item) => {
+          return !_.isEmpty(item)
+        })
+        .map((item) => {
+          return item.gapAndShorRef.$refs.form
+        })
+        .value()
       return targetRefs
-    },
-    // 获取表格的数据
-    getFormData() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = this.getFormDataFun(targetRefs)
     },
     //清空所有的表格校验以及表格数据
     clearMarkForm() {
       const targetRefs = this.getTargetRefs()
-      _.forIn(targetRefs, (value) => {
-        _.each(value, (item) => {
-          // 清空
-          const tempRef = _.get(item, '$refs.gapAndShorRef.$refs.form', null)
-          tempRef && tempRef.resetFields()
-        })
-      })
-    },
-    // 获取表格数据的具体处理函数
-    getFormDataFun(targetRefs) {
-      let temp = []
-      _.forIn(targetRefs, (value) => {
-        _.each(value, (item) => {
-          const tempFormData = _.get(item, '$refs.gapAndShorRef.formData', null)
-          temp.push(_.assign(tempFormData, { id: _.get(item, 'data.id', null) }))
-        })
-      })
-      return temp
-    },
-    // 获取验证表格的list
-    getValidateList(targetRefs) {
-      this.formDataList = []
-      let checkList = []
-      _.forIn(targetRefs, (value) => {
-        _.each(value, (item) => {
-          const tempRef = _.get(item, '$refs.gapAndShorRef.$refs.form', null)
-          if (tempRef) {
-            checkList.push(this.validateByOne(tempRef))
-          }
-        })
-      })
-      return checkList
-    },
-    // 一个接一个验证表格
-    validateByOne(tempRef) {
-      return new Promise((resolve) => {
-        tempRef
-          .validate()
-          .then(() => {
-            resolve(true)
-          })
-          .catch(() => {
-            this.$message.error('请为所有已评出结果的试题输入得分！')
-            resolve(false)
-          })
+      _.map(targetRefs, (item) => {
+        return item.resetFields()
       })
     },
     getItemTotalScore(data) {
