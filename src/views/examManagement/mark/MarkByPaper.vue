@@ -338,19 +338,13 @@ export default {
       this.checkRequired()
     },
     // 检测提交前的逻辑
-    async checkRequired() {
+    checkRequired() {
       const targetRefs = this.getTargetRefs()
-      let checkList = await this.asyncGetValidate(targetRefs)
-      let finalList = []
-      _.each(checkList, (item) => {
-        item.then((value) => {
-          finalList.push(value)
-          if (_.size(checkList) === _.size(finalList)) {
-            if (_.every(finalList, Boolean)) {
-              this.submitFun()
-            }
-          }
-        })
+      let checkList = this.getValidateList(targetRefs)
+      Promise.all(checkList).then((res) => {
+        if (_.every(res, Boolean)) {
+          this.submitFun()
+        }
       })
     },
     // 具体提交函数
@@ -401,20 +395,18 @@ export default {
       return targetRefs
     },
     // 异步验证表格
-    asyncGetValidate(targetRefs) {
+    getValidateList(targetRefs) {
       this.formDataList = []
       let checkList = []
-      return new Promise((resolve) => {
-        _.forIn(targetRefs, (value) => {
-          _.each(value, (item) => {
-            const tempRef = _.get(item, '$refs.form', null)
-            if (tempRef) {
-              checkList.push(this.validateByOne(tempRef))
-            }
-          })
+      _.forIn(targetRefs, (value) => {
+        _.each(value, (item) => {
+          const tempRef = _.get(item, '$refs.form', null)
+          if (tempRef) {
+            checkList.push(this.validateByOne(tempRef))
+          }
         })
-        resolve(checkList)
       })
+      return checkList
     },
     // 一个接一个验证表格
     validateByOne(tempRef) {
