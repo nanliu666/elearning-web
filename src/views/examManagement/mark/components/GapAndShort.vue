@@ -15,9 +15,9 @@
           <span class="answer-label">考生答案：</span>
           <span class="answer-value">{{ data.answerUser || '--' }}</span>
         </div>
-        <el-button type="text">
+        <!-- <el-button type="text">
           编辑
-        </el-button>
+        </el-button> -->
       </div>
       <div class="split-line"></div>
       <common-form

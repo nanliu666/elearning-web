@@ -184,36 +184,36 @@
           </ul>
         </li>
       </ul>
-      <div class="handle-button">
-        <div class="button-box">
-          <el-button
-            type="primary"
-            size="medium"
-            @click="submit"
-          >
-            提交评分
-          </el-button>
-          <el-button
-            size="medium"
-            @click="submitAndNext"
-          >
-            提交且评下一个
-          </el-button>
-          <el-button
-            size="medium"
-            @click="save"
-          >
-            保存
-          </el-button>
-          <el-button
-            size="medium"
-            @click="refreshSubmit"
-          >
-            重新评分
-          </el-button>
-        </div>
-      </div>
     </el-card>
+    <div class="handle-button">
+      <div class="button-box">
+        <el-button
+          type="primary"
+          size="medium"
+          @click="submit"
+        >
+          提交评分
+        </el-button>
+        <el-button
+          size="medium"
+          @click="submitAndNext"
+        >
+          提交且评下一个
+        </el-button>
+        <el-button
+          size="medium"
+          @click="save"
+        >
+          保存
+        </el-button>
+        <el-button
+          size="medium"
+          @click="refreshSubmit"
+        >
+          重新评分
+        </el-button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -592,23 +592,23 @@ export default {
     .card-content {
       padding-bottom: 76px;
     }
-    .handle-button {
-      position: absolute;
-      bottom: 0;
-      width: calc(100% + 24px);
-      left: -24px;
-      background-color: #fff;
-      box-shadow: 0 -6px 12px 0 rgba(0, 61, 112, 0.08);
+  }
+  .handle-button {
+    position: fixed;
+    bottom: 0;
+    right: 40px;
+    width: calc(100vw - 16.5vw - 72px);
+    background-color: #fff;
+    box-shadow: 0 -6px 12px 0 rgba(0, 61, 112, 0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 76px;
+    .button-box {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 76px;
-      .button-box {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: calc(104px * 4 + 3 * 16px);
-      }
+      width: calc(104px * 4 + 3 * 16px);
     }
   }
 }
