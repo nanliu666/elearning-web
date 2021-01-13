@@ -98,12 +98,12 @@
               </div>
             </div>
             <li
-              v-for="(item, index) in qustionList"
+              v-for="item in qustionList"
               :key="item.id"
               class="question-li"
             >
               <by-paper-form
-                :ref="`refSelect${index}`"
+                ref="refSelect"
                 :data="item"
               />
             </li>
@@ -366,9 +366,9 @@ export default {
       if (_.isEmpty(list)) {
         this.$message.error('您未对该考卷进行评分，请评分后再提交！')
       } else {
-        actionExamineePaperIngUser(list)
+        actionExamineePaperIngUser({ list: list })
           .then(() => {
-            // console.log('res==', res)
+            this.$router.go(-1)
           })
           .catch(() => {
             window.console.error(JSON.stringify(list))
@@ -383,7 +383,7 @@ export default {
           return !_.isEmpty(item)
         })
         .map((item) => {
-          return item.gapAndShorRef.$refs.form
+          return item.form
         })
         .value()
       return targetRefs

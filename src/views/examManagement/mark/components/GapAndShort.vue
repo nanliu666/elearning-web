@@ -85,6 +85,7 @@ export default {
     return {
       columns: _.cloneDeep(EventColumns),
       formData: {
+        id: this.data.id,
         result: '',
         scoreUser: '',
         reviewRemark: ''
