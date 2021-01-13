@@ -149,6 +149,21 @@ export default {
     background-color: #fafafa;
   }
 }
+.dot-box {
+  .dot-content {
+    min-width: 60px;
+    display: flex;
+    align-items: center;
+    .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: rgba(0, 11, 21, 0.25);
+      margin-right: 6px;
+    }
+  }
+}
 .mark-section {
   margin-top: 8px;
   background: #fafafa;
