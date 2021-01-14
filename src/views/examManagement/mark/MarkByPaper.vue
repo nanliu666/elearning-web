@@ -339,7 +339,7 @@ export default {
     },
     setQuestionList() {
       // 获取到当前的展示数组
-      // 第几题的第几页的数据
+      // 第几题的第几页的数据--手动创建了一个二维数组
       this.qustionList = this.totalList[this.currentIndex][this.pageNo - 1]
     },
     // 页数改变
@@ -384,10 +384,6 @@ export default {
       this.loadData()
     },
     submit() {
-      this.checkRequired()
-    },
-    // 检测提交前的逻辑
-    checkRequired() {
       const checkList = this.getTargetRefs()
       Promise.all(
         _.map(checkList, (item) => {
@@ -403,8 +399,7 @@ export default {
     },
     // 具体提交函数
     submitFun() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = _.map(targetRefs, 'model')
+      this.formDataList = _.map(this.getTargetRefs(), 'model')
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
@@ -416,7 +411,7 @@ export default {
       } else {
         actionExamineePaperIngUser({ list: list })
           .then(() => {
-            this.$router.push({ path: 'examManagement/mark/MarkList' })
+            this.$router.push({ path: '/examManagement/mark/MarkList' })
           })
           .catch((err) => {
             window.console.error('err==', err)
