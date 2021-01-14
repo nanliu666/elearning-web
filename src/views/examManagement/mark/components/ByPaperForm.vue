@@ -79,9 +79,9 @@ export default {
     return {
       formData: {
         result: '', // 评价结果
-        scoreUser: '', // scoreUser
+        scoreUser: '', // 评分
         reviewRemark: '', // 评语
-        id: this.data.id //考生答卷答题卡id
+        id: '' //考生答卷答题卡id
       },
       columns: _.cloneDeep(EventColumnsS)
     }
@@ -95,6 +95,15 @@ export default {
         }
       },
       deep: true
+    },
+    data: {
+      handler(value) {
+        if (value) {
+          _.assign(this.formData, _.pick(this.data, _.keys(this.formData)))
+        }
+      },
+      deep: true,
+      immediate: true
     }
   },
   created() {},
