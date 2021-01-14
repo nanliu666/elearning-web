@@ -11,7 +11,7 @@
           多选题
         </div>
         <el-radio-group
-          v-model="currentRadio"
+          v-model="model.multipleChoice"
           class="radio-group"
         >
           <el-radio
@@ -76,7 +76,8 @@ const defaultValue = {
   scopeLimit: false,
   scopeLimitValue: 100, // 最高分默认值100
   objectiveQuestions: false,
-  decideItem: false
+  decideItem: false,
+  multipleChoice: 0
 }
 export default {
   name: 'EvaluationStrategy',
@@ -104,7 +105,6 @@ export default {
             '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
         }
       ],
-      currentRadio: 1,
       insertConfig,
       switchConfig: switchConfig,
       model: _.cloneDeep(defaultValue)

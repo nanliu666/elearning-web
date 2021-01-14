@@ -24,3 +24,20 @@ export const getExamineePaperDetail = (params) => get('/manage/v1/getExamineePap
  */
 export const getExamineePaperDetailist = (params) =>
   get('/manage/v1/getExamineePaperDetailist', params)
+/**
+ * 逐人评卷提交
+ */
+export const postSubmitByOne = (params) => post('/manage/v1/actionExamineePaperIng', params)
+/**
+ * 获取逐题评卷题干的考生答卷
+ */
+export const getByPaper = (params) => post('/manage/v1/listExamineePaperOnceUser', params)
+/**
+ * 逐题评卷题干
+ */
+export const listExamineePaperOnce = (params) => post('/manage/v1/listExamineePaperOnce', params)
+/**
+ * 逐题评卷提交action
+ */
+export const actionExamineePaperIngUser = (params) =>
+  post('/manage/v1/actionExamineePaperIngUser', params)

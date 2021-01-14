@@ -4,10 +4,10 @@
     class="requiredSchedule Menu fill"
   >
     <!-- 必修课安排 详情页面 -->
-    <page-header>
-      <template slot="title">
-        <span class="header_title">必修课程安排</span>学员完成率
-      </template>
+    <page-header
+      show-back
+      title="学员完成率"
+    >
     </page-header>
     <basic-container block>
       <common-table
@@ -39,7 +39,7 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import { queryPercentageComplete } from '@/api/learnPlan'
-
+import { getCourseList } from '@/api/learnPlan'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -86,12 +86,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
     type: 'input'
   }
 ]
-let SELECT_GROUP = JSON.parse(window.sessionStorage.requiredScheduleDetail).courseList || []
-SELECT_GROUP = SELECT_GROUP.map((item) => {
-  item.value = item.id
-  item.label = item.courseName
-  return item
-})
+
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'input',
@@ -101,11 +96,21 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     // config: { optionLabel: 'name', optionValue: 'id' }
   },
   {
-    type: 'select',
+    type: 'lazySelect',
     field: 'courseId',
     label: '课程',
     data: '',
-    options: SELECT_GROUP
+    placeholder: '请选择课程',
+    optionProps: {
+      label: 'courseName',
+      key: 'id',
+      value: 'id'
+    },
+    load: (params) => {
+      params.courseName = params.search
+      return getCourseList(params)
+    },
+    searchable: true
   },
   {
     type: 'numInterval',

@@ -58,10 +58,11 @@
             </div>
           </div>
           <el-alert
-            title="该列表将列出您被安排评卷的考试的列表;建议逐人及逐题不可同时使用"
+            title="该列表将列出您被安排评卷的考试的列表，建议逐人及逐题不可同时使用"
             type="info"
             show-icon
             class="tips"
+            :closable="false"
           >
           </el-alert>
         </template>
@@ -77,7 +78,12 @@
           {{ row.categoryName ? row.categoryName : '未分类' }}
         </template>
         <template #createUser1="{row}">
-          {{ moment(row.examBeginTime).diff(moment(row.examEndTime), 'minutes') }}
+          {{ moment(row.examEndTime).diff(moment(row.examBeginTime), 'minutes') }}
+        </template>
+        <template #examEndTime="{row}">
+          <span>{{ moment(row.examBeginTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          <span>至</span>
+          <span>{{ moment(row.examEndTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
         </template>
 
         <template #completeStatus="{row}">
@@ -148,6 +154,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '有效时间',
+    slot: true,
     prop: 'examEndTime',
     minWidth: 120
   }

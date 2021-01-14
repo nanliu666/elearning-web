@@ -8,7 +8,7 @@ module.exports = {
   },
   extends: ['eslint:recommended', 'plugin:vue/recommended'],
   rules: {
-    'no-console': 'error',
+    'no-console': 'warn',
     'no-debugger': 'error',
     'no-prototype-builtins': 'off',
     semi: [2, 'never'],

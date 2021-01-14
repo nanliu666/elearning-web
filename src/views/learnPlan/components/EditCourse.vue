@@ -15,10 +15,10 @@
             全选
           </el-checkbox>
         </li>
-        <li @click="deleteTableData">
+        <li @click="handleDeleteCourse">
           <i class="el-icon-delete"></i>删除
         </li>
-        <li @click="bulkEdit">
+        <li @click="handleBatchEdit">
           <i class="el-icon-edit-outline"></i>批量修改
         </li>
       </ul>
@@ -26,7 +26,7 @@
         class="header_right"
         type="primary"
         size="medium"
-        @click="addScheduleBtn"
+        @click="handleAddCourse"
       >
         添加课程
       </el-button>
@@ -36,240 +36,206 @@
       @change="checkboxGroupChange"
     >
       <el-collapse
-        v-model="activeNames"
+        v-model="activeCollapses"
         class="layout_content"
-        @change="handleChange"
       >
-        <el-collapse-item
-          v-for="item in courseList"
-          :key="item.id"
-          :name="item.id"
+        <draggable
+          v-model="courseList"
+          :animation="200"
         >
-          <template slot="title">
-            <div class="layout_content_label">
-              <i class="el-icon-arrow-down"></i>
-              <el-checkbox
-                :key="index"
-                :label="item.id"
-              ></el-checkbox>
-              {{ item.label }}
-              <i
-                class="el-icon-s-grid"
-                title="拖拽可调整课程排序"
-              ></i>
-            </div>
-          </template>
-          <div class="layout_content_detail">
-            <common-form
-              :model="item"
-              :columns="columns"
-            >
-              <div
-                slot="courseName"
-                class="course-name-input"
-              >
-                <el-input v-model="item.courseName"></el-input><span
-                  class="precondition"
-                  @click="setPrecondition"
-                >设置前置条件</span>
+          <el-collapse-item
+            v-for="course in courseList"
+            :key="course.courseId"
+            :name="course.courseId"
+          >
+            <template slot="title">
+              <div class="layout_content_label">
+                <div class="layout_content_label__head">
+                  <i
+                    v-if="activeCollapses.includes(course.courseId)"
+                    class="el-icon-arrow-down"
+                  ></i>
+                  <i
+                    v-else
+                    class="el-icon-arrow-right"
+                  ></i>
+                  <el-checkbox :label="course.courseId"></el-checkbox>
+                  {{ course.courseName }}
+                </div>
+                <i class="icon-drag"></i>
               </div>
-              <template slot="studyFrequency">
-                <el-input-number
-                  v-model="item.studyFrequency"
-                  controls-position="right"
-                  :min="0"
-                ></el-input-number>
-              </template>
-              <template slot="timeList">
-                <el-date-picker
-                  v-model="item.timeList[0]"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始月份"
-                  end-placeholder="结束月份"
-                >
-                </el-date-picker>
-                <el-date-picker
-                  v-model="item.timeList[1]"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始月份"
-                  end-placeholder="结束月份"
-                >
-                </el-date-picker>
-                <el-date-picker
-                  v-model="item.timeList[2]"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始月份"
-                  end-placeholder="结束月份"
-                >
-                </el-date-picker>
-              </template>
-            </common-form>
-            <el-tabs
-              v-model="activeName"
-              @tab-click="handleClick"
-            >
-              <el-tab-pane
-                label="关联考试"
-                name="first"
+            </template>
+            <div class="layout_content_detail">
+              <common-form
+                ref="form"
+                :model="course"
+                :columns="formColumns"
               >
                 <div
-                  v-for="(list, indexs) in item.arr1"
-                  :key="indexs"
-                  class="tab_list clearfix"
+                  slot="courseName"
+                  class="course-name-input"
                 >
-                  {{ list.name }}
-                  <div class="tab_right">
-                    <span>预览</span><span>编辑</span>
-                    <el-dropdown @command="commandClick">
-                      <i class="el-icon-more"></i>
-                      <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="a">
-                          人员列表
-                        </el-dropdown-item>
-                        <el-dropdown-item command="b">
-                          前置条件
-                        </el-dropdown-item>
-                        <el-dropdown-item command="c">
-                          删除
-                        </el-dropdown-item>
-                      </el-dropdown-menu>
-                    </el-dropdown>
+                  <el-input
+                    :value="course.courseName"
+                    @click.native="replaceCourse(course)"
+                  />
+                  <el-tooltip
+                    class="item"
+                    effect="dark"
+                    content="学习当前课程之前需满足的条件"
+                    placement="top"
+                  >
+                    <span
+                      class="precondition"
+                      @click="handleSetPrecondition(course)"
+                    >设置前置条件</span>
+                  </el-tooltip>
+                </div>
+                <template slot="studyFrequency">
+                  <el-input-number
+                    v-model="course.studyFrequency"
+                    controls-position="right"
+                    :min="0"
+                  ></el-input-number>
+                </template>
+                <template slot="timeList">
+                  <el-date-picker
+                    v-for="(time, index) in course.timeList"
+                    :key="index"
+                    v-model="time.list"
+                    type="daterange"
+                    value-format="yyyy-MM-dd HH:mm:ss"
+                    range-separator="至"
+                    start-placeholder="开始时间"
+                    end-placeholder="结束时间"
+                  >
+                  </el-date-picker>
+                </template>
+              </common-form>
+              <el-tabs value="first">
+                <el-tab-pane
+                  label="关联考试"
+                  name="first"
+                >
+                  <div
+                    v-for="(exam, indexs) in course.studyExam"
+                    :key="indexs"
+                    class="tab_list clearfix"
+                  >
+                    {{ exam.examName }}
+                    <div class="tab_right">
+                      <span @click="handleViewTextPaper(course, exam)">预览</span>
+                      <span @click="handleExamEdit(course, exam)">编辑</span>
+                      <el-dropdown @command="handleExamCommand(course, indexs, $event)">
+                        <i class="el-icon-more"></i>
+                        <el-dropdown-menu slot="dropdown">
+                          <el-dropdown-item command="del">
+                            删除
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </el-dropdown>
+                    </div>
                   </div>
-                </div>
-                <div
-                  class="tabsAddBtn"
-                  @click="tabsAddBtn(item.arr1)"
+                  <div
+                    class="exam-add"
+                    @click="handleExamEdit(course)"
+                  >
+                    添加
+                  </div>
+                </el-tab-pane>
+                <el-tab-pane
+                  label="关联练习"
+                  name="second"
                 >
-                  添加
-                </div>
-              </el-tab-pane>
-              <el-tab-pane
-                label="关联练习"
-                name="second"
-              >
-              </el-tab-pane>
-              <el-tab-pane
-                label="关联作业"
-                name="third"
-              >
-              </el-tab-pane>
-            </el-tabs>
-          </div>
-        </el-collapse-item>
+                </el-tab-pane>
+                <el-tab-pane
+                  label="关联作业"
+                  name="third"
+                >
+                </el-tab-pane>
+              </el-tabs>
+            </div>
+          </el-collapse-item>
+        </draggable>
       </el-collapse>
     </el-checkbox-group>
 
     <!-- 批量修改的弹窗 -->
-    <el-dialog
-      title="批量修改"
-      :visible.sync="dialogVisible"
-      :append-to-body="true"
-    >
-      <div class="batch_label">
-        允许输入的时间段
-      </div>
-      <el-date-picker v-model="datePick1"></el-date-picker>
-      <el-date-picker v-model="datePick2"></el-date-picker>
-      <el-date-picker v-model="datePick3"></el-date-picker>
-      <div class="batch_label">
-        允许学习次数
-      </div>
-      <el-input-number
-        v-model="learnNumber"
-        controls-position="right"
-        :min="0"
-        placeholder="请输入"
-      ></el-input-number>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button
-          type="primary"
-          @click="dialogVisible = false"
-        >确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <CourseBatchEditDialog
+      ref="batchEdit"
+      :visible.sync="batchDialogVisible"
+      @submit="handleBatchEditSubmit"
+    />
     <!-- 前置条件的弹窗 -->
-    <el-dialog
-      title="前置条件"
-      class="preconditionDialog"
-      :visible.sync="precondDialogShow"
-      :append-to-body="true"
-    >
-      <div class="precondition_label">
-        当前课程：AAA
-      </div>
-      <ul class="precondition_container">
-        <li class="container_title">
-          <span class="precondition_left">当前课程</span>
-          <span class="precondition_right">是否必须通过</span>
-        </li>
-        <li
-          v-for="(item, idx) in preconditionList"
-          :key="idx"
-        >
-          <el-select class="precondition_left">
-            <el-option label="社区的分类与定位"></el-option>
-          </el-select>
-          <el-select class="precondition_right">
-            <el-option label="是"></el-option>
-          </el-select>
-        </li>
-      </ul>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button
-          type="primary"
-          @click="dialogVisible = false"
-        >确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <CoursePreCourseDialog
+      ref="preEdit"
+      :course="settingPreCourse"
+      :course-list="courseList"
+      :visible.sync="precondDialogVisible"
+      @submit="handleSetPrecondSubmit"
+    />
     <!-- 课程列表的弹窗 -->
     <CourseSelectDialog
+      ref="listSelect"
+      :multiple="!replacingCourse"
       :visible.sync="courseDialogVisible"
       @submit="handleCourseSelectSubmit"
+    />
+    <!-- 课程考试编辑 -->
+    <EditExamineDrawer
+      :visible.sync="examDrawerVisible"
+      :examine="editingExam"
+      @submit="handleExamineSubmit"
     />
   </basicContainer>
 </template>
 
 <script>
 import CourseSelectDialog from './CourseSelectDialog'
+import CoursePreCourseDialog from './CoursePreCourseDialog'
+import CourseBatchEditDialog from './CourseBatchEditDialog'
+import EditExamineDrawer from '@/views/training/components/drawerComponents/editExamineDrawer'
+import { getCourseExam } from '@/api/learnPlan/index'
+import { createUniqueID } from '@/util/util'
+import draggable from 'vuedraggable'
+const COURSE_TEMPLATE = {
+  timeRange: [], //开课日期
+  passRule: [], // 通过条件
+  studyFrequency: 0, //允许学习次数
+  studyExam: [],
+  beforeCourse: [], // 前置课程
+  timeList: [{ list: [] }, { list: [] }, { list: [] }]
+}
 export default {
-  inject: ['parentObj'],
+  name: 'EditCourse',
   components: {
-    CourseSelectDialog
+    draggable,
+    CourseSelectDialog,
+    CoursePreCourseDialog,
+    CourseBatchEditDialog,
+    EditExamineDrawer
   },
   props: {
-    courseList: {
-      type: Array,
-      default: () => []
+    planId: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
-      dialogVisible: false, // 弹出对象值
-      courseDialogVisible: false, // 课程列表的弹窗标记
-
-      datePick1: '',
-      datePick2: '',
-      datePick3: '',
-      learnNumber: '', // 允许学习次数
-      iputSearch: '',
-      checkAll: true,
-      activeNames: '',
+      courseDialogVisible: false, // 课程选择弹窗标记
+      replacingCourse: null, // 当前要重新选择的课程
+      batchDialogVisible: false, // 批量操作的弹窗标记
+      precondDialogVisible: false, // 前置条件弹窗隐藏和显示
+      settingPreCourse: null, // 当前要设置前置条件的课程
+      examDrawerVisible: false, // 考试编辑弹窗编辑
+      editingExamCourse: null, // 当前要编辑考试的课程
+      editingExam: null, // 当前要编辑考试
+      courseList: [],
+      checkAll: false,
       checkedCourseIds: [],
-      isIndeterminate: true,
-      columns: [
+      isIndeterminate: false,
+      formColumns: [
         {
           prop: 'courseName',
           label: '课程名称',
@@ -277,22 +243,23 @@ export default {
           required: true
         },
         {
-          prop: 'text',
+          prop: 'passRule',
           itemType: 'checkbox',
           label: '通过条件',
           options: [
-            { label: '教师评定', value: '1' },
-            { label: '考试通过', value: '2' },
-            { label: '达到课程学时', value: '3' }
+            { label: '教师评定', value: 1 },
+            { label: '考试通过', value: 2 },
+            { label: '达到课程学时', value: 3 }
           ],
           offset: 4,
           required: true
         },
         {
-          prop: 'startTime',
+          prop: 'timeRange',
           itemType: 'datePicker',
-          label: '开课时间',
           type: 'daterange',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
+          label: '开课时间',
           required: true
         },
         {
@@ -309,104 +276,183 @@ export default {
           required: false
         }
       ],
-      activeName: 'first',
-
-      preconditionList: [], // 前置条件数组
-      precondDialogShow: false // 前置条件弹窗隐藏和显示
+      activeCollapses: []
     }
   },
+  computed: {},
   methods: {
+    // 考试安排提交后
+    handleExamineSubmit(data, type) {
+      if (type == 'add') {
+        this.editingExamCourse.studyExam.push(data)
+        this.editingExamCourse = null
+      } else {
+        let index = _.findIndex(this.editingExamCourse.studyExam, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.editingExamCourse.studyExam, index, data)
+        this.editingExamCourse = null
+        this.editingExam = null
+      }
+    },
+    handleViewTextPaper(course, exam) {
+      if (exam.testPaperType === 'manual') {
+        this.$router.push({
+          path: '/examManagement/examSchedule/preview',
+          query: { paperId: exam.testPaper, paperType: exam.testPaperType }
+        })
+      } else {
+        this.$message.error('随机试卷不支持预览')
+      }
+    },
+    handleExamEdit(course, exam) {
+      this.editingExamCourse = course
+      this.editingExam = exam || null
+      this.examDrawerVisible = true
+    },
+    handleExamCommand(course, index, command) {
+      if (command === 'del') {
+        course.studyExam.splice(index, 1)
+      }
+    },
+    replaceCourse(course) {
+      this.replacingCourse = course
+      this.courseDialogVisible = true
+    },
+    setCourseList(list) {
+      const res = _.map(list, (course) => {
+        let _course = {
+          ...course,
+          timeRange: [course.startTime, course.endTime],
+          timeList: _.map(course.timeList, (time) => ({
+            ...time,
+            list: [time.startTime, time.endTime]
+          })),
+          beforeCourse: _.map(course.beforeCourse, (c) => ({ courseId: c, required: 1 }))
+        }
+        return _course
+      })
+      this.courseList = res
+    },
+    // validateForm(form){
+    //   return
+    // }
+    getData() {
+      return new Promise((resolve, reject) => {
+        Promise.all(_.map(this.$refs.form, (ref) => ref.validate()))
+          .then(() => {
+            const data = _.map(this.courseList, (course, index) => {
+              let _course = {
+                courseName: course.courseName,
+                courseId: course.courseId,
+                id: course.id,
+                sequence: index + 1,
+                studyFrequency: course.studyFrequency,
+                passRule: course.passRule,
+                studyPlanId: this.planId,
+                startTime: course.timeRange[0],
+                endTime: course.timeRange[1],
+                studyExam: _.map(course.studyExam, (exam) => ({
+                  ...exam,
+                  studyPlanCourseId: course.id
+                })),
+                timeList: _.map(course.timeList, (time) => ({
+                  startTime: time.list[0],
+                  endTime: time.list[1],
+                  id: time.id,
+                  studyPlanCourseId: course.id
+                })),
+                beforeCourse: _.map(course.beforeCourse, 'courseId'),
+                beforeCourseName: _.map(course.beforeCourse, 'courseName')
+              }
+              return _course
+            })
+            resolve(data)
+          })
+          .catch(reject)
+      })
+      // this.$refs.form
+    },
+    // 课程添加回调
     handleCourseSelectSubmit(selected) {
-      // 课程列表弹窗确认回调
-      let idArr = this.courseList.map((item) => item.id)
-      let filterArr = selected.filter((item) => {
-        return !idArr.includes(item.id)
+      if (this.replacingCourse) {
+        this.replacingCourse.courseId = selected[0].id
+        this.replacingCourse.courseName = selected[0].courseName
+        this.replacingCourse = null
+      } else {
+        const idMap = _.reduce(
+          this.courseList,
+          (pre, cur) => {
+            pre[cur.courseId] = 1
+            return pre
+          },
+          {}
+        )
+        _.forEach(selected, (item) => {
+          if (!idMap[item.courseId]) {
+            let course = {
+              ..._.cloneDeep(COURSE_TEMPLATE),
+              courseId: item.id,
+              courseName: item.courseName
+            }
+            this.loadExamsOfCourse(course)
+            this.courseList.push(course)
+          }
+        })
+      }
+    },
+    loadExamsOfCourse(course) {
+      getCourseExam({ id: course.courseId }).then((exams) => {
+        course.studyExam.push(..._.map(exams, (exam) => ({ ...exam, id: createUniqueID() })))
       })
-      filterArr.forEach((item) => {
-        item.timeList = [[], [], []]
-        return item
-      })
-      this.courseList.push(...filterArr)
-      // this.treeData
     },
     handleCheckAllChange(val) {
       // 全选回调
-      this.checkedCourseIds = val ? this.courseList.map((item) => item.id) : []
-      this.indeterminate = false
+      this.checkedCourseIds = val ? this.courseList.map((item) => item.courseId) : []
+      this.isIndeterminate = false
     },
-
-    commandClick(val) {
-      // 关联开始删除
-      switch (val) {
-        case 'a':
-          break
-        case 'b':
-          break
-        case 'c': // 删除
-          this.$confirm('您确定要删除当前课程吗?', '提醒', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-            center: true
-          })
-            .then(() => {})
-            .catch(() => {})
-          break
-      }
+    checkboxGroupChange(value) {
+      let checkedCount = value.length
+      this.checkAll = checkedCount === this.courseList.length && checkedCount !== 0
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.courseList.length
     },
-    bulkEdit() {
+    handleBatchEdit() {
       // 批量修改
-      this.dialogVisible = true
+      this.batchDialogVisible = true
     },
-    checkboxGroupChange(val) {
-      this.checkAll = val.length == this.courseList.length ? true : false
-      this.indeterminate = val.length < this.courseList.length ? true : false
-    },
-    setPrecondition() {
-      // 设置前置条件
-      this.precondDialogShow = true
-    },
-    handleChange() {},
-    handleClick() {},
-    dropdownClick() {},
-    tabsAddBtn(arr) {
-      arr.push({ name: '信息安全考试' })
-    },
-    deleteTableData() {
-      // 删除列表数据
-      this.courseList.forEach((item, index, arr) => {
-        if (this.checkedCourseIds.includes(item.id)) {
-          let that = this
-          let ids = that.checkedCourseIds.indexOf(item.id)
-          arr.splice(index, 1)
-          this.checkedCourseIds.splice(ids, 1)
+    handleBatchEditSubmit(data) {
+      _.forEach(this.courseList, (course) => {
+        if (this.checkedCourseIds.includes(course.courseId)) {
+          course.studyFrequency = data.studyFrequency
+          _.forEach(data.timeList, (time, index) => {
+            _.set(course, `timeList[${index}].list`, time.list)
+            // this.$set(course, `timeList[${index}].list`, time.list)
+          })
         }
       })
-      this.checkboxGroupChange(this.checkboxGroup)
     },
-    addScheduleBtn() {
-      this.courseListDialog = true
-      this.getCourseData()
-      // this.$router.push({path: '/course/courseDraft'});
-      //   添加课程按钮回调
-      //   let id =  1 || this.treeData[this.treeData.length - 1].id + 1
-      //   this.treeData.push({
-      //     label: '课程一',
-      //     id: id,
-      //     form: {
-      //       recruitmentId: '',
-      //       text: '',
-      //       time1: '',
-      //       selectVal: '',
-      //       time2: '',
-      //       time3: ''
-      //     },
-      //     checkbox: false,
-      //     arr1: [],
-      //     arr2: [],
-      //     arr3: []
-      //   })
-      //   this.checkboxGroupChange(this.checkboxGroup)
+
+    handleSetPrecondition(course) {
+      // 设置前置条件
+      this.settingPreCourse = course
+      this.precondDialogVisible = true
+      setTimeout(() => {
+        this.$refs['preEdit'].update()
+      })
+    },
+    handleSetPrecondSubmit(list) {
+      this.settingPreCourse.beforeCourse = list
+    },
+    handleDeleteCourse() {
+      this.courseList = _.filter(
+        this.courseList,
+        (item) => !this.checkedCourseIds.includes(item.courseId)
+      )
+      this.checkedCourseIds = []
+      this.checkboxGroupChange(this.checkedCourseIds)
+    },
+    handleAddCourse() {
+      this.courseDialogVisible = true
     }
   }
 }
@@ -414,6 +460,9 @@ export default {
 
 <style lang="scss" scoped>
 .addSchedule {
+  .icon-drag {
+    cursor: move;
+  }
   /deep/.el-input-number {
     width: 100%;
   }
@@ -427,7 +476,11 @@ export default {
       top: 0;
     }
   }
+  /deep/.el-collapse {
+    border-bottom: none;
+  }
   .layout_header {
+    margin-bottom: 16px;
     &::after {
       content: '';
       clear: both;
@@ -450,13 +503,30 @@ export default {
     }
   }
   .layout_content {
+    /deep/.el-collapse-item {
+      margin-bottom: 2px;
+    }
     .layout_content_label {
+      background: #fafafa;
+      border-bottom: 1px solid #ebeced;
       width: 100%;
       position: relative;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 16px 0 24px;
+      &__head {
+        i {
+          font-size: 16px;
+        }
+      }
       /deep/.el-checkbox {
-        margin: 0 10px;
+        margin: 0 24px 0 16px;
         .el-checkbox__label {
           display: none;
+        }
+        .el-checkbox__inner {
+          width: 16px;
+          height: 16px;
         }
       }
       .el-icon-s-grid {
@@ -475,6 +545,7 @@ export default {
       }
     }
     .layout_content_detail {
+      padding-top: 16px;
       /deep/.el-tabs {
         .tab_list {
           height: 40px;
@@ -496,7 +567,7 @@ export default {
             }
           }
         }
-        .tabsAddBtn {
+        .exam-add {
           width: 100%;
           height: 42px;
           line-height: 42px;
@@ -529,37 +600,6 @@ export default {
 .commonTable {
   /deep/.el-form-item {
     width: 45%;
-  }
-}
-.preconditionDialog {
-  /deep/.el-dialog {
-    .precondition_label {
-      line-height: 40px;
-    }
-    .precondition_container {
-      .container_title {
-        text-align: center;
-        background-color: rgb(207, 201, 201);
-        // color: #fff;
-        line-height: 40px;
-      }
-      .precondition_left,
-      .precondition_right {
-        display: inline-block;
-      }
-      .precondition_left {
-        width: 60%;
-        .el-select {
-          width: 100%;
-        }
-      }
-      .precondition_right {
-        width: 40%;
-        .el-select {
-          width: 150px;
-        }
-      }
-    }
   }
 }
 </style>

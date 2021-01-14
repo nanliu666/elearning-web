@@ -25,6 +25,7 @@
 
 <script>
 import { getCatalogs } from '@/api/learnPlan'
+import { filterTree } from '@/util/util'
 export default {
   props: {
     model: {
@@ -39,18 +40,21 @@ export default {
           prop: 'coursePlanNo',
           itemType: 'input',
           label: '课程安排编号',
+          maxlength: 32,
           required: true
         },
         {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
-          required: false,
+          maxlength: 32,
+          required: true,
           offset: 4
         },
         {
           prop: 'timeRange',
           itemType: 'datePicker',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           type: 'daterange',
           label: '时间范围',
           required: true
@@ -69,14 +73,15 @@ export default {
           required: false
         },
         {
-          prop: 'courseCatalogId',
-          itemType: 'select',
+          prop: 'categoryId',
+          itemType: 'cascader',
           label: '所属分类',
           options: [],
           props: {
-            label: 'name',
-            value: 'id'
+            value: 'id',
+            emitPath: false
           },
+          showAllLevels: false,
           offset: 4,
           required: true
         },
@@ -96,19 +101,30 @@ export default {
           required: false
         },
         {
-          prop: 'date1',
+          prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
+          maxlength: 32,
           required: false
         }
       ],
       categoryData: []
     }
   },
+  watch: {
+    'model.categoryId': {
+      immediate: true,
+      handler(val) {
+        const node = filterTree(this.categoryData, (node) => node.id === val, true)[0]
+        if (node) {
+          this.$set(this.model, 'categoryName', node.label)
+        }
+      }
+    }
+  },
   created() {
     this.getCategoryData()
   },
-
   methods: {
     getData() {
       return new Promise((resolve, reject) => {
@@ -124,8 +140,34 @@ export default {
     },
     getCategoryData() {
       getCatalogs().then((res) => {
-        this.categoryData = res
-        this.columns[5].options = res
+        let data = []
+        res.group.forEach((item) => {
+          if (!item.id) {
+            return
+          }
+          data.push({
+            id: item.idStr,
+            label: item.name,
+            btnshow: 1,
+            children: [],
+            count: item.count
+          })
+        })
+        data.forEach((item) => {
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+          filterArr = filterArr.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0,
+              count: item.count
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
+        this.categoryData = data
+        this.columns[5].options = data
       })
     }
   }

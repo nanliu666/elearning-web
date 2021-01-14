@@ -15,7 +15,6 @@
           :key="index"
           class="step"
           :class="[activeStep === index ? 'active' : '']"
-          @click="jumpStep(index)"
         >
           <span class="step-index">
             <i
@@ -35,7 +34,7 @@
         <el-button
           v-if="!id"
           size="medium"
-          @click="publish('draft')"
+          @click="handleSubmit(1)"
         >
           存草稿
         </el-button>
@@ -58,19 +57,19 @@
           v-if="activeStep === 2"
           size="medium"
           type="primary"
-          @click="publish(0)"
+          @click="handleSubmit(0)"
         >
           发布
         </el-button>
       </div>
     </header>
     <el-row
-      v-loading="loading"
       type="flex"
       justify="center"
       class="page__content"
     >
       <el-col
+        v-loading="loading"
         :xl="16"
         :lg="16"
         :md="18"
@@ -86,11 +85,13 @@
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
-          :course-list.sync="formData.courseList"
+          :plan-id="id"
         />
         <EditPerson
           v-show="activeStep === 2"
           ref="editPerson"
+          :plan-id="id"
+          :user-list.sync="formData.participantsList"
         />
       </el-col>
     </el-row>
@@ -101,26 +102,28 @@
 import EditBasicInfo from './components/EditBasicInfo' // 基本信息
 import EditCourse from './components/EditCourse' // 添加课程
 import EditPerson from './components/EditPerson' // 人员信息
-import { addPlan, updatePlan, planDetail, courseDetail } from '@/api/learnPlan'
+import { addPlan, updatePlan, planDetail } from '@/api/learnPlan'
 import { mapGetters } from 'vuex'
 import moment from 'moment'
 const REFS_LIST = ['editBasicInfo', 'editCourse', 'editPerson']
 const defaultFormData = {
   automaticIntegralCount: false,
-  courseCatalogId: '',
-  courseCatalogName: '',
+  categoryId: null,
+  categoryName: null,
   coursePlanName: '',
   coursePlanNo: '',
   endDate: '',
   endTime: '',
   sponsor: '',
   creatorName: '',
+  createTime: null,
   startTime: '',
   participantsList: [],
   courseList: [],
-  timeRange: '' // 时间范围
+  timeRange: [] // 时间范围
 }
 export default {
+  name: 'EditPlan',
   components: {
     EditBasicInfo,
     EditCourse,
@@ -144,6 +147,7 @@ export default {
           icon: 'icon-approval-flow-outlined'
         }
       ],
+      timer: null,
       formData: _.cloneDeep(defaultFormData)
     }
   },
@@ -162,6 +166,14 @@ export default {
       parentObj: this
     }
   },
+  watch: {
+    'formData.timeRange': {
+      handler(data) {
+        this.$store.commit('SET_TRAIN_TIME', data)
+      },
+      deep: true
+    }
+  },
   created() {
     if (this.id) {
       this.getPlanDetail()
@@ -169,10 +181,19 @@ export default {
       this.setupDefaultFields()
     }
   },
+  destroyed() {
+    clearInterval(this.timer)
+  },
   methods: {
     setupDefaultFields() {
       this.formData.creatorName = this.userInfo.user_name
-      this.formData.coursePlanNo = moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id
+      this.formData.coursePlanNo =
+        moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
+      let that = this
+      this.timer = setInterval(() => {
+        if (that.id) return
+        that.formData.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
+      }, 1000)
     },
     exit() {
       this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {
@@ -187,37 +208,51 @@ export default {
         .catch(() => {})
     },
     handlePreviousStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
-      })
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
-
     handleNextStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
-      })
+      if (this.activeStep !== 2) {
+        this.$refs[REFS_LIST[this.activeStep]]
+          .getData()
+          .then(() => {
+            this.activeStep++
+          })
+          .catch((err) => {
+            console.error(err)
+            if (this.activeStep === 1) {
+              this.$message.error('请先完善课程信息')
+            }
+          })
+      } else {
+        this.activeStep = 0
+      }
     },
-    handleSubmit(type) {
+    // 0-发布，1-草稿箱
+    async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
       let [startTime, endTime] = data.timeRange
       data.startTime = startTime
       data.endTime = endTime
+      data.type = type
+      data.courseList = await this.$refs['editCourse'].getData()
       let func
       if (this.id) {
         func = updatePlan
       } else {
+        data.creatorId = this.userInfo.user_id
+        data.creatorName = this.userInfo.user_name
         func = addPlan
       }
       func(data)
         .then(() => {
-          const tips = type === 'draft' ? '已发布草稿' : '已成功发布课程安排'
+          const tips = type === 1 ? '已发布草稿' : '已成功发布课程安排'
           this.$message.success(`${tips}，1秒后将自动返回课程安排列表`)
           setTimeout(() => {
-            this.$router.push({ path: '/examManagement/examSchedule/list' })
+            this.$router.push({ path: '/learnPlan/CoursePlanList' })
             this.resetData()
           }, 1000)
         })
-        .catch((err) => window.console.log(err))
+        .catch()
     },
     resetData() {
       this.formData = _.cloneDeep(defaultFormData)
@@ -227,24 +262,13 @@ export default {
       // 获取学习计划详情
       planDetail({ id: this.id })
         .then((res) => {
+          res.timeRange = [res.startTime, res.endTime]
           this.formData = res
-          let formData = this.formData
-          formData.timeRange = [formData.startTime, formData.endTime]
+          this.$refs.editCourse.setCourseList(res.courseList)
         })
-        .catch((err) => {
-          window.console.log(err)
-        })
+        .catch()
         .finally(() => {
           this.loading = false
-        })
-    },
-    getCourseDetail() {
-      // 获取课程详情
-      let data = { id: this.id }
-      courseDetail(data)
-        .then(() => {})
-        .catch((err) => {
-          window.console.log(err)
         })
     }
   }

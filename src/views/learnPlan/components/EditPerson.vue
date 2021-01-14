@@ -1,78 +1,64 @@
 <template>
-  <div
-    id="personInfo"
-    class="personInfo"
+  <!-- 人员信息 页面 -->
+  <basic-container
+    block
+    class="basicContainer"
   >
-    <!-- 人员信息 页面 -->
-    <basic-container
-      block
-      class="basicContainer"
-    >
-      <common-table
-        ref="table"
-        class="commonTable"
-        :columns="columnsVisible | columnsFilter"
-        :config="tableConfig"
-        :data="tableData"
-        :loading="tableLoading"
-        :page-config="tablePageConfig"
-        :page="page"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
+    <div style="text-align: right;">
+      <el-button
+        type="primary"
+        size="medium"
+        @click="handleAddUser"
       >
-        <template #multiSelectMenu="{ selection }">
-          <el-button
-            style="margin-bottom:0;"
-            type="text"
-            @click="() => handleRemoveItems(selection)"
-          >
-            批量删除
-          </el-button>
-        </template>
+        添加人员
+      </el-button>
+    </div>
 
-        <template #topMenu>
-          <div class="operations">
-            <SearchPopover
-              ref="searchPopover"
-              :popover-options="searchPopoverConfig.popoverOptions"
-              :require-options="searchPopoverConfig.requireOptions"
-              @submit="handleSearch"
-            />
-          </div>
-        </template>
-        <template #oparetion="{row}">
-          <span
-            class="startBtn"
-            :title="row.title"
-          >删除 &nbsp; </span>
-        </template>
-      </common-table>
-    </basic-container>
-    <!-- <el-dialog title="人员添加"
-      :visible.sync="dialogVisible"
-      :append-to-body="true">
+    <common-table
+      ref="table"
+      class="commonTable"
+      :columns="tableColumns"
+      :config="tableConfig"
+      :data="userList"
+    >
+      <template #multiSelectMenu="{ selection }">
+        <el-button
+          style="margin-bottom:0;"
+          type="text"
+          @click="handleMultiDelete(selection)"
+        >
+          批量删除
+        </el-button>
+      </template>
 
-    </el-dialog> -->
-  </div>
+      <template #oparetion="{row}">
+        <el-button
+          size="medium"
+          type="text"
+          @click="handleDelete(row)"
+        >
+          删除
+        </el-button>
+      </template>
+    </common-table><user-picker
+      select-type="Org,OuterUser"
+      :value="userList"
+      :visible.sync="userPicking"
+      @input="handleSelect"
+    />
+  </basic-container>
 </template>
 
 <script>
-import SearchPopover from '@/components/searchPopOver/index'
-import { getUserList } from '@/api/learnPlan'
+import UserPicker from '@/components/user-picker/userPicker'
 
+import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 70,
-    fixed: 'left',
+    label: '序号',
+    prop: 'index',
     type: 'index'
-  },
-  {
-    label: '用户编号',
-    fixed: 'left',
-    width: 180,
-    prop: 'workNo'
   },
   {
     label: '姓名',
@@ -87,7 +73,7 @@ const TABLE_COLUMNS = [
   {
     label: '手机号码',
     slot: true,
-    prop: 'phonenum',
+    prop: 'phoneNum',
     minWidth: 100
   },
   {
@@ -98,105 +84,34 @@ const TABLE_COLUMNS = [
   }
 ]
 const TABLE_CONFIG = {
-  enablePagination: true,
+  // enablePagination: true,
 
   showIndexColumn: false,
 
   enableMultiSelect: true,
-  rowKey: 'id',
-  showHandler: false,
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  rowKey: 'userId',
+  showHandler: false
 }
 const TABLE_PAGE_CONFIG = {}
 
-// 搜索配置
-const SEARCH_POPOVER_REQUIRE_OPTIONS = [
-  {
-    config: { placeholder: '输入菜单名称搜索', 'suffix-icon': 'el-icon-search' },
-    data: '',
-    field: 'name',
-    label: '',
-    type: 'input'
-  }
-]
-let SEARCH_POPOVER_POPOVER_OPTIONS = [
-  {
-    type: 'input',
-    field: 'cellPhone',
-    label: '手机',
-    data: ''
-    // config: { optionLabel: 'name', optionValue: 'id' }
-  },
-  {
-    type: 'select',
-    field: 'course',
-    label: '课程',
-    data: '',
-    options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
-    ]
-  },
-  {
-    type: 'numInterval',
-    field: 'percentageRate',
-    label: '完成率 （%）',
-    data: { min: '', max: '' }
-    // config: { optionLabel: 'name', optionValue: 'id' }
-  }
-]
-let SEARCH_POPOVER_CONFIG = {
-  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
-}
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
 export default {
-  name: 'KnowledgeManagement',
+  name: 'EditPerson',
   components: {
-    SearchPopover
+    UserPicker
   },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+  props: {
+    planId: {
+      type: String,
+      default: null
+    },
+    userList: {
+      type: Array,
+      default: () => []
+    }
   },
   data() {
     return {
-      preview: {},
-      moveKnowledgeRow: {},
-      formColumns: FORM_COLUMNS,
-      formData: {
-        catalogId: ''
-      },
-      dialogTableVisible: false,
+      userPicking: false,
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       page: {
@@ -204,13 +119,6 @@ export default {
         size: 10,
         total: 0
       },
-      // 请求参数
-      queryInfo: {
-        pageNo: 1,
-        pageSize: 10
-        // courseCatalogId: ''
-      },
-      searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
@@ -218,72 +126,60 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  mounted() {
-    // this.initSearchData()
-    this.refreshTableData()
-  },
+  mounted() {},
   methods: {
-    handleRemoveItems() {
-      //   console.log(data)
+    handleAddUser() {
+      this.userPicking = true
     },
-
-    viewRate() {
-      // 查看完成率
-      this.$router.push({ path: '/learnPlan/requiredScheduleDetail' })
-    },
-    // 去新建证书
-    toAddCertificate() {
-      this.$router.push({ path: '/learnPlan/newSchedule' })
-    },
-    /**
-     * 处理页码改变
-     */
-    handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
-      this.loadTableData()
-    },
-    /**
-     * 处理页码大小更改
-     */
-    handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
-      this.loadTableData()
-    },
-    /**
-     * 搜索
-     */
-    handleSearch(searchParams) {
-      for (let i in searchParams) {
-        this.queryInfo[i] = searchParams[i]
+    async handleSelect(users) {
+      const orgs = _.remove(users, { type: 'Org' })
+      if (orgs.length > 0) {
+        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
+        this.$emit('update:user-list', _.concat(users, orgUsers))
+      } else {
+        this.$emit('update:user-list', users)
       }
-      this.loadTableData()
     },
-    // 跳去详情
-    jumpDetail({ id }) {
-      this.$router.push({
-        path: '/repository/knowledgeDetail',
-        query: { id }
+    // 拉取公司的直属员工
+    async getOrgUsers(orgId) {
+      return new Promise((resolve) => {
+        getUserByOrgId({ orgId }).then((res) => {
+          const users = _.map(res, (item) =>
+            _.assign(
+              {
+                bizId: item.userId,
+                bizName: item.name,
+                orgName: item.orgName,
+                department: item.orgName,
+                departmentId: item.orgId,
+                phonenum: item.phoneNum,
+                studyPlanId: this.planId,
+                type: 'User',
+                isLeaf: true
+              },
+              item
+            )
+          )
+          resolve(users)
+        })
       })
     },
-    // 刷新列表数据
-    refreshTableData() {
-      //  因为只加载了最外层的数据，children仍然是旧的，清空数据
-      this.tableData = []
-      this.loadTableData()
+    handleDelete(row) {
+      this.$emit(
+        'update:user-list',
+        _.filter(this.userList, (user) => user.userId !== row.userId)
+      )
     },
-    // 加载表格数据
-    async loadTableData() {
-      if (this.tableLoading) return
-      this.tableLoading = true
-      try {
-        let { totalNum, data } = await getUserList(this.queryInfo)
-        this.tableData = data
-        this.page.total = totalNum
-      } catch (error) {
-        // window.console.log(error)
-      } finally {
-        this.tableLoading = false
-      }
+    handleMultiDelete(selection) {
+      let selectedIdMap = _.reduce(
+        selection,
+        (pre, cur) => {
+          pre[cur.userId] = 1
+          return pre
+        },
+        {}
+      )
+      this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
     }
   }
 }
@@ -307,173 +203,4 @@ export default {
   display: block;
   clear: both;
 }
-.preview_right_box {
-  position: relative;
-  border: 1px solid #d9dbdc;
-  margin-top: 15px;
-  width: 100%;
-  height: 100%;
-  .bgimg {
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background-repeat: no-repeat;
-  }
-  .name {
-    position: absolute;
-    top: 22%;
-    left: 50%;
-    font-size: 30px;
-    font-weight: 700;
-    transform: translateX(-50%);
-  }
-  .text {
-    position: absolute;
-    top: 58%;
-    left: 50%;
-    font-size: 12px;
-    font-weight: 700;
-    transform: translateX(-50%);
-    color: #8b8a8a;
-    width: 50%;
-    height: 28%;
-    text-align: center;
-  }
-  .logo {
-    position: absolute;
-    top: 75.6%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px !important;
-    height: 40px !important;
-  }
-  .studentName {
-    position: absolute;
-    top: 46%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 22px;
-    font-weight: 500;
-  }
-  .serial {
-    position: absolute;
-    right: 6%;
-    bottom: 6%;
-    color: #8b8a8a;
-    font-size: 8px;
-  }
-}
-.header_title {
-  font-size: 22px;
-  color: rgba(0, 11, 21, 0.45);
-  line-height: 34px;
-  vertical-align: middle;
-  &::after {
-    content: '/';
-    display: inline-block;
-    margin: 0 5px;
-  }
-}
-.preview {
-  z-index: 999;
-  width: 422px;
-  height: 441px;
-  border-radius: 4px;
-  background: #ffffff;
-  box-shadow: 0 2px 12px 0;
-  border: 1px solid #ccc;
-  margin: -12px;
-  padding: 20px;
-  .previewTitle {
-    font-family: PingFangSC-Medium;
-    font-size: 18px;
-    color: rgba(0, 11, 21, 0.85);
-    letter-spacing: 0;
-    line-height: 28px;
-    font-weight: 900;
-    display: flex;
-    justify-content: space-between;
-    height: 40px;
-    border-bottom: 1px solid #ebeced;
-  }
-  .previewContent {
-    width: 374px;
-    height: 280px;
-    overflow: hidden;
-    margin-top: 15px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .previewBtn {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-.top-button {
-  width: 40px;
-}
-</style>
-<style lang="sass" scoped>
-$color_icon: #A0A8AE
-.status-span
-    padding: 4px;
-    border-radius: 2px;
-.basic-container--block
-  height: calc(100% - 92px)
-  min-height: calc(100% - 92px)
-.title
-  color: $primaryColor
-  cursor: pointer
-.operations
-  align-items: center
-  display: flex
-  justify-content: space-between
-  &__column--item
-    height: 25px
-  &__column--visible
-    height: 200px
-    overflow: scroll
-  &__btns
-    align-items: center
-    display: flex
-    height: 24px
-    justify-content: flex-start
-  &__btns--item
-    margin: 0
-    margin-right: 4px
-    padding: 0
-    height: 24px
-    width: 24px
-    line-height: 24px
-    &:last-child
-      margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-  .iconfont
-    color: $color_icon
-    font-weight: bold
-    font-size: 16px
-
-.Menu
-  // 添加一个分隔号 "｜"
-  .table__handler
-    display: flex
-    justify-content: flex-end
-    > .el-button--text
-      text-align: center
-      padding: 0 8px
-      margin-left: 0px
-      position: relative
-      &:not(:last-child)::after
-        background-color: #e3e7e9
-        content: ''
-        height: 10px
-        position: absolute
-        right: 0
-        top: 50%
-        transform: translateY(-50%)
-        width: 1px
 </style>

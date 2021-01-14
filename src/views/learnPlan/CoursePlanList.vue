@@ -125,6 +125,7 @@
             <el-button
               type="text"
               size="medium"
+              :disabled="[2, 3].includes(row.status)"
               @click="jumpEdit(row)"
             >
               编辑
@@ -132,6 +133,7 @@
             <el-button
               type="text"
               size="medium"
+              :disabled="[2].includes(row.status)"
               @click="handleDelete(row)"
             >
               删除
@@ -139,6 +141,7 @@
             <el-button
               type="text"
               size="medium"
+              :disabled="[1, 2].includes(row.status)"
               @click="jumpUserList(row)"
             >
               查看完成率
@@ -255,7 +258,7 @@ const TABLE_COLUMNS = [
   {
     label: '编号',
     width: 180,
-    prop: 'courseCatalogId'
+    prop: 'coursePlanNo'
   },
   {
     label: '名称',
@@ -294,7 +297,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'coursePlanName',
     label: '',
     type: 'input'
   }
@@ -306,21 +309,21 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程编号',
     data: ''
   },
-  {
-    type: 'input',
-    field: 'coursePlanName',
-    label: '课程安排名称',
-    data: ''
-  },
+  // {
+  //   type: 'input',
+  //   field: 'coursePlanName',
+  //   label: '课程安排名称',
+  //   data: ''
+  // },
   {
     type: 'select',
     field: 'status',
     label: '状态',
     data: '',
     options: [
-      { value: 0, label: '未开始' },
-      { value: 1, label: '进行中' },
-      { value: 2, label: '已结束' }
+      { value: 1, label: '未开始' },
+      { value: 2, label: '进行中' },
+      { value: 3, label: '已结束' }
     ]
   },
   {
@@ -407,7 +410,6 @@ export default {
         tableData: [],
         tableLoading: false,
         queryInfo: {
-          coursePlanNo: '',
           type: 1
         },
         columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -430,11 +432,6 @@ export default {
       this.published.queryInfo.categoryId = id
       this.loadPublishedData()
     },
-
-    nodeClick(data) {
-      this.queryInfo.courseCatalogId = data.id
-      this.loadPublishedData()
-    },
     jumpUserList(row) {
       // 查看完成率
       this.$router.push({ path: '/learnPlan/CourseUserList', query: { planId: row.id } })
@@ -446,25 +443,12 @@ export default {
       })
     },
     refreshPublished() {
-      this.getCategoryData()
       this.loadPublishedData()
     },
-    // 拿左侧树形图数据
-    getCategoryData() {
-      return getCatalogs().then((res) => {
-        this.data = [
-          {
-            id: null,
-            name: '未分类'
-          }
-        ].concat(res)
-        // this.idSchedule = datar[0].children[0].id
-        // this.isgetScheduleList()
-      })
-    },
+
     handleDelete(selection) {
       if (Array.isArray(selection)) {
-        if (_.some(selection, { status: '1' })) {
+        if (_.some(selection, { status: 2 })) {
           this.$alert(
             '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
@@ -478,7 +462,7 @@ export default {
         }
         this.deletePlanFn(selection)
       } else {
-        if (selection.status === '1') {
+        if (selection.status === 2) {
           this.$alert('选中的课程安排正在进行中，无法进行删除操作。', {
             confirmButtonText: '关闭',
             callback: () => {}
@@ -587,7 +571,7 @@ export default {
     position: relative;
     .content {
       // padding: 24px;
-      height: calc(100% - 54px);
+      height: calc(100% - 34px);
       overflow: auto;
       position: relative;
       &.published {

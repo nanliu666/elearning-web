@@ -39,13 +39,11 @@
         </el-menu-item>
       </el-menu>
       <common-table
-        id="demo"
         ref="table"
         :columns="columnsVisible | columnsFilter"
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        :page-config="tablePageConfig"
         :page="page"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
@@ -370,7 +368,6 @@ export default {
       activeIndex: '0',
       tableLoading: false,
       tableData: [],
-      tablePageConfig: {},
       page: {
         currentPage: 1,
         size: 10,
@@ -386,8 +383,8 @@ export default {
         categoryId: '', // 分类ID
         creatorId: '', //评卷人id
         examType: '', //考试类型 CurrencyExam-通用考试 CourseExam-课程考试 TrainExam-培训班考试
-        pageNo: '',
-        pageSize: '',
+        pageNo: 1,
+        pageSize: 10,
         status: '', //状态: 未开始-1, 进行中-2, 已结束-3
         testPaper: '', //关联考卷id
         type: 0 //状态:0-已发布，1-草稿箱
@@ -425,14 +422,14 @@ export default {
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo = _.assign(this.queryInfo, { pageNo: param })
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo = _.assign(this.queryInfo, { pageSize: param })
       this.loadTableData()
     },
     // 跳转详情
@@ -529,6 +526,8 @@ export default {
     // 搜索
     handleSearch(params) {
       this.queryInfo = _.assign(this.queryInfo, params)
+      this.queryInfo.pageNo = 1
+      this.page.currentPage = 1
       this.loadTableData()
     },
     /**

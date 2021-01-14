@@ -13,6 +13,7 @@
           :allow-create="true"
           :searchable="true"
           :load="loadTestPaper"
+          :option-list.sync="testPaperList"
           :option-props="{
             label: 'name',
             value: 'id',
@@ -96,6 +97,13 @@ export default {
     RadioInput,
     CheckboxInput,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
+  },
+  props: {
+    // 父实体名称
+    parentEntryCName: {
+      type: String,
+      default: '培训'
+    }
   },
   data() {
     return {
@@ -198,6 +206,14 @@ export default {
         integral: 0,
         strategy: 0,
         publishTime: 0
+      },
+      testPaperList: []
+    }
+  },
+  watch: {
+    'model.testPaper': {
+      handler(val) {
+        this.$set(this.model, 'testPaperType', _.find(this.testPaperList, { id: val }).type)
       }
     }
   },
@@ -216,9 +232,17 @@ export default {
         moment(this.model.examTime[1])
       )
       if (!isLegalBeginTime) {
-        callback(new Error(`考试开始日期要在培训开始日期（${this.trainTimeInVuex[0]}）之后`))
+        callback(
+          new Error(
+            `考试开始日期要在${this.parentEntryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
+          )
+        )
       } else if (!isLegalEndTime) {
-        callback(new Error(`考试结束日期要在培训结束日期（${this.trainTimeInVuex[1]}）之前`))
+        callback(
+          new Error(
+            `考试结束日期要在${this.parentEntryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
+          )
+        )
       } else {
         callback()
       }
@@ -231,7 +255,9 @@ export default {
       // 培训结束日期在卷子有效期之前
       const isLegalExpiredTime = moment(this.trainTimeInVuex[1]).isSameOrBefore(paperExpiredTime)
       if (paperExpiredTime && !isLegalExpiredTime) {
-        callback(new Error(`此卷在培训结束日时（${this.trainTimeInVuex[1]}）已过期`))
+        callback(
+          new Error(`此卷在${this.parentEntryCName}结束日时（${this.trainTimeInVuex[1]}）已过期`)
+        )
       } else {
         callback()
       }

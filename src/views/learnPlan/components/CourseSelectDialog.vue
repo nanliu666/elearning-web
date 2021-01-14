@@ -1,8 +1,9 @@
 <template>
   <el-dialog
     title="课程列表"
-    :visible.sync="visible"
-    :append-to-body="true"
+    :visible="visible"
+    width="800px"
+    @close="handleClose"
   >
     <common-table
       ref="table"
@@ -12,6 +13,7 @@
       :loading="tableLoading"
       :page-config="tablePageConfig"
       :page="page"
+      @select="handleSelect"
       @current-page-change="handleCurrentPageChange"
       @page-size-change="handlePageSizeChange"
     >
@@ -27,9 +29,13 @@
       slot="footer"
       class="dialog-footer"
     >
-      <el-button @click="handleClose">取 消</el-button>
+      <el-button
+        size="medium"
+        @click="handleClose"
+      >取 消</el-button>
       <el-button
         type="primary"
+        size="medium"
         @click="handleSubmit"
       >确 定</el-button>
     </span>
@@ -114,6 +120,10 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    multiple: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -136,7 +146,18 @@ export default {
       }
     }
   },
+  created() {
+    this.getCourseData()
+    this.loadCategoryData()
+  },
   methods: {
+    handleSelect(selection, row) {
+      if (!this.multiple) {
+        this.$refs['table'].clearSelection()
+        this.$refs['table'].toggleRowSelection(row, true)
+        this.$refs.table.selection = [row]
+      }
+    },
     /**
      * 处理页码改变
      */
