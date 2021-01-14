@@ -70,7 +70,9 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: false
 }
-const TABLE_PAGE_CONFIG = {}
+const TABLE_PAGE_CONFIG = {
+  layout: 'total,prev, pager, next'
+}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
