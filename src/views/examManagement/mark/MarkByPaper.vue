@@ -33,37 +33,53 @@
       </div>
     </el-card>
     <el-card class="paper-card">
-      <div
-        slot="header"
-        class="card-header"
-      >
-        <div class="card-left">
-          <span class="title">试题答卷</span>
-          <span class="sub-title">
-            <span>（搜索结果：</span>
-            <span>{{ `${totalQustionNum > 0 ? `共${totalQustionNum}题` : '--'}）` }}</span>
-          </span>
+      <div class="sticky-header-box">
+        <div class="card-header">
+          <div class="card-left">
+            <span class="title">试题答卷</span>
+            <span class="sub-title">
+              <span>（搜索结果：</span>
+              <span>{{ `${totalQustionNum > 0 ? `共${totalQustionNum}题` : '--'}）` }}</span>
+            </span>
+          </div>
+          <div class="card-right">
+            <el-button
+              size="medium"
+              :disabled="currentIndex === 0"
+              @click="prevQuestion"
+            >
+              上一题
+            </el-button>
+            <span class="number-box">
+              <span>{{ currentIndex + 1 }}</span>
+              <span>/</span>
+              <span>{{ totalQustionNum }}</span>
+            </span>
+            <el-button
+              size="medium"
+              :disabled="currentIndex + 1 === totalQustionNum"
+              @click="nextQuestion"
+            >
+              下一题
+            </el-button>
+          </div>
         </div>
-        <div class="card-right">
-          <el-button
-            size="medium"
-            :disabled="currentIndex === 0"
-            @click="prevQuestion"
+        <div
+          v-if="!_.isEmpty(questionMain)"
+          class="stem-main"
+        >
+          <span>{{ currentIndex + 1 }}.</span>
+          <span v-html="getHTML()" />
+          <el-tooltip
+            class="item"
+            effect="dark"
+            :content="`试题分析：${questionMain.analysis || '暂无'}`"
+            placement="top-start"
           >
-            上一题
-          </el-button>
-          <span class="number-box">
-            <span>{{ currentIndex + 1 }}</span>
-            <span>/</span>
-            <span>{{ totalQustionNum }}</span>
-          </span>
-          <el-button
-            size="medium"
-            :disabled="currentIndex + 1 === totalQustionNum"
-            @click="nextQuestion"
-          >
-            下一题
-          </el-button>
+            <el-button type="text">
+              [查看试题分析]
+            </el-button>
+          </el-tooltip>
         </div>
       </div>
       <ul
@@ -71,20 +87,6 @@
         class="card-content"
       >
         <li class="card-li">
-          <div class="stem-main">
-            <span>{{ currentIndex + 1 }}.</span>
-            <span v-html="getHTML()" />
-            <el-tooltip
-              class="item"
-              effect="dark"
-              :content="`试题分析：${questionMain.analysis || '暂无'}`"
-              placement="top-start"
-            >
-              <el-button type="text">
-                [查看试题分析]
-              </el-button>
-            </el-tooltip>
-          </div>
           <ul class="question-ul">
             <div class="dot-box">
               <div class="dot-content">
@@ -361,16 +363,6 @@ export default {
     handleCurrentChange(val) {
       this.pageNo = val
       this.setQuestionList()
-      // const targetRefs = this.getTargetRefs()
-      // this.formDataList = _.map(targetRefs, 'model')
-      // const isAllPass = _.every(this.formDataList, (item) => {
-      //   return _.get(item, 'result') && _.get(item, 'scoreUser') && _.get(item, 'reviewRemark')
-      // })
-      // if (isAllPass) {
-      //   this.changePageList()
-      // } else {
-      //   this.needTips()
-      // }
     },
     // 10分钟自动提交
     initAutoCommit() {},
@@ -396,16 +388,6 @@ export default {
       this.queryInfo.direction = 1
       this.loadData()
     },
-    needTips() {
-      this.$confirm('当前页面还有试题未进行评价，是否忽略进入下一页？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.changePageList()
-      })
-    },
-    changePageList() {},
     submit() {
       this.checkRequired()
     },
@@ -510,10 +492,11 @@ export default {
     padding-bottom: 76px;
     position: relative;
     .card-header {
-      padding: 10px 0;
+      padding-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid #ebeced;
       .card-left {
         display: flex;
         align-items: flex-end;
@@ -535,6 +518,14 @@ export default {
         }
       }
     }
+    .sticky-header-box {
+      position: sticky;
+      top: 0;
+      .stem-main {
+        margin: 0 13.5%;
+        padding-top: 16px;
+      }
+    }
     .card-content {
       .card-li {
         margin: 0 13.5%;
@@ -549,8 +540,6 @@ export default {
           font-size: 12px;
           color: rgba(0, 11, 21, 0.25);
           margin: 10px 0 18px;
-        }
-        .stem-main {
         }
         .standard-class {
           position: relative;
