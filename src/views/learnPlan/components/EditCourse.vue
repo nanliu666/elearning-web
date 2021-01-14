@@ -354,6 +354,7 @@ export default {
                 endTime: course.timeRange[1],
                 studyExam: _.map(course.studyExam, (exam) => ({
                   ...exam,
+                  id: typeof exam.id === 'string' ? exam.id : null,
                   studyPlanCourseId: course.id
                 })),
                 timeList: _.map(course.timeList, (time) => ({

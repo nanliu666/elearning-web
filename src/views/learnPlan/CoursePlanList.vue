@@ -267,7 +267,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '分类',
-    prop: 'courseCatalogName',
+    prop: 'categoryName',
     minWidth: 100
   },
   {
@@ -331,7 +331,7 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '时间选择',
     type: 'dataPicker',
     field: 'startTime,endTime',
-    config: { type: 'daterange' }
+    config: { type: 'daterange', 'value-format': 'yyyy-MM-dd HH:mm:ss' }
   },
   {
     type: 'input',
