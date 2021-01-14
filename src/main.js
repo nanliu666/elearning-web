@@ -17,7 +17,6 @@ import basicContainer from './components/basic-container/main'
 import pageHeader from './components/page-header/pageHeader'
 import commonForm from './components/common-form/commonForm'
 import OrgSelect from './components/OrgSelect/orgSelect'
-import FormParser from '@/views/processDesign/components/FormDesign/components/parser/Parser'
 import commonTable from 'vue-common-table'
 import website from '@/config/website'
 
@@ -63,7 +62,6 @@ Vue.component('commonTable', commonTable)
 Vue.component('tinymce', tinymce)
 Vue.component('pageHeader', pageHeader)
 Vue.component('commonForm', commonForm)
-Vue.component('formParser', FormParser)
 // 加载相关url地址
 Object.keys(urls).forEach((key) => {
   Vue.prototype[key] = urls[key]

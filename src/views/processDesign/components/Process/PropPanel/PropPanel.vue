@@ -38,528 +38,101 @@
           size="mini"
           style="z-index: 9; max-width: 200px"
         />
-        <el-select
-          v-if="isConditionNode()"
-          v-model="properties.priority"
-          size="mini"
-          class="priority-select"
-        >
-          <el-option
-            v-for="item in priorityLength"
-            :key="item"
-            :value="item - 1"
-            :label="'优先级' + item"
-          />
-        </el-select>
       </header>
-
-      <!-- 条件  -->
-      <section
-        v-if="value && isConditionNode()"
-        class="condition-pane"
-      >
-        <row-wrapper
-          v-if="showingPCons.includes(-1)"
-          title="发起部门"
-        >
-          <fc-org-select
-            ref="condition-org"
-            v-model="initiator"
-            :tab-list="['user']"
-            :org="org"
-            is-department-only
-          />
-        </row-wrapper>
-        <template v-for="(item, index) in pconditions">
-          <!-- 计数 -->
-          <row-wrapper
-            v-if="
-              couldShowIt(
-                item,
-                'daterange',
-                'el-input-number',
-                'fc-date-duration',
-                'fc-time-duration',
-                'fc-amount',
-                'fc-calculate',
-                'money',
-                'number'
-              )
-            "
-            :key="index"
-            :title="
-              `${item.__config__.label}${item.__config__.type === 'daterange' ? '(时长/天)' : ''}`
-            "
-          >
-            <num-input
-              :key="index"
-              v-model="item.__config__.defaultValue"
-              :title="timeTangeLabel(item)"
-              style="padding-right: 6px"
-            />
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper>
-          <!-- 单选组 -->
-          <row-wrapper
-            v-if="couldShowIt(item, 'el-radio-group', 'radio')"
-            :key="index"
-            :title="item.__config__.label"
-          >
-            <el-radio-group
-              v-model="item.__config__.defaultValue"
-              class="radio-group"
-            >
-              <el-radio
-                v-for="option in item.__slot__.options"
-                :key="option.label"
-                :label="option.label"
-              >
-                {{ option.label }}
-              </el-radio>
-            </el-radio-group>
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper>
-          <!--        多选-->
-          <row-wrapper
-            v-if="couldShowIt(item, 'el-radio-group', 'checkbox')"
-            :key="index"
-            :title="item.__config__.label"
-          >
-            <!-- 在这里设置多选的默认值 -->
-            <el-select
-              v-model="item.__config__.selectMode"
-              placeholder="请选择选择模式"
-            >
-              <el-option
-                label="选中所有"
-                value="every"
-              />
-              <el-option
-                label="选中任意"
-                value="some"
-              />
-            </el-select>
-            <el-select
-              v-model="item.__config__.defaultValue"
-              multiple
-            >
-              <el-option
-                v-for="option of item.__slot__.options"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              />
-            </el-select>
-
-            <!-- <el-checkbox-group v-model="item.__config__.defaultValue">
-              <el-checkbox
-                v-for="city in item.__slot__.options"
-                :key="city.label"
-                :label="city.label"
-              >
-                {{ city.label }}
-              </el-checkbox>
-            </el-checkbox-group> -->
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper>
-
-          <!-- 日期选择器 -->
-          <!-- <row-wrapper
-            v-if="couldShowIt(item, 'daterange')"
-            :key="index"
-            :title="item.label"
-          >
-            {{ item.__config__.label }}
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer;"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper> -->
-
-          <!-- 下拉 -->
-          <row-wrapper
-            v-if="couldShowIt(item, 'el-select', 'select')"
-            :key="index"
-            :title="item.label"
-          >
-            <!-- 这里设置单选的默认值  -->
-            <el-select
-              v-model="item.__config__.defaultValue"
-              style="width: 280px"
-              placeholder="请选择"
-              size="small"
-            >
-              <el-option
-                v-for="option in item.__slot__.options"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              />
-            </el-select>
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper>
-          <!-- 组织机构 -->
-          <row-wrapper
-            v-if="couldShowIt(item, 'fc-org-select')"
-            :key="index"
-            :title="item.label"
-          >
-            <fc-org-select
-              :ref="'org' + index"
-              v-model="item.__config__.defaultValue"
-              :tab-list="['org']"
-            />
-            <template v-slot:action>
-              <i
-                class="el-icon-delete"
-                style="cursor: pointer"
-                @click="onDelCondition(item)"
-              />
-            </template>
-          </row-wrapper>
-        </template>
-        <div style="padding-left: 24px; margin-top: 2em">
-          <el-button
-            type="primary"
-            size="small"
-            icon="el-icon-plus"
-            @click="dialogVisible = true"
-          >
-            添加条件
-          </el-button>
-          <span style="color: #aaa; margin-left: 16px">还有{{ notUseConNum }}个可用条件</span>
-        </div>
-      </section>
-
       <!-- 审批人 -->
       <section
         v-if="value && (isApproverNode() || isStartNode() || isParallelNode())"
         class="approver-pane"
         style="height: 100%"
       >
-        <div class="tabs_div flex flex-center flex-align-items">
-          <div
-            :class="[activeName == 'config' ? 'active' : '']"
-            @click="activeName = 'config'"
-          >
-            {{ '设置' + (value.type === 'start' ? '发起人' : '审批人') }}
-          </div>
-          <div
-            :class="[activeName == 'formAuth' ? 'active' : '']"
-            @click="activeName = 'formAuth'"
-          >
-            表单权限
-          </div>
-        </div>
-
-        <div v-show="activeName == 'config'">
-          <!-- 开始节点 -->
-          <el-row
-            v-if="value.type === 'start'"
-            style="padding: 24px"
-          >
-            <el-row>
-              <el-col style="font-size: 14px; line-height: 30px">
-                发起人
-              </el-col>
-            </el-row>
-
-            <el-col :span="24">
-              <fc-org-select
-                ref="start-org"
-                v-model="initiator"
-                :tab-list="['user']"
-                :all="all"
-                :org="org"
-                :type="type"
-                title="发起人"
-              />
+        <!-- 开始节点 -->
+        <el-row
+          v-if="value.type === 'start'"
+          style="padding: 24px"
+        >
+          <el-row>
+            <el-col style="font-size: 14px; line-height: 30px">
+              发起人
             </el-col>
           </el-row>
 
-          <div v-else-if="value.type === 'approver' || value.type === 'parallel'">
-            <div style="padding: 24px;">
-              <el-radio-group
-                v-model="approverForm.assigneeType"
-                style="line-height: 32px"
-                @change="resetOrgColl"
+          <el-col :span="24">
+            <fc-org-select
+              ref="start-org"
+              v-model="initiator"
+              :tab-list="['user']"
+              :all="all"
+              :org="org"
+              :type="type"
+              title="发起人"
+            />
+          </el-col>
+        </el-row>
+
+        <div v-else-if="value.type === 'approver' || value.type === 'parallel'">
+          <div style="padding: 24px;">
+            <el-radio-group
+              v-model="approverForm.assigneeType"
+              style="line-height: 32px"
+              @change="resetOrgColl"
+            >
+              <el-radio
+                v-for="item in assigneeTypeOptions"
+                :key="item.value"
+                :label="item.value"
+                :disabled="item.disabled"
+                class="radio-item"
               >
-                <el-radio
-                  v-for="item in assigneeTypeOptions"
-                  :key="item.value"
-                  :label="item.value"
-                  :disabled="item.disabled"
-                  class="radio-item"
-                >
-                  {{ item.label }}
+                {{ item.label }}
+              </el-radio>
+            </el-radio-group>
+          </div>
+          <div style="padding-bottom: 24px">
+            <div
+              v-if="approverForm.assigneeType === 'myself'"
+              class="option-box"
+              style="color: #a5a5a5"
+            >
+              发起人自己将作为审批人处理审批单
+            </div>
+            <div
+              v-else-if="approverForm.assigneeType === assigneeTypeObect.optional"
+              class="option-box"
+            >
+              <p>设置选择条件</p>
+              <el-radio-group v-model="approverForm.optionalMultiUser">
+                <el-radio :label="false">
+                  自选一个人
+                </el-radio>
+                <el-radio :label="true">
+                  自选多个人
                 </el-radio>
               </el-radio-group>
-            </div>
-            <div style="padding-bottom: 24px">
-              <div
-                v-if="approverForm.assigneeType === 'myself'"
-                class="option-box"
-                style="color: #a5a5a5"
+              <!--              <el-switch-->
+              <!--                v-model="approverForm.optionalMultiUser"-->
+              <!--                active-color="#13ce66"-->
+              <!--              />-->
+
+              <p>选择范围</p>
+              <el-select
+                v-model="approverForm.optionalRange"
+                style="width: 312px"
+                size="medium"
               >
-                发起人自己将作为审批人处理审批单
-              </div>
-              <div
-                v-else-if="approverForm.assigneeType === assigneeTypeObect.optional"
-                class="option-box"
-              >
-                <p>设置选择条件</p>
-                <el-radio-group v-model="approverForm.optionalMultiUser">
-                  <el-radio :label="false">
-                    自选一个人
-                  </el-radio>
-                  <el-radio :label="true">
-                    自选多个人
-                  </el-radio>
-                </el-radio-group>
-                <!--              <el-switch-->
-                <!--                v-model="approverForm.optionalMultiUser"-->
-                <!--                active-color="#13ce66"-->
-                <!--              />-->
-
-                <p>选择范围</p>
-                <el-select
-                  v-model="approverForm.optionalRange"
-                  style="width: 312px"
-                  size="medium"
-                >
-                  <el-option
-                    v-for="(item, index) in rangeOptions"
-                    :key="index"
-                    :label="item.label"
-                    :value="item.value"
-                    :disabled="item.disabled"
-                  />
-                </el-select>
-                <div style="margin-top: 15px">
-                  <fc-org-select
-                    ref="approver-org"
-                    v-model="orgCollection"
-                    button-type="button"
-                    title="指定成员"
-                    :tab-list="
-                      fcOrgTabList.includes(approverForm.assigneeType)
-                        ? [approverForm.assigneeType]
-                        : ['dep']
-                    "
-                    @change="onOrgChange"
-                  />
-                </div>
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.competentBusiness">
-                <!-- 审批人为业务主管时候的选项 -->
-                <div style="font-size: 14px; padding-left: 24px">
-                  <el-row>
-                    <el-col style="line-height: 30px">
-                      发起人的
-                    </el-col>
-                  </el-row>
-                  <el-row>
-                    <el-col :span="24">
-                      <el-select
-                        v-model="infoForm.competentBusinessLevel"
-                        style="width: 312px"
-                        size="small"
-                      >
-                        <el-option
-                          v-for="({ dictValue, dictKey }, index) of dictionary.ManageBizLevel"
-                          :key="index"
-                          :label="dictValue"
-                          :value="dictKey"
-                        />
-                      </el-select>
-                    </el-col>
-                  </el-row>
-
-                  <br />
-                </div>
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.departmentHeads">
-                <!-- 审批人为部门领导时候的选项 -->
-                <div style="font-size: 14px; padding-left: 24px">
-                  <el-row>
-                    <el-col style="line-height: 30px">
-                      发起人的
-                    </el-col>
-                  </el-row>
-                  <el-row>
-                    <el-col :span="24">
-                      <el-select
-                        v-model="infoForm.departmentHeadsLevel"
-                        style="width: 312px"
-                        size="small"
-                      >
-                        <el-option
-                          v-for="({ dictValue, dictKey }, index) of dictionary.ManageOrgLevel"
-                          :key="index"
-                          :label="dictValue"
-                          :value="dictKey"
-                        />
-                      </el-select>
-                    </el-col>
-                  </el-row>
-
-                  <br />
-                </div>
-              </div>
-
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.multiDepartmentHeads">
-                <!-- 审批人为连续多级领导时候的选项 -->
-                <div style="font-size: 14px; padding-left: 24px">
-                  <el-row>
-                    <el-col style="line-height: 30px">
-                      发起人的
-                    </el-col>
-                  </el-row>
-                  <el-row>
-                    <el-col :span="24">
-                      <el-select
-                        v-model="infoForm.multiDepartmentHeadsLevel"
-                        style="width: 312px"
-                        size="small"
-                      >
-                        <el-option
-                          v-for="({ dictValue, dictKey }, index) of dictionary.SerialManageOrgLevel"
-                          :key="index"
-                          :label="dictValue"
-                          :value="dictKey"
-                        />
-                      </el-select>
-                    </el-col>
-                  </el-row>
-
-                  <br />
-                </div>
-              </div>
-              <div
-                v-else-if="approverForm.assigneeType === assigneeTypeObect.multiCompetentBusiness"
-              >
-                <!-- 审批人为连续多级业务主管时 -->
-                <div style="font-size: 14px; padding-left: 24px">
-                  <el-row>
-                    <el-col style="line-height: 30px">
-                      发起人的
-                    </el-col>
-                  </el-row>
-                  <el-row>
-                    <el-col :span="24">
-                      <el-select
-                        v-model="infoForm.multiCompetentBusinessLevel"
-                        style="width: 312px"
-                        size="small"
-                      >
-                        <el-option
-                          v-for="({ dictValue, dictKey }, index) of dictionary.SerialManageBizLevel"
-                          :key="index"
-                          :label="dictValue"
-                          :value="dictKey"
-                        />
-                      </el-select>
-                    </el-col>
-                  </el-row>
-
-                  <br />
-                </div>
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.job">
-                <div style="padding-bottom: 24px">
-                  <commonForm
-                    ref="jobData"
-                    :model="infoForm"
-                    :columns="jobData"
-                  />
-                </div>
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.position">
-                <commonForm
-                  ref="positionData"
-                  :model="infoForm"
-                  :columns="positionData"
+                <el-option
+                  v-for="(item, index) in rangeOptions"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.value"
+                  :disabled="item.disabled"
                 />
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.tag">
-                <commonForm
-                  ref="tagData"
-                  :model="infoForm"
-                  :columns="tagData"
-                />
-              </div>
-              <div v-else-if="approverForm.assigneeType === assigneeTypeObect.role">
-                <commonForm
-                  ref="roleForm1"
-                  :model="infoForm"
-                  :columns="roleColumns"
-                />
-                <div class="option-box">
-                  <p>设置选择条件</p>
-                  <el-radio-group v-model="approverForm.optionalMultiUser">
-                    <el-radio :label="false">
-                      自选一个人
-                    </el-radio>
-                    <el-radio :label="true">
-                      自选多个人
-                    </el-radio>
-                  </el-radio-group>
-                  <template v-if="approverForm.optionalMultiUser">
-                    <p>多人审批时采用的审批方式</p>
-                    <el-radio
-                      v-model="approverForm.counterSign"
-                      :label="true"
-                      class="radio-item"
-                    >
-                      会签（须所有审批人同意）
-                    </el-radio>
-                    <br />
-                    <el-radio
-                      v-model="approverForm.counterSign"
-                      :label="false"
-                      class="radio-item"
-                    >
-                      或签（一名审批人同意或拒绝即可）
-                    </el-radio>
-                  </template>
-                </div>
-              </div>
-              <div
-                v-else
-                class="option-box"
-              >
+              </el-select>
+              <div style="margin-top: 15px">
                 <fc-org-select
                   ref="approver-org"
                   v-model="orgCollection"
                   button-type="button"
-                  :title="getAssignTypeLabel()"
+                  title="指定成员"
                   :tab-list="
                     fcOrgTabList.includes(approverForm.assigneeType)
                       ? [approverForm.assigneeType]
@@ -569,125 +142,220 @@
                 />
               </div>
             </div>
-            <div
-              v-if="
-                (_.size(orgCollection[approverForm.assigneeType]) > 1 &&
-                  !['optional'].includes(approverForm.assigneeType)) ||
-                  (['optional'].includes(approverForm.assigneeType) &&
-                    approverForm.optionalMultiUser)
-              "
-              class="option-box"
-            >
-              <p>多人审批时采用的审批方式</p>
-              <el-radio
-                v-model="approverForm.counterSign"
-                :label="true"
-                class="radio-item"
-              >
-                会签（须所有审批人同意）
-              </el-radio>
-              <br />
-              <el-radio
-                v-model="approverForm.counterSign"
-                :label="false"
-                class="radio-item"
-              >
-                或签（一名审批人同意或拒绝即可）
-              </el-radio>
-            </div>
-          </div>
-        </div>
-        <div
-          v-show="activeName == 'formAuth'"
-          class="formAuth"
-        >
-          <div class="form-auth-table">
-            <header class="auth-table-header">
-              <div class="header-title">
-                表单字段
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.competentBusiness">
+              <!-- 审批人为业务主管时候的选项 -->
+              <div style="font-size: 14px; padding-left: 24px">
+                <el-row>
+                  <el-col style="line-height: 30px">
+                    发起人的
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-select
+                      v-model="infoForm.competentBusinessLevel"
+                      style="width: 312px"
+                      size="small"
+                    >
+                      <el-option
+                        v-for="({ dictValue, dictKey }, index) of dictionary.ManageBizLevel"
+                        :key="index"
+                        :label="dictValue"
+                        :value="dictKey"
+                      />
+                    </el-select>
+                  </el-col>
+                </el-row>
+
+                <br />
               </div>
-              <ul class="header-ul">
-                <li
-                  v-for="(item, index) in ['可编辑', '只读', '隐藏']"
-                  :key="index"
-                >
-                  {{ item }}
-                </li>
-              </ul>
-            </header>
-            <div class="auth-table-body">
-              <div
-                v-for="(item, index) in properties.formOperates"
-                :key="index"
-                class="row"
-              >
-                <div class="label flex flex-center flex-align-items">
-                  <span
-                    v-show="item.required"
-                    class="required"
-                  >*</span>
-                  <el-tooltip
-                    :content="item.label"
-                    placement="right-end"
-                    effect="dark"
-                  >
-                    <!-- 现在的业务，只存在说明类型不存在label，以后有其他业务字段，需要自增 -->
-                    <div class="label">
-                      {{ `${item.label ? item.label : '说明'}` }}
-                    </div>
-                  </el-tooltip>
-                </div>
-                <el-tooltip
-                  v-if="hasTooltip(item)"
-                  content="设置为条件后审批人将不能对这个字段进行编辑"
-                  placement="right-end"
-                  effect="dark"
-                >
-                  <div class="label">
-                    {{ `${item.label ? item.label : '说明'}` }}
-                  </div>
-                  <el-radio-group
-                    v-model="item.formPrivilege"
-                    class="radio-group"
-                  >
-                    <el-radio
-                      :label="0"
-                      disabled
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.departmentHeads">
+              <!-- 审批人为部门领导时候的选项 -->
+              <div style="font-size: 14px; padding-left: 24px">
+                <el-row>
+                  <el-col style="line-height: 30px">
+                    发起人的
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-select
+                      v-model="infoForm.departmentHeadsLevel"
+                      style="width: 312px"
+                      size="small"
                     >
-                      <span style="display: none">可编辑</span>
-                    </el-radio>
-                    <el-radio
-                      :label="1"
-                      disabled
+                      <el-option
+                        v-for="({ dictValue, dictKey }, index) of dictionary.ManageOrgLevel"
+                        :key="index"
+                        :label="dictValue"
+                        :value="dictKey"
+                      />
+                    </el-select>
+                  </el-col>
+                </el-row>
+
+                <br />
+              </div>
+            </div>
+
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.multiDepartmentHeads">
+              <!-- 审批人为连续多级领导时候的选项 -->
+              <div style="font-size: 14px; padding-left: 24px">
+                <el-row>
+                  <el-col style="line-height: 30px">
+                    发起人的
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-select
+                      v-model="infoForm.multiDepartmentHeadsLevel"
+                      style="width: 312px"
+                      size="small"
                     >
-                      <span style="display: none">只读</span>
-                    </el-radio>
-                    <el-radio
-                      :label="2"
-                      disabled
+                      <el-option
+                        v-for="({ dictValue, dictKey }, index) of dictionary.SerialManageOrgLevel"
+                        :key="index"
+                        :label="dictValue"
+                        :value="dictKey"
+                      />
+                    </el-select>
+                  </el-col>
+                </el-row>
+
+                <br />
+              </div>
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.multiCompetentBusiness">
+              <!-- 审批人为连续多级业务主管时 -->
+              <div style="font-size: 14px; padding-left: 24px">
+                <el-row>
+                  <el-col style="line-height: 30px">
+                    发起人的
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-select
+                      v-model="infoForm.multiCompetentBusinessLevel"
+                      style="width: 312px"
+                      size="small"
                     >
-                      <span style="display: none">隐藏</span>
-                    </el-radio>
-                  </el-radio-group>
-                </el-tooltip>
-                <el-radio-group
-                  v-else
-                  v-model="item.formPrivilege"
-                  class="radio-group"
-                  @change="$forceUpdate()"
-                >
-                  <el-radio :label="0">
-                    <span style="display: none">可编辑</span>
+                      <el-option
+                        v-for="({ dictValue, dictKey }, index) of dictionary.SerialManageBizLevel"
+                        :key="index"
+                        :label="dictValue"
+                        :value="dictKey"
+                      />
+                    </el-select>
+                  </el-col>
+                </el-row>
+
+                <br />
+              </div>
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.job">
+              <div style="padding-bottom: 24px">
+                <commonForm
+                  ref="jobData"
+                  :model="infoForm"
+                  :columns="jobData"
+                />
+              </div>
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.position">
+              <commonForm
+                ref="positionData"
+                :model="infoForm"
+                :columns="positionData"
+              />
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.tag">
+              <commonForm
+                ref="tagData"
+                :model="infoForm"
+                :columns="tagData"
+              />
+            </div>
+            <div v-else-if="approverForm.assigneeType === assigneeTypeObect.role">
+              <commonForm
+                ref="roleForm1"
+                :model="infoForm"
+                :columns="roleColumns"
+              />
+              <div class="option-box">
+                <p>设置选择条件</p>
+                <el-radio-group v-model="approverForm.optionalMultiUser">
+                  <el-radio :label="false">
+                    自选一个人
                   </el-radio>
-                  <el-radio :label="1">
-                    <span style="display: none">只读</span>
-                  </el-radio>
-                  <el-radio :label="2">
-                    <span style="display: none">隐藏</span>
+                  <el-radio :label="true">
+                    自选多个人
                   </el-radio>
                 </el-radio-group>
+                <template v-if="approverForm.optionalMultiUser">
+                  <p>多人审批时采用的审批方式</p>
+                  <el-radio
+                    v-model="approverForm.counterSign"
+                    :label="true"
+                    class="radio-item"
+                  >
+                    会签（须所有审批人同意）
+                  </el-radio>
+                  <br />
+                  <el-radio
+                    v-model="approverForm.counterSign"
+                    :label="false"
+                    class="radio-item"
+                  >
+                    或签（一名审批人同意或拒绝即可）
+                  </el-radio>
+                </template>
               </div>
             </div>
+            <div
+              v-else
+              class="option-box"
+            >
+              <fc-org-select
+                ref="approver-org"
+                v-model="orgCollection"
+                button-type="button"
+                :title="getAssignTypeLabel()"
+                :tab-list="
+                  fcOrgTabList.includes(approverForm.assigneeType)
+                    ? [approverForm.assigneeType]
+                    : ['dep']
+                "
+                @change="onOrgChange"
+              />
+            </div>
+          </div>
+          <div
+            v-if="
+              (_.size(orgCollection[approverForm.assigneeType]) > 1 &&
+                !['optional'].includes(approverForm.assigneeType)) ||
+                (['optional'].includes(approverForm.assigneeType) && approverForm.optionalMultiUser)
+            "
+            class="option-box"
+          >
+            <p>多人审批时采用的审批方式</p>
+            <el-radio
+              v-model="approverForm.counterSign"
+              :label="true"
+              class="radio-item"
+            >
+              会签（须所有审批人同意）
+            </el-radio>
+            <br />
+            <el-radio
+              v-model="approverForm.counterSign"
+              :label="false"
+              class="radio-item"
+            >
+              或签（一名审批人同意或拒绝即可）
+            </el-radio>
           </div>
         </div>
       </section>
@@ -705,56 +373,6 @@
         />
         <br />
       </section>
-
-      <el-dialog
-        title="选择条件"
-        :visible.sync="dialogVisible"
-        width="500px"
-        :append-to-body="true"
-        custom-class="condition-dialog"
-      >
-        <div style="margin-bottom: 10px">
-          请选择用来区分审批流程的条件字段
-        </div>
-        <el-checkbox-group v-model="showingPCons">
-          <!-- 发起人默认就有 -->
-          <el-checkbox
-            v-if="isShowInitiator"
-            style="margin-bottom: 10px"
-            :label="-1"
-          >
-            发起人
-          </el-checkbox>
-          <el-checkbox
-            v-for="(item, index) in pconditions"
-            :key="index"
-            style="margin-bottom: 10px"
-            class="flex justify-space-around"
-            :label="item.__config__.formId"
-          >
-            {{ item.__config__.label }}
-          </el-checkbox>
-        </el-checkbox-group>
-
-        <div
-          slot="footer"
-          class="dialog-footer"
-        >
-          <el-button
-            size="medium"
-            @click="dialogVisible = false"
-          >
-            取 消
-          </el-button>
-          <el-button
-            size="medium"
-            type="primary"
-            @click="showCons()"
-          >
-            确 定
-          </el-button>
-        </div>
-      </el-dialog>
 
       <div class="actions">
         <div class="flex flex-align-items flex-center">
@@ -784,8 +402,6 @@ import { getOrgTreeSimple, getJob, getPosition, getTagList } from '@/api/org/org
 import { mapGetters } from 'vuex'
 import { NodeUtils } from '../FlowCard/util.js'
 import Clickoutside from 'element-ui/src/utils/clickoutside'
-import NumInput from './NumInput'
-import RowWrapper from './RowWrapper'
 
 // 审批人类型枚举
 const ASSIGNEE_TYPE = {
@@ -802,13 +418,7 @@ const ASSIGNEE_TYPE = {
 const notEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0
 const hasBranch = (data) => notEmptyArray(data.conditionNodes)
 const hasParallelBranch = (data) => notEmptyArray(data.parallelNodes)
-const rangeType = {
-  lt: '<',
-  lte: '≤',
-  gt: '>',
-  gte: '≥',
-  eq: '='
-}
+
 // 默认表单模版
 const defaultApproverForm = {
   approvers: [], // 审批人集合
@@ -864,10 +474,7 @@ export default {
   directives: {
     Clickoutside
   },
-  components: {
-    'num-input': NumInput,
-    'row-wrapper': RowWrapper
-  },
+  components: {},
   props: {
     /*当前节点数据*/
     value: {
@@ -1083,7 +690,7 @@ export default {
     ...mapGetters(['fieldList'])
   },
   watch: {
-    async 'infoForm.orgId'(orgId) {
+    'infoForm.orgId': async function(orgId) {
       if (_.isNil(orgId)) return
       await this.getJobData()
       // 处理如果部门改变了。职位跟部门一起改变
@@ -1309,108 +916,6 @@ export default {
       this.visible = false
     },
 
-    /**
-     * 条件节点确认保存得回调
-     */
-    conditionNodeComfirm() {
-      let nodeContent = ''
-      const conditions = []
-      let isTip = false
-      this.showingPCons
-        .map((fid) => this.pconditions.find((t) => t.__config__.formId === fid))
-        .forEach((t) => {
-          if (!t) return // 发起人条件时 t 为空 发起人在其他地方获取
-          const cValue = t.__config__.defaultValue
-          if (cValue === undefined || cValue === null) {
-            return
-          }
-          const numberTypeCmp = [
-            'daterange', // 日期类型作为数字处理
-            'el-input-number',
-            'fc-date-duration',
-            'fc-time-duration',
-            'fc-amount',
-            'fc-calculate',
-            'money',
-            'number'
-          ]
-          const res = {
-            vModel: t.__vModel__,
-            type: t.__config__.type,
-            formId: t.__config__.formId,
-            defaultValue: cValue
-          }
-          if (t.__config__.type === 'radio') {
-            res.val = ''
-            t.__slot__.options.map((it) => {
-              it.label === cValue && (res.val = it.value)
-            })
-          } else if (t.__config__.type === 'checkbox') {
-            res.val = []
-            res.selectMode = t.__config__.selectMode
-            t.__slot__.options.map((it) => {
-              cValue.includes(it.value) && res.val.push(it.value)
-            })
-          }
-          if (numberTypeCmp.includes(t.__config__.type)) {
-            if (cValue.type === 'bet') {
-              if (!(_.toNumber(cValue.value[0]) <= _.toNumber(cValue.value[3]))) {
-                this.$message.error(`${t.__config__.label} 第一个值应该小于等于第二个值`)
-                isTip = true
-                return
-              }
-              const numVal = cValue.value
-              nodeContent +=
-                `[${numVal[0]} ${rangeType[numVal[1]]} ${t.__config__.label} ${
-                  rangeType[numVal[2]]
-                } ${numVal[3]}] ` + '\n'
-            } else {
-              nodeContent +=
-                `[${t.__config__.label} ${rangeType[cValue.type]} ${cValue.value}] ` + '\n'
-            }
-          } else if (t.tag === 'fc-org-select') {
-            const index = this.pconditions.findIndex((p) => p.formId === t.formId)
-            const labels = this.$refs['org' + index][0].selectedLabels
-            nodeContent += `[${t.label} = ${labels}] ` + '\n'
-          } else if (['checkbox'].includes(t.__config__.type)) {
-            const { options } = t.__slot__
-            nodeContent +=
-              `[${t.__config__.label} = ${options
-                .filter(({ value }) => cValue.includes(value))
-                .map(({ label }) => label)}] ` + '\n'
-          } else {
-            nodeContent += `[${t.__config__.label} = ${cValue}] ` + '\n'
-          }
-          conditions.push(res)
-        }, [])
-      if (isTip) {
-        //如果条件是数字条件是两者之间，要前者小于等于后者
-        return
-      }
-      this.properties.conditions = conditions
-      // 发起人虽然是条件 但是这里把发起人放到外部单独判断
-      this.properties.initiator = this.initiator['user']
-      this.initiator['user'] &&
-        this.initiator['user'].length > 0 &&
-        (nodeContent = `[发起人: ${this.getOrgSelectLabel('condition')}]` + '\n' + nodeContent) &&
-        this.initiator['user'].map((it) => {
-          it.children && delete it.children
-          it.users && delete it.users
-        })
-      ;(this.properties.conditions &&
-        this.properties.conditions.length > 0 &&
-        delete this.properties.isDefault) ||
-        (this.properties.initiator &&
-          this.properties.initiator.length > 0 &&
-          delete this.properties.isDefault)
-      !this.showingPCons.includes(-1) &&
-        this.properties.initiator &&
-        this.properties.initiator.length > 0 &&
-        ((this.properties.initiator = null), (nodeContent = null))
-      this.$emit('confirm', this.properties, nodeContent || '请设置条件')
-      this.visible = false
-    },
-
     getOrgSelectLabel(type) {
       return this.$refs[type + '-org'] ? this.$refs[type + '-org']['selectedLabels'] : ''
     },
@@ -1546,7 +1051,6 @@ export default {
       this.isStartNode() && this.startNodeComfirm()
       this.isApproverNode() && this.approverNodeComfirm()
       this.isParallelNode() && this.approverNodeComfirm()
-      this.isConditionNode() && this.conditionNodeComfirm()
     },
     // 关闭抽屉
     cancel() {
