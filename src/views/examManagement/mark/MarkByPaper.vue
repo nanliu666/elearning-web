@@ -81,36 +81,33 @@
             </el-button>
           </el-tooltip>
         </div>
+        <div class="dot-box">
+          <div class="dot-content">
+            <span class="dot"></span>
+            <span>
+              <span class="label">标准答案：</span>
+              <span class="value is-correct">{{
+                _.get(qustionList, '[0].answerQuestion', '未设置标椎答案')
+              }}</span>
+            </span>
+          </div>
+        </div>
       </div>
       <ul
         v-if="!_.isEmpty(questionMain)"
         class="card-content"
       >
-        <li class="card-li">
-          <ul class="question-ul">
-            <div class="dot-box">
-              <div class="dot-content">
-                <span class="dot"></span>
-                <span>
-                  <span class="label">标准答案：</span>
-                  <span class="value is-correct">{{
-                    _.get(qustionList, '[0].answerQuestion', '未设置标椎答案')
-                  }}</span>
-                </span>
-              </div>
-            </div>
-            <li
-              v-for="item in qustionList"
-              :key="item.id"
-              class="question-li"
-            >
-              <by-paper-form
-                v-show="isShowQustion(item)"
-                ref="refSelect"
-                :data="item"
-              />
-            </li>
-          </ul>
+        <li
+          v-for="item in _.flattenDeep(totalList)"
+          :key="item.id"
+          class="card-li"
+          :class="{ 'is-show-li': isShowQustion(item) }"
+        >
+          <by-paper-form
+            v-show="isShowQustion(item)"
+            ref="refSelect"
+            :data="item"
+          />
         </li>
       </ul>
       <com-empty
@@ -264,11 +261,12 @@ export default {
   },
   data() {
     return {
+      autoCommitTimer: {}, // 自动提交的定时器
       currentSize: 10, // 每页几条
       pageNo: 1, //第几页
       totalNum: 0, // 考生总条数
       currentTotalList: [], // 当前题目下的所有的考生答卷
-      currentIndex: 0,
+      currentIndex: 0, //第几题
       emptySrc: noData,
       emptyText: '请搜索需要评分的考生试题~',
       columns: EventColumns,
@@ -283,7 +281,6 @@ export default {
       questionMain: {},
       formDataList: [],
       qustionList: [],
-      totalQustionList: [],
       totalList: []
     }
   },
@@ -320,11 +317,8 @@ export default {
       const { totalNum, list } = res
       this.totalQustionNum = totalNum
       this.questionMain = list
-      const questionIndex = _.findIndex(this.totalList, (item) => {
-        return item.id === this.questionMain.id
-      })
       //此题目未被记录在数据内
-      if (questionIndex === -1) {
+      if (_.isEmpty(this.totalList[this.currentIndex])) {
         this.getPaperData()
       } else {
         this.setQuestionList()
@@ -340,19 +334,13 @@ export default {
       })
       this.totalNum = totalNum
       this.currentTotalList = list
-      this.totalList.push({
-        id: this.questionMain.id,
-        data: _.chunk(this.currentTotalList, this.currentSize)
-      })
+      this.totalList.push(_.chunk(this.currentTotalList, this.currentSize))
       this.setQuestionList()
     },
     setQuestionList() {
-      const tempIndex = _.findIndex(this.totalList, (item) => {
-        return item.id === this.questionMain.id
-      })
-      this.totalQustionList = this.totalList[tempIndex].data
       // 获取到当前的展示数组
-      this.qustionList = this.totalQustionList[this.pageNo - 1]
+      // 第几题的第几页的数据
+      this.qustionList = this.totalList[this.currentIndex][this.pageNo - 1]
     },
     // 页数改变
     handleSizeChange(val) {
@@ -365,16 +353,23 @@ export default {
       this.setQuestionList()
     },
     // 10分钟自动提交
-    initAutoCommit() {},
+    initAutoCommit() {
+      const TEN_MINUTES = 1000
+      // const TEN_MINUTES = 10 * 60 * 1000
+      this.autoCommitTimer = setInterval(() => {
+        // console.log(11)
+      }, TEN_MINUTES)
+    },
     getHTML() {
       return addLine(this.questionMain.content)
     },
     // 离开后清除页面数据?为啥这个页面不能自定清除？
     clearActiveData() {
       this.questionMain = {}
-      this.totalQustionList = []
+      this.totalList = []
       this.qustionList = []
       this.currentIndex = 0
+      clearInterval(this.autoCommitTimer)
     },
     // 上一题
     prevQuestion() {
@@ -421,9 +416,10 @@ export default {
       } else {
         actionExamineePaperIngUser({ list: list })
           .then(() => {
-            this.$route.push({ path: 'examManagement/mark/MarkList' })
+            this.$router.push({ path: 'examManagement/mark/MarkList' })
           })
-          .catch(() => {
+          .catch((err) => {
+            window.console.error('err==', err)
             window.console.error(JSON.stringify({ list: list }))
           })
       }
@@ -455,7 +451,7 @@ export default {
       this.$refs.form.resetFields()
     },
     search() {
-      this.totalQustionList = []
+      this.totalList = []
       this.qustionList = []
       this.loadData()
     },
@@ -525,47 +521,30 @@ export default {
         margin: 0 13.5%;
         padding-top: 16px;
       }
+      .dot-box {
+        margin: 0 13.5%;
+        padding-bottom: 16px;
+        .dot-content {
+          min-width: 60px;
+          display: flex;
+          align-items: center;
+          .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(0, 11, 21, 0.25);
+            margin-right: 6px;
+          }
+        }
+      }
     }
     .card-content {
       .card-li {
         margin: 0 13.5%;
-        .card-title {
-          font-family: PingFangSC-Medium;
-          font-size: 16px;
-          color: rgba(0, 11, 21, 0.85);
-          font-weight: 550;
-        }
-        .card-sub-title {
-          font-family: PingFangSC-Regular;
-          font-size: 12px;
-          color: rgba(0, 11, 21, 0.25);
-          margin: 10px 0 18px;
-        }
-        .standard-class {
-          position: relative;
-          padding-left: 34px;
-          margin-bottom: 8px;
-          &::before {
-            content: '';
-            position: absolute;
-            left: 24px;
-            bottom: 6px;
-            width: 6px;
-            height: 6px;
-            background-color: rgba(0, 11, 21, 0.25);
-            border-radius: 100%;
-          }
-          .standard-label {
-            font-family: PingFangSC-Regular;
-            font-size: 14px;
-            color: rgba(0, 11, 21, 0.25);
-          }
-          .standard-value {
-            font-family: PingFangSC-Regular;
-            font-size: 14px;
-            color: rgba(0, 11, 21, 0.85);
-          }
-        }
+      }
+      .is-show-li {
+        margin-bottom: 32px;
       }
     }
     .label {
@@ -591,27 +570,7 @@ export default {
       padding: 24px;
       background-color: #fafafa;
     }
-    .question-ul {
-      .dot-box {
-        padding-left: 24px;
-        .dot-content {
-          min-width: 60px;
-          display: flex;
-          align-items: center;
-          .dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: rgba(0, 11, 21, 0.25);
-            margin-right: 6px;
-          }
-        }
-      }
-      .question-li {
-        margin-bottom: 32px;
-      }
-    }
+
     .pagination-box {
       display: flex;
       justify-content: flex-end;

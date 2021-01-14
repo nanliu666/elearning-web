@@ -122,7 +122,6 @@ export default {
 
 <style scoped lang="scss">
 .mark-section {
-  margin-top: 8px;
   background: #fafafa;
   padding: 24px;
   .mark-top {
