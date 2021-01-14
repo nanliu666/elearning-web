@@ -73,7 +73,7 @@
         <li class="card-li">
           <div class="stem-main">
             <span>{{ currentIndex + 1 }}.</span>
-            <span v-html="_.unescape(questionMain.content)" />
+            <span v-html="getHTML()" />
             <el-tooltip
               class="item"
               effect="dark"
@@ -244,6 +244,7 @@ import addPng from '@/assets/images/add.jpg'
 import noData from '@/assets/images/noData.jpg'
 import ComEmpty from '@/components/common-empty/empty'
 import ByPaperForm from './components/ByPaperForm.vue'
+import { addLine } from '@/util/util'
 export default {
   name: 'MarkByPaper',
   components: {
@@ -299,6 +300,9 @@ export default {
     next()
   },
   methods: {
+    getHTML() {
+      return addLine(this.questionMain.content)
+    },
     clearActiveData() {
       this.questionMain = []
       this.qustionList = []
