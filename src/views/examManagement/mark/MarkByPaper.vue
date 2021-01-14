@@ -276,7 +276,7 @@ export default {
       totalPage: 0, // 考生总条数
       pageQuery: {
         id: '',
-        size: 10,
+        size: 1,
         currentPage: 1
       },
       questionMain: {},
@@ -293,6 +293,7 @@ export default {
   activated() {
     this.initForm()
     this.loadData()
+    this.initAutoCommit()
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -300,6 +301,8 @@ export default {
     next()
   },
   methods: {
+    // 10分钟自动提交
+    initAutoCommit() {},
     getHTML() {
       return addLine(this.questionMain.content)
     },
@@ -336,7 +339,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.loadData()
+        this.getPaperData()
       })
     },
     submit() {
@@ -375,7 +378,7 @@ export default {
             this.$router.go(-1)
           })
           .catch(() => {
-            window.console.error(JSON.stringify(list))
+            window.console.error(JSON.stringify({ list: list }))
           })
       }
     },
@@ -594,6 +597,7 @@ export default {
   }
   .handle-button {
     position: fixed;
+    z-index: 1;
     bottom: 0;
     right: 40px;
     width: calc(100vw - 16.5vw - 72px);
