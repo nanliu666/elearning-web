@@ -17,29 +17,29 @@
     <div class="split-line"></div>
     <common-form
       ref="form"
-      :model="formData"
+      :model="data"
       :columns="columns"
       :config="{ labelPosition: 'left', labelWidth: '100px', labelPosition: 'right' }"
     >
       <template slot="scoreUser">
         <el-input-number
-          v-model="formData.scoreUser"
+          v-model="data.scoreUser"
           controls-position="right"
           :step="0.1"
         ></el-input-number>
       </template>
       <template slot="result">
         <el-radio-group
-          v-model="formData.result"
+          v-model="data.result"
           @change="reslutChange"
         >
-          <el-radio label="0">
+          <el-radio :label="0">
             对
           </el-radio>
-          <el-radio label="1">
+          <el-radio :label="1">
             错
           </el-radio>
-          <el-radio label="2">
+          <el-radio :label="2">
             部分对
           </el-radio>
         </el-radio-group>
@@ -86,12 +86,6 @@ export default {
   },
   data() {
     return {
-      formData: {
-        result: '', // 评价结果
-        scoreUser: '', // 评分
-        reviewRemark: '', // 评语
-        id: '' //考生答卷答题卡id
-      },
       columns: _.cloneDeep(EventColumnsS)
     }
   },
@@ -99,7 +93,8 @@ export default {
     data: {
       handler(value) {
         if (value) {
-          _.assign(this.formData, _.pick(this.data, _.keys(this.formData)))
+          this.columns[1].rules[0].required = true
+          this.columns[2].rules[0].required = true
         }
       },
       deep: true,
@@ -109,17 +104,15 @@ export default {
   created() {},
   methods: {
     reslutChange(value) {
-      this.columns[1].rules[0].required = true
-      this.columns[2].rules[0].required = true
       switch (value) {
-        case '0':
-          this.formData.scoreUser = this.data.scoreQuestion
+        case 0:
+          this.data.scoreUser = this.data.scoreQuestion
           break
-        case '1':
-          this.formData.scoreUser = 0
+        case 1:
+          this.data.scoreUser = 0
           break
-        case '2':
-          this.formData.scoreUser = this.data.scoreQuestion / 2
+        case 2:
+          this.data.scoreUser = this.data.scoreQuestion / 2
           break
       }
     }

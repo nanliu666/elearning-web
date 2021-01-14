@@ -41,7 +41,7 @@
           <span class="title">试题答卷</span>
           <span class="sub-title">
             <span>（搜索结果：</span>
-            <span>{{ `${totalNum > 0 ? `共${totalNum}题` : '--'}）` }}</span>
+            <span>{{ `${totalQustionNum > 0 ? `共${totalQustionNum}题` : '--'}）` }}</span>
           </span>
         </div>
         <div class="card-right">
@@ -55,11 +55,11 @@
           <span class="number-box">
             <span>{{ currentIndex + 1 }}</span>
             <span>/</span>
-            <span>{{ totalNum }}</span>
+            <span>{{ totalQustionNum }}</span>
           </span>
           <el-button
             size="medium"
-            :disabled="currentIndex + 1 === totalNum"
+            :disabled="currentIndex + 1 === totalQustionNum"
             @click="nextQuestion"
           >
             下一题
@@ -103,6 +103,7 @@
               class="question-li"
             >
               <by-paper-form
+                v-show="isShowQustion(item)"
                 ref="refSelect"
                 :data="item"
               />
@@ -119,9 +120,9 @@
       <div class="pagination-box">
         <el-pagination
           :page-sizes="[10, 20, 30, 40]"
-          :page-size="10"
+          :current-page="pageNo"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="totalPage"
+          :total="totalNum"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -261,6 +262,10 @@ export default {
   },
   data() {
     return {
+      currentSize: 10, // 每页几条
+      pageNo: 1, //第几页
+      totalNum: 0, // 考生总条数
+      currentTotalList: [], // 当前题目下的所有的考生答卷
       currentIndex: 0,
       emptySrc: noData,
       emptyText: '请搜索需要评分的考生试题~',
@@ -272,16 +277,12 @@ export default {
         examId: '',
         orgId: ''
       },
-      totalNum: 0,
-      totalPage: 0, // 考生总条数
-      pageQuery: {
-        id: '',
-        size: 1,
-        currentPage: 1
-      },
+      totalQustionNum: 0, //此类型一共有几题
       questionMain: {},
       formDataList: [],
-      qustionList: []
+      qustionList: [],
+      totalQustionList: [],
+      totalList: []
     }
   },
   computed: {
@@ -291,9 +292,9 @@ export default {
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {
-    this.initForm()
-    this.loadData()
+    this.initSearchForm()
     this.initAutoCommit()
+    this.loadData()
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -301,37 +302,99 @@ export default {
     next()
   },
   methods: {
+    // 获取当前的答卷显示列表
+    isShowQustion(data) {
+      const index = _.findIndex(this.qustionList, (item) => {
+        return item.id === data.id
+      })
+      return index > -1
+    },
+    async loadData() {
+      _.assign(this.queryInfo, {
+        examId: this.$route.query.id,
+        lastId: _.get(this.questionMain, 'id', '')
+      })
+      const res = await listExamineePaperOnce(this.queryInfo)
+      const { totalNum, list } = res
+      this.totalQustionNum = totalNum
+      this.questionMain = list
+      const questionIndex = _.findIndex(this.totalList, (item) => {
+        return item.id === this.questionMain.id
+      })
+      //此题目未被记录在数据内
+      if (questionIndex === -1) {
+        this.getPaperData()
+      } else {
+        this.setQuestionList()
+      }
+    },
+    // 一次将当前题目的所有考生答卷拉取回来
+    // 前端做分页
+    async getPaperData() {
+      const { totalNum, list } = await getByPaper({
+        id: this.questionMain.id,
+        size: 100000,
+        currentPage: 1
+      })
+      this.totalNum = totalNum
+      this.currentTotalList = list
+      this.totalList.push({
+        id: this.questionMain.id,
+        data: _.chunk(this.currentTotalList, this.currentSize)
+      })
+      this.setQuestionList()
+    },
+    setQuestionList() {
+      const tempIndex = _.findIndex(this.totalList, (item) => {
+        return item.id === this.questionMain.id
+      })
+      this.totalQustionList = this.totalList[tempIndex].data
+      // 获取到当前的展示数组
+      this.qustionList = this.totalQustionList[this.pageNo - 1]
+    },
+    // 页数改变
+    handleSizeChange(val) {
+      this.currentSize = val
+      this.setQuestionList()
+    },
+    // 页码改变
+    handleCurrentChange(val) {
+      this.pageNo = val
+      this.setQuestionList()
+      // const targetRefs = this.getTargetRefs()
+      // this.formDataList = _.map(targetRefs, 'model')
+      // const isAllPass = _.every(this.formDataList, (item) => {
+      //   return _.get(item, 'result') && _.get(item, 'scoreUser') && _.get(item, 'reviewRemark')
+      // })
+      // if (isAllPass) {
+      //   this.changePageList()
+      // } else {
+      //   this.needTips()
+      // }
+    },
     // 10分钟自动提交
     initAutoCommit() {},
     getHTML() {
       return addLine(this.questionMain.content)
     },
+    // 离开后清除页面数据?为啥这个页面不能自定清除？
     clearActiveData() {
-      this.questionMain = []
+      this.questionMain = {}
+      this.totalQustionList = []
       this.qustionList = []
       this.currentIndex = 0
     },
+    // 上一题
     prevQuestion() {
       this.currentIndex -= 1
       this.queryInfo.direction = 0
       this.loadData()
     },
+    // 下一题
     nextQuestion() {
       this.currentIndex += 1
       this.queryInfo.direction = 1
       this.loadData()
-    },
-    pageChange() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = _.map(targetRefs, 'model')
-      const isAllPass = _.every(this.formDataList, (item) => {
-        return _.get(item, 'result') && _.get(item, 'scoreUser') && _.get(item, 'reviewRemark')
-      })
-      if (isAllPass) {
-        this.getPaperData()
-      } else {
-        this.needTips()
-      }
     },
     needTips() {
       this.$confirm('当前页面还有试题未进行评价，是否忽略进入下一页？', '提示', {
@@ -339,9 +402,10 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.getPaperData()
+        this.changePageList()
       })
     },
+    changePageList() {},
     submit() {
       this.checkRequired()
     },
@@ -375,7 +439,7 @@ export default {
       } else {
         actionExamineePaperIngUser({ list: list })
           .then(() => {
-            this.$router.go(-1)
+            this.$route.push({ path: 'examManagement/mark/MarkList' })
           })
           .catch(() => {
             window.console.error(JSON.stringify({ list: list }))
@@ -398,15 +462,8 @@ export default {
     goback() {
       this.$router.go(-1)
     },
-    handleSizeChange(val) {
-      this.pageQuery.size = val
-      this.getPaperData()
-    },
-    handleCurrentChange(val) {
-      this.pageQuery.currentPage = val
-      this.pageChange()
-    },
-    initForm() {
+    //初始化搜索表单的数据
+    initSearchForm() {
       _.set(this.columns, '[0].options', SOURCE)
       getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
         _.set(this.columns, '[1].props.treeParams.data', res)
@@ -414,34 +471,11 @@ export default {
     },
     reset() {
       this.$refs.form.resetFields()
-      this.search()
     },
     search() {
+      this.totalQustionList = []
+      this.qustionList = []
       this.loadData()
-    },
-    async loadData() {
-      _.assign(this.queryInfo, {
-        examId: this.$route.query.id,
-        lastId: _.get(this.questionMain, 'id', '')
-      })
-      const res = await listExamineePaperOnce(this.queryInfo)
-      const { totalNum, list } = res
-      this.totalNum = totalNum
-      if (list) {
-        this.questionMain = list
-        this.getPaperData()
-      } else {
-        this.questionMain = Object.create(null)
-        this.qustionList = []
-        this.isEmpty()
-      }
-    },
-    async getPaperData() {
-      const { totalNum, list } = await getByPaper(
-        _.assign(this.pageQuery, { id: this.questionMain.id })
-      )
-      this.qustionList = list
-      this.totalPage = totalNum
     },
     isEmpty() {
       this.emptySrc = addPng
