@@ -26,7 +26,15 @@
         :model="formData"
         :columns="columns"
         :config="{ labelPosition: 'left', labelWidth: '100px', labelPosition: 'right' }"
-      />
+      >
+        <template slot="scoreUser">
+          <el-input-number
+            v-model="formData.scoreUser"
+            controls-position="right"
+            :step="0.1"
+          ></el-input-number>
+        </template>
+      </common-form>
       <div
         v-else
         class="view-box"
@@ -58,7 +66,7 @@
 const EventColumns = [
   {
     itemType: 'radio',
-    span: 14,
+    span: 13,
     required: false,
     options: [
       {
@@ -78,7 +86,7 @@ const EventColumns = [
     label: '评分结果：'
   },
   {
-    itemType: 'input',
+    itemType: 'slot',
     span: 10,
     prop: 'scoreUser',
     label: '得分：',

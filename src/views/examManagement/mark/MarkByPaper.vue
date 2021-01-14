@@ -197,15 +197,15 @@ const EventColumns = [
     options: [
       {
         label: '全部',
-        value: '0'
+        value: ''
       },
       {
         label: '未评分',
-        value: '1'
+        value: '0'
       },
       {
         label: '已评分',
-        value: '2'
+        value: '1'
       }
     ],
     prop: 'status',
@@ -266,7 +266,7 @@ export default {
       columns: EventColumns,
       queryInfo: {
         type: '',
-        status: '2', //默认显示已评分
+        status: '', //默认显示全部
         lastId: '',
         examId: '',
         orgId: ''
