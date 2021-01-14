@@ -12,8 +12,8 @@
     <div class="mark-section">
       <div class="answer-li">
         <div class="li-left">
-          <span class="answer-label">考生答案：</span>
-          <span class="answer-value">{{ data.answerUser || '--' }}</span>
+          <span class="label">考生答案：</span>
+          <span class="value">{{ data.answerUser || '--' }}</span>
         </div>
         <!-- <el-button type="text">
           编辑
@@ -21,12 +21,35 @@
       </div>
       <div class="split-line"></div>
       <common-form
+        v-if="!isView"
         ref="form"
         :model="formData"
         :columns="columns"
         :config="{ labelPosition: 'left', labelWidth: '100px', labelPosition: 'right' }"
+      />
+      <div
+        v-else
+        class="view-box"
       >
-      </common-form>
+        <div class="view-box-top">
+          <div class="top-content">
+            <span class="label">评分结果：</span>
+            <span class="value">{{ getResult(data.result) || '--' }}</span>
+          </div>
+          <div class="top-content">
+            <span class="label">得分：</span>
+            <span class="value">{{ data.scoreUser || '--' }}</span>
+          </div>
+          <div v-if="data.review">
+            <span class="label">评卷人：</span>
+            <span class="value">{{ data.review || '--' }}</span>
+          </div>
+        </div>
+        <div class="view-box-bottom">
+          <span class="label">评语：</span>
+          <span class="value">{{ data.reviewRemark || '--' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -75,6 +98,7 @@ const EventColumns = [
 ]
 export default {
   name: 'GapAndShort',
+  inject: ['mark'],
   props: {
     data: {
       type: Object,
@@ -83,6 +107,7 @@ export default {
   },
   data() {
     return {
+      isView: false,
       columns: _.cloneDeep(EventColumns),
       formData: {
         id: '',
@@ -112,8 +137,17 @@ export default {
       immediate: true
     }
   },
-  created() {},
+  created() {
+    this.isView = this.mark.isView
+  },
   methods: {
+    getResult(result) {
+      const options = _.get(EventColumns, '[0].options', [])
+      const target = _.find(options, (item) => {
+        return item.value === result
+      })
+      return target.label
+    },
     // 获取正确答案
     getCorrect() {
       // TODO: 填空题的标准答案获取
@@ -185,16 +219,6 @@ export default {
     .li-left {
       display: flex;
       align-items: center;
-      .answer-label {
-        font-family: PingFangSC-Regular;
-        font-size: 14px;
-        color: rgba(0, 11, 21, 0.25);
-      }
-      .answer-value {
-        font-family: PingFangSC-Regular;
-        font-size: 14px;
-        color: rgba(0, 11, 21, 0.85);
-      }
     }
   }
   .split-line {
@@ -205,6 +229,15 @@ export default {
   }
   /deep/ .el-form-item {
     margin-bottom: 16px;
+  }
+  .view-box {
+    .view-box-top {
+      margin-bottom: 30px;
+      display: flex;
+      .top-content {
+        margin-right: 120px;
+      }
+    }
   }
 }
 </style>
