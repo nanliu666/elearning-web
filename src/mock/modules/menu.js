@@ -696,6 +696,48 @@ const res = {
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
+          },
+          {
+            menuId: '12234523464567254058',
+            menuName: '课程审核',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/center',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125945634575684562358',
+            menuName: '审核详情',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/details',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259123124353455058',
+            menuName: '查看章节内容',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/chapter',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
           }
         ]
       },

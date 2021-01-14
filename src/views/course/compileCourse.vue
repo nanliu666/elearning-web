@@ -390,7 +390,9 @@
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{
+                  scope.row.name || scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -715,15 +717,15 @@ export default {
       typeOption: [
         {
           name: '文章',
-          value: '1'
+          value: 1
         },
         {
           name: '普通课件',
-          value: '2'
+          value: 2
         },
         {
           name: '资料下载',
-          value: '3'
+          value: 3
         }
       ],
       // 填写课程信息
@@ -796,6 +798,23 @@ export default {
       immediate: false,
       deep: true
     }
+    // 'ruleForm.contents': {
+    //   handler(newVel) {
+    //     newVel.map((item, index) => {
+    //       console.log(item.upLoad)
+
+    //       if (item.upLoad >= 1) {
+    //         if (!item.name) {
+    //           this.ruleForm.contents[index].name = this.ruleForm.contents[index].upLoad[
+    //             this.ruleForm.contents[index].upLoad.length - 1
+    //           ].localName
+    //         }
+    //       }
+    //     })
+    //   },
+    //   immediate: false,
+    //   deep: true
+    // }
   },
 
   activated() {
@@ -818,7 +837,7 @@ export default {
           localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
           sort: '', //序号
           type: 2, //章节类型
-          name: '社区的商业模式', // 章节名称
+          name, // 章节名称
           content: '', //文章内容
           upLoad: [
             {
@@ -845,7 +864,7 @@ export default {
           localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
           sort: '', //序号
           type: 2, //章节类型
-          name: '社区的商业模式', // 章节名称
+          name, // 章节名称
           content: '', //文章内容
           upLoad: [
             {
@@ -944,6 +963,9 @@ export default {
           }
           // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
           // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
+          if (!this.ruleForm.contents[this.AddArticleBtntableIndex].name) {
+            this.ruleForm.contents[this.AddArticleBtntableIndex].name = this.addArticle.localName
+          }
           this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
           this.addArticle.localName = ''
           this.addArticle.content = ''

@@ -221,9 +221,14 @@ export default {
   filters: {
     formColumnsFilter: function(formData) {
       let res = _(FORM_COLUMNS)
-      if (_.eq(formData.menuType, 'Button') || _.isNil(formData.menuType)) {
+      //目前做了修改
+      // if (_.eq(formData.menuType, 'Button') || _.isNil(formData.menuType)) {
+      //   res = res.difference([_.find(FORM_COLUMNS, { prop: 'sort' })])
+      // }
+      if (_.eq(formData.menuType, 'Dir' || _.isNil(formData.menuType))) {
         res = res.difference([_.find(FORM_COLUMNS, { prop: 'sort' })])
       }
+
       return res.value()
     }
   },

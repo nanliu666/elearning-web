@@ -296,7 +296,7 @@
         <el-button
           v-show="!showBtnDel"
           type="primary"
-          @click="RulusFn(rowData, 1)"
+          @click="RulusFn(rowData, 0)"
         >
           确 定
         </el-button>
@@ -712,11 +712,13 @@ export default {
         id: '',
         status: '' // '0 停用 1 正常',
       }
+      // console.log(i)
       params.id = id.idStr || id.teacherId
       params.status = i
+
       editSysRulus(params).then(() => {
         this.$message({
-          message: `${i ? '停用' : '启动'}成功`,
+          message: `${i ? '启动' : '停用'}成功`,
           type: 'success'
         })
         //刷新
@@ -757,7 +759,7 @@ export default {
               type: 'warning'
             })
               .then(() => {
-                this.RulusFn(id, i)
+                this.RulusFn(id, 0)
               })
               .catch(() => {
                 this.$message({
