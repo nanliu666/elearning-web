@@ -486,9 +486,9 @@ export default {
 //   }
 // }
 
-/deep/ .el-form-item__label {
-  line-height: 30px;
-}
+// /deep/ .el-form-item__label {
+//   line-height: 30px;
+// }
 /deep/ .treeSelect {
   .el-form-item__content {
     min-width: 198px;

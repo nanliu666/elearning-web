@@ -589,18 +589,18 @@ export default {
   display: block;
   content: '';
 }
-/deep/.el-dialog {
-  //   max-width: 420px;
-  .el-date-editor {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-  width: 80%;
-  max-width: 600px;
-}
-.commonTable {
-  /deep/.el-form-item {
-    width: 45%;
-  }
-}
+// /deep/.el-dialog {
+//   //   max-width: 420px;
+//   .el-date-editor {
+//     width: 100%;
+//     margin-bottom: 8px;
+//   }
+//   width: 80%;
+//   max-width: 600px;
+// }
+// .commonTable {
+//   /deep/.el-form-item {
+//     width: 45%;
+//   }
+// }
 </style>
