@@ -1210,7 +1210,7 @@ const res = {
             icon: 'iconfont iconicon_compile'
           },
           {
-            menuId: '1590112075692666',
+            menuId: '1590112075692668',
             menuName: '直播回放',
             menuType: 'Menu',
             isEnabled: 1,
@@ -1218,7 +1218,7 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/CoursePlanList',
+            path: '/live/playBackList',
             icon: 'iconfont iconicon_compile'
           },
           {

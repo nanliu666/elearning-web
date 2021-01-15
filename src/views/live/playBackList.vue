@@ -65,7 +65,7 @@
               type="text"
               @click="jumpDetail(row)"
             >
-              查看
+              查看回放
             </el-button>
           </div>
         </template>
@@ -109,11 +109,6 @@ let TABLE_COLUMNS = [
   },
   {
     label: '状态',
-    prop: 'examType',
-    minWidth: 120
-  },
-  {
-    label: '操作',
     prop: 'examType',
     minWidth: 120
   }
