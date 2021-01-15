@@ -3,7 +3,6 @@
   <div
     v-loading="loading"
     class="page"
-    @click="hidePreview()"
   >
     <header class="page__header">
       <div class="page-actions">
@@ -40,85 +39,6 @@
         />
       </div>
       <div class="button-group-box">
-        <el-dropdown
-          v-if="hasVersion"
-          split-button
-          size="medium"
-          style="margin-right: 10px;"
-        >
-          历史版本
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item
-              v-for="(verItem, verIndex) in apprVersionList"
-              :key="verIndex"
-              class="version-li"
-              @click.native="toVersion(verItem)"
-            >
-              V{{ verItem.version }}
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-popover
-          v-model="isPreviewClick"
-          placement="top"
-          width="350"
-          trigger="manual"
-        >
-          <div
-            v-loading="previewLoading"
-            class="preview-box"
-          >
-            <div class="preview-description">
-              通过模拟发起人，来模拟运行整个审批的流程，检测是否有不合理和遗漏
-            </div>
-            <div class="preview-content">
-              <div class="content-title">
-                移动端扫码预览
-              </div>
-              <div class="mobile-qr-code">
-                <div v-if="isDevelopment">
-                  {{ qrcode.url }}
-                </div>
-                <vue-qr
-                  class="qr-code-img"
-                  :text="qrcode.url"
-                  :margin="0"
-                  color-light="#fff"
-                  :logo-src="qrcode.logo"
-                  :logo-corner-radius="11"
-                  :size="200"
-                />
-                <div class="preview-description">
-                  请用微信扫码预览
-                </div>
-              </div>
-            </div>
-            <div class="preview-content">
-              <div class="content-title">
-                PC端链接预览
-              </div>
-              <div>{{ host }}{{ previewLink }}</div>
-              <div class="preview-button">
-                <el-button
-                  style="margin-top: 10px"
-                  class="publish-btn"
-                  size="medium"
-                  type="primary"
-                  @click="openNewLink"
-                >
-                  打开链接
-                </el-button>
-              </div>
-            </div>
-          </div>
-          <el-button
-            slot="reference"
-            size="medium"
-            @click.stop="previewClick"
-          >
-            预览
-          </el-button>
-        </el-popover>
         <el-button
           class="publish-btn"
           size="medium"
@@ -139,14 +59,6 @@
         @initiatorChange="onInitiatorChange"
       />
 
-      <FormDesign
-        v-show="activeStep === 'formDesign'"
-        ref="formDesign"
-        :conf="mockData.formData"
-        :form-key="formKey"
-        tab-name="formDesign"
-      />
-
       <Process
         v-show="activeStep === 'processDesign'"
         ref="processDesign"
@@ -154,28 +66,17 @@
         tab-name="processDesign"
         @startNodeChange="onStartChange"
       />
-
-      <AdvancedSetting
-        v-show="activeStep === 'advancedSetting'"
-        ref="advancedSetting"
-        :conf="mockData.advancedSetting"
-        @jump="jumpStep"
-      />
     </section>
   </div>
 </template>
 
 <script>
 import Process from './components/Process/Process'
-import vueQr from 'vue-qr'
-import logo from '@/assets/images/logo_c.png'
-import FormDesign from './components/FormDesign/FormDesign'
 import BasicSetting from './components/BasicSetting/BasicSetting'
-import AdvancedSetting from './components/AdvancedSetting/AdvancedSetting'
 import { Base64 } from 'js-base64'
 import { getApprProcess, postApprProcess, putApprProcess } from '@/api/processDesign/basicSetting'
-import { createApprRreview, getApprVersion } from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
+import mockData from './mockData'
 
 const beforeUnload = function(e) {
   var confirmationMessage = '离开网站可能会丢失您编辑得内容'
@@ -185,16 +86,11 @@ const beforeUnload = function(e) {
 const notEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0
 const hasBranch = (data) => notEmptyArray(data.conditionNodes)
 const hasParallelBranch = (data) => notEmptyArray(data.parallelNodes)
-const devMobileHost = 'http://192.168.1.26:2000/' //开发环境
-const pronMobileHost = 'http://apitest.epro.com.cn/' //测试环境
 export default {
   name: 'ProcessDesign',
   components: {
-    vueQr,
     Process,
-    FormDesign,
-    BasicSetting,
-    AdvancedSetting
+    BasicSetting
   },
   props: {
     title: {
@@ -204,18 +100,6 @@ export default {
   },
   data() {
     return {
-      mobileHost: '',
-      isDevelopment: false, // 用来区分当前页面是否存在移动端二维码
-      hasVersion: false,
-      apprVersionList: [],
-      isPreviewClick: false,
-      previewLoading: false,
-      qrcode: {
-        url: '',
-        logo
-      },
-      host: location.host,
-      previewLink: '',
       loading: false,
       Title: this.title,
       base: [],
@@ -223,12 +107,10 @@ export default {
       condition: [],
       endNode: [],
       prevData: '', // 一进入暂存数据原先的
-      mockData: {}, // 可选择诸如 $route.param，Ajax获取数据等方式自行注入
+      mockData, // 可选择诸如 $route.param，Ajax获取数据等方式自行注入
       activeStep: 'basicSetting', // 激活的步骤面板
       processMap: {},
-      flowName: 'flowName',
-      flowId: 'fsdf',
-      flowCategory: 'fsd',
+
       baseJson: '',
       formKey: null,
       steps: [
@@ -238,19 +120,9 @@ export default {
           icon: 'icon-approval-info-outlined'
         },
         {
-          label: '表单设计',
-          key: 'formDesign',
-          icon: 'icon-approval-form-outlined'
-        },
-        {
           label: '流程设计',
           key: 'processDesign',
           icon: 'icon-approval-flow-outlined'
-        },
-        {
-          label: '高级设置',
-          key: 'advancedSetting',
-          icon: 'icon-approval-setup-outlined'
         }
       ]
     }
@@ -274,7 +146,6 @@ export default {
   },
   created() {
     this.isDevelopment = process.env.NODE_ENV === 'development' ? true : false
-    this.mobileHost = process.env.NODE_ENV === 'development' ? devMobileHost : pronMobileHost
     if (this.processId) {
       this.initData()
     }
@@ -284,33 +155,13 @@ export default {
     this.formKey = this.$route.query.formKey
   },
   methods: {
-    // 版本切换
-    toVersion(version) {
-      this.$router.replace({
-        path: '/process/design',
-        query: { processId: version.processId, formKey: this.formKey }
-      })
-      this.initData()
-    },
     openNewLink() {
       window.open(this.previewLink)
     },
-    // 获取版本
-    getVersionFun(res) {
-      if (res.processKey) {
-        this.hasVersion = true
-        let params = {
-          processKey: res.processKey
-        }
-        getApprVersion(params).then((res) => {
-          this.apprVersionList = res
-        })
-      }
-    },
+
     initData() {
       const { processId } = this
       getApprProcess({ processId }).then((res) => {
-        this.getVersionFun(res)
         this.Title = res.processName
         this.mockData = JSON.parse(Base64.decode(res.baseJson))
         // 暂存之前的表单设计以及流程设计的数据
@@ -335,32 +186,7 @@ export default {
       }
       this.activeStep = item.key
     },
-    /**
-     * 预览参数与发布参数一致
-     */
-    previewClick() {
-      this.toPublish('preview')
-    },
-    hidePreview() {
-      this.isPreviewClick = false
-    },
-    handlePreview(params) {
-      let previewParams = _.assign(params, { userId: this.userId })
-      // this.$refs.basicSetting.getData().then(res => {
-      //   console.log('res==', res.formData)
-      // })
-      this.previewLoading = true
-      createApprRreview(previewParams)
-        .then((res) => {
-          this.previewLoading = false
-          const data = res.processId
-          this.qrcode.url = `${this.mobileHost}selfhelper/approval/apprApply?processId=${data}&type=preview`
-          this.previewLink = `#/apprProcess/apprSubmit?processId=${data}&type=preview`
-        })
-        .catch(() => {
-          this.previewLoading = false
-        })
-    },
+
     /**
      * @author guanfenda
      * @desc 发布事件
@@ -486,20 +312,6 @@ export default {
     },
 
     /**
-     * 处理发起人范围 转成，processAdmin属性
-     * @param {object} items 业务架构组织或用户
-     * @returns {Array<any>} 将处理好的发起人信息返回
-     */
-    getProcessAdmin(items) {
-      // 复用visible逻辑,只需要bizId
-      return _(this.getProcessVisible(items))
-        .reject({ type: 'All' })
-        .map('bizId')
-        .compact()
-        .value()
-    },
-
-    /**
      * @author guanfenda
      * @desc 处理前端数据的空节点导致的连线问题处理掉
      * @params param 引用类型
@@ -621,9 +433,6 @@ export default {
       this.ApprovalNode(data, item, origin)
       //条件
       this.conditionNode(data, origin, conditionNextNodeId_)
-      //并行审批
-      this.parallelNode(data, origin, conditionNextNodeId_)
-      //处理节点线，
       //有前节点且前节点不为no_flow,且节点类型不能为条件节点（带有条件节点，他的子节点不在这么算进去）
       this.evenLine(data, item)
       // 过滤节点不能为条件节点,因为在处理条件节点是会处理。这里就过滤条件
@@ -752,57 +561,7 @@ export default {
         }
       }
     },
-    /**
-     * @author guanfenda
-     * @desc 处理并行节点转换成后台需要节点 （格式化）
-     * @params  data origin  conditionNextNodeId_引用类型
-     * */
-    parallelNode(data, origin, fisrtbranchChild) {
-      if (hasParallelBranch(data)) {
-        //判断是否存在条件，如果有。。。
-        let conditionNextNodeId = fisrtbranchChild
-          ? fisrtbranchChild
-          : data.childNode
-          ? data.childNode.nodeId
-          : '' //判断第一个条件是否存在子节点
-        let parallelGatewayNode = this.addParallelGatewayNode(data)
 
-        if (data.childNode) {
-          data.childNode.prevId = 'no_flow' //避免重新连线（后面处理线，不给连线）
-        }
-        this.enterBeforeLine(data)
-        this.leaveBeforeLine(data, conditionNextNodeId)
-        data.parallelNodes.map((d, index) => {
-          let targetId = ''
-          let sourceId = ''
-          if (d.childNode) {
-            let endChild = this.childNode(d, data)
-            targetId = parallelGatewayNode.end && parallelGatewayNode.end.id
-            sourceId = endChild.nodeId
-          } else if (d.conditionNodes) {
-            targetId = data.VirtualNodeId ? data.VirtualNodeId.id : ''
-          } else if (d.parallelNodes) {
-            targetId = 'parallelGateway_' + d.nodeId
-            sourceId = d.nodeId
-          } else {
-            targetId = parallelGatewayNode.end && parallelGatewayNode.end.id
-            sourceId = d.nodeId
-          }
-
-          this.enterAfterlLine(d, parallelGatewayNode.start)
-
-          if (!d.conditionNodes && !d.parallelNodes) {
-            //不处理有条件的节点和有并行的节点
-            this.leaveLine(data, d, targetId, sourceId)
-          } else {
-            d.fisrtParallelBanchNodeId = d.fisrtParallelBanchNodeId
-              ? d.fisrtParallelBanchNodeId
-              : data.nodeId
-          }
-          this.recursion(d, origin.parallelNodes[index], conditionNextNodeId)
-        })
-      }
-    },
     enterBeforeLine(data) {
       if (data.type !== 'empty' && data.type !== 'condition') {
         //这里处理的除了空节点以外的节点和网关节点的连线
@@ -900,31 +659,6 @@ export default {
         target: data.nodeId
       }
       this.lineList.push(startParallelLine)
-    },
-    /**
-     * @author guanfenda
-     * @desc 添加并行网关节点
-     * @params data
-     * */
-    addParallelGatewayNode(data) {
-      let startParallelGatewayNode = {
-        //并行网关节点
-        type: 'parallelGateway',
-        id: 'parallelGateway_' + data.nodeId,
-        name: ''
-      }
-      let endParallelGatewayNode = {
-        //并行网关节点
-        type: 'parallelGateway',
-        id: 'parallelGateway_' + data.nodeId + '_end',
-        name: ''
-      }
-      this.condition.push(startParallelGatewayNode)
-      this.condition.push(endParallelGatewayNode)
-      return {
-        start: startParallelGatewayNode,
-        end: endParallelGatewayNode
-      }
     },
     /**
      * @author guanfenda
@@ -1194,39 +928,6 @@ export default {
 </script>
 <style lang="stylus" scoped>
 $header-height = 54px;
-.preview-box {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  .preview-description {
-    font-size:12px;
-    color: #999999;
-    margin-bottom: 10px
-  }
-  .preview-content {
-    margin-bottom: 10px;
-    .content-title {
-      font-size: 16px;
-      color: #1e1e1e;
-      font-weight: 550;
-    }
-    .mobile-qr-code {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      .qr-code-img {
-        width: 150px;
-        height: 150px;
-        margin: 4px 0;
-      }
-    }
-    .preview-button {
-      display: flex;
-      justify-content: center;
-    }
-  }
-}
 .page {
   width: 100vw;
   height: 100vh;
@@ -1341,11 +1042,5 @@ $header-height = 54px;
 
 .publish-btn {
   margin: 0 15px;
-}
-
-.github {
-  position fixed
-  bottom 10px
-  left 20px
 }
 </style>

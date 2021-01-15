@@ -247,9 +247,9 @@ export default {
           itemType: 'checkbox',
           label: '通过条件',
           options: [
-            { label: '教师评定', value: 1 },
-            { label: '考试通过', value: 2 },
-            { label: '达到课程学时', value: 3 }
+            { label: '教师评定', value: '1' },
+            { label: '考试通过', value: '2' },
+            { label: '达到课程学时', value: '3' }
           ],
           offset: 4,
           required: true
@@ -354,6 +354,7 @@ export default {
                 endTime: course.timeRange[1],
                 studyExam: _.map(course.studyExam, (exam) => ({
                   ...exam,
+                  id: typeof exam.id === 'string' ? exam.id : null,
                   studyPlanCourseId: course.id
                 })),
                 timeList: _.map(course.timeList, (time) => ({

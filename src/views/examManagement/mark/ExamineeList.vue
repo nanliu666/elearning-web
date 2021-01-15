@@ -331,10 +331,16 @@ export default {
      */
     handleExaminee(row) {
       const basicQuery = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
-      //兼容评价下一个
+      let query = Object.create(null)
+      if (row.status === '5' || (row.status === '4' && row.currentId !== this.userId)) {
+        const viewQuery = { isView: true }
+        query = _.assign(basicQuery, viewQuery)
+      } else {
+        query = basicQuery
+      }
       this.$router.push({
         path: '/examManagement/mark/MarkByExaminee',
-        query: basicQuery
+        query
       })
     }
   }

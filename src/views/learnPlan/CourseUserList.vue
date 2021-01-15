@@ -16,7 +16,6 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        :page-config="tablePageConfig"
         :page="page"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
@@ -49,24 +48,25 @@ const TABLE_COLUMNS = [
   },
   {
     label: '手机',
-    prop: 'text',
+    prop: 'phonenum',
     width: 300
   },
   {
     label: '部门名称',
-    prop: 'awardAgency',
+    prop: 'department',
     minWidth: 100
   },
   {
     label: '课程名称',
     slot: true,
-    prop: 'name1',
+    prop: 'courseName',
     minWidth: 100
   },
   {
     label: '完成率',
     slot: true,
-    prop: 'name2',
+    prop: 'totalPrecent',
+    formatter: (row) => (row.totalPrecent ? row.totalPrecent + '%' : '-'),
     minWidth: 100
   }
 ]
@@ -154,7 +154,6 @@ export default {
         phonenum: '', // 电话号码
         totalPrecentMax: '', // 最大完成值
         totalPrecentMin: '' // 最小完成值
-        // courseCatalogId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
@@ -170,7 +169,7 @@ export default {
   },
   activated() {
     // this.initSearchData()
-    this.refreshTableData()
+    this.loadTableData()
   },
   methods: {
     /**
@@ -207,9 +206,11 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        this.queryInfo.courseName = this.queryInfo.courseId == 0 ? '停用' : '启用'
-        let queryData = JSON.parse(JSON.stringify(this.queryInfo))
-        let { totalNum, data } = await queryPercentageComplete(queryData)
+        let { totalNum, data } = await queryPercentageComplete({
+          ...this.queryInfo,
+          pageSize: this.page.size,
+          pageNo: this.page.currentPage
+        })
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
