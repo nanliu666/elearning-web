@@ -76,8 +76,14 @@ Vue.prototype.$message = $message
 
 Vue.config.productionTip = false
 
+// 页面初始化
+import init from '@/init'
+
 new Vue({
   router,
   store,
+  mounted() {
+    init()
+  },
   render: (h) => h(App)
 }).$mount('#app')

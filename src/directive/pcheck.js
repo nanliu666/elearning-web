@@ -2,7 +2,7 @@
  * author: Waizau.Tam
  */
 
-import store from 'src/store'
+import store from '@/store'
 
 /**
  *
@@ -23,7 +23,7 @@ function p(nameSpace) {
   } else if (!nameSpace || nameSpace.length <= 0) {
     return false
   } else {
-    if (!store.getters.user) {
+    if (!store.getters.userInfo) {
       return false
     }
     const plist = store.getters.privileges || []
