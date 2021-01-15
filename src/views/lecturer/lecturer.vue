@@ -259,8 +259,8 @@
     >
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训， 停用后需尽快对课程进行调整。
-          你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
+          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
         <div>
           <div
             class="showBtn"
@@ -296,7 +296,7 @@
         <el-button
           v-show="!showBtnDel"
           type="primary"
-          @click="RulusFn(rowData, 1)"
+          @click="RulusFn(rowData, 0)"
         >
           确 定
         </el-button>
@@ -712,11 +712,13 @@ export default {
         id: '',
         status: '' // '0 停用 1 正常',
       }
+      // console.log(i)
       params.id = id.idStr || id.teacherId
       params.status = i
+
       editSysRulus(params).then(() => {
         this.$message({
-          message: `${i ? '停用' : '启动'}成功`,
+          message: `${i ? '启动' : '停用'}成功`,
           type: 'success'
         })
         //刷新
@@ -757,7 +759,7 @@ export default {
               type: 'warning'
             })
               .then(() => {
-                this.RulusFn(id, i)
+                this.RulusFn(id, 0)
               })
               .catch(() => {
                 this.$message({

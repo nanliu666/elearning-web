@@ -435,7 +435,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '编号',
-    minWidth: 140,
+    minWidth: 200,
     prop: 'trainNo'
   },
   {
@@ -446,7 +446,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '培训时间',
-    prop: 'trainTime',
+    prop: 'trainBeginTime',
     minWidth: 180
   },
   {
