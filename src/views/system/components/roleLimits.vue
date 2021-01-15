@@ -200,9 +200,11 @@ export default {
           table.push(_.cloneDeep(it))
         }
         if (it.children && it.children.length > 0) {
-          table[i].childrenList = _.get(_.cloneDeep(it), 'children', [])
-          table[i].children = []
-          this.filterData(it.children, table[i].children)
+          if (i) {
+            table[i].childrenList = _.get(_.cloneDeep(it), 'children', [])
+            table[i].children = []
+            this.filterData(it.children, table[i].children)
+          }
         }
       })
     },
