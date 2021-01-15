@@ -647,7 +647,7 @@ export default {
         selfMarking: false,
         publicAnswers: false,
         // openEntrance: false,
-        isExamine: false,
+        // isExamine: false,
         openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
         modifyAnswer: false,
         modifyLimit: false,

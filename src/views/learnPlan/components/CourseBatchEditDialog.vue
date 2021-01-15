@@ -3,6 +3,7 @@
     title="批量修改"
     :visible="visible"
     class="course-batch-edit-dialog"
+    width="422px"
     @close="handleClose"
   >
     <div class="batch_label">
@@ -12,6 +13,7 @@
       v-for="(time, index) in timeList"
       :key="index"
       v-model="time.list"
+      class="picker"
       type="daterange"
       value-format="yyyy-MM-dd HH:mm:ss"
       range-separator="至"
@@ -26,7 +28,9 @@
       controls-position="right"
       :min="0"
     ></el-input-number>
-    <div>0：表示无限制</div>
+    <div class="batch_label__tip">
+      0：表示无限制
+    </div>
     <span
       slot="footer"
       class="dialog-footer"
@@ -78,8 +82,25 @@ export default {
 
 <style lang="scss" scoped>
 .course-batch-edit-dialog {
+  /deep/.el-dialog__header {
+    padding-bottom: 16px;
+  }
+  /deep/.el-dialog__body {
+    padding-top: 16px;
+  }
+  .picker {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  .batch_label {
+    margin-bottom: 8px;
+    &__tip {
+      margin-top: 8px;
+    }
+  }
   .batch_label--study {
-    margin-top: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
   }
 }
 </style>

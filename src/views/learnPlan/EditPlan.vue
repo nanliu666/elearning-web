@@ -186,7 +186,7 @@ export default {
   },
   methods: {
     setupDefaultFields() {
-      this.formData.creatorName = this.userInfo.user_name
+      this.formData.creatorName = this.userInfo.nick_name
       this.formData.coursePlanNo =
         moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
       let that = this
@@ -240,7 +240,7 @@ export default {
         func = updatePlan
       } else {
         data.creatorId = this.userInfo.user_id
-        data.creatorName = this.userInfo.user_name
+        data.creatorName = this.userInfo.nick_name
         func = addPlan
       }
       func(data)

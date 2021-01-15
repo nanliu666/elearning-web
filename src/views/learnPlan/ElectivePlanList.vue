@@ -35,6 +35,19 @@
             </div>
           </div>
         </template>
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
+          <el-button
+            type="text"
+            size="medium"
+            icon="el-icon-delete"
+            @click="handleDelete(selection)"
+          >
+            批量删除
+          </el-button>
+        </template>
         <template #oparetion="{row}">
           <el-button
             type="text"
