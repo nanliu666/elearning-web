@@ -149,6 +149,7 @@
               slot-scope="{ row }"
             >
               <el-button
+                p="@/course/courseDraft"
                 type="text"
                 @click="todetail(row.id)"
               >
@@ -584,21 +585,7 @@ export default {
       // query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [
-        {
-          isRecommend: 1,
-          passCondition: 'c',
-          catalogId: 4,
-          teacherId: 4,
-          isTop: 1,
-          createId: 4,
-          name: 'dd',
-          electiveType: 2,
-          id: 4,
-          type: 2,
-          createName: '小红'
-        }
-      ],
+      tableData: [],
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
