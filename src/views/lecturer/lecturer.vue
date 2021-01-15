@@ -259,8 +259,8 @@
     >
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训， 停用后需尽快对课程进行调整。
-          你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
+          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
         <div>
           <div
             class="showBtn"

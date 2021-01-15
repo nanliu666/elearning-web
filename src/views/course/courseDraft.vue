@@ -149,6 +149,7 @@
               slot-scope="{ row }"
             >
               <el-button
+                p="@/course/courseDraft"
                 type="text"
                 @click="todetail(row.id)"
               >

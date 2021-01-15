@@ -717,15 +717,15 @@ export default {
       typeOption: [
         {
           name: '文章',
-          value: 1
+          value: '1'
         },
         {
           name: '普通课件',
-          value: 2
+          value: '2'
         },
         {
           name: '资料下载',
-          value: 3
+          value: '3'
         }
       ],
       // 填写课程信息
