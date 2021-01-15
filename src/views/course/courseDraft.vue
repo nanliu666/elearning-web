@@ -77,6 +77,7 @@
                     </el-button>
                   </el-tooltip>
                   <span
+                    v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
                     style="cursor:pointer;"
                     @click="refreshTableData"
@@ -149,7 +150,7 @@
               slot-scope="{ row }"
             >
               <el-button
-                p="@/course/courseDraft"
+                v-p="'/course/courseDraft/test1'"
                 type="text"
                 @click="todetail(row.id)"
               >

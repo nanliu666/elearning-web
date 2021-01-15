@@ -117,7 +117,8 @@
               class="btn1"
               href="#/lecturer/lecturer"
               @click="adddata"
-            >新建分组</a>
+            >
+              <i class="el-icon-plus btn_icon"></i> 新建分组</a>
             <!-- <span class="btn2">新建分类</span> -->
           </div>
         </div>
@@ -628,7 +629,9 @@ export default {
 /deep/ .el-tree-node__content {
   margin-top: 10px;
 }
-
+.btn_icon {
+  font-weight: 700;
+}
 .isShowinput {
   margin-top: 5px;
   display: flex;
