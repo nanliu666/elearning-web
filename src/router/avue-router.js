@@ -110,7 +110,6 @@ RouterPlugin.install = function(router, store) {
         let path = oMenu[propsDefault.path] || '',
           //特殊处理组件 执行完这个 component 也就是精确到具体的文件了  views文件夹下面就是具体的页面代码
           component = genComponent(oMenu.path),
-          name = oMenu[propsDefault.label],
           icon = oMenu[propsDefault.icon],
           children = oMenu[propsDefault.children],
           meta = oMenu[propsDefault.meta] || {}
@@ -143,7 +142,6 @@ RouterPlugin.install = function(router, store) {
               require([`../${component}.vue`], resolve)
             }
           },
-          name: name,
           icon: icon,
           meta: meta,
           // redirect: (() => {
@@ -163,7 +161,6 @@ RouterPlugin.install = function(router, store) {
                         require([`../${component}.vue`], resolve)
                       },
                       icon: icon,
-                      name: name,
                       meta: meta,
                       path: 'index'
                     }
