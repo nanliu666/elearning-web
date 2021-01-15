@@ -1,0 +1,206 @@
+<template>
+  <!-- 人员信息 页面 -->
+  <basic-container
+    block
+    class="basicContainer"
+  >
+    <div style="text-align: right;">
+      <el-button
+        type="primary"
+        size="medium"
+        @click="handleAddUser"
+      >
+        添加人员
+      </el-button>
+    </div>
+
+    <common-table
+      ref="table"
+      class="commonTable"
+      :columns="tableColumns"
+      :config="tableConfig"
+      :data="userList"
+    >
+      <template #multiSelectMenu="{ selection }">
+        <el-button
+          style="margin-bottom:0;"
+          type="text"
+          @click="handleMultiDelete(selection)"
+        >
+          批量删除
+        </el-button>
+      </template>
+
+      <template #oparetion="{row}">
+        <el-button
+          size="medium"
+          type="text"
+          @click="handleDelete(row)"
+        >
+          删除
+        </el-button>
+      </template>
+    </common-table><user-picker
+      select-type="Org,OuterUser"
+      :value="userList"
+      :visible.sync="userPicking"
+      @input="handleSelect"
+    />
+  </basic-container>
+</template>
+
+<script>
+import UserPicker from '@/components/user-picker/userPicker'
+
+import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
+// 表格属性
+const TABLE_COLUMNS = [
+  {
+    label: '序号',
+    prop: 'index',
+    type: 'index'
+  },
+  {
+    label: '姓名',
+    prop: 'name',
+    width: 300
+  },
+  {
+    label: '所在部门',
+    prop: 'orgName',
+    minWidth: 100
+  },
+  {
+    label: '手机号码',
+    slot: true,
+    prop: 'phoneNum',
+    minWidth: 100
+  },
+  {
+    label: '操作',
+    slot: true,
+    prop: 'oparetion',
+    minWidth: 100
+  }
+]
+const TABLE_CONFIG = {
+  // enablePagination: true,
+
+  showIndexColumn: false,
+
+  enableMultiSelect: true,
+  rowKey: 'userId',
+  showHandler: false
+}
+const TABLE_PAGE_CONFIG = {}
+
+export default {
+  name: 'EditPerson',
+  components: {
+    UserPicker
+  },
+  props: {
+    planId: {
+      type: String,
+      default: null
+    },
+    userList: {
+      type: Array,
+      default: () => []
+    }
+  },
+  data() {
+    return {
+      userPicking: false,
+      // 默认选中所有列
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
+      tableColumns: TABLE_COLUMNS,
+      tableConfig: TABLE_CONFIG,
+      tableData: [],
+      tableLoading: false,
+      tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  mounted() {},
+  methods: {
+    handleAddUser() {
+      this.userPicking = true
+    },
+    async handleSelect(users) {
+      const orgs = _.remove(users, { type: 'Org' })
+      if (orgs.length > 0) {
+        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
+        this.$emit('update:user-list', _.concat(users, orgUsers))
+      } else {
+        this.$emit('update:user-list', users)
+      }
+    },
+    // 拉取公司的直属员工
+    async getOrgUsers(orgId) {
+      return new Promise((resolve) => {
+        getUserByOrgId({ orgId }).then((res) => {
+          const users = _.map(res, (item) =>
+            _.assign(
+              {
+                bizId: item.userId,
+                bizName: item.name,
+                orgName: item.orgName,
+                department: item.orgName,
+                departmentId: item.orgId,
+                phonenum: item.phoneNum,
+                studyPlanId: this.planId,
+                type: 'User',
+                isLeaf: true
+              },
+              item
+            )
+          )
+          resolve(users)
+        })
+      })
+    },
+    handleDelete(row) {
+      this.$emit(
+        'update:user-list',
+        _.filter(this.userList, (user) => user.userId !== row.userId)
+      )
+    },
+    handleMultiDelete(selection) {
+      let selectedIdMap = _.reduce(
+        selection,
+        (pre, cur) => {
+          pre[cur.userId] = 1
+          return pre
+        },
+        {}
+      )
+      this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.requiredSchedule {
+  .basicContainer {
+    position: relative;
+    .line {
+      position: absolute;
+      left: 335px;
+      top: 0;
+      height: 100%;
+      width: 1px;
+      background-color: rgba(0, 11, 21, 0.25);
+    }
+  }
+}
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+</style>

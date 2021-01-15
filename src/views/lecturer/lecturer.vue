@@ -31,177 +31,12 @@
             @node-click="nodeClick"
           ></leftColumn> -->
 
-          <div class="issue_l_tree">
-            <el-input
-              v-model="filterText"
-              placeholder="分类名称"
-              suffix-icon="el-icon-search"
-              maxlength="32"
-            >
-            </el-input>
-
-            <!-- <div class="ungrouped">
-              未分类
-            </div> -->
-
-            <el-tree
-              ref="tree"
-              :data="data"
-              node-key="id"
-              :expand-on-click-node="false"
-              :filter-node-method="filterNode"
-              :props="props"
-              lazy
-              :load="loadNode"
-              class="tree"
-              :default-expanded-keys="expandedKeysData"
-              @node-click="treeClickNode"
-            >
-              <span
-                slot-scope="{ node, data }"
-                class="custom-tree-node"
-              >
-                <span
-                  v-show="!isEdit || data.id !== isEditId"
-                >{{ node.label }}&nbsp;{{ `(${data.count})` }}</span>
-                <span
-                  v-show="isEdit && data.id === isEditId"
-                  class="tree_input"
-                >
-                  <el-input
-                    id="addSon"
-                    v-model="dataAddCatalog.input"
-                    placeholder="请输入分类名称"
-                    maxlength="20"
-                  ></el-input>
-                  <el-button
-                    type="text"
-                    @click="isaddCatalog(data)"
-                  >确认</el-button>&nbsp;
-                  <span @click="isEditFn(data)"> 取消</span>
-                  <!-- <span @click="isEdit = false"> 取消</span> -->
-                </span>
-                <span>
-                  <!-- 编辑&删除 -->
-                  <el-dropdown
-                    v-show="data.label !== '未分类'"
-                    trigger="hover"
-                    style="color: #a0a8ae;"
-                    class="right-content"
-                    @command="handleCommandSide($event, data)"
-                  >
-                    <span class="el-dropdown-link more-column">
-                      <i class="el-icon-more" />
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item
-                        v-show="data.btnshow"
-                        command="add"
-                      >
-                        新增分类
-                      </el-dropdown-item>
-                      <el-dropdown-item
-                        v-show="!data.btnshow"
-                        command="move"
-                      >
-                        移动
-                      </el-dropdown-item>
-                      <el-dropdown-item command="edit">
-                        编辑
-                      </el-dropdown-item>
-                      <el-dropdown-item command="del">
-                        删除
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </span>
-              </span>
-            </el-tree>
-
-            <div
-              v-show="isShowinput"
-              class="isShowinput"
-            >
-              <el-input
-                id="/lecturer/lecturer"
-                v-model="dataAddCatalog.input"
-                class="isShowinput_input"
-                placeholder="请输入分组名称"
-                maxlength="20"
-              ></el-input>
-              <span
-                class="isShowinput_yes"
-                @click="isaddCatalog(data)"
-              >确认</span>
-              <span @click="isShowinputFn"> 取消</span>
-              <!-- <span @click="isShowinput = false"> 取消</span> -->
-            </div>
-            <div class="btn_bottom_box">
-              <div
-                v-show="!isShowinput"
-                class="btn_bottom"
-              >
-                <a
-                  class="btn1"
-                  href="#/lecturer/lecturer"
-                  @click="adddata"
-                >新建分组</a>
-                <!-- <span class="btn2">新建分类</span> -->
-              </div>
-            </div>
-          </div>
+          <my-column
+            v-if="myColumnShow"
+            :column-interface="columnInterface"
+            @treeClick="treeClick"
+          ></my-column>
         </div>
-
-        <!-- 移动选择框 -->
-        <el-dialog
-          title="收货地址"
-          :visible.sync="dialogFormVisible"
-          :modal-append-to-body="false"
-        >
-          <el-form :model="form">
-            <el-form-item
-              label="分类名称"
-              label-width="120px"
-            >
-              <el-input
-                v-model="form.name"
-                autocomplete="off"
-                maxlength="32"
-                disabled
-              ></el-input>
-            </el-form-item>
-            <el-form-item
-              label="上级分类组"
-              label-width="120px"
-            >
-              <el-select
-                v-model="form.region"
-                placeholder="请选择"
-              >
-                <el-option
-                  v-for="(item, index) in data"
-                  :key="index"
-                  :label="item.label"
-                  :value="item.id"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
-          <div
-            slot="footer"
-            class="dialog-footer"
-          >
-            <el-button @click="dialogFormVisible = false">
-              取 消
-            </el-button>
-            <el-button
-              type="primary"
-              @click="ismove"
-            >
-              确 定
-            </el-button>
-          </div>
-        </el-dialog>
 
         <div class="issue_r">
           <!-- 表格内容 -->
@@ -373,10 +208,10 @@
                 slot-scope="scope"
               >
                 <el-button
-                  v-if="scope.row.status == false"
+                  v-if="scope.row.status == 1"
                   type="text"
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row.idStr, 1)"
+                  @click.stop="iseditSysRulus(scope.row, 0)"
                 >
                   停用
                 </el-button>
@@ -384,7 +219,7 @@
                   v-else
                   style=" cursor:pointer; "
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row.idStr, 0)"
+                  @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
@@ -404,7 +239,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click.stop="isTeacherdelete(scope.row.idStr)"
+                  @click.stop="isTeacherdelete(scope.row)"
                 >
                   删除
                 </el-button>
@@ -414,11 +249,71 @@
         </div>
       </div>
     </div>
+
+    <!-- 停用弹框 -->
+    <el-dialog
+      title="提醒"
+      :visible.sync="blockDialogVisible"
+      append-to-body
+      width="420px"
+    >
+      <div class="dialog_box">
+        <i class="el-icon-warning dialog_box_icon-warning"></i>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
+          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <div>
+          <div
+            class="showBtn"
+            @click="showBtnData = !showBtnData"
+          >
+            查看关联课程 <i
+              v-show="!showBtnData"
+              class="el-icon-arrow-down"
+            ></i>
+            <i
+              v-show="showBtnData"
+              class="el-icon-arrow-up"
+            ></i>
+          </div>
+          <div
+            v-for="(item, index) in CourseList"
+            v-show="showBtnData"
+            :key="index"
+            class="item_box"
+          >
+            {{ item.catalogName }}
+          </div>
+        </div>
+      </div>
+
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="blockDialogVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          v-show="!showBtnDel"
+          type="primary"
+          @click="RulusFn(rowData, 0)"
+        >
+          确 定
+        </el-button>
+        <el-button
+          v-show="showBtnDel"
+          type="primary"
+          @click="TeacherdeleteFn(rowData)"
+        >
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { delCourseInfo } from '@/api/course/course'
+import { getCourseListData } from '@/api/course/course'
 import {
   listTeacherCategory,
   addCatalog,
@@ -476,12 +371,12 @@ const TABLE_COLUMNS = [
   // },
   {
     label: '讲师级别',
-    prop: 'teacher_title',
+    prop: 'teacher_level',
     minWidth: 130
   },
   {
     label: '讲师职称',
-    prop: 'organizer',
+    prop: 'teacher_title',
     minWidth: 130
   },
   {
@@ -504,7 +399,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'creator_id',
+    prop: 'createName',
     minWidth: 200
   },
   {
@@ -621,7 +516,8 @@ const SEARCH_POPOVER_CONFIG = {
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
@@ -630,6 +526,21 @@ export default {
   },
   data() {
     return {
+      CourseList: '',
+      blockDialogVisible: false,
+      showBtnData: false,
+      showBtnDel: false,
+      rowData: '',
+      myColumnShow: true,
+      // 接口
+      columnInterface: {
+        listTeacherCategory, //查询讲师分类列表
+        addCatalog, //新增分组/分类
+        deleteTeacherCatalog, //删除分组/分类
+        move, //移动
+        editTeacherCatalog //编辑
+      },
+
       inputAddMark: false,
       expandedKeysData: [],
       interfaceList: {
@@ -702,90 +613,19 @@ export default {
   created() {
     this.islistTeacherCategory()
   },
-  activated() {},
+  activated() {
+    this.islistTeacherCategory()
+  },
   methods: {
-    // 输入框取消按钮
-    isShowinputFn() {
-      this.isShowinput = false
-      this.dataAddCatalog.input = ''
+    treeClick(val) {
+      this.islistTeacher(val)
     },
-    isEditFn(data) {
-      this.isEdit = false
-      this.dataAddCatalog.input = ''
-      // this.data.forEach((item, index) => {
-      //   if (item.id == data.myid) {
-      //     // this.data[index].children.splice(item.children.length - 1, 1)
-      //     delete this.data[index].children[item.children.length - 1]
-      //     // this.expandedKeysData = []
-      //     // this.expandedKeysData.push(item.id)
-      //   }
-      // })
-      this.expandedKeysData = []
-      this.expandedKeysData.push(data.myid)
-      this.islistTeacherCategory()
-    },
-
     nodeClick(data) {
       // if (data.hasOwnProperty('children') && data.children.length > 0) return
       // this.islistTeacherCategory(data.id)
       this.islistTeacher(data.id)
     },
     isgetCatalogs() {},
-    async loadNode(node, resolve) {
-      // 树数据懒加载
-      // if (node.level > 1) return;
-      // this.islistTeacherCategory().then((res) => {
-      //   resolve([
-      //     {
-      //       id: '123123',
-      //       label: '123123'
-      //     }
-      //   ])
-      // })
-      if (node.level === 0) {
-        return resolve([{ name: 'region' }])
-      }
-      if (node.level > 1) return resolve([])
-
-      let res = await listTeacherCategory({ parentId: node.data.id })
-      let filterArr = res.son.map((item) => {
-        return {
-          id: item.idStr,
-          parent_id: item.parentStr,
-          label: item.name,
-          btnshow: 0,
-          count: item.count,
-          leaf: true
-        }
-      })
-
-      node.data.children = filterArr
-      resolve(filterArr)
-
-      if (this.inputAddMark) {
-        this.inputAddMark = false
-        this.addSonInput(this.addSonInputData)
-      }
-    },
-    // 移动
-    ismove() {
-      this.dialogFormVisible = false
-      this.form
-      let params = {
-        id: '', //讲师所属分类ID
-        parentId: '' //讲师所属分组ID
-      }
-      params.id = this.form.optionData.id
-      params.parentId = this.form.region
-      move(params).then(() => {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
-        this.islistTeacherCategory()
-      })
-    },
-
     // 去添加
     toAddLecturer() {
       this.$router.push({ path: '/lecturer/addLecturer' })
@@ -820,10 +660,11 @@ export default {
       })
     },
 
-    // 删除讲师
-    isTeacherdelete(id) {
+    // 删除讲师fn
+    TeacherdeleteFn(id) {
+      this.myColumnShow = false
       let params = {
-        ids: id
+        ids: id.idStr || id.teacherId
       }
       Teacherdelete(params).then(() => {
         this.$message({
@@ -831,36 +672,110 @@ export default {
           type: 'success'
         })
         this.islistTeacherCategory()
+        this.blockDialogVisible = false
+        this.myColumnShow = true
       })
     },
 
-    // 删除分组/分类
-    iddeleteTeacherCatalog(id) {
-      deleteTeacherCatalog({ id: id }).then(() => {
-        this.$message({
-          message: '删除成功',
-          type: 'success'
-        })
-        this.islistTeacherCategory()
+    // 删除讲师按钮
+    isTeacherdelete(id) {
+      getCourseListData({ teacherId: id.user_id_str, pageNo: 1, pageSize: 999 }).then((res) => {
+        // 如果没有课程
+        if (res.data.length === 0) {
+          this.$confirm('您确定要删除该讲师吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              this.TeacherdeleteFn(id)
+            })
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
+              })
+            })
+        } else {
+          // 如果有课程
+          this.blockDialogVisible = true
+          // teacherId
+          this.CourseList = res.data
+          this.showBtnDel = true
+          this.rowData = id
+        }
       })
     },
-
-    // 启动/停用系统规则列表
-    iseditSysRulus(id, i) {
+    // 启动/停用方法
+    RulusFn(id, i) {
       let params = {
         id: '',
         status: '' // '0 停用 1 正常',
       }
-      params.id = id
+      // console.log(i)
+      params.id = id.idStr || id.teacherId
       params.status = i
+
       editSysRulus(params).then(() => {
         this.$message({
-          message: '操作成功',
+          message: `${i ? '启动' : '停用'}成功`,
           type: 'success'
         })
         //刷新
         this.islistTeacherCategory()
+        this.blockDialogVisible = false
       })
+    },
+
+    // 启动/停用按钮
+    iseditSysRulus(id, i) {
+      // 启用弹框
+      if (i) {
+        this.$confirm('您确定要启用该讲师吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            this.RulusFn(id, i)
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
+      } else {
+        // 停用弹框
+        // 先查讲师下面有没有课程
+        // 再弹框
+
+        getCourseListData({ teacherId: id.user_id_str, pageNo: 1, pageSize: 999 }).then((res) => {
+          // 如果没有课程
+          if (res.data.length === 0) {
+            this.$confirm('您确定要停用该讲师吗？', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(() => {
+                this.RulusFn(id, 0)
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          } else {
+            // 如果有课程
+            this.blockDialogVisible = true
+            this.CourseList = res.data
+            this.showBtnDel = false
+            this.rowData = id
+          }
+        })
+      }
     },
 
     // 查询讲师列表
@@ -885,62 +800,6 @@ export default {
           })
         })
       })
-    },
-    // 新增分组/分类&编辑
-    isaddCatalog(node) {
-      if (this.compileNewly == 1) {
-        // 编辑
-        let params = {
-          id: '',
-          name: ''
-        }
-        params.id = node.id
-        params.name = this.dataAddCatalog.input
-        if (params.name.trim() == '') {
-          this.$message({
-            message: '名称不能为空',
-            type: 'warning'
-          })
-          return
-        }
-        editTeacherCatalog(params).then(() => {
-          this.islistTeacherCategory()
-          this.isEdit = false
-          this.dataAddCatalog.input = ''
-          this.$message({
-            message: '保存成功',
-            type: 'success'
-          })
-        })
-      } else {
-        // 新增
-        let params = {
-          // creatorId: '', //	分组id	query	false
-          name: '', //	名称	query	false
-          parentId: '' //	类id	query	false
-        }
-        if (node) {
-          params.id = node.myid
-          // params.parentId = node.parentId
-        }
-        params.name = this.dataAddCatalog.input
-        if (params.name.trim() == '') {
-          this.$message({
-            message: '名称不能为空',
-            type: 'warning'
-          })
-          return
-        }
-        addCatalog(params).then(() => {
-          this.islistTeacherCategory()
-          this.isShowinput = false
-          this.dataAddCatalog.input = ''
-          this.$message({
-            message: '新增成功',
-            type: 'success'
-          })
-        })
-      }
     },
     // 查询讲师分类列表
     islistTeacherCategory(id) {
@@ -993,116 +852,6 @@ export default {
       })
     },
 
-    //   tree节点点击
-    treeClickNode(data) {
-      this.clickId = data.id
-      if (data.num === 1) {
-        // this.islistTeacherCategory(data.id)
-      }
-      this.islistTeacher(data.id)
-    },
-    // 底部btn
-    adddata() {
-      this.isShowinput = true
-    },
-    handleCommandSide($event, data) {
-      //   编辑
-      if ($event === 'edit') {
-        this.isEdit = true
-        this.isEditId = data.id
-        this.compileNewly = 1
-        this.dataAddCatalog.input = data.label
-      }
-      //   新增
-      if ($event === 'add') {
-        this.addSonInputData = data
-        // 展开
-        this.expandedKeysData = []
-        this.expandedKeysData.push(data.id)
-
-        this.inputAddMark = true
-        this.addSonInput(data)
-      }
-      //移动
-      if ($event === 'move') {
-        this.dialogFormVisible = true
-        this.form.name = data.label
-        this.form.optionData = data
-      }
-      // 删除
-      if ($event === 'del') {
-        if (data.count) {
-          this.$message({
-            message: `您选择的${data.btnshow ? '分组' : '分类'}下存在数据，请调整后再删除！`,
-            type: 'error'
-          })
-          return
-        }
-
-        this.$confirm(`确定要删除选中的${data.btnshow ? '分组' : '分类'}么?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            this.iddeleteTeacherCatalog(data.id)
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-      }
-    },
-
-    // 新增子类输入框
-    addSonInput(data) {
-      this.compileNewly = 0
-      let i = this.data.indexOf(data)
-      let idNum = Math.floor(Math.random() * 10000)
-      if (i == '-1') return
-      this.data[i].children.push({
-        label: '- -',
-        btnshow: 0,
-        id: idNum,
-        myid: data.id
-      })
-      this.isEdit = true
-      this.isEditId = idNum
-    },
-
-    // 编辑&删除&移动
-    handleCommand(e, row) {
-      if (e === 'edit') {
-        // 编辑
-      }
-      if (e === 'del') {
-        // 删除
-        this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            delCourseInfo({ courseId: row.catalogId }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
-              })
-            })
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-      }
-      if (e === 'move') {
-        // 移动
-      }
-    },
     //  处理页码改变
     handleCurrentPageChange(param) {
       this.page.currentPage = param
@@ -1146,13 +895,7 @@ export default {
     },
 
     // 刷新列表数据
-    refreshTableData() {},
-
-    // tree
-    filterNode(value, data) {
-      if (!value) return true
-      return data.label.indexOf(value) !== -1
-    }
+    refreshTableData() {}
   }
 }
 </script>
@@ -1226,6 +969,33 @@ $color_icon: #A0A8AE
         width: 1px
 </style>
 <style lang="scss" scoped>
+.dialog-footer {
+  display: flex;
+  padding-left: 25%;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+.dialog_box {
+  padding: 0 10px;
+  color: #606266;
+  font-size: 14px;
+  .dialog_box_icon-warning {
+    color: #e6a23c;
+    font-size: 24px !important;
+    margin-right: 12px;
+  }
+  .showBtn {
+    color: #227ffa;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .item_box {
+    color: #606266;
+    margin-top: 5px;
+  }
+}
+
 .trainingArrange {
   .box_title {
     height: 60px;
@@ -1259,17 +1029,18 @@ $color_icon: #A0A8AE
         position: relative;
         width: 20%;
         border-right: 1px solid #ccc;
-        padding: 20px;
+
         height: 100%;
         .issue_l_tree {
+          padding: 20px;
           // padding: 0 25px;
           width: 100%;
           height: 100%;
           padding-bottom: 200px;
           overflow: auto;
-          &::-webkit-scrollbar {
-            display: none;
-          }
+          // &::-webkit-scrollbar {
+          //   display: none;
+          // }
           /deep/.el-input {
             margin-bottom: 15px;
           }
@@ -1344,9 +1115,8 @@ $color_icon: #A0A8AE
       }
     }
     .tree_input {
-      width: 55%;
-      font-size: 12px;
-      padding-top: 3px;
+      width: 60%;
+      font-size: 14px;
 
       /deep/ input {
         height: 25px;
@@ -1368,6 +1138,10 @@ $color_icon: #A0A8AE
       .isShowinput_yes {
         color: #2092fb;
         padding: 0 12px;
+        cursor: pointer;
+      }
+      .isShowinput_no {
+        cursor: pointer;
       }
       /deep/ input {
         height: 25px;

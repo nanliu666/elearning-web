@@ -140,6 +140,7 @@
 </template>
 <script>
 import { getOrgUserChild, getOuterUser } from '@/api/system/user'
+import _ from 'lodash'
 const SEARCH_DELAY = 200
 const NODE_TYPE = {
   All: 'All',
@@ -183,7 +184,7 @@ export default {
   name: 'UserPicker',
   props: {
     // 只选人，选了组织在右侧会显示人
-    isOnlyPerson: {
+    onlyUser: {
       type: Boolean,
       default: false
     },
@@ -300,7 +301,9 @@ export default {
       if (_.some(checkedNodes, (item) => item.bizId === node.bizId)) {
         // this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
         if (node.type !== NODE_TYPE.User) {
-          this.selected = _.reject(this.selected, (item) => _.includes(item.path, node.path))
+          if (!this.onlyUser) {
+            this.selected = _.reject(this.selected, (item) => _.includes(item.path, node.path))
+          }
         }
         // 如果是单选模式
         if (this.isSingle) {

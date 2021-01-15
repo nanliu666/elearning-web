@@ -17,6 +17,7 @@
           :type="item.config && item.config.type ? item.config.type : 'text'"
           :placeholder="item.config.placeholder || '请输入' + item.label"
           class="elInput"
+          :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
           @input="search"
         />
@@ -137,7 +138,10 @@
               class="popover-form"
               label-position="top"
             >
-              <el-row justify="start">
+              <el-row
+                justify="start"
+                :gutter="24"
+              >
                 <el-col
                   v-for="item in popoverOptions"
                   :key="item.field"
@@ -154,6 +158,7 @@
                       :suffix-icon="item.config && item.config['suffix-icon']"
                       class="elInput"
                     />
+
                     <el-select
                       v-if="item.type === 'select'"
                       v-model="item.data"
@@ -252,28 +257,27 @@
                       :option-list.sync="item.optionList"
                       :placeholder="item.placeholder"
                       :option-props="item.optionProps"
+                      :searchable="item.searchable"
                     />
                   </el-form-item>
                 </el-col>
               </el-row>
             </el-form>
-            <el-col :span="24">
-              <div class="popOver-footer">
-                <el-button
-                  type="primary"
-                  size="medium"
-                  @click="submitSearch"
-                >
-                  搜索
-                </el-button>
-                <el-button
-                  size="medium"
-                  @click="resetForm"
-                >
-                  重置
-                </el-button>
-              </div>
-            </el-col>
+            <div class="popOver-footer">
+              <el-button
+                type="primary"
+                size="medium"
+                @click="submitSearch"
+              >
+                搜索
+              </el-button>
+              <el-button
+                size="medium"
+                @click="resetForm"
+              >
+                重置
+              </el-button>
+            </div>
           </div>
           <el-button
             slot="reference"
@@ -454,17 +458,9 @@ export default {
 </script>
 
 <style lang="scss">
-@media screen and (max-width: 990px) {
-  .popover-class {
-    left: 30px !important;
-    right: 30px;
-  }
-}
-@media screen and (min-width: 991px) {
-  .popover-class {
-    left: 270px !important;
-    right: 30px;
-  }
+.popover-class {
+  left: calc(16.5vw + 32px) !important;
+  right: 32px;
 }
 </style>
 
@@ -481,11 +477,14 @@ export default {
     padding-right: 6px;
   }
 }
-.popover-form {
-  .el-form-item {
-    padding-right: 24px;
-  }
-}
+// .popover-form {
+//   .el-form-item {
+//     padding-right: 24px;
+//     &:last-of-type {
+//       padding-right: 0;
+//     }
+//   }
+// }
 
 /deep/ .el-form-item__label {
   line-height: 30px;

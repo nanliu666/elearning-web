@@ -207,59 +207,62 @@ export default {
     QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
   },
   watch: {
-    'value.type'(val, oldVal) {
-      if (val === QUESTION_TYPE_SINGLE) {
-        this.contentColumns = SELECT_COLUMNS
-      } else if (QUESTION_TYPE_MULTIPLE === val) {
-        const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
-        _SELECT_COLUMNS[2].rules = [
-          {
-            validator: (rule, value, callback) => {
-              if (_.some(value, (item) => !item.content && !item.url)) {
-                return callback(new Error('选项内容请填写完整'))
-              } else if (!_.some(value, { isCorrect: 1 })) {
-                return callback(new Error('请设置正确选项'))
-              } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
-                return callback(new Error('多选题请最少选择两个正确答案'))
-              }
-              callback()
-            },
-            trigger: 'change'
-          }
-        ]
-        this.contentColumns = _SELECT_COLUMNS
-      } else if (val === QUESTION_TYPE_JUDGE) {
-        this.contentColumns = SELECT_COLUMNS
-        this.value.options = [
-          { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
-          { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
-        ]
-      } else if (QUESTION_TYPE_SHOER === val) {
-        this.contentColumns = SHORT_COLUMNS
-      } else if (QUESTION_TYPE_BLANK === val) {
-        this.contentColumns = FILL_COLUMNS
-      } else {
-        SELECT_COLUMNS[2].rules = [
-          {
-            validator: (rule, value, callback) => {
-              if (_.some(value, (item) => !item.content && !item.url)) {
-                return callback(new Error('选项内容请填写完整'))
-              } else if (!_.some(value, { isCorrect: 1 })) {
-                return callback(new Error('请设置正确选项'))
-              }
-              callback()
-            },
-            trigger: 'change'
-          }
-        ]
-        this.contentColumns = SELECT_COLUMNS
-      }
-      // 从多选题切换到单选题时把正确答案置空
-      if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
-        _.forEach(this.value.options, (item) => {
-          item.isCorrect = 0
-        })
-      }
+    'value.type': {
+      handler(val, oldVal) {
+        if (val === QUESTION_TYPE_SINGLE) {
+          this.contentColumns = SELECT_COLUMNS
+        } else if (QUESTION_TYPE_MULTIPLE === val) {
+          const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
+          _SELECT_COLUMNS[2].rules = [
+            {
+              validator: (rule, value, callback) => {
+                if (_.some(value, (item) => !item.content && !item.url)) {
+                  return callback(new Error('选项内容请填写完整'))
+                } else if (!_.some(value, { isCorrect: 1 })) {
+                  return callback(new Error('请设置正确选项'))
+                } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
+                  return callback(new Error('多选题请最少选择两个正确答案'))
+                }
+                callback()
+              },
+              trigger: 'change'
+            }
+          ]
+          this.contentColumns = _SELECT_COLUMNS
+        } else if (val === QUESTION_TYPE_JUDGE) {
+          this.contentColumns = SELECT_COLUMNS
+          this.value.options = [
+            { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
+            { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
+          ]
+        } else if (QUESTION_TYPE_SHOER === val) {
+          this.contentColumns = SHORT_COLUMNS
+        } else if (QUESTION_TYPE_BLANK === val) {
+          this.contentColumns = FILL_COLUMNS
+        } else {
+          SELECT_COLUMNS[2].rules = [
+            {
+              validator: (rule, value, callback) => {
+                if (_.some(value, (item) => !item.content && !item.url)) {
+                  return callback(new Error('选项内容请填写完整'))
+                } else if (!_.some(value, { isCorrect: 1 })) {
+                  return callback(new Error('请设置正确选项'))
+                }
+                callback()
+              },
+              trigger: 'change'
+            }
+          ]
+          this.contentColumns = SELECT_COLUMNS
+        }
+        // 从多选题切换到单选题时把正确答案置空
+        if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
+          _.forEach(this.value.options, (item) => {
+            item.isCorrect = 0
+          })
+        }
+      },
+      immediate: true
     }
   },
   methods: {

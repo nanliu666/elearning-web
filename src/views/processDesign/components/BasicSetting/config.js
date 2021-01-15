@@ -1,20 +1,7 @@
 // const validate = (rule, value, callback) => {
 //   callback()
 // }
-export let info = [
-  {
-    span: 24,
-    prop: 'icon',
-    itemType: 'slot',
-    label: '审批图标',
-    clearable: true,
-    options: [],
-    props: {
-      label: 'label',
-      value: 'value'
-    },
-    required: true
-  },
+export const columns = [
   {
     span: 24,
     prop: 'processName',
@@ -25,67 +12,55 @@ export let info = [
   },
   {
     span: 24,
-    prop: 'categoryId',
+    prop: 'processType',
     itemType: 'select',
-    label: '分组',
-    clearable: true,
-    options: [],
-    props: {
-      label: 'name',
-      value: 'id'
-    },
-    required: true
-  },
-  {
-    span: 24,
-    prop: 'initiator',
-    itemType: 'slot',
-    label: '谁可以发起审批'
-    // rules: [
-    //   { required: true, validator: validate, trigger: 'change' },
-    //   {
-    //     required: true,
-    //     message: '请选择谁可以发起审批',
-    //     trigger: 'blur'
-    //   }
-    // ]
-  },
-  {
-    span: 24,
-    prop: 'processAdmin',
-    itemType: 'slot',
-    label: '谁可以管理这个审批',
-    rules: [
+    label: '流程类型',
+    required: true,
+    options: [
       {
-        validator: (rule, value, cb) => {
-          if (!_.size(value)) {
-            cb(new Error('请选择审批人'))
-          } else {
-            cb()
-          }
-        }
+        label: '课程审批',
+        value: 1
       }
     ]
-    // multiple: true,
-    // options: [],
-    // props: {
-    //   label: 'userName',
-    //   value: 'userId'
-    // },
-    // rules: [
-    //   {
-    //     required: true,
-    //     message: '请选择谁可以管理这个审批',
-    //     trigger: 'blur'
-    //   }
-    // ]
   },
   {
     span: 24,
-    prop: 'remark',
+    prop: 'approverDistinct',
+    itemType: 'select',
+    label: '审批人去重',
+    placeholder: '请选择去重类型',
+    options: [
+      {
+        label: '仅对连续出现的审批人去重',
+        value: 1
+      },
+      {
+        label: '仅保留流程中的第一个',
+        value: 2
+      },
+      {
+        label: '不做任何处理',
+        value: 0
+      }
+    ]
+  },
+  {
+    span: 24,
+    prop: 'isOpinion',
+    label: '审批意见',
+    itemType: 'slot',
+    props: {
+      label: 'label',
+      value: 'value'
+    }
+  },
+
+  {
+    span: 24,
+    prop: 'tip',
     itemType: 'input',
     type: 'textarea',
-    label: '审批描述',
+    label: '审批意见填写提示',
     clearable: true,
     maxlength: 200,
     showWordLimit: true,

@@ -229,20 +229,20 @@ const res = {
             dataPrivileges: [],
             children: []
           },
-          {
-            menuId: '125907843471874',
-            menuName: '原始菜单管理',
-            menuType: 'Menu',
-            isEnabled: 1,
-            isOwn: 1,
-            isShow: 0,
-            code: 'system_menu_all',
-            alias: 'menuAll ',
-            path: '/system/menuAll',
-            icon: 'iconfont iconicon_compile',
-            dataPrivileges: [],
-            children: []
-          },
+          // {
+          //   menuId: '125907843471874',
+          //   menuName: '原始菜单管理',
+          //   menuType: 'Menu',
+          //   isEnabled: 1,
+          //   isOwn: 1,
+          //   isShow: 0,
+          //   code: 'system_menu_all',
+          //   alias: 'menuAll ',
+          //   path: '/system/menuAll',
+          //   icon: 'iconfont iconicon_compile',
+          //   dataPrivileges: [],
+          //   children: []
+          // },
           {
             menuId: '1259071409534308354',
             menuName: '操作日志',
@@ -561,7 +561,6 @@ const res = {
             menuId: '12590123136834562058',
             menuName: '培训安排',
             menuType: 'Menu',
-            isEnabled: 1,
             isOwn: 1,
             isShow: 1,
             code: 'org_user',
@@ -693,6 +692,48 @@ const res = {
             code: 'org_user',
             alias: 'user',
             path: '/certificate/certificateDetail',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '12234523464567254058',
+            menuName: '课程审核',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/center',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '125945634575684562358',
+            menuName: '审核详情',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/details',
+            icon: 'iconfont iconicon_boss',
+            dataPrivileges: [],
+            children: []
+          },
+          {
+            menuId: '1259123124353455058',
+            menuName: '查看章节内容',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 1,
+            code: 'org_user',
+            alias: 'user',
+            path: '/approvalCenter/chapter',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
             children: []
@@ -1032,9 +1073,9 @@ const res = {
       },
       {
         menuId: '1590112075691',
-        menuName: '审批管理',
+        menuName: '流程管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
-        isOwn: 0, // 是否拥有 0：否，1：是
+        isOwn: 1, // 是否拥有 0：否，1：是
         isEnabled: 1,
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
         code: 'approval',
@@ -1067,30 +1108,6 @@ const res = {
             icon: 'iconfont iconicon_compile'
           },
           {
-            menuId: '159011207563',
-            menuName: '审批提交',
-            menuType: 'Menu',
-            isOwn: 1,
-            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-            isShow: 0,
-            code: 'submit_approval',
-            alias: 'submitApproval',
-            path: '/apprProcess/apprSubmit',
-            icon: 'iconfont iconicon_compile'
-          },
-          {
-            menuId: '1590112075691322',
-            menuName: '发起申请',
-            menuType: 'Menu',
-            isOwn: 1,
-            isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-            isShow: 1,
-            code: 'approval_launchApply',
-            alias: 'launchApply',
-            path: '/apprProcess/launchApply',
-            icon: 'iconfont iconicon_compile'
-          },
-          {
             menuId: '0000006',
             menuName: '审批详情',
             menuType: 'Menu',
@@ -1101,68 +1118,6 @@ const res = {
             alias: 'approval',
             path: '/apprProcess/apprDetail',
             icon: 'iconfont iconicon_compile'
-          },
-          {
-            menuId: '000000',
-            menuName: '我的审批',
-            menuType: 'Dir',
-            isEnabled: 1,
-            isOwn: 1,
-            isShow: 1,
-            code: 'approval_approval',
-            alias: 'approval',
-            path: '',
-            icon: 'iconfont iconicon_compile',
-            children: [
-              {
-                menuId: '0000003',
-                menuName: '待我审批',
-                menuType: 'Menu',
-                isEnabled: 1,
-                isOwn: 1,
-                isShow: 1,
-                code: 'approval_approval',
-                alias: 'approval',
-                path: '/apprProcess/appr/waitAppr',
-                icon: 'iconfont iconicon_compile'
-              },
-              {
-                menuId: '0000004',
-                menuName: '我已审批',
-                menuType: 'Menu',
-                isEnabled: 1,
-                isOwn: 1,
-                isShow: 1,
-                code: 'approval_approval',
-                alias: 'approval',
-                path: '/apprProcess/appr/hasAppr',
-                icon: 'iconfont iconicon_compile'
-              },
-              {
-                menuId: '0000005',
-                menuName: '抄送我的',
-                menuType: 'Menu',
-                isEnabled: 1,
-                isOwn: 1,
-                isShow: 1,
-                code: 'approval_approval',
-                alias: 'approval',
-                path: '/apprProcess/appr/copyApprToMe',
-                icon: 'iconfont iconicon_compile'
-              },
-              {
-                menuId: '0000001',
-                menuName: '我发起的',
-                menuType: 'Menu',
-                isEnabled: 1,
-                isOwn: 1,
-                isShow: 1,
-                code: 'approval_approval',
-                alias: 'approval',
-                path: '/apprProcess/appr/apprByMe',
-                icon: 'iconfont iconicon_compile'
-              }
-            ]
           }
         ]
       },
@@ -1188,7 +1143,7 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/requiredSchedule',
+            path: '/learnPlan/CoursePlanList',
             icon: 'iconfont iconicon_compile'
           },
           {
@@ -1200,31 +1155,19 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/elective',
-            icon: 'iconfont iconicon_compile'
-          },
-          {
-            menuId: '15956747645635423113',
-            menuName: '新建手工试卷',
-            menuType: 'Menu',
-            isEnabled: 1,
-            isOwn: 1,
-            isShow: 0,
-            code: 'approval_approval',
-            alias: 'approval',
-            path: '/learnPlan/newSchedule',
+            path: '/learnPlan/ElectivePlanList',
             icon: 'iconfont iconicon_compile'
           },
           {
             menuId: '15901120756924',
-            menuName: '必修课安排详情',
+            menuName: '必修课完成率',
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
             isShow: 0,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/requiredScheduleDetail',
+            path: '/learnPlan/CourseUserList',
             icon: 'iconfont iconicon_compile'
           }
         ]
@@ -1267,7 +1210,7 @@ const res = {
             icon: 'iconfont iconicon_compile'
           },
           {
-            menuId: '1590112075692666',
+            menuId: '1590112075692668',
             menuName: '直播回放',
             menuType: 'Menu',
             isEnabled: 1,
@@ -1275,7 +1218,7 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/learnPlan/CoursePlanList',
+            path: '/live/playBackList',
             icon: 'iconfont iconicon_compile'
           },
           {

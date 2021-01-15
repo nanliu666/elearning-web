@@ -64,10 +64,14 @@ export default {
       const that = this
       that.uploading = true
       uploadQiniu(file.file, {
-        // next({ total }) {
-        //     that.uploadPercent = parseInt(total.percent)
-        // },
-
+        next({ total }) {
+          // that.uploadPercent = parseInt(total.percent)
+          file.percent = parseInt(total.percent)
+          const { name, uid } = file.file
+          file.name = name
+          file.uid = uid
+          that.$emit('on-progress', file)
+        },
         error(err) {
           that.uploading = false
           if (err.code === 614) {
@@ -77,11 +81,16 @@ export default {
             // eslint-disable-next-line
             console.error('upload err:', err)
           }
+          const { name, uid } = file.file
+          file.name = name
+          file.uid = uid
+          that.$emit('on-error', file)
         },
         complete({ url, fileName }) {
           that.uploading = false
           let newFile = {
             fileUrl: url,
+            uid: file.file.uid,
             url: url, // 新增url字段，为与移动端上传回显一致
             fileName,
             localName: file.file.name
@@ -90,6 +99,8 @@ export default {
           that.$emit('input', newValue)
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
+
+          that.$emit('on-complete', newFile)
         }
       })
     }

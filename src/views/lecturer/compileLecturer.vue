@@ -98,7 +98,7 @@
               >
                 <el-select
                   v-model="ruleForm.type"
-                  placeholder="请选择讲师类型"
+                  placeholder="请选择"
                 >
                   <el-option
                     label="内训"
@@ -175,6 +175,7 @@
                 <el-input
                   v-model="ruleForm.teacherLevel"
                   maxlength="32"
+                  placeholder="请输入"
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -188,6 +189,7 @@
                 <el-input
                   v-model="ruleForm.teacherTitle"
                   maxlength="32"
+                  placeholder="请输入"
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -281,7 +283,7 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/jpge/png/gif文件，且不超过5M
+                      只能上传jpg/jpge/png文件，且不超过5M
                     </div>
                   </div>
                   <img
@@ -357,7 +359,7 @@ export default {
           label: '双皮奶'
         }
       ],
-      // 填写课程信息
+      // 填写信息
       ruleForm: {
         categoryId: '',
         userId: '',
@@ -365,14 +367,14 @@ export default {
         phonenum: '',
         sex: '',
         attachments: [],
-        isRecommend: 0,
+        isRecommend: false,
         isLatestTeacher: 0,
         isPopularTeacher: 0
       },
       rules: {
         userId: [{ required: true, message: '请选择讲师', trigger: 'blur' }],
         // categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
-        type: [{ required: true, message: '请选择课程类型', trigger: 'blur' }]
+        type: [{ required: true, message: '请选择讲师类型', trigger: 'blur' }]
       }
     }
   },
@@ -395,6 +397,11 @@ export default {
     // }
   },
   created() {
+    this.isgetTeacher()
+    this.isqueryTeacherlist()
+    this.islistTeacherCategory()
+  },
+  activated() {
     this.isgetTeacher()
     this.isqueryTeacherlist()
     this.islistTeacherCategory()
@@ -433,7 +440,6 @@ export default {
     async isgetTeacher() {
       let data = await getTeacher({ id: this.$route.query.id })
       // 存userId
-      // console.log(data.teacherInfo)
       this.userIdData = data.teacherInfo.userId
       data.teacherInfo.attachments = []
       data.teacherInfo.attachments.push({ fileUrl: data.teacherInfo.photo })
@@ -442,6 +448,7 @@ export default {
       data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
       data.teacherInfo.phonenum = this.$route.query.phonenum
       this.ruleForm = data.teacherInfo
+      this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
     },
 
     // 点击节点
@@ -506,6 +513,7 @@ export default {
             })
           }
         }
+        this.data.splice(0, 1)
       })
     },
 
@@ -547,7 +555,7 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      // console.log(this.ruleForm)
+
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {
           this.$message({
@@ -557,6 +565,7 @@ export default {
         } else {
           this.ruleForm.teacherId = this.$route.query.id
           this.ruleForm.userId = this.userIdData
+          this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
           update(this.ruleForm).then(() => {
             if (i) {
               this.toLecturer()
@@ -567,7 +576,9 @@ export default {
                 phonenum: '',
                 sex: '',
                 attachments: [],
-                isRecommend: ''
+                isRecommend: false,
+                isLatestTeacher: 0,
+                isPopularTeacher: 0
               }
             } else {
               this.ruleForm = {
@@ -577,7 +588,9 @@ export default {
                 phonenum: '',
                 sex: '',
                 attachments: [],
-                isRecommend: ''
+                isRecommend: false,
+                isLatestTeacher: 0,
+                isPopularTeacher: 0
               }
             }
           })
@@ -587,7 +600,7 @@ export default {
 
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png|gif)$/
+      const regx = /^.*\.(jpg|jpge|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -595,7 +608,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png|gif文件')
+        this.$message.error('上传图片只支持jpg|jpge|png文件')
         return false
       }
       return true
@@ -653,7 +666,7 @@ export default {
     height: 60px;
     box-shadow: 2px 2px 5px #000;
     background-color: #fff;
-    padding: 15px 170px;
+    padding: 15px 35%;
     z-index: 999999;
   }
 }
@@ -669,9 +682,6 @@ export default {
 }
 /deep/.el-form-item__label {
   float: none;
-}
-/deep/ .tox-edit-area {
-  height: 350px;
 }
 /deep/.el-upload__tip {
   line-height: 0;

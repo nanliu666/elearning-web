@@ -392,7 +392,7 @@
                 v-if="scope.row.onlineProgress == 100 && row.examStatus == 1"
                 type="text"
                 size="medium"
-                @click.stop="isgrantCertificate(scope.row.id)"
+                @click.stop="isgrantCertificate(scope.row)"
               >
                 发放证书
               </el-button>
@@ -400,7 +400,7 @@
                 v-else-if="scope.row.certificate == 1"
                 type="text"
                 size="medium"
-                @click.stop="isrevokeCertificate(scope.row.id)"
+                @click.stop="isrevokeCertificate(scope.row)"
               >
                 撤回证书
               </el-button>
@@ -922,8 +922,11 @@ export default {
     isstopSchedule() {
       let id = this.$route.query.id
       stopSchedule(id).then(() => {
-        this.isgetScheduleList()
         this.issueStatus = false
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
       })
     },
     // 去列表页
@@ -945,8 +948,8 @@ export default {
     },
 
     //发放学员证书
-    isgrantCertificate(id) {
-      grantCertificate([id]).then(() => {
+    isgrantCertificate(row) {
+      grantCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -955,8 +958,8 @@ export default {
       })
     },
     // 撤回学员证书
-    isrevokeCertificate(id) {
-      revokeCertificate([id]).then(() => {
+    isrevokeCertificate(row) {
+      revokeCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'

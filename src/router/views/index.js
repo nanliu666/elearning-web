@@ -2,6 +2,8 @@ import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
 import ExamEdit from '@/views/examManagement/examSchedule/edit'
+import EditPlan from '@/views/learnPlan/EditPlan'
+import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
 import todo from './todo'
 export default [
@@ -9,6 +11,7 @@ export default [
     path: '/',
     redirect: '/wel'
   },
+
   {
     path: '/process/design',
     name: '流程设计器',
@@ -28,6 +31,15 @@ export default [
     }
   },
   {
+    path: '/learnPlan/edit',
+    name: '编辑学习计划',
+    component: EditPlan,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
     path: '/examManagement/examSchedule/edit',
     name: '新建考试',
     component: ExamEdit,
@@ -40,6 +52,12 @@ export default [
     path: '/wel',
     component: Layout,
     children: [
+      {
+        path: '/menuAll',
+        name: '平台后台菜单管理',
+        component: MenuAll,
+        meta: {}
+      },
       {
         path: '',
         name: '工作台',
