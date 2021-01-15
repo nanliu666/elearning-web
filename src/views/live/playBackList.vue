@@ -1,29 +1,13 @@
 <template>
-  <div class="mark-list">
-    <page-header
-      title="试卷列表"
-      show-back
-    />
+  <div class="fill">
+    <page-header title="直播回放" />
     <basic-container block>
-      <div class="title-box">
-        <span class="title">{{ $route.query.examName }}</span>
-        <span
-          v-if="!_.isEmpty(evaluationCount)"
-          class="sub-title"
-        >
-          <span>（未评卷：{{ evaluationCount.notExamNum }}人，</span>
-          <span> 阅卷中：{{ evaluationCount.ExamNumIng }}人，</span>
-          <span>已评卷：{{ evaluationCount.ExamNumed }}人 ）</span>
-        </span>
-      </div>
       <common-table
-        id="demo"
         ref="table"
         :columns="columnsVisible | columnsFilter"
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        :page-config="tablePageConfig"
         :page="page"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
@@ -36,7 +20,10 @@
               :popover-options="searchConfig.popoverOptions"
               @submit="handleSearch"
             />
-            <div class="filter-box">
+            <div
+              v-if="activeIndex === '0'"
+              class="filter-box"
+            >
               <div
                 class="search-sort-box"
                 @click="loadTableData"
@@ -72,33 +59,13 @@
             </div>
           </div>
         </template>
-        <template #name>
-          ******
-        </template>
-        <template #phone>
-          ******
-        </template>
-        <template #status="{row}">
-          {{ row.status | statusFilterer }}
-        </template>
-        <template #effectiveTime="{row}">
-          <span v-if="row.answerBeginTime">
-            {{ row.answerBeginTime }} ~ {{ row.answerEndTime }}
-          </span>
-          <span v-else>
-            暂无
-          </span>
-        </template>
-        <template #score="{row}">
-          {{ row.score != 0 ? row.score : '--' }}
-        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
               type="text"
-              @click="handleExaminee(row)"
+              @click="jumpDetail(row)"
             >
-              {{ getHandleButtonText(row) }}
+              查看回放
             </el-button>
           </div>
         </template>
@@ -109,43 +76,40 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { listManualEvaluationOnce, listManualEvaluationOnceCount } from '@/api/examManage/mark'
-import { mapGetters } from 'vuex'
+import { getArrangeList } from '@/api/examManage/schedule'
+import { getCreatUsers, getKnowledgeCatalogList } from '@/api/knowledge/knowledge'
 let TABLE_COLUMNS = [
+  { type: 'index', label: '序号', minWidth: 150 },
   {
-    label: '考生姓名',
-    prop: 'name',
-    slot: true,
+    label: '直播编号',
+    prop: 'examName',
+    minWidth: 150
+  },
+
+  {
+    label: '直播名称',
+    prop: 'category',
     minWidth: 120
   },
   {
-    label: '手机号码',
-    prop: 'phone',
+    label: '所属分类',
     slot: true,
+    prop: 'examPattern',
     minWidth: 120
   },
   {
-    label: '所属组织',
-    prop: 'dept',
+    label: '包含课程',
+    prop: 'examType',
+    minWidth: 120
+  },
+  {
+    label: '创建人',
+    prop: 'examType',
     minWidth: 120
   },
   {
     label: '状态',
-    prop: 'status',
-    slot: true,
-    minWidth: 120
-  },
-  {
-    label: '考试时间',
-    prop: 'effectiveTime',
-    slot: true,
-    minWidth: 120
-  },
-  {
-    label: '得分',
-    prop: 'score',
-    slot: true,
+    prop: 'examType',
     minWidth: 120
   }
 ]
@@ -156,51 +120,53 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 150
+    minWidth: 50
   }
 }
-const STATUS_STATUS = [
-  { value: '', label: '全部' },
-  { value: '3', label: '待评卷' },
-  { value: '4', label: '阅卷中' },
-  { value: '5', label: '已评卷' }
-]
+
 const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'name',
+      field: 'examName',
       label: '',
       data: '',
       options: [],
-      config: { placeholder: '请输入考试名称搜索', 'suffix-icon': 'el-icon-search' }
+      config: { placeholder: '输入直播标题或编号搜索', 'suffix-icon': 'el-icon-search' }
     }
   ],
   popoverOptions: [
     {
-      type: 'select',
-      field: 'status',
-      label: '状态',
+      type: 'treeSelect',
+      field: 'catalogId',
+      label: '所在分类',
       data: '',
-      options: STATUS_STATUS
-    },
-    {
-      type: 'numInterval',
-      data: { min: '', max: '' },
-      label: '得分',
-      field: 'scoreMin,scoreMax'
-    },
-    {
-      type: 'numInterval',
-      data: { min: '', max: '' },
-      label: '正确率',
-      field: 'accuracyMin,accuracyMax'
+      config: {
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'name',
+            disabled: 'disabled',
+            value: 'id'
+          }
+        }
+      }
     },
     {
       type: 'select',
-      field: 'reviewer',
+      field: 'userId',
       data: '',
-      label: '评卷人',
+      label: '创建人',
       options: [],
       config: { optionLabel: 'name', optionValue: 'userId' },
       loading: false,
@@ -220,32 +186,38 @@ const SEARCH_CONFIG = {
           }
         })
       }
+    },
+    {
+      type: 'select',
+      field: 'status',
+      label: '状态',
+      data: '',
+      options: [
+        { value: '', label: '全部' },
+        { value: 0, label: '正常' },
+        { value: 1, label: '禁用' }
+      ]
     }
   ]
 }
+import styles from '@/styles/variables.scss'
+import { getOrgTreeSimple } from '@/api/org/org'
 export default {
-  name: 'ExamineeList',
+  name: 'PlayBackList',
   components: { SearchPopover },
   filters: {
-    statusFilterer(data) {
-      if (data) {
-        return _.filter(STATUS_STATUS, (item) => {
-          return item.value === data + ''
-        })[0].label
-      }
-    },
     // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   data() {
     return {
+      activeColor: styles.primaryColor,
+      activeIndex: '0',
       tableLoading: false,
       tableData: [],
-      evaluationCount: {},
-      tablePageConfig: {},
       page: {
-        currentPage: 0,
+        currentPage: 1,
         size: 10,
         total: 0
       },
@@ -253,68 +225,99 @@ export default {
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchConfig: SEARCH_CONFIG,
-      data: [],
-      createOrgDailog: false,
       queryInfo: {
-        currentPage: 0,
-        size: 10
+        parentOrgId: '', // 分类ID
+        creatorId: '', //评卷人id
+        examType: '', //考试类型 CurrencyExam-通用考试 CourseExam-课程考试 TrainExam-培训班考试
+        pageNo: 1,
+        pageSize: 10,
+        testPaper: '', //关联考卷id
+        type: 0 //状态:0-已发布，1-草稿箱
       }
     }
   },
-  computed: {
-    ...mapGetters(['userId'])
-  },
-  beforeRouteLeave(to, from, next) {
-    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
-    next()
-  },
-  async activated() {
-    this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
-    this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })
-    let reviewer = _.filter(this.searchConfig.popoverOptions, (item) => {
-      return item.field === 'reviewer'
-    })[0]
-    if (_.size(reviewer.options) === 0) {
-      getCreatUsers().then((res) => {
-        if (reviewer) {
-          reviewer.options.push(...res)
-        }
-      })
-    }
+  activated() {
+    this.initSearchData()
+    getCreatUsers().then((res) => {
+      this.searchConfig.popoverOptions[1].options.push(...res)
+    })
     this.loadTableData()
+    let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'parentOrgId' })
+    getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      _.set(categoryIdType, 'config.treeParams.data', res)
+    })
   },
   methods: {
-    getHandleButtonText(row) {
-      const STATUS_DICTS = {
-        3: '开始评卷',
-        4: row.currentId === this.userId ? '继续评卷' : '查看答卷',
-        5: '查看答卷'
+    getCategoryList() {
+      return getKnowledgeCatalogList().then((res) => {
+        return _.concat(
+          [
+            {
+              id: '',
+              name: '全部'
+            }
+          ],
+          res
+        )
+      })
+    },
+    async initSearchData() {
+      let catalogId = _.find(this.searchConfig.popoverOptions, { field: 'catalogId' })
+      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
+      // if (tagId) {
+      //   getKnowledgeManageTaglist().then(
+      //     (res) =>
+      //       (tagId.options = _.concat(
+      //         [
+      //           {
+      //             id: '',
+      //             name: '全部'
+      //           }
+      //         ],
+      //         res
+      //       ))
+      //   )
+      // }
+      let catalogList = await this.getCategoryList()
+      if (catalogId) {
+        catalogId.config.treeParams.data = catalogList
       }
-      return STATUS_DICTS[row.status]
     },
     /**
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.currentPage = param
+      this.queryInfo = _.assign(this.queryInfo, { pageNo: param })
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.size = param
+      this.queryInfo = _.assign(this.queryInfo, { pageSize: param })
       this.loadTableData()
+    },
+    // 跳转详情
+    jumpDetail(row) {
+      this.$router.push({ path: '/live/statisticsDetails', query: { id: row.id } })
+    },
+    // 切换nav
+    handleSelect(key) {
+      this.$refs.table.clearSelection()
+      this.activeIndex = key
+      this.handleSearch({ type: Number(key) })
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) return
+      if (this.tableLoading) {
+        return
+      }
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, list } = await listManualEvaluationOnce(this.queryInfo)
+        let { totalNum, data } = await getArrangeList(this.queryInfo)
         this.tableLoading = false
-        this.tableData = list
+        this.tableData = data
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
@@ -324,24 +327,9 @@ export default {
     // 搜索
     handleSearch(params) {
       this.queryInfo = _.assign(this.queryInfo, params)
+      this.queryInfo.pageNo = 1
+      this.page.currentPage = 1
       this.loadTableData()
-    },
-    /**
-     * 逐人评卷
-     */
-    handleExaminee(row) {
-      const basicQuery = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
-      let query = Object.create(null)
-      if (row.status === '5' || (row.status === '4' && row.currentId !== this.userId)) {
-        const viewQuery = { isView: true }
-        query = _.assign(basicQuery, viewQuery)
-      } else {
-        query = basicQuery
-      }
-      this.$router.push({
-        path: '/examManagement/mark/MarkByExaminee',
-        query
-      })
     }
   }
 }
@@ -351,18 +339,16 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
-  .title-box {
-    margin-bottom: 10px;
-    .title {
-      font-size: 18px;
-      color: rgba(0, 11, 21, 0.85);
-      font-weight: 550;
-    }
-    .sub-title {
-      font-size: 16px;
-      color: rgba(0, 11, 21, 0.45);
-      margin-left: 6px;
-    }
+  .el-menu {
+    margin-bottom: 20px;
+    margin-top: -10px;
+  }
+  /deep/ .el-menu--horizontal {
+    border-bottom: 1px solid #cccccc !important;
+  }
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
   }
 }
 .originColumn {

@@ -54,136 +54,138 @@
         </li>
       </ul>
     </el-card>
-    <el-card
-      v-if="examData.keguan"
-      class="paper-card"
-    >
-      <div
-        class="card-header"
-        :style="{ 'padding-bottom': isShowImpersonality ? '16px' : '' }"
+    <div v-if="!isView">
+      <el-card
+        v-if="examData.keguan"
+        class="paper-card"
       >
-        <div class="card-left">
-          <span class="title">客观题部分</span>
-          <span class="sub-title">
-            <span>（共{{ examData.keguan }}题</span>
-            <span v-if="examData.scoreKeguan">共{{ examData.scoreKeguan }}分）</span>
-          </span>
-        </div>
         <div
-          class="card-right"
-          @click="isShowImpersonality = !isShowImpersonality"
+          class="card-header"
+          :style="{ 'padding-bottom': isShowImpersonality ? '16px' : '' }"
         >
-          <i :class="`el-icon-arrow-${isShowImpersonality ? 'up' : 'down'}`" />
-          <span
-            class="expand-text"
-            style="margin-left:8px"
-          >{{
-            isShowImpersonality ? '收起' : '展开'
-          }}</span>
+          <div class="card-left">
+            <span class="title">客观题部分</span>
+            <span class="sub-title">
+              <span>（共{{ examData.keguan }}题</span>
+              <span v-if="examData.scoreKeguan">共{{ examData.scoreKeguan }}分）</span>
+            </span>
+          </div>
+          <div
+            class="card-right"
+            @click="isShowImpersonality = !isShowImpersonality"
+          >
+            <i :class="`el-icon-arrow-${isShowImpersonality ? 'up' : 'down'}`" />
+            <span
+              class="expand-text"
+              style="margin-left:8px"
+            >{{
+              isShowImpersonality ? '收起' : '展开'
+            }}</span>
+          </div>
         </div>
-      </div>
-      <ul
-        v-if="isShowImpersonality"
-        class="card-content"
-      >
-        <li
-          v-for="(item, index) in impersonalityList"
-          :key="index"
-          class="card-li"
+        <ul
+          v-if="isShowImpersonality"
+          class="card-content"
         >
-          <div class="card-title">
-            <span>{{ (index + 1) | number2zhcn }}、</span>
-            <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
-            <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
-          </div>
-          <div class="card-sub-title">
-            {{ _.get(item, '[0].title', null) }}
-          </div>
-          <ul class="content-box">
-            <li
-              v-for="(conItem, conIndex) in item"
-              :key="conItem.id"
-              class="content-li"
-            >
-              <span>{{ conIndex + 1 }}.</span>
-              <span>（{{ conItem.scoreQuestion }}分）</span>
-              <QustionPreview
-                :data="conItem"
-                type="view"
-              />
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </el-card>
-    <el-card
-      v-if="examData.zhuguan"
-      class="paper-card object-card"
-    >
-      <div
-        class="card-header"
-        :style="{ 'padding-bottom': '16px' }"
+          <li
+            v-for="(item, index) in impersonalityList"
+            :key="index"
+            class="card-li"
+          >
+            <div class="card-title">
+              <span>{{ (index + 1) | number2zhcn }}、</span>
+              <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
+              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+            </div>
+            <div class="card-sub-title">
+              {{ _.get(item, '[0].title', null) }}
+            </div>
+            <ul class="content-box">
+              <li
+                v-for="(conItem, conIndex) in item"
+                :key="conItem.id"
+                class="content-li"
+              >
+                <span>{{ conIndex + 1 }}.</span>
+                <span>（{{ conItem.scoreQuestion }}分）</span>
+                <QustionPreview
+                  :data="conItem"
+                  type="view"
+                />
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </el-card>
+      <el-card
+        v-if="examData.zhuguan"
+        class="paper-card object-card"
       >
-        <div class="card-left">
-          <span class="title">主观题部分</span>
-          <span class="sub-title">
-            <span>（共{{ examData.zhuguan }}题</span>
-            <span v-if="examData.scoreZhuguan">共{{ examData.scoreZhuguan }}分）</span>
-          </span>
+        <div
+          class="card-header"
+          :style="{ 'padding-bottom': '16px' }"
+        >
+          <div class="card-left">
+            <span class="title">主观题部分</span>
+            <span class="sub-title">
+              <span>（共{{ examData.zhuguan }}题</span>
+              <span v-if="examData.scoreZhuguan">共{{ examData.scoreZhuguan }}分）</span>
+            </span>
+          </div>
         </div>
-      </div>
-      <ul class="card-content">
-        <li
-          v-for="(item, index) in subjectivityList"
-          :key="index"
-          class="card-li"
-        >
-          <div class="card-title">
-            <span>{{ (index + 1) | number2zhcn }}、</span>
-            <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
-            <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
-          </div>
-          <div class="card-sub-title">
-            {{ _.get(item, '[0].title', null) }}
-          </div>
-          <ul class="content-box">
-            <li
-              v-for="(conItem, conIndex) in item"
-              :key="conItem.id"
-              class="content-li"
-            >
-              <span>{{ conIndex + 1 }}.</span>
-              <span>（{{ conItem.scoreQuestion }}分）</span>
-              <QustionPreview
-                v-if="QUESTION_TYPE_GROUP !== conItem.type"
-                ref="refSelect"
-                :data="conItem"
-                type="view"
-              />
-              <span v-else>
-                <span
-                  class="right-title"
-                  v-html="_.unescape(conItem.content)"
-                ></span>
-                <ul>
-                  <li
-                    v-for="(paperItem, paperIndex) in conItem.subQuestions"
-                    :key="paperIndex"
-                    class=""
-                  >
-                    <span>{{ paperIndex + 1 }}.</span>
-                    <QustionPreview
-                      :ref="`refSelect`"
-                      :data="paperItem"
-                      type="view"
-                    />
-                  </li>
-                </ul>
-              </span>
-            </li>
-          </ul>
-        </li>
-      </ul>
+        <ul class="card-content">
+          <li
+            v-for="(item, index) in subjectivityList"
+            :key="index"
+            class="card-li"
+          >
+            <div class="card-title">
+              <span>{{ (index + 1) | number2zhcn }}、</span>
+              <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
+              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+            </div>
+            <div class="card-sub-title">
+              {{ _.get(item, '[0].title', null) }}
+            </div>
+            <ul class="content-box">
+              <li
+                v-for="(conItem, conIndex) in item"
+                :key="conItem.id"
+                class="content-li"
+              >
+                <span>{{ conIndex + 1 }}.</span>
+                <span>（{{ conItem.scoreQuestion }}分）</span>
+                <QustionPreview
+                  v-if="QUESTION_TYPE_GROUP !== conItem.type"
+                  ref="refSelect"
+                  :data="conItem"
+                  type="view"
+                />
+                <span v-else>
+                  <span
+                    class="right-title"
+                    v-html="_.unescape(conItem.content)"
+                  ></span>
+                  <ul>
+                    <li
+                      v-for="(paperItem, paperIndex) in conItem.subQuestions"
+                      :key="paperIndex"
+                      class="content-li"
+                    >
+                      <span>{{ paperIndex + 1 }}.</span>
+                      <QustionPreview
+                        :ref="`refSelect`"
+                        :data="paperItem"
+                        type="view"
+                      />
+                    </li>
+                  </ul>
+                </span>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </el-card>
       <div class="handle-button">
         <div class="button-box">
           <el-button
@@ -213,7 +215,98 @@
           </el-button>
         </div>
       </div>
-    </el-card>
+    </div>
+    <div v-else>
+      <el-card class="paper-card">
+        <div class="card-header view-header">
+          <div class="card-left">
+            <span class="title">答卷详情</span>
+            <span class="sub-title">
+              <span>（共{{ examData.keguan + examData.zhuguan }}题</span>
+              <span>共{{ examData.scoreKeguan + examData.scoreZhuguan }}分）</span>
+            </span>
+          </div>
+          <div class="card-right">
+            <span class="right-title">查看试题范围</span>
+            <el-radio-group
+              v-model="queryInfo.flag"
+              @change="getPaperData"
+            >
+              <el-radio label="">
+                全部试题
+              </el-radio>
+              <el-radio label="0">
+                仅显示答对试题
+              </el-radio>
+              <el-radio label="1">
+                仅显示答错试题
+              </el-radio>
+            </el-radio-group>
+          </div>
+        </div>
+        <com-empty
+          v-if="_.isEmpty(questionList)"
+          height="38vh"
+          text="暂无试题"
+        />
+        <ul
+          v-else
+          class="question-ul"
+        >
+          <li
+            v-for="(item, index) in questionList"
+            :key="index"
+            class="question-li"
+          >
+            <div class="title-box">
+              <div class="question-li-title">
+                <span>{{ (index + 1) | number2zhcn }}、</span>
+                <span>{{ item[0].type | typeFilter }}</span>
+                <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分)</span>
+              </div>
+              <div class="sub-title">
+                {{ item[0].title }}
+              </div>
+            </div>
+            <div class="content-box">
+              <ul class="content-ul">
+                <li
+                  v-for="(conItem, conIndex) in item"
+                  :key="conItem.id"
+                  class="content-li"
+                >
+                  <span>{{ conIndex + 1 }}.</span>
+                  <QustionPreview
+                    v-if="QUESTION_TYPE_GROUP !== conItem.type"
+                    :data="conItem"
+                    type="view"
+                  />
+                  <span v-else>
+                    <span
+                      class="right-title"
+                      v-html="_.unescape(conItem.content)"
+                    ></span>
+                    <ul>
+                      <li
+                        v-for="(paperItem, paperIndex) in conItem.subQuestions"
+                        :key="paperIndex"
+                        class="content-li"
+                      >
+                        <span>{{ paperIndex + 1 }}.</span>
+                        <QustionPreview
+                          :data="paperItem"
+                          type="view"
+                        />
+                      </li>
+                    </ul>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </el-card>
+    </div>
   </div>
 </template>
 
@@ -228,6 +321,7 @@ import {
 import { mapGetters } from 'vuex'
 import moment from 'moment'
 import QustionPreview from './components/questionPreview'
+import ComEmpty from '@/components/common-empty/empty'
 const STATUS_STATUS = [
   { value: '3', label: '待评卷', type: 'success' },
   { value: '4', label: '阅卷中', type: 'danger' },
@@ -245,7 +339,13 @@ import {
 export default {
   name: 'MarkByExaminee',
   components: {
-    QustionPreview
+    QustionPreview,
+    ComEmpty
+  },
+  provide() {
+    return {
+      mark: this
+    }
   },
   filters: {
     typeFilter(data) {
@@ -261,6 +361,14 @@ export default {
       examData: {},
       examineeAchievementDO: {},
       formDataList: [],
+      questionList: [],
+      queryInfo: {
+        userId: '',
+        type: '',
+        id: '',
+        flag: '' //0 全队，1全错
+      },
+      isView: false,
       impersonalityList: [], //客观题
       subjectivityList: [] // 主观题
     }
@@ -280,6 +388,7 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    this.clearMarkForm()
     next()
   },
   methods: {
@@ -419,19 +528,47 @@ export default {
       this.examineeAchievementDO = examineeAchievementDO
     },
     async getPaperData() {
-      const paperData = await getExamineePaperDetailist({
+      _.assign(this.queryInfo, {
         userId: this.examineeAchievementDO.examineeId,
-        type: '',
         id: this.$route.query.id
       })
-      const tempPaperData = _.groupBy(paperData, 'state')
-      _.forIn(tempPaperData, (value, key) => {
-        if (key === '0') {
-          this.impersonalityList = this.initQuestionList(value)
+      const paperData = await getExamineePaperDetailist(this.queryInfo)
+      this.isView = _.get(this.$route, 'query.isView', false)
+      if (this.isView) {
+        this.getViewData(paperData)
+      } else {
+        this.getEditData(paperData)
+      }
+    },
+    getEditData(paperData) {
+      let targetList = []
+      _.each(paperData, (item) => {
+        if (!_.isEmpty(item.subQuestions)) {
+          targetList.push(...item.subQuestions)
         } else {
-          this.subjectivityList = this.initQuestionList(value)
+          targetList.push(item)
         }
       })
+      const tempPaperData = _.groupBy(targetList, 'state')
+      _.forIn(tempPaperData, (value, key) => {
+        switch (key) {
+          case '0':
+            this.impersonalityList = this.initQuestionList(value)
+            break
+          case '1':
+            this.subjectivityList = this.initQuestionList(value)
+            break
+        }
+      })
+    },
+    getViewData(paperData) {
+      this.questionList = _.chain(_.cloneDeep(paperData))
+        .groupBy('parentSort')
+        .sortBy('parentSort')
+        .map((item) => {
+          return _.sortBy(item, 'sort')
+        })
+        .value()
     },
     initQuestionList(data) {
       return _.chain(_.cloneDeep(data))
@@ -523,6 +660,17 @@ export default {
         }
       }
     }
+    .view-header {
+      padding-bottom: 16px;
+      border-bottom: 1px solid #ebeced;
+      margin-bottom: 16px;
+      .right-title {
+        font-family: PingFangSC-Regular;
+        font-size: 16px;
+        color: rgba(0, 11, 21, 0.65);
+        margin-right: 16px;
+      }
+    }
     .card-content {
       padding-top: 16px;
       border-top: 1px solid #ebeced;
@@ -570,6 +718,30 @@ export default {
       }
     }
   }
+  .question-ul {
+    .question-li {
+      .title-box {
+        margin-bottom: 24px;
+        .question-li-title {
+          font-family: PingFangSC-Medium;
+          font-size: 16px;
+          color: rgba(0, 11, 21, 0.85);
+          font-weight: 550;
+          margin-bottom: 4px;
+        }
+        .sub-title {
+          font-family: PingFangSC-Regular;
+          font-size: 12px;
+          color: rgba(0, 11, 21, 0.25);
+        }
+      }
+      .content-box {
+        .content-li {
+          margin-bottom: 32px;
+        }
+      }
+    }
+  }
   .content-box {
     .content-li {
       margin-bottom: 32px;
@@ -580,23 +752,23 @@ export default {
     .card-content {
       padding-bottom: 76px;
     }
-    .handle-button {
-      position: absolute;
-      bottom: 0;
-      width: calc(100% + 24px);
-      left: -24px;
-      background-color: #fff;
-      box-shadow: 0 -6px 12px 0 rgba(0, 61, 112, 0.08);
+  }
+  .handle-button {
+    position: fixed;
+    bottom: 0;
+    right: 40px;
+    width: calc(100vw - 16.5vw - 72px);
+    background-color: #fff;
+    box-shadow: 0 -6px 12px 0 rgba(0, 61, 112, 0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 76px;
+    .button-box {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 76px;
-      .button-box {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: calc(104px * 4 + 3 * 16px);
-      }
+      width: calc(104px * 4 + 3 * 16px);
     }
   }
 }

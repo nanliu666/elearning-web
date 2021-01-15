@@ -11,10 +11,10 @@ export default {
   },
   copy: {
     type: 'copy',
-    content: '请设置抄送人',
+    content: '发起人自选',
     properties: {
       title: '抄送人',
-      members: [],
+      menbers: [],
       userOptional: true
     }
   },
@@ -22,11 +22,6 @@ export default {
     type: 'condition',
     content: '请设置条件',
     properties: { title: '条件', conditions: [], initiator: null }
-  },
-  parallel: {
-    type: 'parallel',
-    content: '请设置审批人',
-    properties: { title: '审批人' }
   },
   branch: { type: 'branch', content: '', properties: {} },
   empty: { type: 'empty', content: '', properties: {} }

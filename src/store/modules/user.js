@@ -1,7 +1,7 @@
 import { setToken, setRefreshToken, removeToken, removeRefreshToken } from '@/util/auth'
 import { Message } from 'element-ui'
 import { setStore, getStore } from '@/util/store'
-import { filterTree, flatTree, sortTree } from '@/util/util'
+import { filterTree, sortTree } from '@/util/util'
 import { loginByUsername, getUserInfo, logout, refreshToken, getUserPrivilege } from '@/api/user'
 import md5 from 'js-md5'
 
@@ -64,6 +64,7 @@ const user = {
         getUserPrivilege(userId)
           .then((data) => {
             commit('SET_MENU_LOADING', false)
+            const copy = JSON.parse(JSON.stringify(data))
             commit(
               'SET_ORGS',
               data.orgPrivileges.filter((org) => org.isOwn === 1)
@@ -77,9 +78,11 @@ const user = {
             commit('SET_MENU_ALL', menu)
             commit(
               'SET_PRIVILEGES',
-              flatTree(data.menuPrivileges)
-                .filter((node) => node.isOwn === 1 && node.menuType === 'Button')
-                .map((item) => item.path)
+              filterTree(
+                copy.menuPrivileges,
+                (node) => node.isOwn === 1 && node.menuType === 'Button' && node.isEnabled !== 0,
+                true
+              ).map((item) => item.path)
             )
             resolve(menu)
           })

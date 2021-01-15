@@ -1,794 +1,454 @@
 <template>
-  <div
-    class="approval-index-style fill"
-    :class="{ 'empty-box': emptyVisibile }"
-    @click="hideVersion"
-  >
-    <basic-container
-      v-loading="loading"
-      block
-    >
-      <section class="index-header-box">
-        <h2 class="h2-title">
-          审批
-        </h2>
-        <div
-          v-if="!dragOptions.sortVisible"
-          class="button-box"
-        >
-          <el-button
-            size="medium"
-            @click="groupSort"
-          >
-            分组排序
-          </el-button>
-          <el-button
-            size="medium"
-            @click="addNewGroup"
-          >
-            新建分组
-          </el-button>
-          <el-button
-            size="medium"
-            type="primary"
-            @click="createApproval"
-          >
-            创建审批
-          </el-button>
-        </div>
-        <div
-          v-else
-          class="button-box"
-        >
-          <el-button
-            size="medium"
-            @click="cancelSort"
-          >
-            取消
-          </el-button>
-          <el-button
-            size="medium"
-            type="primary"
-            @click="saveSort"
-          >
-            保存
-          </el-button>
-        </div>
-      </section>
-      <com-empty
-        v-if="emptyVisibile"
-        :src="emptySrc"
-        :visibile="emptyVisibile"
-        :text="emptyText"
-      />
-      <div v-if="!emptyVisibile">
-        <section
-          v-if="!dragOptions.sortVisible"
-          class="approval-section"
-        >
-          <ul
-            v-for="(item, index) in processListData"
-            :key="index"
-            class="approval-ul"
-          >
-            <li class="approval-li">
-              <div class="title-box">
-                <div class="li-title">
-                  {{ item.name }}（{{ item.processes.length }}）
-                </div>
-                <div class="li-button">
-                  <div
-                    v-if="item.code !== 'draftProcess'"
-                    class="action-box"
-                  >
-                    <el-button
-                      class="action-button"
-                      type="text"
-                      @click="renameApproval(item)"
-                    >
-                      重命名
-                    </el-button>
-
-                    <el-button
-                      v-if="item.processes.length === 0"
-                      class="action-button"
-                      type="text"
-                      @click="deleteApproval(item)"
-                    >
-                      删除
-                    </el-button>
-                    <el-tooltip
-                      v-if="item.processes.length !== 0"
-                      class="item"
-                      effect="dark"
-                      content="无法删除组，请先删除/移动组内审批"
-                      placement="top-start"
-                    >
-                      <button
-                        type="text"
-                        class="disable-action-button"
-                      >
-                        删除
-                      </button>
-                    </el-tooltip>
-                  </div>
-                  <el-button
-                    class="action-button"
-                    type="text"
-                    @click="toggleShow(item)"
-                  >
-                    {{ isHideList.indexOf(item.id) === -1 ? '收起' : '展开' }}
-                  </el-button>
-                </div>
-              </div>
-              <draggable
-                v-model="item.processes"
-                :animation="200"
-                :sort="item.code !== 'draftProcess'"
-                :disabled="item.code === 'draftProcess'"
-                @end="dragEnd(item, index)"
+  <div class="approval-index-style fill">
+    <page-header title="审批流程" />
+    <basic-container block>
+      <common-table
+        id="demo"
+        ref="table"
+        :columns="tableColumns | columnsFilter(columnsVisible)"
+        :config="tableConfig"
+        :data="tableData"
+        :loading="tableLoading"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
+      >
+        <template #topMenu>
+          <div class="operations">
+            <seach-popover
+              :popover-options="searchConfigLocal.popoverOptions"
+              :require-options="searchConfigLocal.requireOptions"
+              @submit="handleSearch"
+            />
+            <div class="operations__btns">
+              <el-tooltip
+                class="operations__btns--tooltip"
+                content="刷新"
+                effect="dark"
+                placement="top"
               >
-                <transition-group
-                  v-show="isHideList.indexOf(item.id) === -1"
-                  name="flip-list"
+                <el-button
+                  class="operations__btns--item"
+                  size="mini"
+                  type="text"
+                  @click="refresh"
                 >
-                  <ul
-                    v-for="(processesItem, processesIndex) in item.processes"
-                    :key="processesIndex"
-                    class="detail-ul"
-                  >
-                    <li class="detail-li">
-                      <div class="li-left">
-                        <i
-                          v-if="item.code !== 'draftProcess'"
-                          class="icon-drag drag-i"
-                        />
-                        <div
-                          class="logo-box"
-                          :class="{ 'filter-gray': item.code === 'draftProcess' }"
-                        >
-                          <svg
-                            class="icon"
-                            aria-hidden="true"
-                          >
-                            <use :[symbolKey]="'#' + processesItem.icon" />
-                          </svg>
-                        </div>
-                        <div class="content-box">
-                          <div class="content-title">
-                            <span class="title">{{ processesItem.processName }}</span>
-                            <el-tag
-                              v-if="_.isEmpty(processesItem.formKey)"
-                              type="success"
-                            >
-                              自定义
-                            </el-tag>
-                            <el-tag v-else>
-                              系统定制
-                            </el-tag>
-                          </div>
-                          <el-tooltip
-                            v-if="processesItem.remark"
-                            effect="dark"
-                            placement="top-start"
-                            :content="processesItem.remark"
-                          >
-                            <div class="content-des">
-                              {{ processesItem.remark }}
-                            </div>
-                          </el-tooltip>
-                        </div>
-                      </div>
-                      <div class="li-middle">
-                        <div>可见范围</div>
-                        <div class="middle-span">
-                          {{ processesItem.visibleRange }}
-                        </div>
-                      </div>
-                      <div class="li-right">
-                        <el-button
-                          v-if="item.code !== 'draftProcess'"
-                          type="text"
-                          :disabled="!checkEditable(processesItem)"
-                          @click="createApproval(processesItem)"
-                        >
-                          编辑
-                        </el-button>
-                        <div
-                          v-if="item.code !== 'draftProcess'"
-                          class="margin-left-10"
-                        >
-                          <el-button
-                            type="text"
-                            :disabled="!checkEditable(processesItem)"
-                            @click="disableApproval(processesItem)"
-                          >
-                            停用
-                          </el-button>
-                          <el-button
-                            type="text"
-                            @click="moveApproval(item, processesItem)"
-                          >
-                            移动到
-                          </el-button>
-                          <el-dropdown placement="bottom">
-                            <el-button
-                              class="version-box"
-                              type="text"
-                              :disabled="!checkEditable(processesItem)"
-                              @click.stop="versionApproval(processesItem)"
-                            >
-                              查看版本
-                            </el-button>
-                            <el-dropdown-menu slot="dropdown">
-                              <el-dropdown-item
-                                v-for="(verItem, verIndex) in apprVersionList"
-                                :key="verIndex"
-                                class="version-li"
-                                @click.native="createApproval(verItem)"
-                              >
-                                V{{ verItem.version }}
-                              </el-dropdown-item>
-                            </el-dropdown-menu>
-                          </el-dropdown>
-                        </div>
-                        <div
-                          v-else
-                          class="margin-left-10"
-                        >
-                          <el-button
-                            v-if="processesItem.status === 1"
-                            type="text"
-                            :disabled="!checkEditable(processesItem)"
-                            @click="enableApproval(item, processesItem)"
-                          >
-                            启用
-                          </el-button>
-                          <el-button
-                            v-if="processesItem.status === 0"
-                            type="text"
-                            @click="publishApproval(item, processesItem)"
-                          >
-                            发布
-                          </el-button>
-                          <el-button
-                            type="text"
-                            :disabled="!checkEditable(processesItem)"
-                            @click="deleteProcesses(processesItem)"
-                          >
-                            删除
-                          </el-button>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </transition-group>
-              </draggable>
-            </li>
-          </ul>
-        </section>
-        <drag-list
-          v-if="dragOptions.sortVisible"
-          :drag-options.sync="dragOptions"
-        />
-      </div>
-    </basic-container>
+                  <i class="iconfont iconicon_refresh" />
+                </el-button>
+              </el-tooltip>
+              <el-popover
+                placement="bottom"
+                width="40"
+                trigger="click"
+              >
+                <el-button
+                  class="operations__btns--item"
+                  size="mini"
+                  type="text"
+                >
+                  <i class="iconfont iconicon_setting" />
+                </el-button>
 
-    <process-dialog
-      v-if="dialogOptions.dialogVisible"
-      :dialog-options.sync="dialogOptions"
-      :sub-group.sync="subGroup"
-      @reloadData="refreshData"
-    />
+                <!-- 设置表格列可见性 -->
+                <div class="operations__column--visible">
+                  <el-checkbox-group v-model="columnsVisible">
+                    <el-checkbox
+                      v-for="item of tableColumns"
+                      :key="item.prop"
+                      :disabled="item.prop === 'name'"
+                      :label="item.prop"
+                      class="operations__column--item"
+                    >
+                      {{ item.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+              </el-popover>
+            </div>
+          </div>
+        </template>
+        <template #status="{row}">
+          <span
+            class="status-span"
+            :style="{
+              color: statusToText(row.status).color,
+              backgroundColor: statusToText(row.status).backgroundColor
+            }"
+            v-text="statusToText(row.status).text"
+          />
+        </template>
+
+        <template #apprNo="{row}">
+          <span
+            class="table__link"
+            @click="jumpToDetail(row)"
+          >{{ row.apprNo }}</span>
+        </template>
+
+        <template #handler="{row}">
+          <el-button
+            type="text"
+            @click="jumpToDetail(row)"
+          >
+            查看
+          </el-button>
+        </template>
+      </common-table>
+    </basic-container>
   </div>
 </template>
 <script>
-import {
-  getProcessList,
-  deleteCategory,
-  stopProcessCategory,
-  getDraftList,
-  deleteProcess,
-  releaseProcess,
-  sortCategory,
-  getApprVersion,
-  sortProcess
-} from '@/api/apprProcess/apprProcess'
-import processDialog from '@/views/apprProcess/components/processDialog'
-import ComEmpty from '@/components/common-empty/empty'
-import dragList from '@/views/apprProcess/components/dragList'
-import draggable from 'vuedraggable'
-import { deepClone } from '@/util/util'
-import fix from '@/assets/images/fix.png'
+import { STATUS_DICTS } from '@/const/approve'
+import { getProcessList, getProcessType } from '@/api/apprProcess/apprProcess'
+import { getOrgTreeSimple } from '../../api/org/org'
 import { mapGetters } from 'vuex'
-const DRAFTCODE = 'draftProcess' // 定义弃用code
-export default {
-  name: 'ApprovalIndex',
-  components: { processDialog, dragList, draggable, ComEmpty },
+const TABLE_COLUMNS = [
+  {
+    label: '审批编号',
+    prop: 'apprNo',
+    slot: true,
+    minWidth: 150
+  },
+  {
+    label: '标题',
+    prop: 'title',
+    minWidth: 120
+  },
+  {
+    label: '申请类型',
+    prop: 'processName',
+    minWidth: 120
+  },
+  {
+    label: '申请部门',
+    prop: 'orgName',
+    minWidth: 120
+  },
+  {
+    label: '申请时间',
+    prop: 'applyTime',
+    minWidth: 120
+  },
+  {
+    label: '完成时间',
+    minWidth: 100,
+    prop: 'completeTime'
+  },
+  {
+    label: '当前状态',
+    prop: 'status',
+    slot: true
+  },
+  {
+    label: '当前审批人',
+    minWidth: 100,
+    prop: 'approveUser',
+    formatter(record) {
+      return record.approveUser.map((item) => item.userName).join('+')
+    }
+  }
+]
 
+const TABLE_CONFIG = {
+  rowKey: 'apprNo',
+  showHandler: true,
+  showIndexColumn: false,
+  enablePagination: true,
+  handlerColumn: {
+    minWidth: 50
+  }
+}
+
+const SEARCH_CONFIG = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'search',
+      label: '',
+      data: '',
+      config: {
+        'suffix-icon': 'el-icon-search',
+        placeholder: '审批编号、审批标题'
+      }
+    }
+  ],
+  popoverOptions: [
+    {
+      type: 'select',
+      data: '',
+      field: 'processKey',
+      label: '审批类型',
+      arrField: 'positionId',
+      config: { optionLabel: 'processName', optionValue: 'processKey' },
+      options: []
+    },
+    {
+      type: 'select',
+      data: '',
+      field: 'status',
+      label: '审批状态',
+      arrField: 'positionId',
+      config: { optionLabel: 'dictValue', optionValue: 'dictKey' },
+      options: []
+    },
+    {
+      type: 'treeSelect',
+      field: 'orgId',
+      label: '申请部门',
+      data: '',
+      config: {
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'orgName',
+            disabled: 'disabled',
+            value: 'orgId'
+          }
+        }
+      }
+    },
+    {
+      type: 'dataPicker',
+      data: '',
+      label: '申请日期',
+      field: 'beginApplyTime,endApplyTime',
+      config: {
+        type: 'datetimerange',
+        'range-separator': '至',
+        'value-format': 'yyyy-MM-dd HH:mm:ss'
+      }
+    },
+    {
+      type: 'dataPicker',
+      data: '',
+      label: '完成日期',
+      field: 'beginCompleteTime,endCompleteTime',
+      config: {
+        type: 'datetimerange',
+        'range-separator': '至',
+        'value-format': 'yyyy-MM-dd HH:mm:ss'
+      }
+    }
+  ]
+}
+export default {
+  name: 'ApprovalList',
+  components: {
+    SeachPopover: () => import(/* webpackChunkName: "views" */ '@/components/searchPopOver')
+  },
+  filters: {
+    // 过滤不可见的列
+    columnsFilter: (columns, visibleColProps) =>
+      _.filter(columns, ({ prop }) => _.includes(visibleColProps, prop))
+  },
   data() {
     return {
-      isCurrentProcess: {},
-      apprVersionList: [], // 版本暂存
-      emptySrc: fix,
-      emptyVisibile: false,
-      emptyText: '暂无数据，请前往设置审批流程 ~',
-      isHideList: [],
-      loading: true,
-      symbolKey: 'xlink:href',
-      dragOptions: {
-        sortVisible: false,
-        sortData: {}
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
       },
-      subGroup: {},
-      dialogOptions: {
-        dialogTitle: '',
-        dialogType: 'add',
-        dialogVisible: false
-      },
-      processListData: [],
-      tempProcessList: []
+      searchConfigLocal: SEARCH_CONFIG,
+      searchParams: null,
+      tableColumns: TABLE_COLUMNS,
+      tableConfig: TABLE_CONFIG,
+      tableData: [],
+      tableLoading: false
     }
   },
   computed: {
     ...mapGetters(['userId'])
   },
   mounted() {
-    this.refreshData()
+    // searchConfig 加载数据
+    let fieldProcessId = _.find(this.searchConfigLocal.popoverOptions, { field: 'processKey' })
+    let fieldStatus = _.find(this.searchConfigLocal.popoverOptions, { field: 'status' })
+    let fieldOrgId = _.find(this.searchConfigLocal.popoverOptions, { field: 'orgId' })
+    if (fieldProcessId) {
+      getProcessType().then(
+        (res) =>
+          (fieldProcessId.options = _.concat(
+            [
+              {
+                processKey: '',
+                processName: '全部'
+              }
+            ],
+            res
+          ))
+      )
+    }
+    if (fieldStatus) {
+      fieldStatus.options = _.concat(
+        [
+          {
+            dictKey: '',
+            dictValue: '全部'
+          }
+        ],
+        STATUS_DICTS
+      )
+    }
+    if (fieldOrgId) {
+      getOrgTreeSimple({ parentOrgId: 0 }).then(
+        (res) =>
+          (fieldOrgId.config.treeParams.data = _.concat(
+            [
+              {
+                orgName: '全部',
+                orgId: ''
+              }
+            ],
+            res
+          ))
+      )
+    }
   },
 
   methods: {
-    // 全局隐藏版本
-    hideVersion() {
-      this.isCurrentProcess = {}
-    },
-    // 点击跳转到对应版本
-    versionApproval(data) {
-      this.isCurrentProcess = data
-      let params = {
-        processKey: data.processKey
-      }
-      getApprVersion(params).then((res) => {
-        this.apprVersionList = res
-      })
-    },
-    checkEditable(process) {
-      return _.includes(process.admin, this.userId)
-    },
-    /**
-     * 切换显示隐藏
-     */
-    toggleShow(data) {
-      let index = this.isHideList.indexOf(data.id)
-      if (index > -1) {
-        this.isHideList.splice(index, 1)
-      } else {
-        this.isHideList.push(data.id)
-      }
-    },
-    /**
-     * 重新刷新数据
-     */
-    async refreshData() {
-      let resData = {}
-      await getProcessList().then((res) => {
-        resData = res
-        resData.map((item) => {
-          item.processes = _.sortBy(item.processes, 'sort')
-        })
-        resData = _.sortBy(resData, 'sort')
-        this.dragOptions.sortData = resData
-      })
-      await getDraftList().then((res) => {
-        this.loading = false
-        const conditionList = [resData.length === 0, res.length === 0]
-        if (_.every(conditionList, Boolean)) {
-          this.emptyVisibile = true
-        } else {
-          // 因接口返回数据不同，故专门写成如审批列表结构
-          let resetData = [
-            {
-              id: 0,
-              name: '未启用',
-              code: DRAFTCODE,
-              processes: res,
-              sort: 9999
-            }
-          ]
-          resData = [...resData, ...resetData]
-          // 拖拽的时候用来对比的原先的列表
-          this.tempProcessList = deepClone(resData)
-          this.processListData = resData
-        }
-      })
-    },
-    /**
-     * 拖拽结束
-     */
-    dragEnd(data, index) {
-      if (data.processes.length <= 1) return
-      let parmas = []
-      // 暂存拖拽数组和获取数据的数组的id集合
-      let temProcessIdList = []
-      let temDataIdList = []
-      data.processes.map((item, processesIndex) => {
-        parmas.push({
-          processId: item.processId,
-          categoryId: data.id,
-          sort: processesIndex + 1
-        })
-        temDataIdList.push(item.processId)
-      })
-      this.tempProcessList[index].processes.forEach((tempItem) => {
-        temProcessIdList.push(tempItem.processId)
-      })
-      let isSame = true // 当前两个数组是否相同，默认是两个相同的
-      temProcessIdList.forEach((item, index) => {
-        if (temDataIdList[index] !== item) {
-          isSame = false
-        }
-      })
-      // 当拖拽后的结果与之前暂存的是同一个数组时，不需要调用排序
-      if (isSame) return
-      sortProcess(parmas).then(() => {
-        this.refreshData()
-      })
-    },
-    /**
-     * 启用
-     */
-    enableApproval(data, processesItem) {
-      this.dialogOptions = {
-        dialogTitle: `将"${processesItem.processName}"启用到`,
-        dialogVisible: true,
-        dialogType: 'enable'
-      }
-      // 深克隆防止污染渲染数组
-      let target = deepClone(data)
-      target.processes = processesItem
-      this.subGroup = target
-    },
-    /**
-     * 发布
-     */
-    publishApproval(data, processesItem) {
-      let that = this
-      this.$confirm(
-        `
-      <div style="margin-left: 20px">
-        <p>发布并启用会进入到审批所设置的分组，并启用该审批</p>
-        <p>仅发布则在作为未启用的正式审批放在未启用分组中</p>
-      </div>
-      `,
-        '"用印申请"发布',
-        {
-          distinguishCancelAndClose: true,
-          dangerouslyUseHTMLString: true,
-          confirmButtonText: '发布并启用',
-          cancelButtonText: '仅发布'
-        }
-      )
-        .then(() => {
-          that.releaseProcessApi(processesItem, 1)
-        })
-        .catch(() => {
-          that.releaseProcessApi(processesItem, 0)
-        })
-    },
-    /**
-     * type = 0 是仅启用 1表示启用并发布
-     */
-    releaseProcessApi(processesItem, type) {
-      let parmas = {
-        processId: processesItem.processId,
-        categoryId: ''
-      }
-      releaseProcess(parmas).then(() => {
-        if (type === 0) {
-          this.$message.success(`${processesItem.processName}已发布到【未启用】分组中`)
-        } else {
-          this.$message.success(`${processesItem.processName}已发布到【XXX】分组中`)
-        }
-      })
-    },
-    /**
-     * 删除审批行程
-     */
-    deleteProcesses(data) {
-      this.$confirm('您确定要删除该审批流程吗？', '删除流程', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteProcess({ processId: data.processKey }).then(() => {
-            this.$message.success('删除成功')
-            this.refreshData()
-          })
-        })
-        .catch(() => {
-          this.$message.info('已取消删除')
-        })
-    },
-    /**
-     * 分组排序
-     */
-    groupSort() {
-      this.dragOptions.sortVisible = true
-    },
-    /**
-     * 取消排序
-     */
-    cancelSort() {
-      this.dragOptions.sortVisible = false
-    },
-    /**
-     * 保存排序
-     */
-    saveSort() {
-      let params = []
-      this.dragOptions.sortData.map((item, index) => {
-        params.push({
-          id: item.id,
-          sort: index + 1
-        })
-      })
-      // window.console.log('保存排序参数==', params)
-      sortCategory(params).then(() => {
-        this.sortRefreshData()
-      })
-    },
-    /**
-     * 保存后选刷新列表，再关闭页面，防止抖动
-     */
-    async sortRefreshData() {
-      await this.refreshData()
-      this.dragOptions.sortVisible = false
-    },
-    /**
-     * 移动到
-     */
-    moveApproval(data, processesItem) {
-      this.dialogOptions = {
-        dialogTitle: `将"${processesItem.processName}"移动到`,
-        dialogVisible: true,
-        dialogType: 'move'
-      }
-      let target = deepClone(data)
-      target.processes = processesItem
-      this.subGroup = target
-    },
-    /**
-     * 停用审批
-     */
-    disableApproval(data) {
-      stopProcessCategory({ processId: data.processId }).then(() => {
-        this.$message.success('停用成功')
-        this.refreshData()
-      })
-    },
-    /**
-     * 删除分组
-     */
-    deleteApproval(data) {
-      this.$confirm('您确定要删除该审批分组吗？', '删除分组', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteCategory({ id: data.id }).then(() => {
-            this.$message.success('删除成功')
-            this.refreshData()
-          })
-        })
-        .catch(() => {
-          this.$message.info('已取消删除')
-        })
-    },
-    /**
-     * 重命名
-     */
-    renameApproval(data) {
-      this.subGroup = data
-      this.dialogOptions = {
-        dialogTitle: '重命名分组',
-        dialogVisible: true,
-        dialogType: 'rename'
-      }
-    },
-    /**
-     * 新建分组
-     */
-    addNewGroup() {
-      this.subGroup = {}
-      this.dialogOptions = {
-        dialogTitle: '新建分组',
-        dialogVisible: true,
-        dialogType: 'add'
-      }
-    },
-    /**
-     * 创建审批
-     */
-    createApproval(data) {
+    // 处理跳转
+    jumpToDetail(row) {
       this.$router.push({
-        path: '/process/design',
-        query: data ? { processId: data.processId, formKey: data.formKey } : ''
+        path: '/apprProcess/apprDetail',
+        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo, preview: true }
       })
+    },
+
+    handleCurrentPageChange(page) {
+      this.page.currentPage = page
+      this.loadTableData()
+    },
+    handlePageSizeChange(pageSize) {
+      this.page.size = pageSize
+      this.loadTableData()
+    },
+    handleSearch(searchParams) {
+      this.searchParams = _.pickBy(searchParams)
+      this.page.currentPage = 1
+      this.loadTableData()
+    },
+
+    // 翻译字典
+    translator({ value, dictKey, $config: config }) {
+      if (!(dictKey = dictKey || _.get(config, 'dictKey'))) {
+        return value
+      }
+
+      const dicts = this.dictionary[dictKey]
+      // 如果字典为 undefined 时候加载字典
+      if (!dicts) this.loadDictionary(dictKey)
+      let result = value
+      _.each(dicts, (item) => {
+        if (item.dictKey === _.trim(value)) {
+          result = item.dictValue
+          return false
+        }
+      })
+      return result
+    },
+    async loadDictionary(dictKey) {
+      const dict = await this.$store.dispatch('CommonDict', dictKey)
+      this.$set(this.dictionary, dictKey, dict)
+      return dict
+    },
+    refresh() {
+      this.loadTableData()
+    },
+    async loadTableData() {
+      if (this.tableLoading) {
+        return
+      }
+      try {
+        const params = this.searchParams
+        this.tableLoading = true
+        const page = {
+          pageNo: this.page.currentPage,
+          pageSize: this.page.size
+        }
+        const { data, totalNum } = await getProcessList(_.assign(null, page, params))
+        this.tableData = data
+        this.page.total = totalNum
+        // eslint-disable-next-line no-useless-catch
+      } catch (error) {
+        throw error
+      } finally {
+        this.tableLoading = false
+      }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/mixin.scss';
-.flip-list-move {
-  transition: transform 0.5s;
-}
-.empty-box {
-  /deep/ .el-card__body {
-    height: 100%;
-  }
-  /deep/ .el-card {
-    height: 100%;
-  }
-}
-.basic-container--block {
-  margin-top: 24px;
-  height: calc(100% - 48px);
-  min-height: calc(100% - 48px);
-}
-.version-box {
-  margin-left: 10px;
-}
-.version-list {
-  .version-li {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 30px;
-    cursor: pointer;
-    &:hover {
-      background-color: #f3faff;
-    }
-  }
-}
-.approval-index-style {
-  .index-header-box {
-    @include flexJustify;
-    @include flexAlign;
-    .h2-title {
-      font-size: 18px;
-      color: #202940;
-      margin: 0;
-    }
-  }
-  .approval-section {
-    padding-top: 16px;
-    .margin-left-10 {
-      margin-left: 10px;
-    }
-    .approval-ul {
-      &:last-child {
-        .approval-li {
-          padding-bottom: 0;
-        }
-      }
-      .approval-li {
-        padding-bottom: 15px;
-        .title-box {
-          @include flexJustify;
-          @include flexAlign;
-          height: 42px;
-          padding: 0 24px;
-          background-color: #f7f8fa;
-          border-bottom: 1px solid #e4e7e9;
-          .li-title {
-            font-size: 16px;
-            color: #202940;
-            font-weight: 500;
-          }
-          .li-button {
-            display: flex;
-          }
-          .action-box {
-            margin-right: 10px;
-            .action-button {
-              // color: #202940;
-            }
-          }
-        }
-      }
-      .disable-action-button {
-        // color: #c0c4cc;
-        color: #a9beff;
-        cursor: pointer;
-        display: inline-block;
-        line-height: 1;
-        white-space: nowrap;
-        text-align: center;
-        padding: 13px 0px;
-        font-size: 14px;
-        border: 0;
-        background-color: transparent;
-        margin-left: 10px;
-      }
-      .detail-ul {
-        .detail-li {
-          @include flexJustify;
-          @include flexAlign;
-          height: 80px;
-          padding: 0 24px;
-          border-bottom: 1px solid #e9e9e9;
-          &:hover {
-            background-color: #f2faff;
-          }
-          .li-left {
-            @include flexAlign;
-            justify-self: start;
-            min-width: calc(7 / 12 * 100%);
-            .drag-i {
-              width: 24px;
-              height: 24px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              &:hover {
-                cursor: move;
-              }
-            }
-            .logo-box {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              margin: 0 14px;
-              width: 48px;
-              height: 48px;
-              svg {
-                width: 40px;
-                height: 40px;
-              }
-            }
-            .filter-gray {
-              filter: grayscale(100%);
-              filter: gray;
-            }
-            .content-box {
-              .content-title {
-                font-size: 14px;
-                color: #202940;
-                font-weight: 600;
-                .title {
-                  margin-right: 1rem;
-                }
-              }
-              .content-des {
-                margin-top: 4px;
-                max-width: 300px;
-                color: #757c85;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                cursor: pointer;
-              }
-            }
-          }
-          .li-middle {
-            min-width: calc(1 / 12 * 100%);
-            .middle-span {
-              color: #757c85;
-              margin-top: 4px;
-            }
-          }
-          .li-right {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-          }
-        }
-      }
-    }
-  }
-}
+<style lang="sass" scoped>
+$color_active: #368AFA
+$color_danger: #ff6464
+$color_icon: #A0A8AE
+.export-button
+  cursor: pointer
+.basic-container--block
+  height: 0
+  min-height: calc( 100% - 92px )
+.status-span
+  padding: 4px;
+  border-radius: 2px
+.table__link
+  color: $color_active
+  &:hover
+    cursor: pointer
+    color: $primaryColor
+.table__tags
+  >*
+    margin-left: 1rem
+.operations
+  align-items: center
+  display: flex
+  justify-content: space-between
+  &__column--item
+    height: 25px
+  &__column--visible
+    height: 200px
+    overflow: scroll
+  &__btns
+    align-items: center
+    display: flex
+    height: 24px
+    justify-content: flex-start
+  &__btns--item
+    margin: 0
+    margin-right: 4px
+    padding: 0
+    height: 24px
+    width: 24px
+    line-height: 24px
+    &:last-child
+      margin: 0
+    // margin-bottom: 8px
+    // margin-right: 8px
+  .iconfont
+    color: $color_icon
+    font-weight: bold
+    font-size: 16px
+.font__color--danger
+  color: $color_danger
+  font-weight: bold
+.expand
+  &__label
+    display: flex
+    text-align: center
+    font-size: 12px
+    color: #a0a8ae
+    margin: 0
+    &:not(:last-child)
+      border-right: 1px solid #ccc
 </style>

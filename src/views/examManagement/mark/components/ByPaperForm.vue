@@ -17,10 +17,33 @@
     <div class="split-line"></div>
     <common-form
       ref="form"
-      :model="formData"
+      :model="data"
       :columns="columns"
       :config="{ labelPosition: 'left', labelWidth: '100px', labelPosition: 'right' }"
     >
+      <template slot="scoreUser">
+        <el-input-number
+          v-model="data.scoreUser"
+          controls-position="right"
+          :step="0.1"
+        ></el-input-number>
+      </template>
+      <template slot="result">
+        <el-radio-group
+          v-model="data.result"
+          @change="reslutChange"
+        >
+          <el-radio :label="0">
+            对
+          </el-radio>
+          <el-radio :label="1">
+            错
+          </el-radio>
+          <el-radio :label="2">
+            部分对
+          </el-radio>
+        </el-radio-group>
+      </template>
     </common-form>
   </div>
 </template>
@@ -28,28 +51,14 @@
 <script>
 const EventColumnsS = [
   {
-    itemType: 'radio',
+    itemType: 'slot',
     span: 14,
     required: false,
-    options: [
-      {
-        label: '对',
-        value: '0'
-      },
-      {
-        label: '错',
-        value: '1'
-      },
-      {
-        label: '部分对',
-        value: '2'
-      }
-    ],
     prop: 'result',
     label: '评分结果：'
   },
   {
-    itemType: 'input',
+    itemType: 'slot',
     span: 10,
     prop: 'scoreUser',
     label: '得分：',
@@ -77,34 +86,42 @@ export default {
   },
   data() {
     return {
-      formData: {
-        result: '', // 评价结果
-        scoreUser: '', // scoreUser
-        reviewRemark: '', // 评语
-        id: this.data.id //考生答卷答题卡id
-      },
       columns: _.cloneDeep(EventColumnsS)
     }
   },
   watch: {
-    'formData.result': {
+    data: {
       handler(value) {
         if (value) {
           this.columns[1].rules[0].required = true
           this.columns[2].rules[0].required = true
         }
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   created() {},
-  methods: {}
+  methods: {
+    reslutChange(value) {
+      switch (value) {
+        case 0:
+          this.data.scoreUser = this.data.scoreQuestion
+          break
+        case 1:
+          this.data.scoreUser = 0
+          break
+        case 2:
+          this.data.scoreUser = this.data.scoreQuestion / 2
+          break
+      }
+    }
+  }
 }
 </script>
 
 <style scoped lang="scss">
 .mark-section {
-  margin-top: 8px;
   background: #fafafa;
   padding: 24px;
   .mark-top {
@@ -130,6 +147,9 @@ export default {
   }
   /deep/ .el-form-item {
     margin-bottom: 16px;
+  }
+  /deep/ .el-input-number--medium {
+    width: 100%;
   }
 }
 </style>

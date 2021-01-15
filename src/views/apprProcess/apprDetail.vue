@@ -76,24 +76,7 @@
             <div
               v-show="show"
               class="apply-detail"
-            >
-              <ApplyRecruitment
-                v-if="applyDetail.formKey === 'Recruitment'"
-                :form-key="applyDetail.formKey"
-                :form-id="applyDetail.formId"
-              />
-              <ApplyPersonOffer
-                v-else-if="applyDetail.formKey === 'PersonOfferApply'"
-                :form-key="applyDetail.formKey"
-                :form-id="applyDetail.formId"
-              />
-              <div v-else>
-                <form-parser
-                  ref="formParser"
-                  @downFile="downFile"
-                />
-              </div>
-            </div>
+            ></div>
           </el-col>
         </el-row>
       </transition>
@@ -150,42 +133,10 @@
             同意
           </el-button>
         </el-tooltip>
+
         <el-tooltip
           effect="dark"
-          content="退回"
-          :enterable="false"
-          placement="top"
-        >
-          <el-button
-            v-if="isApprover && hasReturn && backOffNodeList.length > 0"
-            type="primary"
-            size="medium"
-            @click="() => (backOffDialog = true)"
-          >
-            退回
-          </el-button>
-        </el-tooltip>
-        <el-tooltip
-          effect="dark"
-          content="重新申请"
-          :enterable="false"
-          placement="top"
-        >
-          <el-button
-            v-if="
-              (isReject && isApplyUser && !isCustomProcess) ||
-                (isCancel && isApplyUser && !isCustomProcess)
-            "
-            type="primary"
-            size="medium"
-            @click="handleReapplyClick"
-          >
-            重新申请
-          </el-button>
-        </el-tooltip>
-        <el-tooltip
-          effect="dark"
-          content="重新申请"
+          content="催一下"
           :enterable="false"
           placement="top"
         >
@@ -246,20 +197,11 @@
         >确 定</el-button>
       </span>
     </el-dialog>
-    <backOffDialog
-      v-if="backOffDialog"
-      :visible.sync="backOffDialog"
-      :nodelist="backOffNodeList"
-      :process-instance-id="processInstanceId"
-      :task-id="taskId"
-      @load="loadData"
-    />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import backOffDialog from './components/backOffDialog'
 import steps from './components/steps'
 import {
   getApprDetail,
@@ -279,9 +221,6 @@ import 'moment/locale/zh-cn'
 moment.locale('zh-cn')
 import { Base64 } from 'js-base64'
 
-import ApplyRecruitment from './components/applyRecruitment'
-import ApplyPersonOffer from './components/applyPersonOffer'
-
 // 审批状态
 const APPROVE_STATUS_TYPE = {
   CANCEL: 'Cancel',
@@ -295,9 +234,6 @@ const { CANCEL, EMPTY, PASS, REJECT, RETURN } = APPROVE_STATUS_TYPE
 export default {
   name: 'Apprv2Detail',
   components: {
-    ApplyRecruitment,
-    ApplyPersonOffer,
-    backOffDialog,
     steps
   },
   filters: {
@@ -535,10 +471,6 @@ export default {
           })
         }
         this.handleNodeData()
-        // 因为watch progressRecord值后触发，所以异步一下
-        setTimeout(() => {
-          this.initForm()
-        })
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -856,75 +788,7 @@ export default {
       })
       this.progress = _.concat(this.progress, addNodes)
     },
-    /**
-     * 初始化表单生成器的数据，拼接成当前节点的表单权限的数据
-     */
-    initForm() {
-      const { formData } = this.applyDetail
-      this.processData = formData.processData
-      // 如果表单数据为空直接跳出
-      this.JSONData = _.cloneDeep(formData)
-      if (_.isEmpty(formData.formData.fields)) return
-      const assignObj = {
-        labelPosition: 'right',
-        labelWidth: '120px',
-        isDetail: true // 新增isDetail字段区分是否为详情页
-      }
-      formData.formData = _.assign(formData.formData, assignObj)
-      // 以下的都是手动赋值权限
-      if (typeof formData === 'object') {
-        // 当前审批节点的审批人包含当前用户，并且是从非审批记录列表进去的
-        if (this.apprUserIdList.includes(this.userId) && !this.isPreview) {
-          // 获取当前的审批节点
-          const currentNode = this.findCurrentNode(formData.processData)
-          // 当前节点的权限数组
-          const formOperates = currentNode.properties.formOperates
-          // 遍历对比的权限数组，用权限数组内的权限以及必填，更换初始表格的数据的权限以及必填
-          _.each(formOperates, (item) => {
-            _.each(formData.formData.fields, (formItem) => {
-              if (item.formId === formItem.__config__.formId) {
-                // 选中初始表格的每一项，更换当前的权限以及必填
-                formItem.__config__.formPrivilege = item.formPrivilege
-                formItem.__config__.required = item.required
-                if (formItem.children) {
-                  formItem.children.forEach((childrenItem) => {
-                    childrenItem.map((deepItem) => {
-                      deepItem.__config__.formPrivilege = item.formPrivilege
-                    })
-                  })
-                }
-                if (formItem.__config__.formPrivilege === 1) {
-                  formItem.__config__.required = false
-                  if (formItem.children) {
-                    formItem.children.forEach((childrenItem) => {
-                      childrenItem.map((deepItem) => {
-                        deepItem.__config__.required = false
-                      })
-                    })
-                  }
-                }
-              }
-            })
-          })
-        } else {
-          // 详情内，当前用户不拥有审批权限时，权限设置只读，并去除必填校验
-          formData.formData.fields.forEach((formItem) => {
-            formItem.__config__.formPrivilege = 1
-            formItem.__config__.required = false
-            // 兼容处理明细控件
-            if (formItem.children) {
-              formItem.children.forEach((childrenItem) => {
-                childrenItem.forEach((deepItem) => {
-                  deepItem.__config__.formPrivilege = 1
-                  deepItem.__config__.required = false
-                })
-              })
-            }
-          })
-        }
-        this.$refs.formParser.init(formData.formData)
-      }
-    },
+
     handleBack() {
       this.$store.commit('DEL_TAG', this.tag)
       this.$router.back()

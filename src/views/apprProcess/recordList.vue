@@ -1,5 +1,5 @@
 <template>
-  <div class="Recordlist">
+  <div class="Recordlist fill">
     <page-header title="审批记录" />
     <basic-container block>
       <common-table
@@ -21,14 +21,6 @@
               @submit="handleSearch"
             />
             <div class="operations__btns">
-              <el-button
-                icon="el-icon-download"
-                size="medium"
-                style="margin-right: 10px"
-                @click="exportAll()"
-              >
-                导出
-              </el-button>
               <el-tooltip
                 class="operations__btns--tooltip"
                 content="刷新"
@@ -49,21 +41,13 @@
                 width="40"
                 trigger="click"
               >
-                <el-tooltip
-                  slot="reference"
-                  class="operations__btns--tooltip"
-                  content="显隐"
-                  effect="dark"
-                  placement="top"
+                <el-button
+                  class="operations__btns--item"
+                  size="mini"
+                  type="text"
                 >
-                  <el-button
-                    class="operations__btns--item"
-                    size="mini"
-                    type="text"
-                  >
-                    <i class="iconfont iconicon_setting" />
-                  </el-button>
-                </el-tooltip>
+                  <i class="iconfont iconicon_setting" />
+                </el-button>
 
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
@@ -83,18 +67,6 @@
             </div>
           </div>
         </template>
-        <template
-          slot="multiSelectMenu"
-          slot-scope="{ selection }"
-        >
-          <span
-            style="cursor: pointer;"
-            @click="exportAll(selection)"
-          >
-            <i class="el-icon-download" />
-            导出
-          </span>
-        </template>
         <template #status="{row}">
           <span
             class="status-span"
@@ -109,14 +81,14 @@
         <template #apprNo="{row}">
           <span
             class="table__link"
-            @click="() => jumpToDetail(row)"
+            @click="jumpToDetail(row)"
           >{{ row.apprNo }}</span>
         </template>
 
         <template #handler="{row}">
           <el-button
             type="text"
-            @click="() => jumpToDetail(row)"
+            @click="jumpToDetail(row)"
           >
             查看
           </el-button>
@@ -183,7 +155,6 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
   handlerColumn: {
     minWidth: 50
   }
@@ -308,7 +279,7 @@ export default {
     ...mapGetters(['userId'])
   },
   activated() {
-    this.refresh()
+    // this.refresh()
   },
   mounted() {
     // searchConfig 加载数据
@@ -357,82 +328,6 @@ export default {
   },
 
   methods: {
-    async exportAll(selection) {
-      if (!this.validateTable()) return
-      let apprNo = ''
-      if (selection) {
-        let apprNoList = []
-        selection.forEach((item) => {
-          apprNoList.push(item.apprNo)
-        })
-        apprNo = apprNoList.join(',')
-      }
-      let fileType = await this.$confirm('请选择导出格式！', '提示', {
-        confirmButtonText: '导出PDF',
-        cancelButtonText: '导出Excel',
-        distinguishCancelAndClose: true,
-        center: true,
-        type: 'warning'
-      })
-        .then(() => {
-          return 'PDF'
-        })
-        .catch((action) => {
-          return action === 'cancel' ? 'Excel' : ''
-        })
-      if (!fileType) return
-      this.exportDataFun(apprNo, fileType)
-    },
-    exportDataFun(apprNo, fileType) {
-      let params = {
-        dataType: 'approve',
-        processKey: '',
-        orgId: '',
-        bizId: '',
-        beginApplyTime: '',
-        endApplyTime: '',
-        status: '',
-        beginCompleteTime: '',
-        endCompleteTime: '',
-        apprNo,
-        fileType: fileType
-      }
-      if (this.searchParams) {
-        params = _.assign(params, this.searchParams)
-      }
-      let paramsString = ''
-      _.mapKeys(params, (value, key) => {
-        if (value) {
-          paramsString += `${key}=${value}&`
-        }
-      })
-      paramsString = paramsString.substring(0, paramsString.length - 1)
-      // TODO: 后续需要判断processKey、orgId、bizId等不能全为空，即为不能全量导出
-      if (!this.validateExportParams(paramsString)) return
-      window.open(`/api/appr/v2/appr/export/data?${paramsString}`)
-    },
-    /**
-     * 当列表无数据的时候，不许导出
-     */
-    validateTable() {
-      if (_.isEmpty(this.tableData)) {
-        this.$message.error('导出数据为空')
-        return false
-      } else {
-        return true
-      }
-    },
-    /**
-     * 验证导出参数格式是否合格,暂时默认不需要做处理，先写了个空壳
-     */
-    validateExportParams(params) {
-      if (params.length > 8182) {
-        this.$message.error('选择审批数量过多，请减少选中数量')
-        return false
-      } else {
-        return true
-      }
-    },
     statusToText(status) {
       return STATUS_TO_TEXT[status]
     },
@@ -499,8 +394,9 @@ export default {
         const { data, totalNum } = await getRecordList(_.assign(null, page, params))
         this.tableData = data
         this.page.total = totalNum
+        // eslint-disable-next-line no-useless-catch
       } catch (error) {
-        this.$message.error(error.message)
+        throw error
       } finally {
         this.tableLoading = false
       }

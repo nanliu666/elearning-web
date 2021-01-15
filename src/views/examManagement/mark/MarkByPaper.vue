@@ -33,81 +33,81 @@
       </div>
     </el-card>
     <el-card class="paper-card">
-      <div
-        slot="header"
-        class="card-header"
-      >
-        <div class="card-left">
-          <span class="title">试题答卷</span>
-          <span class="sub-title">
-            <span>（搜索结果：</span>
-            <span>{{ `${totalNum > 0 ? `共${totalNum}题` : '--'}）` }}</span>
-          </span>
+      <div class="sticky-header-box">
+        <div class="card-header">
+          <div class="card-left">
+            <span class="title">试题答卷</span>
+            <span class="sub-title">
+              <span>（搜索结果：</span>
+              <span>{{ `${totalQustionNum > 0 ? `共${totalQustionNum}题` : '--'}）` }}</span>
+            </span>
+          </div>
+          <div class="card-right">
+            <el-button
+              size="medium"
+              :disabled="currentIndex === 0"
+              @click="prevQuestion"
+            >
+              上一题
+            </el-button>
+            <span class="number-box">
+              <span>{{ currentIndex + 1 }}</span>
+              <span>/</span>
+              <span>{{ totalQustionNum }}</span>
+            </span>
+            <el-button
+              size="medium"
+              :disabled="currentIndex + 1 === totalQustionNum"
+              @click="nextQuestion"
+            >
+              下一题
+            </el-button>
+          </div>
         </div>
-        <div class="card-right">
-          <el-button
-            size="medium"
-            :disabled="currentIndex === 0"
-            @click="prevQuestion"
+        <div
+          v-if="!_.isEmpty(questionMain)"
+          class="stem-main"
+        >
+          <span>{{ currentIndex + 1 }}.</span>
+          <span v-html="getHTML()" />
+          <el-tooltip
+            class="item"
+            effect="dark"
+            :content="`试题分析：${questionMain.analysis || '暂无'}`"
+            placement="top-start"
           >
-            上一题
-          </el-button>
-          <span class="number-box">
-            <span>{{ currentIndex + 1 }}</span>
-            <span>/</span>
-            <span>{{ totalNum }}</span>
-          </span>
-          <el-button
-            size="medium"
-            :disabled="currentIndex + 1 === totalNum"
-            @click="nextQuestion"
-          >
-            下一题
-          </el-button>
+            <el-button type="text">
+              [查看试题分析]
+            </el-button>
+          </el-tooltip>
+        </div>
+        <div class="dot-box">
+          <div class="dot-content">
+            <span class="dot"></span>
+            <span>
+              <span class="label">标准答案：</span>
+              <span class="value is-correct">{{
+                _.get(qustionList, '[0].answerQuestion', '未设置标椎答案')
+              }}</span>
+            </span>
+          </div>
         </div>
       </div>
       <ul
         v-if="!_.isEmpty(questionMain)"
         class="card-content"
       >
-        <li class="card-li">
-          <div class="stem-main">
-            <span>{{ currentIndex + 1 }}.</span>
-            <span v-html="_.unescape(questionMain.content)" />
-            <el-tooltip
-              class="item"
-              effect="dark"
-              :content="`试题分析：${questionMain.analysis || '暂无'}`"
-              placement="top-start"
-            >
-              <el-button type="text">
-                [查看试题分析]
-              </el-button>
-            </el-tooltip>
-          </div>
-          <ul class="question-ul">
-            <div class="dot-box">
-              <div class="dot-content">
-                <span class="dot"></span>
-                <span>
-                  <span class="label">标准答案：</span>
-                  <span class="value is-correct">{{
-                    _.get(qustionList, '[0].answerQuestion', '未设置标椎答案')
-                  }}</span>
-                </span>
-              </div>
-            </div>
-            <li
-              v-for="(item, index) in qustionList"
-              :key="item.id"
-              class="question-li"
-            >
-              <by-paper-form
-                :ref="`refSelect${index}`"
-                :data="item"
-              />
-            </li>
-          </ul>
+        <li
+          v-for="item in _.flattenDeep(totalList)"
+          :key="item.id"
+          class="card-li"
+          :class="{ 'is-show-li': isShowQustion(item) }"
+        >
+          <by-paper-form
+            v-show="isShowQustion(item)"
+            ref="refSelect"
+            :data="item"
+          />
         </li>
       </ul>
       <com-empty
@@ -119,9 +119,9 @@
       <div class="pagination-box">
         <el-pagination
           :page-sizes="[10, 20, 30, 40]"
-          :page-size="10"
+          :current-page="pageNo"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="totalPage"
+          :total="totalNum"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -197,15 +197,15 @@ const EventColumns = [
     options: [
       {
         label: '全部',
-        value: '0'
+        value: ''
       },
       {
         label: '未评分',
-        value: '1'
+        value: '0'
       },
       {
         label: '已评分',
-        value: '2'
+        value: '1'
       }
     ],
     prop: 'status',
@@ -244,6 +244,7 @@ import addPng from '@/assets/images/add.jpg'
 import noData from '@/assets/images/noData.jpg'
 import ComEmpty from '@/components/common-empty/empty'
 import ByPaperForm from './components/ByPaperForm.vue'
+import { addLine } from '@/util/util'
 export default {
   name: 'MarkByPaper',
   components: {
@@ -260,27 +261,27 @@ export default {
   },
   data() {
     return {
-      currentIndex: 0,
+      autoCommitTimer: {}, // 自动提交的定时器
+      currentSize: 10, // 每页几条
+      pageNo: 1, //第几页
+      totalNum: 0, // 考生总条数
+      currentTotalList: [], // 当前题目下的所有的考生答卷
+      currentIndex: 0, //第几题
       emptySrc: noData,
       emptyText: '请搜索需要评分的考生试题~',
       columns: EventColumns,
       queryInfo: {
         type: '',
-        status: '2', //默认显示已评分
+        status: '', //默认显示全部
         lastId: '',
         examId: '',
         orgId: ''
       },
-      totalNum: 0,
-      totalPage: 0, // 考生总条数
-      pageQuery: {
-        id: '',
-        size: 10,
-        currentPage: 1
-      },
+      totalQustionNum: 0, //此类型一共有几题
       questionMain: {},
       formDataList: [],
-      qustionList: []
+      qustionList: [],
+      totalList: []
     }
   },
   computed: {
@@ -290,7 +291,8 @@ export default {
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {
-    this.initForm()
+    this.initSearchForm()
+    this.initAutoCommit()
     this.loadData()
   },
   beforeRouteLeave(to, from, next) {
@@ -299,47 +301,89 @@ export default {
     next()
   },
   methods: {
+    // 获取当前的答卷显示列表
+    isShowQustion(data) {
+      const index = _.findIndex(this.qustionList, (item) => {
+        return item.id === data.id
+      })
+      return index > -1
+    },
+    async loadData() {
+      _.assign(this.queryInfo, {
+        examId: this.$route.query.id,
+        lastId: _.get(this.questionMain, 'id', '')
+      })
+      const res = await listExamineePaperOnce(this.queryInfo)
+      const { totalNum, list } = res
+      this.totalQustionNum = totalNum
+      this.questionMain = list
+      //此题目未被记录在数据内
+      if (_.isEmpty(this.totalList[this.currentIndex])) {
+        this.getPaperData()
+      } else {
+        this.setQuestionList()
+      }
+    },
+    // 一次将当前题目的所有考生答卷拉取回来
+    // 前端做分页
+    async getPaperData() {
+      const { totalNum, list } = await getByPaper({
+        id: this.questionMain.id,
+        size: 100000,
+        currentPage: 1
+      })
+      this.totalNum = totalNum
+      this.currentTotalList = list
+      this.totalList.push(_.chunk(this.currentTotalList, this.currentSize))
+      this.setQuestionList()
+    },
+    setQuestionList() {
+      // 获取到当前的展示数组
+      // 第几题的第几页的数据--手动创建了一个二维数组
+      this.qustionList = this.totalList[this.currentIndex][this.pageNo - 1]
+    },
+    // 页数改变
+    handleSizeChange(val) {
+      this.currentSize = val
+      this.setQuestionList()
+    },
+    // 页码改变
+    handleCurrentChange(val) {
+      this.pageNo = val
+      this.setQuestionList()
+    },
+    // 10分钟自动提交
+    initAutoCommit() {
+      const TEN_MINUTES = 1000
+      // const TEN_MINUTES = 10 * 60 * 1000
+      this.autoCommitTimer = setInterval(() => {
+        // console.log(11)
+      }, TEN_MINUTES)
+    },
+    getHTML() {
+      return addLine(this.questionMain.content)
+    },
+    // 离开后清除页面数据?为啥这个页面不能自定清除？
     clearActiveData() {
-      this.questionMain = []
+      this.questionMain = {}
+      this.totalList = []
       this.qustionList = []
       this.currentIndex = 0
+      clearInterval(this.autoCommitTimer)
     },
+    // 上一题
     prevQuestion() {
       this.currentIndex -= 1
       this.queryInfo.direction = 0
       this.loadData()
     },
+    // 下一题
     nextQuestion() {
       this.currentIndex += 1
       this.queryInfo.direction = 1
       this.loadData()
     },
-    pageChange() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = _.map(targetRefs, 'model')
-      const isAllPass = _.every(this.formDataList, (item) => {
-        return _.get(item, 'result') && _.get(item, 'scoreUser') && _.get(item, 'reviewRemark')
-      })
-      if (isAllPass) {
-        this.getPaperData()
-      } else {
-        this.needTips()
-      }
-    },
-    needTips() {
-      this.$confirm('当前页面还有试题未进行评价，是否忽略进入下一页？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.loadData()
-      })
-    },
     submit() {
-      this.checkRequired()
-    },
-    // 检测提交前的逻辑
-    checkRequired() {
       const checkList = this.getTargetRefs()
       Promise.all(
         _.map(checkList, (item) => {
@@ -355,8 +399,7 @@ export default {
     },
     // 具体提交函数
     submitFun() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = _.map(targetRefs, 'model')
+      this.formDataList = _.map(this.getTargetRefs(), 'model')
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
@@ -366,12 +409,13 @@ export default {
       if (_.isEmpty(list)) {
         this.$message.error('您未对该考卷进行评分，请评分后再提交！')
       } else {
-        actionExamineePaperIngUser(list)
+        actionExamineePaperIngUser({ list: list })
           .then(() => {
-            // console.log('res==', res)
+            this.$router.push({ path: '/examManagement/mark/MarkList' })
           })
-          .catch(() => {
-            window.console.error(JSON.stringify(list))
+          .catch((err) => {
+            window.console.error('err==', err)
+            window.console.error(JSON.stringify({ list: list }))
           })
       }
     },
@@ -383,7 +427,7 @@ export default {
           return !_.isEmpty(item)
         })
         .map((item) => {
-          return item.gapAndShorRef.$refs.form
+          return item.form
         })
         .value()
       return targetRefs
@@ -391,15 +435,8 @@ export default {
     goback() {
       this.$router.go(-1)
     },
-    handleSizeChange(val) {
-      this.pageQuery.size = val
-      this.getPaperData()
-    },
-    handleCurrentChange(val) {
-      this.pageQuery.currentPage = val
-      this.pageChange()
-    },
-    initForm() {
+    //初始化搜索表单的数据
+    initSearchForm() {
       _.set(this.columns, '[0].options', SOURCE)
       getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
         _.set(this.columns, '[1].props.treeParams.data', res)
@@ -407,34 +444,11 @@ export default {
     },
     reset() {
       this.$refs.form.resetFields()
-      this.search()
     },
     search() {
+      this.totalList = []
+      this.qustionList = []
       this.loadData()
-    },
-    async loadData() {
-      _.assign(this.queryInfo, {
-        examId: this.$route.query.id,
-        lastId: _.get(this.questionMain, 'id', '')
-      })
-      const res = await listExamineePaperOnce(this.queryInfo)
-      const { totalNum, list } = res
-      this.totalNum = totalNum
-      if (list) {
-        this.questionMain = list
-        this.getPaperData()
-      } else {
-        this.questionMain = Object.create(null)
-        this.qustionList = []
-        this.isEmpty()
-      }
-    },
-    async getPaperData() {
-      const { totalNum, list } = await getByPaper(
-        _.assign(this.pageQuery, { id: this.questionMain.id })
-      )
-      this.qustionList = list
-      this.totalPage = totalNum
     },
     isEmpty() {
       this.emptySrc = addPng
@@ -469,10 +483,11 @@ export default {
     padding-bottom: 76px;
     position: relative;
     .card-header {
-      padding: 10px 0;
+      padding-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid #ebeced;
       .card-left {
         display: flex;
         align-items: flex-end;
@@ -494,48 +509,37 @@ export default {
         }
       }
     }
+    .sticky-header-box {
+      position: sticky;
+      top: 0;
+      .stem-main {
+        margin: 0 13.5%;
+        padding-top: 16px;
+      }
+      .dot-box {
+        margin: 0 13.5%;
+        padding-bottom: 16px;
+        .dot-content {
+          min-width: 60px;
+          display: flex;
+          align-items: center;
+          .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(0, 11, 21, 0.25);
+            margin-right: 6px;
+          }
+        }
+      }
+    }
     .card-content {
       .card-li {
         margin: 0 13.5%;
-        .card-title {
-          font-family: PingFangSC-Medium;
-          font-size: 16px;
-          color: rgba(0, 11, 21, 0.85);
-          font-weight: 550;
-        }
-        .card-sub-title {
-          font-family: PingFangSC-Regular;
-          font-size: 12px;
-          color: rgba(0, 11, 21, 0.25);
-          margin: 10px 0 18px;
-        }
-        .stem-main {
-        }
-        .standard-class {
-          position: relative;
-          padding-left: 34px;
-          margin-bottom: 8px;
-          &::before {
-            content: '';
-            position: absolute;
-            left: 24px;
-            bottom: 6px;
-            width: 6px;
-            height: 6px;
-            background-color: rgba(0, 11, 21, 0.25);
-            border-radius: 100%;
-          }
-          .standard-label {
-            font-family: PingFangSC-Regular;
-            font-size: 14px;
-            color: rgba(0, 11, 21, 0.25);
-          }
-          .standard-value {
-            font-family: PingFangSC-Regular;
-            font-size: 14px;
-            color: rgba(0, 11, 21, 0.85);
-          }
-        }
+      }
+      .is-show-li {
+        margin-bottom: 32px;
       }
     }
     .label {
@@ -561,27 +565,7 @@ export default {
       padding: 24px;
       background-color: #fafafa;
     }
-    .question-ul {
-      .dot-box {
-        padding-left: 24px;
-        .dot-content {
-          min-width: 60px;
-          display: flex;
-          align-items: center;
-          .dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: rgba(0, 11, 21, 0.25);
-            margin-right: 6px;
-          }
-        }
-      }
-      .question-li {
-        margin-bottom: 32px;
-      }
-    }
+
     .pagination-box {
       display: flex;
       justify-content: flex-end;
@@ -590,6 +574,7 @@ export default {
   }
   .handle-button {
     position: fixed;
+    z-index: 1;
     bottom: 0;
     right: 40px;
     width: calc(100vw - 16.5vw - 72px);
