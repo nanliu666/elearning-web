@@ -1,7 +1,8 @@
 <template>
   <span class="qustion">
     <span class="qustion__content">
-      <span class="qustion__label">题目: </span><span v-html="_.unescape(data.content)"></span>
+      <span class="qustion__label">题目: </span>
+      <span v-html="getHTML(data.content)" />
     </span>
     <div
       v-if="!_.isEmpty(data.attachments)"
@@ -95,6 +96,8 @@ import {
   QUESTION_TYPE_BLANK,
   QUESTION_TYPE_GROUP
 } from '@/const/examMange'
+import { addLine } from '@/util/util'
+
 export default {
   name: 'QustionPreview',
   components: { ImageViewer },
@@ -125,6 +128,9 @@ export default {
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   methods: {
+    getHTML(content) {
+      return addLine(content)
+    },
     handlePreviewImage(list, index = 0) {
       this.viewing = true
       this.viewingImages = list
