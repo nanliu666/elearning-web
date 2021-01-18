@@ -182,7 +182,7 @@ export default {
         .then((res) => {
           const param = {
             basicSetting: res[0].formData,
-            processData: res[2].formData
+            processData: res[1].formData
           }
           // 区分预览和发布操作
           this.sendToServer(param)

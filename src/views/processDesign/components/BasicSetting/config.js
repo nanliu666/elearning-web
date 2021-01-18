@@ -12,14 +12,14 @@ export const columns = [
   },
   {
     span: 24,
-    prop: 'processType',
+    prop: 'categoryId',
     itemType: 'select',
     label: '流程类型',
     required: true,
     options: [
       {
         label: '课程审批',
-        value: 1
+        value: '1'
       }
     ]
   },

@@ -13,32 +13,10 @@
       <!-- 标题 -->
       <!-- 标题 -->
       <header
-        v-if="value && value.type == 'start' && properties.title"
         slot="title"
         class="header"
       >
         {{ properties.title }}
-      </header>
-      <header
-        v-else
-        slot="title"
-        class="header"
-      >
-        <span
-          v-show="!titleInputVisible"
-          style="cursor: pointer; color: #202940; font-size: 16px"
-          @click="titleInputVisible = true"
-        >
-          {{ properties.title }}
-          <i class="el-icon-edit" />
-        </span>
-        <el-input
-          v-show="titleInputVisible"
-          v-model="properties.title"
-          v-clickoutside="(_) => (titleInputVisible = false)"
-          size="mini"
-          style="z-index: 9; max-width: 200px"
-        />
       </header>
       <!-- 审批人 -->
       <section
@@ -188,7 +166,11 @@ export default {
       },
       useDirectorProxy: true, // 找不到主管时 上级主管代理审批
       approverForm: JSON.parse(JSON.stringify(defaultApproverForm)),
-
+      members: {
+        //抄送节点
+        dep: [],
+        copy: []
+      },
       dictionary: {}
     }
   },
@@ -206,9 +188,6 @@ export default {
       if (newVal && newVal.properties) {
         this.visible = true
         this.properties = newVal.properties
-        if (this.properties) {
-          NodeUtils.isConditionNode(newVal) && this.getPriorityLength()
-        }
       }
     },
     visible(val) {
@@ -300,6 +279,8 @@ export default {
       const approvers = this.approverForm.approvers
       if (Array.isArray(this.approverForm.approvers)) {
         this.orgCollection[this.approverForm.assigneeType] = approvers
+      } else {
+        this.orgCollection[this.approverForm.assigneeType] = []
       }
     },
     /**

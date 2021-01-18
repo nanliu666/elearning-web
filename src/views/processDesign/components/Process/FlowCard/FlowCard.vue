@@ -23,14 +23,6 @@ function createNormalCard(ctx, conf, h) {
             <i class="el-icon-s-promotion" style="font-size:12px;color:white;margin-right:8px;"></i>
           )}
           <span class="title-text">{conf.properties.title}</span>
-          {!isStartNode && (
-            <input
-              vModel_trim={conf.properties.title}
-              class="title-input"
-              style="margin-top:6px;"
-              onClick={stopPro}
-            />
-          )}
         </div>
         <div class="actions" style="margin-right:8px;">
           <i

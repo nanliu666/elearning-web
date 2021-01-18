@@ -62,6 +62,7 @@ export default {
       formData: {
         processName: '',
         processType: '',
+        categoryId: '1',
         processVisible: [],
         approverDistinct: 0,
         isOpinion: '',
