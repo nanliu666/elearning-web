@@ -623,12 +623,16 @@ export default {
         return
       }
       //后台要精确到一位小数，提交是乘以10
-      let randomSettings = this.tableData.map((it) => ({ ...it, score: it.score * 10 }))
+      let randomSettings = this.tableData.map((it, index) => ({
+        ...it,
+        score: it.score * 10,
+        sort: index
+      }))
       let form = _.cloneDeep(this.form)
       form.totalScore = form.totalScore * 10
       let params = {
         ...form,
-        randomSettings: randomSettings,
+        randomSettings,
         type: 'random'
       }
       let testPaperMether =
