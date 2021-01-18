@@ -80,6 +80,7 @@
                   <el-checkbox
                     v-for="item in tableColumns"
                     :key="item.prop"
+                    :disabled="item.prop === 'examName'"
                     :label="item.prop"
                     class="originColumn"
                   >

@@ -14,7 +14,10 @@
       </el-button>
     </page-header>
     <basic-container>
-      <div class="preview-container">
+      <div
+        v-loading="loading"
+        class="preview-container"
+      >
         <div class="preview-title-box">
           <div class="preview-title">
             {{ paperData.name }}
@@ -112,6 +115,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       paperData: []
     }
   },
@@ -142,6 +146,7 @@ export default {
       })
     },
     initData() {
+      this.loading = true
       let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
       if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
         loadFun = createRandomPaper
@@ -151,10 +156,14 @@ export default {
         this.$route.query.paperType === 'manual' || this.$route.query.isManaged
           ? basicParams
           : _.assign(basicParams, { previewId: this.$route.query.previewId })
-      loadFun(parmas).then((res) => {
-        res.questions = this.handleData(res.questions)
-        this.paperData = res
-      })
+      loadFun(parmas)
+        .then((res) => {
+          res.questions = this.handleData(res.questions)
+          this.paperData = res
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     handleData(data) {
       return _.chain(data)
@@ -172,6 +181,7 @@ export default {
 <style scoped lang="scss">
 .preview-container {
   padding: 60px 80px;
+  min-height: 75vh;
   .preview-title-box {
     display: flex;
     align-items: center;
