@@ -152,16 +152,18 @@ export default {
           ? basicParams
           : _.assign(basicParams, { previewId: this.$route.query.previewId })
       loadFun(parmas).then((res) => {
-        const data = _.chain(res.questions)
-          .groupBy('parentSort')
-          .sortBy('parentSort')
-          .map((item) => {
-            return _.sortBy(item, 'sort')
-          })
-          .value()
-        res.questions = data
+        res.questions = this.handleData(res.questions)
         this.paperData = res
       })
+    },
+    handleData(data) {
+      return _.chain(data)
+        .groupBy('parentSort')
+        .sortBy('parentSort')
+        .map((item) => {
+          return _.sortBy(item, 'sort')
+        })
+        .value()
     }
   }
 }
