@@ -8,6 +8,28 @@
       <template slot="processVisible">
         <user-picker v-model="formData.processVisible" />
       </template>
+      <div slot="approverNull">
+        <el-radio-group v-model="formData.approverNull">
+          <el-radio :label="0">
+            自动通过
+            <el-tooltip
+              content="当指定人员或主管为空的时候，审批单将自动通过"
+              placement="top"
+            >
+              <i class="el-icon-info" />
+            </el-tooltip>
+          </el-radio>
+          <el-radio :label="1">
+            自动转交给管理员
+            <el-tooltip
+              content="当指定人员或主管为空的时候，审批单将自动转交给管理员"
+              placement="top"
+            >
+              <i class="el-icon-info" />
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+      </div>
       <template slot="isOpinion">
         <el-checkbox v-model="formData.isOpinion">
           必填

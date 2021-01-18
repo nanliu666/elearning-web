@@ -528,7 +528,7 @@ export class NodeUtils {
     // 抄送人应该可以默认自选
     let valid = true
     const props = node.properties
-    this.isStartNode(node) && !props.initiator && (valid = false)
+    // this.isStartNode(node) && !props.initiator && (valid = false)
     this.isCopyNode(node) &&
       node.properties.members &&
       node.properties.members.length === 0 &&

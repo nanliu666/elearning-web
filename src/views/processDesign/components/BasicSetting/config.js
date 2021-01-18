@@ -53,6 +53,12 @@ export const columns = [
   },
   {
     span: 24,
+    prop: 'approverNull',
+    label: '审批人为空时',
+    itemType: 'slot'
+  },
+  {
+    span: 24,
     prop: 'isOpinion',
     label: '审批意见',
     itemType: 'slot',
