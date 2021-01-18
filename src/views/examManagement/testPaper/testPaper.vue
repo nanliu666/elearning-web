@@ -567,7 +567,9 @@ export default {
   .search-box {
     display: flex;
     align-items: center;
-
+    .refresh-container {
+      cursor: pointer;
+    }
     .search-sort-box {
       position: relative;
       display: flex;

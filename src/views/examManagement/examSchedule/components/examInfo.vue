@@ -41,7 +41,7 @@
           class="title-box"
           style="margin-top: -12px"
         >
-          成绩分布
+          成绩发布
         </div>
       </template>
       <template #testPaper>
