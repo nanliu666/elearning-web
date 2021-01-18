@@ -240,6 +240,12 @@ const TYPE_STATUS = [
   { value: 'CourseExam', label: '课程考试' },
   { value: 'TrainExam', label: '培训班考试' }
 ]
+const WAY_STATUS = [
+  { value: '', label: '全部' },
+  { value: 'general', label: '普通考试' },
+  { value: 'offline', label: '线下考试' }
+]
+
 const SEARCH_CONFIG = {
   requireOptions: [
     {
@@ -291,6 +297,13 @@ const SEARCH_CONFIG = {
       label: '考试类型',
       data: '',
       options: TYPE_STATUS
+    },
+    {
+      type: 'select',
+      field: 'examPattern',
+      label: '考试方式',
+      data: '',
+      options: WAY_STATUS
     },
     {
       data: '',
