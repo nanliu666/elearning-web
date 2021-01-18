@@ -50,27 +50,34 @@
         <span style="margin-right: 10px">证书管理</span>
         <el-switch v-model="formData.certificate" />
       </div>
-      <!-- <common-form
+      <common-form
         v-if="formData.certificate"
         ref="certificateForm"
         class="person-form-style"
         :columns="certificateFormColumns"
         :model="formData"
       >
-        <template #certificateTemplate>
+        <template #certificateId>
           <lazy-select
-            v-model="formData.templateId"
-            :load="loadCertificate"
-            :option-props="personOptionProps"
+            v-model="formData.certificateId"
+            :allow-create="true"
+            :searchable="true"
+            :load="loadCertificateList"
+            :option-props="{
+              label: 'name',
+              value: 'id',
+              key: 'id'
+            }"
           />
         </template>
-      </common-form> -->
+      </common-form>
     </section>
   </div>
 </template>
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
+import { getCertificateList } from '@/api/examManage/schedule'
 const assessFormColumns = [
   {
     itemType: 'checkbox',
@@ -96,7 +103,7 @@ const certificateFormColumns = [
   {
     itemType: 'slot',
     label: '证书模板',
-    prop: 'certificateTemplate',
+    prop: 'certificateId',
     required: true,
     span: 11,
     offset: 0
@@ -140,6 +147,7 @@ export default {
       personFormColumns,
       personOptionProps,
       formData: {
+        certificateId: '',
         evaluation: true,
         certificate: true,
         evaluationType: [0],
@@ -150,6 +158,9 @@ export default {
     }
   },
   methods: {
+    loadCertificateList(params) {
+      return getCertificateList(params)
+    },
     getLiData(name) {
       return new Promise((resolve) => {
         this.$refs[name]
