@@ -657,7 +657,7 @@ export default {
         scopeLimitValue: 100, // 最高分默认值100
         objectiveQuestions: false,
         decideItem: false,
-        autoEvaluate: false,
+        autoEvaluate: true,
         passType: 1,
         passScope: 60,
         publishType: 1,
@@ -735,7 +735,8 @@ export default {
           }
         }
       },
-      deep: true
+      deep: true,
+      immediate: true
     },
     'model.modifyAnswer': {
       handler(value) {
