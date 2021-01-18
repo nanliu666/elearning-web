@@ -15,6 +15,7 @@
             v-model="formData.headTeacher"
             :allow-create="isCreate"
             :searchable="remote"
+            :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />
@@ -22,6 +23,9 @@
         <template #teachAssistant>
           <lazy-select
             v-model="formData.teachAssistant"
+            :allow-create="isCreate"
+            :searchable="remote"
+            :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />
