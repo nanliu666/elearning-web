@@ -259,7 +259,7 @@ import ConditionRadioInput from '@/components/condition-radio-input/condition-ra
 import SwitchInput from './atomComponents/switchInput'
 import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
-import { getOrgUserList } from '@/api/system/user'
+import { getAllUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
 import { getExamList, getCertificateList } from '@/api/examManage/schedule'
 
@@ -797,7 +797,7 @@ export default {
   },
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      return getAllUserList(params)
     },
     loadTestPaper(params) {
       return getExamList(_.assign(params, { status: 'normal' }))
