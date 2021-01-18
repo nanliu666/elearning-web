@@ -5,8 +5,8 @@
       :model="formData"
       :columns="columns"
     >
-      <template slot="initiator">
-        <user-picker v-model="formData.initiator" />
+      <template slot="processVisible">
+        <user-picker v-model="formData.processVisible" />
       </template>
       <template slot="isOpinion">
         <el-checkbox v-model="formData.isOpinion">
@@ -32,45 +32,19 @@ export default {
   },
   props: {
     tabName: { type: String, default: '' },
-    initiator: { type: Array, default: () => [] },
     conf: { type: Object, default: null }
   },
   data() {
     return {
       columns,
-      all: true, //显示所有人
-      org: true, //可以选择部门
-      infoForm: {},
       formData: {
         processName: '',
         processType: '',
-        initiator: [],
+        processVisible: [],
         approverDistinct: 0,
         isOpinion: '',
         tip: ''
       }
-    }
-  },
-  watch: {
-    initiator: {
-      handler(val) {
-        this.formData.initiator = val || []
-      },
-      immediate: true
-    },
-    formData: {
-      handler() {},
-      immediate: true
-    },
-    conf: {
-      handler() {
-        // if (typeof this.conf === 'object' && this.conf !== null) {
-        //   Object.assign(this.formData, this.conf)
-        //   !Array.isArray(this.formData.processAdmin) &&
-        //     (this.formData.processAdmin = [this.formData.processAdmin])
-        // }
-      },
-      deep: true
     }
   },
   created() {

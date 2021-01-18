@@ -145,30 +145,18 @@ export default {
     ...mapGetters(['userId'])
   },
   created() {
-    this.isDevelopment = process.env.NODE_ENV === 'development' ? true : false
     if (this.processId) {
       this.initData()
     }
-    this.formKey = this.$route.query.formKey
   },
-  activated() {
-    this.formKey = this.$route.query.formKey
-  },
+  activated() {},
   methods: {
-    openNewLink() {
-      window.open(this.previewLink)
-    },
-
     initData() {
       const { processId } = this
       getApprProcess({ processId }).then((res) => {
         this.Title = res.processName
         this.mockData = JSON.parse(Base64.decode(res.baseJson))
-        // 暂存之前的表单设计以及流程设计的数据
-        this.prevData = JSON.stringify({
-          formData: this.mockData.formData,
-          processData: this.mockData.processData
-        })
+
         this.mockData.basicSetting.categoryId = res.categoryId
       })
     },
@@ -176,14 +164,6 @@ export default {
       this.activeStep = data
     },
     changeSteps(item) {
-      if (this.formKey && item.key === 'formDesign') {
-        this.$message({
-          showClose: true,
-          message: '特殊流程不可修改表单',
-          type: 'warning'
-        })
-        return
-      }
       this.activeStep = item.key
     },
 
@@ -192,24 +172,19 @@ export default {
      * @desc 发布事件
      *
      * */
-    toPublish(type) {
+    toPublish() {
       const getCmpData = (name) => this.$refs[name].getData()
       // basicSetting  formDesign processDesign 返回的是Promise 因为要做校验
       // advancedSetting返回的就是值
       const p1 = getCmpData('basicSetting')
-      const p2 = getCmpData('formDesign')
       const p3 = getCmpData('processDesign')
-      const p4 = getCmpData('advancedSetting')
-      Promise.all([p1, p2, p3, p4])
+      Promise.all([p1, p3])
         .then((res) => {
           const param = {
             basicSetting: res[0].formData,
-            formData: res[1].formData,
-            processData: res[2].formData,
-            advancedSetting: res[3]
+            processData: res[2].formData
           }
           // 区分预览和发布操作
-          this.isPreviewClick = type === 'preview' ? true : false
           this.sendToServer(param)
         })
         .catch((err) => {
@@ -224,9 +199,7 @@ export default {
      * */
     sendToServer(param) {
       // 修改后的parma内的表单设计、流程设计
-      const laterData = JSON.stringify({ formData: param.formData, processData: param.processData })
       // 1表示需要发布新版本， 0表示不需要发布新版
-      const newVersion = laterData == this.prevData ? 0 : 1
       const { processId, userId } = this
       const processData = _.cloneDeep(param.processData)
       this.base = []
@@ -243,24 +216,18 @@ export default {
       }
       this.base.push(item)
       this.base = [...this.base, ...this.lineList, ...this.condition, ...this.endNode]
-      let { icon, processName, processAdmin, remark, categoryId } = { ...param.basicSetting }
-      let { tip, isOpinion, approverDistinct, approverNull } = { ...param.advancedSetting }
+      let { processName, remark, categoryId, tip, isOpinion, approverDistinct } = param.basicSetting
       //处理发起人节点转成后台processVisible属性
-      let processVisible = this.getProcessVisible(param.basicSetting.initiator)
-      processAdmin = this.getProcessAdmin(processAdmin)
+      let processVisible = this.getProcessVisible(param.basicSetting.processVisible)
 
       let config = {
-        icon,
         processName,
         remark,
         processVisible,
         tip,
         approverDistinct,
         categoryId,
-        isOpinion: isOpinion ? 1 : 0,
-        processAdmin: processAdmin,
-        approverNull: approverNull,
-        formKey: this.formKey
+        isOpinion: isOpinion ? 1 : 0
       }
 
       //处理空节点导致的连线。
@@ -274,28 +241,23 @@ export default {
         baseJson: Base64.encode(JSON.stringify(param)),
         ...config
       }
-      // 预览和发布走不同路线
-      if (this.isPreviewClick) {
-        this.handlePreview(fixParams)
-      } else {
-        // 修改接口判断条件：当存在processId未修改接口，否则为新增审批接口
-        const ApprProcess = processId ? putApprProcess : postApprProcess
-        // 参数设置，在修改时，需要判断是否为发布新版本
-        fixParams = processId ? _.assign(fixParams, { newVersion }) : fixParams
-        this.loading = true
-        ApprProcess(fixParams)
-          .then(() => {
-            this.$message.success('提交成功')
-            setTimeout(() => {
-              this.$router.push({
-                path: '/apprProcess/approvalList'
-              })
-            }, 1000)
-          })
-          .finally(() => {
-            this.loading = false
-          })
-      }
+
+      // 修改接口判断条件：当存在processId未修改接口，否则为新增审批接口
+      const ApprProcess = processId ? putApprProcess : postApprProcess
+
+      this.loading = true
+      ApprProcess(fixParams)
+        .then(() => {
+          this.$message.success('提交成功')
+          setTimeout(() => {
+            this.$router.push({
+              path: '/apprProcess/approvalList'
+            })
+          }, 1000)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     /**
      * @author guanfenda

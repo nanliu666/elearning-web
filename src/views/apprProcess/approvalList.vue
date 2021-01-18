@@ -1,6 +1,16 @@
 <template>
   <div class="approval-index-style fill">
-    <page-header title="审批流程" />
+    <page-header title="审批流程">
+      <template #rightMenu>
+        <el-button
+          type="primary"
+          size="medium"
+          @click="jumpCreate"
+        >
+          创建审批流程
+        </el-button>
+      </template>
+    </page-header>
     <basic-container block>
       <common-table
         id="demo"
@@ -317,6 +327,11 @@ export default {
   },
 
   methods: {
+    jumpCreate() {
+      this.$router.push({
+        path: '/process/design'
+      })
+    },
     // 处理跳转
     jumpToDetail(row) {
       this.$router.push({

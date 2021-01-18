@@ -25,6 +25,13 @@ export const columns = [
   },
   {
     span: 24,
+    prop: 'processVisible',
+    itemType: 'slot',
+    label: '适用范围',
+    required: true
+  },
+  {
+    span: 24,
     prop: 'approverDistinct',
     itemType: 'select',
     label: '审批人去重',
