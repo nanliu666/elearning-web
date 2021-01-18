@@ -1,11 +1,13 @@
 <template>
   <el-radio :label="label">
     {{ textBefore }}
-    <el-input
+    <el-input-number
       v-model.number="innerValue"
+      :controls="false"
+      :min="min"
       :style="`width:${inputWidth}px`"
       v-bind="inputProps"
-    ></el-input>
+    ></el-input-number>
     {{ textAfter }}
   </el-radio>
 </template>
@@ -14,6 +16,10 @@
 export default {
   name: 'RadioInput',
   props: {
+    min: {
+      type: Number,
+      default: 0
+    },
     label: {
       type: [String, Number, Boolean],
       default: true

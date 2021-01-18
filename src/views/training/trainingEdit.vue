@@ -116,7 +116,7 @@ export default {
     return {
       trainWay: 0,
       loading: false,
-      activeStep: 0,
+      activeStep: 2,
       steps: [
         {
           label: '填写基本信息',

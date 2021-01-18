@@ -6,10 +6,12 @@
       style="margin-left: 10px;"
     >
       {{ preText }}
-      <el-input
-        v-model.number="innerInputValue"
+      <el-input-number
+        v-model="innerInputValue"
+        :controls="false"
+        :min="min"
         :style="`width:${inputWidth}px; display: inline-block`"
-      ></el-input>
+      ></el-input-number>
       {{ afterText }}
     </div>
   </div>
@@ -19,6 +21,10 @@
 export default {
   name: 'SwitchInput',
   props: {
+    min: {
+      type: Number,
+      default: 0
+    },
     switchValue: {
       type: Boolean,
       default: false

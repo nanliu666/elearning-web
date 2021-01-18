@@ -49,7 +49,7 @@
       <template #joinNum>
         <el-radio-group v-model="model.joinNum">
           <div class="flex-flow flex flexcenter">
-            <el-radio :label="0">
+            <el-radio :label="false">
               不限次数
             </el-radio>
             <radio-input

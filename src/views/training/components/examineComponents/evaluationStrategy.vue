@@ -35,7 +35,7 @@
       </div>
     </div>
     <div class="footer-tips">
-      提示：客观题指单选题、多选题、判断题、单选测评题、多选测评题
+      提示：客观题指单选题、多选题、判断题
     </div>
   </div>
 </template>
