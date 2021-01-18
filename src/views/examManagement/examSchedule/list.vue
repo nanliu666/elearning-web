@@ -405,7 +405,7 @@ export default {
     this.loadTableData()
     this.setConfig()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryList().then((res) => {
+    getCategoryList({ type: 1 }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
