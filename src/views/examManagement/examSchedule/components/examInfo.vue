@@ -5,7 +5,7 @@
       :model="model"
       :columns="columns"
       :config="{
-        disabled: model.status && model.status !== '1'
+        disabled: modelDisabled
       }"
     >
       <template #basicTitle>
@@ -663,6 +663,17 @@ export default {
         publishType: 1,
         fixedTime: new Date()
       }
+    }
+  },
+  computed: {
+    modelDisabled() {
+      let flag = true
+      if (this.$route.query.isDraft === 'true') {
+        flag = false
+      } else {
+        flag = this.model.status && this.model.status !== '1'
+      }
+      return flag
     }
   },
   watch: {
