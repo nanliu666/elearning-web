@@ -217,8 +217,8 @@ export default {
             this.$message.success('发布成功')
             this.$router.push({ path: '/training/trainingArrange' })
           })
-          .catch((err) => {
-            window.console.error(err)
+          .catch(() => {
+            window.console.error(JSON.stringify(params))
           })
       })
     },

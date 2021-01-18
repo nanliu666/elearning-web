@@ -22,12 +22,19 @@
         </template>
         <template #lecturerName>
           <lazy-select
+            v-if="model.type === 1"
             v-model="model.lecturerName"
-            :disabled="model.type === 1"
+            :disabled="true"
             :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
+          />
+          <el-input
+            v-if="model.type === 2"
+            v-model="model.lecturerName"
+            maxlength="32"
+            placeholder="请输入主持人"
           />
         </template>
       </common-form>

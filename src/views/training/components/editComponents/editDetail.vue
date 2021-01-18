@@ -13,8 +13,8 @@
         <template #headTeacher>
           <lazy-select
             v-model="formData.headTeacher"
-            :allow-create="isCreate"
-            :searchable="remote"
+            :allow-create="true"
+            :searchable="true"
             :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
@@ -23,8 +23,8 @@
         <template #teachAssistant>
           <lazy-select
             v-model="formData.teachAssistant"
-            :allow-create="isCreate"
-            :searchable="remote"
+            :allow-create="true"
+            :searchable="true"
             :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
@@ -140,8 +140,6 @@ export default {
   },
   data() {
     return {
-      remote: true,
-      isCreate: true,
       assessFormColumns,
       certificateFormColumns,
       personFormColumns,

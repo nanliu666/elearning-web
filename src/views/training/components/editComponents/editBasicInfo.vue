@@ -215,8 +215,8 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
+          rules: [{ required: true, message: '请输入培训介绍', trigger: 'blur' }],
           options: [],
-          required: true,
           span: 24,
           offset: 0
         }
@@ -325,6 +325,7 @@ export default {
         }
       }
       this.userList = data
+      this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
