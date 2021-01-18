@@ -326,18 +326,16 @@ export default {
      *
      * */
     async loadTableData() {
-      if (this.tableLoading) {
-        //防抖
-        return
-      }
+      if (this.tableLoading) return
       try {
         const params = this.searchParams
         this.tableLoading = true
         getCreditList(
           _.assign(params, { currentPage: this.page.currentPage, size: this.page.pageSize })
         ).then((res) => {
-          this.tableData = res.list
-          this.page.total = res.totalNum
+          const { list, totalNum } = res
+          this.tableData = list
+          this.page.total = totalNum
           this.tableLoading = false
         })
       } catch (error) {

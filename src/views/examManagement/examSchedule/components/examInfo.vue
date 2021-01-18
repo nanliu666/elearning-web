@@ -210,9 +210,11 @@
               <span v-if="index === 2">得扣</span>
               <span v-if="index === 3">扣</span>
               <span v-if="index === 4">得</span>
-              <el-input
+              <el-input-number
                 v-model.number="model.multipleChoiceValue"
                 style="width: 60px; margin: 0 4px"
+                :controls="false"
+                :min="0"
               />
               <span>分</span>
             </div>

@@ -350,17 +350,11 @@ export default {
      * */
     addTopic() {
       this.$refs.table.clearSelection()
-      let selection = this.selection.filter((it) => {
-        if (this.selectData.length == 0) {
-          return true
-        } else {
-          let data = this.selectData.filter((item) => item.id == it.id)
-          if (data.length === 0) {
-            return true
-          }
-        }
+      _.each(this.selection, (item) => {
+        item.questionId = item.id
       })
-      this.selectData.push(...selection)
+      this.selectData = _.uniqBy([...this.selectData, ...this.selection], 'questionId')
+      console.log('this.selectData==', this.selectData)
     },
     /**
      * @author guanfenda

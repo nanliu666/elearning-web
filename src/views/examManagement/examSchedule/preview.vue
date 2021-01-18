@@ -55,14 +55,14 @@
               <div v-else>
                 <span>{{ sonindex + 1 }}.</span>
                 <span>
-                  <span v-html="_.unescape(sonitem.content)"></span>
+                  <span v-html="getHTML(sonitem.content)" />
                   <ul>
                     <li
                       v-for="(paperItem, paperIndex) in sonitem.subQuestions"
                       :key="paperIndex"
                       class=""
                     >
-                      <span>{{ paperIndex + 1 }}</span>
+                      <span>（{{ paperIndex + 1 }}）</span>
                       <QustionPreview
                         :data="paperItem"
                         :is-preview="true"
@@ -96,6 +96,7 @@ import {
   QUESTION_TYPE_BLANK,
   QUESTION_TYPE_GROUP
 } from '@/const/examMange'
+import { addLine } from '@/util/util'
 const nzhcn = require('nzh/cn')
 export default {
   filters: {
@@ -131,6 +132,9 @@ export default {
     this.initData()
   },
   methods: {
+    getHTML(content) {
+      return addLine(content)
+    },
     deletePreview() {
       delExamPreview({ id: this.$route.query.paperId }).then(() => {
         this.$message.success('删除成功')
@@ -148,16 +152,18 @@ export default {
           ? basicParams
           : _.assign(basicParams, { previewId: this.$route.query.previewId })
       loadFun(parmas).then((res) => {
-        const data = _.chain(res.questions)
-          .groupBy('parentSort')
-          .sortBy('parentSort')
-          .map((item) => {
-            return _.sortBy(item, 'sort')
-          })
-          .value()
-        res.questions = data
+        res.questions = this.handleData(res.questions)
         this.paperData = res
       })
+    },
+    handleData(data) {
+      return _.chain(data)
+        .groupBy('parentSort')
+        .sortBy('parentSort')
+        .map((item) => {
+          return _.sortBy(item, 'sort')
+        })
+        .value()
     }
   }
 }
