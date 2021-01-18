@@ -99,9 +99,9 @@
 </template>
 
 <script>
-import EditArrangement from './components/editArrangement'
-import EditBasicInfo from './components/editBasicInfo'
-import EditDetail from './components/editDetail'
+import EditArrangement from './components/editComponents/editArrangement'
+import EditBasicInfo from './components/editComponents/editBasicInfo'
+import EditDetail from './components/editComponents/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
 const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑

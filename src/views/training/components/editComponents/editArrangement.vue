@@ -155,9 +155,9 @@
 </template>
 
 <script>
-import OfflineCourseDrawer from './drawerComponents/OfflineCourseDrawer'
-import EditExamineDrawer from './drawerComponents/editExamineDrawer'
-import OnlineCourseDrawer from './drawerComponents/OnlineCourseDrawer'
+import OfflineCourseDrawer from '../drawerComponents/OfflineCourseDrawer'
+import EditExamineDrawer from '../drawerComponents/editExamineDrawer'
+import OnlineCourseDrawer from '../drawerComponents/OnlineCourseDrawer'
 const ScheduleColumns = [
   {
     prop: 'todoTime',
