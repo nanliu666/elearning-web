@@ -54,7 +54,7 @@ const COLUMNS = [
     itemType: 'slot',
     label: '考生安排',
     prop: 'examList',
-    rules: [{ required: true, message: '请选择人员', trigger: 'blur' }],
+    rules: [{ required: true, message: '请选择人员', trigger: ['blur', 'change'] }],
     options: [],
     span: 24
   }

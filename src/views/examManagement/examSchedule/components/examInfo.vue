@@ -5,7 +5,7 @@
       :model="model"
       :columns="columns"
       :config="{
-        disabled: model.status && model.status !== '1'
+        disabled: modelDisabled
       }"
     >
       <template #basicTitle>
@@ -41,7 +41,7 @@
           class="title-box"
           style="margin-top: -12px"
         >
-          成绩分布
+          成绩发布
         </div>
       </template>
       <template #testPaper>
@@ -259,7 +259,7 @@ import ConditionRadioInput from '@/components/condition-radio-input/condition-ra
 import SwitchInput from './atomComponents/switchInput'
 import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
-import { getOrgUserList } from '@/api/system/user'
+import { getAllUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
 import { getExamList, getCertificateList } from '@/api/examManage/schedule'
 
@@ -657,12 +657,23 @@ export default {
         scopeLimitValue: 100, // 最高分默认值100
         objectiveQuestions: false,
         decideItem: false,
-        autoEvaluate: false,
+        autoEvaluate: true,
         passType: 1,
         passScope: 60,
         publishType: 1,
         fixedTime: new Date()
       }
+    }
+  },
+  computed: {
+    modelDisabled() {
+      let flag = true
+      if (this.$route.query.isDraft === 'true') {
+        flag = false
+      } else {
+        flag = this.model.status && this.model.status !== '1'
+      }
+      return flag
     }
   },
   watch: {
@@ -724,7 +735,8 @@ export default {
           }
         }
       },
-      deep: true
+      deep: true,
+      immediate: true
     },
     'model.modifyAnswer': {
       handler(value) {
@@ -786,7 +798,7 @@ export default {
   },
   methods: {
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      return getAllUserList(params)
     },
     loadTestPaper(params) {
       return getExamList(_.assign(params, { status: 'normal' }))
