@@ -39,8 +39,8 @@ const res = {
         menuName: '系统管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
-        isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-        isShow: 1, // 是否显示在菜单栏 0：否，1：是
+        isEnabled: 1, // 在后台管理菜单管理的，设置启用停用  0：否，1：是。（是否显示在菜单栏）只有这个页面在menu页面配置
+        isShow: 1, // 是否显示在菜单栏 0：否，1：是 menuAll页面
         code: 'system',
         alias: 'system',
         path: '',
@@ -1128,7 +1128,6 @@ const res = {
         isOwn: 1, // 是否拥有 0：否，1：是
         isEnabled: 1,
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
-        isEnable: 1,
         code: 'approval',
         alias: 'approval',
         path: '',
@@ -1177,9 +1176,8 @@ const res = {
         menuName: '直播管理',
         menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
         isOwn: 1, // 是否拥有 0：否，1：是
-        isEnabled: 1,
+        isEnabled: 1, // 是否启用
         isShow: 1, // 是否显示在菜单栏 0：否，1：是
-        isEnable: 1,
         code: 'approval',
         alias: 'approval',
         path: '',
@@ -1219,6 +1217,18 @@ const res = {
             code: 'approval_approval',
             alias: 'approval',
             path: '/live/playBackList',
+            icon: 'iconfont iconicon_compile'
+          },
+          {
+            menuId: '1590112075692669',
+            menuName: '查看直播回放　　直播回放回传到平台需要一段时间，请耐心等待',
+            menuType: 'Menu',
+            isEnabled: 1,
+            isOwn: 1,
+            isShow: 0,
+            code: 'approval_approval',
+            alias: 'approval',
+            path: '/live/playBackListSingle',
             icon: 'iconfont iconicon_compile'
           },
           {

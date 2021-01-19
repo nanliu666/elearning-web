@@ -79,7 +79,7 @@ import SearchPopover from '@/components/searchPopOver/index'
 import { getArrangeList } from '@/api/examManage/schedule'
 import { getCreatUsers, getKnowledgeCatalogList } from '@/api/knowledge/knowledge'
 let TABLE_COLUMNS = [
-  { type: 'index', label: '序号', minWidth: 150 },
+  { type: 'index', label: '序号', width: 100 },
   {
     label: '直播编号',
     prop: 'examName',
@@ -299,7 +299,7 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/live/statisticsDetails', query: { id: row.id } })
+      this.$router.push({ path: '/live/playBackListSingle', query: { id: row.id } })
     },
     // 切换nav
     handleSelect(key) {
