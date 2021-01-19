@@ -107,11 +107,6 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '更新时间',
-    prop: 'updateTime',
-    minWidth: 120
-  },
-  {
     label: '状态',
     prop: 'status',
     minWidth: 120,
