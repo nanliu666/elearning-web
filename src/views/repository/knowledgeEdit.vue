@@ -108,7 +108,7 @@ const FORM_COLUMNS = [
     offset: 1,
     props: {
       selectParams: {
-        placeholder: '请选择所在目录',
+        placeholder: '请选择所在分类',
         multiple: false
       },
       treeParams: {
