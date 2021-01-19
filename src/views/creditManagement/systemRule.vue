@@ -26,6 +26,9 @@
             </div>
           </div>
         </template>
+        <template #sysRuleSource="{row}">
+          <span :class="{ disabled: row.status == '0' }"> {{ row.sysRuleSource }} </span>
+        </template>
         <template #name="{row}">
           <el-link
             type="primary"
@@ -202,6 +205,9 @@ export default {
 .transitionBox {
   position: relative;
   height: 50px;
+}
+.disabled {
+  color: #d4dbdd;
 }
 
 .searchBox {
