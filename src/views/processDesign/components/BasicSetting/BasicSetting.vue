@@ -6,7 +6,10 @@
       :columns="columns"
     >
       <template slot="processVisible">
-        <user-picker v-model="formData.processVisible" />
+        <user-picker
+          v-model="formData.processVisible"
+          title="适用范围"
+        />
       </template>
       <div slot="approverNull">
         <el-radio-group v-model="formData.approverNull">
@@ -60,6 +63,7 @@ export default {
     return {
       columns,
       formData: {
+        icon: 'icondirectories-bicolor',
         processName: '',
         processType: '',
         categoryId: '1',
@@ -79,7 +83,6 @@ export default {
   methods: {
     // 给父级页面提供得获取本页数据得方法
     getData() {
-      this.formData.icon = this.activeIcon
       return new Promise((resolve, reject) => {
         this.$refs['elForm']
           .validate()
@@ -88,7 +91,6 @@ export default {
               reject({ target: this.tabName })
               return
             }
-
             resolve({ formData: this.formData, target: this.tabName }) // TODO 提交表单
           })
           .catch(() => {

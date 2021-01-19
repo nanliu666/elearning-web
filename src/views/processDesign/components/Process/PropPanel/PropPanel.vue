@@ -29,6 +29,7 @@
           v-model="orgCollection"
           button-type="button"
           title="指定成员"
+          :is-range="true"
           :tab-list="['user']"
         />
         <br />
@@ -59,6 +60,7 @@
           v-model="members"
           :tab-list="['copy']"
           button-type="button"
+          :is-range="true"
           title="抄送人"
         />
       </section>
@@ -208,7 +210,7 @@ export default {
       attribute = attribute.join(',')
       this.properties.attribute = attribute
       this.properties.members = this.members['copy']
-      this.$emit('confirm', this.properties, this.getOrgSelectLabel('copy') || '发起人自选')
+      this.$emit('confirm', this.properties, this.getOrgSelectLabel('copy') || '请选择抄送人')
       this.visible = false
     },
 
@@ -233,7 +235,7 @@ export default {
       this.properties.attribute = attribute // 获取值（抄送人姓名等）
 
       Object.assign(this.properties, this.approverForm)
-      this.$emit('confirm', this.properties, content || '请设置审批人')
+      this.$emit('confirm', this.properties, content || '请选择审批人')
       this.visible = false
     },
     // 确认修改

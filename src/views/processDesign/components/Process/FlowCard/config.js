@@ -11,7 +11,7 @@ export default {
   },
   copy: {
     type: 'copy',
-    content: '发起人自选',
+    content: '请选择抄送人',
     properties: {
       title: '抄送人',
       menbers: [],

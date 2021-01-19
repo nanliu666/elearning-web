@@ -216,11 +216,20 @@ export default {
       }
       this.base.push(item)
       this.base = [...this.base, ...this.lineList, ...this.condition, ...this.endNode]
-      let { processName, remark, categoryId, tip, isOpinion, approverDistinct } = param.basicSetting
+      let {
+        processName,
+        remark,
+        categoryId,
+        tip,
+        isOpinion,
+        approverDistinct,
+        icon
+      } = param.basicSetting
       //处理发起人节点转成后台processVisible属性
       let processVisible = this.getProcessVisible(param.basicSetting.processVisible)
 
       let config = {
+        icon,
         processName,
         remark,
         processVisible,
@@ -371,7 +380,8 @@ export default {
      * @author guanfenda
      * 前端转后端格式函数
      * */
-    recursion(data, origin, conditionNextNodeId_) {
+    // recursion(data, origin, conditionNextNodeId_) {
+    recursion(data, origin) {
       let type = {
         //类型
         start: 'start', //开始节点
@@ -394,7 +404,7 @@ export default {
       //审批人
       this.ApprovalNode(data, item, origin)
       //条件
-      this.conditionNode(data, origin, conditionNextNodeId_)
+      // this.conditionNode(data, origin, conditionNextNodeId_)
       //有前节点且前节点不为no_flow,且节点类型不能为条件节点（带有条件节点，他的子节点不在这么算进去）
       this.evenLine(data, item)
       // 过滤节点不能为条件节点,因为在处理条件节点是会处理。这里就过滤条件

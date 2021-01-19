@@ -84,14 +84,7 @@
       </div>
       <div class="right">
         <div>
-          <span
-            v-if="!isRange"
-            class="title"
-          >已选：</span>
-          <span
-            v-else
-            class="title"
-          >发布范围： <span class="company">企业内部</span> </span>
+          <span class="title">已选：</span>
           <span style="float:right;" />
         </div>
 

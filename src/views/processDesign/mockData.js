@@ -16,7 +16,7 @@ export default {
     nodeId: 'Gb2',
     childNode: {
       type: 'approver',
-      content: '发起人自选',
+      content: '请选择审批人',
       properties: {
         title: '审批人',
         assigneeType: 'user',
