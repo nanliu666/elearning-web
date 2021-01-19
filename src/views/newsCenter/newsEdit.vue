@@ -134,11 +134,6 @@
           </common-form>
         </div>
       </div>
-
-      <!--      <div class="container__editor">-->
-      <!--        <tinymce v-model="formData.content" />-->
-      <!--      </div>-->
-
       <div class="container__buttons">
         <el-button
           :loading="submitting"
@@ -447,7 +442,7 @@ export default {
               : await this.updateNews(_.pickBy(this._formData))
             this.$message.success('保存成功')
             this.hasEdit = false
-            this.handleBack()
+            this.handleBack('Draft')
           } catch (error) {
             this.$message.info('取消操作')
             throw new Error('取消操作')
@@ -459,10 +454,10 @@ export default {
           throw error // => false
         })
     },
-    handleBack() {
+    handleBack(type = 'Published') {
       this.handleLeave()
         .then(() => {
-          this.$router.back()
+          this.$router.push({ path: '/newsCenter/newsManage', query: { activeName: type } })
           this.$store.commit('DEL_TAG', this.tag)
         })
         .catch(() => {})

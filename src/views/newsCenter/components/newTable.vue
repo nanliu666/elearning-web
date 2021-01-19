@@ -102,7 +102,7 @@ const TABLE_COLUMNS = [
     maxWidth: 100
   },
   {
-    label: '发布时间',
+    label: '时间',
     prop: 'publishTime',
     minWidth: 100
   }
