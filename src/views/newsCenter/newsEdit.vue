@@ -143,12 +143,12 @@
         >
           发布
         </el-button>
-        <el-button
+        <!-- <el-button
           size="medium"
           @click="() => handlePreviewBtnClick()"
         >
           预览
-        </el-button>
+        </el-button> -->
         <el-button
           size="medium"
           @click="() => handleSaveDraftBtnClick().catch((error) => error)"
@@ -395,11 +395,10 @@ export default {
             try {
               this.submitting = true
               // 需要先存为草稿再发布新闻
-              // const { id } =
-              _.isNull(this.id)
+              const params = _.isNull(this.id)
                 ? await this.postNews(_.pickBy(this._formData), { status: 'Published' })
                 : await this.updateNews(_.pickBy(this._formData))
-              // await this.publishNews(id)
+              await this.publishNews(params)
               this.$message.success('发布成功')
               this.hasEdit = false
               this.handleBack()

@@ -24,6 +24,7 @@
     <template #handler="{row}">
       <div class="table__handler">
         <el-button
+          v-if="status === 'Published'"
           type="text"
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
