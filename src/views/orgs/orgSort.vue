@@ -201,6 +201,10 @@ export default {
   cursor: move;
   border-bottom: 1px solid #f2f2f2;
 }
+// 根节点的鼠标指针设置为默认
+/deep/ .el-tree > .el-tree-node > .el-tree-node__content:first-of-type {
+  cursor: default;
+}
 /deep/ .basic-container {
   flex: 1;
   height: calc(100% - 58px);
