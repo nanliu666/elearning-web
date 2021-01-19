@@ -67,12 +67,6 @@ export default {
           offset: 4
         },
         {
-          prop: 'endDate',
-          itemType: 'datePicker',
-          label: '学习计划截止日期',
-          required: false
-        },
-        {
           prop: 'categoryId',
           itemType: 'cascader',
           label: '所属分类',
@@ -81,14 +75,13 @@ export default {
             value: 'id',
             emitPath: false
           },
-          showAllLevels: false,
-          offset: 4,
-          required: true
+          showAllLevels: false
         },
         {
           prop: 'creatorName',
           itemType: 'input',
           label: '创建者',
+          offset: 4,
           required: false
         },
         {
@@ -97,13 +90,13 @@ export default {
           type: 'datetime',
           valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '创建时间',
-          offset: 4,
           required: false
         },
         {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
+          offset: 4,
           maxlength: 32,
           required: false
         }
@@ -167,7 +160,7 @@ export default {
           filterArr.length > 0 ? (item.children = filterArr) : ''
         })
         this.categoryData = data
-        this.columns[5].options = data
+        this.columns[4].options = data
       })
     }
   }
