@@ -597,7 +597,16 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.upload {
+  /deep/ .el-upload--text {
+    text-align: left;
+  }
+  .uploader__btn {
+    text-align: center;
+  }
+}
+</style>
 <style lang="sass" scoped>
 $color_active: #368AFA
 $color_border: #E3E7E9
