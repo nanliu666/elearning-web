@@ -238,7 +238,7 @@ export default {
      * */
     handleDelete(row) {
       if (row.status == 0) {
-        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+        this.$confirm('您确定要删除选中的规则吗？', '提醒', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
