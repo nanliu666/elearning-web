@@ -47,7 +47,7 @@ export default (enable) => {
     timeout: 500
   })
   menu({ mock: true })
-  credit({ mock: true })
+  credit({ mock: false })
   questions({ mock: false })
   achievement({ mock: false })
   knowledge(options)

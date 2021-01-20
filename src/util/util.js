@@ -1,6 +1,55 @@
 import { validatenull } from './validate'
 import moment from 'moment'
-
+/**
+ * 给分类接口的数据进行处理
+ * @param {string} res
+ * res数据结构：
+ * {
+ * group: [{name: ''}, count: 1], 
+ * son: [{count: 0
+    id: ""
+    idStr: "x"
+    name: "x"
+    parentStr: "x"
+    parent_id: x}]
+  }
+  前端需要的数据结构：[{
+  btnshow:1
+  children:Array[0]
+  count:0
+  id:"1336219625163157505"
+  label:"设计类"
+}]
+ */
+export const handleCatalogsData = (res) => {
+  let data = []
+  res.group.forEach((item) => {
+    if (!item.id) {
+      return
+    }
+    data.push({
+      id: item.idStr,
+      label: item.name,
+      btnshow: 1,
+      children: [],
+      count: item.count
+    })
+  })
+  data.forEach((item) => {
+    let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+    filterArr = filterArr.map((item) => {
+      return {
+        id: item.idStr,
+        parent_id: item.parentStr,
+        label: item.name,
+        btnshow: 0,
+        count: item.count
+      }
+    })
+    filterArr.length > 0 ? (item.children = filterArr) : ''
+  })
+  return data
+}
 /**
  * 给试题富文本加行内样式
  * @param {string} html

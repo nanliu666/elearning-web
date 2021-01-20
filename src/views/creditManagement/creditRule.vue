@@ -34,50 +34,9 @@
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSearch"
                 />
-                <div
-                  class="refresh-container"
-                  @click="loadTableData"
-                >
-                  <span class="icon  el-icon-refresh-right" />
-                  <span class="refresh-text">刷新</span>
-                </div>
-                <el-popover
-                  placement="bottom"
-                  width="40"
-                  trigger="click"
-                  style="margin-left:10px"
-                >
-                  <el-checkbox-group
-                    v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
-                  >
-                    <el-checkbox
-                      v-for="item in tableColumns"
-                      :key="item.prop"
-                      :label="item.prop"
-                      :disabled="item.prop === 'examName'"
-                      class="originColumn"
-                    >
-                      {{ item.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                  <i
-                    slot="reference"
-                    class="el-icon-setting"
-                    style="cursor: pointer;"
-                  />
-                </el-popover>
               </div>
             </div>
           </div>
-        </template>
-        <template slot="multiSelectMenu">
-          <!--          <el-button-->
-          <!--            type="text"-->
-          <!--            icon="el-icon-delete"-->
-          <!--          >-->
-          <!--            批量导出-->
-          <!--          </el-button>-->
         </template>
         <template #name="{row}">
           <el-link
@@ -207,7 +166,6 @@ export default {
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: {
@@ -280,7 +238,7 @@ export default {
      * */
     handleDelete(row) {
       if (row.status == 0) {
-        this.$confirm('您确定要删除选中的类目吗？', '提醒', {
+        this.$confirm('您确定要删除选中的规则吗？', '提醒', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -326,18 +284,16 @@ export default {
      *
      * */
     async loadTableData() {
-      if (this.tableLoading) {
-        //防抖
-        return
-      }
+      if (this.tableLoading) return
       try {
         const params = this.searchParams
         this.tableLoading = true
         getCreditList(
           _.assign(params, { currentPage: this.page.currentPage, size: this.page.pageSize })
         ).then((res) => {
-          this.tableData = res.list
-          this.page.total = res.totalNum
+          const { list, totalNum } = res
+          this.tableData = list
+          this.page.total = totalNum
           this.tableLoading = false
         })
       } catch (error) {

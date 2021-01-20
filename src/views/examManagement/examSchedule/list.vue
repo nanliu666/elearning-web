@@ -80,6 +80,7 @@
                   <el-checkbox
                     v-for="item in tableColumns"
                     :key="item.prop"
+                    :disabled="item.prop === 'examName'"
                     :label="item.prop"
                     class="originColumn"
                   >
@@ -240,6 +241,12 @@ const TYPE_STATUS = [
   { value: 'CourseExam', label: '课程考试' },
   { value: 'TrainExam', label: '培训班考试' }
 ]
+const WAY_STATUS = [
+  { value: '', label: '全部' },
+  { value: 'general', label: '普通考试' },
+  { value: 'offline', label: '线下考试' }
+]
+
 const SEARCH_CONFIG = {
   requireOptions: [
     {
@@ -291,6 +298,13 @@ const SEARCH_CONFIG = {
       label: '考试类型',
       data: '',
       options: TYPE_STATUS
+    },
+    {
+      type: 'select',
+      field: 'examPattern',
+      label: '考试方式',
+      data: '',
+      options: WAY_STATUS
     },
     {
       data: '',
@@ -405,7 +419,7 @@ export default {
     this.loadTableData()
     this.setConfig()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryList().then((res) => {
+    getCategoryList({ type: 1 }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -536,7 +550,7 @@ export default {
     handleEdit(row) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'edit' }
+        query: { id: row.id, type: 'edit', isDraft: this.activeIndex === '1' }
       })
     },
     // 递归获取所有的停启用的id集合

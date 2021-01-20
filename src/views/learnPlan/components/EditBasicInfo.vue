@@ -25,7 +25,7 @@
 
 <script>
 import { getCatalogs } from '@/api/learnPlan'
-import { filterTree } from '@/util/util'
+import { filterTree, handleCatalogsData } from '@/util/util'
 export default {
   props: {
     model: {
@@ -133,32 +133,7 @@ export default {
     },
     getCategoryData() {
       getCatalogs().then((res) => {
-        let data = []
-        res.group.forEach((item) => {
-          if (!item.id) {
-            return
-          }
-          data.push({
-            id: item.idStr,
-            label: item.name,
-            btnshow: 1,
-            children: [],
-            count: item.count
-          })
-        })
-        data.forEach((item) => {
-          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
-          filterArr = filterArr.map((item) => {
-            return {
-              id: item.idStr,
-              parent_id: item.parentStr,
-              label: item.name,
-              btnshow: 0,
-              count: item.count
-            }
-          })
-          filterArr.length > 0 ? (item.children = filterArr) : ''
-        })
+        const data = handleCatalogsData(res)
         this.categoryData = data
         this.columns[4].options = data
       })

@@ -445,6 +445,7 @@ export default {
       })
       await deleteKnowledgeList({ id: selectedIds.join(',') })
       this.$message.success('删除成功')
+      this.$refs.table.clearSelection()
       this.loadTableData()
     },
     // 置顶与取消置顶
@@ -526,23 +527,23 @@ export default {
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo = _.assign(this.queryInfo, { pageNo: param })
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo = _.assign(this.queryInfo, { pageSize: param })
       this.loadTableData()
     },
     /**
      * 搜索
      */
     handleSearch(searchParams) {
-      for (let i in searchParams) {
-        this.queryInfo[i] = searchParams[i]
-      }
+      this.queryInfo = _.assign(this.queryInfo, searchParams)
+      this.queryInfo.pageNo = 1
+      this.page.currentPage = 1
       this.loadTableData()
     },
     // 跳去详情

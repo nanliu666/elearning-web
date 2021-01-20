@@ -135,7 +135,7 @@
 </template>
 
 <script>
-import stemContent from '@/components/stem-content/stemContent'
+import stemContent from './stemContent'
 import { QUESTION_TYPE_MAP } from '@/const/examMange'
 const TABLE_CONFIG = {
   rowKey: 'id',

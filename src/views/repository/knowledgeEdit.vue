@@ -50,18 +50,16 @@
           </ul>
         </template>
         <template #basicTitle>
-          <div style="height: 85px; color: transparent;">
-            基础信息
-          </div>
+          <!-- 用来占位的 -->
+          <div style="height: 85px; color: transparent;" />
+        </template>
+        <template #introduction>
+          <tinymce
+            ref="tinymceRef"
+            v-model="formData.introduction"
+          />
         </template>
       </common-form>
-
-      <div class="container__editor">
-        <tinymce
-          ref="tinymceRef"
-          v-model="formData.introduction"
-        />
-      </div>
 
       <div class="container__buttons">
         <el-button
@@ -110,7 +108,7 @@ const FORM_COLUMNS = [
     offset: 1,
     props: {
       selectParams: {
-        placeholder: '请选择所在目录',
+        placeholder: '请选择所在分类',
         multiple: false
       },
       treeParams: {
@@ -208,6 +206,7 @@ const UPLOAD_ONLINE = [
     span: 24
   }
 ]
+import { deleteHTMLTag } from '@/util/util'
 export default {
   name: 'KnowledgeEdit',
   components: {
@@ -216,6 +215,13 @@ export default {
   data() {
     return {
       limit: 5,
+      introductionColumn: {
+        prop: 'introduction',
+        label: '资源介绍',
+        itemType: 'slot',
+        rules: [{ required: false, validator: this.checkTinyMax, trigger: ['blur', 'change'] }],
+        span: 24
+      },
       pageTitle: '',
       formColumns: FORM_COLUMNS,
       localColumns: [...FORM_COLUMNS, ...uploadConfigList],
@@ -257,7 +263,6 @@ export default {
     },
     ...mapGetters(['tag'])
   },
-
   watch: {
     // 上传模式变化
     'formData.uploadType': {
@@ -265,7 +270,8 @@ export default {
       immediate: true,
       handler(val) {
         // 本地文件（是否下载+附件），资源文件（资源路径）
-        this.formColumns = val === 0 ? this.localColumns : this.onlineColumns
+        let tmp = val === 0 ? this.localColumns : this.onlineColumns
+        this.formColumns = [...tmp, this.introductionColumn]
       }
     }
   },
@@ -278,6 +284,15 @@ export default {
     this.initData()
   },
   methods: {
+    // 最大字数限制
+    checkTinyMax(rule, value, callback) {
+      const pureValue = deleteHTMLTag(value)
+      if (_.size(pureValue) < 2000) {
+        callback()
+      } else {
+        callback(new Error('最大输入2000字符，已超字数限制！'))
+      }
+    },
     // 新增附件时，直接赋值
     getValue(value) {
       _.each(value, (item) => {
@@ -344,36 +359,32 @@ export default {
     },
     // 点击完成
     handlePublishBtnClick(isContinue = false) {
-      this.validate()
-        .then(async () => {
-          try {
-            this.submitting = true
-            // 区分是编辑还是新增
-            _.isNull(this.id)
-              ? await this.createKnowledgeFun(this._formData)
-              : await this.updateKnowledgeFun(this._formData)
-            this.$message.success('发布成功')
-            // 去往列表页
-            if (!isContinue) {
-              this.$router.push({ path: '/repository/knowledgeManagement' })
-            } else {
-              // 继续添加
-              this.$refs.form.resetFields()
-              this.formData.introduction = ''
-              // 删除elTree的校验
-              this.$nextTick(() => {
-                this.clearValidate()
-              })
-            }
-          } catch (error) {
-            this.$message.error(error.message)
-          } finally {
-            this.submitting = false
+      this.validate().then(async () => {
+        try {
+          this.submitting = true
+          // 区分是编辑还是新增
+          _.isNull(this.id)
+            ? await this.createKnowledgeFun(this._formData)
+            : await this.updateKnowledgeFun(this._formData)
+          this.$message.success('发布成功')
+          // 去往列表页
+          if (!isContinue) {
+            this.$router.push({ path: '/repository/knowledgeManagement' })
+          } else {
+            // 继续添加
+            this.$refs.form.resetFields()
+            this.formData.introduction = ''
+            // 删除elTree的校验
+            this.$nextTick(() => {
+              this.clearValidate()
+            })
           }
-        })
-        .catch(() => {
-          this.$message.error('请填写完整必填项')
-        })
+        } catch (error) {
+          this.$message.error(error.message)
+        } finally {
+          this.submitting = false
+        }
+      })
     },
     handleContinueAdd() {
       this.handlePublishBtnClick(true)
@@ -441,6 +452,9 @@ $color_font_uploader: #a0a8ae;
   .basic-container--block {
     height: 0;
     min-height: calc(100% - 92px);
+    .editor__title {
+      margin-bottom: 10px;
+    }
   }
 }
 .container__buttons {

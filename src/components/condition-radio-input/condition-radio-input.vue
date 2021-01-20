@@ -7,13 +7,14 @@
       >{{ labelText }}</span>
       <span v-if="innerValue === value">
         {{ textBefore }}
-        <el-input
+        <el-input-number
           v-model.number="modelNumber"
+          :controls="false"
+          :min="min"
           :style="`width:${inputWidth}px`"
           :disabled="disabled"
           v-bind="inputProps"
-          @input="inputNumber"
-        ></el-input>
+        ></el-input-number>
         {{ textAfter }}
       </span>
     </el-radio>
@@ -24,6 +25,10 @@
 export default {
   name: 'ConditionRadioInput',
   props: {
+    min: {
+      type: Number,
+      default: 0
+    },
     value: {
       type: Number,
       default: null
@@ -77,12 +82,7 @@ export default {
       this.$emit('input', val)
     }
   },
-  methods: {
-    inputNumber(value) {
-      value = value.replace(/[^\d]/g, '')
-      this.$emit('update:number', parseInt(value))
-    }
-  }
+  methods: {}
 }
 </script>
 <style lang="scss" scoped>
