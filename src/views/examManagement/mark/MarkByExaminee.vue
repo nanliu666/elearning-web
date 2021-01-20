@@ -167,7 +167,7 @@
 </template>
 
 <script>
-// 逐人评卷详情内
+// 逐人评卷列表继续评卷以及开始评卷进入页面
 const nzhcn = require('nzh/cn')
 import {
   getExamineePaperDetail,

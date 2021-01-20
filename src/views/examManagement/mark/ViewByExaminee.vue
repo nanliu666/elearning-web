@@ -95,7 +95,7 @@
 </template>
 
 <script>
-// 逐人评卷详情内
+// 逐人评卷列表查看答卷跳转进来的页面
 const nzhcn = require('nzh/cn')
 import { getExamineePaperDetail, getExamineePaperDetailist } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
