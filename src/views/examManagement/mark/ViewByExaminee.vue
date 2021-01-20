@@ -1,100 +1,59 @@
 <template>
   <div class="mark-by-examinee">
     <mark-header-card :data="examineeAchievementDO" />
-    <div>
-      <el-card
-        v-if="examData.keguan"
-        class="paper-card"
-      >
-        <div
-          class="card-header"
-          :style="{ 'padding-bottom': isShowImpersonality ? '16px' : '' }"
-        >
-          <div class="card-left">
-            <span class="title">客观题部分</span>
-            <span class="sub-title">
-              <span>（共{{ examData.keguan }}题</span>
-              <span v-if="examData.scoreKeguan">共{{ examData.scoreKeguan }}分）</span>
-            </span>
-          </div>
-          <div
-            class="card-right"
-            @click="isShowImpersonality = !isShowImpersonality"
-          >
-            <i :class="`el-icon-arrow-${isShowImpersonality ? 'up' : 'down'}`" />
-            <span
-              class="expand-text"
-              style="margin-left:8px"
-            >{{
-              isShowImpersonality ? '收起' : '展开'
-            }}</span>
-          </div>
+    <el-card class="paper-card">
+      <div class="card-header view-header">
+        <div class="card-left">
+          <span class="title">答卷详情</span>
+          <span class="sub-title">
+            <span>（共{{ examData.keguan + examData.zhuguan }}题</span>
+            <span>共{{ examData.scoreKeguan + examData.scoreZhuguan }}分）</span>
+          </span>
         </div>
-        <ul
-          v-if="isShowImpersonality"
-          class="card-content"
-        >
-          <li
-            v-for="(item, index) in impersonalityList"
-            :key="index"
-            class="card-li"
+        <div class="card-right">
+          <span class="right-title">查看试题范围</span>
+          <el-radio-group
+            v-model="queryInfo.flag"
+            @change="getPaperData"
           >
-            <div class="card-title">
-              <span>{{ (index + 1) | number2zhcn }}、</span>
-              <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
-              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
-            </div>
-            <div class="card-sub-title">
-              {{ _.get(item, '[0].title', null) }}
-            </div>
-            <ul class="content-box">
-              <li
-                v-for="(conItem, conIndex) in item"
-                :key="conItem.id"
-                class="content-li"
-              >
-                <span>{{ conIndex + 1 }}.</span>
-                <span>（{{ conItem.scoreQuestion }}分）</span>
-                <QustionPreview
-                  :data="conItem"
-                  type="view"
-                />
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </el-card>
-      <el-card
-        v-if="examData.zhuguan"
-        class="paper-card object-card"
-      >
-        <div
-          class="card-header"
-          :style="{ 'padding-bottom': '16px' }"
-        >
-          <div class="card-left">
-            <span class="title">主观题部分</span>
-            <span class="sub-title">
-              <span>（共{{ examData.zhuguan }}题</span>
-              <span v-if="examData.scoreZhuguan">共{{ examData.scoreZhuguan }}分）</span>
-            </span>
-          </div>
+            <el-radio label="">
+              全部试题
+            </el-radio>
+            <el-radio label="0">
+              仅显示答对试题
+            </el-radio>
+            <el-radio label="1">
+              仅显示答错试题
+            </el-radio>
+          </el-radio-group>
         </div>
-        <ul class="card-content">
-          <li
-            v-for="(item, index) in subjectivityList"
-            :key="index"
-            class="card-li"
-          >
-            <div class="card-title">
+      </div>
+      <com-empty
+        v-if="_.isEmpty(questionList)"
+        height="38vh"
+        text="暂无试题"
+      />
+      <ul
+        v-else
+        class="question-ul"
+      >
+        <li
+          v-for="(item, index) in questionList"
+          :key="index"
+          class="question-li"
+        >
+          <div class="title-box">
+            <div class="question-li-title">
               <span>{{ (index + 1) | number2zhcn }}、</span>
-              <span>{{ _.get(item, '[0].type', null) | typeFilter }}</span>
-              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+              <span>{{ item[0].type | typeFilter }}</span>
+              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分)</span>
             </div>
-            <div class="card-sub-title">
-              {{ _.get(item, '[0].title', null) }}
+            <div class="sub-title">
+              {{ item[0].title }}
             </div>
-            <ul class="content-box">
+          </div>
+          <div class="content-box">
+            <ul class="content-ul">
               <li
                 v-for="(conItem, conIndex) in item"
                 :key="conItem.id"
@@ -104,7 +63,6 @@
                 <span>（{{ conItem.scoreQuestion }}分）</span>
                 <QustionPreview
                   v-if="QUESTION_TYPE_GROUP !== conItem.type"
-                  ref="refSelect"
                   :data="conItem"
                   type="view"
                 />
@@ -119,9 +77,8 @@
                       :key="paperIndex"
                       class="content-li"
                     >
-                      <span>（{{ paperIndex + 1 }}）.</span>
+                      <span>({{ paperIndex + 1 }}).</span>
                       <QustionPreview
-                        :ref="`refSelect`"
                         :data="paperItem"
                         type="view"
                       />
@@ -130,52 +87,20 @@
                 </span>
               </li>
             </ul>
-          </li>
-        </ul>
-      </el-card>
-      <div class="handle-button">
-        <div class="button-box">
-          <el-button
-            type="primary"
-            size="medium"
-            @click="submit"
-          >
-            提交评分
-          </el-button>
-          <el-button
-            size="medium"
-            @click="submitAndNext"
-          >
-            提交且评下一个
-          </el-button>
-          <el-button
-            size="medium"
-            @click="save"
-          >
-            保存
-          </el-button>
-          <el-button
-            size="medium"
-            @click="refreshSubmit"
-          >
-            重新评分
-          </el-button>
-        </div>
-      </div>
-    </div>
+          </div>
+        </li>
+      </ul>
+    </el-card>
   </div>
 </template>
 
 <script>
 // 逐人评卷详情内
 const nzhcn = require('nzh/cn')
-import {
-  getExamineePaperDetail,
-  getExamineePaperDetailist,
-  postSubmitByOne
-} from '@/api/examManage/mark'
+import { getExamineePaperDetail, getExamineePaperDetailist } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
 import QustionPreview from './components/questionPreview'
+import ComEmpty from '@/components/common-empty/empty'
 import MarkHeaderCard from './components//MarkHeaderCard'
 import { addLine } from '@/util/util'
 import {
@@ -191,7 +116,8 @@ export default {
   name: 'MarkByExaminee',
   components: {
     MarkHeaderCard,
-    QustionPreview
+    QustionPreview,
+    ComEmpty
   },
   provide() {
     return {
@@ -208,20 +134,16 @@ export default {
   },
   data() {
     return {
-      isShowImpersonality: false,
+      isView: true,
       examData: {},
       examineeAchievementDO: {},
-      formDataList: [],
       questionList: [],
       queryInfo: {
         userId: '',
         type: '',
         id: '',
         flag: '' //0 全队，1全错
-      },
-      isView: false,
-      impersonalityList: [], //客观题
-      subjectivityList: [] // 主观题
+      }
     }
   },
   computed: {
@@ -239,95 +161,11 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
-    this.clearMarkForm()
     next()
   },
   methods: {
     getHTML(content) {
       return addLine(content)
-    },
-    // 重新评分
-    refreshSubmit() {
-      this.$confirm('您确定重新对该考卷进行评分吗？确定后考卷的所有评分信息将会被清空！', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.clearMarkForm()
-      })
-    },
-    // 保存
-    save() {
-      this.submit()
-    },
-    // 提交且评下一个
-    submitAndNext() {
-      this.isNext = true
-    },
-    // 提交
-    submit() {
-      this.checkRequired()
-    },
-    // 具体提交函数
-    submitFun() {
-      const targetRefs = this.getTargetRefs()
-      this.formDataList = _.map(targetRefs, 'model')
-      const list = _.chain(this.formDataList)
-        .cloneDeep()
-        .filter((item) => {
-          return item.result
-        })
-        .value()
-      if (_.isEmpty(list)) {
-        this.$message.error('您未对该考卷进行评分，请评分后再提交！')
-      } else {
-        const params = {
-          id: this.examineeAchievementDO.id,
-          list
-        }
-        postSubmitByOne(params)
-          .then(() => {
-            this.$router.go(-1)
-          })
-          .catch(() => {
-            window.console.error(JSON.stringify(params))
-          })
-      }
-    },
-    // 检测提交前的逻辑
-    checkRequired() {
-      const checkList = this.getTargetRefs()
-      Promise.all(
-        _.map(checkList, (item) => {
-          return item.validate()
-        })
-      )
-        .then(() => {
-          this.submitFun()
-        })
-        .catch(() => {
-          this.$message.error('请为所有已评出结果的试题输入得分！')
-        })
-    },
-    // 获取当前所有的refs
-    getTargetRefs() {
-      const targetRefs = _.chain(this.$refs.refSelect)
-        .map('$refs')
-        .filter((item) => {
-          return !_.isEmpty(item)
-        })
-        .map((item) => {
-          return item.gapAndShorRef.$refs.form
-        })
-        .value()
-      return targetRefs
-    },
-    //清空所有的表格校验以及表格数据
-    clearMarkForm() {
-      const targetRefs = this.getTargetRefs()
-      _.map(targetRefs, (item) => {
-        return item.resetFields()
-      })
     },
     getItemTotalScore(data) {
       const addScore = (args) => {
@@ -339,7 +177,6 @@ export default {
         return Number(item.scoreQuestion)
       })
       const totalScore = addScore(scoreList)
-
       return totalScore
     },
     async initData() {
@@ -358,32 +195,10 @@ export default {
         id: this.$route.query.id
       })
       const paperData = await getExamineePaperDetailist(this.queryInfo)
-      // 页面一进来就区分是评卷还是查看卷子
-      this.getEditData(paperData)
+      this.getViewData(paperData)
     },
-    getEditData(paperData) {
-      let targetList = []
-      _.each(paperData, (item) => {
-        if (!_.isEmpty(item.subQuestions)) {
-          targetList.push(...item.subQuestions)
-        } else {
-          targetList.push(item)
-        }
-      })
-      const tempPaperData = _.groupBy(targetList, 'state')
-      _.forIn(tempPaperData, (value, key) => {
-        switch (key) {
-          case '0':
-            this.impersonalityList = this.initQuestionList(value)
-            break
-          case '1':
-            this.subjectivityList = this.initQuestionList(value)
-            break
-        }
-      })
-    },
-    initQuestionList(data) {
-      return _.chain(_.cloneDeep(data))
+    getViewData(paperData) {
+      this.questionList = _.chain(_.cloneDeep(paperData))
         .groupBy('parentSort')
         .sortBy('parentSort')
         .map((item) => {

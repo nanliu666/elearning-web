@@ -331,18 +331,16 @@ export default {
      * 逐人评卷
      */
     handleExaminee(row) {
-      const basicQuery = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
-      let query = Object.create(null)
+      const query = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
+      let path = ''
       if (row.status === '5' || (row.status === '4' && row.currentId !== this.userId)) {
-        const viewQuery = { isView: true }
-        query = _.assign(basicQuery, viewQuery)
+        // 查看试卷详情
+        path = '/examManagement/mark/ViewByExaminee'
       } else {
-        query = basicQuery
+        // 可评卷试卷页面
+        path = '/examManagement/mark/MarkByExaminee'
       }
-      this.$router.push({
-        path: '/examManagement/mark/MarkByExaminee',
-        query
-      })
+      this.$router.push({ path, query })
     }
   }
 }
