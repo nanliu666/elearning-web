@@ -41,7 +41,7 @@
               <span>{{ item[0].type | typeFilter }}</span>
               <span
                 v-if="paperData.type === 'manual'"
-              >（每题{{ item[0].score / 10 }}分，共{{ item.length }}题）</span>
+              >（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
             </div>
             <div
               v-for="(sonitem, sonindex) in item"
@@ -136,6 +136,18 @@ export default {
     this.initData()
   },
   methods: {
+    addScore(args) {
+      return args.reduce((prev, curr) => {
+        return prev + curr
+      })
+    },
+    getItemTotalScore(data) {
+      const scoreList = _.map(data, (item) => {
+        return item.score
+      })
+      const totalScore = this.addScore(scoreList)
+      return totalScore / 10
+    },
     getHTML(content) {
       return addLine(content)
     },

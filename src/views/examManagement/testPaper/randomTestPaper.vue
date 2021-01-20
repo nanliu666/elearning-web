@@ -67,6 +67,9 @@
           :config="tableConfig"
           :data="tableData"
         >
+          <template #index="{$index}">
+            {{ $index + 1 }}
+          </template>
           <template #type="{row}">
             <el-select
               v-model="row.type"
@@ -286,6 +289,13 @@ const BASE_COLUMNS = [
 ]
 const TABLE_COLUMNS = [
   {
+    label: '序号',
+    prop: 'index',
+    slot: true,
+    align: 'center',
+    minWidth: 80
+  },
+  {
     label: '试题类型',
     prop: 'type',
     slot: true,
@@ -321,7 +331,7 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
   defaultExpandAll: false,
-  showIndexColumn: true,
+  showIndexColumn: false,
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {

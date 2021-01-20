@@ -320,7 +320,6 @@ export default {
       return result
     },
     handleSubmit() {
-      this.submitting = true
       let userIdArr = this.selectList.map((item) => {
         return item.userId
       })
@@ -328,18 +327,23 @@ export default {
         roleId: this.roleId || this.$route.query.roleId,
         userId: userIdArr.join(',')
       }
-      addUser(params)
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
+      if (_.isEmpty(userIdArr)) {
+        this.$message.error('请添加用户')
+      } else {
+        this.submitting = true
+        addUser(params)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '操作成功!'
+            })
+            this.close()
+            this.$emit('after-submit')
           })
-          this.close()
-          this.$emit('after-submit')
-        })
-        .finally(() => {
-          this.submitting = false
-        })
+          .finally(() => {
+            this.submitting = false
+          })
+      }
     },
     resolveTree(tree) {
       if (tree.orgs.length > 0) {
