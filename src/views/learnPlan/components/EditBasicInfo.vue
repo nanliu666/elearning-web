@@ -62,7 +62,7 @@ export default {
         {
           prop: 'automaticIntegralCount',
           itemType: 'switch',
-          label: '自动计算积分',
+          label: '自动计算学分',
           required: false,
           offset: 4
         },
