@@ -17,6 +17,7 @@
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
             <common-image-view
+              v-if="option.url"
               :url="option.url"
               :file-name="option.fileName"
               :preview-src-list="[option.url]"

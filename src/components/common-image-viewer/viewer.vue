@@ -9,7 +9,10 @@
       :visible.sync="viewing"
       :initial-index="viewIndex"
     ></image-viewer>
-    <div class="image-name">
+    <div
+      v-if="fileName"
+      class="image-name"
+    >
       <span class="ellipsis">
         {{ fileName }}
       </span>
@@ -76,7 +79,6 @@ export default {
 .image-li {
   position: relative;
   margin-right: 40px;
-  margin-bottom: 40px;
   width: 240px;
   border: 1px solid #ebeced;
   box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);

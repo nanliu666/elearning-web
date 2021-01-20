@@ -25,6 +25,7 @@
         class="qustion__attachment"
       >
         <common-image-view
+          v-if="attachment.fileUrl"
           :url="attachment.fileUrl"
           :file-name="attachment.fileName"
           :preview-src-list="[attachment.fileUrl]"
@@ -50,6 +51,7 @@
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
             <common-image-view
+              v-if="option.url"
               :url="option.url"
               :file-name="option.fileName"
               :preview-src-list="[option.url]"
@@ -77,6 +79,7 @@
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
             <common-image-view
+              v-if="option.url"
               :url="option.url"
               :file-name="option.fileName"
               :preview-src-list="[option.url]"
