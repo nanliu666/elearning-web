@@ -449,10 +449,11 @@ export default {
     handleDelete(selection) {
       if (Array.isArray(selection)) {
         if (_.some(selection, { status: 2 })) {
-          this.$alert(
+          this.$confirm(
             '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
               confirmButtonText: '知道了',
+              showCancelButton: false,
               callback: () => {
                 this.deletePlanFn(selection)
               }
@@ -460,15 +461,23 @@ export default {
           )
           return
         }
-        this.deletePlanFn(selection)
+        this.$confirm('确定要删除选中的课程安排吗？', {
+          callback: () => {
+            this.deletePlanFn(selection)
+          }
+        })
       } else {
         if (selection.status === 2) {
-          this.$alert('选中的课程安排正在进行中，无法进行删除操作。', {
+          this.$confirm('选中的课程安排正在进行中，无法进行删除操作。', {
             confirmButtonText: '关闭',
             callback: () => {}
           })
         }
-        this.deletePlanFn([selection])
+        this.$confirm('确定要删除选中的课程安排吗？', {
+          callback: () => {
+            this.deletePlanFn([selection])
+          }
+        })
       }
     },
     deletePlanFn(arr) {

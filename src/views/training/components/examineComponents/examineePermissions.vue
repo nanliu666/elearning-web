@@ -51,7 +51,7 @@ const defaultValue = {
   selfMarking: false,
   publicAnswers: true,
   // openEntrance: false,
-  isExamine: false,
+  // isExamine: false,
   openResultsValue: 0 // 默认值0，表示永久
 }
 export default {
