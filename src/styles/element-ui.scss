@@ -192,3 +192,8 @@ table tr {
 .el-tree-node.is-current > .el-tree-node__content {
   background-color: #f2f5f7;
 }
+
+// 数字输入框内容左对齐显示
+.el-input-number.is-controls-right .el-input__inner {
+  text-align: left;
+}
