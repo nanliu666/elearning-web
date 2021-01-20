@@ -49,6 +49,7 @@
 </template>
 
 <script>
+// 单选题和多选题
 import CommonImageView from '@/components/common-image-viewer/viewer'
 export default {
   name: 'SelectView',

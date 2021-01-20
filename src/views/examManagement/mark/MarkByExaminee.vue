@@ -312,7 +312,7 @@
 </template>
 
 <script>
-// 逐人评卷
+// 逐人评卷详情内
 const nzhcn = require('nzh/cn')
 import {
   getExamineePaperDetail,

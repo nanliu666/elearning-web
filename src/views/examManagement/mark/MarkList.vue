@@ -111,6 +111,7 @@
 </template>
 
 <script>
+// 手工评卷列表页
 import SearchPopover from '@/components/searchPopOver/index'
 import { listManualEvaluation } from '@/api/examManage/mark'
 import { getExamList } from '@/api/examManage/schedule'

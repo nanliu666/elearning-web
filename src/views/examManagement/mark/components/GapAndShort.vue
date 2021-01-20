@@ -63,6 +63,7 @@
 </template>
 
 <script>
+// 填空题和简答题
 const EventColumns = [
   {
     itemType: 'radio',
