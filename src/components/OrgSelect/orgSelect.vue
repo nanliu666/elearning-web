@@ -7,14 +7,14 @@
         type="primary"
         icon="el-icon-plus"
         style="margin-bottom: 6px;"
-        @click="() => $refs.userSelect.init(selectedData)"
+        @click="() => (show = true)"
       >
         添加{{ title }}
       </el-button>
       <div
         class="input-box"
         :class="{ 'as-input': buttonType === 'input' }"
-        @click="() => $refs.userSelect.init(selectedData)"
+        @click="() => (show = true)"
       >
         <el-tag
           v-for="(item, i) in selectedData"
@@ -22,6 +22,7 @@
           v-bind="tagConfig"
           class="org-tag"
           size="medium"
+          style="margin-bottom:6px;"
           @close="onClose(item, i)"
         >
           {{ item.name }}
@@ -50,12 +51,13 @@
       ref="userSelect"
       :is-department-only="isDepartmentOnly"
       :org="org"
+      :value="selectedData"
       :users="selectOldData"
       :visible.sync="show"
       :title="'请选择' + title"
       :is-range="isRange"
       v-bind="type"
-      @addUser="adduser"
+      @submit="adduser"
     />
   </div>
 </template>

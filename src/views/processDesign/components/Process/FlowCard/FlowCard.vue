@@ -23,14 +23,6 @@ function createNormalCard(ctx, conf, h) {
             <i class="el-icon-s-promotion" style="font-size:12px;color:white;margin-right:8px;"></i>
           )}
           <span class="title-text">{conf.properties.title}</span>
-          {!isStartNode && (
-            <input
-              vModel_trim={conf.properties.title}
-              class="title-input"
-              style="margin-top:6px;"
-              onClick={stopPro}
-            />
-          )}
         </div>
         <div class="actions" style="margin-right:8px;">
           <i
@@ -51,7 +43,6 @@ function createNormalCard(ctx, conf, h) {
 // arg = ctx, data, h
 const createFunc = (...arg) => createNormalCard.call(arg[0], ...arg)
 let nodes = {
-  start: createFunc,
   approver: createFunc,
   copy: createFunc,
   empty: (_) => '',
@@ -108,7 +99,7 @@ function addNodeButton(ctx, data, h, isBranch = false) {
   return (
     <div class="add-node-btn-box flex  justify-center">
       <div class="add-node-btn">
-        <el-popover placement="right" trigger="click" width="300">
+        <el-popover placement="right" trigger="click" width="200">
           <div class="condition-box">
             <div>
               <div
@@ -144,6 +135,15 @@ function NodeFactory(ctx, data, h) {
   const showErrorTip = ctx.verifyMode && NodeUtils.checkNode(data) === false
   let res = [],
     branchNode = '',
+    selfNode
+  if (NodeUtils.isStartNode(data)) {
+    selfNode = (
+      <div class="node-wrap">
+        <section class="start-node">发起申请</section>
+        {addNodeButton.call(ctx, ctx, data, h)}
+      </div>
+    )
+  } else {
     selfNode = (
       <div class="node-wrap">
         <div class={`node-wrap-box ${data.type} ${showErrorTip ? 'error' : ''}`}>
@@ -157,7 +157,7 @@ function NodeFactory(ctx, data, h) {
         </div>
       </div>
     )
-
+  }
   if (hasBranch(data)) {
     // 如果节点是数组 一定为条件分支 添加分支样式包裹
     // {data.childNode && NodeFactory.call(ctx, ctx, data.childNode, h)}
@@ -197,7 +197,6 @@ function NodeFactory(ctx, data, h) {
 function addEndNode(h) {
   return <section class="end-node">流程结束</section>
 }
-
 export default {
   props: {
     data: { type: Object, required: true },

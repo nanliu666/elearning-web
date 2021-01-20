@@ -62,15 +62,9 @@ export default {
         {
           prop: 'automaticIntegralCount',
           itemType: 'switch',
-          label: '自动计算积分',
+          label: '自动计算学分',
           required: false,
           offset: 4
-        },
-        {
-          prop: 'endDate',
-          itemType: 'datePicker',
-          label: '学习计划截止日期',
-          required: false
         },
         {
           prop: 'categoryId',
@@ -81,14 +75,13 @@ export default {
             value: 'id',
             emitPath: false
           },
-          showAllLevels: false,
-          offset: 4,
-          required: true
+          showAllLevels: false
         },
         {
           prop: 'creatorName',
           itemType: 'input',
           label: '创建者',
+          offset: 4,
           required: false
         },
         {
@@ -97,13 +90,13 @@ export default {
           type: 'datetime',
           valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '创建时间',
-          offset: 4,
           required: false
         },
         {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
+          offset: 4,
           maxlength: 32,
           required: false
         }
@@ -142,7 +135,7 @@ export default {
       getCatalogs().then((res) => {
         const data = handleCatalogsData(res)
         this.categoryData = data
-        this.columns[5].options = data
+        this.columns[4].options = data
       })
     }
   }

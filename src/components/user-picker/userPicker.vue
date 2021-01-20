@@ -7,11 +7,11 @@
     append-to-body
     :before-close="close"
   >
-    <div
-      v-loading="loading"
-      class="content-wr"
-    >
-      <div class="left">
+    <div class="content-wr">
+      <div
+        v-loading="loading"
+        class="left"
+      >
         <div>
           <el-tabs v-model="activeTab">
             <el-tab-pane
@@ -128,7 +128,6 @@
         @click="handleClose"
       >取 消</el-button>
       <el-button
-        v-loading="loading"
         size="medium"
         type="primary"
         @click="handleSubmit"
@@ -221,7 +220,7 @@ export default {
       orgSearchData: [],
       outerParams: {
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 15,
         search: '',
         loaded: false
       },
