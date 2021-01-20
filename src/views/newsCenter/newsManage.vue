@@ -116,13 +116,13 @@ export default {
       }
     }
   },
-
   watch: {
     'searchParams.categoryId'() {
       this.handleSearch(this.searchParams)
     }
   },
   mounted() {
+    this.activeName = _.get(this, '$route.query.activeName', 'Published')
     this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
       this.typeList = [{ dictValue: '全部', id: '' }, ...res]
     })

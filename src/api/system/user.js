@@ -88,7 +88,10 @@ export const modifyUserStatus = (userId, userStatus) => {
 export const getOrgUserList = (params) => {
   return get('/org/v1/org/user', params)
 }
-
+// 搜索所有人员，包括外部员工
+export const getAllUserList = (params) => {
+  return get('/user/v1/user/all', params)
+}
 /**
  * 标签所属用户移除接口
  * @param {String} tagId 标签ID

@@ -35,7 +35,17 @@
                 class="el-icon-folder"
                 style="margin-right: 5px;"
               />
-              <span class="label-name ellipsis">{{ data[props.label] }}</span>
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="data[props.label]"
+                placement="top-start"
+                :disabled="_.size(_.trim(data[props.label])) < 10"
+              >
+                <span class="label-name ellipsis">
+                  <span>{{ data[props.label] }}</span>
+                </span>
+              </el-tooltip>
               <span>{{ `(${data.roleNum})` }}</span>
             </span>
             <el-dropdown

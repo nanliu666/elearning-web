@@ -24,6 +24,7 @@
     <template #handler="{row}">
       <div class="table__handler">
         <el-button
+          v-if="status === 'Published'"
           type="text"
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
@@ -102,7 +103,7 @@ const TABLE_COLUMNS = [
     maxWidth: 100
   },
   {
-    label: '发布时间',
+    label: '时间',
     prop: 'publishTime',
     minWidth: 100
   }

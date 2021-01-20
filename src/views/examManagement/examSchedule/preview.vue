@@ -14,7 +14,10 @@
       </el-button>
     </page-header>
     <basic-container>
-      <div class="preview-container">
+      <div
+        v-loading="loading"
+        class="preview-container"
+      >
         <div class="preview-title-box">
           <div class="preview-title">
             {{ paperData.name }}
@@ -38,7 +41,7 @@
               <span>{{ item[0].type | typeFilter }}</span>
               <span
                 v-if="paperData.type === 'manual'"
-              >（每题{{ item[0].score / 10 }}分，共{{ item.length }}题）</span>
+              >（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
             </div>
             <div
               v-for="(sonitem, sonindex) in item"
@@ -112,6 +115,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       paperData: []
     }
   },
@@ -132,6 +136,18 @@ export default {
     this.initData()
   },
   methods: {
+    addScore(args) {
+      return args.reduce((prev, curr) => {
+        return prev + curr
+      })
+    },
+    getItemTotalScore(data) {
+      const scoreList = _.map(data, (item) => {
+        return item.score
+      })
+      const totalScore = this.addScore(scoreList)
+      return totalScore / 10
+    },
     getHTML(content) {
       return addLine(content)
     },
@@ -142,6 +158,7 @@ export default {
       })
     },
     initData() {
+      this.loading = true
       let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
       if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
         loadFun = createRandomPaper
@@ -151,10 +168,14 @@ export default {
         this.$route.query.paperType === 'manual' || this.$route.query.isManaged
           ? basicParams
           : _.assign(basicParams, { previewId: this.$route.query.previewId })
-      loadFun(parmas).then((res) => {
-        res.questions = this.handleData(res.questions)
-        this.paperData = res
-      })
+      loadFun(parmas)
+        .then((res) => {
+          res.questions = this.handleData(res.questions)
+          this.paperData = res
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     handleData(data) {
       return _.chain(data)
@@ -172,6 +193,7 @@ export default {
 <style scoped lang="scss">
 .preview-container {
   padding: 60px 80px;
+  min-height: 75vh;
   .preview-title-box {
     display: flex;
     align-items: center;

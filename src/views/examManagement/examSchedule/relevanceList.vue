@@ -77,7 +77,7 @@ const TABLE_CONFIG = {
   showHandler: true,
   enableMultiSelect: true,
   showIndexColumn: false,
-  rowKey: 'id',
+  rowKey: 'previewId',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 

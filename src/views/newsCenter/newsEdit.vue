@@ -37,8 +37,11 @@
                   单个文件大小＜5MB，最多5个文件
                 </div>
                 <template>
-                  <el-button size="medium">
-                    上传
+                  <el-button
+                    size="medium"
+                    icon="el-icon-upload"
+                  >
+                    点击上传
                   </el-button>
                   <div>
                     <ul class="upload__files">
@@ -120,25 +123,15 @@
             }"
           >
             <template slot="isVisibles">
-              <fc-org-select
-                ref="org-select"
+              <SelectUser
                 v-model="formData.visibles"
-                title="发布范围"
                 class="select"
-                :all="all"
-                :is-range="isRange"
-                :org="isOrg"
-                :empty-text="emptyText"
-              />
+                title="发布范围"
+              ></SelectUser>
             </template>
           </common-form>
         </div>
       </div>
-
-      <!--      <div class="container__editor">-->
-      <!--        <tinymce v-model="formData.content" />-->
-      <!--      </div>-->
-
       <div class="container__buttons">
         <el-button
           :loading="submitting"
@@ -148,12 +141,12 @@
         >
           发布
         </el-button>
-        <el-button
+        <!-- <el-button
           size="medium"
           @click="() => handlePreviewBtnClick()"
         >
           预览
-        </el-button>
+        </el-button> -->
         <el-button
           size="medium"
           @click="() => handleSaveDraftBtnClick().catch((error) => error)"
@@ -170,6 +163,7 @@ import Vue from 'vue'
 import { postV1News, postNewsPublish, getNewsDetail, putV1News } from '@/api/newsCenter/newCenter'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
+import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 
 // 接口需要的参数
 const API_PARAMS = [
@@ -199,7 +193,8 @@ const vmSetDeep = (target, key, value) => {
 export default {
   name: 'NewsEdit',
   components: {
-    CommonUpload
+    CommonUpload,
+    SelectUser
   },
 
   data() {
@@ -400,11 +395,10 @@ export default {
             try {
               this.submitting = true
               // 需要先存为草稿再发布新闻
-              // const { id } =
-              _.isNull(this.id)
+              const params = _.isNull(this.id)
                 ? await this.postNews(_.pickBy(this._formData), { status: 'Published' })
                 : await this.updateNews(_.pickBy(this._formData))
-              // await this.publishNews(id)
+              await this.publishNews(params)
               this.$message.success('发布成功')
               this.hasEdit = false
               this.handleBack()
@@ -447,7 +441,7 @@ export default {
               : await this.updateNews(_.pickBy(this._formData))
             this.$message.success('保存成功')
             this.hasEdit = false
-            this.handleBack()
+            this.handleBack('Draft')
           } catch (error) {
             this.$message.info('取消操作')
             throw new Error('取消操作')
@@ -459,10 +453,10 @@ export default {
           throw error // => false
         })
     },
-    handleBack() {
+    handleBack(type = 'Published') {
       this.handleLeave()
         .then(() => {
-          this.$router.back()
+          this.$router.push({ path: '/newsCenter/newsManage', query: { activeName: type } })
           this.$store.commit('DEL_TAG', this.tag)
         })
         .catch(() => {})
@@ -603,7 +597,16 @@ export default {
   }
 }
 </script>
-
+<style lang="scss" scoped>
+.upload {
+  /deep/ .el-upload--text {
+    text-align: left;
+  }
+  .uploader__btn {
+    text-align: center;
+  }
+}
+</style>
 <style lang="sass" scoped>
 $color_active: #368AFA
 $color_border: #E3E7E9
