@@ -164,7 +164,7 @@
                 <span v-else>
                   <span
                     class="right-title"
-                    v-html="_.unescape(conItem.content)"
+                    v-html="getHTML(conItem.content)"
                   ></span>
                   <ul>
                     <li
@@ -172,7 +172,7 @@
                       :key="paperIndex"
                       class="content-li"
                     >
-                      <span>{{ paperIndex + 1 }}.</span>
+                      <span>（{{ paperIndex + 1 }}）.</span>
                       <QustionPreview
                         :ref="`refSelect`"
                         :data="paperItem"
@@ -276,6 +276,7 @@
                   class="content-li"
                 >
                   <span>{{ conIndex + 1 }}.</span>
+                  <span>（{{ conItem.scoreQuestion }}分）</span>
                   <QustionPreview
                     v-if="QUESTION_TYPE_GROUP !== conItem.type"
                     :data="conItem"
@@ -284,7 +285,7 @@
                   <span v-else>
                     <span
                       class="right-title"
-                      v-html="_.unescape(conItem.content)"
+                      v-html="getHTML(conItem.content)"
                     ></span>
                     <ul>
                       <li
@@ -292,7 +293,7 @@
                         :key="paperIndex"
                         class="content-li"
                       >
-                        <span>{{ paperIndex + 1 }}.</span>
+                        <span>({{ paperIndex + 1 }}).</span>
                         <QustionPreview
                           :data="paperItem"
                           type="view"
@@ -327,6 +328,7 @@ const STATUS_STATUS = [
   { value: '4', label: '阅卷中', type: 'danger' },
   { value: '5', label: '已评卷', type: 'info' }
 ]
+import { addLine } from '@/util/util'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -392,6 +394,9 @@ export default {
     next()
   },
   methods: {
+    getHTML(content) {
+      return addLine(content)
+    },
     // 重新评分
     refreshSubmit() {
       this.$confirm('您确定重新对该考卷进行评分吗？确定后考卷的所有评分信息将会被清空！', '提示', {

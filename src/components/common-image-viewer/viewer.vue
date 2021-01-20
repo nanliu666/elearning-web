@@ -3,27 +3,38 @@
     <el-image
       class="el-image"
       :src="url"
-      :preview-src-list="previewSrcList"
     />
+    <image-viewer
+      :url-list="previewSrcList"
+      :visible.sync="viewing"
+      :initial-index="viewIndex"
+    ></image-viewer>
     <div class="image-name">
-      {{ fileName }}
+      <span class="ellipsis">
+        {{ fileName }}
+      </span>
     </div>
     <div class="handle-box">
       <span
         v-if="isDownload"
         @click.stop="downloadFile(url)"
       ><i class="el-icon-download"></i></span>
+      <span @click.stop="handlePreviewImage([url])"><i class="el-icon-view" /></span>
     </div>
   </div>
 </template>
 
 <script>
+import ImageViewer from '@/components/image-viewer/ImageViewer'
 export default {
   name: 'CommonImageView',
+  components: {
+    ImageViewer
+  },
   props: {
     isDownload: {
       type: Boolean,
-      default: true
+      default: false
     },
     // 文件名称
     fileName: {
@@ -41,12 +52,21 @@ export default {
       default: ''
     }
   },
+
   data() {
-    return {}
+    return {
+      viewing: false,
+      viewIndex: 0
+    }
   },
   methods: {
     downloadFile(url) {
       this.$emit('downloadFile', url)
+    },
+    handlePreviewImage(list, index = 0) {
+      this.viewing = true
+      this.viewingImages = list
+      this.viewIndex = index
     }
   }
 }
@@ -69,7 +89,7 @@ export default {
     height: 36px;
     display: flex;
     align-items: center;
-    padding-left: 16px;
+    padding: 0 10px;
     font-family: PingFangSC-Regular;
     font-size: 14px;
     color: #000b15;
