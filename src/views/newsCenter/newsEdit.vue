@@ -120,16 +120,11 @@
             }"
           >
             <template slot="isVisibles">
-              <fc-org-select
-                ref="org-select"
+              <SelectUser
                 v-model="formData.visibles"
-                title="发布范围"
                 class="select"
-                :all="all"
-                :is-range="isRange"
-                :org="isOrg"
-                :empty-text="emptyText"
-              />
+                title="发布范围"
+              ></SelectUser>
             </template>
           </common-form>
         </div>
@@ -165,6 +160,7 @@ import Vue from 'vue'
 import { postV1News, postNewsPublish, getNewsDetail, putV1News } from '@/api/newsCenter/newCenter'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
+import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 
 // 接口需要的参数
 const API_PARAMS = [
@@ -194,7 +190,8 @@ const vmSetDeep = (target, key, value) => {
 export default {
   name: 'NewsEdit',
   components: {
-    CommonUpload
+    CommonUpload,
+    SelectUser
   },
 
   data() {
