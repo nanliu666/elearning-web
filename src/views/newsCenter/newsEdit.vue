@@ -37,8 +37,11 @@
                   单个文件大小＜5MB，最多5个文件
                 </div>
                 <template>
-                  <el-button size="medium">
-                    上传
+                  <el-button
+                    size="medium"
+                    icon="el-icon-upload"
+                  >
+                    点击上传
                   </el-button>
                   <div>
                     <ul class="upload__files">
