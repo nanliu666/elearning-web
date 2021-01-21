@@ -16,9 +16,11 @@
             :class="{ 'is-correct': option.isCorrect, 'is-fault': getFault(option) }"
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
-            <question-view
+            <common-image-view
               v-if="option.url"
               :url="option.url"
+              :file-name="option.fileName"
+              :preview-src-list="[option.url]"
             />
           </li>
         </ul>
@@ -47,11 +49,12 @@
 </template>
 
 <script>
-import questionView from './questionView'
+// 单选题和多选题
+import CommonImageView from '@/components/common-image-viewer/viewer'
 export default {
   name: 'SelectView',
   components: {
-    questionView
+    CommonImageView
   },
   props: {
     data: {

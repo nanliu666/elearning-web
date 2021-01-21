@@ -25,6 +25,7 @@
       <div class="table__handler">
         <el-button
           v-if="status === 'Published'"
+          v-p="'/newsCenter/newsManage/top'"
           type="text"
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
@@ -36,6 +37,7 @@
 
         <el-button
           v-if="status === STATUS['Draft']"
+          v-p="'/newsCenter/newsManage/edit'"
           type="text"
           size="medium"
           @click="() => handleEditItemBtnClick(row)"
@@ -44,6 +46,7 @@
         </el-button>
 
         <el-button
+          v-p="'/newsCenter/newsManage/delete'"
           type="text"
           size="medium"
           @click="() => handleRemoveItemBtnClick(row)"

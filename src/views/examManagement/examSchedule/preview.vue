@@ -65,7 +65,7 @@
                       :key="paperIndex"
                       class=""
                     >
-                      <span>（{{ paperIndex + 1 }}）</span>
+                      <span>({{ paperIndex + 1 }}).</span>
                       <QustionPreview
                         :data="paperItem"
                         :is-preview="true"

@@ -33,6 +33,7 @@
               @submit="handleSearch"
             />
             <el-button
+              v-p="'/examManagement/category/management/add'"
               type="primary"
               size="medium"
               @click="addCategory"
@@ -59,6 +60,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/examManagement/category/management/disable'"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -66,12 +68,16 @@
               {{ row.status === 1 ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="'/examManagement/category/management/limit'"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-p="'/examManagement/category/management/others'"
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"

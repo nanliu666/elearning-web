@@ -151,6 +151,7 @@
 </template>
 
 <script>
+// 逐题评卷详情内
 const nzhcn = require('nzh/cn')
 const EventColumns = [
   {

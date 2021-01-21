@@ -38,14 +38,6 @@ export default [
         component: () => import('@/views/todo/resumeReview')
       },
       {
-        path: '/msg/msg',
-        name: '消息中心',
-        meta: {
-          fullscreen: true
-        },
-        component: () => import('@/views/msg/msg')
-      },
-      {
         path: '/todo/leaveListOrg',
         name: '离职事项（部门）',
         meta: {

@@ -3,6 +3,7 @@
     <page-header title="新闻管理">
       <template #rightMenu>
         <el-button
+          v-p="'/newsCenter/newsManage/add'"
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
