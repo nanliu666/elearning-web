@@ -178,7 +178,7 @@ export default {
           table.push(_.cloneDeep(it))
         }
         if (it.children && it.children.length > 0) {
-          if (i) {
+          if (table[i]) {
             table[i].childrenList = _.get(_.cloneDeep(it), 'children', [])
             table[i].children = []
             this.filterData(it.children, table[i].children)
@@ -363,7 +363,6 @@ export default {
 
     nodeClick(data, isok, num) {
       // num 1复选框点击0文字点击
-
       let cloneMenuData = _.cloneDeep(data)
       let index = this.submitData.findIndex((item) => {
         return item.menuId == data.menuId
