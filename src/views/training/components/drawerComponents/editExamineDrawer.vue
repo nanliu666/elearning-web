@@ -20,6 +20,7 @@
         <basicSetting
           v-show="currentIndex === 0"
           ref="basicSettingRef"
+          :entry-c-name="entryCName"
         />
         <testEnvironment
           v-show="currentIndex === 1"
@@ -81,6 +82,7 @@ export default {
   },
   props: {
     examine: { type: Object, default: null },
+    entryCName: { type: String, default: '培训' },
     visible: { type: Boolean, default: false }
   },
   data() {

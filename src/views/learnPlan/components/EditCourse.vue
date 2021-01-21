@@ -185,6 +185,7 @@
     <EditExamineDrawer
       :visible.sync="examDrawerVisible"
       :examine="editingExam"
+      entry-c-name="学习计划"
       @submit="handleExamineSubmit"
     />
   </basicContainer>
