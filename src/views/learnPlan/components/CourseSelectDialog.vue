@@ -140,7 +140,8 @@ export default {
         // 课程列表的请求参数
         catalogId: '',
         courseName: '',
-        status: 1
+        status: 1,
+        courseType: 1
       },
       page: {
         currentPage: 1,

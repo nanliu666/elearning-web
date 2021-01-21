@@ -41,7 +41,9 @@
       </div>
       <div class="footer">
         <div class="footer-inner">
-          注：培训发布后，本条考试信息数据将会同步至【考评管理】，可在考试安排和成绩管理查到对应信息
+          注：{{
+            entryCName
+          }}发布后，本条考试信息数据将会同步至【考评管理】，可在考试安排和成绩管理查到对应信息
         </div>
         <div>
           <el-button
