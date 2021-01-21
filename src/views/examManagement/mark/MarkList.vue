@@ -92,12 +92,14 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/examManagement/mark/MarkList/byPerson'"
               type="text"
               @click="handleExaminee(row)"
             >
               逐人评卷
             </el-button>
             <el-button
+              v-p="'/examManagement/mark/MarkList/byQuestion'"
               type="text"
               @click="handlePaper(row)"
             >
