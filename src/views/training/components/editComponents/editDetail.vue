@@ -175,11 +175,16 @@ export default {
       let promiseList = []
       const personForm = this.getLiData('personForm')
       promiseList.push(personForm)
+      // 问卷类型校验
       if (this.formData.evaluation) {
         const assessForm = this.getLiData('assessForm')
         promiseList.push(assessForm)
       }
-      // const certificateForm = this.getLiData('certificateForm')
+      // 证书模板校验
+      if (this.formData.certificate) {
+        const certificateForm = this.getLiData('certificateForm')
+        promiseList.push(certificateForm)
+      }
       return Promise.all(promiseList).then(() => {
         return this.formData
       })

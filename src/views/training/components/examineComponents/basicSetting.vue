@@ -99,8 +99,8 @@ export default {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
-    // 父实体名称
-    parentEntryCName: {
+    // 实体名称
+    entryCName: {
       type: String,
       default: '培训'
     }
@@ -232,15 +232,11 @@ export default {
       )
       if (!isLegalBeginTime) {
         callback(
-          new Error(
-            `考试开始日期要在${this.parentEntryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
-          )
+          new Error(`考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`)
         )
       } else if (!isLegalEndTime) {
         callback(
-          new Error(
-            `考试结束日期要在${this.parentEntryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
-          )
+          new Error(`考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`)
         )
       } else {
         callback()

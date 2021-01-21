@@ -78,6 +78,7 @@
             </template>
             <template #handler="{row}">
               <el-button
+                v-p="'/creditManagement/credit/view'"
                 size="medium"
                 type="text"
                 @click="jumpEdit(row.user_id_str)"

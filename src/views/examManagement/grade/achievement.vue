@@ -80,6 +80,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/examManagement/grade/achievement/view'"
               type="text"
               @click="handleLookUp(row)"
             >

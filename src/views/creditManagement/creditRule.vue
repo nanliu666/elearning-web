@@ -3,6 +3,7 @@
     <page-header title="学分规则管理">
       <div slot="rightMenu">
         <el-button
+          v-p="'/creditManagement/creditRule/add'"
           type="primary"
           size="medium"
           @click="handleAddRule"
@@ -49,18 +50,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/creditManagement/creditRule/disabled'"
               type="text"
               @click="handleIsStart(row)"
             >
               {{ row.status ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="'/creditManagement/creditRule/edit'"
               type="text"
               @click="handleLookUp(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="'/creditManagement/creditRule/delete'"
               type="text"
               @click="handleDelete(row)"
             >

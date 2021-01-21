@@ -67,15 +67,30 @@ export default {
           offset: 4
         },
         {
-          prop: 'categoryId',
-          itemType: 'cascader',
+          itemType: 'treeSelect',
           label: '所属分类',
-          options: [],
+          prop: 'categoryId',
           props: {
-            value: 'id',
-            emitPath: false
+            selectParams: {
+              placeholder: '请选择分类',
+              multiple: false
+            },
+            treeParams: {
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              data: [],
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'label',
+                value: 'id'
+              },
+              required: true
+            }
           },
-          showAllLevels: false
+          required: false
         },
         {
           prop: 'creatorName',
@@ -135,7 +150,7 @@ export default {
       getCatalogs().then((res) => {
         const data = handleCatalogsData(res)
         this.categoryData = data
-        this.columns[4].options = data
+        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = data
       })
     }
   }

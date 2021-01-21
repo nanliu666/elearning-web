@@ -3,6 +3,7 @@
     <page-header title="考试安排">
       <el-dropdown
         slot="rightMenu"
+        v-p="'/examManagement/examSchedule/list/add'"
         @command="createExam"
       >
         <el-button
@@ -118,6 +119,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="'/examManagement/examSchedule/list/deleteAll'"
             type="text"
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
@@ -128,12 +130,14 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/examManagement/examSchedule/list/edit'"
               type="text"
               @click="handleEdit(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="'/examManagement/examSchedule/list/delete'"
               type="text"
               @click="handleDelete(row)"
             >
@@ -141,6 +145,7 @@
             </el-button>
             <el-dropdown
               v-if="activeIndex === '0'"
+              v-p="'/examManagement/examSchedule/list/others'"
               @command="handleCommand(row)"
             >
               <el-button

@@ -49,6 +49,7 @@
 </template>
 
 <script>
+// 逐题评卷内的表格
 const EventColumnsS = [
   {
     itemType: 'slot',

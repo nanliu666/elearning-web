@@ -5,6 +5,11 @@ import { del, get, post, put } from '@/router/axios'
  */
 export const getProcessList = (params) => get('/appr/v2/appr/user/process/list', params)
 /**
+ * 可发起的课程审批流程列表查询接口
+ * @param {*} params
+ */
+export const getCourseProcessList = (params) => get('/appr/v2/appr/course/process/list', params)
+/**
  * 审批申请提交接口
  * */
 export const submitApprApply = (params) => post('/appr/v2/appr/apply/submit', params)

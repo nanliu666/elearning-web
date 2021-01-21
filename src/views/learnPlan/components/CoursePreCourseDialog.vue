@@ -93,7 +93,7 @@ export default {
           _list.push({
             courseId: course.courseId,
             courseName: course.courseName,
-            required: requiredIdMap[course.id] || 0
+            required: requiredIdMap[course.courseId] || 0
           })
         }
       })

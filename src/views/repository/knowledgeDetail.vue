@@ -120,6 +120,7 @@
             <div
               v-for="(item, index) in fileGroup.true"
               :key="index"
+              class="image__li"
             >
               <common-image-view
                 :url="item.url"
@@ -289,6 +290,9 @@ export default {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
+  .image__li {
+    margin-bottom: 40px;
+  }
 }
 .file-title {
   margin-bottom: 10px;

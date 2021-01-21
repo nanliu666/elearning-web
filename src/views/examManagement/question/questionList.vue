@@ -3,6 +3,7 @@
     <page-header title="题库管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="'/examManagement/question/questionList/add'"
         @command="handleCommand"
       >
         <el-button
@@ -81,6 +82,7 @@
           >
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="'/examManagement/question/questionList/deleteAll'"
                 type="text"
                 style="margin-bottom:0;"
                 @click="handleDelete(selection)"
@@ -126,6 +128,7 @@
             </template>
             <template #handler="{row}">
               <el-button
+                v-p="'/examManagement/question/questionList/edit'"
                 size="medium"
                 type="text"
                 @click="handleEdit(row.id)"
@@ -133,6 +136,7 @@
                 编辑
               </el-button>
               <el-button
+                v-p="'/examManagement/question/questionList/delete'"
                 size="medium"
                 type="text"
                 @click="handleDelete(row)"
@@ -173,7 +177,7 @@ export default {
         value: 'id',
         children: 'children'
       },
-      activeCategory: { id: null },
+      activeCategory: { id: -1 },
       parentOrgId: 0,
       treeSearch: '',
       treeLoading: false,
@@ -235,10 +239,6 @@ export default {
     this.loadData()
     this.loadTree()
   },
-  mounted() {
-    this.loadTree()
-    this.loadData()
-  },
   methods: {
     deleteHTMLTag(...args) {
       return deleteHTMLTag(...args)
@@ -256,10 +256,13 @@ export default {
       this.treeLoading = true
       getQuestionCategory({ parentId: '0', type: '0' })
         .then((data) => {
-          this.treeData = [{ id: null, name: '未分类' }, ...data]
+          this.treeData = [{ id: -1, name: '未分类' }, ...data]
+          this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
           getQuestionList({ pageNo: 1, pageSize: 1 }).then((res) => {
-            this.$set(this.treeData, 0, { id: null, name: '未分类', relatedNum: res.totalNum })
-            // this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
+            this.$set(this.treeData, 0, { id: -1, name: '未分类', relatedNum: res.totalNum })
+            setTimeout(() => {
+              this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
+            })
           })
         })
         .catch(() => {})
@@ -344,7 +347,7 @@ export default {
       getQuestionList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        categoryId: this.activeCategory.id,
+        categoryId: this.activeCategory.id === -1 ? null : this.activeCategory.id,
         ...this.query
       })
         .then((res) => {

@@ -10,7 +10,7 @@
       v-loading="loading"
       class="limit-wrap"
     >
-      <el-scrollbar class="scroll-item">
+      <el-scrollbar class="scroll-item border__right">
         <div class="limit-item">
           <menuRulePermission
             ref="privilege"
@@ -42,25 +42,6 @@
           />
         </div>
       </el-scrollbar>
-      <el-scrollbar
-        class="scroll-item"
-        style="border: none;width: 100%;"
-      >
-        <div class="limit-item">
-          <div class="limit-title">
-            管理范围
-          </div>
-          <data-rule
-            v-if="buttonMenuId"
-            ref="dataRule"
-            :menu-id="buttonMenuId"
-            :defualt-rule-data="defualtRuleData"
-            class="data-rule"
-            :show-checkbox="showCheckbox"
-            @getDataRuleCleck="getDataRuleCleck"
-          />
-        </div>
-      </el-scrollbar>
     </div>
     <div
       slot="footer"
@@ -88,7 +69,6 @@
 <script>
 import checkLimits from './roleCheckPermission'
 import menuRulePermission from './menuRulePermission'
-import dataRule from './dataRulePermission'
 import { getRoleMenuPermission, postOrgPrivilege } from '../../../api/system/menu'
 import { flatTree } from '@/util/util'
 
@@ -118,8 +98,7 @@ export default {
   name: 'RoleLimite',
   components: {
     checkLimits,
-    menuRulePermission,
-    dataRule
+    menuRulePermission
   },
   props: {
     visible: {
@@ -154,7 +133,6 @@ export default {
         label: 'name',
         id: 'menuId'
       },
-      showCheckbox: false, //是否显示数据规则复选框
       pages,
       page: [],
       rule: [],
@@ -205,23 +183,6 @@ export default {
             table[i].children = []
             this.filterData(it.children, table[i].children)
           }
-        }
-      })
-    },
-    //获取数据规则选中
-    getDataRuleCleck(data) {
-      this.defualtRuleData = {
-        orgId: data.orgId,
-        bizId: data.bizId,
-        form: data.form
-      }
-
-      this.submitData.map((item) => {
-        if (item.menuId == this.buttonMenuId) {
-          item.orgId = data.orgId
-          item.bizId = data.bizId
-          item.scopeClass = data.form.scopeClass
-          item.scopeValue = data.form.scopeValue
         }
       })
     },
@@ -415,8 +376,7 @@ export default {
         isok && (this.buttonMenuId = cloneMenuData.menuId)
       }
       this.buttonMenuId = cloneMenuData.menuId
-      this.showCheckbox = false
-      isok && data.cleck && (this.showCheckbox = isok)
+      isok && data.cleck
       if (index == -1 && data.cleck && this.buttonMenuId) {
         this.submitData.push({
           menuId: this.buttonMenuId,
@@ -471,8 +431,7 @@ export default {
   height: 400px;
 
   .scroll-item {
-    border-right: 1px solid #f2f2f2;
-    min-width: 180px;
+    min-width: 50%;
     overflow: hidden;
     overflow-y: auto;
 
@@ -484,6 +443,9 @@ export default {
       padding: 0 15px;
       /*flex: 1;*/
     }
+  }
+  .border__right {
+    border-right: 1px solid #f2f2f2;
   }
 }
 </style>
