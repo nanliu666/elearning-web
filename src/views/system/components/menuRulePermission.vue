@@ -65,10 +65,9 @@ export default {
           let filterVal = []
           this.filterData(val, filterVal)
           let fiterTree = flatTree(filterVal)
-          // 当存在权限时，默认为勾选状态
-          _.each(fiterTree, (item) => {
-            if (item.isOwn) {
-              this.defaultValue.push(item.menuId)
+          fiterTree.map((it) => {
+            if (it.isOwn && it.menuType === 'Menu') {
+              this.defaultValue.push(it.menuId)
             }
           })
         }
