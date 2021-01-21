@@ -76,40 +76,40 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList } from '@/api/examManage/schedule'
-import { getCreatUsers, getKnowledgeCatalogList } from '@/api/knowledge/knowledge'
+import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { getLivePlanList, getcategoryTree } from '@/api/live/editLive'
 let TABLE_COLUMNS = [
-  { type: 'index', label: '序号', minWidth: 150 },
+  { type: 'index', label: '序号', width: 100 },
   {
     label: '直播编号',
-    prop: 'examName',
+    prop: 'liveNo',
     minWidth: 150
   },
 
   {
     label: '直播名称',
-    prop: 'category',
+    prop: 'channelName',
     minWidth: 120
   },
   {
     label: '所属分类',
     slot: true,
-    prop: 'examPattern',
+    prop: 'categoryName',
     minWidth: 120
   },
   {
     label: '包含课程',
-    prop: 'examType',
+    prop: 'courses',
     minWidth: 120
   },
   {
     label: '创建人',
-    prop: 'examType',
+    prop: 'creatorName',
     minWidth: 120
   },
   {
     label: '状态',
-    prop: 'examType',
+    prop: 'isUsed',
     minWidth: 120
   }
 ]
@@ -128,7 +128,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'examName',
+      field: 'titleOrNo',
       label: '',
       data: '',
       options: [],
@@ -138,7 +138,7 @@ const SEARCH_CONFIG = {
   popoverOptions: [
     {
       type: 'treeSelect',
-      field: 'catalogId',
+      field: 'categoryId',
       label: '所在分类',
       data: '',
       config: {
@@ -164,7 +164,7 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'select',
-      field: 'userId',
+      field: 'creatorId',
       data: '',
       label: '创建人',
       options: [],
@@ -189,13 +189,13 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'select',
-      field: 'status',
+      field: 'isUsed',
       label: '状态',
       data: '',
       options: [
         { value: '', label: '全部' },
-        { value: 0, label: '正常' },
-        { value: 1, label: '禁用' }
+        { value: '1', label: '正常' },
+        { value: '0', label: '禁用' }
       ]
     }
   ]
@@ -226,13 +226,10 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchConfig: SEARCH_CONFIG,
       queryInfo: {
-        parentOrgId: '', // 分类ID
-        creatorId: '', //评卷人id
-        examType: '', //考试类型 CurrencyExam-通用考试 CourseExam-课程考试 TrainExam-培训班考试
+        categoryId: '', // 分类ID
+        creatorId: '', //创建人id
         pageNo: 1,
-        pageSize: 10,
-        testPaper: '', //关联考卷id
-        type: 0 //状态:0-已发布，1-草稿箱
+        pageSize: 10
       }
     }
   },
@@ -249,7 +246,7 @@ export default {
   },
   methods: {
     getCategoryList() {
-      return getKnowledgeCatalogList().then((res) => {
+      return getcategoryTree({ source: 'live' }).then((res) => {
         return _.concat(
           [
             {
@@ -262,22 +259,7 @@ export default {
       })
     },
     async initSearchData() {
-      let catalogId = _.find(this.searchConfig.popoverOptions, { field: 'catalogId' })
-      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
-      // if (tagId) {
-      //   getKnowledgeManageTaglist().then(
-      //     (res) =>
-      //       (tagId.options = _.concat(
-      //         [
-      //           {
-      //             id: '',
-      //             name: '全部'
-      //           }
-      //         ],
-      //         res
-      //       ))
-      //   )
-      // }
+      let catalogId = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
       let catalogList = await this.getCategoryList()
       if (catalogId) {
         catalogId.config.treeParams.data = catalogList
@@ -299,15 +281,9 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/live/statisticsDetails', query: { id: row.id } })
+      this.$router.push({ path: '/live/playBackListSingle', query: { liveId: row.liveId } })
     },
-    // 切换nav
-    handleSelect(key) {
-      this.$refs.table.clearSelection()
-      this.activeIndex = key
-      this.handleSearch({ type: Number(key) })
-    },
-    // 加载函数
+    // 查询播放列表
     async loadTableData() {
       if (this.tableLoading) {
         return
@@ -315,7 +291,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getArrangeList(this.queryInfo)
+        let { totalNum, data } = await getLivePlanList(this.queryInfo)
         this.tableLoading = false
         this.tableData = data
         this.page.total = totalNum

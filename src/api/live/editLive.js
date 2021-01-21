@@ -1,10 +1,16 @@
-import { del, get, post, put } from '@/router/axios'
+import { get, post } from '@/router/axios'
 
 // 添加直播
 export const postAddLive = (params) => post('/api/common/v1/live/plan/addLivePlan', params)
 
 // 分类查询接口
 export const getcategoryTree = (params) => get('/api/common/v1/category/getCategoryTree', params)
+
+// 回播中直播列表
+export const getLivePlanList = (params) => get('/api/common/v1/live/plan/getLivePlanList', params)
+
+// 回播列表
+export const getCategoryTree = (params) => get('/api/common/v1/category/getCategoryTree', params)
 
 /**
  * 分类查询接口

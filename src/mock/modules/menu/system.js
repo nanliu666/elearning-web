@@ -4,7 +4,7 @@ export default {
   menuName: '系统管理',
   menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
   isOwn: 1, // 是否拥有 0：否，1：是
-  isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+  isEnabled: 1, // 在后台管理菜单管理的，设置启用停用  0：否，1：是。（是否显示在菜单栏）只有这个页面在menu页面配置
   isShow: 1, // 是否显示在菜单栏 0：否，1：是
   code: 'system',
   alias: 'system',
