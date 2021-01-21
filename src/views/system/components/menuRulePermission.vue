@@ -65,12 +65,12 @@ export default {
           let filterVal = []
           this.filterData(val, filterVal)
           let fiterTree = flatTree(filterVal)
-          fiterTree.map((it) => {
-            if (it.isOwn && it.menuType === 'Menu') {
-              this.defaultValue.push(it.menuId)
+          // 当存在权限时，默认为勾选状态
+          this.defaultValue = _.map(fiterTree, (item) => {
+            if (item.isOwn) {
+              return item.menuId
             }
           })
-          // this.findValue(val, this.defaultValue)
         }
       },
       immediate: true,
