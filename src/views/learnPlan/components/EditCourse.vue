@@ -390,7 +390,7 @@ export default {
           {}
         )
         _.forEach(selected, (item) => {
-          if (!idMap[item.courseId]) {
+          if (!idMap[item.id]) {
             let course = {
               ..._.cloneDeep(COURSE_TEMPLATE),
               courseId: item.id,
@@ -398,6 +398,8 @@ export default {
             }
             this.loadExamsOfCourse(course)
             this.courseList.push(course)
+          } else {
+            this.$message.info(`课程【${item.courseName}】已被安排，无法执行重复操作`)
           }
         })
       }
