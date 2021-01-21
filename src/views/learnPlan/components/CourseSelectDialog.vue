@@ -77,7 +77,7 @@ const TABLE_PAGE_CONFIG = {
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入课程关键词', 'suffix-icon': 'el-icon-search' },
     data: '',
     field: 'courseName',
     label: '',

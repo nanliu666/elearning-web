@@ -268,6 +268,7 @@ export default {
           itemType: 'slot',
           label: '允许学习次数',
           offset: 4,
+          desc: '0：表示无限制',
           required: true
         },
         {
