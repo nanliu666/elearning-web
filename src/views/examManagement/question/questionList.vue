@@ -3,6 +3,7 @@
     <page-header title="题库管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="'/examManagement/question/questionList/add'"
         @command="handleCommand"
       >
         <el-button
@@ -81,6 +82,7 @@
           >
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="'/examManagement/question/questionList/deleteAll'"
                 type="text"
                 style="margin-bottom:0;"
                 @click="handleDelete(selection)"
@@ -126,6 +128,7 @@
             </template>
             <template #handler="{row}">
               <el-button
+                v-p="'/examManagement/question/questionList/edit'"
                 size="medium"
                 type="text"
                 @click="handleEdit(row.id)"
@@ -133,6 +136,7 @@
                 编辑
               </el-button>
               <el-button
+                v-p="'/examManagement/question/questionList/delete'"
                 size="medium"
                 type="text"
                 @click="handleDelete(row)"

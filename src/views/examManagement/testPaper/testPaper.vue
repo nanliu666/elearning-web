@@ -3,6 +3,7 @@
     <page-header title="试卷管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="'/examManagement/testPaper/testPaper/add'"
         @command="handleCommand"
       >
         <el-button
@@ -86,6 +87,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="'/examManagement/testPaper/testPaper/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -112,18 +114,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/examManagement/testPaper/testPaper/edit'"
               type="text"
               @click="handleLookUp(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="'/examManagement/testPaper/testPaper/delete'"
               type="text"
               @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-button
+              v-p="'/examManagement/testPaper/testPaper/copy'"
               type="text"
               @click="handleCope(row)"
             >

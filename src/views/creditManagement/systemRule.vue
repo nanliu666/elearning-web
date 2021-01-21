@@ -40,6 +40,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/creditManagement/systemRule/delete'"
               type="text"
               @click="handleIsStart(row)"
             >

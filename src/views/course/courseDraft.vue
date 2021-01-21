@@ -4,6 +4,7 @@
     <page-header title="课程管理">
       <el-button
         slot="rightMenu"
+        v-p="'/course/courseDraft/add'"
         size="medium"
         type="primary"
         @click="toEstablishCourse"
@@ -128,6 +129,7 @@
 
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="'/course/courseDraft/deleteAll'"
                 style="margin-bottom:0;"
                 type="text"
                 @click="() => handleRemoveItems(selection)"
@@ -219,23 +221,25 @@
             >
               <el-button
                 v-if="scope.row.isTop == 0"
+                v-p="'/course/courseDraft/top'"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
               >
-                &nbsp;&nbsp; 置顶&nbsp;
+                置顶
               </el-button>
               <el-button
                 v-if="scope.row.isTop == 1"
+                v-p="'/course/courseDraft/top'"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
               >
                 已置顶
               </el-button>
-              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-button
                 v-if="scope.row.isPutaway === 1"
+                v-p="'/course/courseDraft/putaway'"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 0)"
@@ -244,19 +248,23 @@
               </el-button>
               <el-button
                 v-if="scope.row.isPutaway === 0"
+                v-p="'/course/courseDraft/slotOut'"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 1)"
               >
                 上架
               </el-button>
-              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-dropdown
+                v-p="'/course/courseDraft/others'"
                 trigger="hover"
-                style="color: #a0a8ae;"
+                style="color: #a0a8ae"
                 @command="handleCommand($event, scope.row)"
               >
-                <span class="el-dropdown-link">
+                <span
+                  class="el-dropdown-link"
+                  style="margin-left: 10px"
+                >
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
