@@ -70,7 +70,6 @@ export default {
               this.defaultValue.push(it.menuId)
             }
           })
-          // this.findValue(val, this.defaultValue)
         }
       },
       immediate: true,
