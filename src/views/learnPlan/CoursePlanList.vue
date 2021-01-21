@@ -277,6 +277,12 @@ const TABLE_COLUMNS = [
     minWidth: 100
   },
   {
+    label: '状态',
+    formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),
+    prop: 'status',
+    minWidth: 100
+  },
+  {
     label: '课程时间',
     prop: 'time',
     formatter: (row) => row.startTime + '~' + row.endTime,
@@ -488,6 +494,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
+          this.$refs.table.clearSelection()
           this.loadPublishedData()
         })
         .catch()
