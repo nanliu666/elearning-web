@@ -499,7 +499,44 @@ const res = {
             path: '/course/courseDraft',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/add'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/top'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/putaway'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/slotOut'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/course/courseDraft/others'
+              }
+            ]
           },
           {
             menuId: '125123412355342345058',
@@ -507,7 +544,7 @@ const res = {
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/course/detail',
@@ -666,7 +703,38 @@ const res = {
             path: '/certificate/certificateManage',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1,
+                path: '/certificate/certificateManage/add'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1,
+                path: '/certificate/certificateManage/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1,
+                path: '/certificate/certificateManage/disabled'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1,
+                path: '/certificate/certificateManage/preview'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1,
+                path: '/certificate/certificateManage/delete'
+              }
+            ]
           },
           {
             menuId: '1212437546742158',
@@ -702,7 +770,7 @@ const res = {
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/approvalCenter/center',
@@ -716,7 +784,7 @@ const res = {
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/approvalCenter/details',
@@ -730,7 +798,7 @@ const res = {
             menuType: 'Menu',
             isEnabled: 1,
             isOwn: 1,
-            isShow: 1,
+            isShow: 0,
             code: 'org_user',
             alias: 'user',
             path: '/approvalCenter/chapter',
@@ -771,7 +839,32 @@ const res = {
             path: '/examManagement/category/management',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/category/management/add'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/category/management/disable'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/category/management/limit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/category/management/others'
+              }
+            ]
           },
           {
             menuId: '125907345334589',
@@ -807,7 +900,33 @@ const res = {
             path: '/examManagement/question/questionList',
             code: 'questionList',
             alias: 'questionList',
-            icon: 'iconfont iconicon_boss'
+            icon: 'iconfont iconicon_boss',
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/question/questionList/delete'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/question/questionList/edit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/question/questionList/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/question/questionList/add'
+              }
+            ]
           },
 
           {
@@ -822,11 +941,42 @@ const res = {
             path: '/examManagement/testPaper/testPaper',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/testPaper/testPaper/copy'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/testPaper/testPaper/delete'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/testPaper/testPaper/edit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/testPaper/testPaper/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/testPaper/testPaper/add'
+              }
+            ]
           },
           {
             menuId: '1567454768323454620582323',
-            menuName: '试卷管理',
+            menuName: '随机试卷',
             menuType: 'Menu',
             isOwn: 1,
             isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
@@ -864,7 +1014,38 @@ const res = {
             path: '/examManagement/examSchedule/list',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/examSchedule/list/add'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/examSchedule/list/edit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/examSchedule/list/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/examSchedule/list/delete'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/examManagement/examSchedule/list/others'
+              }
+            ]
           },
           {
             menuId: '12590567456745635058',
@@ -920,7 +1101,22 @@ const res = {
             path: '/examManagement/mark/MarkList',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                menuName: '逐人评卷',
+                path: '/examManagement/mark/MarkList/byPerson'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                menuName: '逐题评卷',
+                path: '/examManagement/mark/MarkList/byQuestion'
+              }
+            ]
           },
           {
             menuId: '15674547683454620582323',
@@ -990,7 +1186,15 @@ const res = {
             path: '/examManagement/grade/achievement',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                menuName: '逐题评卷',
+                path: '/examManagement/grade/achievement/view'
+              }
+            ]
           },
           {
             menuId: '15674547683454620582323',
@@ -1039,7 +1243,32 @@ const res = {
             path: '/creditManagement/creditRule',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/creditRule/delete'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/creditRule/edit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/creditRule/disabled'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/creditRule/add'
+              }
+            ]
           },
           {
             menuId: '1259073412671256735058',
@@ -1053,7 +1282,14 @@ const res = {
             path: '/creditManagement/systemRule',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/systemRule/delete'
+              }
+            ]
           },
           {
             menuId: '1259073412671256735038',
@@ -1067,7 +1303,14 @@ const res = {
             path: '/creditManagement/credit',
             icon: 'iconfont iconicon_boss',
             dataPrivileges: [],
-            children: []
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/creditManagement/credit/view'
+              }
+            ]
           },
           {
             menuId: '1259073412671256735032',
@@ -1158,7 +1401,45 @@ const res = {
             code: 'approval_approval',
             alias: 'approval',
             path: '/learnPlan/CoursePlanList',
-            icon: 'iconfont iconicon_compile'
+            icon: 'iconfont iconicon_compile',
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/add'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/edit'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/delete'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/view'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/CoursePlanList/addGroup'
+              }
+            ]
           },
           {
             menuId: '15901120756922',
@@ -1170,7 +1451,27 @@ const res = {
             code: 'approval_approval',
             alias: 'approval',
             path: '/learnPlan/ElectivePlanList',
-            icon: 'iconfont iconicon_compile'
+            icon: 'iconfont iconicon_compile',
+            children: [
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/ElectivePlanList/deleteAll'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/ElectivePlanList/view'
+              },
+              {
+                menuType: 'Button',
+                isOwn: 1,
+                isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+                path: '/learnPlan/ElectivePlanList/delete'
+              }
+            ]
           },
           {
             menuId: '15901120756924',
@@ -1208,7 +1509,7 @@ const res = {
             isShow: 1,
             code: 'approval_approval',
             alias: 'approval',
-            path: '/live/list',
+            path: '/live/liveList',
             icon: 'iconfont iconicon_compile'
           },
           {
