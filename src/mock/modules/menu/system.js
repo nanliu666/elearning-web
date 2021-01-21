@@ -258,7 +258,33 @@ export default {
           alias: '新闻管理',
           path: '/newsCenter/newsManage',
           icon: 'iconfont iconicon_study',
-          dataPrivileges: []
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+              path: '/newsCenter/newsManage/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+              path: '/newsCenter/newsManage/delete'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+              path: '/newsCenter/newsManage/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+              path: '/newsCenter/newsManage/top'
+            }
+          ]
         },
         {
           menuId: 'e407bfbd-6f90-4628-97c4-eac6949e0a5b',
