@@ -1,7 +1,7 @@
 <template>
   <div class="PlayBackListSingleC">
     <div class="crumbs">
-      <span class="title iconfont  iconimage_icon_leftarrow">查看直播回放</span>
+      <span class="title">查看直播回放</span><!-- class="title iconfont  iconimage_icon_leftarrow" -->
       <span class="tip">直播回放回传到平台需要一段时间，请耐心等待。</span>
     </div>
     <div>
@@ -88,27 +88,41 @@
   </div>
 </template>
 <script>
+import { getCategoryTree } from '@/api/live/editLive'
 export default {
   name: 'PlayBackListSingle',
   data() {
     return {
+      playBackListData: [],
       pageObj: {
         pageSizes: [5, 10],
         currentPage: 0,
         totalNum: 0,
         parmas: {
+          sourceType: '1',
+          livePlanId: this.$router.query.liveId,
           pageNo: 1,
           pageSize: 5
         }
       }
     }
   },
+  activated() {
+    this.initPlayBackData()
+  },
   methods: {
     recover() {
       // 恢复
     },
+
     initPlayBackData() {
       // 初始化直播回放列表
+      getCategoryTree(this.pageObj.parmas).then((res) => {
+        let { data, totalNum, totalPage } = res
+        this.playBackListData = data
+        this.pageObj.totalNum = totalNum
+        this.pageObj.totalPage = totalPage
+      })
       // getNoticeCenterList(this.parmas).then((res) => {
       //   let { data, totalNum, totalPage } = res
       //   this.noticeList = data
