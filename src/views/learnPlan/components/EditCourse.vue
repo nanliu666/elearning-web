@@ -103,7 +103,7 @@
                     v-for="(time, index) in course.timeList"
                     :key="index"
                     v-model="time.list"
-                    type="datetimerange"
+                    type="daterange"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     range-separator="至"
                     start-placeholder="开始时间"
@@ -185,7 +185,6 @@
     <EditExamineDrawer
       :visible.sync="examDrawerVisible"
       :examine="editingExam"
-      entry-c-name="学习计划"
       @submit="handleExamineSubmit"
     />
   </basicContainer>
@@ -268,7 +267,6 @@ export default {
           itemType: 'slot',
           label: '允许学习次数',
           offset: 4,
-          desc: '0：表示无限制',
           required: true
         },
         {
@@ -392,7 +390,7 @@ export default {
           {}
         )
         _.forEach(selected, (item) => {
-          if (!idMap[item.id]) {
+          if (!idMap[item.courseId]) {
             let course = {
               ..._.cloneDeep(COURSE_TEMPLATE),
               courseId: item.id,
@@ -400,8 +398,6 @@ export default {
             }
             this.loadExamsOfCourse(course)
             this.courseList.push(course)
-          } else {
-            this.$message.info(`课程【${item.courseName}】已被安排，无法执行重复操作`)
           }
         })
       }

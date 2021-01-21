@@ -4,7 +4,6 @@
     <page-header title="课程管理">
       <el-button
         slot="rightMenu"
-        v-p="'/course/courseDraft/add'"
         size="medium"
         type="primary"
         @click="toEstablishCourse"
@@ -129,7 +128,6 @@
 
             <template #multiSelectMenu="{ selection }">
               <el-button
-                v-p="'/course/courseDraft/deleteAll'"
                 style="margin-bottom:0;"
                 type="text"
                 @click="() => handleRemoveItems(selection)"
@@ -151,7 +149,6 @@
               slot-scope="{ row }"
             >
               <el-button
-                p="@/course/courseDraft"
                 type="text"
                 @click="todetail(row.id)"
               >
@@ -176,9 +173,15 @@
                 v-for="(item, index) in row.passCondition.split(',')"
                 :key="index"
               >
-                <span v-if="item == 'a'">教师评定,</span>
-                <span v-if="item == 'b'">考试通过,</span>
-                <span v-if="item == 'c'">达到课程学时</span>
+                <span
+                  v-if="item == 'a'"
+                >教师评定 {{ row.passCondition.split(',').length >= 2 ? ',' : '' }}
+                </span>
+                <span
+                  v-if="item == 'b'"
+                >考试通过{{ row.passCondition.split(',').length >= 3 ? ',' : '' }}
+                </span>
+                <span v-if="item == 'c'">达到课程学时 </span>
               </span>
             </template>
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
@@ -221,25 +224,23 @@
             >
               <el-button
                 v-if="scope.row.isTop == 0"
-                v-p="'/course/courseDraft/top'"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
               >
-                置顶
+                &nbsp;&nbsp; 置顶&nbsp;
               </el-button>
               <el-button
                 v-if="scope.row.isTop == 1"
-                v-p="'/course/courseDraft/top'"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
               >
                 已置顶
               </el-button>
+              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-button
                 v-if="scope.row.isPutaway === 1"
-                v-p="'/course/courseDraft/putaway'"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 0)"
@@ -248,23 +249,19 @@
               </el-button>
               <el-button
                 v-if="scope.row.isPutaway === 0"
-                v-p="'/course/courseDraft/slotOut'"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 1)"
               >
                 上架
               </el-button>
+              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-dropdown
-                v-p="'/course/courseDraft/others'"
                 trigger="hover"
-                style="color: #a0a8ae"
+                style="color: #a0a8ae;"
                 @command="handleCommand($event, scope.row)"
               >
-                <span
-                  class="el-dropdown-link"
-                  style="margin-left: 10px"
-                >
+                <span class="el-dropdown-link">
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">

@@ -14,7 +14,7 @@
       :key="index"
       v-model="time.list"
       class="picker"
-      type="datetimerange"
+      type="daterange"
       value-format="yyyy-MM-dd HH:mm:ss"
       range-separator="至"
       start-placeholder="开始时间"

@@ -107,7 +107,7 @@ import { mapGetters } from 'vuex'
 import moment from 'moment'
 const REFS_LIST = ['editBasicInfo', 'editCourse', 'editPerson']
 const defaultFormData = {
-  automaticIntegralCount: true,
+  automaticIntegralCount: false,
   categoryId: null,
   categoryName: null,
   coursePlanName: '',

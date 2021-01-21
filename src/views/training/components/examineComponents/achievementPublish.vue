@@ -47,7 +47,6 @@
 
 <script>
 import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
-import moment from 'moment'
 const defaultValue = {
   id: '',
   passType: 1,
@@ -103,22 +102,6 @@ export default {
           itemType: 'datePicker',
           span: 24,
           type: 'datetime',
-          rules: [
-            { required: true, message: '定时发布日期不能为空', trigger: 'blur' },
-            {
-              required: true,
-              validator: (rule, value, callback) => {
-                // value成绩发布时间 isBefore 考试结束时间
-                const examEndTime = _.get(this, '$parent.$children[0].model.examTime[1]', null)
-                console.log('this==', moment(value).isBefore(moment(examEndTime)))
-                if (moment(value).isBefore(moment(examEndTime))) {
-                  return callback(new Error('成绩发布时间不能早于考试结束时间'))
-                }
-                callback()
-              },
-              trigger: ['blur', 'change']
-            }
-          ],
           required: true,
           prop: 'fixedTime',
           label: '定时发布日期时间'
