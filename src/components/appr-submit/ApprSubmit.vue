@@ -141,7 +141,7 @@ export default {
     },
     submit(data) {
       const processMap = this.createProcessMap()
-      const nodeData = this.createNodeLine()
+      const nodeData = JSON.stringify(this.createNodeLine())
       return submitApprApply({
         ...data,
         userId: this.userId,
