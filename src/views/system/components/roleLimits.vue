@@ -404,7 +404,6 @@ export default {
       }
 
       if (data) {
-        console.log('data==', data.childrenList)
         this.buttonData = []
         data.childrenList &&
           data.childrenList.map((it) => {
