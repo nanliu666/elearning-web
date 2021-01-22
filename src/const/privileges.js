@@ -46,3 +46,8 @@ export const AUTH_EXAM_CATALOG = '/examManagement/category/management/author' //
 export const EDIT_EXAM_CATALOG = '/examManagement/category/management/edit' // 编辑
 export const DELETE_EXAM_CATALOG = '/examManagement/category/management/delete' // 删除
 export const ADD_GROUNP_EXAM_CATALOG = '/examManagement/category/management/addNewChild' // 新建子分类
+// 考评管理的题库管理的鉴权
+export const DELETE_QUSTION = '/examManagement/question/questionList/delete' // 删除
+export const EDIT_QUSTION = '/examManagement/question/questionList/edit' // 编辑
+export const DELETE_ALL_QUSTION = '/examManagement/question/questionList/deleteAll' // 批量删除
+export const ADD_QUSTION = '/examManagement/question/questionList/add' // 新增
