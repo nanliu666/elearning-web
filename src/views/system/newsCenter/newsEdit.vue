@@ -421,7 +421,7 @@ export default {
       const { _formData } = this
       this.$router.push(
         {
-          path: '/newsCenter/newsDetail'
+          path: '/system/newsCenter/newsDetail'
         },
         (route) => {
           route.params.data = _formData
@@ -456,7 +456,7 @@ export default {
     handleBack(type = 'Published') {
       this.handleLeave()
         .then(() => {
-          this.$router.push({ path: '/newsCenter/newsManage', query: { activeName: type } })
+          this.$router.push({ path: '/system/newsCenter/newsManage', query: { activeName: type } })
           this.$store.commit('DEL_TAG', this.tag)
         })
         .catch(() => {})
