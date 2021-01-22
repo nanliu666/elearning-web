@@ -179,7 +179,15 @@ export default {
       path: '/certificate/certificateDetail',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '导出Excel',
+          isEnabled: 1,
+          path: '/certificate/certificateDetail/export'
+        }
+      ]
     }
   ]
 }

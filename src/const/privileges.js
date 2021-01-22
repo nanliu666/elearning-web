@@ -90,3 +90,5 @@ export const ADD_CERTIFICATE = '/certificate/certificateManage/add' // 新建模
 export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 新建模板
 export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 新建模板
 export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 新建模板
+// 证书发放明细的鉴权
+export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
