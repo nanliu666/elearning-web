@@ -390,14 +390,14 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          menuName: '逐题评卷',
+          menuName: '查看考生成绩',
           path: '/examManagement/grade/achievement/view'
         }
       ]
     },
     {
       menuId: '15674547683454620582323',
-      menuName: '成绩管理',
+      menuName: '成绩详情',
       menuType: 'Menu',
       isOwn: 1,
       isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
@@ -406,8 +406,7 @@ export default {
       alias: 'user',
       path: '/examManagement/grade/examineeAchievement',
       icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
+      dataPrivileges: []
     }
   ]
 }

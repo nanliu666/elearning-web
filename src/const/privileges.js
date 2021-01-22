@@ -58,3 +58,5 @@ export const COPY_EXAM = '/examManagement/examSchedule/list/copy' // 复制
 // 考评管理的手工评卷的鉴权
 export const BY_PERSON = '/examManagement/mark/MarkList/byPerson' // 逐人评卷
 export const BY_QUESTION = '/examManagement/mark/MarkList/byQuestion' // 逐题评卷
+// 考评管理的成绩管理的鉴权
+export const VIEW_GRADE = '/examManagement/grade/achievement/view' // 查看考生成绩
