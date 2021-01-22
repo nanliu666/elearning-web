@@ -55,3 +55,6 @@ export const ADD_EXAM = '/examManagement/examSchedule/list/add' // 创建考试
 export const EDIT_EXAM = '/examManagement/examSchedule/list/edit' // 编辑
 export const DELETE_EXAM = '/examManagement/examSchedule/list/delete' // 删除
 export const COPY_EXAM = '/examManagement/examSchedule/list/copy' // 复制
+// 考评管理的手工评卷的鉴权
+export const BY_PERSON = '/examManagement/mark/MarkList/byPerson' // 逐人评卷
+export const BY_QUESTION = '/examManagement/mark/MarkList/byQuestion' // 逐题评卷

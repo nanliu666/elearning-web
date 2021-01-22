@@ -92,14 +92,14 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/examManagement/mark/MarkList/byPerson'"
+              v-p="BY_PERSON"
               type="text"
               @click="handleExaminee(row)"
             >
               逐人评卷
             </el-button>
             <el-button
-              v-p="'/examManagement/mark/MarkList/byQuestion'"
+              v-p="BY_QUESTION"
               type="text"
               @click="handlePaper(row)"
             >
@@ -269,6 +269,8 @@ const SEARCH_CONFIG = {
     }
   ]
 }
+import { BY_PERSON, BY_QUESTION } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'MarkList',
   components: { SearchPopover },
@@ -306,6 +308,20 @@ export default {
         categoryId: '', // 分类ID
         completeStatus: ''
       }
+    }
+  },
+  computed: {
+    BY_PERSON: () => BY_PERSON,
+    BY_QUESTION: () => BY_QUESTION,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([BY_PERSON, BY_QUESTION])
+      },
+      deep: true
     }
   },
   activated() {
