@@ -75,3 +75,5 @@ export const DELETE_CREDIT = '/creditManagement/creditRule/delete' // 删除
 export const EDIT_CREDIT = '/creditManagement/creditRule/edit' // 编辑
 export const STOP_CREDIT = '/creditManagement/creditRule/stop' // 停用
 export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
+// 学分规则管理的鉴权
+export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
