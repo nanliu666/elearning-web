@@ -39,3 +39,10 @@ export const DELETE_REP = '/repository/knowledgeManagement/delete' // 删除
 export const DELETE_ALL_REP = '/repository/knowledgeManagement/deleteAll' // 批量删除
 export const MOVE_REP = '/repository/knowledgeManagement/move' // 移动
 export const VIEW_REP = '/repository/knowledgeManagement/view' // 查看
+// 考评管理的分类管理的鉴权
+export const ADD_EXAM_CATALOG = '/examManagement/category/management/add' // 新建分类
+export const STOP_EXAM_CATALOG = '/examManagement/category/management/stop' // 停用
+export const AUTH_EXAM_CATALOG = '/examManagement/category/management/author' // 权限配置
+export const EDIT_EXAM_CATALOG = '/examManagement/category/management/edit' // 编辑
+export const DELETE_EXAM_CATALOG = '/examManagement/category/management/delete' // 删除
+export const ADD_GROUNP_EXAM_CATALOG = '/examManagement/category/management/addNewChild' // 新建子分类

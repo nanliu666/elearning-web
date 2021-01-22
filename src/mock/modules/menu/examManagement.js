@@ -34,26 +34,44 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建分类',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/category/management/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '启用/停用',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/disable'
+          path: '/examManagement/category/management/stop'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '权限配置',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/limit'
+          path: '/examManagement/category/management/author'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/others'
+          path: '/examManagement/category/management/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/examManagement/category/management/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建子分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/examManagement/category/management/addNewChild'
         }
       ]
     },
