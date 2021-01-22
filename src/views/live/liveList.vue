@@ -71,6 +71,17 @@
             </div>
           </div>
         </template>
+        <template
+          slot="index"
+          slot-scope="{ row }"
+        >
+          <span>{{ tableData.indexOf(row) + 1 }}</span>
+        </template>
+
+        <template v-slot:isUsed="{ row }">
+          <span v-show="row.isUsed == 1">正常</span>
+          <span v-show="row.isUsed == 0">禁用</span>
+        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
@@ -83,11 +94,12 @@
               type="text"
               @click="handleLock(row)"
             >
-              禁用
+              <span v-show="row.isUsed == 1">禁用</span>
+              <span v-show="row.isUsed == 0">启用</span>
             </el-button>
             <el-button
               type="text"
-              @click="handleDelete(row)"
+              @click="handleDelete(tableData, row)"
             >
               删除
             </el-button>
@@ -99,27 +111,27 @@
 </template>
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
+import { getLiveList, delLive, toggleLiveStatus } from '@/api/live/liveList'
 
 const TABLE_COLUMNS = [
   {
     label: '序号',
-    prop: 'no',
-    slot: true,
-    fixed: true
+    prop: 'index',
+    width: '70',
+    slot: true
   },
   {
     label: '直播编号',
-    prop: 'liveCode'
+    prop: 'liveNo'
   },
   {
     label: '直播标题',
-    prop: 'title',
-    slot: true,
-    align: 'center'
+    prop: 'channelName',
+    slot: true
   },
   {
     label: '所属分类',
-    prop: 'type',
+    prop: 'categoryName',
     slot: true
   },
   {
@@ -129,17 +141,12 @@ const TABLE_COLUMNS = [
   {
     label: '创建人',
     slot: true,
-    prop: 'createName'
+    prop: 'creatorName'
   },
   {
     label: '状态',
     slot: true,
-    prop: 'status'
-  },
-  {
-    label: '操作',
-    slot: true,
-    prop: 'operating'
+    prop: 'isUsed'
   }
 ]
 const TABLE_CONFIG = {
@@ -229,8 +236,8 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 'normal', label: '正常' },
-              { value: 'expired', label: '禁用' }
+              { value: '1', label: '正常' },
+              { value: '0', label: '禁用' }
             ]
           }
         ]
@@ -261,39 +268,60 @@ export default {
       this.page.pageSize = param
       this.loadTableData()
     },
-    handleSearch() {},
+    handleSearch(searchParams) {
+      this.loadTableData(searchParams)
+    },
     // 加载函数
     /**
      * @author guanfenda
      * @desc 加载table数据
      *
      * */
-    async loadTableData() {
-      // if (this.tableLoading) {
-      //     //防抖
-      //     return
-      // }
-      // try {
-      //     const params = this.searchParams
-      //     this.tableLoading = true
-      //     getTestPaperList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-      //     (res) => {
-      //         this.tableData = res.data
-      //         this.page.total = res.totalNum
-      //         this.tableLoading = false
-      //     }
-      //     )
-      // } catch (error) {
-      //     this.$message.error(error.message)
-      // } finally {
-      //     this.tableLoading = false
-      // }
+    async loadTableData(searchParams) {
+      if (this.tableLoading) {
+        //防抖
+        return
+      }
+      try {
+        var params = {}
+        if (searchParams) {
+          params = { titleOrNo: searchParams.search }
+          params = { categoryId: searchParams.categoryId }
+          params = { isUsed: searchParams.status }
+          // params = {isUsed: searchParams.status}
+        }
+        this.tableLoading = true
+        getLiveList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+          this.tableLoading = false
+        })
+      } catch (error) {
+        this.$message.error(error.message)
+      } finally {
+        this.tableLoading = false
+      }
     },
-    handleEdit() {},
-    handleLock() {},
-    handleDelete() {},
+    handleEdit(row) {
+      this.$router.push({ path: '/live/editLive', query: { id: row.liveId } })
+    },
+    handleLock(row) {
+      var isUsed = ''
+      row.isUsed == 1 ? (isUsed = 0) : (isUsed = 1)
+      toggleLiveStatus({
+        liveId: row.liveId,
+        isUsed: isUsed
+      }).then(() => {
+        row.isUsed == 1 ? (row.isUsed = 0) : (row.isUsed = 1)
+      })
+    },
+    handleDelete(arr, row) {
+      delLive({ liveId: row.liveId }).then(() => {
+        var index = arr.findIndex((item) => item.liveId == row.liveId)
+        arr.splice(index, 1)
+      })
+    },
     toEstablishCourse() {
-      // this.$router.push({ path: '/course/establishCourse' })
       this.$router.push({ path: '/live/editLive' })
     }
   }

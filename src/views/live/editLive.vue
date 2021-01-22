@@ -83,11 +83,15 @@
                 required
               >
                 <el-select
-                  v-model="value"
+                  ref="ref_liveClassification"
+                  v-model="liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
                 >
-                  <el-option>
+                  <el-option
+                    :label="liveClassification_option.label"
+                    :value="liveClassification_option.value"
+                  >
                     <el-tree
                       :expand-on-click-node="false"
                       :data="liveClassification"
@@ -168,13 +172,13 @@
               >
                 <el-row :gutter="20">
                   <el-col :span="5">
-                    <div @click="toggle_scene = 1">
+                    <div @click="toggle_scene = 'ppt'">
                       <img
-                        v-show="toggle_scene == 1"
+                        v-show="toggle_scene == 'ppt'"
                         src="../../assets/images/live/live_act_screen.png"
                       />
                       <img
-                        v-show="toggle_scene == 2"
+                        v-show="toggle_scene == 'topclass'"
                         src="../../assets/images/live/live_screen.png"
                       />
                       <p>云课堂</p>
@@ -182,13 +186,13 @@
                     </div>
                   </el-col>
                   <el-col :span="5">
-                    <div @click="toggle_scene = 2">
+                    <div @click="toggle_scene = 'topclass'">
                       <img
-                        v-show="toggle_scene == 2"
+                        v-show="toggle_scene == 'topclass'"
                         src="../../assets/images/live/live_act_vedio.png"
                       />
                       <img
-                        v-show="toggle_scene == 1"
+                        v-show="toggle_scene == 'ppt'"
                         src="../../assets/images/live/live_vedio.png"
                       />
                       <p>直播助手</p>
@@ -275,7 +279,7 @@
             </el-col>
 
             <el-col
-              v-show="select_mode_value == 3"
+              v-show="select_mode_value == 'cycle'"
               :span="12"
             >
               <el-form-item
@@ -284,15 +288,18 @@
               >
                 <el-date-picker
                   v-model="loopTime"
-                  type="datetime"
-                  placeholder="选择日期时间"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  value-format="yyyy-MM-dd hh:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row
-            v-show="select_mode_value == 1"
+            v-show="select_mode_value == 'single'"
             class="block_label"
           >
             <el-col :span="12">
@@ -304,6 +311,7 @@
                   v-model="start_time"
                   type="datetime"
                   placeholder="选择日期时间"
+                  value-format="yyyy-MM-dd hh:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -316,13 +324,14 @@
                   v-model="end_time"
                   type="datetime"
                   placeholder="选择日期时间"
+                  value-format="yyyy-MM-dd hh:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row
-            v-show="select_mode_value == 3"
+            v-show="select_mode_value == 'cycle'"
             class="block_label"
           >
             <el-col :span="12">
@@ -367,7 +376,7 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row v-show="select_mode_value !== 1">
+          <el-row v-show="select_mode_value !== 'single'">
             <el-col :span="24">
               <el-form-item
                 label="直播设置"
@@ -396,6 +405,7 @@
                         v-model="scope.row.start_time"
                         type="datetime"
                         placeholder="选择日期时间"
+                        value-format="yyyy-MM-dd hh:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -405,6 +415,7 @@
                         v-model="scope.row.end_time"
                         type="datetime"
                         placeholder="选择日期时间"
+                        value-format="yyyy-MM-dd hh:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -482,14 +493,21 @@
             <template slot-scope="scope">
               <el-select
                 v-model="scope.row.nameList_value"
+                filterable
+                remote
+                :remote-method="query_teacherList"
                 size="small"
                 placeholder="请选择"
+                @focus="get_teacherType(scope.row.type)"
+                @change="
+                  add_teacherList(scope.row.nameList_value, teachingTeacherList, scope.$index)
+                "
               >
                 <el-option
-                  v-for="item in scope.row.nameList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in teachingTeacherList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
                 ></el-option>
               </el-select>
             </template>
@@ -522,7 +540,7 @@
                 v-if="scope.$index"
                 type="text"
                 size="small"
-                @click="delete_table_teacherSet(table_teacherSet, scope.$index, scope.row.type)"
+                @click="delete_table_teacherSet(table_teacherSet, scope.$index)"
               >
                 删除
               </el-button>
@@ -535,7 +553,7 @@
           </h3>
           <el-button
             size="mini"
-            @click="show_relatedCourses_form(table_teacherSet, 'add')"
+            @click="show_relatedCourses_form('add')"
           >
             添加课程
           </el-button>
@@ -553,19 +571,13 @@
           >
           </el-table-column>
           <el-table-column
-            prop="coursesCode"
-            label="课程编号"
-            width="200px;"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="coursesName"
+            prop="courseName"
             label="课程名称"
             width="200px;"
           >
           </el-table-column>
           <el-table-column
-            prop="teacher"
+            prop="teacherName"
             label="讲师"
           ></el-table-column>
           <el-table-column
@@ -584,7 +596,7 @@
               <el-button
                 type="text"
                 size="small"
-                @click="edit_table_relatedCourses(scope.row, scope.$index, 'edit')"
+                @click="show_relatedCourses_form('edit', scope.row, scope.$index)"
               >
                 修改
               </el-button>
@@ -606,38 +618,38 @@
                 <div style="clear: both;">
                   <el-radio
                     v-model="radio_connectionMode"
-                    label="1"
+                    label="all"
                   >
                     所有人可见
                   </el-radio>
                   <el-radio
                     v-model="radio_connectionMode"
-                    label="2"
+                    label="code"
                   >
                     验证码观看
                   </el-radio>
                   <el-radio
                     v-model="radio_connectionMode"
-                    label="3"
+                    label="direct"
                   >
                     关联学员
                   </el-radio>
                 </div>
               </el-form-item>
               <p
-                v-show="radio_connectionMode != 3"
+                v-show="radio_connectionMode != 'direct'"
                 style="color:rgba(0,11,21,0.85)"
               >
                 学员总数：
               </p>
               <p
-                v-show="radio_connectionMode == 1"
+                v-show="radio_connectionMode == 'all'"
                 style="color:rgba(0,11,21,0.25);"
               >
                 学员登录平台即可观看，链接分享给任意人员可以进行观看。
               </p>
               <p
-                v-show="radio_connectionMode == 2"
+                v-show="radio_connectionMode == 'code'"
                 style="color:rgba(0,11,21,0.25);"
               >
                 学员登录平即可观看，链接分享给其他人员需要使用验证码。
@@ -645,7 +657,7 @@
             </el-col>
           </el-row>
           <el-row
-            v-show="radio_connectionMode == 2"
+            v-show="radio_connectionMode == 'code'"
             class="block_label"
           >
             <el-col :span="12">
@@ -654,7 +666,7 @@
                 required
               >
                 <el-input
-                  v-model="ruleForm.name"
+                  v-model="formLiveTypeForm.title"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -665,7 +677,7 @@
                 required
               >
                 <el-input
-                  v-model="ruleForm.name"
+                  v-model="formLiveTypeForm.code"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -676,7 +688,7 @@
                 required
               >
                 <el-input
-                  v-model="ruleForm.name"
+                  v-model="formLiveTypeForm.tips"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -689,7 +701,7 @@
                 class="live_upload_img"
               >
                 <common-upload
-                  v-model="ruleForm.imageUrl"
+                  v-model="formLiveTypeForm.imgUrl"
                   class="upload-demo"
                   drag
                   :show-file-list="false"
@@ -707,8 +719,8 @@
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.imageUrl[0]"
-                    :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
+                    v-if="formLiveTypeForm.imgUrl[0]"
+                    :src="formLiveTypeForm.imgUrl[formLiveTypeForm.imgUrl.length - 1].url"
                     class="avatar"
                   />
                 </common-upload>
@@ -716,9 +728,11 @@
             </el-col>
           </el-row>
 
-          <el-row v-show="radio_connectionMode == 3">
+          <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
-              <el-form-item label="关联学员：58人（仅关联学员可以观看）">
+              <el-form-item
+                :label="'关联学员：' + table_relatedStudents.length + '人（仅关联学员可以观看）'"
+              >
                 <el-button
                   type="text"
                   style="float:right;"
@@ -732,7 +746,7 @@
                   style="width: 100%"
                 >
                   <el-table-column
-                    type="no"
+                    type="selection"
                     width="55"
                   ></el-table-column>
                   <el-table-column
@@ -787,14 +801,15 @@
             required
           >
             <el-select
-              v-model="add_relatedCourses_form_value"
+              v-model="add_relatedCourses_form.teacherVal"
               placeholder="请选择讲师"
+              @change="query_liveCurriculum(add_relatedCourses_form.teacherVal)"
             >
               <el-option
-                v-for="item in add_relatedCourses_form.teacher"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="(item, index) in add_relatedCourses_form.teacher"
+                :key="index"
+                :label="item.name"
+                :value="item.id"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -803,16 +818,14 @@
             required
           >
             <el-select
-              v-model="add_relatedCourses_form.courses"
+              v-model="add_relatedCourses_form.coursesVal"
               placeholder="直播课程"
             >
               <el-option
-                label="区域一"
-                value="shanghai"
-              ></el-option>
-              <el-option
-                label="区域二"
-                value="beijing"
+                v-for="(item, index) in add_relatedCourses_form.courses"
+                :key="index"
+                :label="item.courseName"
+                :value="item.id"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -859,9 +872,23 @@
                   suffix-icon="el-icon-search"
                 ></el-input>
                 <el-tree
-                  :data="props"
+                  :data="organizationUser"
                   show-checkbox
-                ></el-tree>
+                  :expand-on-click-node="false"
+                  lazy
+                  node-key="id"
+                  :load="load_organizationUser"
+                  :props="{ isLeaf: 'leaf' }"
+                  @check="select_organizationUser"
+                >
+                  <span
+                    slot-scope="{ node, data }"
+                    class="custom-tree-node"
+                  >
+                    <span>{{ data.name }}</span>
+                    <span v-show="data.phoneNum">({{ data.phoneNum }})</span>
+                  </span>
+                </el-tree>
               </el-tab-pane>
               <el-tab-pane
                 label="其他人员"
@@ -869,6 +896,20 @@
                 suffix-icon="el-icon-search"
               >
                 <el-input placeholder="请输入用户名称或手机搜索"></el-input>
+                <el-tree
+                  :data="otherUser"
+                  show-checkbox
+                  default-expand-all
+                  :expand-on-click-node="false"
+                  @check="select_organizationUser"
+                >
+                  <span
+                    slot-scope="{ node, data }"
+                    class="custom-tree-node"
+                  >
+                    <span>{{ data.name }}({{ data.phoneNum }})</span>
+                  </span>
+                </el-tree>
               </el-tab-pane>
             </el-tabs>
           </el-col>
@@ -900,7 +941,7 @@
           <el-button
             size="medium "
             type="primary"
-            @click="dialog_add_student = false"
+            @click="add_associateStudents(dialogSelectStudent, table_relatedStudents)"
           >
             确 定
           </el-button>
@@ -917,29 +958,27 @@
 </template>
 
 <script>
-import { postAddLive, getcategoryTree } from '@/api/live/editLive'
+import {
+  postAddLive,
+  getcategoryTree,
+  getQueryTeacher,
+  getQueryAssistant,
+  getQueryCurriculum,
+  getOrganizationUser,
+  getOtherUser,
+  getUsersByOrgId
+} from '@/api/live/editLive'
 
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   data() {
-    const generateData = (_) => {
-      const data = []
-      for (let i = 1; i <= 15; i++) {
-        data.push({
-          key: i,
-          label: `备选项 ${i}`,
-          disabled: i % 4 === 0
-        })
-      }
-      return data
-    }
     return {
       headIndex: 1, //步骤切换
-
       ruleForm: {
-        imageUrl: [{}] // 图片
+        imageUrl: [{}], // 图片
+        introduction: '' // 富文本
       },
 
       /** tabs 1 的提交数据 */
@@ -948,25 +987,12 @@ export default {
         title: '' // 直播标题
       },
 
-      liveClassification: [
-        {
-          // 所属分类
-          name: '一级 1',
-          id: '1',
-          children: [
-            {
-              name: '二级 1-1',
-              id: '1',
-              children: [
-                {
-                  name: '三级 1-1-1',
-                  id: '1'
-                }
-              ]
-            }
-          ]
-        }
-      ],
+      liveClassification: [],
+      liveClassification_value: '',
+      liveClassification_option: {
+        label: '',
+        value: ''
+      },
       liveClassification_props: {
         label: 'name',
         children: 'children'
@@ -977,38 +1003,38 @@ export default {
         // 直播状态
         {
           value: 1,
-          label: '禁用'
+          label: '正常'
         },
         {
           value: 2,
-          label: '正常'
+          label: '禁用'
         }
       ],
-      select_linkNumber_value: 1, // 当前选择的数量
+      select_linkNumber_value: '', // 当前选择的数量
       select_linkNumber: [
         // 连麦数量
         {
-          value: 1,
+          value: 6,
           label: '1v1~6'
         },
         {
-          value: 2,
+          value: 16,
           label: '1v7~16'
         }
       ],
-      select_mode_value: 1, // 当前选择的方式
+      select_mode_value: 'single', // 当前选择的方式
       select_mode: [
         //直播方式
         {
-          value: 1,
+          value: 'single',
           label: '单次直播'
         },
         {
-          value: 2,
+          value: 'plural',
           label: '多次直播'
         },
         {
-          value: 3,
+          value: 'cycle',
           label: '循环直播'
         }
       ],
@@ -1028,16 +1054,16 @@ export default {
       select_loopCycle: [
         // 循环周期
         {
-          value: 1,
+          value: 'day',
           label: '按天循环'
         },
 
         {
-          value: 2,
+          value: 'week',
           label: '按周循环'
         },
         {
-          value: 3,
+          value: 'month',
           label: '按月循环'
         }
       ],
@@ -1047,32 +1073,15 @@ export default {
         // 讲师设置
         {
           identity: '主讲师',
-          nameList_value: 1,
-          nameList: [
-            {
-              value: 1,
-              label: '李老师'
-            }
-          ],
+          nameList_value: '',
           role: '主讲师',
-          type: 1
+          type: 1 //1=主讲，2=助教，3=嘉宾
         }
       ],
-      table_relatedCourses: [
-        // 关联课程
-        {
-          coursesCode: '5544899644',
-          coursesName: '语文',
-          teacher: '李老师',
-          teacherId: 1
-        },
-        {
-          coursesCode: '5544899644',
-          coursesName: '语文',
-          teacher: '李老师',
-          teacherId: 1
-        }
-      ],
+      // 要搜索的讲师类型
+      index_teacherType: 1,
+      teachingTeacherList: [],
+      table_relatedCourses: [], // 关联课程表格数据
       dialog_relatedCourses_form: false,
       dialog_relatedCourses_type: {
         // 弹出框的标题设置
@@ -1080,73 +1089,54 @@ export default {
         type: 'edit',
         row: {}
       },
-      add_relatedCourses_form_value: 1,
+      //   添加课程弹窗表单数据
       add_relatedCourses_form: {
-        teacher: [
-          {
-            value: 1,
-            label: ''
-          }
-        ],
-        courses: [
-          {
-            value: 1,
-            label: '语文'
-          }
-        ]
+        teacherVal: '',
+        teacher: [],
+        coursesVal: '',
+        courses: []
       },
 
       /** tabs 3 的提交数据 */
-      radio_connectionMode: '1',
+      radio_connectionMode: 'all', // 关联方式
       activeName: 'first',
       dialog_add_student: false,
-      props: [
-        {
-          label: '广州分公司',
-          children: [
-            {
-              label: '市场部',
-              children: [
-                {
-                  label: '杨超越'
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      dialogSelectStudent: [
-        {
-          id: 1,
-          name: '杨超越',
-          userCode: '321321',
-          department: '研发部',
-          phone: '13589654263'
-        },
-        {
-          id: 2,
-          name: '杨超越1',
-          userCode: '321321',
-          department: '研发部',
-          phone: '13589654263'
-        }
-      ],
-      table_relatedStudents: [
-        {
-          no: 1,
-          userCode: '321321',
-          name: '何宇非',
-          department: '研发部',
-          phone: '18718571732'
-        }
-      ]
+      organizationUser: [],
+      otherUser: [],
+      dialogSelectStudent: [],
+      table_relatedStudents: [],
+      formLiveTypeForm: {
+        title: '',
+        code: '',
+        tips: '',
+        imgUrl: [{}]
+      }
     }
   },
   created() {
+    // 通过查看id是否存在判断是否是编辑
+    // if (this.$route.query.id) {
+    // }
+    //   获取直播分类
     getcategoryTree({
       source: 'live'
     }).then((res) => {
       this.liveClassification = res
+    })
+    // 获取其他用户
+    getOtherUser({
+      categoryId: '',
+      pageNo: 1,
+      pageSize: 99999
+    }).then((res) => {
+      this.otherUser = res.data
+
+      this.otherUser.forEach((item) => {
+        item.phoneNum = item.phonenum
+        item.userCode = item.workNo
+        item.id = item.userId
+        item.type = 'user'
+      })
     })
   },
   methods: {
@@ -1179,7 +1169,7 @@ export default {
     toggle_loopCycle(val) {
       this.select_mode_time_value = ''
       switch (val) {
-        case 1:
+        case 'day':
           this.select_mode_time = [
             {
               value: 1,
@@ -1187,7 +1177,7 @@ export default {
             }
           ]
           break
-        case 2:
+        case 'week':
           this.select_mode_time = [
             {
               value: 1,
@@ -1219,7 +1209,7 @@ export default {
             }
           ]
           break
-        case 3:
+        case 'month':
           this.select_mode_time = []
           for (var i = 0; i <= 30; i++) {
             this.select_mode_time.push({
@@ -1240,13 +1230,7 @@ export default {
           } else {
             this.table_teacherSet.push({
               identity: '嘉宾',
-              nameList_value: 1,
-              nameList: [
-                {
-                  value: 1,
-                  label: '赵老师'
-                }
-              ],
+              nameList_value: '',
               role: '嘉宾',
               num: typeNum + 1,
               type: 2
@@ -1259,13 +1243,7 @@ export default {
           } else {
             this.table_teacherSet.push({
               identity: '助教',
-              nameList_value: 1,
-              nameList: [
-                {
-                  value: 1,
-                  label: '王老师'
-                }
-              ],
+              nameList_value: '',
               role: '助教',
               num: typeNum + 1,
               type: 3
@@ -1285,8 +1263,10 @@ export default {
       })
       return arr.length
     },
-    delete_table_teacherSet(arr, index, type) {
+    delete_table_teacherSet(arr, index) {
       arr.splice(index, 1)
+      // 同时在关联课程中的教师列表删除该教师
+      this.add_relatedCourses_form.teacher.splice(index, 1)
       arr.forEach((item) => {
         if (item.num == 2) {
           item.num--
@@ -1301,26 +1281,31 @@ export default {
         return index + 1
       }
     },
-    show_relatedCourses_form(table_teacherSet) {
-      this.add_relatedCourses_form.teacher = this.get_table_teacherSet_teacher(table_teacherSet)
-      this.dialog_relatedCourses_type = {
-        title: '添加直播课',
-        type: 'add'
+    // 关联课程弹出窗口根据类型判断 add or edit
+    show_relatedCourses_form(type, row) {
+      if (type == 'edit') {
+        this.dialog_relatedCourses_type = {
+          title: '修改直播课程',
+          type: 'edit',
+          row: row
+        }
+      } else {
+        if (this.add_relatedCourses_form.teacher.length == 0) {
+          this.$message({
+            message: '请先完成讲师设置。',
+            type: 'warning'
+          })
+          return false
+        }
+        this.dialog_relatedCourses_type = {
+          title: '添加直播课',
+          type: 'add'
+        }
       }
       this.dialog_relatedCourses_form = true
     },
-    delete_table_relatedCourses(arr, index) {
-      arr.splice(index, 1)
-    },
-    edit_table_relatedCourses(row, index) {
-      this.dialog_relatedCourses_type = {
-        title: '修改直播课程',
-        type: 'edit',
-        row: row
-      }
-      this.dialog_relatedCourses_form = true
-    },
-    // 获取讲师设置所选教师
+
+    // 获取讲师表格中每一行所选的嘉宾或教师组合为一个select
     get_table_teacherSet_teacher(table) {
       var arr = []
       var obj = {}
@@ -1332,77 +1317,275 @@ export default {
       })
       return arr
     },
+    delete_table_relatedCourses(arr, index) {
+      arr.splice(index, 1)
+    },
+    // 查看当前讲师直播课程
+    query_liveCurriculum(id) {
+      getQueryCurriculum({
+        courseType: 3,
+        pageSize: 1000,
+        teacherId: id,
+        pageNo: 1,
+        isPutaway: 1,
+        status: 1
+      }).then((res) => {
+        this.add_relatedCourses_form.courses = res.data
+      })
+    },
+    // 添加/修改课程
     add_table_relatedCourses() {
       if (this.dialog_relatedCourses_type.type == 'add') {
-        this.table_relatedCourses.push({
-          coursesCode: '5544899644',
-          coursesName: '语文',
-          teacher: '李老师',
-          teacherId: 1
+        var data = {
+          teacherName: '',
+          teacherId: '',
+          courseName: '',
+          courseId: ''
+        }
+
+        var obj = this.add_relatedCourses_form.teacher.find((res) => {
+          return res.id == this.add_relatedCourses_form.teacherVal
         })
+        data.teacherId = obj.id
+        data.teacherName = obj.name
+
+        obj = this.add_relatedCourses_form.courses.find((res) => {
+          return res.id == this.add_relatedCourses_form.coursesVal
+        })
+
+        data.courseId = obj.id
+        data.courseName = obj.courseName
+
+        this.table_relatedCourses.push(data)
       } else if (this.dialog_relatedCourses_type.type == 'edit') {
-        this.dialog_relatedCourses_type.row.teacher = this.add_relatedCourses_form_value
+        obj = this.add_relatedCourses_form.teacher.find((res) => {
+          return res.id == this.add_relatedCourses_form.teacherVal
+        })
+        this.dialog_relatedCourses_type.row.teacherId = obj.id
+        this.dialog_relatedCourses_type.row.teacherName = obj.name
+
+        obj = this.add_relatedCourses_form.courses.find((res) => {
+          return res.id == this.add_relatedCourses_form.coursesVal
+        })
+        this.dialog_relatedCourses_type.row.courseId = obj.id
+        this.dialog_relatedCourses_type.row.courseName = obj.courseName
       }
       this.dialog_relatedCourses_form = false
     },
-    handleCheckChange(data, checked, indeterminate) {
-      console.log(data, checked, indeterminate)
-    },
-
-    handleClick() {},
-    // 树形控件
-    loadNode(node, resolve) {
-      if (node.level === 0) {
-        return resolve([{ name: 'region1' }, { name: 'region2' }])
+    get_teacherType(type) {
+      this.index_teacherType = type
+      if (type == 1 && this.teachingTeacherList != []) {
+        getQueryTeacher().then((res) => {
+          this.teachingTeacherList = res
+        })
+      } else if (type != 1 && this.teachingTeacherList != []) {
+        getQueryAssistant().then((res) => {
+          this.teachingTeacherList = res
+        })
       }
-      if (node.level > 3) return resolve([])
-
-      var hasChild
-      if (node.data.name === 'region1') {
-        hasChild = true
-      } else if (node.data.name === 'region2') {
-        hasChild = false
+    },
+    // 将讲师设置中所选的教师添加到教师列表供关联课程使用
+    add_teacherList(val, list, index) {
+      var data = list.find((item) => {
+        return item.id == val
+      })
+      if (this.add_relatedCourses_form.teacher.length > index) {
+        this.add_relatedCourses_form.teacher[index] = data
       } else {
-        hasChild = Math.random() > 0.5
+        this.add_relatedCourses_form.teacher.push(data)
       }
-
-      setTimeout(() => {
-        var data
-        if (hasChild) {
-          data = [
-            {
-              name: 'zone' + this.count++
-            },
-            {
-              name: 'zone' + this.count++
-            }
-          ]
-        } else {
-          data = []
-        }
-
-        resolve(data)
-      }, 500)
     },
+    // 查询教师列表
+    query_teacherList(query) {
+      switch (this.index_teacherType) {
+        case 1:
+          getQueryTeacher({
+            name: query
+          }).then((res) => {
+            this.teachingTeacherList = res
+          })
+          break
+        case 2:
+          getQueryAssistant({
+            name: query
+          }).then((res) => {
+            this.teachingTeacherList = res
+          })
+          break
+        case 3:
+          break
+      }
+    },
+    handleClick() {},
+
     delete_dialog_selectStudent(arr, index) {
       arr.splice(index, 1)
     },
     delete_table_relatedStudents(arr, index) {
       arr.splice(index, 1)
     },
-    submit_live_data() {
-      postAddLive({
-        authType: '',
-        codeLinkInfo: {
-          welcomeTitle: '',
-          captcha: '',
-          notice: '',
-          batchDeclare: '' // 直播方式 single：单次；plural：多次；cycle：循环
-        }
-      }).then(() => {})
+    // 添加关联学员
+    add_associateStudents(list, table) {
+      list.forEach((item) => {
+        table.push({
+          userCode: item.userCode,
+          name: item.name,
+          department: item.department,
+          phone: item.phone,
+          id: item.id
+        })
+      })
+      this.dialog_add_student = false
     },
-    //
-    liveClassification_nodeClick(data) {}
+    load_organizationUser(node, resolve) {
+      if (node.level === 0) {
+        getOrganizationUser({
+          parentId: 1
+        }).then((res) => {
+          res.users.forEach((item) => {
+            item.type = 'user'
+            item.leaf = true
+            item.id = item.userId
+            res.orgs.push(item)
+          })
+          this.organizationUser = res.orgs
+        })
+      } else {
+        if (node.data.type != 'user') {
+          getOrganizationUser({
+            parentId: node.data.id
+          }).then((res) => {
+            res.users.forEach((item) => {
+              item.type = 'user'
+              item.leaf = true
+              item.id = item.userId
+              res.orgs.push(item)
+            })
+            resolve(res.orgs)
+          })
+        } else {
+          return resolve([])
+        }
+      }
+    },
+    // 将选中的组织或学员添加到已选中列表
+    select_organizationUser(data) {
+      var index = this.dialogSelectStudent.findIndex((item) => item.id == data.userId)
+      if (index != -1) {
+        this.dialogSelectStudent.splice(index, 1)
+      } else {
+        if (data.type == 'user') {
+          this.dialogSelectStudent.push({
+            name: data.name,
+            phone: data.phoneNum,
+            userCode: data.workNo,
+            id: data.userId
+          })
+        } else {
+          getUsersByOrgId({ orgId: data.id }).then((res) => {
+            res.forEach((item) => {
+              this.dialogSelectStudent.push({
+                name: item.name,
+                phone: item.phonenum,
+                userCode: item.workNo,
+                id: item.id
+              })
+            })
+          })
+        }
+      }
+    },
+    // 在所属分类中点击树状菜单，将值赋值到option
+    liveClassification_nodeClick(data) {
+      this.liveClassification_option.label = data.name
+      this.liveClassification_option.value = data.id
+      this.liveClassification_value = data.id
+      this.$refs.ref_liveClassification.blur()
+    },
+    // 提交直播信息
+    submit_live_data() {
+      var data = {
+        batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
+        categoryId: this.liveClassification_value, // 所属分类
+        channelName: this.basicForm.title, // 直播标题
+        linkMicLimit: this.select_linkNumber_value, //  最大连麦数量
+        isUsed: this.select_liveStatus_value, // 直播状态
+        introduction: _.escape(this.ruleForm.introduction), // 直播介绍
+        scene: this.toggle_scene, // 直播场景
+        lecturerId: this.table_teacherSet.nameList_value //  主讲师设置
+      }
+
+      // 提交关联课程数据
+      if (this.table_relatedCourses.length > 0) {
+        data.courses = []
+        this.table_relatedCourses.forEach((item) => {
+          data.courses.push(item.courseId)
+        })
+      }
+      // 如果为多次或循环直播添加其他字段
+      switch (data.batchDeclare) {
+        case 'single':
+          data.planTime = []
+          data.planTime.push(this.start_time + '~' + this.end_time)
+          break
+        case 'plural':
+          data.planTime = []
+          this.table_liveTime.forEach((item) => {
+            data.planTime.push(item.start_time + '~' + item.end_time)
+          })
+          break
+        case 'cycle':
+          var cycleTimeArr = []
+          this.select_mode_time_value.forEach((item) => {
+            cycleTimeArr.push(item)
+          })
+
+          data.cycleInfo = {
+            cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
+            cycleMode: this.select_loopCycle_value,
+            cycleTime: cycleTimeArr.toString()
+          }
+
+          data.planTime = []
+          this.table_liveTime.forEach((item) => {
+            data.planTime.push(item.start_time + '~' + item.end_time)
+          })
+
+          break
+      }
+
+      // 观众授权方式。直接授权:direct，验证码授权:code, 默认为空表示所有人可见
+      switch (this.radio_connectionMode) {
+        case 'all':
+          data.authType = ''
+          break
+        case 'direct':
+          data.authType = this.radio_connectionMode
+          // 提交关联学员数据
+          if (this.table_relatedStudents.length) {
+            data.userAndOrgIds = {
+              users: []
+            }
+            this.table_relatedStudents.forEach((item) => {
+              data.userAndOrgIds.users.push(item.id)
+            })
+          }
+          break
+        case 'code':
+          data.authType = this.radio_connectionMode
+          data.codeLinkInfo = {
+            //当authType=code时，需要此参数，其他不需要
+            welcomeTitle: this.formLiveTypeForm.title,
+            captcha: this.formLiveTypeForm.code,
+            notice: this.formLiveTypeForm.tips
+          }
+          break
+      }
+
+      postAddLive(data).then(() => {
+        this.$router.push({ path: '/live/liveList' })
+      })
+    }
   }
 }
 </script>
@@ -1457,11 +1640,6 @@ export default {
         width: 20vw;
       }
     }
-    // .tabs1, .tabs3 {
-    // 	/deep/.el-input {
-    // 		width: 20vw;
-    // 	}
-    // }
   }
 }
 
@@ -1531,6 +1709,8 @@ export default {
       .el-tree {
         margin-top: 8px;
         margin-left: 15px;
+        overflow-y: scroll;
+        height: 410px;
       }
     }
     .selectNumber {
