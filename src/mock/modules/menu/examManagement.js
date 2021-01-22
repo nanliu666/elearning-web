@@ -219,26 +219,30 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '创建考试',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/edit'
         },
         {
           menuType: 'Button',
+          menuName: '删除',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/delete'
         },
         {
           menuType: 'Button',
+          menuName: '复制',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/examSchedule/list/others'
+          path: '/examManagement/examSchedule/list/copy'
         }
       ]
     },
