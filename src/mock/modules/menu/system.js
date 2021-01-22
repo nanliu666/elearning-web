@@ -43,7 +43,36 @@ export default {
           path: '/orgs/orgManagement',
           icon: 'iconfont iconicon_subordinate',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建组织',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建子组织',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/addChild'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/delete'
+            }
+          ]
         },
         {
           menuId: '1260118258720522241',

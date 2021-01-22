@@ -92,3 +92,8 @@ export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // �
 export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 新建模板
 // 证书发放明细的鉴权
 export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
+// 组织管理的鉴权
+export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
+export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
+export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
+export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
