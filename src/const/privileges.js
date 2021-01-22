@@ -60,3 +60,10 @@ export const BY_PERSON = '/examManagement/mark/MarkList/byPerson' // 逐人评�
 export const BY_QUESTION = '/examManagement/mark/MarkList/byQuestion' // 逐题评卷
 // 考评管理的成绩管理的鉴权
 export const VIEW_GRADE = '/examManagement/grade/achievement/view' // 查看考生成绩
+// 必修课程安排的鉴权
+export const ADD_REQUIRED = '/learnPlan/CoursePlanList/add' // 新建必修课程安排
+export const EDIT_REQUIRED = '/learnPlan/CoursePlanList/edit' // 编辑
+export const DELETE_REQUIRED = '/learnPlan/CoursePlanList/delete' // 删除
+export const VIEW_REQUIRED = '/learnPlan/CoursePlanList/view' // 查看完成率
+export const ADD_GROUP_REQUIRED = '/learnPlan/CoursePlanList/addGroup' // 新建分组
+export const STOP_REQUIRED = '/learnPlan/CoursePlanList/stop' // 结办

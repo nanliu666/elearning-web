@@ -10,7 +10,7 @@
       </template>
       <template slot="rightMenu">
         <el-button
-          v-p="'/learnPlan/CoursePlanList/add'"
+          v-p="ADD_REQUIRED"
           type="primary"
           size="medium"
           @click="jumpEdit"
@@ -114,7 +114,7 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -125,7 +125,7 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
+              v-p="EDIT_REQUIRED"
               type="text"
               size="medium"
               :disabled="[2, 3].includes(row.status)"
@@ -134,7 +134,7 @@
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/stop'"
+              v-p="STOP_REQUIRED"
               type="text"
               size="medium"
               :disabled="[3].includes(row.status)"
@@ -143,7 +143,7 @@
               结办
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               :disabled="[2].includes(row.status)"
@@ -152,7 +152,7 @@
               删除
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/view'"
+              v-p="VIEW_REQUIRED"
               type="text"
               size="medium"
               :disabled="[1].includes(row.status)"
@@ -226,7 +226,7 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -237,14 +237,14 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
+              v-p="EDIT_REQUIRED"
               type="text"
               @click="jumpEdit(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
+              v-p="DELETE_REQUIRED"
               type="text"
               @click="handleDelete(row)"
             >
@@ -368,6 +368,14 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import {
+  ADD_REQUIRED,
+  EDIT_REQUIRED,
+  DELETE_REQUIRED,
+  VIEW_REQUIRED,
+  STOP_REQUIRED
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CoursePlanList',
   components: {
@@ -445,11 +453,33 @@ export default {
       }
     }
   },
+  computed: {
+    ADD_REQUIRED: () => ADD_REQUIRED,
+    EDIT_REQUIRED: () => EDIT_REQUIRED,
+    DELETE_REQUIRED: () => DELETE_REQUIRED,
+    VIEW_REQUIRED: () => VIEW_REQUIRED,
+    STOP_REQUIRED: () => STOP_REQUIRED,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          EDIT_REQUIRED,
+          DELETE_REQUIRED,
+          VIEW_REQUIRED,
+          STOP_REQUIRED
+        ])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.refreshPublished()
     this.loadDraftData()
   },
-  created() {},
+
   methods: {
     // 点击左侧档返回数据
     treeClick(id) {
