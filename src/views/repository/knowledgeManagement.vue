@@ -3,7 +3,7 @@
     <page-header title="知识管理">
       <template slot="rightMenu">
         <el-button
-          v-p="'/repository/knowledgeManagement/add'"
+          v-p="ADD_REP"
           type="primary"
           size="medium"
           @click="createResource"
@@ -93,7 +93,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/repository/knowledgeManagement/deleteAll'"
+            v-p="DELETE_ALL_REP"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -107,7 +107,7 @@
           slot-scope="{ row }"
         >
           <div
-            v-if="$p('/repository/knowledgeManagement/view')"
+            v-if="VIEW_REP"
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
@@ -119,7 +119,7 @@
         </template>
         <template #handler="{row}">
           <el-button
-            v-p="'/repository/knowledgeManagement/top'"
+            v-p="TOP_REP"
             type="text"
             class="top-button"
             @click="handleTop(row)"
@@ -127,19 +127,14 @@
             {{ row.topTime ? '已置顶' : '置顶' }}
           </el-button>
           <el-button
+            v-p="PUTAWAY_REP"
             type="text"
             @click="handleStatus(row)"
           >
             {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
           <el-dropdown
-            v-if="
-              $p([
-                '/repository/knowledgeManagement/edit',
-                '/repository/knowledgeManagement/delete',
-                '/repository/knowledgeManagement/move'
-              ])
-            "
+            v-if="$p([EDIT_REP, DELETE_REP, MOVE_REP])"
             style="margin-left: 4px"
             @command="handleCommand($event, row)"
           >
@@ -151,19 +146,19 @@
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item
-                v-p="'/repository/knowledgeManagement/edit'"
+                v-p="EDIT_REP"
                 command="editKnow"
               >
                 编辑
               </el-dropdown-item>
               <el-dropdown-item
-                v-p="'/repository/knowledgeManagement/delete'"
+                v-p="DELETE_REP"
                 command="deleteKnow"
               >
                 删除
               </el-dropdown-item>
               <el-dropdown-item
-                v-p="'/repository/knowledgeManagement/move'"
+                v-p="MOVE_REP"
                 command="moveKnow"
               >
                 移动
@@ -373,6 +368,17 @@ const FORM_COLUMNS = [
     }
   }
 ]
+import {
+  ADD_REP,
+  TOP_REP,
+  PUTAWAY_REP,
+  EDIT_REP,
+  DELETE_REP,
+  DELETE_ALL_REP,
+  MOVE_REP,
+  VIEW_REP
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -414,6 +420,32 @@ export default {
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    ADD_REP: () => ADD_REP,
+    TOP_REP: () => TOP_REP,
+    PUTAWAY_REP: () => PUTAWAY_REP,
+    EDIT_REP: () => EDIT_REP,
+    DELETE_REP: () => DELETE_REP,
+    DELETE_ALL_REP: () => DELETE_ALL_REP,
+    VIEW_REP: () => VIEW_REP,
+    MOVE_REP: () => MOVE_REP,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          TOP_REP,
+          PUTAWAY_REP,
+          EDIT_REP,
+          MOVE_REP,
+          DELETE_REP
+        ])
+      },
+      deep: true
     }
   },
   activated() {
