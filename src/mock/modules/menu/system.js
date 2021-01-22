@@ -264,7 +264,15 @@ export default {
       path: '/system/menu',
       icon: 'iconfont iconicon_compile',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '启用/停用',
+          isEnabled: 1,
+          path: '/system/menu/stop'
+        }
+      ]
     },
     // {
     //   menuId: '125907843471874',
@@ -335,23 +343,27 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
+              menuName: '新建公告',
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/add'
             },
             {
               menuType: 'Button',
               isOwn: 1,
+              menuName: '删除',
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/delete'
             },
             {
               menuType: 'Button',
+              menuName: '编辑',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/edit'
             },
             {
               menuType: 'Button',
+              menuName: '置顶',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/top'

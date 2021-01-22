@@ -104,3 +104,10 @@ export const RESET_USER = '/system/user/resetPassword' // 密码重置
 export const EDIT_USER = '/system/user/edit' // 编辑
 export const END_USER = '/system/user/end' // 冻结
 export const DELETE_USER = '/system/user/delete' // 删除
+// 菜单管理的鉴权
+export const STOP_MENU = '/system/menu/stop' // 启用/停用
+// 新闻管理的鉴权
+export const ADD_NEWS = '/system/newsCenter/newsManage/add' // 新建公告
+export const DELETE_NEWS = '/system/newsCenter/newsManage/delete' // 删除
+export const EDIT_NEWS = '/system/newsCenter/newsManage/edit' // 删除
+export const TOP_NEWS = '/system/newsCenter/newsManage/top' // 置顶
