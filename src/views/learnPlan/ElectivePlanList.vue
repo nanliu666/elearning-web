@@ -40,7 +40,6 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -51,7 +50,6 @@
         </template>
         <template #oparetion="{row}">
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/view'"
             type="text"
             size="medium"
             @click="jumpDetail(row)"
@@ -59,7 +57,6 @@
             查看
           </el-button>
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/delete'"
             type="text"
             size="medium"
             @click="handleDelete([row])"

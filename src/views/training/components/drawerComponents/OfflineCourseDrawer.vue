@@ -20,21 +20,14 @@
             @selectItem="selectContact"
           />
         </template>
-        <template #lecturerName>
+        <template #lecturerId>
           <lazy-select
-            v-if="model.type === 1"
-            v-model="model.lecturerName"
-            :disabled="true"
+            v-model="model.lecturerId"
+            :disabled="model.type === 1"
             :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
-          />
-          <el-input
-            v-if="model.type === 2"
-            v-model="model.lecturerName"
-            maxlength="32"
-            placeholder="请输入主持人"
           />
         </template>
       </common-form>
@@ -81,7 +74,7 @@ const EventColumns = [
     label: '活动时间'
   },
   { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
-  { itemType: 'slot', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
+  { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const CourseColumns = [
@@ -121,13 +114,14 @@ const CourseColumns = [
     prop: 'courseId',
     label: '关联课程'
   },
-  { itemType: 'slot', span: 24, prop: 'lecturerName', label: '讲师' },
+  { itemType: 'slot', span: 24, prop: 'lecturerId', label: '讲师' },
   { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
 ]
 const modelCopy = {
   type: 1,
   todoDate: null,
   todoTime: [moment().startOf('day'), moment().endOf('day')],
+  lecturerId: null,
   lecturerName: null,
   address: '',
   courseId: null,
@@ -222,6 +216,9 @@ export default {
         const data = this.model
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
+        data.lecturerName = _.find(this.userList, (item) => {
+          return item.userId === data.lecturerId
+        }).name
         this.$emit('submit', data, this.editType)
         this.close()
       })

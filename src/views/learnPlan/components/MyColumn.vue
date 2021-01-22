@@ -114,7 +114,6 @@
             class="btn_bottom"
           >
             <a
-              v-p="'/learnPlan/CoursePlanList/addGroup'"
               class="btn1"
               href="#/learnPlan/CoursePlanList"
               @click="adddata"
@@ -180,13 +179,6 @@
 </template>
 
 <script>
-// import {
-//   listTeacherCategory,
-//   addCatalog,
-//   deleteTeacherCatalog,
-//   move,
-//   editTeacherCatalog
-// } from '@/api/lecturer/lecturer'
 export default {
   props: {
     columnInterface: {
@@ -332,7 +324,26 @@ export default {
 
         if (ifReturn) return
         this.columnInterface.editTeacherCatalog(params).then(() => {
-          this.islistTeacherCategory()
+          // this.islistTeacherCategory()
+
+          if (node.btnshow) {
+            this.data.map((item, index) => {
+              if (item.id == node.id) {
+                this.data[index].label = params.name
+              }
+            })
+          } else {
+            this.data.map((item, index) => {
+              if (node.parent_id == item.id) {
+                item.children.map((itemi, indexi) => {
+                  if (node.id == itemi.id) {
+                    this.data[index].children[indexi].label = params.name
+                  }
+                })
+              }
+            })
+          }
+
           this.isEdit = false
           this.dataAddCatalog.input = ''
           this.$message({
@@ -360,13 +371,46 @@ export default {
           return
         }
         this.columnInterface.addCatalog(params).then(() => {
-          this.islistTeacherCategory()
-          this.isShowinput = false
-          this.dataAddCatalog.input = ''
-          this.$message({
-            message: '新增成功',
-            type: 'success'
-          })
+          // this.islistTeacherCategory()
+          // 不再收起BUG
+          // 再请求回来数据
+          this.columnInterface
+            .listTeacherCategory({ test: '123', parentId: params.id })
+            .then((res) => {
+              // 去找到相应的数据push进去
+
+              if (params.id) {
+                this.data.map((item) => {
+                  if (item.id == params.id) {
+                    item.children[item.children.length - 1].id = res.son[res.son.length - 1].idStr
+                    item.children[item.children.length - 1].parent_id =
+                      res.son[res.son.length - 1].parentStr
+                    item.children[item.children.length - 1].label = res.son[res.son.length - 1].name
+                    item.children[item.children.length - 1].btnshow = 0
+                    item.children[item.children.length - 1].count =
+                      res.son[res.son.length - 1].count
+                  }
+                })
+                this.isEdit = false
+                this.dataAddCatalog.input = ''
+              } else {
+                this.data.push({
+                  label: res.group[res.group.length - 1].name,
+                  btnshow: 1,
+                  id: res.group[res.group.length - 1].idStr,
+                  myid: res.group[res.group.length - 1].idStr,
+                  count: res.group[res.group.length - 1].count,
+                  children: []
+                })
+                this.dataAddCatalog.input = ''
+                this.isShowinput = false
+              }
+
+              this.$message({
+                message: '新增成功',
+                type: 'success'
+              })
+            })
         })
       }
     },
@@ -378,8 +422,10 @@ export default {
     isEditFn(data) {
       this.isEdit = false
       this.dataAddCatalog.input = ''
+      // this.expandedKeysData = []
+      // this.expandedKeysData.push(data.myid)
       this.expandedKeysData = []
-      this.expandedKeysData.push(data.myid)
+      if (data.parent_id) this.expandedKeysData.push(data.parent_id)
       this.islistTeacherCategory()
     },
     // 增删改查
@@ -474,13 +520,13 @@ export default {
       let params = {}
       if (id) {
         params = {
-          // test: '123',
+          test: '123',
           parentId: '' // 父ID
         }
         params.parentId = id
       } else {
         params = {
-          // test: '123'
+          test: '123'
         }
       }
       return this.columnInterface.listTeacherCategory(params).then((res) => {
@@ -516,8 +562,6 @@ export default {
         })
 
         this.clickId = this.data[0].id
-        // 右侧list
-        // this.islistTeacher(this.data[0].id)
       })
     },
     // 删除分组/分类
@@ -527,9 +571,28 @@ export default {
           message: '删除成功',
           type: 'success'
         })
-        this.islistTeacherCategory()
-        this.expandedKeysData = []
-        if (data.parent_id) this.expandedKeysData.push(data.parent_id)
+
+        if (data.btnshow) {
+          this.data = this.data.filter(function(item) {
+            if (data.id != item.id) {
+              return item
+            }
+          })
+        } else {
+          // this.data.map((item, index) => {
+          //   if (data.parent_id == item.id) {
+          //     item.children.map((itemi, indexi) => {
+          //       if (data.id == itemi.id) {
+          //         this.data[index].children.splice(indexi, 1)
+          //       }
+          //     })
+          //   }
+          // })
+
+          this.islistTeacherCategory()
+          this.expandedKeysData = []
+          if (data.parent_id) this.expandedKeysData.push(data.parent_id)
+        }
       })
     }
   }
