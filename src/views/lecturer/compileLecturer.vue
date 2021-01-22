@@ -283,11 +283,11 @@
                       slot="tip"
                       class="el-upload__tip"
                     >
-                      只能上传jpg/jpge/png文件，且不超过5M
+                      只能上传jpg/jpeg/png文件，且不超过5M
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments.length > 0 && ruleForm.attachments[0].fileUrl"
+                    v-if="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl !== ''"
                     :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
                     class="avatar"
                   />
@@ -600,7 +600,7 @@ export default {
 
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png)$/
+      const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -608,7 +608,7 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png文件')
+        this.$message.error('上传图片只支持jpg|jpeg|png文件')
         return false
       }
       return true

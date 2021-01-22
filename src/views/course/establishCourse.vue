@@ -673,10 +673,15 @@
         </div>
       </div>
     </div>
+    <appr-submit
+      ref="apprSubmit"
+      @submit="handleSubmit"
+    />
   </div>
 </template>
 
 <script>
+import { categoryMap } from '@/const/approve'
 import {
   getCourseTags,
   getCatalog,
@@ -685,9 +690,12 @@ import {
   addCourse,
   listTeacher
 } from '@/api/course/course'
+import ApprSubmit from '@/components/appr-submit/ApprSubmit'
+
 export default {
   components: {
-    commonUpload: () => import('@/components/common-upload/commonUpload')
+    commonUpload: () => import('@/components/common-upload/commonUpload'),
+    ApprSubmit
   },
   data() {
     return {
@@ -1045,25 +1053,39 @@ export default {
               type: 'warning'
             })
           } else {
-            this.disabledBtn = true
-            params.status = status
-            addCourse(params).then(() => {
-              this.$message({
-                message: '本课程已发布成功',
-                type: 'success'
+            this.$refs.apprSubmit.validate().then(() => {
+              this.disabledBtn = true
+              // 状态设置为审批中
+              params.status = 0
+              addCourse(params).then(({ id }) => {
+                this.submitApprApply(id)
               })
-              setTimeout(() => {
-                this.isdeleteData()
-                this.disabledBtn = false
-                // this.$router.go(-1)
-                this.$router.push({ path: '/course/courseDraft?status=' + status })
-              }, 3000)
             })
           }
         })
       }
     },
-
+    handleSubmit() {
+      this.isAddCourse(1)
+    },
+    // 提交课程审批
+    submitApprApply(courseId) {
+      this.$refs.apprSubmit
+        .submit({ formId: courseId, processName: categoryMap['1'] })
+        .then(() => {
+          this.$message({
+            message: '本课程已发布成功',
+            type: 'success'
+          })
+          setTimeout(() => {
+            this.isdeleteData()
+            this.disabledBtn = false
+            // this.$router.go(-1)
+            this.$router.push({ path: '/course/courseDraft?status=' + status })
+          }, 3000)
+        })
+        .catch(console.error)
+    },
     // 清空数据
     isdeleteData() {
       this.ruleForm = {

@@ -99,9 +99,9 @@
 </template>
 
 <script>
-import EditArrangement from './components/editComponents/editArrangement'
-import EditBasicInfo from './components/editComponents/editBasicInfo'
-import EditDetail from './components/editComponents/editDetail'
+import EditArrangement from './components/editArrangement'
+import EditBasicInfo from './components/editBasicInfo'
+import EditDetail from './components/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
 const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑
@@ -217,8 +217,8 @@ export default {
             this.$message.success('发布成功')
             this.$router.push({ path: '/training/trainingArrange' })
           })
-          .catch(() => {
-            window.console.error(JSON.stringify(params))
+          .catch((err) => {
+            window.console.error(err)
           })
       })
     },

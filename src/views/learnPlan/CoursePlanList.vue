@@ -10,7 +10,6 @@
       </template>
       <template slot="rightMenu">
         <el-button
-          v-p="'/learnPlan/CoursePlanList/add'"
           type="primary"
           size="medium"
           @click="jumpEdit"
@@ -114,7 +113,6 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -125,7 +123,6 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
               type="text"
               size="medium"
               :disabled="[2, 3].includes(row.status)"
@@ -134,7 +131,6 @@
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
               type="text"
               size="medium"
               :disabled="[2].includes(row.status)"
@@ -143,7 +139,6 @@
               删除
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/view'"
               type="text"
               size="medium"
               :disabled="[1, 2].includes(row.status)"
@@ -217,7 +212,6 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -228,14 +222,12 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
               type="text"
               @click="jumpEdit(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
               type="text"
               @click="handleDelete(row)"
             >
