@@ -98,6 +98,7 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '查看详情',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/credit/view'
