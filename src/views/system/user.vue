@@ -3,6 +3,7 @@
     <page-header title="用户管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="ADD_USER"
         @command="handleCommand"
       >
         <el-button
@@ -72,7 +73,7 @@
 <script>
 import { getOrganization, getOuterUser } from '@/api/system/user'
 import { mapGetters } from 'vuex'
-
+import { ADD_USER } from '@/const/privileges'
 export default {
   name: 'User',
   components: {
@@ -99,6 +100,7 @@ export default {
     }
   },
   computed: {
+    ADD_USER: () => ADD_USER,
     ...mapGetters(['userInfo'])
   },
   watch: {

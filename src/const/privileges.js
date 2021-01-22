@@ -97,3 +97,10 @@ export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
 export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
 export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
+// 用户管理的鉴权
+export const ADD_USER = '/system/user/add' // 新建用户
+export const SETTING_USER = '/system/user/setting' // 角色设置
+export const RESET_USER = '/system/user/resetPassword' // 密码重置
+export const EDIT_USER = '/system/user/edit' // 编辑
+export const END_USER = '/system/user/end' // 冻结
+export const DELETE_USER = '/system/user/delete' // 删除

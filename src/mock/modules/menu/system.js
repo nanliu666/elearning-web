@@ -128,7 +128,50 @@ export default {
           path: '/system/user',
           icon: 'iconfont iconicon_boss',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '添加用户',
+              isEnabled: 1,
+              path: '/system/user/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '角色设置',
+              isEnabled: 1,
+              path: '/system/user/setting'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '密码重置',
+              isEnabled: 1,
+              path: '/system/user/resetPassword'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/system/user/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '冻结',
+              isEnabled: 1,
+              path: '/system/user/end'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/user/delete'
+            }
+          ]
         },
         {
           menuId: '1259034522778285058',
