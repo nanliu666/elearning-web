@@ -3,6 +3,7 @@
     <page-header title="角色管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_ROLE"
         size="medium"
         type="primary"
         :disabled="!options.currentId"
@@ -35,6 +36,7 @@
                 slot-scope="{ selection }"
               >
                 <span
+                  v-p="DELETE_ROLE"
                   class="del-all"
                   @click="handlerDeleteAll(selection)"
                 ><i class="el-icon-delete" />批量删除</span>
@@ -62,6 +64,7 @@
                 slot-scope="scope"
               >
                 <el-button
+                  v-p="AUTH_ROLE"
                   type="text"
                   size="medium"
                   @click.stop="handleConfig(scope.row, scope.index)"
@@ -70,6 +73,7 @@
                 </el-button>
                 <el-button
                   v-if="scope.row.isBasic == 0"
+                  v-p="VIEW_ROLE"
                   type="text"
                   size="medium"
                   @click.stop="handleCheck(scope.row, scope.index)"
@@ -85,6 +89,7 @@
                   全部员工
                 </el-button>
                 <el-dropdown
+                  v-if="$p([EDIT_ROLE, DELETE_ROLE])"
                   trigger="hover"
                   @command="handleCommand($event, scope.row)"
                 >
@@ -92,10 +97,16 @@
                     <i class="el-icon-more" />
                   </span>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">
+                    <el-dropdown-item
+                      v-p="EDIT_ROLE"
+                      command="edit"
+                    >
                       编辑
                     </el-dropdown-item>
-                    <el-dropdown-item command="del">
+                    <el-dropdown-item
+                      v-p="DELETE_ROLE"
+                      command="del"
+                    >
                       删除
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -131,6 +142,8 @@ import roleEdit from './components/roleEdit'
 import roleAside from './components/roleAside'
 import { getRoleList, getCate, getPositions, delRole } from '../../api/system/role'
 import addUserDialog from './components/addUserDialog'
+import { ADD_ROLE, VIEW_ROLE, EDIT_ROLE, DELETE_ROLE, AUTH_ROLE } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'Role',
   components: {
@@ -204,10 +217,25 @@ export default {
     }
   },
   computed: {
+    ADD_ROLE: () => ADD_ROLE,
+    VIEW_ROLE: () => VIEW_ROLE,
+    EDIT_ROLE: () => EDIT_ROLE,
+    DELETE_ROLE: () => DELETE_ROLE,
+    AUTH_ROLE: () => AUTH_ROLE,
+    ...mapGetters(['privileges']),
     filterList() {
       return this.data.filter((item) => {
         return item.roleName.indexOf(this.form.roleName) > -1
       })
+    }
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([VIEW_ROLE, EDIT_ROLE, DELETE_ROLE, AUTH_ROLE])
+      },
+      deep: true
     }
   },
   created() {

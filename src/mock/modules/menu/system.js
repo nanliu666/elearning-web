@@ -225,7 +225,50 @@ export default {
           path: '/system/role',
           icon: 'iconfont iconicon_group',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建角色',
+              isEnabled: 1,
+              path: '/system/role/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '查看用户',
+              isEnabled: 1,
+              path: '/system/role/view'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '权限配置',
+              isEnabled: 1,
+              path: '/system/role/author'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/system/role/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/role/delete'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建分类',
+              isEnabled: 1,
+              path: '/system/role/addCatalog'
+            }
+          ]
         },
         {
           menuId: '12604101852546387969',

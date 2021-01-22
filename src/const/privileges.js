@@ -111,3 +111,10 @@ export const ADD_NEWS = '/system/newsCenter/newsManage/add' // 新建公告
 export const DELETE_NEWS = '/system/newsCenter/newsManage/delete' // 删除
 export const EDIT_NEWS = '/system/newsCenter/newsManage/edit' // 删除
 export const TOP_NEWS = '/system/newsCenter/newsManage/top' // 置顶
+// 角色管理的鉴权
+export const ADD_ROLE = '/system/role/add' // 新建角色
+export const VIEW_ROLE = '/system/role/view' // 查看用户
+export const EDIT_ROLE = '/system/role/edit' // 编辑
+export const DELETE_ROLE = '/system/role/delete' // 删除
+export const AUTH_ROLE = '/system/role/author' // 删除
+export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 删除
