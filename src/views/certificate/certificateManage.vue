@@ -3,6 +3,7 @@
     <page-header title="证书管理">
       <template slot="rightMenu">
         <el-button
+          v-p="'/certificate/certificateManage/add'"
           type="primary"
           size="medium"
           @click="toAddCertificate"
@@ -72,6 +73,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="'/certificate/certificateManage/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -89,6 +91,7 @@
         <template #handler="{row}">
           <el-button
             v-if="row.status"
+            v-p="'/certificate/certificateManage/disabled'"
             type="text"
             @click.stop="blockStart(row.id, 0)"
           >
@@ -96,11 +99,14 @@
           </el-button>
           <span
             v-else
+            v-p="'/certificate/certificateManage/disabled'"
             class="startBtn"
             @click.stop="blockStart(row.id, 1)"
-          >启用 &nbsp; </span>
+          >启用 &nbsp;
+          </span>
           <!-- 预览框 -->
           <el-tooltip
+            v-p="'/certificate/certificateManage/preview'"
             placement="top"
             effect="light"
           >
@@ -153,6 +159,7 @@
           </el-tooltip>
 
           <el-button
+            v-p="'/certificate/certificateManage/delete'"
             type="text"
             @click="handleRemove(row)"
           >

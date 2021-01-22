@@ -108,7 +108,6 @@
         title="消息通知"
         :label-array="newList"
         class="new"
-        @click="goMsgCenter"
       >
         <div
           v-if="msgWorkList.length"
@@ -449,12 +448,6 @@ export default {
       } catch (error) {
         this.warnLoading = false
       }
-    },
-    // 跳去信息中心
-    goMsgCenter() {
-      this.$router.push({
-        path: '/msg/msg'
-      })
     },
     // 确定已读信息
     async handelRead({ id, isRead }) {

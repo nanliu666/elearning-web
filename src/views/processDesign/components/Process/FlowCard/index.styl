@@ -104,6 +104,23 @@ btn-bigger()
     top: 34%;
   }
 }
+.start-node {
+  font-size: $base-size;
+  text-align: center;
+  flex-center()
+  flex-direction column
+
+  &::after {
+    content:"";
+    width: 10px;
+    height: 10px;
+    margin: auto;
+    border: none;
+    margin-top: 12px;
+    border-radius: 50%;
+    background: #dbdcdc;
+  }
+}
 .end-node {
   font-size: $base-size;
   text-align: center;
@@ -222,9 +239,9 @@ btn-bigger()
       visibility: visible;
     }
 
-    .title-text {
-      border-bottom: 1px dashed currentColor;
-    }
+    // .title-text {
+    //   border-bottom: 1px dashed currentColor;
+    // }
   }
 
   .body {
@@ -320,7 +337,7 @@ btn-bigger()
   width: 200px;
   height: 100px;
   position: relative;
-  padding-top: 30px;
+  padding-top: 36px;
   margin auto
 
   &::before {

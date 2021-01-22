@@ -24,6 +24,8 @@
     <template #handler="{row}">
       <div class="table__handler">
         <el-button
+          v-if="status === 'Published'"
+          v-p="'/system/newsCenter/newsManage/top'"
           type="text"
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
@@ -35,6 +37,7 @@
 
         <el-button
           v-if="status === STATUS['Draft']"
+          v-p="'/system/newsCenter/newsManage/edit'"
           type="text"
           size="medium"
           @click="() => handleEditItemBtnClick(row)"
@@ -43,6 +46,7 @@
         </el-button>
 
         <el-button
+          v-p="'/system/newsCenter/newsManage/delete'"
           type="text"
           size="medium"
           @click="() => handleRemoveItemBtnClick(row)"
@@ -102,7 +106,7 @@ const TABLE_COLUMNS = [
     maxWidth: 100
   },
   {
-    label: '发布时间',
+    label: '时间',
     prop: 'publishTime',
     minWidth: 100
   }
@@ -228,17 +232,17 @@ export default {
     },
     handlePublishBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit'
       })
     },
     handlePublishedBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsPublished'
+        path: '/system/newsCenter/newsPublished'
       })
     },
     handleDraftBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsDrafts'
+        path: '/system/newsCenter/newsDrafts'
       })
     },
     // toggle isTop handler
@@ -263,7 +267,7 @@ export default {
 
     handleEditItemBtnClick({ id }) {
       this.$router.push({
-        path: '/newsCenter/newsEdit',
+        path: '/system/newsCenter/newsEdit',
         query: { id }
       })
     },
@@ -306,7 +310,7 @@ export default {
     // 跳转新闻详情
     handleItemLinkClick({ id }) {
       this.$router.push({
-        path: '/newsCenter/newsDetail',
+        path: '/system/newsCenter/newsDetail',
         query: {
           id,
           userId: this.userId

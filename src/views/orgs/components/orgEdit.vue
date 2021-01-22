@@ -368,6 +368,9 @@ export default {
       this.form.parentOrgId = row.id
       this.form.parentOrgType = _.cloneDeep(row.orgType)
       this.$emit('changevisible', true)
+      this.$nextTick(() => {
+        this.$refs.ruleForm.clearValidate(...arguments)
+      })
     },
     async edit(row) {
       this.type = 'edit'
@@ -376,6 +379,9 @@ export default {
       this.form.leaders = _.map(this.form.leaders, 'userId')
       await this.loadOrgTree()
       this.$emit('changevisible', true)
+      this.$nextTick(() => {
+        this.$refs.ruleForm.clearValidate(...arguments)
+      })
     },
     async loadOrgTree() {
       let res = await getOrgTreeSimple({ parentOrgId: 0 })

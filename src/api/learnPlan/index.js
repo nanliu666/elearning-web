@@ -1,6 +1,12 @@
 import { get, post, del, put } from '@/router/axios'
 
 /**
+ * 修改学习计划状态
+ * @param {Object} params - 参数
+ * */
+export const updateStatus = (params) => get('/api/manage/v1/study/plan/updateStatus', params)
+
+/**
  * 新增学习计划
  * @param {Object} params - 参数
  * */

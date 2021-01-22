@@ -262,7 +262,7 @@
           </li>
           <li class="extend-li">
             <div class="li-title">
-              成绩分布：
+              成绩发布：
             </div>
             <div class="li-content">
               <div class="content">

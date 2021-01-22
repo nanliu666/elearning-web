@@ -114,6 +114,7 @@
             class="btn_bottom"
           >
             <a
+              v-p="'/training/trainingArrange/addGroup'"
               class="btn1"
               href="#/training/trainingArrange"
               @click="adddata"

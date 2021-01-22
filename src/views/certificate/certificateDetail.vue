@@ -3,6 +3,7 @@
     <page-header title="证书发放明细">
       <template slot="rightMenu">
         <el-button
+          v-p="'/certificate/certificateDetail/export'"
           type="primary"
           size="medium"
           @click="isexportGrantExcel"
@@ -82,6 +83,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="'/certificate/certificateDetail/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"

@@ -1,60 +1,7 @@
 <template>
   <div class="mark-by-examinee">
-    <page-header
-      title="评卷详情"
-      show-back
-    />
-    <el-card
-      v-if="!_.isEmpty(examineeAchievementDO)"
-      class="examinee-card"
-    >
-      <div class="heder">
-        <span>{{ examineeAchievementDO.examName }}</span>
-        <el-tag
-          :type="getTag(examineeAchievementDO.status).type"
-          style="margin-left: 10px"
-        >
-          {{ getTag(examineeAchievementDO.status).label }}
-        </el-tag>
-      </div>
-      <ul class="card-ul">
-        <li class="card-li">
-          <span class="li-label">考试名称：</span>
-          <span class="li-value">******</span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">手机号码：</span>
-          <span class="li-value">******</span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">归属组织：</span>
-          <span class="li-value">{{ examineeAchievementDO.dept }}</span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">考试用卷：</span>
-          <span class="li-value">{{ examineeAchievementDO.paperName }}</span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">考试时间：</span>
-          <span class="li-value">
-            <span>{{ examineeAchievementDO.examBeginTime }}</span>
-            <span>~</span>
-            <span>{{ examineeAchievementDO.examEndTime }}</span>
-          </span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">考试用时：</span>
-          <span class="li-value">
-            {{ getExamUseTime() }}
-          </span>
-        </li>
-        <li class="card-li">
-          <span class="li-label">试卷总分：</span>
-          <span class="li-value">{{ examineeAchievementDO.totalScore }}</span>
-        </li>
-      </ul>
-    </el-card>
-    <div v-if="!isView">
+    <mark-header-card :data="examineeAchievementDO" />
+    <div>
       <el-card
         v-if="examData.keguan"
         class="paper-card"
@@ -164,7 +111,7 @@
                 <span v-else>
                   <span
                     class="right-title"
-                    v-html="_.unescape(conItem.content)"
+                    v-html="getHTML(conItem.content)"
                   ></span>
                   <ul>
                     <li
@@ -172,7 +119,7 @@
                       :key="paperIndex"
                       class="content-li"
                     >
-                      <span>{{ paperIndex + 1 }}.</span>
+                      <span>（{{ paperIndex + 1 }}）.</span>
                       <QustionPreview
                         :ref="`refSelect`"
                         :data="paperItem"
@@ -216,102 +163,11 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      <el-card class="paper-card">
-        <div class="card-header view-header">
-          <div class="card-left">
-            <span class="title">答卷详情</span>
-            <span class="sub-title">
-              <span>（共{{ examData.keguan + examData.zhuguan }}题</span>
-              <span>共{{ examData.scoreKeguan + examData.scoreZhuguan }}分）</span>
-            </span>
-          </div>
-          <div class="card-right">
-            <span class="right-title">查看试题范围</span>
-            <el-radio-group
-              v-model="queryInfo.flag"
-              @change="getPaperData"
-            >
-              <el-radio label="">
-                全部试题
-              </el-radio>
-              <el-radio label="0">
-                仅显示答对试题
-              </el-radio>
-              <el-radio label="1">
-                仅显示答错试题
-              </el-radio>
-            </el-radio-group>
-          </div>
-        </div>
-        <com-empty
-          v-if="_.isEmpty(questionList)"
-          height="38vh"
-          text="暂无试题"
-        />
-        <ul
-          v-else
-          class="question-ul"
-        >
-          <li
-            v-for="(item, index) in questionList"
-            :key="index"
-            class="question-li"
-          >
-            <div class="title-box">
-              <div class="question-li-title">
-                <span>{{ (index + 1) | number2zhcn }}、</span>
-                <span>{{ item[0].type | typeFilter }}</span>
-                <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分)</span>
-              </div>
-              <div class="sub-title">
-                {{ item[0].title }}
-              </div>
-            </div>
-            <div class="content-box">
-              <ul class="content-ul">
-                <li
-                  v-for="(conItem, conIndex) in item"
-                  :key="conItem.id"
-                  class="content-li"
-                >
-                  <span>{{ conIndex + 1 }}.</span>
-                  <QustionPreview
-                    v-if="QUESTION_TYPE_GROUP !== conItem.type"
-                    :data="conItem"
-                    type="view"
-                  />
-                  <span v-else>
-                    <span
-                      class="right-title"
-                      v-html="_.unescape(conItem.content)"
-                    ></span>
-                    <ul>
-                      <li
-                        v-for="(paperItem, paperIndex) in conItem.subQuestions"
-                        :key="paperIndex"
-                        class="content-li"
-                      >
-                        <span>{{ paperIndex + 1 }}.</span>
-                        <QustionPreview
-                          :data="paperItem"
-                          type="view"
-                        />
-                      </li>
-                    </ul>
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </el-card>
-    </div>
   </div>
 </template>
 
 <script>
-// 逐人评卷
+// 逐人评卷列表继续评卷以及开始评卷进入页面
 const nzhcn = require('nzh/cn')
 import {
   getExamineePaperDetail,
@@ -319,14 +175,9 @@ import {
   postSubmitByOne
 } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
-import moment from 'moment'
 import QustionPreview from './components/questionPreview'
-import ComEmpty from '@/components/common-empty/empty'
-const STATUS_STATUS = [
-  { value: '3', label: '待评卷', type: 'success' },
-  { value: '4', label: '阅卷中', type: 'danger' },
-  { value: '5', label: '已评卷', type: 'info' }
-]
+import MarkHeaderCard from './components//MarkHeaderCard'
+import { addLine } from '@/util/util'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -339,8 +190,8 @@ import {
 export default {
   name: 'MarkByExaminee',
   components: {
-    QustionPreview,
-    ComEmpty
+    MarkHeaderCard,
+    QustionPreview
   },
   provide() {
     return {
@@ -392,6 +243,9 @@ export default {
     next()
   },
   methods: {
+    getHTML(content) {
+      return addLine(content)
+    },
     // 重新评分
     refreshSubmit() {
       this.$confirm('您确定重新对该考卷进行评分吗？确定后考卷的所有评分信息将会被清空！', '提示', {
@@ -488,35 +342,6 @@ export default {
 
       return totalScore
     },
-    // 获取考试用时
-    getExamUseTime() {
-      const diffTime = moment(this.examineeAchievementDO.answerEndTime).diff(
-        moment(this.examineeAchievementDO.answerBeginTime),
-        'ms'
-      )
-      return this.createCountdown(diffTime)
-    },
-    /**
-     * 入参：差异时间
-     * 返回：倒计时
-     * 作用：创建一个倒计时
-     */
-    createCountdown(diffTime) {
-      const hoursTime = moment.duration(diffTime).hours()
-      const minutesTime = moment.duration(diffTime).minutes()
-      const secondsTime = moment.duration(diffTime).seconds()
-      const formatHours = `${hoursTime < 10 ? `0${hoursTime}` : hoursTime}`
-      const formatMinutes = `${minutesTime < 10 ? `0${minutesTime}` : minutesTime}`
-      const formatSeconds = `${secondsTime < 10 ? `0${secondsTime}` : secondsTime}`
-      const targetTime = `${formatHours} : ${formatMinutes} : ${formatSeconds}`
-      return targetTime
-    },
-    getTag(status) {
-      return _.find(STATUS_STATUS, (item) => {
-        return item.value === status
-      })
-    },
-    moment,
     async initData() {
       const examData = await getExamineePaperDetail({ id: this.$route.query.id })
       this.handleExamData(examData)
@@ -533,12 +358,8 @@ export default {
         id: this.$route.query.id
       })
       const paperData = await getExamineePaperDetailist(this.queryInfo)
-      this.isView = _.get(this.$route, 'query.isView', false)
-      if (this.isView) {
-        this.getViewData(paperData)
-      } else {
-        this.getEditData(paperData)
-      }
+      // 页面一进来就区分是评卷还是查看卷子
+      this.getEditData(paperData)
     },
     getEditData(paperData) {
       let targetList = []
@@ -561,15 +382,6 @@ export default {
         }
       })
     },
-    getViewData(paperData) {
-      this.questionList = _.chain(_.cloneDeep(paperData))
-        .groupBy('parentSort')
-        .sortBy('parentSort')
-        .map((item) => {
-          return _.sortBy(item, 'sort')
-        })
-        .value()
-    },
     initQuestionList(data) {
       return _.chain(_.cloneDeep(data))
         .groupBy('parentSort')
@@ -586,51 +398,6 @@ export default {
 <style lang="scss" scoped>
 .mark-by-examinee {
   position: relative;
-  .examinee-card {
-    .heder {
-      display: flex;
-      align-items: center;
-      font-family: PingFangSC-Medium;
-      font-size: 18px;
-      color: rgba(0, 11, 21, 0.85);
-      font-weight: 550;
-      margin-bottom: 19px;
-    }
-    /deep/ .el-card__body {
-      padding-bottom: 8px;
-    }
-    .card-ul {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      &::after {
-        content: '';
-        flex: auto;
-      }
-      .card-li {
-        width: calc(100% / 3);
-        display: flex;
-        align-items: center;
-        margin-bottom: 16px;
-        .li-label {
-          min-width: 84px;
-          font-family: PingFangSC-Regular;
-          font-size: 14px;
-          color: rgba(0, 11, 21, 0.45);
-        }
-        .li-value {
-          flex: 1;
-          font-family: PingFangSC-Regular;
-          font-size: 14px;
-          color: rgba(0, 11, 21, 0.85);
-          max-width: 350px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-    }
-  }
   .paper-card {
     margin-top: 16px;
     .card-header {

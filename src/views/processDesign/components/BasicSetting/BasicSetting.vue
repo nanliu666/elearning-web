@@ -5,9 +5,34 @@
       :model="formData"
       :columns="columns"
     >
-      <template slot="initiator">
-        <user-picker v-model="formData.initiator" />
+      <template slot="processVisible">
+        <user-picker
+          v-model="formData.processVisible"
+          title="适用范围"
+        />
       </template>
+      <div slot="approverNull">
+        <el-radio-group v-model="formData.approverNull">
+          <el-radio :label="0">
+            自动通过
+            <el-tooltip
+              content="当指定人员或主管为空的时候，审批单将自动通过"
+              placement="top"
+            >
+              <i class="el-icon-info" />
+            </el-tooltip>
+          </el-radio>
+          <el-radio :label="1">
+            自动转交给管理员
+            <el-tooltip
+              content="当指定人员或主管为空的时候，审批单将自动转交给管理员"
+              placement="top"
+            >
+              <i class="el-icon-info" />
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+      </div>
       <template slot="isOpinion">
         <el-checkbox v-model="formData.isOpinion">
           必填
@@ -32,45 +57,21 @@ export default {
   },
   props: {
     tabName: { type: String, default: '' },
-    initiator: { type: Array, default: () => [] },
     conf: { type: Object, default: null }
   },
   data() {
     return {
       columns,
-      all: true, //显示所有人
-      org: true, //可以选择部门
-      infoForm: {},
       formData: {
+        icon: 'icondirectories-bicolor',
         processName: '',
         processType: '',
-        initiator: [],
+        categoryId: '1',
+        processVisible: [],
         approverDistinct: 0,
         isOpinion: '',
         tip: ''
       }
-    }
-  },
-  watch: {
-    initiator: {
-      handler(val) {
-        this.formData.initiator = val || []
-      },
-      immediate: true
-    },
-    formData: {
-      handler() {},
-      immediate: true
-    },
-    conf: {
-      handler() {
-        // if (typeof this.conf === 'object' && this.conf !== null) {
-        //   Object.assign(this.formData, this.conf)
-        //   !Array.isArray(this.formData.processAdmin) &&
-        //     (this.formData.processAdmin = [this.formData.processAdmin])
-        // }
-      },
-      deep: true
     }
   },
   created() {
@@ -82,7 +83,6 @@ export default {
   methods: {
     // 给父级页面提供得获取本页数据得方法
     getData() {
-      this.formData.icon = this.activeIcon
       return new Promise((resolve, reject) => {
         this.$refs['elForm']
           .validate()
@@ -91,7 +91,6 @@ export default {
               reject({ target: this.tabName })
               return
             }
-
             resolve({ formData: this.formData, target: this.tabName }) // TODO 提交表单
           })
           .catch(() => {

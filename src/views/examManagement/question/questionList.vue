@@ -3,6 +3,7 @@
     <page-header title="题库管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="ADD_QUSTION"
         @command="handleCommand"
       >
         <el-button
@@ -81,6 +82,7 @@
           >
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="DELETE_QUSTION"
                 type="text"
                 style="margin-bottom:0;"
                 @click="handleDelete(selection)"
@@ -126,6 +128,7 @@
             </template>
             <template #handler="{row}">
               <el-button
+                v-p="EDIT_QUSTION"
                 size="medium"
                 type="text"
                 @click="handleEdit(row.id)"
@@ -133,6 +136,7 @@
                 编辑
               </el-button>
               <el-button
+                v-p="DELETE_QUSTION"
                 size="medium"
                 type="text"
                 @click="handleDelete(row)"
@@ -158,6 +162,8 @@ const COLUMNS = [
     slot: true
   }
 ]
+import { DELETE_QUSTION, EDIT_QUSTION, ADD_QUSTION } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'QuestionList',
   components: {
@@ -173,7 +179,7 @@ export default {
         value: 'id',
         children: 'children'
       },
-      activeCategory: { id: null },
+      activeCategory: { id: -1 },
       parentOrgId: 0,
       treeSearch: '',
       treeLoading: false,
@@ -224,20 +230,27 @@ export default {
   computed: {
     columns: () => COLUMNS,
     QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    DELETE_QUSTION: () => DELETE_QUSTION,
+    EDIT_QUSTION: () => EDIT_QUSTION,
+    ADD_QUSTION: () => ADD_QUSTION,
+    ...mapGetters(['privileges'])
   },
   watch: {
     treeSearch(val) {
       this.$refs.categoryTree.filter(val)
+    },
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_QUSTION, EDIT_QUSTION])
+      },
+      deep: true
     }
   },
   activated() {
     this.loadData()
     this.loadTree()
-  },
-  mounted() {
-    this.loadTree()
-    this.loadData()
   },
   methods: {
     deleteHTMLTag(...args) {
@@ -256,10 +269,13 @@ export default {
       this.treeLoading = true
       getQuestionCategory({ parentId: '0', type: '0' })
         .then((data) => {
-          this.treeData = [{ id: null, name: '未分类' }, ...data]
+          this.treeData = [{ id: -1, name: '未分类' }, ...data]
+          this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
           getQuestionList({ pageNo: 1, pageSize: 1 }).then((res) => {
-            this.$set(this.treeData, 0, { id: null, name: '未分类', relatedNum: res.totalNum })
-            // this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
+            this.$set(this.treeData, 0, { id: -1, name: '未分类', relatedNum: res.totalNum })
+            setTimeout(() => {
+              this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
+            })
           })
         })
         .catch(() => {})
@@ -344,7 +360,7 @@ export default {
       getQuestionList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        categoryId: this.activeCategory.id,
+        categoryId: this.activeCategory.id === -1 ? null : this.activeCategory.id,
         ...this.query
       })
         .then((res) => {

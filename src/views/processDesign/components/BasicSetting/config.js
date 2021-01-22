@@ -1,27 +1,27 @@
-// const validate = (rule, value, callback) => {
-//   callback()
-// }
+import { categoryOptions } from '@/const/approve'
 export const columns = [
   {
     span: 24,
     prop: 'processName',
     itemType: 'input',
-    maxlength: 20,
+    maxlength: 32,
     label: '审批名称',
     required: true
   },
   {
     span: 24,
-    prop: 'processType',
+    prop: 'categoryId',
     itemType: 'select',
     label: '流程类型',
     required: true,
-    options: [
-      {
-        label: '课程审批',
-        value: 1
-      }
-    ]
+    options: categoryOptions
+  },
+  {
+    span: 24,
+    prop: 'processVisible',
+    itemType: 'slot',
+    label: '适用范围',
+    required: true
   },
   {
     span: 24,
@@ -43,6 +43,12 @@ export const columns = [
         value: 0
       }
     ]
+  },
+  {
+    span: 24,
+    prop: 'approverNull',
+    label: '审批人为空时',
+    itemType: 'slot'
   },
   {
     span: 24,

@@ -382,10 +382,16 @@ export default {
           url: item.url,
           localName: item.name
         }))
-        // this.columns.find((item) => item.prop === 'leaderId').firstOption = {
-        //   userId: res.leaderId + '',
-        //   name: res.leaderName
-        // }
+        if (res.leaderId) {
+          this.$set(
+            this.columns.find((item) => item.prop === 'leaderId'),
+            'firstOption',
+            {
+              userId: res.leaderId + '',
+              name: res.leaderName
+            }
+          )
+        }
         this.form = {
           roleIds: _.map(res.roles, 'roleId'),
           leaderId: res.leaderId + '',

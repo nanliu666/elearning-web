@@ -3,6 +3,7 @@
     <page-header title="新闻管理">
       <template #rightMenu>
         <el-button
+          v-p="'/system/newsCenter/newsManage/add'"
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
@@ -116,13 +117,13 @@ export default {
       }
     }
   },
-
   watch: {
     'searchParams.categoryId'() {
       this.handleSearch(this.searchParams)
     }
   },
   mounted() {
+    this.activeName = _.get(this, '$route.query.activeName', 'Published')
     this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
       this.typeList = [{ dictValue: '全部', id: '' }, ...res]
     })
@@ -144,7 +145,7 @@ export default {
     },
     handlePublishBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit'
       })
     }
   }

@@ -3,6 +3,7 @@
     <page-header title="考试安排">
       <el-dropdown
         slot="rightMenu"
+        v-p="ADD_EXAM"
         @command="createExam"
       >
         <el-button
@@ -80,6 +81,7 @@
                   <el-checkbox
                     v-for="item in tableColumns"
                     :key="item.prop"
+                    :disabled="item.prop === 'examName'"
                     :label="item.prop"
                     class="originColumn"
                   >
@@ -117,6 +119,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="DELETE_EXAM"
             type="text"
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
@@ -127,19 +130,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="EDIT_EXAM"
               type="text"
               @click="handleEdit(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="DELETE_EXAM"
               type="text"
               @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-dropdown
-              v-if="activeIndex === '0'"
+              v-if="activeIndex === '0' && $p([COPY_EXAM])"
               @command="handleCommand(row)"
             >
               <el-button
@@ -148,7 +153,10 @@
               >
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
-              <el-dropdown-menu slot="dropdown">
+              <el-dropdown-menu
+                slot="dropdown"
+                v-p="COPY_EXAM"
+              >
                 <el-dropdown-item command="copy">
                   复制
                 </el-dropdown-item>
@@ -240,6 +248,12 @@ const TYPE_STATUS = [
   { value: 'CourseExam', label: '课程考试' },
   { value: 'TrainExam', label: '培训班考试' }
 ]
+const WAY_STATUS = [
+  { value: '', label: '全部' },
+  { value: 'general', label: '普通考试' },
+  { value: 'offline', label: '线下考试' }
+]
+
 const SEARCH_CONFIG = {
   requireOptions: [
     {
@@ -293,6 +307,13 @@ const SEARCH_CONFIG = {
       options: TYPE_STATUS
     },
     {
+      type: 'select',
+      field: 'examPattern',
+      label: '考试方式',
+      data: '',
+      options: WAY_STATUS
+    },
+    {
       data: '',
       field: 'testPaper',
       label: '关联试卷',
@@ -337,6 +358,9 @@ const SEARCH_CONFIG = {
   ]
 }
 import styles from '@/styles/variables.scss'
+
+import { ADD_EXAM, EDIT_EXAM, DELETE_EXAM, COPY_EXAM } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover },
@@ -391,6 +415,22 @@ export default {
       }
     }
   },
+  computed: {
+    ADD_EXAM: () => ADD_EXAM,
+    EDIT_EXAM: () => EDIT_EXAM,
+    DELETE_EXAM: () => DELETE_EXAM,
+    COPY_EXAM: () => COPY_EXAM,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([EDIT_EXAM, DELETE_EXAM, COPY_EXAM])
+      },
+      deep: true
+    }
+  },
   activated() {
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
@@ -405,7 +445,7 @@ export default {
     this.loadTableData()
     this.setConfig()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryList().then((res) => {
+    getCategoryList({ type: 1 }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -536,7 +576,7 @@ export default {
     handleEdit(row) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'edit' }
+        query: { id: row.id, type: 'edit', isDraft: this.activeIndex === '1' }
       })
     },
     // 递归获取所有的停启用的id集合

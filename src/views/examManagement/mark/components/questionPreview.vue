@@ -3,7 +3,7 @@
     <span
       v-if="data.type !== QUESTION_TYPE_BLANK || type === 'view'"
       class="qustion-content-box"
-      v-html="_.unescape(data.content)"
+      v-html="getHTML(data.content)"
     ></span>
     <el-tooltip
       class="item"
@@ -24,7 +24,12 @@
         :key="index"
         class="qustion__attachment"
       >
-        <question-view :url="attachment.fileUrl" />
+        <common-image-view
+          v-if="attachment.fileUrl"
+          :url="attachment.fileUrl"
+          :file-name="attachment.fileName"
+          :preview-src-list="[attachment.fileUrl]"
+        />
       </div>
     </div>
     <!-- 考试用来可编辑的状态 -->
@@ -45,9 +50,11 @@
             :label="option.id"
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
-            <question-view
+            <common-image-view
               v-if="option.url"
               :url="option.url"
+              :file-name="option.fileName"
+              :preview-src-list="[option.url]"
             />
           </el-radio>
         </el-radio-group>
@@ -71,9 +78,11 @@
             @change="changeMultiple(option)"
           >
             <span>{{ _.unescape(option.contentOption) }}</span>
-            <question-view
+            <common-image-view
               v-if="option.url"
               :url="option.url"
+              :file-name="option.fileName"
+              :preview-src-list="[option.url]"
             />
           </el-checkbox>
         </li>
@@ -106,7 +115,7 @@
           </el-input>
           <span
             v-else
-            v-html="_.unescape(item)"
+            v-html="getHTML(item)"
           />
         </li>
       </ul>
@@ -132,9 +141,10 @@
 
 <script>
 import { deleteHTMLTag } from '@/util/util'
-import questionView from './questionView'
+import CommonImageView from '@/components/common-image-viewer/viewer'
 import SelectView from './SelectView'
 import GapAndShort from './GapAndShort'
+import { addLine } from '@/util/util'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -147,7 +157,7 @@ import {
 export default {
   name: 'QustionPreview',
   components: {
-    questionView,
+    CommonImageView,
     SelectView,
     GapAndShort
   },
@@ -200,6 +210,9 @@ export default {
     }
   },
   methods: {
+    getHTML(content) {
+      return addLine(content)
+    },
     handleMulipleValue(value) {
       const temp = _.cloneDeep(value.answerModel)
       let target = _.map(temp, (item) => {

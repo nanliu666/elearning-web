@@ -51,6 +51,7 @@ const addressConfig = {
   span: 11,
   offset: 0
 }
+import { handleCatalogsData } from '@/util/util'
 export default {
   name: 'EditBasicInfo',
   components: { lazySelect, SelectUser },
@@ -93,8 +94,8 @@ export default {
               data: [],
               filterable: false,
               props: {
-                children: 'list',
-                label: 'name',
+                children: 'children',
+                label: 'label',
                 value: 'id'
               },
               required: true
@@ -214,8 +215,8 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
+          rules: [{ required: true, message: '请输入培训介绍', trigger: 'blur' }],
           options: [],
-          required: true,
           span: 24,
           offset: 0
         }
@@ -324,6 +325,7 @@ export default {
         }
       }
       this.userList = data
+      this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
@@ -345,7 +347,9 @@ export default {
     },
     getCatalogs() {
       getTrainGetCatalogs().then((res) => {
-        this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
+        this.infoFormColumns.find(
+          (it) => it.prop === 'categoryId'
+        ).props.treeParams.data = handleCatalogsData(res)
       })
     },
     getData() {

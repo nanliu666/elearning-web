@@ -2,119 +2,89 @@
   <el-dialog
     class="user-select"
     :title="title"
-    :visible="visible"
+    :visible.sync="innerVisible"
     width="800px"
     append-to-body
-    :before-close="close"
   >
-    <div
-      v-loading="loading"
-      class="content-wr"
-    >
-      <div class="left">
-        <div v-if="!isPreviewSelect || initData.length === 0">
-          <el-tabs
-            v-if="!isRange"
-            v-model="tab"
-          >
-            <el-tab-pane
-              label="组织架构"
-              name="Org"
+    <div class="content-wr">
+      <div
+        v-loading="loading"
+        class="left"
+      >
+        <el-tabs
+          v-if="!isRange"
+          v-model="tab"
+        >
+          <el-tab-pane
+            label="组织架构"
+            name="Org"
+          />
+          <el-tab-pane
+            label="外部联系人"
+            name="OuterUser"
+          />
+        </el-tabs>
+        <div v-show="tab === 'Org'">
+          <el-input
+            v-model="orgSearch"
+            placeholder="搜索组织部门或成员姓名"
+          />
+          <div class="tree">
+            <el-tree
+              v-show="!orgSearch"
+              ref="orgTree"
+              :load="lazyLoadOrgTree"
+              :props="treeProps"
+              check-strictly
+              lazy
+              node-key="_nodeKey"
+              show-checkbox
+              @check="handleCheckItem"
+              @node-click="handleClickItem"
             />
-            <el-tab-pane
-              label="业务架构"
-              name="Biz"
+            <el-tree
+              v-show="orgSearch"
+              ref="orgTreeSearch"
+              :data="orgSearchData"
+              :props="treeProps"
+              check-strictly
+              lazy
+              node-key="_nodeKey"
+              show-checkbox
+              @node-click="handleClickItem"
+              @check="handleCheckItem"
             />
-          </el-tabs>
-          <div v-show="tab === 'Org'">
-            <el-input
-              v-model="orgSearch"
-              placeholder="搜索组织部门或成员姓名"
-            />
-            <div class="tree">
-              <el-tree
-                v-show="!orgSearch"
-                ref="orgTree"
-                :load="lazyLoadOrgTree"
-                :props="treeProps"
-                check-strictly
-                lazy
-                node-key="_nodeKey"
-                show-checkbox
-                @check="handleCheckItem"
-                @node-click="handleClickItem"
-              />
-              <el-tree
-                v-show="orgSearch"
-                ref="orgTreeSearch"
-                :data="orgSearchData"
-                :props="treeProps"
-                check-strictly
-                lazy
-                node-key="_nodeKey"
-                show-checkbox
-                @node-click="handleClickItem"
-                @check="handleCheckItem"
-              />
-            </div>
-          </div>
-          <div v-show="tab === 'Biz'">
-            <el-input
-              v-model="bizSearch"
-              placeholder="搜索业务部门或成员姓名"
-            />
-            <div class="tree">
-              <el-tree
-                v-show="!bizSearch"
-                ref="bizTree"
-                :load="lazyLoadBizTree"
-                :props="treeProps"
-                check-strictly
-                lazy
-                node-key="_nodeKey"
-                show-checkbox
-                @node-click="handleClickItem"
-                @check="handleCheckItem"
-              />
-              <el-tree
-                v-show="bizSearch"
-                ref="bizTreeSearch"
-                :data="bizSearchData"
-                :props="treeProps"
-                check-strictly
-                lazy
-                node-key="_nodeKey"
-                show-checkbox
-                @node-click="handleClickItem"
-                @check="handleCheckItem"
-              />
-            </div>
           </div>
         </div>
-        <div v-else>
-          <el-tree
-            ref="bizTree"
-            :load="lazyLoadPreviewData"
-            :props="treeProps"
-            check-strictly
-            lazy
-            node-key="_nodeKey"
-            show-checkbox
-            @node-click="handleClickItem"
-            @check="handleCheckItem"
+        <div
+          v-show="tab === 'OuterUser'"
+          class="outer-user"
+        >
+          <el-input
+            v-model.trim="outerParams.search"
+            placeholder="搜索姓名或手机号码"
           />
+          <ul
+            ref="outerUser"
+            @scroll="debounceOuterScrollHandler"
+          >
+            <li
+              v-for="item in outerData"
+              :key="item.bizId"
+            >
+              <el-checkbox
+                :value="!!_.find(selected, { bizId: item.bizId })"
+                @change="handleSelectUser(item)"
+              ></el-checkbox>
+
+              {{ item.bizName }}{{ item.phonenum ? `(${item.phonenum})` : '' }}
+            </li>
+          </ul>
         </div>
       </div>
       <div class="right">
         <div>
-          <span
-            v-if="!isRange"
-            class="title"
-          >已选：</span>
-          <span
-            v-else
-            class="title"
-          >发布范围： <span class="company">企业内部</span> </span>
+          <span class="title">已选：</span>
           <span style="float:right;" />
         </div>
 
@@ -140,7 +110,7 @@
           </div>
           <div class="icon">
             <i
-              class="el-icon-error"
+              class="el-icon-error pointer"
               @click="() => handleUncheckItem(item)"
             />
           </div>
@@ -156,7 +126,6 @@
         @click="close"
       >取 消</el-button>
       <el-button
-        v-loading="loading"
         size="medium"
         type="primary"
         @click="handleSubmit"
@@ -167,23 +136,22 @@
   </el-dialog>
 </template>
 <script>
-import { getBizUserChild, getOrgUserChild } from '@/api/system/user'
+import { getOrgUserChild, getOuterUser } from '@/api/system/user'
 const SEARCH_DELAY = 500
-const PROCESS_TYPE = {
+
+const NODE_TYPE = {
   All: 'All',
-  Biz: 'Biz',
   Org: 'Org',
   User: 'User'
 }
-
 const loadOrgTree = async ({ parentId, search }) => {
   search = _.trim(search)
   // 只能传入一个参数 当传入search的时候不使用parentId
   const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
   // 在这里处理两个数组为树形组件需要的结构
   const { orgs, users } = data
-  const ORG_PROPS = { type: PROCESS_TYPE.Org }
-  const USER_PROPS = { isLeaf: true, type: PROCESS_TYPE.User }
+  const ORG_PROPS = { type: NODE_TYPE.Org }
+  const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
   return _.concat(
     _.map(orgs, (item) =>
       _.assign(
@@ -205,54 +173,16 @@ const loadOrgTree = async ({ parentId, search }) => {
     )
   )
 }
-const loadBizTree = async ({ parentId, search }) => {
-  search = _.trim(search)
-  // 只能传入一个参数 当传入search的时候不使用parentId
-  const data = await getBizUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
-  // 在这里处理两个数组为树形组件需要的结构
-  const { bizs, users } = data
-  const BIZ_PROPS = { type: 'Biz' }
-  const USER_PROPS = { isLeaf: true, type: 'User' }
-  return _.concat(
-    _.map(bizs, (item) =>
-      _.assign(
-        {
-          _nodeKey: `${parentId || '0'}_${item.id}`,
-          bizId: item.id,
-          bizName: item.name
-        },
-        item,
-        BIZ_PROPS
-      )
-    ),
-    _.map(users, (item) =>
-      _.assign(
-        {
-          _nodeKey: `${parentId || '0'}_${item.userId}`,
-          bizId: item.userId,
-          bizName: item.name
-        },
-        item,
-        USER_PROPS
-      )
-    )
-  )
-}
 
 export default {
-  name: 'UserTagedEdit',
+  name: 'UserSelect',
   props: {
     // 初始化有数据,例如预览时
-    initData: {
+    value: {
       type: Array,
       default: () => {
         return []
       }
-    },
-    // 专门为预览做的选择器，默认不是
-    isPreviewSelect: {
-      type: Boolean,
-      default: false
     },
     // 是否为单选，默认为多选
     isSingle: {
@@ -288,10 +218,17 @@ export default {
       loading: false,
       orgSearch: '',
       orgSearchData: [],
-      bizSearch: '',
-      bizSearchData: [],
+      outerParams: {
+        pageNo: 1,
+        pageSize: 15,
+        search: '',
+        loaded: false
+      },
+      outerData: [],
       // 存放node对象
-      selected: []
+      selected: [],
+      debounceOuterScrollHandler: _.debounce(this.handleOuterScroll, SEARCH_DELAY),
+      debounceOuterSearchFn: _.debounce(this.handleSearchOuterUser, SEARCH_DELAY)
     }
   },
   computed: {
@@ -305,13 +242,26 @@ export default {
         children: 'children'
       }
       return props
+    },
+    innerVisible: {
+      get() {
+        return this.visible
+      },
+      set(val) {
+        this.$emit('update:visible', val)
+      }
     }
   },
-
+  created() {
+    this.loadOuterUser()
+  },
   watch: {
+    value(val) {
+      this.selected = val.slice()
+    },
     selected(val) {
-      const { orgTree, bizTree, orgTreeSearch, bizTreeSearch } = this.$refs
-      ;[orgTree, bizTree, orgTreeSearch, bizTreeSearch].forEach((ref) => {
+      const { orgTree, orgTreeSearch } = this.$refs
+      ;[orgTree, orgTreeSearch].forEach((ref) => {
         if (_.isNil(ref)) return
         ref.setCheckedKeys(_.map(val, (item) => item._nodeKey))
       })
@@ -329,22 +279,9 @@ export default {
         })
         .finally(() => (this.loading = false))
     }, SEARCH_DELAY),
-
-    // 在业务架构下使用查询参数
-    bizSearch: _.debounce(function(search) {
-      if (!search) return
-      this.loading = true
-      loadBizTree({ search })
-        .then((res) => {
-          this.bizSearchData = _.map(this.thruHandler(res), (item) =>
-            _.assign({ isLeaf: true }, item)
-          )
-        })
-        .finally(() => (this.loading = false))
-    }, SEARCH_DELAY)
-  },
-  created() {
-    // this.title =
+    'outerParams.search'() {
+      this.debounceOuterSearchFn()
+    }
   },
   methods: {
     /**
@@ -385,22 +322,64 @@ export default {
 
     close() {
       this.selected = []
-      this.$emit('update:visible', false)
-    },
-
-    init(data) {
-      // 处理输入为null和没有参数输入的情况
-      if (_.isNil(data)) data = []
-      this.selected = _.cloneDeep(data)
-      this.$emit('update:visible', true)
+      this.innerVisible = false
     },
 
     handleSubmit() {
       const { selected } = this
-      this.$emit('addUser', _.uniqBy(selected, 'bizId'))
+      this.$emit('submit', _.uniqBy(selected, 'bizId'))
       this.close()
     },
-
+    handleSelectUser(user) {
+      const index = _.findIndex(this.selected, { bizId: user.bizId })
+      if (index > -1) {
+        this.selected = _.filter(this.selected, (item, i) => i != index)
+      } else {
+        this.selected.push(user)
+      }
+    },
+    handleOuterScroll() {
+      const ref = this.$refs.outerUser
+      if (ref.scrollTop + ref.offsetHeight >= ref.scrollHeight) {
+        this.loadOuterUser()
+      }
+    },
+    handleSearchOuterUser() {
+      this.outerParams.loaded = false
+      this.outerParams.pageNo = 1
+      this.loadOuterUser(true)
+    },
+    async loadOuterUser(isRefresh) {
+      if (this.outerParams.loaded) {
+        return
+      }
+      const { pageNo, pageSize, search } = this.outerParams
+      this.loading = true
+      getOuterUser({ pageNo, search, pageSize })
+        .then((res) => {
+          if (_.size(res.data) > 0) {
+            const data = _.map(res.data, (item) =>
+              _.assign(item, {
+                path: item.userId,
+                bizId: item.userId,
+                bizName: item.name,
+                type: NODE_TYPE.User
+              })
+            )
+            if (isRefresh) {
+              this.outerData = data
+            } else {
+              this.outerData = _.concat(this.outerData, data)
+            }
+          } else {
+            this.outerParams.loaded = true
+          }
+          this.outerParams.pageNo = pageNo + 1
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
     /**
      * 懒加载组织树形组件数据
      * @param {string} [parentId="0"] 父级id
@@ -413,39 +392,6 @@ export default {
         .then((res) => resolve(this.thruHandler(res)))
         .finally(() => (this.loading = false))
     },
-    /**
-     * 加载预览数据
-     */
-    lazyLoadPreviewData(node, resolve) {
-      if (node.level === 0) {
-        resolve(this.thruHandler(this.initData))
-      } else {
-        let nodeData = _.filter(this.initData, (item) => {
-          return item.id === node.data.id
-        })[0]
-        if (nodeData.type !== 'User') {
-          let ObjectF = {
-            Org: loadOrgTree,
-            Biz: loadBizTree
-          }
-          ObjectF[nodeData.type]({ parentId: nodeData.id }).then((res) => {
-            resolve(this.thruHandler(res))
-          })
-        }
-      }
-    },
-    /**
-     * 懒加载组织树形组件数据
-     * @param {string} [parentId="0"] 父级id
-     * @returns {void}
-     */
-    lazyLoadBizTree(node, resolve) {
-      const parentId = node.level > 0 ? node.data.id : '0'
-      if (parentId === '0') this.loading = true
-      loadBizTree({ parentId })
-        .then((res) => resolve(this.thruHandler(res)))
-        .finally(() => (this.loading = false))
-    },
 
     // 数据处理中间函数
     thruHandler(arr) {
@@ -455,7 +401,7 @@ export default {
         arr = _.map(arr, (item) =>
           _.assign(
             {
-              disabled: !_.eq(item.type, PROCESS_TYPE.User)
+              disabled: !_.eq(item.type, NODE_TYPE.User)
             },
             item
           )
@@ -463,7 +409,7 @@ export default {
       }
       if (this.isDepartmentOnly) {
         // 只可以选择部门, 过滤所有的User类型
-        arr = _.reject(arr, { type: PROCESS_TYPE.User })
+        arr = _.reject(arr, { type: NODE_TYPE.User })
       }
       return arr
     }
@@ -500,6 +446,23 @@ export default {
     .el-tag {
       margin-right: 12px;
       margin-bottom: 8px;
+    }
+  }
+}
+.outer-user {
+  ul {
+    overflow: auto;
+    padding-top: 8px;
+    height: 340px;
+    li {
+      &:hover {
+        background-color: $lightGray;
+      }
+      padding: 6px;
+
+      label {
+        margin-right: 4px;
+      }
     }
   }
 }
