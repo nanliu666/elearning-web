@@ -156,8 +156,7 @@ import {
   EDIT_COURSE_CATALOG,
   DELETEALL_COURSE_CATALOG,
   DELETE_COURSE_CATALOG,
-  ADD_GROUNP_COURSE_CATALOG,
-  ALL_COURSE_CATALOG_PRIVI
+  ADD_GROUNP_COURSE_CATALOG
 } from '@/const/privileges'
 const TABLE_COLUMNS = [
   {
@@ -257,14 +256,19 @@ export default {
     DELETEALL_COURSE_CATALOG: () => DELETEALL_COURSE_CATALOG,
     DELETE_COURSE_CATALOG: () => DELETE_COURSE_CATALOG,
     ADD_GROUNP_COURSE_CATALOG: () => ADD_GROUNP_COURSE_CATALOG,
-    ALL_COURSE_CATALOG_PRIVI: () => ALL_COURSE_CATALOG_PRIVI,
     ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p(ALL_COURSE_CATALOG_PRIVI)
+        this.tableConfig.showHandler = this.$p([
+          STOP_COURSE_CATALOG,
+          AUTH_COURSE_CATALOG,
+          EDIT_COURSE_CATALOG,
+          DELETE_COURSE_CATALOG,
+          ADD_GROUNP_COURSE_CATALOG
+        ])
       },
       deep: true
     }
