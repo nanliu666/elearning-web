@@ -67,3 +67,6 @@ export const DELETE_REQUIRED = '/learnPlan/CoursePlanList/delete' // 删除
 export const VIEW_REQUIRED = '/learnPlan/CoursePlanList/view' // 查看完成率
 export const ADD_GROUP_REQUIRED = '/learnPlan/CoursePlanList/addGroup' // 新建分组
 export const STOP_REQUIRED = '/learnPlan/CoursePlanList/stop' // 结办
+// 选修课程安排的鉴权
+export const VIEW_ELECTIVE = '/learnPlan/ElectivePlanList/view' // 查看
+export const DELETE_ELECTIVE = '/learnPlan/ElectivePlanList/delete' // 删除

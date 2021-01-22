@@ -83,12 +83,14 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '查看',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/ElectivePlanList/view'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/ElectivePlanList/delete'
         }

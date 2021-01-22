@@ -376,6 +376,7 @@ import {
   STOP_REQUIRED
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+
 export default {
   name: 'CoursePlanList',
   components: {
