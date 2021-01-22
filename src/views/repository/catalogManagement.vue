@@ -3,7 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
-        v-p="'/repository/catalogManagement/edit'"
+        v-p="ADD_REP_CATALOG"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -86,7 +86,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/repository/catalogManagement/stop'"
+              v-p="STOP_REP_CATALOG"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -94,20 +94,14 @@
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
-              v-p="'/repository/catalogManagement/author'"
+              v-p="AUTH_REP_CATALOG"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
             </el-button>
             <el-dropdown
-              v-if="
-                $p([
-                  '/repository/catalogManagement/edit',
-                  '/repository/catalogManagement/delete',
-                  '/repository/catalogManagement/addNewChild'
-                ])
-              "
+              v-if="$p([EDIT_REP_CATALOG, DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -118,19 +112,19 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="'/repository/catalogManagement/edit'"
+                  v-p="EDIT_REP_CATALOG"
                   command="edit"
                 >
                   编辑
                 </el-dropdown-item>
                 <el-dropdown-item
-                  v-p="'/repository/catalogManagement/delete'"
+                  v-p="DELETE_REP_CATALOG"
                   command="delete"
                 >
                   删除
                 </el-dropdown-item>
                 <el-dropdown-item
-                  v-p="'/repository/catalogManagement/addNewChild'"
+                  v-p="ADD_CHILD_REP_CATALOG"
                   command="addChild"
                 >
                   新建子分类
@@ -195,6 +189,16 @@ const TABLE_CONFIG = {
     minWidth: 100
   }
 }
+import {
+  ADD_REP_CATALOG,
+  STOP_REP_CATALOG,
+  AUTH_REP_CATALOG,
+  EDIT_REP_CATALOG,
+  DELETE_REP_CATALOG,
+  DELETE_ALL_REP_CATALOG,
+  ADD_CHILD_REP_CATALOG
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover, CatalogEdit },
@@ -264,6 +268,31 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {}
+    }
+  },
+  computed: {
+    ADD_REP_CATALOG: () => ADD_REP_CATALOG,
+    STOP_REP_CATALOG: () => STOP_REP_CATALOG,
+    AUTH_REP_CATALOG: () => AUTH_REP_CATALOG,
+    EDIT_REP_CATALOG: () => EDIT_REP_CATALOG,
+    DELETE_REP_CATALOG: () => DELETE_REP_CATALOG,
+    DELETE_ALL_REP_CATALOG: () => DELETE_ALL_REP_CATALOG,
+    ADD_CHILD_REP_CATALOG: () => ADD_CHILD_REP_CATALOG,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          STOP_REP_CATALOG,
+          AUTH_REP_CATALOG,
+          EDIT_REP_CATALOG,
+          DELETE_REP_CATALOG,
+          ADD_CHILD_REP_CATALOG
+        ])
+      },
+      deep: true
     }
   },
   activated() {
