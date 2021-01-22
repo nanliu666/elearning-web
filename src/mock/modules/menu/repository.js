@@ -22,7 +22,50 @@ export default {
       alias: '目录管理',
       path: '/repository/catalogManagement',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '停用/启用',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/stop'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '权限配置',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/author'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建子分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/catalogManagement/addNewChild'
+        }
+      ]
     },
     {
       menuId: '12604101852546387969',
@@ -44,7 +87,65 @@ export default {
       isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
       code: 'role',
       alias: '知识管理',
-      path: '/repository/knowledgeEdit'
+      path: '/repository/knowledgeEdit',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '创建资源',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '置顶',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/top'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '查看详情',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/view'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '下架/上架',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/slotOut'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '移动',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/move'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '批量删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/deleteAll'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/repository/knowledgeManagement/delete'
+        }
+      ]
     },
     {
       menuId: '12604101852546387969',

@@ -3,6 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
+        v-p="'/repository/catalogManagement/edit'"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -85,6 +86,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="'/repository/catalogManagement/stop'"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -92,12 +94,22 @@
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="'/repository/catalogManagement/author'"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-if="
+                $p([
+                  '/repository/catalogManagement/edit',
+                  '/repository/catalogManagement/delete',
+                  '/repository/catalogManagement/addNewChild'
+                ])
+              "
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"
@@ -105,13 +117,22 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="edit">
+                <el-dropdown-item
+                  v-p="'/repository/catalogManagement/edit'"
+                  command="edit"
+                >
                   编辑
                 </el-dropdown-item>
-                <el-dropdown-item command="delete">
+                <el-dropdown-item
+                  v-p="'/repository/catalogManagement/delete'"
+                  command="delete"
+                >
                   删除
                 </el-dropdown-item>
-                <el-dropdown-item command="addChild">
+                <el-dropdown-item
+                  v-p="'/repository/catalogManagement/addNewChild'"
+                  command="addChild"
+                >
                   新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>

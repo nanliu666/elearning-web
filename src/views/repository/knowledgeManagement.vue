@@ -3,6 +3,7 @@
     <page-header title="知识管理">
       <template slot="rightMenu">
         <el-button
+          v-p="'/repository/knowledgeManagement/add'"
           type="primary"
           size="medium"
           @click="createResource"
@@ -92,6 +93,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="'/repository/knowledgeManagement/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -105,14 +107,19 @@
           slot-scope="{ row }"
         >
           <div
+            v-if="$p('/repository/knowledgeManagement/view')"
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
             {{ row.resName }}
           </div>
+          <div v-else>
+            {{ row.resName }}
+          </div>
         </template>
         <template #handler="{row}">
           <el-button
+            v-p="'/repository/knowledgeManagement/top'"
             type="text"
             class="top-button"
             @click="handleTop(row)"
@@ -125,8 +132,14 @@
           >
             {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
-
           <el-dropdown
+            v-if="
+              $p([
+                '/repository/knowledgeManagement/edit',
+                '/repository/knowledgeManagement/delete',
+                '/repository/knowledgeManagement/move'
+              ])
+            "
             style="margin-left: 4px"
             @command="handleCommand($event, row)"
           >
@@ -137,13 +150,22 @@
               <i class="el-icon-arrow-down el-icon-more" />
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="editKnow">
+              <el-dropdown-item
+                v-p="'/repository/knowledgeManagement/edit'"
+                command="editKnow"
+              >
                 编辑
               </el-dropdown-item>
-              <el-dropdown-item command="deleteKnow">
+              <el-dropdown-item
+                v-p="'/repository/knowledgeManagement/delete'"
+                command="deleteKnow"
+              >
                 删除
               </el-dropdown-item>
-              <el-dropdown-item command="moveKnow">
+              <el-dropdown-item
+                v-p="'/repository/knowledgeManagement/move'"
+                command="moveKnow"
+              >
                 移动
               </el-dropdown-item>
             </el-dropdown-menu>
