@@ -3,7 +3,7 @@
     <page-header title="证书管理">
       <template slot="rightMenu">
         <el-button
-          v-p="'/certificate/certificateManage/add'"
+          v-p="ADD_CERTIFICATE"
           type="primary"
           size="medium"
           @click="toAddCertificate"
@@ -73,7 +73,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/certificate/certificateManage/deleteAll'"
+            v-p="DELETE_CERTIFICATE"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -91,7 +91,7 @@
         <template #handler="{row}">
           <el-button
             v-if="row.status"
-            v-p="'/certificate/certificateManage/disabled'"
+            v-p="STOP_CERTIFICATE"
             type="text"
             @click.stop="blockStart(row.id, 0)"
           >
@@ -99,14 +99,14 @@
           </el-button>
           <span
             v-else
-            v-p="'/certificate/certificateManage/disabled'"
+            v-p="STOP_CERTIFICATE"
             class="startBtn"
             @click.stop="blockStart(row.id, 1)"
           >启用 &nbsp;
           </span>
           <!-- 预览框 -->
           <el-tooltip
-            v-p="'/certificate/certificateManage/preview'"
+            v-p="PREVIEW_CERTIFICATE"
             placement="top"
             effect="light"
           >
@@ -159,7 +159,7 @@
           </el-tooltip>
 
           <el-button
-            v-p="'/certificate/certificateManage/delete'"
+            v-p="DELETE_CERTIFICATE"
             type="text"
             @click="handleRemove(row)"
           >
@@ -280,6 +280,13 @@ const FORM_COLUMNS = [
     }
   }
 ]
+import {
+  ADD_CERTIFICATE,
+  STOP_CERTIFICATE,
+  PREVIEW_CERTIFICATE,
+  DELETE_CERTIFICATE
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -320,6 +327,27 @@ export default {
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    ADD_CERTIFICATE: () => ADD_CERTIFICATE,
+    STOP_CERTIFICATE: () => STOP_CERTIFICATE,
+    PREVIEW_CERTIFICATE: () => PREVIEW_CERTIFICATE,
+    DELETE_CERTIFICATE: () => DELETE_CERTIFICATE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          ADD_CERTIFICATE,
+          STOP_CERTIFICATE,
+          PREVIEW_CERTIFICATE,
+          DELETE_CERTIFICATE
+        ])
+      },
+      deep: true
     }
   },
   activated() {

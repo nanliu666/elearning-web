@@ -85,3 +85,8 @@ export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
 export const EDIT_LECTURER = '/lecturer/lecturer/edit' // 编辑
 export const DELETE_LECTURER = '/lecturer/lecturer/delete' // 删除
 export const ADD_LECTURER_GROUNP = '/lecturer/lecturer/addNewGroup' // 新建分组
+// 讲师管理的鉴权
+export const ADD_CERTIFICATE = '/certificate/certificateManage/add' // 新建模板
+export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 新建模板
+export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 新建模板
+export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 新建模板

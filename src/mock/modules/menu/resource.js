@@ -126,24 +126,28 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建模板',
           isEnabled: 1,
           path: '/certificate/certificateManage/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '停用',
           isEnabled: 1,
-          path: '/certificate/certificateManage/disabled'
+          path: '/certificate/certificateManage/stop'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '预览',
           isEnabled: 1,
           path: '/certificate/certificateManage/preview'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1,
           path: '/certificate/certificateManage/delete'
         }
