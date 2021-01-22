@@ -127,12 +127,6 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/question/questionList/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/question/questionList/add'
         }
       ]
@@ -168,12 +162,6 @@ export default {
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/edit'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/testPaper/testPaper/deleteAll'
         },
         {
           menuType: 'Button',
@@ -235,12 +223,6 @@ export default {
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/edit'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/examSchedule/list/deleteAll'
         },
         {
           menuType: 'Button',

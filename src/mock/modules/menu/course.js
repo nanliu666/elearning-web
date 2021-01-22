@@ -40,13 +40,6 @@ export default {
         },
         {
           menuType: 'Button',
-          menuName: '批量删除',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/course/courseDraft/deleteAll'
-        },
-        {
-          menuType: 'Button',
           isOwn: 1,
           menuName: '置顶/取消置顶',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是

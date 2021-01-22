@@ -195,7 +195,6 @@ import {
   AUTH_REP_CATALOG,
   EDIT_REP_CATALOG,
   DELETE_REP_CATALOG,
-  DELETE_ALL_REP_CATALOG,
   ADD_CHILD_REP_CATALOG
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
@@ -276,7 +275,6 @@ export default {
     AUTH_REP_CATALOG: () => AUTH_REP_CATALOG,
     EDIT_REP_CATALOG: () => EDIT_REP_CATALOG,
     DELETE_REP_CATALOG: () => DELETE_REP_CATALOG,
-    DELETE_ALL_REP_CATALOG: () => DELETE_ALL_REP_CATALOG,
     ADD_CHILD_REP_CATALOG: () => ADD_CHILD_REP_CATALOG,
     ...mapGetters(['privileges'])
   },

@@ -34,12 +34,6 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/learnPlan/CoursePlanList/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/CoursePlanList/edit'
         },
         {
@@ -81,12 +75,6 @@ export default {
       path: '/learnPlan/ElectivePlanList',
       icon: 'iconfont iconicon_compile',
       children: [
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/learnPlan/ElectivePlanList/deleteAll'
-        },
         {
           menuType: 'Button',
           isOwn: 1,

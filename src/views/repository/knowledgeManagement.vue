@@ -93,7 +93,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="DELETE_ALL_REP"
+            v-p="DELETE_REP"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -374,7 +374,6 @@ import {
   PUTAWAY_REP,
   EDIT_REP,
   DELETE_REP,
-  DELETE_ALL_REP,
   MOVE_REP,
   VIEW_REP
 } from '@/const/privileges'
@@ -428,7 +427,6 @@ export default {
     PUTAWAY_REP: () => PUTAWAY_REP,
     EDIT_REP: () => EDIT_REP,
     DELETE_REP: () => DELETE_REP,
-    DELETE_ALL_REP: () => DELETE_ALL_REP,
     VIEW_REP: () => VIEW_REP,
     MOVE_REP: () => MOVE_REP,
     ...mapGetters(['privileges'])

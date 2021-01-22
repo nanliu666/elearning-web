@@ -283,7 +283,7 @@
 
               <template #multiSelectMenu="{ selection }">
                 <el-button
-                  v-p="DELETE_ALL_TRAIN"
+                  v-p="DELETE_TRAIN"
                   style="margin-bottom:0;"
                   type="text"
                   @click="() => handleRemoveItems(selection)"
@@ -416,7 +416,6 @@ import {
 import {
   ADD_TRAIN,
   ADD_GROUNP_TRAIN,
-  DELETE_ALL_TRAIN,
   DELETE_TRAIN,
   EDIT_TRAIN,
   END_TRAIN,
@@ -627,7 +626,6 @@ export default {
   computed: {
     ADD_TRAIN: () => ADD_TRAIN,
     ADD_GROUNP_TRAIN: () => ADD_GROUNP_TRAIN,
-    DELETE_ALL_TRAIN: () => DELETE_ALL_TRAIN,
     DELETE_TRAIN: () => DELETE_TRAIN,
     EDIT_TRAIN: () => EDIT_TRAIN,
     NEXT_TRAIN: () => NEXT_TRAIN,

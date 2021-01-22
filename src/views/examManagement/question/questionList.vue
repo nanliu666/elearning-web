@@ -82,7 +82,7 @@
           >
             <template #multiSelectMenu="{ selection }">
               <el-button
-                v-p="DELETE_ALL_QUSTION"
+                v-p="DELETE_QUSTION"
                 type="text"
                 style="margin-bottom:0;"
                 @click="handleDelete(selection)"
@@ -162,7 +162,7 @@ const COLUMNS = [
     slot: true
   }
 ]
-import { DELETE_QUSTION, EDIT_QUSTION, DELETE_ALL_QUSTION, ADD_QUSTION } from '@/const/privileges'
+import { DELETE_QUSTION, EDIT_QUSTION, ADD_QUSTION } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'QuestionList',
@@ -233,7 +233,6 @@ export default {
     QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     DELETE_QUSTION: () => DELETE_QUSTION,
     EDIT_QUSTION: () => EDIT_QUSTION,
-    DELETE_ALL_QUSTION: () => DELETE_ALL_QUSTION,
     ADD_QUSTION: () => ADD_QUSTION,
     ...mapGetters(['privileges'])
   },

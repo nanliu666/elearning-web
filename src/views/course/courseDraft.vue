@@ -129,7 +129,7 @@
 
             <template #multiSelectMenu="{ selection }">
               <el-button
-                v-p="DELETEALL_COURSE"
+                v-p="DELETE_COURSE"
                 style="margin-bottom:0;"
                 type="text"
                 @click="() => handleRemoveItems(selection)"
@@ -561,7 +561,6 @@ const FORM_COLUMNS = [
 import { mapGetters } from 'vuex'
 import {
   ADD_COURSE,
-  DELETEALL_COURSE,
   TOP_COURSE,
   EDIT_COURSE,
   DELETE_COURSE,
@@ -618,7 +617,6 @@ export default {
   },
   computed: {
     ADD_COURSE: () => ADD_COURSE,
-    DELETEALL_COURSE: () => DELETEALL_COURSE,
     TOP_COURSE: () => TOP_COURSE,
     EDIT_COURSE: () => EDIT_COURSE,
     DELETE_COURSE: () => DELETE_COURSE,
