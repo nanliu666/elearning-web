@@ -43,7 +43,22 @@ export default {
       path: '/training/trainingArrange',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '创建培训',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建分组',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/addGroup'
+        }
+      ]
     },
     {
       menuId: '1214878678567464558',
