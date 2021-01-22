@@ -3,6 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_COURSE_CATALOG"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -85,6 +86,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="STOP_COURSE_CATALOG"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -92,12 +94,16 @@
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="AUTH_COURSE_CATALOG"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-if="$p([EDIT_COURSE_CATALOG, DELETE_COURSE_CATALOG, ADD_GROUNP_COURSE_CATALOG])"
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"
@@ -105,13 +111,22 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="edit">
+                <el-dropdown-item
+                  v-p="EDIT_COURSE_CATALOG"
+                  command="edit"
+                >
                   编辑
                 </el-dropdown-item>
-                <el-dropdown-item command="delete">
+                <el-dropdown-item
+                  v-p="DELETE_COURSE_CATALOG"
+                  command="delete"
+                >
                   删除
                 </el-dropdown-item>
-                <el-dropdown-item command="addChild">
+                <el-dropdown-item
+                  v-p="ADD_GROUNP_COURSE_CATALOG"
+                  command="addChild"
+                >
                   新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -130,9 +145,20 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 import { getCatalog, delCatalag, updateStatus } from '@/api/course/course'
+import {
+  ADD_COURSE_CATALOG,
+  STOP_COURSE_CATALOG,
+  AUTH_COURSE_CATALOG,
+  EDIT_COURSE_CATALOG,
+  DELETEALL_COURSE_CATALOG,
+  DELETE_COURSE_CATALOG,
+  ADD_GROUNP_COURSE_CATALOG,
+  ALL_COURSE_CATALOG_PRIVI
+} from '@/const/privileges'
 const TABLE_COLUMNS = [
   {
     label: '分类名称',
@@ -221,6 +247,26 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {}
+    }
+  },
+  computed: {
+    ADD_COURSE_CATALOG: () => ADD_COURSE_CATALOG,
+    STOP_COURSE_CATALOG: () => STOP_COURSE_CATALOG,
+    AUTH_COURSE_CATALOG: () => AUTH_COURSE_CATALOG,
+    EDIT_COURSE_CATALOG: () => EDIT_COURSE_CATALOG,
+    DELETEALL_COURSE_CATALOG: () => DELETEALL_COURSE_CATALOG,
+    DELETE_COURSE_CATALOG: () => DELETE_COURSE_CATALOG,
+    ADD_GROUNP_COURSE_CATALOG: () => ADD_GROUNP_COURSE_CATALOG,
+    ALL_COURSE_CATALOG_PRIVI: () => ALL_COURSE_CATALOG_PRIVI,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p(ALL_COURSE_CATALOG_PRIVI)
+      },
+      deep: true
     }
   },
   activated() {

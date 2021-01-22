@@ -33,12 +33,14 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '创建课程',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/courseDraft/add'
         },
         {
           menuType: 'Button',
+          menuName: '批量删除',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/courseDraft/deleteAll'
@@ -46,26 +48,37 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '置顶/取消置顶',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/courseDraft/top'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/courseDraft/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/courseDraft/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '移动',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/courseDraft/move'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '上架/下架',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/courseDraft/putaway'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/course/courseDraft/slotOut'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/course/courseDraft/others'
         }
       ]
     },
@@ -81,7 +94,50 @@ export default {
       path: '/course/catalog',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '停用',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/stop'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '权限配置',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/author'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建子分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/course/catalog/addNewGroup'
+        }
+      ]
     },
     {
       menuId: '1259073456754674589',
