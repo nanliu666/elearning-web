@@ -45,3 +45,8 @@ export const ADD_GROUNP_EXAM_CATALOG = '/examManagement/category/management/addN
 export const DELETE_QUSTION = '/examManagement/question/questionList/delete' // 删除
 export const EDIT_QUSTION = '/examManagement/question/questionList/edit' // 编辑
 export const ADD_QUSTION = '/examManagement/question/questionList/add' // 新增
+// 考评管理的试卷管理的鉴权
+export const COPY_TESTPAPER = '/examManagement/testPaper/testPaper/copy' // 复制
+export const ADD_TESTPAPER = '/examManagement/testPaper/testPaper/add' // 创建试卷
+export const DELETE_TESTPAPER = '/examManagement/testPaper/testPaper/delete' // 删除
+export const EDIT_TESTPAPER = '/examManagement/testPaper/testPaper/edit' // 编辑

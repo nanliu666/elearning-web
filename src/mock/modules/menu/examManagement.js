@@ -147,6 +147,7 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '复制',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/copy'
@@ -154,18 +155,21 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/delete'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/edit'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/add'
         }
