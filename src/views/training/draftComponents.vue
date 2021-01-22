@@ -131,14 +131,15 @@
                 <!-- 草稿 -->
 
                 <el-button
+                  v-p="EDIT_TRAIN"
                   type="text"
                   size="medium"
                   @click.stop="toTrainingEdit(scope)"
                 >
                   编辑
                 </el-button>
-                <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
                 <el-button
+                  v-p="DELETE_TRAIN"
                   type="text"
                   size="medium"
                   @click.stop="isDraftDel(scope)"
@@ -156,6 +157,7 @@
 
 <script>
 import { getScheduleList, delTrain } from '@/api/training/training'
+import { DELETE_TRAIN, EDIT_TRAIN } from '@/const/privileges'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -230,6 +232,7 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
   components: {
@@ -291,7 +294,11 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-
+  computed: {
+    EDIT_TRAIN: () => EDIT_TRAIN,
+    DELETE_TRAIN: () => DELETE_TRAIN,
+    ...mapGetters(['privileges'])
+  },
   created() {
     this.isgetScheduleList()
   },

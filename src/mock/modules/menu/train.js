@@ -57,6 +57,41 @@ export default {
           menuName: '新建分组',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/training/trainingArrange/addGroup'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '批量删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/deleteAll'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '开办下一期',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/next'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '结办',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/training/trainingArrange/end'
         }
       ]
     },
