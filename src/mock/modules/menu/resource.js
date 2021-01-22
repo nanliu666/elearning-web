@@ -30,7 +30,43 @@ export default {
       path: '/lecturer/lecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          menuName: '添加讲师',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/add'
+        },
+        {
+          menuType: 'Button',
+          menuName: '停用',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/stop'
+        },
+        {
+          menuType: 'Button',
+          menuName: '编辑',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/edit'
+        },
+        {
+          menuType: 'Button',
+          menuName: '删除',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/delete'
+        },
+        {
+          menuType: 'Button',
+          menuName: '新建分组',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/addNewGroup'
+        }
+      ]
     },
     {
       menuId: '12512312345778934534558',
