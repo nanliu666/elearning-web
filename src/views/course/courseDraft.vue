@@ -566,8 +566,7 @@ import {
   EDIT_COURSE,
   DELETE_COURSE,
   MOVE_COURSE,
-  PUTAWAY_COURSE,
-  ALL_COURSE_PRIVI
+  PUTAWAY_COURSE
 } from '@/const/privileges'
 export default {
   // 搜索组件
@@ -625,14 +624,19 @@ export default {
     DELETE_COURSE: () => DELETE_COURSE,
     MOVE_COURSE: () => MOVE_COURSE,
     PUTAWAY_COURSE: () => PUTAWAY_COURSE,
-    ALL_COURSE_PRIVI: () => ALL_COURSE_PRIVI,
     ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p(ALL_COURSE_PRIVI)
+        this.tableConfig.showHandler = this.$p([
+          TOP_COURSE,
+          PUTAWAY_COURSE,
+          EDIT_COURSE,
+          DELETE_COURSE,
+          MOVE_COURSE
+        ])
       },
       deep: true
     }
