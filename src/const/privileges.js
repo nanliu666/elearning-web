@@ -118,3 +118,5 @@ export const EDIT_ROLE = '/system/role/edit' // 编辑
 export const DELETE_ROLE = '/system/role/delete' // 删除
 export const AUTH_ROLE = '/system/role/author' // 删除
 export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 删除
+// TODO: 待补充权限配置页面、查看用户鉴权
+// TODO: 待补充测试环境的鉴权配置
