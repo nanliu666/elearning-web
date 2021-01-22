@@ -70,3 +70,8 @@ export const STOP_REQUIRED = '/learnPlan/CoursePlanList/stop' // 结办
 // 选修课程安排的鉴权
 export const VIEW_ELECTIVE = '/learnPlan/ElectivePlanList/view' // 查看
 export const DELETE_ELECTIVE = '/learnPlan/ElectivePlanList/delete' // 删除
+// 学分规则管理的鉴权
+export const DELETE_CREDIT = '/creditManagement/creditRule/delete' // 删除
+export const EDIT_CREDIT = '/creditManagement/creditRule/edit' // 编辑
+export const STOP_CREDIT = '/creditManagement/creditRule/stop' // 停用
+export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
