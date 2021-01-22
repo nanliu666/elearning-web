@@ -6,6 +6,7 @@
       </div>
       <div>
         <el-button
+          v-p="'/training/trainingArrange/add'"
           type="primary"
           size="medium"
           @click="goAdd"
