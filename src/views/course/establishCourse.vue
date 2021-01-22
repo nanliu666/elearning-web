@@ -1055,7 +1055,8 @@ export default {
           } else {
             this.$refs.apprSubmit.validate().then(() => {
               this.disabledBtn = true
-              params.status = status
+              // 状态设置为审批中
+              params.status = 0
               addCourse(params).then(({ id }) => {
                 this.submitApprApply(id)
               })
