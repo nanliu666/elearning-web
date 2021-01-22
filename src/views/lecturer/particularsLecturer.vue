@@ -1,17 +1,11 @@
 <template>
   <div class="compileLecturer">
-    <!-- <div
+    <div
       class="compileLecturerr_head"
       @click="toLecturer"
     >
       <i class="el-icon-arrow-left"></i> 讲师详情
-    </div> -->
-    <page-header
-      title="讲师详情"
-      :back="() => toLecturer()"
-      show-back
-    />
-
+    </div>
     <div class="compileLecturerr_head_box">
       <div class="head_box_img">
         <img
@@ -68,7 +62,7 @@
             电子邮箱：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.userEmail || '--' }}
+            {{ teacherData.userEmail }}
           </el-col>
         </el-row>
         <el-row>
@@ -81,7 +75,6 @@
           <el-col :span="7">
             <span v-if="teacherData.sex == 1">男</span>
             <span v-if="teacherData.sex == 0">女</span>
-            <span v-if="teacherData.sex == ''">--</span>
           </el-col>
           <el-col
             :span="5"
@@ -102,7 +95,7 @@
             讲师级别：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherLevel || '--' }}
+            {{ teacherData.teacherLevel }}
           </el-col>
           <el-col
             :span="5"
@@ -111,7 +104,7 @@
             讲师职称：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherTitle || '--' }}
+            {{ teacherData.teacherTitle }}
           </el-col>
         </el-row>
         <!-- <el-row>
@@ -181,8 +174,8 @@
     >
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
-          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训， 停用后需尽快对课程进行调整。
+          你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
         <div>
           <div
             class="showBtn"

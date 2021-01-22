@@ -46,10 +46,10 @@ const switchConfig = [
 const defaultValue = {
   id: '',
   isDecoil: false,
-  openResults: false,
-  openAnswerSheet: false,
+  openResults: true,
+  openAnswerSheet: true,
   selfMarking: false,
-  publicAnswers: false,
+  publicAnswers: true,
   // openEntrance: false,
   // isExamine: false,
   openResultsValue: 0 // 默认值0，表示永久

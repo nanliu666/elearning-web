@@ -318,8 +318,8 @@
                 slot-scope="{ row }"
               >
                 <span v-if="row.trainWay === 1">面授</span>
-                <span v-if="row.trainWay === 2">混合</span>
-                <span v-if="row.trainWay === 3">在线</span>
+                <span v-if="row.trainWay === 2">在线</span>
+                <span v-if="row.trainWay === 3">混合</span>
               </template>
               <!-- 标签 -->
               <template
