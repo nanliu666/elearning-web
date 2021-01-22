@@ -114,7 +114,7 @@
             class="btn_bottom"
           >
             <a
-              v-p="'/learnPlan/CoursePlanList/addGroup'"
+              v-p="ADD_GROUP_REQUIRED"
               class="btn1"
               href="#/learnPlan/CoursePlanList"
               @click="adddata"
@@ -187,6 +187,7 @@
 //   move,
 //   editTeacherCatalog
 // } from '@/api/lecturer/lecturer'
+import { ADD_GROUP_REQUIRED } from '@/const/privileges'
 export default {
   props: {
     columnInterface: {
@@ -231,6 +232,9 @@ export default {
       isEditId: '', //显示分类——输入框id
       btnshow: 'false' //新增分类&移动
     }
+  },
+  computed: {
+    ADD_GROUP_REQUIRED: () => ADD_GROUP_REQUIRED
   },
   watch: {
     filterText(val) {

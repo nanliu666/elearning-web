@@ -97,12 +97,6 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1,
-          path: '/certificate/certificateManage/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1,
           path: '/certificate/certificateManage/disabled'
         },
         {

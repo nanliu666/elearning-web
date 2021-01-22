@@ -256,7 +256,7 @@ export default {
           isShow: 1,
           code: 'news_manage',
           alias: '新闻管理',
-          path: '/newsCenter/newsManage',
+          path: '/system/newsCenter/newsManage',
           icon: 'iconfont iconicon_study',
           dataPrivileges: [],
           children: [
@@ -264,25 +264,25 @@ export default {
               menuType: 'Button',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-              path: '/newsCenter/newsManage/add'
+              path: '/system/newsCenter/newsManage/add'
             },
             {
               menuType: 'Button',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-              path: '/newsCenter/newsManage/delete'
+              path: '/system/newsCenter/newsManage/delete'
             },
             {
               menuType: 'Button',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-              path: '/newsCenter/newsManage/edit'
+              path: '/system/newsCenter/newsManage/edit'
             },
             {
               menuType: 'Button',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-              path: '/newsCenter/newsManage/top'
+              path: '/system/newsCenter/newsManage/top'
             }
           ]
         },
@@ -295,7 +295,7 @@ export default {
           isShow: 0,
           code: 'news_publish',
           alias: '新闻发布',
-          path: '/newsCenter/newsEdit',
+          path: '/system/newsCenter/newsEdit',
           icon: '',
           dataPrivileges: [],
           children: []
@@ -309,7 +309,7 @@ export default {
           isShow: 0,
           code: 'news_manage',
           alias: '新闻中心',
-          path: '/newsCenter/newsCenter',
+          path: '/system/newsCenter/newsCenter',
           icon: 'iconfont iconicon_study',
           dataPrivileges: [],
           children: []
@@ -323,7 +323,7 @@ export default {
           isShow: 0,
           code: 'news_detail',
           alias: '新闻详情',
-          path: '/newsCenter/newsDetail',
+          path: '/system/newsCenter/newsDetail',
           icon: 'icon-basics-detailed-outlined',
           dataPrivileges: [],
           children: []
@@ -337,7 +337,7 @@ export default {
           isShow: 0,
           code: 'news_drafts',
           alias: '新闻详情',
-          path: '/newsCenter/newsDrafts',
+          path: '/system/newsCenter/newsDrafts',
           icon: '',
           dataPrivileges: [],
           children: []
@@ -351,7 +351,7 @@ export default {
           isShow: 0,
           code: 'news_published',
           alias: 'news_published',
-          path: '/newsCenter/newsPublished',
+          path: '/system/newsCenter/newsPublished',
           icon: '',
           dataPrivileges: [],
           children: []
