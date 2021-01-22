@@ -4,7 +4,6 @@
       title="学习情况"
       show-back
     />
-
     <div class="compileLecturerr_head_box">
       <div class="imgBox">
         <img
@@ -202,10 +201,11 @@
                   </el-button>
                 </el-tooltip>
                 <span
+                  v-p="'/course/detail/addtest2'"
                   class="text_refresh"
                   style="cursor:pointer;"
                   @click="refreshTableData"
-                >刷新</span>
+                >刷新11111166</span>
                 <el-popover
                   placement="bottom"
                   width="40"

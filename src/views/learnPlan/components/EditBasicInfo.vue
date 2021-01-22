@@ -25,7 +25,7 @@
 
 <script>
 import { getCatalogs } from '@/api/learnPlan'
-import { filterTree, handleCatalogsData } from '@/util/util'
+import { filterTree } from '@/util/util'
 export default {
   props: {
     model: {
@@ -62,41 +62,33 @@ export default {
         {
           prop: 'automaticIntegralCount',
           itemType: 'switch',
-          label: '自动计算学分',
+          label: '自动计算积分',
           required: false,
           offset: 4
         },
         {
-          itemType: 'treeSelect',
-          label: '所属分类',
-          prop: 'categoryId',
-          props: {
-            selectParams: {
-              placeholder: '请选择分类',
-              multiple: false
-            },
-            treeParams: {
-              'check-strictly': true,
-              'default-expand-all': false,
-              'expand-on-click-node': false,
-              clickParent: true,
-              data: [],
-              filterable: false,
-              props: {
-                children: 'children',
-                label: 'label',
-                value: 'id'
-              },
-              required: true
-            }
-          },
+          prop: 'endDate',
+          itemType: 'datePicker',
+          label: '学习计划截止日期',
           required: false
+        },
+        {
+          prop: 'categoryId',
+          itemType: 'cascader',
+          label: '所属分类',
+          options: [],
+          props: {
+            value: 'id',
+            emitPath: false
+          },
+          showAllLevels: false,
+          offset: 4,
+          required: true
         },
         {
           prop: 'creatorName',
           itemType: 'input',
           label: '创建者',
-          offset: 4,
           required: false
         },
         {
@@ -105,13 +97,13 @@ export default {
           type: 'datetime',
           valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '创建时间',
+          offset: 4,
           required: false
         },
         {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
-          offset: 4,
           maxlength: 32,
           required: false
         }
@@ -148,9 +140,34 @@ export default {
     },
     getCategoryData() {
       getCatalogs().then((res) => {
-        const data = handleCatalogsData(res)
+        let data = []
+        res.group.forEach((item) => {
+          if (!item.id) {
+            return
+          }
+          data.push({
+            id: item.idStr,
+            label: item.name,
+            btnshow: 1,
+            children: [],
+            count: item.count
+          })
+        })
+        data.forEach((item) => {
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+          filterArr = filterArr.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0,
+              count: item.count
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
         this.categoryData = data
-        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = data
+        this.columns[5].options = data
       })
     }
   }

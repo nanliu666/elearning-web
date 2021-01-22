@@ -10,7 +10,6 @@
       </template>
       <template slot="rightMenu">
         <el-button
-          v-p="'/learnPlan/CoursePlanList/add'"
           type="primary"
           size="medium"
           @click="jumpEdit"
@@ -114,7 +113,6 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -125,7 +123,6 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
               type="text"
               size="medium"
               :disabled="[2, 3].includes(row.status)"
@@ -134,16 +131,6 @@
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/stop'"
-              type="text"
-              size="medium"
-              :disabled="[3].includes(row.status)"
-              @click="closePlan(row)"
-            >
-              结办
-            </el-button>
-            <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
               type="text"
               size="medium"
               :disabled="[2].includes(row.status)"
@@ -152,10 +139,9 @@
               删除
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/view'"
               type="text"
               size="medium"
-              :disabled="[1].includes(row.status)"
+              :disabled="[1, 2].includes(row.status)"
               @click="jumpUserList(row)"
             >
               查看完成率
@@ -226,7 +212,6 @@
             slot-scope="{ selection }"
           >
             <el-button
-              v-p="'/learnPlan/CoursePlanList/deleteAll'"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -237,14 +222,12 @@
           </template>
           <template #handler="{row}">
             <el-button
-              v-p="'/learnPlan/CoursePlanList/edit'"
               type="text"
               @click="jumpEdit(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="'/learnPlan/CoursePlanList/delete'"
               type="text"
               @click="handleDelete(row)"
             >
@@ -267,8 +250,7 @@ import {
   addCatalog,
   delCatalogs,
   updateCatalogs,
-  moveCatalogs,
-  updateStatus
+  moveCatalogs
 } from '@/api/learnPlan'
 
 // 表格属性
@@ -295,12 +277,6 @@ const TABLE_COLUMNS = [
     minWidth: 100
   },
   {
-    label: '状态',
-    formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),
-    prop: 'status',
-    minWidth: 100
-  },
-  {
     label: '课程时间',
     prop: 'time',
     formatter: (row) => row.startTime + '~' + row.endTime,
@@ -313,7 +289,7 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   rowKey: 'id',
   showHandler: true,
-  handlerColumn: { label: '操作', minWidth: 220, fixed: 'right' }
+  handlerColumn: { label: '操作', minWidth: 200, fixed: 'right' }
 }
 
 // 搜索配置
@@ -466,15 +442,6 @@ export default {
         query: { id: row.id }
       })
     },
-    closePlan(row) {
-      updateStatus({ id: row.id }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '结办成功!'
-        })
-        this.refreshPublished()
-      })
-    },
     refreshPublished() {
       this.loadPublishedData()
     },
@@ -486,22 +453,17 @@ export default {
             '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
               confirmButtonText: '知道了',
-              showCancelButton: true,
-              callback: (action) => {
-                if (action !== 'cancel') {
-                  this.deletePlanFn(selection)
-                }
+              showCancelButton: false,
+              callback: () => {
+                this.deletePlanFn(selection)
               }
             }
           )
           return
         }
         this.$confirm('确定要删除选中的课程安排吗？', {
-          showCancelButton: true,
-          callback: (action) => {
-            if (action !== 'cancel') {
-              this.deletePlanFn(selection)
-            }
+          callback: () => {
+            this.deletePlanFn(selection)
           }
         })
       } else {
@@ -512,34 +474,20 @@ export default {
           })
         }
         this.$confirm('确定要删除选中的课程安排吗？', {
-          showCancelButton: true,
-          callback: (action) => {
-            if (action !== 'cancel') {
-              this.deletePlanFn([selection])
-            }
+          callback: () => {
+            this.deletePlanFn([selection])
           }
         })
       }
     },
     deletePlanFn(arr) {
       // 删除学习计划
-      let ids = _(arr)
-        .filter((item) => item.status != 2)
-        .map(arr, 'id')
-        .join(',')
-        .value()
-      if (!ids) {
-        return
-      }
-      deletePlan({
-        ids
-      })
+      deletePlan({ ids: _.map(arr, 'id').join(',') })
         .then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
-          this.$refs.table.clearSelection()
           this.loadPublishedData()
         })
         .catch()
