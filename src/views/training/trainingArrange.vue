@@ -361,7 +361,6 @@
                     >
                       结办
                     </el-button>
-                    <span v-else>结办</span>
                   </span>
                   <el-dropdown
                     v-if="$p([EDIT_TRAIN, DELETE_TRAIN])"
@@ -421,8 +420,7 @@ import {
   DELETE_TRAIN,
   EDIT_TRAIN,
   END_TRAIN,
-  NEXT_TRAIN,
-  ALL_TRAIN_PRIVI
+  NEXT_TRAIN
 } from '@/const/privileges'
 // 表格属性
 const TABLE_COLUMNS = [
@@ -634,14 +632,13 @@ export default {
     EDIT_TRAIN: () => EDIT_TRAIN,
     NEXT_TRAIN: () => NEXT_TRAIN,
     END_TRAIN: () => END_TRAIN,
-    ALL_TRAIN_PRIVI: () => ALL_TRAIN_PRIVI,
     ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p(ALL_TRAIN_PRIVI)
+        this.tableConfig.showHandler = this.$p([NEXT_TRAIN, END_TRAIN, EDIT_TRAIN, DELETE_TRAIN])
       },
       deep: true
     },
