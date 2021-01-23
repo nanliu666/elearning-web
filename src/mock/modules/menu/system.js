@@ -279,7 +279,30 @@ export default {
           isShow: 0,
           code: 'role',
           alias: '角色权限',
-          path: '/system/permissionConfig'
+          path: '/system/permissionConfig',
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新增权限',
+              isEnabled: 1,
+              path: '/system/permissionConfig/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '管理范围',
+              isEnabled: 1,
+              path: '/system/permissionConfig/range'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/permissionConfig/delete'
+            }
+          ]
         },
 
         {
@@ -291,7 +314,23 @@ export default {
           isShow: 0,
           code: 'role',
           alias: '查看用户',
-          path: '/system/roleUsers'
+          path: '/system/roleUsers',
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '添加用户',
+              isEnabled: 1,
+              path: '/system/roleUsers/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/roleUsers/delete'
+            }
+          ]
         }
       ]
     },

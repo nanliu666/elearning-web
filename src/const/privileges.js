@@ -118,5 +118,11 @@ export const EDIT_ROLE = '/system/role/edit' // 编辑
 export const DELETE_ROLE = '/system/role/delete' // 删除
 export const AUTH_ROLE = '/system/role/author' // 删除
 export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 删除
-// TODO: 待补充权限配置页面、查看用户鉴权
+// 角色管理的权限配置的鉴权
+export const ADD_PERMISSION = '/system/permissionConfig/add' // 新建权限
+export const RANGE_PERMISSION = '/system/permissionConfig/range' // 管理范围
+export const DELETE_PERMISSION = '/system/permissionConfig/delete' // 删除
+// 角色管理的查看用户的鉴权
+export const ADD_ROLE_USER = '/system/roleUsers/add' // 添加用户
+export const DELETE_ROLE_USER = '/system/roleUsers/delete' // 删除
 // TODO: 待补充测试环境的鉴权配置
