@@ -3,7 +3,7 @@
     <page-header title="新闻管理">
       <template #rightMenu>
         <el-button
-          v-p="'/newsCenter/newsManage/add'"
+          v-p="'/system/newsCenter/newsManage/add'"
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
@@ -145,7 +145,7 @@ export default {
     },
     handlePublishBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit'
       })
     }
   }

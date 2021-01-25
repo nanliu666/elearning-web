@@ -3,7 +3,7 @@
     <page-header title="考试安排">
       <el-dropdown
         slot="rightMenu"
-        v-p="'/examManagement/examSchedule/list/add'"
+        v-p="ADD_EXAM"
         @command="createExam"
       >
         <el-button
@@ -119,7 +119,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/examManagement/examSchedule/list/deleteAll'"
+            v-p="DELETE_EXAM"
             type="text"
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
@@ -130,22 +130,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/examManagement/examSchedule/list/edit'"
+              v-p="EDIT_EXAM"
               type="text"
               @click="handleEdit(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="'/examManagement/examSchedule/list/delete'"
+              v-p="DELETE_EXAM"
               type="text"
               @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-dropdown
-              v-if="activeIndex === '0'"
-              v-p="'/examManagement/examSchedule/list/others'"
+              v-if="activeIndex === '0' && $p([COPY_EXAM])"
               @command="handleCommand(row)"
             >
               <el-button
@@ -154,7 +153,10 @@
               >
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
-              <el-dropdown-menu slot="dropdown">
+              <el-dropdown-menu
+                slot="dropdown"
+                v-p="COPY_EXAM"
+              >
                 <el-dropdown-item command="copy">
                   复制
                 </el-dropdown-item>
@@ -356,6 +358,9 @@ const SEARCH_CONFIG = {
   ]
 }
 import styles from '@/styles/variables.scss'
+
+import { ADD_EXAM, EDIT_EXAM, DELETE_EXAM, COPY_EXAM } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover },
@@ -408,6 +413,22 @@ export default {
         testPaper: '', //关联考卷id
         type: 0 //状态:0-已发布，1-草稿箱
       }
+    }
+  },
+  computed: {
+    ADD_EXAM: () => ADD_EXAM,
+    EDIT_EXAM: () => EDIT_EXAM,
+    DELETE_EXAM: () => DELETE_EXAM,
+    COPY_EXAM: () => COPY_EXAM,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([EDIT_EXAM, DELETE_EXAM, COPY_EXAM])
+      },
+      deep: true
     }
   },
   activated() {

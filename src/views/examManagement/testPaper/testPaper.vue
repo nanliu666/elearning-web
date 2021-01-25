@@ -3,7 +3,7 @@
     <page-header title="试卷管理">
       <el-dropdown
         slot="rightMenu"
-        v-p="'/examManagement/testPaper/testPaper/add'"
+        v-p="ADD_TESTPAPER"
         @command="handleCommand"
       >
         <el-button
@@ -87,7 +87,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/examManagement/testPaper/testPaper/deleteAll'"
+            v-p="DELETE_TESTPAPER"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -114,21 +114,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/examManagement/testPaper/testPaper/edit'"
+              v-p="EDIT_TESTPAPER"
               type="text"
               @click="handleLookUp(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="'/examManagement/testPaper/testPaper/delete'"
+              v-p="DELETE_TESTPAPER"
               type="text"
               @click="handleDelete(row)"
             >
               删除
             </el-button>
             <el-button
-              v-p="'/examManagement/testPaper/testPaper/copy'"
+              v-p="COPY_TESTPAPER"
               type="text"
               @click="handleCope(row)"
             >
@@ -211,6 +211,8 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
+import { COPY_TESTPAPER, ADD_TESTPAPER, DELETE_TESTPAPER, EDIT_TESTPAPER } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'TestPaper',
   components: { SearchPopover, tipDialog },
@@ -309,6 +311,22 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {}
+    }
+  },
+  computed: {
+    COPY_TESTPAPER: () => COPY_TESTPAPER,
+    ADD_TESTPAPER: () => ADD_TESTPAPER,
+    DELETE_TESTPAPER: () => DELETE_TESTPAPER,
+    EDIT_TESTPAPER: () => EDIT_TESTPAPER,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([EDIT_TESTPAPER, DELETE_TESTPAPER, COPY_TESTPAPER])
+      },
+      deep: true
     }
   },
   mounted() {

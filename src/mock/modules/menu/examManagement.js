@@ -34,26 +34,44 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建分类',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/category/management/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '启用/停用',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/disable'
+          path: '/examManagement/category/management/stop'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '权限配置',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/limit'
+          path: '/examManagement/category/management/author'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/category/management/others'
+          path: '/examManagement/category/management/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/examManagement/category/management/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建子分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/examManagement/category/management/addNewChild'
         }
       ]
     },
@@ -109,12 +127,6 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/question/questionList/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/question/questionList/add'
         }
       ]
@@ -135,6 +147,7 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '复制',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/copy'
@@ -142,24 +155,21 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/delete'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/edit'
         },
         {
           menuType: 'Button',
           isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/testPaper/testPaper/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
+          menuName: '新建',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/testPaper/testPaper/add'
         }
@@ -209,32 +219,30 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '创建考试',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '编辑',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/edit'
         },
         {
           menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/examSchedule/list/deleteAll'
-        },
-        {
-          menuType: 'Button',
+          menuName: '删除',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/examManagement/examSchedule/list/delete'
         },
         {
           menuType: 'Button',
+          menuName: '复制',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/examManagement/examSchedule/list/others'
+          path: '/examManagement/examSchedule/list/copy'
         }
       ]
     },
@@ -382,14 +390,14 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          menuName: '逐题评卷',
+          menuName: '查看考生成绩',
           path: '/examManagement/grade/achievement/view'
         }
       ]
     },
     {
       menuId: '15674547683454620582323',
-      menuName: '成绩管理',
+      menuName: '成绩详情',
       menuType: 'Menu',
       isOwn: 1,
       isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
@@ -398,8 +406,7 @@ export default {
       alias: 'user',
       path: '/examManagement/grade/examineeAchievement',
       icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
+      dataPrivileges: []
     }
   ]
 }
