@@ -70,3 +70,59 @@ export const STOP_REQUIRED = '/learnPlan/CoursePlanList/stop' // 结办
 // 选修课程安排的鉴权
 export const VIEW_ELECTIVE = '/learnPlan/ElectivePlanList/view' // 查看
 export const DELETE_ELECTIVE = '/learnPlan/ElectivePlanList/delete' // 删除
+// 学分规则管理的鉴权
+export const DELETE_CREDIT = '/creditManagement/creditRule/delete' // 删除
+export const EDIT_CREDIT = '/creditManagement/creditRule/edit' // 编辑
+export const STOP_CREDIT = '/creditManagement/creditRule/stop' // 停用
+export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
+// 学分规则管理的鉴权
+export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
+// 学分明细的鉴权
+export const VIEW_CREDIT = '/creditManagement/credit/view' // 查看详情
+// 讲师管理的鉴权
+export const ADD_LECTURER = '/lecturer/lecturer/add' // 添加讲师
+export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
+export const EDIT_LECTURER = '/lecturer/lecturer/edit' // 编辑
+export const DELETE_LECTURER = '/lecturer/lecturer/delete' // 删除
+export const ADD_LECTURER_GROUNP = '/lecturer/lecturer/addNewGroup' // 新建分组
+// 讲师管理的鉴权
+export const ADD_CERTIFICATE = '/certificate/certificateManage/add' // 新建模板
+export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 新建模板
+export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 新建模板
+export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 新建模板
+// 证书发放明细的鉴权
+export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
+// 组织管理的鉴权
+export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
+export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
+export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
+export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
+// 用户管理的鉴权
+export const ADD_USER = '/system/user/add' // 新建用户
+export const SETTING_USER = '/system/user/setting' // 角色设置
+export const RESET_USER = '/system/user/resetPassword' // 密码重置
+export const EDIT_USER = '/system/user/edit' // 编辑
+export const END_USER = '/system/user/end' // 冻结
+export const DELETE_USER = '/system/user/delete' // 删除
+// 菜单管理的鉴权
+export const STOP_MENU = '/system/menu/stop' // 启用/停用
+// 新闻管理的鉴权
+export const ADD_NEWS = '/system/newsCenter/newsManage/add' // 新建公告
+export const DELETE_NEWS = '/system/newsCenter/newsManage/delete' // 删除
+export const EDIT_NEWS = '/system/newsCenter/newsManage/edit' // 删除
+export const TOP_NEWS = '/system/newsCenter/newsManage/top' // 置顶
+// 角色管理的鉴权
+export const ADD_ROLE = '/system/role/add' // 新建角色
+export const VIEW_ROLE = '/system/role/view' // 查看用户
+export const EDIT_ROLE = '/system/role/edit' // 编辑
+export const DELETE_ROLE = '/system/role/delete' // 删除
+export const AUTH_ROLE = '/system/role/author' // 删除
+export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 删除
+// 角色管理的权限配置的鉴权
+export const ADD_PERMISSION = '/system/permissionConfig/add' // 新建权限
+export const RANGE_PERMISSION = '/system/permissionConfig/range' // 管理范围
+export const DELETE_PERMISSION = '/system/permissionConfig/delete' // 删除
+// 角色管理的查看用户的鉴权
+export const ADD_ROLE_USER = '/system/roleUsers/add' // 添加用户
+export const DELETE_ROLE_USER = '/system/roleUsers/delete' // 删除
+// TODO: 待补充测试环境的鉴权配置

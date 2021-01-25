@@ -30,7 +30,43 @@ export default {
       path: '/lecturer/lecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          menuName: '添加讲师',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/add'
+        },
+        {
+          menuType: 'Button',
+          menuName: '停用',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/stop'
+        },
+        {
+          menuType: 'Button',
+          menuName: '编辑',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/edit'
+        },
+        {
+          menuType: 'Button',
+          menuName: '删除',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/delete'
+        },
+        {
+          menuType: 'Button',
+          menuName: '新建分组',
+          isOwn: 1,
+          isEnabled: 1,
+          path: '/lecturer/lecturer/addNewGroup'
+        }
+      ]
     },
     {
       menuId: '12512312345778934534558',
@@ -90,24 +126,28 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建模板',
           isEnabled: 1,
           path: '/certificate/certificateManage/add'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '停用',
           isEnabled: 1,
-          path: '/certificate/certificateManage/disabled'
+          path: '/certificate/certificateManage/stop'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '预览',
           isEnabled: 1,
           path: '/certificate/certificateManage/preview'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1,
           path: '/certificate/certificateManage/delete'
         }
@@ -139,7 +179,15 @@ export default {
       path: '/certificate/certificateDetail',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '导出Excel',
+          isEnabled: 1,
+          path: '/certificate/certificateDetail/export'
+        }
+      ]
     }
   ]
 }

@@ -6,6 +6,7 @@
     >
       <template slot="rightMenu">
         <el-button
+          v-p="ADD_ROLE_USER"
           type="primary"
           size="medium"
           @click="handlerAdd"
@@ -51,7 +52,10 @@
               slot="multiSelectMenu"
               slot-scope="{ selection }"
             >
-              <span class="all">
+              <span
+                v-p="DELETE_ROLE_USER"
+                class="all"
+              >
                 <span
                   @click="handlerDeleteAll(selection)"
                 ><i class="el-icon-delete" /> 批量删除</span>
@@ -70,6 +74,7 @@
                 编辑
               </el-button> -->
               <el-button
+                v-p="DELETE_ROLE_USER"
                 type="text"
                 size="medium"
                 @click.stop="handleDelete(scope.row, scope.index)"
@@ -94,7 +99,8 @@ import { getToken } from '@/util/auth'
 import addUserDialog from './components/addUserDialog'
 // import { getV1Position, deleteV1Position } from '@/api/organize/position'
 import { getUserList, deleteUser } from '@/api/system/role'
-
+import { ADD_ROLE_USER, DELETE_ROLE_USER } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'RoleUsers',
   components: {
@@ -165,12 +171,23 @@ export default {
       editVisible: false
     }
   },
-
-  watch: {},
+  computed: {
+    ADD_ROLE_USER: () => ADD_ROLE_USER,
+    DELETE_ROLE_USER: () => DELETE_ROLE_USER,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_ROLE_USER])
+      },
+      deep: true
+    }
+  },
   created() {
     this.getData()
   },
-  mounted() {},
   activated() {
     this.getData()
   },

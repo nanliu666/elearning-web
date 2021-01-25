@@ -12,22 +12,6 @@
     </page-header>
 
     <basic-container block>
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">
-          Web端菜单
-        </el-menu-item>
-        <el-menu-item index="2">
-          Mobile菜单
-        </el-menu-item>
-        <el-menu-item index="3">
-          后台系统菜单
-        </el-menu-item>
-      </el-menu>
       <common-table
         ref="table"
         :columns="columnsVisible | columnsFilter"
@@ -335,7 +319,6 @@ export default {
         }
       ],
       statusValue: 'all',
-      activeIndex: '1',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -358,8 +341,6 @@ export default {
     this.refreshTableData()
   },
   methods: {
-    handleSelect() {},
-    // handleSelect(key, keyPath) {},
     //  处理页码改变
     handleCurrentPageChange() {},
     handlePageSizeChange() {},
