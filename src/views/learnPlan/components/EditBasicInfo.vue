@@ -36,40 +36,25 @@ export default {
   data() {
     return {
       columns: [
-        {
-          prop: 'coursePlanNo',
-          itemType: 'input',
-          label: '课程安排编号',
-          maxlength: 32,
-          required: true
-        },
+        // {
+        //   prop: 'coursePlanNo',
+        //   itemType: 'input',
+        //   label: '课程安排编号',
+        //   maxlength: 32,
+        //   required: true
+        // },
         {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
           maxlength: 32,
-          required: true,
-          offset: 4
-        },
-        {
-          prop: 'timeRange',
-          itemType: 'datePicker',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          type: 'daterange',
-          label: '时间范围',
           required: true
-        },
-        {
-          prop: 'automaticIntegralCount',
-          itemType: 'switch',
-          label: '自动计算学分',
-          required: false,
-          offset: 4
         },
         {
           itemType: 'treeSelect',
           label: '所属分类',
           prop: 'categoryId',
+          offset: 4,
           props: {
             selectParams: {
               placeholder: '请选择分类',
@@ -93,28 +78,42 @@ export default {
           required: false
         },
         {
-          prop: 'creatorName',
-          itemType: 'input',
-          label: '创建者',
-          offset: 4,
-          required: false
+          prop: 'timeRange',
+          itemType: 'datePicker',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
+          type: 'daterange',
+          label: '时间范围',
+          required: true
         },
         {
-          prop: 'createTime',
-          itemType: 'datePicker',
-          type: 'datetime',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          label: '创建时间',
-          required: false
+          prop: 'automaticIntegralCount',
+          itemType: 'switch',
+          label: '自动计算学分',
+          required: false,
+          offset: 4
         },
         {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
-          offset: 4,
           maxlength: 32,
           required: false
         }
+        // {
+        //   prop: 'creatorName',
+        //   itemType: 'input',
+        //   label: '创建者',
+        //   offset: 4,
+        //   required: false
+        // },
+        // {
+        //   prop: 'createTime',
+        //   itemType: 'datePicker',
+        //   type: 'datetime',
+        //   valueFormat: 'yyyy-MM-dd HH:mm:ss',
+        //   label: '创建时间',
+        //   required: false
+        // },
       ],
       categoryData: []
     }
