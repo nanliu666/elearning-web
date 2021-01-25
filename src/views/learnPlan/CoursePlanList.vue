@@ -527,7 +527,6 @@ export default {
         .filter((item) => item.status != 2)
         .map(arr, 'id')
         .join(',')
-        .value()
       if (!ids) {
         return
       }
