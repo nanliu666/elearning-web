@@ -82,11 +82,11 @@ const TABLE_COLUMNS = [
   {
     label: '课程编号',
     width: 180,
-    prop: 'coursePlanNo'
+    prop: 'courseId'
   },
   {
     label: '课程名称',
-    prop: 'coursePlanName',
+    prop: 'courseName',
     width: 300
   },
   {
@@ -258,7 +258,7 @@ export default {
     jumpDetail(row) {
       this.$router.push({
         path: '/course/detail',
-        query: { id: row.coursePlanNo }
+        query: { id: row.courseId }
       })
     },
     handleDelete(selection) {
