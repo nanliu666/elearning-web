@@ -36,10 +36,10 @@ const $message = (options) => {
     showClose: true
   })
 }
-// 用来开发鉴权，开完完成需要删除
-store.dispatch('GetUserPrivilege', store.getters.userId).then((menu) => {
-  router.$avueRouter.formatRoutes(menu, true)
-})
+// // 用来开发鉴权，开完完成需要删除
+// store.dispatch('GetUserPrivilege', store.getters.userId).then((menu) => {
+//   router.$avueRouter.formatRoutes(menu, true)
+// })
 ;['success', 'warning', 'info', 'error'].forEach((type) => {
   $message[type] = (options) => {
     if (typeof options === 'string') {

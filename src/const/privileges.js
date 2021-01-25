@@ -12,7 +12,7 @@ export const AUTH_COURSE_CATALOG = '/course/catalog/author' // 权限配置
 export const EDIT_COURSE_CATALOG = '/course/catalog/edit' // 编辑
 export const DELETE_COURSE_CATALOG = '/course/catalog/delete' // 删除
 export const ADD_GROUNP_COURSE_CATALOG = '/course/catalog/addNewGroup' // 新增分组
-// 培训中心的分类管理的鉴权
+// 培训中心的鉴权
 export const ADD_TRAIN = '/training/trainingArrange/add' // 新增培训
 export const ADD_GROUNP_TRAIN = '/training/trainingArrange/addGroup' // 新增分组
 export const DELETE_TRAIN = '/training/trainingArrange/delete' // 删除
@@ -85,11 +85,11 @@ export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
 export const EDIT_LECTURER = '/lecturer/lecturer/edit' // 编辑
 export const DELETE_LECTURER = '/lecturer/lecturer/delete' // 删除
 export const ADD_LECTURER_GROUNP = '/lecturer/lecturer/addNewGroup' // 新建分组
-// 讲师管理的鉴权
+// 证书管理的鉴权
 export const ADD_CERTIFICATE = '/certificate/certificateManage/add' // 新建模板
-export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 新建模板
-export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 新建模板
-export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 新建模板
+export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 停用
+export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 预览
+export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 删除
 // 证书发放明细的鉴权
 export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
 // 组织管理的鉴权
@@ -116,13 +116,12 @@ export const ADD_ROLE = '/system/role/add' // 新建角色
 export const VIEW_ROLE = '/system/role/view' // 查看用户
 export const EDIT_ROLE = '/system/role/edit' // 编辑
 export const DELETE_ROLE = '/system/role/delete' // 删除
-export const AUTH_ROLE = '/system/role/author' // 删除
-export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 删除
-// 角色管理的权限配置的鉴权
+export const AUTH_ROLE = '/system/role/author' // 权限配置
+export const ADD_ROLE_CATALOG = '/system/role/addCatalog' // 新建分类
+// 角色管理的角色权限的鉴权
 export const ADD_PERMISSION = '/system/permissionConfig/add' // 新建权限
 export const RANGE_PERMISSION = '/system/permissionConfig/range' // 管理范围
 export const DELETE_PERMISSION = '/system/permissionConfig/delete' // 删除
 // 角色管理的查看用户的鉴权
 export const ADD_ROLE_USER = '/system/roleUsers/add' // 添加用户
 export const DELETE_ROLE_USER = '/system/roleUsers/delete' // 删除
-// TODO: 待补充测试环境的鉴权配置
