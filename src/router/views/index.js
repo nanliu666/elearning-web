@@ -5,7 +5,6 @@ import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
 import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
-import todo from './todo'
 export default [
   {
     path: '/',
@@ -31,15 +30,6 @@ export default [
     }
   },
   {
-    path: '/learnPlan/edit',
-    name: '编辑学习计划',
-    component: EditPlan,
-    meta: {
-      keepAlive: true,
-      isTab: false
-    }
-  },
-  {
     path: '/examManagement/examSchedule/edit',
     name: '新建考试',
     component: ExamEdit,
@@ -57,6 +47,17 @@ export default [
         name: '平台后台菜单管理',
         component: MenuAll,
         meta: {}
+      },
+      {
+        path: '/learnPlan/edit',
+        name: '编辑学习计划',
+        component: EditPlan,
+        meta: {
+          $keepAlive: true,
+          noHeader: true,
+          fullscreen: true,
+          isTab: false
+        }
       },
       {
         path: '',
@@ -88,36 +89,5 @@ export default [
       }
     ]
   },
-  {
-    path: '',
-    component: Layout,
-    children: [
-      {
-        path: '/taskCenter/taskCenter',
-        name: '任务中心',
-        meta: {
-          fullscreen: true
-        },
-        component: () => import('@/views/taskCenter/taskCenter')
-      },
-      {
-        path: '/quickAccess/mailList',
-        name: '通讯录',
-        meta: {
-          fullscreen: true
-        },
-        component: () => import('@/views/quickAccess/mailList')
-      },
-      {
-        path: '/taskCenter/scheduleCenter',
-        name: '日程中心',
-        meta: {
-          fullscreen: true
-        },
-        component: () => import('@/views/taskCenter/scheduleCenter')
-      }
-    ]
-  },
-  ...todo,
   ...(process.env.NODE_ENV === 'development' ? demoRoutes : [])
 ]

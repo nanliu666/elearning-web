@@ -3,6 +3,7 @@
     title="课程列表"
     :visible="visible"
     width="800px"
+    append-to-body
     @close="handleClose"
   >
     <common-table

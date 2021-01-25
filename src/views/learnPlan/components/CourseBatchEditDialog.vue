@@ -4,6 +4,7 @@
     :visible="visible"
     class="course-batch-edit-dialog"
     width="422px"
+    append-to-body
     @close="handleClose"
   >
     <div class="batch_label">
@@ -80,7 +81,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .course-batch-edit-dialog {
   /deep/.el-dialog__header {
     padding-bottom: 16px;
