@@ -141,7 +141,8 @@ export default {
         catalogId: '',
         courseName: '',
         status: 1,
-        courseType: 1
+        courseType: 1,
+        isPutaway: 1
       },
       page: {
         currentPage: 1,
