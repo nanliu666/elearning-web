@@ -25,11 +25,20 @@
           <span>直播时间：{{ item.startTime }}</span>
         </div>
         <div class="operation">
-          <span @click="repRecover(item)">恢复</span>
-          <span @click="repRelease(item)">发布</span>
+          <span
+            v-if="item.lecturerDeleted == '1'"
+            @click="repRecover(item)"
+          >恢复</span>
+          <span
+            v-if="item.shelfStatus == '1'"
+            @click="repRelease(item)"
+          >发布</span>
+          <span
+            v-if="item.shelfStatus == '0'"
+            @click="repOffShelf(item)"
+          >下架</span>
           <span @click="repDownload(item)">下载</span>
           <span @click="repDelete(item)">删除</span>
-          <span @click="repOffShelf(item)">下架</span>
         </div>
       </div>
       <!-- <div class="PBLS">
@@ -115,15 +124,11 @@ export default {
     this.initPlayBackData()
   },
   methods: {
-    //  <span @click="repRecover">恢复</span>
-    //       <span @click="repRelease">发布</span>
-    //       <span @click="repDownload">下载</span>
-    //       <span @click="repDelete">删除</span>
-    //       <span @click="repOffShelf">下架</span>
     repRecover(item) {
       // 恢复
       let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
       setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -132,23 +137,56 @@ export default {
     },
     repRelease(item) {
       // 发布
-      let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
+      let sendPar = { videoId: item.id.toString(), shelfStatus: '0' }
       setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
         this.$message({
           message: '操作成功',
           type: 'success'
         })
       })
     },
-    // repDownload(item) {
-    //   // 下载
-    // },
-    // repDelete(item) {
-    //   // 删除
-    // },
-    // repOffShelf(item) {
-    //   // 下架
-    // },
+    repDownload(item) {
+      // 下载
+      if (item.localUrl) {
+        window.open(item.localUrl)
+      } else {
+        this.$message({
+          message: '没有视频文件',
+          type: 'error'
+        })
+      }
+    },
+    repDelete(item) {
+      // 删除
+      let sendPar = { videoId: item.id.toString(), isDeleted: '1' }
+      this.$confirm('是否删除该视频?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          setReplayStatus(sendPar).then(() => {
+            this.initPlayBackData()
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+          })
+        })
+        .catch(() => {})
+    },
+    repOffShelf(item) {
+      // 下架
+      let sendPar = { videoId: item.id.toString(), shelfStatus: '1' }
+      setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+      })
+    },
     initPlayBackData() {
       // 初始化直播回放列表
       liveReplayList(this.PBLParmas).then((res) => {
