@@ -260,7 +260,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-
+  // defaultExpandAll: true,
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
@@ -426,6 +426,17 @@ export default {
         }))
         // 更新分页器数据
         this.page.total = _.size(tableData)
+        // 用来批量增加鉴权
+        // _.each(this.tableData, item => {
+        //   const loop = (node) => {
+        //     node.hasChildren = false
+        //     if(_.isEmpty(item.children)) return
+        //     _.each(node.children, child => {
+        //       loop(child)
+        //     })
+        //   }
+        //   loop(item)
+        // })
       } catch (error) {
         window.console.log(error)
       } finally {
