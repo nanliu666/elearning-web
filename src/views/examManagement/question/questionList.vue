@@ -3,7 +3,7 @@
     <page-header title="题库管理">
       <el-dropdown
         slot="rightMenu"
-        v-p="'/examManagement/question/questionList/add'"
+        v-p="ADD_QUSTION"
         @command="handleCommand"
       >
         <el-button
@@ -82,7 +82,7 @@
           >
             <template #multiSelectMenu="{ selection }">
               <el-button
-                v-p="'/examManagement/question/questionList/deleteAll'"
+                v-p="DELETE_QUSTION"
                 type="text"
                 style="margin-bottom:0;"
                 @click="handleDelete(selection)"
@@ -128,7 +128,7 @@
             </template>
             <template #handler="{row}">
               <el-button
-                v-p="'/examManagement/question/questionList/edit'"
+                v-p="EDIT_QUSTION"
                 size="medium"
                 type="text"
                 @click="handleEdit(row.id)"
@@ -136,7 +136,7 @@
                 编辑
               </el-button>
               <el-button
-                v-p="'/examManagement/question/questionList/delete'"
+                v-p="DELETE_QUSTION"
                 size="medium"
                 type="text"
                 @click="handleDelete(row)"
@@ -162,6 +162,8 @@ const COLUMNS = [
     slot: true
   }
 ]
+import { DELETE_QUSTION, EDIT_QUSTION, ADD_QUSTION } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'QuestionList',
   components: {
@@ -228,11 +230,22 @@ export default {
   computed: {
     columns: () => COLUMNS,
     QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    DELETE_QUSTION: () => DELETE_QUSTION,
+    EDIT_QUSTION: () => EDIT_QUSTION,
+    ADD_QUSTION: () => ADD_QUSTION,
+    ...mapGetters(['privileges'])
   },
   watch: {
     treeSearch(val) {
       this.$refs.categoryTree.filter(val)
+    },
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_QUSTION, EDIT_QUSTION])
+      },
+      deep: true
     }
   },
   activated() {

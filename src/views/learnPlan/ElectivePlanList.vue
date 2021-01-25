@@ -40,7 +40,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/deleteAll'"
+            v-p="DELETE_ELECTIVE"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -51,7 +51,7 @@
         </template>
         <template #oparetion="{row}">
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/view'"
+            v-p="VIEW_ELECTIVE"
             type="text"
             size="medium"
             @click="jumpDetail(row)"
@@ -59,7 +59,7 @@
             查看
           </el-button>
           <el-button
-            v-p="'/learnPlan/ElectivePlanList/delete'"
+            v-p="DELETE_ELECTIVE"
             type="text"
             size="medium"
             @click="handleDelete([row])"
@@ -82,11 +82,11 @@ const TABLE_COLUMNS = [
   {
     label: '课程编号',
     width: 180,
-    prop: 'coursePlanNo'
+    prop: 'courseId'
   },
   {
     label: '课程名称',
-    prop: 'coursePlanName',
+    prop: 'courseName',
     width: 300
   },
   {
@@ -174,7 +174,8 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-
+import { VIEW_ELECTIVE, EDIT_REQUDELETE_ELECTIVEIRED } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'ElectivePlanList',
   components: {
@@ -208,6 +209,20 @@ export default {
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    VIEW_ELECTIVE: () => VIEW_ELECTIVE,
+    EDIT_REQUDELETE_ELECTIVEIRED: () => EDIT_REQUDELETE_ELECTIVEIRED,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([VIEW_ELECTIVE, EDIT_REQUDELETE_ELECTIVEIRED])
+      },
+      deep: true
     }
   },
   activated() {
@@ -258,7 +273,7 @@ export default {
     jumpDetail(row) {
       this.$router.push({
         path: '/course/detail',
-        query: { id: row.coursePlanNo }
+        query: { id: row.courseId }
       })
     },
     handleDelete(selection) {

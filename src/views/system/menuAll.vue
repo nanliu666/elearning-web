@@ -12,22 +12,6 @@
     </page-header>
 
     <basic-container block>
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">
-          Web端菜单
-        </el-menu-item>
-        <el-menu-item index="2">
-          Mobile菜单
-        </el-menu-item>
-        <el-menu-item index="3">
-          后台系统菜单
-        </el-menu-item>
-      </el-menu>
       <common-table
         ref="table"
         :columns="columnsVisible | columnsFilter"
@@ -276,7 +260,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-
+  // defaultExpandAll: true,
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
@@ -335,7 +319,6 @@ export default {
         }
       ],
       statusValue: 'all',
-      activeIndex: '1',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       menuEditVisible: false,
@@ -358,8 +341,6 @@ export default {
     this.refreshTableData()
   },
   methods: {
-    handleSelect() {},
-    // handleSelect(key, keyPath) {},
     //  处理页码改变
     handleCurrentPageChange() {},
     handlePageSizeChange() {},
@@ -445,6 +426,17 @@ export default {
         }))
         // 更新分页器数据
         this.page.total = _.size(tableData)
+        // 用来批量增加鉴权
+        // _.each(this.tableData, item => {
+        //   const loop = (node) => {
+        //     node.hasChildren = false
+        //     if(_.isEmpty(item.children)) return
+        //     _.each(node.children, child => {
+        //       loop(child)
+        //     })
+        //   }
+        //   loop(item)
+        // })
       } catch (error) {
         window.console.log(error)
       } finally {

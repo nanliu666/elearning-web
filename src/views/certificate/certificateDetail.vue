@@ -3,7 +3,7 @@
     <page-header title="证书发放明细">
       <template slot="rightMenu">
         <el-button
-          v-p="'/certificate/certificateDetail/export'"
+          v-p="EXPORT_CERTIFICATE"
           type="primary"
           size="medium"
           @click="isexportGrantExcel"
@@ -185,6 +185,7 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { EXPORT_CERTIFICATE } from '@/const/privileges'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -227,6 +228,9 @@ export default {
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
     }
+  },
+  computed: {
+    EXPORT_CERTIFICATE: () => EXPORT_CERTIFICATE
   },
   activated() {
     // this.initSearchData()

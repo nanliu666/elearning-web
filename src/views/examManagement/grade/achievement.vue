@@ -80,7 +80,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/examManagement/grade/achievement/view'"
+              v-p="VIEW_GRADE"
               type="text"
               @click="handleLookUp(row)"
             >
@@ -141,11 +141,13 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
     minWidth: 150
   }
 }
+import { VIEW_GRADE } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'Achievement',
   components: { SearchPopover },
@@ -213,6 +215,19 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {}
+    }
+  },
+  computed: {
+    VIEW_GRADE: () => VIEW_GRADE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([VIEW_GRADE])
+      },
+      deep: true
     }
   },
   activated() {

@@ -3,7 +3,7 @@
     <page-header title="新闻管理">
       <template #rightMenu>
         <el-button
-          v-p="'/newsCenter/newsManage/add'"
+          v-p="ADD_NEWS"
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
@@ -87,7 +87,7 @@ const ENUMS_STATUS = {
   Published: 'Published',
   Draft: 'Draft'
 }
-
+import { ADD_NEWS } from '@/const/privileges'
 // 全部/新闻中心/系统消息
 export default {
   name: 'NewsManage',
@@ -117,6 +117,9 @@ export default {
       }
     }
   },
+  computed: {
+    ADD_NEWS: () => ADD_NEWS
+  },
   watch: {
     'searchParams.categoryId'() {
       this.handleSearch(this.searchParams)
@@ -145,7 +148,7 @@ export default {
     },
     handlePublishBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit'
       })
     }
   }

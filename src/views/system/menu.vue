@@ -99,6 +99,7 @@
           <div class="table__handler">
             <el-button
               v-if="row.isEnabled === 1"
+              v-p="STOP_MENU"
               size="medium"
               type="text"
               :disabled="
@@ -110,6 +111,7 @@
             </el-button>
             <el-button
               v-else
+              v-p="STOP_MENU"
               size="medium"
               type="text"
               @click.stop="() => handleMenuEnable(row)"
@@ -217,6 +219,8 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { STOP_MENU } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'Menu',
   components: {
@@ -263,6 +267,19 @@ export default {
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    STOP_MENU: () => STOP_MENU,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_MENU])
+      },
+      deep: true
     }
   },
   created() {

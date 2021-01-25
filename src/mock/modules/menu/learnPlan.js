@@ -27,6 +27,7 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '新建必修课程',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/CoursePlanList/add'
         },
@@ -34,17 +35,13 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/learnPlan/CoursePlanList/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          menuName: '编辑',
           path: '/learnPlan/CoursePlanList/edit'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/CoursePlanList/delete'
         },
@@ -52,12 +49,14 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          menuName: '查看完成率',
           path: '/learnPlan/CoursePlanList/view'
         },
         {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          menuName: '新建分组',
           path: '/learnPlan/CoursePlanList/addGroup'
         },
         {
@@ -84,18 +83,14 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
-          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/learnPlan/ElectivePlanList/deleteAll'
-        },
-        {
-          menuType: 'Button',
-          isOwn: 1,
+          menuName: '查看',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/ElectivePlanList/view'
         },
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '删除',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/learnPlan/ElectivePlanList/delete'
         }
