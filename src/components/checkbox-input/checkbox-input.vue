@@ -4,13 +4,15 @@
     class="checkbox-input"
   >
     {{ textBefore }}
-    <el-input
+    <el-input-number
       v-model.number="innerValue"
+      :controls="false"
+      :min="0"
       :style="`width:${inputWidth}px`"
       :disabled="disabled"
       v-bind="inputProps"
       @input="inputNumber"
-    ></el-input>
+    ></el-input-number>
     {{ textAfter }}
   </el-checkbox>
 </template>
