@@ -6,6 +6,7 @@
     >
       <el-button
         slot="rightMenu"
+        v-p="ADD_PERMISSION"
         size="medium"
         type="primary"
         @click="handleMenuAddBtnClick"
@@ -48,6 +49,7 @@
 // import { getRoleList, getCate, getPositions, delRole } from '../../api/system/role'
 import webPermission from './components/webPermission'
 import roleLimits from './components/roleLimits'
+import { ADD_PERMISSION } from '@/const/privileges'
 export default {
   components: {
     webPermission,
@@ -59,6 +61,9 @@ export default {
       clientId: 'Admin',
       configVisible: false
     }
+  },
+  computed: {
+    ADD_PERMISSION: () => ADD_PERMISSION
   },
   methods: {
     handleMenuAddBtnClick() {

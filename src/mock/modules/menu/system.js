@@ -43,7 +43,36 @@ export default {
           path: '/orgs/orgManagement',
           icon: 'iconfont iconicon_subordinate',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建组织',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建子组织',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/addChild'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/orgs/orgManagement/delete'
+            }
+          ]
         },
         {
           menuId: '1260118258720522241',
@@ -99,7 +128,50 @@ export default {
           path: '/system/user',
           icon: 'iconfont iconicon_boss',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '添加用户',
+              isEnabled: 1,
+              path: '/system/user/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '角色设置',
+              isEnabled: 1,
+              path: '/system/user/setting'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '密码重置',
+              isEnabled: 1,
+              path: '/system/user/resetPassword'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/system/user/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '冻结',
+              isEnabled: 1,
+              path: '/system/user/end'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/user/delete'
+            }
+          ]
         },
         {
           menuId: '1259034522778285058',
@@ -153,7 +225,50 @@ export default {
           path: '/system/role',
           icon: 'iconfont iconicon_group',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建角色',
+              isEnabled: 1,
+              path: '/system/role/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '查看用户',
+              isEnabled: 1,
+              path: '/system/role/view'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '权限配置',
+              isEnabled: 1,
+              path: '/system/role/author'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/system/role/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/role/delete'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建分类',
+              isEnabled: 1,
+              path: '/system/role/addCatalog'
+            }
+          ]
         },
         {
           menuId: '12604101852546387969',
@@ -164,7 +279,30 @@ export default {
           isShow: 0,
           code: 'role',
           alias: '角色权限',
-          path: '/system/permissionConfig'
+          path: '/system/permissionConfig',
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新增权限',
+              isEnabled: 1,
+              path: '/system/permissionConfig/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '管理范围',
+              isEnabled: 1,
+              path: '/system/permissionConfig/range'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/permissionConfig/delete'
+            }
+          ]
         },
 
         {
@@ -176,7 +314,23 @@ export default {
           isShow: 0,
           code: 'role',
           alias: '查看用户',
-          path: '/system/roleUsers'
+          path: '/system/roleUsers',
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '添加用户',
+              isEnabled: 1,
+              path: '/system/roleUsers/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/system/roleUsers/delete'
+            }
+          ]
         }
       ]
     },
@@ -192,22 +346,30 @@ export default {
       path: '/system/menu',
       icon: 'iconfont iconicon_compile',
       dataPrivileges: [],
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '启用/停用',
+          isEnabled: 1,
+          path: '/system/menu/stop'
+        }
+      ]
+    },
+    {
+      menuId: '125907843471874',
+      menuName: '原始菜单管理',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 1,
+      code: 'system_menu_all',
+      alias: 'menuAll ',
+      path: '/system/menuAll',
+      icon: 'iconfont iconicon_compile',
+      dataPrivileges: [],
       children: []
     },
-    // {
-    //   menuId: '125907843471874',
-    //   menuName: '原始菜单管理',
-    //   menuType: 'Menu',
-    //   isEnabled: 1,
-    //   isOwn: 1,
-    //   isShow: 0,
-    //   code: 'system_menu_all',
-    //   alias: 'menuAll ',
-    //   path: '/system/menuAll',
-    //   icon: 'iconfont iconicon_compile',
-    //   dataPrivileges: [],
-    //   children: []
-    // },
     {
       menuId: '1259071409534308354',
       menuName: '操作日志',
@@ -263,23 +425,27 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
+              menuName: '新建公告',
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/add'
             },
             {
               menuType: 'Button',
               isOwn: 1,
+              menuName: '删除',
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/delete'
             },
             {
               menuType: 'Button',
+              menuName: '编辑',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/edit'
             },
             {
               menuType: 'Button',
+              menuName: '置顶',
               isOwn: 1,
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/top'

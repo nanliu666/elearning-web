@@ -13,6 +13,7 @@
     >
       <template #multiSelectMenu="{ selection }">
         <el-button
+          v-p="DELETE_PERMISSION"
           style="margin-bottom:0;"
           type="text"
           @click="() => handleRemoveItems(selection)"
@@ -35,6 +36,7 @@
           <!--            页面控件权限-->
           <!--          </el-button>-->
           <el-button
+            v-p="RANGE_PERMISSION"
             size="medium"
             type="text"
             @click.stop="() => handleMenuItemAddBtnClick(row.menuId)"
@@ -42,6 +44,7 @@
             管理范围
           </el-button>
           <el-button
+            v-p="DELETE_PERMISSION"
             size="medium"
             type="text"
             @click.stop="() => handleRemoveItems([row])"
@@ -179,6 +182,8 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { RANGE_PERMISSION, DELETE_PERMISSION } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   filters: {
     // 过滤不可见的列
@@ -218,6 +223,20 @@ export default {
       loading: false,
       menuId: '',
       pageRuleDialog: false
+    }
+  },
+  computed: {
+    RANGE_PERMISSION: () => RANGE_PERMISSION,
+    DELETE_PERMISSION: () => DELETE_PERMISSION,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([RANGE_PERMISSION, DELETE_PERMISSION])
+      },
+      deep: true
     }
   },
   created() {

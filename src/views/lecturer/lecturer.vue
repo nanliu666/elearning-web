@@ -6,6 +6,7 @@
       </div>
       <div>
         <el-button
+          v-p="ADD_LECTURER"
           type="primary"
           size="medium"
           @click="toAddLecturer"
@@ -19,18 +20,6 @@
       <!-- 内容 -->
       <div class="draft_issue">
         <div class="issue_l">
-          <!-- <leftColumn
-            :search="true"
-            :data="data"
-            :current-node-key="currentNodeKey"
-            :more-menu="['edit', 'add', 'delete', 'move']"
-            :interface-list="interfaceList"
-            lazy
-            :load="loadNode"
-            @refreshTree="islistTeacherCategory"
-            @node-click="nodeClick"
-          ></leftColumn> -->
-
           <my-column
             v-if="myColumnShow"
             :column-interface="columnInterface"
@@ -128,6 +117,7 @@
 
               <template #multiSelectMenu="{ selection }">
                 <el-button
+                  v-p="DELETE_LECTURER"
                   style="margin-bottom:0;"
                   type="text"
                   @click="() => handleRemoveItems(selection)"
@@ -209,6 +199,7 @@
               >
                 <el-button
                   v-if="scope.row.status == 1"
+                  v-p="STOP_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 0)"
@@ -217,26 +208,25 @@
                 </el-button>
                 <span
                   v-else
+                  v-p="STOP_LECTURER"
                   style=" cursor:pointer; "
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
-                &nbsp;
-                <i style="color:#ccc;">|</i>
-                &nbsp;
+                &nbsp; &nbsp;
                 <el-button
+                  v-p="EDIT_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
-                &nbsp;
-                <i style="color:#ccc;">|</i>
-                &nbsp;
+                &nbsp; &nbsp;
                 <el-button
+                  v-p="DELETE_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="isTeacherdelete(scope.row)"
@@ -513,6 +503,8 @@ const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
 
+import { ADD_LECTURER, STOP_LECTURER, EDIT_LECTURER, DELETE_LECTURER } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
   components: {
@@ -604,8 +596,21 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-
+  computed: {
+    ADD_LECTURER: () => ADD_LECTURER,
+    STOP_LECTURER: () => STOP_LECTURER,
+    EDIT_LECTURER: () => EDIT_LECTURER,
+    DELETE_LECTURER: () => DELETE_LECTURER,
+    ...mapGetters(['privileges'])
+  },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_LECTURER, EDIT_LECTURER, DELETE_LECTURER])
+      },
+      deep: true
+    },
     filterText(val) {
       this.$refs.tree.filter(val)
     }

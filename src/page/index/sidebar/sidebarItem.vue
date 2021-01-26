@@ -14,7 +14,10 @@
       :class="{ 'is-active': vaildActive(onlyOneChild) }"
       @click="open(onlyOneChild)"
     >
-      <i :class="onlyOneChild[iconKey]" />
+      <i
+        v-if="iconKey"
+        :class="onlyOneChild[iconKey]"
+      />
       <span
         slot="title"
         :alt="onlyOneChild[pathKey]"
