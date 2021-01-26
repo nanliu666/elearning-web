@@ -150,7 +150,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'search',
+      field: 'processName',
       label: '',
       data: '',
       config: {
@@ -163,7 +163,7 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       data: '',
-      field: 'userStatus',
+      field: 'useStatus',
       label: '状态',
 
       options: [
@@ -180,7 +180,7 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'input',
-      field: 'visible',
+      field: 'visibleRange',
       label: '适用范围',
       data: ''
     }
@@ -231,7 +231,6 @@ export default {
     },
     handleSearch(searchParams) {
       this.searchParams = _.pickBy(searchParams)
-      this.page.currentPage = 1
       this.loadTableData()
     },
     /**

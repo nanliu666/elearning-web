@@ -41,13 +41,11 @@
                 width="40"
                 trigger="click"
               >
-                <el-button
-                  class="operations__btns--item"
-                  size="mini"
-                  type="text"
-                >
-                  <i class="iconfont iconicon_setting" />
-                </el-button>
+                <i
+                  slot="reference"
+                  style="cursor: pointer;"
+                  class="el-icon-setting"
+                />
 
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
@@ -55,7 +53,7 @@
                     <el-checkbox
                       v-for="item of tableColumns"
                       :key="item.prop"
-                      :disabled="item.prop === 'name'"
+                      :disabled="item.prop === 'apprNo'"
                       :label="item.prop"
                       class="operations__column--item"
                     >
@@ -100,6 +98,7 @@
 
 <script>
 import { STATUS_TO_TEXT, STATUS_DICTS } from '@/const/approve'
+import { categoryOptions, categoryMap } from '@/const/approve'
 import { getRecordList, getProcessType } from '@/api/apprProcess/apprProcess'
 import { getOrgTreeSimple } from '../../api/org/org'
 import { mapGetters } from 'vuex'
@@ -112,7 +111,8 @@ const TABLE_COLUMNS = [
   },
   {
     label: '审批类型',
-    prop: 'processName',
+    prop: 'categoryId',
+    formatter: (row) => categoryMap[row.status] || '',
     minWidth: 120
   },
   {
@@ -172,15 +172,6 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       data: '',
-      field: 'processKey',
-      label: '审批类型',
-      arrField: 'positionId',
-      config: { optionLabel: 'processName', optionValue: 'processKey' },
-      options: []
-    },
-    {
-      type: 'select',
-      data: '',
       field: 'status',
       label: '审批状态',
       arrField: 'positionId',
@@ -188,52 +179,17 @@ const SEARCH_CONFIG = {
       options: []
     },
     {
-      type: 'treeSelect',
-      field: 'orgId',
-      label: '申请部门',
+      type: 'select',
       data: '',
-      config: {
-        selectParams: {
-          placeholder: '请输入内容',
-          multiple: false
-        },
-        treeParams: {
-          data: [],
-          'check-strictly': true,
-          'default-expand-all': false,
-          'expand-on-click-node': false,
-          clickParent: true,
-          filterable: false,
-          props: {
-            children: 'children',
-            label: 'orgName',
-            disabled: 'disabled',
-            value: 'orgId'
-          }
-        }
-      }
+      field: 'categoryId',
+      label: '审批类型',
+      options: categoryOptions
     },
     {
-      type: 'dataPicker',
-      data: '',
-      label: '申请日期',
-      field: 'beginApplyTime,endApplyTime',
-      config: {
-        type: 'datetimerange',
-        'range-separator': '至',
-        'value-format': 'yyyy-MM-dd HH:mm:ss'
-      }
-    },
-    {
-      type: 'dataPicker',
-      data: '',
-      label: '完成日期',
-      field: 'beginCompleteTime,endCompleteTime',
-      config: {
-        type: 'datetimerange',
-        'range-separator': '至',
-        'value-format': 'yyyy-MM-dd HH:mm:ss'
-      }
+      type: 'input',
+      field: 'visible',
+      label: '申请人',
+      data: ''
     }
   ]
 }
