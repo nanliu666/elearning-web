@@ -24,9 +24,9 @@
             @selectItem="selectContact"
           />
         </template>
-        <template #lecturerId>
+        <template #lecturerName>
           <lazy-select
-            v-model="model.lecturerId"
+            v-model="model.lecturerName"
             :disabled="true"
             :allow-create="true"
             :searchable="true"
@@ -64,7 +64,7 @@ const EventColumns = [
     label: '上课日期'
   },
   { itemType: 'slot', span: 24, required: true, prop: 'courseId', label: '关联课程' },
-  { itemType: 'slot', span: 24, required: false, prop: 'lecturerId', label: '讲师' },
+  { itemType: 'slot', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
   {
     itemType: 'radio',
     prop: 'studyType',
@@ -77,7 +77,14 @@ const EventColumns = [
     ]
   }
 ]
-
+const modelCopy = {
+  studyType: 0,
+  courseId: '',
+  courseName: '',
+  lecturerId: null,
+  lecturerName: null,
+  classTime: []
+}
 export default {
   name: 'OnlineCourseDrawer',
   components: {
@@ -94,14 +101,7 @@ export default {
       editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
-      model: {
-        studyType: 0,
-        courseId: '',
-        courseName: '',
-        lecturerId: null,
-        lecturerName: null,
-        classTime: []
-      }
+      model: modelCopy
     }
   },
   computed: {
