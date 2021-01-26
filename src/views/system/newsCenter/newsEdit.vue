@@ -30,12 +30,6 @@
                 multiple
                 :before-upload="beforeUpload"
               >
-                <div
-                  slot="tip"
-                  class="upload__tip"
-                >
-                  单个文件大小＜5MB，最多5个文件
-                </div>
                 <template>
                   <el-button
                     size="medium"
@@ -43,13 +37,16 @@
                   >
                     点击上传
                   </el-button>
+                  <div class="upload__tip">
+                    单个文件大小＜5MB，最多5个文件
+                  </div>
                   <div>
                     <ul class="upload__files">
                       <li
                         v-for="(item, index) in formData.attachment"
                         :key="index"
                       >
-                        {{ item.localName }}
+                        <span class="ellipsis files__name">{{ item.localName }}</span>
                         <i
                           class="el-icon-close"
                           @click.stop="handleRemoveAttachment(index)"
@@ -659,8 +656,15 @@ $color_font_uploader: #A0A8AE
     justify-content: space-between
     align-items: center
     margin-bottom: 4px
+    border: 1px solid #dfdddf
+    padding: 4px 10px
+    width: 60%;
     &:hover
       color: $primaryColor
+    .files__name
+      color: #292a29;
+      font-weight: 550
+      width: 60%;
 .select
   width: 194px
 </style>

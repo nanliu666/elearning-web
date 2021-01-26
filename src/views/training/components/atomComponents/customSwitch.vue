@@ -23,10 +23,12 @@
             prop="value"
             :rules="rules"
           >
-            <el-input
+            <el-input-number
               v-model.number="data[`${item.prop}Value`]"
+              :controls="false"
+              :min="0"
               class="expand-input"
-            ></el-input>
+            ></el-input-number>
           </el-form-item>
         </el-form>
         <span>{{ item.expand.before }}</span>

@@ -6,7 +6,8 @@
         :data.sync="model"
         @changeSwitch="changeSwitch"
       />
-      <div>
+      <!-- 此版本注释考试多选功能 -->
+      <!-- <div>
         <div class="group-title">
           多选题
         </div>
@@ -32,7 +33,7 @@
             </el-tooltip>
           </el-radio>
         </el-radio-group>
-      </div>
+      </div> -->
     </div>
     <div class="footer-tips">
       提示：客观题指单选题、多选题、判断题
@@ -76,8 +77,8 @@ const defaultValue = {
   scopeLimit: false,
   scopeLimitValue: 100, // 最高分默认值100
   objectiveQuestions: false,
-  decideItem: false,
-  multipleChoice: 0
+  decideItem: false
+  // multipleChoice: 0
 }
 export default {
   name: 'EvaluationStrategy',
@@ -86,25 +87,25 @@ export default {
   },
   data() {
     return {
-      radioList: [
-        { value: '完全正确得分' },
-        { value: '按正确选项个数计分' },
-        {
-          value: '每项得扣分',
-          des:
-            '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
-        },
-        {
-          value: '每项答错扣分',
-          des:
-            '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
-        },
-        {
-          value: '每正确项得分',
-          des:
-            '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
-        }
-      ],
+      // radioList: [
+      //   { value: '完全正确得分' },
+      //   { value: '按正确选项个数计分' },
+      //   {
+      //     value: '每项得扣分',
+      //     des:
+      //       '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
+      //   },
+      //   {
+      //     value: '每项答错扣分',
+      //     des:
+      //       '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
+      //   },
+      //   {
+      //     value: '每正确项得分',
+      //     des:
+      //       '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
+      //   }
+      // ],
       insertConfig,
       switchConfig: switchConfig,
       model: _.cloneDeep(defaultValue)
