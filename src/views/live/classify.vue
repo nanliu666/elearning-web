@@ -288,7 +288,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteCategory({ id: id }).then(() => {
+      deleteCategory({ id: id + '' }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
@@ -308,7 +308,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.deleteFun(row.id)
+          this.deleteFun(row.idStr || row.id)
         })
       }
     },

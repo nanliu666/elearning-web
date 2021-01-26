@@ -287,7 +287,7 @@
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments.length > 0 && ruleForm.attachments[0].fileUrl"
+                    v-if="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl !== ''"
                     :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
                     class="avatar"
                   />

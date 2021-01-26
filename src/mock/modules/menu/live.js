@@ -61,6 +61,18 @@ export default {
       icon: 'iconfont iconicon_compile'
     },
     {
+      menuId: '1590112075692670',
+      menuName: '播放回放',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'approval_approval',
+      alias: 'approval',
+      path: '/live/replayPlaying',
+      icon: 'iconfont iconicon_compile'
+    },
+    {
       menuId: '1590112075692666',
       menuName: '数据统计',
       menuType: 'Menu',
