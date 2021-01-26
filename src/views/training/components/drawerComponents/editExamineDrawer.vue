@@ -3,6 +3,8 @@
     :title="title"
     :visible.sync="innnerVisible"
     size="524px"
+    append-to-body
+    custom-class="examineDrawer"
   >
     <div class="wrapper">
       <ul class="nav-ul">
@@ -20,6 +22,7 @@
         <basicSetting
           v-show="currentIndex === 0"
           ref="basicSettingRef"
+          :entry-c-name="entryCName"
         />
         <testEnvironment
           v-show="currentIndex === 1"
@@ -40,7 +43,9 @@
       </div>
       <div class="footer">
         <div class="footer-inner">
-          注：培训发布后，本条考试信息数据将会同步至【考评管理】，可在考试安排和成绩管理查到对应信息
+          注：{{
+            entryCName
+          }}发布后，本条考试信息数据将会同步至【考评管理】，可在考试安排和成绩管理查到对应信息
         </div>
         <div>
           <el-button
@@ -81,6 +86,7 @@ export default {
   },
   props: {
     examine: { type: Object, default: null },
+    entryCName: { type: String, default: '培训' },
     visible: { type: Boolean, default: false }
   },
   data() {
@@ -174,58 +180,59 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-.wrapper {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  .nav-ul {
-    margin: 0 30px 20px;
+<style lang="scss">
+.examineDrawer {
+  .wrapper {
+    height: 100%;
     display: flex;
-    justify-content: space-between;
-    border: 1px solid #c7cbd1;
-    .nav-li {
-      flex: 1;
-      height: 100%;
-      width: calc(100% / 5);
-      padding: 4px 10px;
+    flex-direction: column;
+    .nav-ul {
+      margin: 0 30px 20px;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      border-right: 1px solid #c7cbd1;
-      cursor: pointer;
-      &:last-child {
-        border-right: 0;
+      justify-content: space-between;
+      border: 1px solid #c7cbd1;
+      .nav-li {
+        flex: 1;
+        height: 100%;
+        width: calc(100% / 5);
+        padding: 4px 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right: 1px solid #c7cbd1;
+        cursor: pointer;
+        &:last-child {
+          border-right: 0;
+        }
+      }
+      .active-nav {
+        background-color: #437bfd;
+        color: #ffffff;
       }
     }
-    .active-nav {
-      background-color: #437bfd;
-      color: #ffffff;
-    }
   }
-}
-.form {
-  flex: 1;
-  padding: 0 30px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  height: 300px;
-  /*height: calc(100% - 400px);*/
-}
+  .form {
+    flex: 1;
+    padding: 0 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100vh - 208px);
+  }
 
-.footer {
-  display: flex;
-  padding: 20px 10px;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #f5f5f7;
-  .footer-inner {
-    font-size: 12px;
-    color: #cccccc;
-    width: 70%;
-  }
-  /deep/ .el-checkbox__label {
-    font-size: 12px;
+  .footer {
+    display: flex;
+    padding: 20px 10px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f5f5f7;
+    .footer-inner {
+      font-size: 12px;
+      color: #cccccc;
+      width: 70%;
+    }
+    /deep/ .el-checkbox__label {
+      font-size: 12px;
+    }
   }
 }
 </style>

@@ -1,20 +1,13 @@
 export default {
   basicSetting: {
-    processName: '入职',
-    processType: 1,
-    approverDistinct: 1,
-    isOpinion: true,
-    tip: '这里是填写提示',
-    initiator: [
-      {
-        hasChildren: false,
-        id: '1257943561580855298',
-        name: '后端组',
-        orgId: '1257943561580855298',
-        orgName: '后端组',
-        parentId: '1252523599903072261'
-      }
-    ]
+    icon: 'icondirectories-bicolor',
+    processName: '',
+    processType: '',
+    categoryId: '1',
+    processVisible: [],
+    approverDistinct: 0,
+    isOpinion: '',
+    tip: ''
   },
   processData: {
     type: 'start',
@@ -26,10 +19,10 @@ export default {
     nodeId: 'Gb2',
     childNode: {
       type: 'approver',
-      content: '发起人自选',
+      content: '请选择审批人',
       properties: {
         title: '审批人',
-        assigneeType: 'optional',
+        assigneeType: 'user',
         counterSign: true,
         optionalMultiUser: false,
         optionalRange: 'ALL'

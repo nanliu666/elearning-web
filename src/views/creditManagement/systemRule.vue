@@ -22,50 +22,12 @@
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSearch"
                 />
-                <div
-                  class="refresh-container"
-                  @click="loadTableData"
-                >
-                  <span class="icon  el-icon-refresh-right" />
-                  <span class="refresh-text">刷新</span>
-                </div>
-                <el-popover
-                  placement="bottom"
-                  width="40"
-                  trigger="click"
-                  style="margin-left:10px"
-                >
-                  <el-checkbox-group
-                    v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
-                  >
-                    <el-checkbox
-                      v-for="item in tableColumns"
-                      :key="item.prop"
-                      :label="item.prop"
-                      :disabled="item.prop === 'examName'"
-                      class="originColumn"
-                    >
-                      {{ item.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                  <i
-                    slot="reference"
-                    class="el-icon-setting"
-                    style="cursor: pointer;"
-                  />
-                </el-popover>
               </div>
             </div>
           </div>
         </template>
-        <template slot="multiSelectMenu">
-          <!--          <el-button-->
-          <!--            type="text"-->
-          <!--            icon="el-icon-delete"-->
-          <!--          >-->
-          <!--            批量导出-->
-          <!--          </el-button>-->
+        <template #sysRuleSource="{row}">
+          <span :class="{ disabled: row.status == '0' }"> {{ row.sysRuleSource }} </span>
         </template>
         <template #name="{row}">
           <el-link
@@ -78,6 +40,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="STOP_SYSTEM_RULE"
               type="text"
               @click="handleIsStart(row)"
             >
@@ -107,11 +70,6 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '更新时间',
-    prop: 'updateTime',
-    minWidth: 120
-  },
-  {
     label: '状态',
     prop: 'status',
     minWidth: 120,
@@ -136,6 +94,8 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
+import { STOP_SYSTEM_RULE } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'SystemRule',
   components: { SearchPopover },
@@ -149,7 +109,6 @@ export default {
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: {
@@ -169,7 +128,19 @@ export default {
       searchParams: {}
     }
   },
-  mounted() {},
+  computed: {
+    STOP_SYSTEM_RULE: () => STOP_SYSTEM_RULE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_SYSTEM_RULE])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.loadTableData()
   },
@@ -249,6 +220,9 @@ export default {
 .transitionBox {
   position: relative;
   height: 50px;
+}
+.disabled {
+  color: #d4dbdd;
 }
 
 .searchBox {

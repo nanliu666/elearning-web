@@ -78,6 +78,7 @@
             </template>
             <template #handler="{row}">
               <el-button
+                v-p="VIEW_CREDIT"
                 size="medium"
                 type="text"
                 @click="jumpEdit(row.user_id_str)"
@@ -138,6 +139,8 @@ const COLUMNS = [
     minWidth: 180
   }
 ]
+import { VIEW_CREDIT } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'Credit',
   components: {
@@ -204,9 +207,18 @@ export default {
   computed: {
     columns: () => COLUMNS,
     QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    VIEW_CREDIT: () => VIEW_CREDIT,
+    ...mapGetters(['privileges'])
   },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([VIEW_CREDIT])
+      },
+      deep: true
+    },
     treeSearch(val) {
       this.$refs.categoryTree.filter(val)
     }

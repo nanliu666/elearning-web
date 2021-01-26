@@ -33,6 +33,7 @@
               @submit="handleSearch"
             />
             <el-button
+              v-p="ADD_EXAM_CATALOG"
               type="primary"
               size="medium"
               @click="addCategory"
@@ -59,6 +60,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="STOP_EXAM_CATALOG"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -66,12 +68,16 @@
               {{ row.status === 1 ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="AUTH_EXAM_CATALOG"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
             </el-button>
-            <el-dropdown @command="handleCommand($event, row)">
+            <el-dropdown
+              v-if="$p([EDIT_EXAM_CATALOG, DELETE_EXAM_CATALOG, ADD_GROUNP_EXAM_CATALOG])"
+              @command="handleCommand($event, row)"
+            >
               <el-button
                 type="text"
                 style="margin-left: 10px"
@@ -79,13 +85,22 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="edit">
+                <el-dropdown-item
+                  v-p="EDIT_EXAM_CATALOG"
+                  command="edit"
+                >
                   编辑
                 </el-dropdown-item>
-                <el-dropdown-item command="delete">
+                <el-dropdown-item
+                  v-p="DELETE_EXAM_CATALOG"
+                  command="delete"
+                >
                   删除
                 </el-dropdown-item>
-                <el-dropdown-item command="addChild">
+                <el-dropdown-item
+                  v-p="ADD_GROUNP_EXAM_CATALOG"
+                  command="addChild"
+                >
                   新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -157,6 +172,15 @@ const searchConfig = {
   popoverOptions: []
 }
 import styles from '@/styles/variables.scss'
+import {
+  ADD_EXAM_CATALOG,
+  STOP_EXAM_CATALOG,
+  AUTH_EXAM_CATALOG,
+  EDIT_EXAM_CATALOG,
+  DELETE_EXAM_CATALOG,
+  ADD_GROUNP_EXAM_CATALOG
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CatelogManager',
   components: { SearchPopover, CatalogEdit },
@@ -178,6 +202,30 @@ export default {
         type: '0',
         name: ''
       }
+    }
+  },
+  computed: {
+    ADD_EXAM_CATALOG: () => ADD_EXAM_CATALOG,
+    STOP_EXAM_CATALOG: () => STOP_EXAM_CATALOG,
+    AUTH_EXAM_CATALOG: () => AUTH_EXAM_CATALOG,
+    EDIT_EXAM_CATALOG: () => EDIT_EXAM_CATALOG,
+    DELETE_EXAM_CATALOG: () => DELETE_EXAM_CATALOG,
+    ADD_GROUNP_EXAM_CATALOG: () => ADD_GROUNP_EXAM_CATALOG,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          STOP_EXAM_CATALOG,
+          AUTH_EXAM_CATALOG,
+          EDIT_EXAM_CATALOG,
+          DELETE_EXAM_CATALOG,
+          ADD_GROUNP_EXAM_CATALOG
+        ])
+      },
+      deep: true
     }
   },
   activated() {

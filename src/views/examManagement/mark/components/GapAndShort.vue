@@ -3,7 +3,7 @@
     <div class="dot-box">
       <div class="dot-content">
         <span class="dot"></span>
-        <span>
+        <span class="dot-main">
           <span class="label">标准答案：</span>
           <span class="value is-correct">{{ getCorrect() }}</span>
         </span>
@@ -63,6 +63,7 @@
 </template>
 
 <script>
+// 填空题和简答题
 const EventColumns = [
   {
     itemType: 'radio',
@@ -207,12 +208,17 @@ export default {
     display: flex;
     align-items: center;
     .dot {
+      align-self: flex-start;
       display: inline-block;
       width: 6px;
       height: 6px;
       border-radius: 50%;
       background-color: rgba(0, 11, 21, 0.25);
       margin-right: 6px;
+      margin-top: 6px;
+    }
+    .dot-main {
+      flex: 1;
     }
   }
 }

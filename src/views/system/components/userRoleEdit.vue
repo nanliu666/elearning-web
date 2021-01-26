@@ -59,6 +59,7 @@
             v-for="item in selectList"
             :key="item.roleId"
             size="small"
+            closable
             @close="handleUnselect(item)"
           >
             {{ item.roleName }}

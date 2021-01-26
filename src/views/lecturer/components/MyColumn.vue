@@ -108,7 +108,10 @@
           > 取消</span>
           <!-- <span @click="isShowinput = false"> 取消</span> -->
         </div>
-        <div class="btn_bottom_box">
+        <div
+          v-p="ADD_LECTURER_GROUNP"
+          class="btn_bottom_box"
+        >
           <div
             v-show="!isShowinput"
             class="btn_bottom"
@@ -187,6 +190,7 @@
 //   move,
 //   editTeacherCatalog
 // } from '@/api/lecturer/lecturer'
+import { ADD_LECTURER_GROUNP } from '@/const/privileges'
 export default {
   props: {
     columnInterface: {
@@ -231,6 +235,9 @@ export default {
       isEditId: '', //显示分类——输入框id
       btnshow: 'false' //新增分类&移动
     }
+  },
+  computed: {
+    ADD_LECTURER_GROUNP: () => ADD_LECTURER_GROUNP
   },
   watch: {
     filterText(val) {

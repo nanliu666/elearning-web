@@ -1,6 +1,16 @@
 <template>
   <div class="approval-index-style fill">
-    <page-header title="审批流程" />
+    <page-header title="审批流程">
+      <template #rightMenu>
+        <el-button
+          type="primary"
+          size="medium"
+          @click="jumpCreate"
+        >
+          创建审批流程
+        </el-button>
+      </template>
+    </page-header>
     <basic-container block>
       <common-table
         id="demo"
@@ -9,9 +19,6 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        :page="page"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="operations">
@@ -20,15 +27,13 @@
               :require-options="searchConfigLocal.requireOptions"
               @submit="handleSearch"
             />
-            <div class="operations__btns">
+            <div class="operations__right">
               <el-tooltip
-                class="operations__btns--tooltip"
                 content="刷新"
                 effect="dark"
                 placement="top"
               >
                 <el-button
-                  class="operations__btns--item"
                   size="mini"
                   type="text"
                   @click="refresh"
@@ -41,23 +46,20 @@
                 width="40"
                 trigger="click"
               >
-                <el-button
-                  class="operations__btns--item"
-                  size="mini"
-                  type="text"
-                >
-                  <i class="iconfont iconicon_setting" />
-                </el-button>
+                <i
+                  slot="reference"
+                  style="cursor: pointer;"
+                  class="el-icon-setting"
+                />
 
                 <!-- 设置表格列可见性 -->
-                <div class="operations__column--visible">
+                <div>
                   <el-checkbox-group v-model="columnsVisible">
                     <el-checkbox
                       v-for="item of tableColumns"
                       :key="item.prop"
-                      :disabled="item.prop === 'name'"
+                      :disabled="item.prop === 'processName'"
                       :label="item.prop"
-                      class="operations__column--item"
                     >
                       {{ item.label }}
                     </el-checkbox>
@@ -66,16 +68,6 @@
               </el-popover>
             </div>
           </div>
-        </template>
-        <template #status="{row}">
-          <span
-            class="status-span"
-            :style="{
-              color: statusToText(row.status).color,
-              backgroundColor: statusToText(row.status).backgroundColor
-            }"
-            v-text="statusToText(row.status).text"
-          />
         </template>
 
         <template #apprNo="{row}">
@@ -87,10 +79,24 @@
 
         <template #handler="{row}">
           <el-button
+            v-if="row.useStatus === 'Yes'"
             type="text"
-            @click="jumpToDetail(row)"
+            @click="disableApproval(row)"
           >
-            查看
+            停用
+          </el-button>
+          <el-button
+            v-if="row.useStatus === 'No'"
+            type="text"
+            @click="enableApproval(row)"
+          >
+            启用
+          </el-button>
+          <el-button
+            type="text"
+            @click="jumpToEdit(row)"
+          >
+            编辑
           </el-button>
         </template>
       </common-table>
@@ -98,54 +104,35 @@
   </div>
 </template>
 <script>
-import { STATUS_DICTS } from '@/const/approve'
-import { getProcessList, getProcessType } from '@/api/apprProcess/apprProcess'
-import { getOrgTreeSimple } from '../../api/org/org'
+import { categoryOptions, categoryMap } from '@/const/approve'
+import { getProcessList, startProcess, stopProcess } from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
+const statusDict = {
+  No: '停用',
+  Yes: '正常'
+}
 const TABLE_COLUMNS = [
   {
-    label: '审批编号',
-    prop: 'apprNo',
-    slot: true,
-    minWidth: 150
-  },
-  {
-    label: '标题',
-    prop: 'title',
-    minWidth: 120
-  },
-  {
-    label: '申请类型',
+    label: '审批名称',
     prop: 'processName',
     minWidth: 120
   },
   {
-    label: '申请部门',
-    prop: 'orgName',
+    label: '状态',
+    prop: 'useStatus',
+    formatter: (row) => statusDict[row.useStatus],
+    width: 100
+  },
+  {
+    label: '审批类型',
+    prop: 'categoryId',
+    formatter: (row) => categoryMap[row.status] || '',
+    width: 120
+  },
+  {
+    label: '适用范围',
+    prop: 'visibleRange',
     minWidth: 120
-  },
-  {
-    label: '申请时间',
-    prop: 'applyTime',
-    minWidth: 120
-  },
-  {
-    label: '完成时间',
-    minWidth: 100,
-    prop: 'completeTime'
-  },
-  {
-    label: '当前状态',
-    prop: 'status',
-    slot: true
-  },
-  {
-    label: '当前审批人',
-    minWidth: 100,
-    prop: 'approveUser',
-    formatter(record) {
-      return record.approveUser.map((item) => item.userName).join('+')
-    }
   }
 ]
 
@@ -153,9 +140,9 @@ const TABLE_CONFIG = {
   rowKey: 'apprNo',
   showHandler: true,
   showIndexColumn: false,
-  enablePagination: true,
+  // enablePagination: true,
   handlerColumn: {
-    minWidth: 50
+    width: 100
   }
 }
 
@@ -168,7 +155,7 @@ const SEARCH_CONFIG = {
       data: '',
       config: {
         'suffix-icon': 'el-icon-search',
-        placeholder: '审批编号、审批标题'
+        placeholder: '审批名称'
       }
     }
   ],
@@ -176,68 +163,26 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       data: '',
-      field: 'processKey',
-      label: '审批类型',
-      arrField: 'positionId',
-      config: { optionLabel: 'processName', optionValue: 'processKey' },
-      options: []
+      field: 'userStatus',
+      label: '状态',
+
+      options: [
+        { label: '正常', value: 'Yes' },
+        { label: '停用', value: 'No' }
+      ]
     },
     {
       type: 'select',
       data: '',
-      field: 'status',
-      label: '审批状态',
-      arrField: 'positionId',
-      config: { optionLabel: 'dictValue', optionValue: 'dictKey' },
-      options: []
+      field: 'categoryId',
+      label: '审批类型',
+      options: categoryOptions
     },
     {
-      type: 'treeSelect',
-      field: 'orgId',
-      label: '申请部门',
-      data: '',
-      config: {
-        selectParams: {
-          placeholder: '请输入内容',
-          multiple: false
-        },
-        treeParams: {
-          data: [],
-          'check-strictly': true,
-          'default-expand-all': false,
-          'expand-on-click-node': false,
-          clickParent: true,
-          filterable: false,
-          props: {
-            children: 'children',
-            label: 'orgName',
-            disabled: 'disabled',
-            value: 'orgId'
-          }
-        }
-      }
-    },
-    {
-      type: 'dataPicker',
-      data: '',
-      label: '申请日期',
-      field: 'beginApplyTime,endApplyTime',
-      config: {
-        type: 'datetimerange',
-        'range-separator': '至',
-        'value-format': 'yyyy-MM-dd HH:mm:ss'
-      }
-    },
-    {
-      type: 'dataPicker',
-      data: '',
-      label: '完成日期',
-      field: 'beginCompleteTime,endCompleteTime',
-      config: {
-        type: 'datetimerange',
-        'range-separator': '至',
-        'value-format': 'yyyy-MM-dd HH:mm:ss'
-      }
+      type: 'input',
+      field: 'visible',
+      label: '适用范围',
+      data: ''
     }
   ]
 }
@@ -254,91 +199,59 @@ export default {
   data() {
     return {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       searchConfigLocal: SEARCH_CONFIG,
       searchParams: null,
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
-      tableLoading: false
+      tableLoading: false,
+      statusDict
     }
   },
   computed: {
     ...mapGetters(['userId'])
   },
-  mounted() {
-    // searchConfig 加载数据
-    let fieldProcessId = _.find(this.searchConfigLocal.popoverOptions, { field: 'processKey' })
-    let fieldStatus = _.find(this.searchConfigLocal.popoverOptions, { field: 'status' })
-    let fieldOrgId = _.find(this.searchConfigLocal.popoverOptions, { field: 'orgId' })
-    if (fieldProcessId) {
-      getProcessType().then(
-        (res) =>
-          (fieldProcessId.options = _.concat(
-            [
-              {
-                processKey: '',
-                processName: '全部'
-              }
-            ],
-            res
-          ))
-      )
-    }
-    if (fieldStatus) {
-      fieldStatus.options = _.concat(
-        [
-          {
-            dictKey: '',
-            dictValue: '全部'
-          }
-        ],
-        STATUS_DICTS
-      )
-    }
-    if (fieldOrgId) {
-      getOrgTreeSimple({ parentOrgId: 0 }).then(
-        (res) =>
-          (fieldOrgId.config.treeParams.data = _.concat(
-            [
-              {
-                orgName: '全部',
-                orgId: ''
-              }
-            ],
-            res
-          ))
-      )
-    }
+  activated() {
+    this.refresh()
   },
-
   methods: {
-    // 处理跳转
-    jumpToDetail(row) {
+    jumpCreate() {
       this.$router.push({
-        path: '/apprProcess/apprDetail',
-        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo, preview: true }
+        path: '/process/design'
       })
     },
-
-    handleCurrentPageChange(page) {
-      this.page.currentPage = page
-      this.loadTableData()
-    },
-    handlePageSizeChange(pageSize) {
-      this.page.size = pageSize
-      this.loadTableData()
+    // 处理跳转
+    jumpToEdit(row) {
+      this.$router.push({
+        path: '/process/design',
+        query: {
+          processId: row.processId
+        }
+      })
     },
     handleSearch(searchParams) {
       this.searchParams = _.pickBy(searchParams)
       this.page.currentPage = 1
       this.loadTableData()
     },
-
+    /**
+     * 停用审批
+     */
+    disableApproval(data) {
+      stopProcess({ processId: data.processId }).then(() => {
+        this.$message.success('停用成功')
+        this.refres()
+      })
+    },
+    /**
+     * 启用
+     */
+    enableApproval(data) {
+      startProcess({ processId: data.processId }).then(() => {
+        this.$message.success('启用成功')
+        this.refresh()
+      })
+    },
     // 翻译字典
     translator({ value, dictKey, $config: config }) {
       if (!(dictKey = dictKey || _.get(config, 'dictKey'))) {
@@ -372,13 +285,8 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        const page = {
-          pageNo: this.page.currentPage,
-          pageSize: this.page.size
-        }
-        const { data, totalNum } = await getProcessList(_.assign(null, page, params))
+        const data = await getProcessList(params)
         this.tableData = data
-        this.page.total = totalNum
         // eslint-disable-next-line no-useless-catch
       } catch (error) {
         throw error
@@ -390,65 +298,44 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-$color_active: #368AFA
-$color_danger: #ff6464
-$color_icon: #A0A8AE
-.export-button
-  cursor: pointer
-.basic-container--block
-  height: 0
-  min-height: calc( 100% - 92px )
-.status-span
-  padding: 4px;
-  border-radius: 2px
-.table__link
-  color: $color_active
-  &:hover
-    cursor: pointer
-    color: $primaryColor
-.table__tags
-  >*
-    margin-left: 1rem
-.operations
-  align-items: center
-  display: flex
-  justify-content: space-between
-  &__column--item
-    height: 25px
-  &__column--visible
-    height: 200px
-    overflow: scroll
-  &__btns
-    align-items: center
-    display: flex
-    height: 24px
-    justify-content: flex-start
-  &__btns--item
-    margin: 0
-    margin-right: 4px
-    padding: 0
-    height: 24px
-    width: 24px
-    line-height: 24px
-    &:last-child
-      margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-  .iconfont
-    color: $color_icon
-    font-weight: bold
-    font-size: 16px
-.font__color--danger
-  color: $color_danger
-  font-weight: bold
-.expand
-  &__label
-    display: flex
-    text-align: center
-    font-size: 12px
-    color: #a0a8ae
-    margin: 0
-    &:not(:last-child)
-      border-right: 1px solid #ccc
+<style lang="scss" scoped>
+.basic-container--block {
+  height: 0;
+  min-height: calc(100% - 92px);
+}
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &__right {
+    i {
+      margin-left: 12px;
+      font-size: 18px;
+      color: #a0a8ae;
+      cursor: pointer;
+    }
+    display: flex;
+    align-items: center;
+    .refresh-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      color: #a0a8ae;
+      padding: 0 10px;
+      cursor: pointer;
+      span {
+        padding-left: 6px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
+}
 </style>

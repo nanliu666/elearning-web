@@ -10,6 +10,7 @@
       </template>
       <template slot="rightMenu">
         <el-button
+          v-p="ADD_REQUIRED"
           type="primary"
           size="medium"
           @click="jumpEdit"
@@ -113,6 +114,7 @@
             slot-scope="{ selection }"
           >
             <el-button
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -123,6 +125,7 @@
           </template>
           <template #handler="{row}">
             <el-button
+              v-p="EDIT_REQUIRED"
               type="text"
               size="medium"
               :disabled="[2, 3].includes(row.status)"
@@ -131,6 +134,16 @@
               编辑
             </el-button>
             <el-button
+              v-p="STOP_REQUIRED"
+              type="text"
+              size="medium"
+              :disabled="[3].includes(row.status)"
+              @click="closePlan(row)"
+            >
+              结办
+            </el-button>
+            <el-button
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               :disabled="[2].includes(row.status)"
@@ -139,9 +152,10 @@
               删除
             </el-button>
             <el-button
+              v-p="VIEW_REQUIRED"
               type="text"
               size="medium"
-              :disabled="[1, 2].includes(row.status)"
+              :disabled="[1].includes(row.status)"
               @click="jumpUserList(row)"
             >
               查看完成率
@@ -212,6 +226,7 @@
             slot-scope="{ selection }"
           >
             <el-button
+              v-p="DELETE_REQUIRED"
               type="text"
               size="medium"
               icon="el-icon-delete"
@@ -222,12 +237,14 @@
           </template>
           <template #handler="{row}">
             <el-button
+              v-p="EDIT_REQUIRED"
               type="text"
               @click="jumpEdit(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="DELETE_REQUIRED"
               type="text"
               @click="handleDelete(row)"
             >
@@ -250,7 +267,8 @@ import {
   addCatalog,
   delCatalogs,
   updateCatalogs,
-  moveCatalogs
+  moveCatalogs,
+  updateStatus
 } from '@/api/learnPlan'
 
 // 表格属性
@@ -277,6 +295,12 @@ const TABLE_COLUMNS = [
     minWidth: 100
   },
   {
+    label: '状态',
+    formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),
+    prop: 'status',
+    minWidth: 100
+  },
+  {
     label: '课程时间',
     prop: 'time',
     formatter: (row) => row.startTime + '~' + row.endTime,
@@ -289,7 +313,7 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   rowKey: 'id',
   showHandler: true,
-  handlerColumn: { label: '操作', minWidth: 200, fixed: 'right' }
+  handlerColumn: { label: '操作', minWidth: 220, fixed: 'right' }
 }
 
 // 搜索配置
@@ -344,6 +368,15 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import {
+  ADD_REQUIRED,
+  EDIT_REQUIRED,
+  DELETE_REQUIRED,
+  VIEW_REQUIRED,
+  STOP_REQUIRED
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'CoursePlanList',
   components: {
@@ -421,11 +454,33 @@ export default {
       }
     }
   },
+  computed: {
+    ADD_REQUIRED: () => ADD_REQUIRED,
+    EDIT_REQUIRED: () => EDIT_REQUIRED,
+    DELETE_REQUIRED: () => DELETE_REQUIRED,
+    VIEW_REQUIRED: () => VIEW_REQUIRED,
+    STOP_REQUIRED: () => STOP_REQUIRED,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          EDIT_REQUIRED,
+          DELETE_REQUIRED,
+          VIEW_REQUIRED,
+          STOP_REQUIRED
+        ])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.refreshPublished()
     this.loadDraftData()
   },
-  created() {},
+
   methods: {
     // 点击左侧档返回数据
     treeClick(id) {
@@ -442,6 +497,15 @@ export default {
         query: { id: row.id }
       })
     },
+    closePlan(row) {
+      updateStatus({ id: row.id }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '结办成功!'
+        })
+        this.refreshPublished()
+      })
+    },
     refreshPublished() {
       this.loadPublishedData()
     },
@@ -453,17 +517,22 @@ export default {
             '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
               confirmButtonText: '知道了',
-              showCancelButton: false,
-              callback: () => {
-                this.deletePlanFn(selection)
+              showCancelButton: true,
+              callback: (action) => {
+                if (action !== 'cancel') {
+                  this.deletePlanFn(selection)
+                }
               }
             }
           )
           return
         }
         this.$confirm('确定要删除选中的课程安排吗？', {
-          callback: () => {
-            this.deletePlanFn(selection)
+          showCancelButton: true,
+          callback: (action) => {
+            if (action !== 'cancel') {
+              this.deletePlanFn(selection)
+            }
           }
         })
       } else {
@@ -474,20 +543,33 @@ export default {
           })
         }
         this.$confirm('确定要删除选中的课程安排吗？', {
-          callback: () => {
-            this.deletePlanFn([selection])
+          showCancelButton: true,
+          callback: (action) => {
+            if (action !== 'cancel') {
+              this.deletePlanFn([selection])
+            }
           }
         })
       }
     },
     deletePlanFn(arr) {
       // 删除学习计划
-      deletePlan({ ids: _.map(arr, 'id').join(',') })
+      let ids = _(arr)
+        .filter((item) => item.status != 2)
+        .map('id')
+        .join(',')
+      if (!ids) {
+        return
+      }
+      deletePlan({
+        ids
+      })
         .then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
+          this.$refs.table.clearSelection()
           this.loadPublishedData()
         })
         .catch()

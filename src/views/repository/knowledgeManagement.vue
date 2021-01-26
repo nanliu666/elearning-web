@@ -3,6 +3,7 @@
     <page-header title="知识管理">
       <template slot="rightMenu">
         <el-button
+          v-p="ADD_REP"
           type="primary"
           size="medium"
           @click="createResource"
@@ -92,6 +93,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="DELETE_REP"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -105,14 +107,19 @@
           slot-scope="{ row }"
         >
           <div
+            v-if="VIEW_REP"
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
             {{ row.resName }}
           </div>
+          <div v-else>
+            {{ row.resName }}
+          </div>
         </template>
         <template #handler="{row}">
           <el-button
+            v-p="TOP_REP"
             type="text"
             class="top-button"
             @click="handleTop(row)"
@@ -120,13 +127,14 @@
             {{ row.topTime ? '已置顶' : '置顶' }}
           </el-button>
           <el-button
+            v-p="PUTAWAY_REP"
             type="text"
             @click="handleStatus(row)"
           >
             {{ row.status === '0' ? '下架' : '上架' }}
           </el-button>
-
           <el-dropdown
+            v-if="$p([EDIT_REP, DELETE_REP, MOVE_REP])"
             style="margin-left: 4px"
             @command="handleCommand($event, row)"
           >
@@ -137,13 +145,22 @@
               <i class="el-icon-arrow-down el-icon-more" />
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="editKnow">
+              <el-dropdown-item
+                v-p="EDIT_REP"
+                command="editKnow"
+              >
                 编辑
               </el-dropdown-item>
-              <el-dropdown-item command="deleteKnow">
+              <el-dropdown-item
+                v-p="DELETE_REP"
+                command="deleteKnow"
+              >
                 删除
               </el-dropdown-item>
-              <el-dropdown-item command="moveKnow">
+              <el-dropdown-item
+                v-p="MOVE_REP"
+                command="moveKnow"
+              >
                 移动
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -351,6 +368,16 @@ const FORM_COLUMNS = [
     }
   }
 ]
+import {
+  ADD_REP,
+  TOP_REP,
+  PUTAWAY_REP,
+  EDIT_REP,
+  DELETE_REP,
+  MOVE_REP,
+  VIEW_REP
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -392,6 +419,31 @@ export default {
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    ADD_REP: () => ADD_REP,
+    TOP_REP: () => TOP_REP,
+    PUTAWAY_REP: () => PUTAWAY_REP,
+    EDIT_REP: () => EDIT_REP,
+    DELETE_REP: () => DELETE_REP,
+    VIEW_REP: () => VIEW_REP,
+    MOVE_REP: () => MOVE_REP,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          TOP_REP,
+          PUTAWAY_REP,
+          EDIT_REP,
+          MOVE_REP,
+          DELETE_REP
+        ])
+      },
+      deep: true
     }
   },
   activated() {
@@ -445,6 +497,7 @@ export default {
       })
       await deleteKnowledgeList({ id: selectedIds.join(',') })
       this.$message.success('删除成功')
+      this.$refs.table.clearSelection()
       this.loadTableData()
     },
     // 置顶与取消置顶
@@ -526,23 +579,23 @@ export default {
      * 处理页码改变
      */
     handleCurrentPageChange(param) {
-      this.queryInfo.pageNo = param
+      this.queryInfo = _.assign(this.queryInfo, { pageNo: param })
       this.loadTableData()
     },
     /**
      * 处理页码大小更改
      */
     handlePageSizeChange(param) {
-      this.queryInfo.pageSize = param
+      this.queryInfo = _.assign(this.queryInfo, { pageSize: param })
       this.loadTableData()
     },
     /**
      * 搜索
      */
     handleSearch(searchParams) {
-      for (let i in searchParams) {
-        this.queryInfo[i] = searchParams[i]
-      }
+      this.queryInfo = _.assign(this.queryInfo, searchParams)
+      this.queryInfo.pageNo = 1
+      this.page.currentPage = 1
       this.loadTableData()
     },
     // 跳去详情

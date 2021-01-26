@@ -1,28 +1,57 @@
 import { del, get, post, put } from '@/router/axios'
 /**
- * 审批数据导出接口
+ * 审批流程列表查询接口
+ * @param {*} params
+ */
+export const getProcessList = (params) => get('/appr/v2/appr/process/all/list', params)
+/**
+ * 可发起的课程审批流程列表查询接口
+ * @param {*} params
+ */
+export const getCourseProcessList = (params) => get('/appr/v2/appr/course/process/list', params)
+/**
+ * 审批申请提交接口
  * */
-export const exportData = (params) => post('/appr/v2/appr/export/data', params)
+export const submitApprApply = (params) => post('/appr/v2/appr/apply/submit', params)
 /**
  * 审批流程查询接口
  * @param {Object} params - 参数
  * @param {String} params.processId - 流程ID
  * */
 export const getProcessDetail = (params) => get('/appr/v2/appr/process', params)
+/**
+ * 审批记录查询接口
+ * @param {object} params 查询参数
+ */
+export const getRecordList = (params) => get('/appr/v2/appr/approve/record/list', params)
 
+/**
+ * 审批流程停用接口
+ */
+export const stopProcess = (params) => post('/appr/v2/appr/process/stop', params)
+
+/**
+ * 审批流程启用接口
+ */
+export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
+
+// 审批历史记录、审批进度
+export const getApprRecord = (params) => get('/appr/v2/appr/apply/record', params)
+
+/**
+ *
+ * 下面的都是OA的旧接口
+ *
+ **/
+
+/**
+ * 审批数据导出接口
+ * */
+export const exportData = (params) => post('/appr/v2/appr/export/data', params)
 /**
  * 审批表单内容编辑提交
  * */
 export const putApprForm = (params) => put('/appr/v2/appr/apply/form', params)
-/**
- * 审批申请提交接口
- * */
-export const submitApprApply = (params) => post('/appr/v2/appr/apply/submit', params)
-/**
- * 审批流程列表查询接口
- * @param {*} params
- */
-export const getProcessList = (params) => get('/appr/v2/appr/process/list', params)
 /**
  * 获取历史版本
  */
@@ -42,9 +71,6 @@ export const getApprRreview = (params) => get('/appr/v2/appr/process/preview', p
  * @returns {object}
  */
 export const getApprDetail = (params) => get('/appr/v2/appr/process/apply/detail', params)
-
-// 审批历史记录、审批进度
-export const getApprRecord = (params) => get('/appr/v2/appr/apply/record', params)
 // 同意审批
 export const createApprPass = (params) => post('/appr/v2/appr/apply/pass', params)
 // 审批拒绝
@@ -94,10 +120,7 @@ export const deleteCategory = (params) => del('/appr/v2/appr/category', params)
  * 审批流程删除接口
  */
 export const deleteProcess = (params) => post('/appr/v2/appr/process/del', params)
-/**
- * 审批流程停用接口
- */
-export const stopProcessCategory = (params) => post('/appr/v2/appr/process/stop', params)
+
 /**
  * 未启用审批流程列表查询接口
  */
@@ -115,10 +138,6 @@ export const getProcessTypeList = (params) => get('/appr/v2/appr/process/type', 
  */
 export const moveProcess = (params) => post('/appr/v2/appr/process/move', params)
 /**
- * 审批流程启用接口
- */
-export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
-/**
  * 审批流程发布接口
  */
 export const releaseProcess = (params) => post('/appr/v2/appr/process/release', params)
@@ -130,13 +149,6 @@ export const sortCategory = (params) => post('/appr/v2/appr/category/sort', para
  * 审批流程排序接口
  */
 export const sortProcess = (params) => post('/appr/v2/appr/process/sort', params)
-
-/**
- * 审批记录查询接口
- * @param {object} params 查询参数
- */
-export const getRecordList = (params) => get('/appr/v2/appr/approve/record/list', params)
-
 /**
  *
  * 审批类型查询接口

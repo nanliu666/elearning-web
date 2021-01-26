@@ -20,7 +20,7 @@
               :require-options="searchConfigLocal.requireOptions"
               @submit="handleSearch"
             />
-            <div class="operations__btns">
+            <div class="operations__right">
               <el-tooltip
                 class="operations__btns--tooltip"
                 content="刷新"
@@ -111,18 +111,13 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '标题',
-    prop: 'title',
-    minWidth: 120
-  },
-  {
-    label: '申请类型',
+    label: '审批类型',
     prop: 'processName',
     minWidth: 120
   },
   {
-    label: '申请部门',
-    prop: 'orgName',
+    label: '申请人',
+    prop: 'userName',
     minWidth: 120
   },
   {
@@ -279,7 +274,7 @@ export default {
     ...mapGetters(['userId'])
   },
   activated() {
-    // this.refresh()
+    this.refresh()
   },
   mounted() {
     // searchConfig 加载数据
@@ -404,68 +399,44 @@ export default {
   }
 }
 </script>
-
-<style lang="sass">
-$color_active: #368AFA
-$color_danger: #ff6464
-$color_icon: #A0A8AE
-.export-button
-  cursor: pointer
-.Recordlist
-  height: 100%
-  .basic-container--block
-    height: 0
-    min-height: calc( 100% - 92px )
-  .status-span
-    padding: 4px;
-    border-radius: 2px
-  .table__link
-    color: $color_active
-    &:hover
-      cursor: pointer
-      color: $primaryColor
-  .table__tags
-    >*
-      margin-left: 1rem
-  .operations
-    align-items: center
-    display: flex
-    justify-content: space-between
-    &__column--item
-      height: 25px
-    &__column--visible
-      height: 200px
-      overflow: scroll
-    &__btns
-      align-items: center
-      display: flex
-      height: 24px
-      justify-content: flex-start
-    &__btns--item
-      margin: 0
-      margin-right: 4px
-      padding: 0
-      height: 24px
-      width: 24px
-      line-height: 24px
-      &:last-child
-        margin: 0
-      // margin-bottom: 8px
-      // margin-right: 8px
-    .iconfont
-      color: $color_icon
-      font-weight: bold
-      font-size: 16px
-  .font__color--danger
-    color: $color_danger
-    font-weight: bold
-  .expand
-    &__label
-      display: flex
-      text-align: center
-      font-size: 12px
-      color: #a0a8ae
-      margin: 0
-      &:not(:last-child)
-        border-right: 1px solid #ccc
+<style lang="scss" scoped>
+.basic-container--block {
+  height: 0;
+  min-height: calc(100% - 92px);
+}
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &__right {
+    i {
+      margin-left: 12px;
+      font-size: 18px;
+      color: #a0a8ae;
+      cursor: pointer;
+    }
+    display: flex;
+    align-items: center;
+    .refresh-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      color: #a0a8ae;
+      padding: 0 10px;
+      cursor: pointer;
+      span {
+        padding-left: 6px;
+      }
+      &::before {
+        position: absolute;
+        content: '';
+        top: 3px;
+        right: 0px;
+        width: 0.5px;
+        height: 80%;
+        background-color: #a0a8ae;
+      }
+    }
+  }
+}
 </style>

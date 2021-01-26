@@ -109,7 +109,7 @@ export default {
       return moment(new Date()).isSameOrBefore(time[0])
     },
     initData() {
-      if (this.$route.query.id) {
+      if (this.$route.query.id && this.$route.query.type !== 'copy') {
         getBatchexaminee({ id: this.$route.query.id }).then((res) => {
           this.batchList = res
         })

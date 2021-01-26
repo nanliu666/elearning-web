@@ -189,12 +189,6 @@ export default {
         return []
       }
     },
-    waitProgress: {
-      type: Array,
-      default: function() {
-        return []
-      }
-    },
     isParallel: {
       type: Boolean,
       default: false
