@@ -163,6 +163,9 @@ export default {
           if (this.type !== 'edit') {
             this.loading = true
             // console.log('this.form', this.form)
+
+            this.form.parentId = this.form.parentId + ''
+            this.form.source = 'live'
             addCategory(this.form)
               .then((res) => {
                 this.$message.success('创建成功')
@@ -211,9 +214,11 @@ export default {
     // 新建子分类
     createChild(row) {
       this.type = 'createChild'
-      this.form = _.cloneDeep(row)
-      this.form.parentId = row.id
-      this.form.name = ''
+      this.form = {
+        parentId: row.idStr,
+        name: '',
+        source: 'live'
+      }
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
     },
@@ -251,7 +256,7 @@ export default {
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.form.parentId = data.id
+        this.form.parentId = data.idStr
         this.parentOrgIdLabel = data.name
       }
     }
