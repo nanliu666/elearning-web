@@ -286,3 +286,7 @@ export const getBizPrivilege = (params) => get('/sys/v1/role/biz/privilege', par
  * @param {Object} params 过滤条件
  */
 export const getTrainGetCatalogs = (params) => get('/api/manage/v1/train/getCatalogs', params)
+/**
+ * @desc 获取所有的培训分类
+ */
+export const getAllCatalog = (params) => get('/api/manage/v1/train/queryAllCatalog', params)
