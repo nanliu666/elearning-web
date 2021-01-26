@@ -5,6 +5,7 @@
   >
     <div class="wrapper">
       <common-form
+        v-if="innnerVisible"
         ref="form"
         :model="model"
         class="form"
@@ -52,7 +53,6 @@
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
-import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 const EventColumns = [
   {
@@ -123,8 +123,7 @@ export default {
             this.title = '编辑在线课程'
             this.editType = 'edit'
           } else {
-            this.$refs.form && this.$refs.form.resetFields()
-            this.model.id = createUniqueID()
+            this.model = _.assign(_.cloneDeep(modelCopy), { id: _.uniqueId('12454611451154') })
             this.editType = 'add'
           }
         }
@@ -148,7 +147,7 @@ export default {
     submit() {
       this.$refs.form.validate().then(() => {
         this.close()
-        this.$emit('submit', this.model, this.editType)
+        this.$emit('submit', _.cloneDeep(this.model), this.editType)
       })
     }
   }
