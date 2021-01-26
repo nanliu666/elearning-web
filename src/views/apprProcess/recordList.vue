@@ -99,8 +99,8 @@
 <script>
 import { STATUS_TO_TEXT, STATUS_DICTS } from '@/const/approve'
 import { categoryOptions, categoryMap } from '@/const/approve'
-import { getRecordList, getProcessType } from '@/api/apprProcess/apprProcess'
-import { getOrgTreeSimple } from '../../api/org/org'
+import { getUserWorkList } from '@/api/org/org'
+import { getRecordList } from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
 const TABLE_COLUMNS = [
   {
@@ -112,7 +112,7 @@ const TABLE_COLUMNS = [
   {
     label: '审批类型',
     prop: 'categoryId',
-    formatter: (row) => categoryMap[row.status] || '',
+    formatter: (row) => categoryMap[row.categoryId] || '',
     minWidth: 120
   },
   {
@@ -186,10 +186,18 @@ const SEARCH_CONFIG = {
       options: categoryOptions
     },
     {
-      type: 'input',
-      field: 'visible',
+      data: '',
+      field: 'userId',
       label: '申请人',
-      data: ''
+      type: 'lazySelect',
+      optionList: [],
+      placeholder: '请选择申请人',
+      optionProps: {
+        key: 'userId',
+        label: 'name',
+        value: 'userId'
+      },
+      load: getUserWorkList
     }
   ]
 }
@@ -234,23 +242,8 @@ export default {
   },
   mounted() {
     // searchConfig 加载数据
-    let fieldProcessId = _.find(this.searchConfigLocal.popoverOptions, { field: 'processKey' })
     let fieldStatus = _.find(this.searchConfigLocal.popoverOptions, { field: 'status' })
-    let fieldOrgId = _.find(this.searchConfigLocal.popoverOptions, { field: 'orgId' })
-    if (fieldProcessId) {
-      getProcessType().then(
-        (res) =>
-          (fieldProcessId.options = _.concat(
-            [
-              {
-                processKey: '',
-                processName: '全部'
-              }
-            ],
-            res
-          ))
-      )
-    }
+
     if (fieldStatus) {
       fieldStatus.options = _.concat(
         [
@@ -260,20 +253,6 @@ export default {
           }
         ],
         STATUS_DICTS
-      )
-    }
-    if (fieldOrgId) {
-      getOrgTreeSimple({ parentOrgId: 0 }).then(
-        (res) =>
-          (fieldOrgId.config.treeParams.data = _.concat(
-            [
-              {
-                orgName: '全部',
-                orgId: ''
-              }
-            ],
-            res
-          ))
       )
     }
   },

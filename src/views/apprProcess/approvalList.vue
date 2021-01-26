@@ -126,7 +126,7 @@ const TABLE_COLUMNS = [
   {
     label: '审批类型',
     prop: 'categoryId',
-    formatter: (row) => categoryMap[row.status] || '',
+    formatter: (row) => categoryMap[row.categoryId] || '',
     width: 120
   },
   {
