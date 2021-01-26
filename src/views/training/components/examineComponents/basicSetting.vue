@@ -229,7 +229,11 @@ export default {
       // 培训结束日期在卷子有效期之前
       const isLegalExpiredTime = moment(this.model.examTime[1]).isSameOrBefore(paperExpiredTime)
       if (paperExpiredTime && !isLegalExpiredTime) {
-        callback(new Error(`此卷在考试结束日时（${this.model.examTime[1]}）已过期`))
+        callback(
+          new Error(
+            `此卷结束日${paperExpiredTime}在考试结束日时（${this.model.examTime[1]}）已过期`
+          )
+        )
       } else {
         callback()
       }
