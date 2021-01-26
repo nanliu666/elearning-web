@@ -33,7 +33,7 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList, getTrainGetCatalogs } from '@/api/system/user'
+import { getOrgUserList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
 import { getUserList } from '@/api/examManage/schedule'
@@ -51,7 +51,6 @@ const addressConfig = {
   span: 11,
   offset: 0
 }
-import { handleCatalogsData } from '@/util/util'
 export default {
   name: 'EditBasicInfo',
   components: { lazySelect, SelectUser },
@@ -94,8 +93,8 @@ export default {
               data: [],
               filterable: false,
               props: {
-                children: 'children',
-                label: 'label',
+                children: 'list',
+                label: 'name',
                 value: 'id'
               },
               required: true
@@ -346,10 +345,8 @@ export default {
       })
     },
     getCatalogs() {
-      getTrainGetCatalogs().then((res) => {
-        this.infoFormColumns.find(
-          (it) => it.prop === 'categoryId'
-        ).props.treeParams.data = handleCatalogsData(res)
+      getAllCatalog().then((res) => {
+        this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
     getData() {

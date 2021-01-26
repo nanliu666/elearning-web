@@ -605,6 +605,10 @@ export default {
           }
           randomSettings.map((data) => {
             data.column = _.cloneDeep(this.column)
+            // 前端实现自己组装未分类的数据
+            if (_.isEmpty(data.categoryIds)) {
+              data.categoryIds = ['0']
+            }
             this.getTopicCategory(data.type, data.column)
           })
           this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
