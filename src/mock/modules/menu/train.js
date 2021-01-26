@@ -87,20 +87,6 @@ export default {
           path: '/training/trainingArrange/end'
         }
       ]
-    },
-    {
-      menuId: '1214878678567464558',
-      menuName: '编辑页面',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 0,
-      code: 'org_user',
-      alias: 'user',
-      path: '/training/trainingEdit',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
     }
   ]
 }

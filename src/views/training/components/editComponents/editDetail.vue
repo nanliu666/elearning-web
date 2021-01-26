@@ -157,7 +157,7 @@ export default {
   },
   methods: {
     loadCertificateList(params) {
-      return getCertificateList(params)
+      return getCertificateList(_.assign(params, { status: 1 }))
     },
     getLiData(name) {
       return new Promise((resolve) => {
