@@ -111,18 +111,13 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '标题',
-    prop: 'title',
-    minWidth: 120
-  },
-  {
-    label: '申请类型',
+    label: '审批类型',
     prop: 'processName',
     minWidth: 120
   },
   {
-    label: '申请部门',
-    prop: 'orgName',
+    label: '申请人',
+    prop: 'userName',
     minWidth: 120
   },
   {
@@ -279,7 +274,7 @@ export default {
     ...mapGetters(['userId'])
   },
   activated() {
-    // this.refresh()
+    this.refresh()
   },
   mounted() {
     // searchConfig 加载数据

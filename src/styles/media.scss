@@ -65,7 +65,8 @@
   background: #f2f5f7;
   z-index: 1026;
   #avue-view {
-    height: calc(100% - 96px);
+    // height: calc(100% - 96px);
+    height: 100%;
   }
   &--fullscreen {
     width: 100%;
