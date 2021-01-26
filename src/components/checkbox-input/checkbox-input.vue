@@ -11,7 +11,6 @@
       :style="`width:${inputWidth}px`"
       :disabled="disabled"
       v-bind="inputProps"
-      @input="inputNumber"
     ></el-input-number>
     {{ textAfter }}
   </el-checkbox>
@@ -73,12 +72,7 @@ export default {
       this.$emit('input', val)
     }
   },
-  methods: {
-    inputNumber(value) {
-      value = _.toNumber(value.replace(/[^\d]/g, ''))
-      this.innerValue = value < 1 ? 1 : value
-    }
-  }
+  methods: {}
 }
 </script>
 <style lang="scss">
