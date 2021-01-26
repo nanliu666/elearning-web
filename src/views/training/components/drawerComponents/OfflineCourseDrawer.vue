@@ -212,7 +212,8 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadCourse(params) {
-      return getTrainCource(params)
+      //courseType 2-线下日程
+      return getTrainCource(_.assign(params, { courseType: 2 }))
     },
     close() {
       this.innnerVisible = false
