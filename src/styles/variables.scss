@@ -1,0 +1,10 @@
+// 主颜色
+$primaryColor: #01aafc;
+
+// 常规灰背景色和线条色
+$lightGray: #f2f5f7;
+
+:export {
+  primaryColor: $primaryColor;
+  lightGray: $lightGray;
+}
