@@ -82,7 +82,7 @@ const EventColumns = [
   },
   { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
   { itemType: 'slot', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
-  { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
+  { itemType: 'input', span: 24, prop: 'address', label: '活动地点' }
 ]
 const CourseColumns = [
   {
