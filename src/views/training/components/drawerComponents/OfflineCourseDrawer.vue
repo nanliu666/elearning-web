@@ -5,6 +5,7 @@
   >
     <div class="wrapper">
       <common-form
+        v-if="innnerVisible"
         ref="form"
         :model="model"
         class="form"
@@ -55,7 +56,6 @@
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
-import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
 
@@ -172,7 +172,7 @@ export default {
           } else {
             // 新增的时候重置数据
             this.editType = 'add'
-            this.model.id = createUniqueID()
+            this.model.id = _.uniqueId('12454611451154')
           }
         }
       }

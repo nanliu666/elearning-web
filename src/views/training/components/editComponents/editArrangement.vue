@@ -66,7 +66,7 @@
         <el-button
           type="primary"
           size="medium"
-          @click="handleEditCourse(null)"
+          @click="handleEditCourse({})"
         >
           添加在线课程
         </el-button>
