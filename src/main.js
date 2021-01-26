@@ -7,10 +7,17 @@ import './permission' // 权限
 import './error' // 日志
 import './cache' //页面缓存
 import store from './store'
-import { loadStyle } from './util/util'
+import {
+  loadStyle
+} from './util/util'
 import * as urls from '@/config/env'
-import Element, { Message } from 'element-ui'
-import { iconfontUrl, iconfontVersion } from '@/config/env'
+import Element, {
+  Message
+} from 'element-ui'
+import {
+  iconfontUrl,
+  iconfontVersion
+} from '@/config/env'
 import '@/styles/oa-custom/theme/index.css'
 import './styles/common.scss'
 import basicContainer from './components/basic-container/main'
@@ -26,17 +33,17 @@ import loadmore from './directive/loadmore'
 Vue.prototype._ = _
 
 import tinymce from '@/components/tinymce'
-// if (process.env.NODE_ENV !== 'production') {
-//   const mock = require('@/mock')
-//   mock.default(true)
-// }
+if (process.env.NODE_ENV !== 'production') {
+  const mock = require('@/mock')
+  mock.default(true)
+}
 const $message = (options) => {
   return Message({
     ...options,
     showClose: true
   })
-}
-;['success', 'warning', 'info', 'error'].forEach((type) => {
+};
+['success', 'warning', 'info', 'error'].forEach((type) => {
   $message[type] = (options) => {
     if (typeof options === 'string') {
       options = {
