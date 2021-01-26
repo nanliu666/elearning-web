@@ -307,13 +307,13 @@ export default {
         roleId: this.roleId,
         privileges: menuIdList
       }
-
       this.loading = true
       await postOrgPrivilege(param)
       this.$message.success('权限添加成功')
       this.buttonMenuId = ''
       this.submitData = []
       this.$emit('setConfig')
+      this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId)
       // if(this.buttonMenuId){
       //
       // }else{

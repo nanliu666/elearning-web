@@ -139,7 +139,8 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadCourse(params) {
-      return getTrainCource(params)
+      //courseType 1-在线课程
+      return getTrainCource(_.assign(params, { courseType: 1 }))
     },
     close() {
       this.innnerVisible = false
