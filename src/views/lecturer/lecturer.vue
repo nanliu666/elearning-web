@@ -6,6 +6,7 @@
       </div>
       <div>
         <el-button
+          v-p="ADD_LECTURER"
           type="primary"
           size="medium"
           @click="toAddLecturer"
@@ -20,6 +21,7 @@
       <div class="draft_issue">
         <div class="issue_l">
           <my-column
+            v-if="myColumnShow"
             :column-interface="columnInterface"
             @treeClick="treeClick"
           ></my-column>
@@ -58,20 +60,18 @@
                       style="color:#acb3b8;"
                     >
                       <el-button
-                        style="font-size: 16px; cursor:pointer;"
                         class="operations__btns--item"
                         size="mini"
                         icon="el-icon-refresh-right"
                         type="text"
-                        @click="islistTeacher(undefined)"
+                        @click="refreshTableData"
                       >
                         <!-- <i class="iconfont iconicon_refresh" /> -->
                       </el-button>
                     </el-tooltip>
                     <span
                       class="text_refresh"
-                      style="font-size: 16px; cursor:pointer;"
-                      @click="islistTeacher(undefined)"
+                      @click="islistTeacher"
                     >刷新</span>
                     <el-popover
                       placement="bottom"
@@ -90,7 +90,7 @@
                           size="mini"
                           type="text"
                           icon="el-icon-setting"
-                          style="color:#acb3b8; font-size: 16px;"
+                          style="color:#acb3b8;"
                         >
                           <!-- <i class="iconfont iconicon_setting" /> -->
                         </el-button>
@@ -117,6 +117,7 @@
 
               <template #multiSelectMenu="{ selection }">
                 <el-button
+                  v-p="DELETE_LECTURER"
                   style="margin-bottom:0;"
                   type="text"
                   @click="() => handleRemoveItems(selection)"
@@ -198,6 +199,7 @@
               >
                 <el-button
                   v-if="scope.row.status == 1"
+                  v-p="STOP_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 0)"
@@ -206,26 +208,25 @@
                 </el-button>
                 <span
                   v-else
+                  v-p="STOP_LECTURER"
                   style=" cursor:pointer; "
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
-                &nbsp;
-                <i style="color:#ccc;">|</i>
-                &nbsp;
+                &nbsp; &nbsp;
                 <el-button
+                  v-p="EDIT_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
-                &nbsp;
-                <i style="color:#ccc;">|</i>
-                &nbsp;
+                &nbsp; &nbsp;
                 <el-button
+                  v-p="DELETE_LECTURER"
                   type="text"
                   size="medium"
                   @click.stop="isTeacherdelete(scope.row)"
@@ -321,37 +322,37 @@ const TABLE_COLUMNS = [
   {
     label: '讲师姓名',
     prop: 'name',
-    width: '160',
+    width: '180',
     slot: true,
     fixed: 'left'
   },
   {
     label: '手机号码',
-    prop: 'phonenum',
-    width: '160'
+    minWidth: 140,
+    prop: 'phonenum'
   },
   {
     label: '电子邮箱',
     prop: 'user_email',
-    width: '200'
+    minWidth: 80
   },
   {
     label: '状态',
     prop: 'status',
-    slot: true,
-    width: '80'
+    minWidth: 180,
+    slot: true
   },
   {
     label: '性别',
     prop: 'sex',
-    slot: true,
-    width: '120'
+    minWidth: 80,
+    slot: true
   },
   {
     label: '讲师类型',
     prop: 'type',
     slot: true,
-    width: '120'
+    minWidth: 80
   },
   // {
   //   label: '擅长领域',
@@ -361,40 +362,40 @@ const TABLE_COLUMNS = [
   {
     label: '讲师级别',
     prop: 'teacher_level',
-    minWidth: '120'
+    minWidth: 130
   },
   {
     label: '讲师职称',
     prop: 'teacher_title',
-    minWidth: '80'
+    minWidth: 130
   },
   {
     label: '是否推荐',
     prop: 'is_recommend',
     slot: true,
-    minWidth: '80'
+    minWidth: 200
   },
   {
     label: '是否最新讲师',
     prop: 'is_latest_teacher',
     slot: true,
-    minWidth: '120'
+    minWidth: 200
   },
   {
     label: '是否热门讲师',
     prop: 'is_popular_teacher',
     slot: true,
-    minWidth: '120'
+    minWidth: 200
   },
   {
     label: '创建人',
     prop: 'createName',
-    minWidth: '160'
+    minWidth: 200
   },
   {
     label: '创建时间',
     prop: 'create_time',
-    minWidth: '160'
+    minWidth: 200
   }
 ]
 const TABLE_CONFIG = {
@@ -411,7 +412,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入姓名/手机号码搜索', width: '280px' },
+    config: { placeholder: '请输入姓名/手机号码搜索' },
     data: '',
     field: 'likeQuery',
     label: '',
@@ -426,76 +427,74 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: '0', label: '停用' },
-      { value: '1', label: '正常' },
-      { value: '', label: '全部' }
+      { value: 0, label: '停用' },
+      { value: 1, label: '正常' }
     ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'type',
+    field: 'trainWay',
     label: '讲师类型',
     type: 'select',
     options: [
-      { value: '1', label: '内训' },
-      { value: '2', label: '外聘' },
-      { value: '', label: '全部' }
+      { value: 1, label: '内训' },
+      { value: 2, label: '外聘' }
     ]
   },
-  // {
-  //   config: { placeholder: '请选择' },
-  //   data: '',
-  //   field: 'lingyu',
-  //   label: '擅长领域',
-  //   type: 'select',
-  //   options: []
-  // },
   {
-    config: { placeholder: '请输入' },
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'lingyu',
+    label: '擅长领域',
+    type: 'select',
+    options: []
+  },
+  {
+    config: { placeholder: '请选择' },
     data: '',
     field: 'teacher_level',
     label: '讲师级别',
     type: 'input'
   },
   {
-    config: { placeholder: '请输入' },
+    config: { placeholder: '请选择' },
     data: '',
     field: 'teacher_title',
     label: '讲师职称',
     type: 'input'
   },
   {
-    placeholder: '请选择文章标签',
+    config: { placeholder: '请选择' },
     data: '',
     field: 'is_recommend',
     label: '是否推荐',
     type: 'select',
     options: [
-      { value: '1', label: '是' },
-      { value: '0', label: '否' }
+      { value: 1, label: '是' },
+      { value: 0, label: '否' }
     ]
   },
   {
-    // config: { placeholder: '请选择' },
+    config: { placeholder: '请选择' },
     data: '',
     field: 'is_latest_teacher',
     label: '是否最新',
     type: 'select',
     options: [
-      { value: '1', label: '是' },
-      { value: '0', label: '否' }
+      { value: 1, label: '是' },
+      { value: 0, label: '否' }
     ]
   },
   {
-    // config: { placeholder: '请选择' },
+    config: { placeholder: '请选择' },
     data: '',
     field: 'is_popular_teacher',
     label: '是否热门',
     type: 'select',
     options: [
-      { value: '1', label: '是' },
-      { value: '0', label: '否' }
+      { value: 1, label: '是' },
+      { value: 0, label: '否' }
     ]
   }
 ]
@@ -504,6 +503,8 @@ const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
 
+import { ADD_LECTURER, STOP_LECTURER, EDIT_LECTURER, DELETE_LECTURER } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
   components: {
@@ -522,6 +523,7 @@ export default {
       showBtnData: false,
       showBtnDel: false,
       rowData: '',
+      myColumnShow: true,
       // 接口
       columnInterface: {
         listTeacherCategory, //查询讲师分类列表
@@ -531,6 +533,18 @@ export default {
         editTeacherCatalog //编辑
       },
 
+      inputAddMark: false,
+      expandedKeysData: [],
+      interfaceList: {
+        addCatalog: addCatalog, //新增树单元接口
+        delCatalogs: deleteTeacherCatalog, //删除树单元接口
+        getCatalogs: listTeacherCategory, //获取树单元接口
+        moveCatalogs: move, //移动树单元接口
+        updateCatalogs: listTeacherCategory //更新树单元接口
+      },
+      currentNodeKey: '',
+
+      compileNewly: '',
       // 保存左栏点过的的id或者默认id
       clickId: '',
       props: {
@@ -582,23 +596,39 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-
+  computed: {
+    ADD_LECTURER: () => ADD_LECTURER,
+    STOP_LECTURER: () => STOP_LECTURER,
+    EDIT_LECTURER: () => EDIT_LECTURER,
+    DELETE_LECTURER: () => DELETE_LECTURER,
+    ...mapGetters(['privileges'])
+  },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_LECTURER, EDIT_LECTURER, DELETE_LECTURER])
+      },
+      deep: true
+    },
     filterText(val) {
       this.$refs.tree.filter(val)
     }
   },
   created() {
-    this.islistTeacher(undefined)
+    this.islistTeacherCategory()
   },
   activated() {
-    this.islistTeacher(undefined)
+    this.islistTeacherCategory()
   },
   methods: {
     treeClick(val) {
-      this.clickId = val
-      SEARCH_POPOVER_REQUIRE_OPTIONS[0].data = ''
       this.islistTeacher(val)
+    },
+    nodeClick(data) {
+      // if (data.hasOwnProperty('children') && data.children.length > 0) return
+      // this.islistTeacherCategory(data.id)
+      this.islistTeacher(data.id)
     },
     isgetCatalogs() {},
     // 去添加
@@ -637,6 +667,7 @@ export default {
 
     // 删除讲师fn
     TeacherdeleteFn(id) {
+      this.myColumnShow = false
       let params = {
         ids: id.idStr || id.teacherId
       }
@@ -645,8 +676,9 @@ export default {
           message: '删除成功',
           type: 'success'
         })
-        this.islistTeacher()
+        this.islistTeacherCategory()
         this.blockDialogVisible = false
+        this.myColumnShow = true
       })
     },
 
@@ -685,6 +717,7 @@ export default {
         id: '',
         status: '' // '0 停用 1 正常',
       }
+      // console.log(i)
       params.id = id.idStr || id.teacherId
       params.status = i
 
@@ -693,8 +726,9 @@ export default {
           message: `${i ? '启动' : '停用'}成功`,
           type: 'success'
         })
+        //刷新
+        this.islistTeacherCategory()
         this.blockDialogVisible = false
-        this.islistTeacher()
       })
     },
 
@@ -751,26 +785,75 @@ export default {
 
     // 查询讲师列表
     islistTeacher(id, searchParams) {
-      // console.log(searchParams)
-      if (searchParams && searchParams.likeQuery) {
-        this.page.currentPage = 1
-        this.page.size = 10
-      }
-      let params = { categoryId: id || this.clickId, ...searchParams, ...this.page }
-      if (!params.categoryId) {
-        delete params.categoryId
+      let categoryId = {
+        categoryId: id
       }
 
+      if (!id) {
+        categoryId.categoryId = this.clickId
+      }
+
+      let params = { ...categoryId, ...searchParams, ...this.page }
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
         this.page.total = res.totalNum || 0
         // 下拉筛选框
-        // this.tableData.forEach((item) => {
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-        //     value: item.lingyu,
-        //     label: item.lingyu
-        //   })
-        // })
+        this.tableData.forEach((item) => {
+          SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
+            value: item.lingyu,
+            label: item.lingyu
+          })
+        })
+      })
+    },
+    // 查询讲师分类列表
+    islistTeacherCategory(id) {
+      let params = {}
+      if (id) {
+        params = {
+          test: '123',
+          parentId: '' // 父ID
+        }
+        params.parentId = id
+      } else {
+        params = {
+          test: '123'
+        }
+      }
+      return listTeacherCategory(params).then((res) => {
+        this.data = []
+        res.group.forEach((item) => {
+          let i = {
+            id: 1,
+            label: '一级 1',
+            btnshow: 1,
+            children: [],
+            num: 1,
+            count: 0
+          }
+          i.id = item.idStr
+          i.label = item.name
+          i.btnshow = 1
+          i.children = []
+          i.count = item.count
+          this.data.push(i)
+        })
+        this.data.forEach((item) => {
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
+          filterArr = filterArr.map((item) => {
+            return {
+              id: item.idStr,
+              parent_id: item.parentStr,
+              label: item.name,
+              btnshow: 0,
+              count: item.count
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
+
+        this.clickId = this.data[0].id
+        this.islistTeacher(this.data[0].id)
       })
     },
 
@@ -786,7 +869,7 @@ export default {
 
     // 搜索
     handleSearch(searchParams) {
-      this.islistTeacher(this.clickId, searchParams)
+      this.islistTeacher('', searchParams)
     },
     // 批量删除
     handleRemoveItems(selection) {
@@ -806,14 +889,18 @@ export default {
               message: '操作成功',
               type: 'success'
             })
+            this.islistTeacherCategory()
           })
         })
         .then(() => {
           // 删除完成后更新视图
           this.$refs.table.clearSelection()
-          this.islistTeacher()
+          this.islistTeacherCategory()
         })
-    }
+    },
+
+    // 刷新列表数据
+    refreshTableData() {}
   }
 }
 </script>
@@ -830,7 +917,7 @@ export default {
     display: flex;
 .text_refresh
     color: #acb3b8
-    margin-right: 5px
+    margin-right: 20px
 $color_icon: #A0A8AE
 
 .basic-container--block
@@ -941,13 +1028,13 @@ $color_icon: #A0A8AE
     .draft_issue {
       padding-top: 25px;
       display: flex;
-      height: 710px;
+      height: 700px;
       // overflow: hidden;
       .issue_l {
         position: relative;
         width: 20%;
         border-right: 1px solid #ccc;
-        padding-top: 7px;
+
         height: 100%;
         .issue_l_tree {
           padding: 20px;
@@ -997,9 +1084,6 @@ $color_icon: #A0A8AE
       .issue_r {
         width: 75%;
         padding: 0 40px;
-        /deep/.el-form-item__content {
-          width: 280px;
-        }
       }
       .istrainingArrange {
         width: 100%;

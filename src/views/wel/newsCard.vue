@@ -29,7 +29,7 @@
             class="poster link"
             :src="row.picUrl"
             @click="() => handleItemImageClick(row)"
-          >
+          />
           <div class="info">
             <a
               class="title link"
@@ -118,7 +118,7 @@ export default {
     navigateToDetail(id) {
       this.$router.push(
         {
-          path: '/newsCenter/newsDetail',
+          path: '/system/newsCenter/newsDetail',
           query: {
             id
           }
@@ -129,7 +129,7 @@ export default {
     },
 
     navigateToNewsCenter() {
-      this.$router.push('/newsCenter/newsCenter', ({ meta }) => (meta.fullscreen = true))
+      this.$router.push('/system/newsCenter/newsCenter', ({ meta }) => (meta.fullscreen = true))
     }
   }
 }

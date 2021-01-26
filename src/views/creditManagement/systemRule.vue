@@ -40,7 +40,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="'/creditManagement/systemRule/delete'"
+              v-p="STOP_SYSTEM_RULE"
               type="text"
               @click="handleIsStart(row)"
             >
@@ -94,6 +94,8 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
+import { STOP_SYSTEM_RULE } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'SystemRule',
   components: { SearchPopover },
@@ -126,7 +128,19 @@ export default {
       searchParams: {}
     }
   },
-  mounted() {},
+  computed: {
+    STOP_SYSTEM_RULE: () => STOP_SYSTEM_RULE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_SYSTEM_RULE])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.loadTableData()
   },

@@ -19,8 +19,6 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        @current-page-change="handleCurrentPageChange"
-        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="operations">
@@ -81,24 +79,24 @@
 
         <template #handler="{row}">
           <el-button
-            v-if="row.status === 0"
+            v-if="row.useStatus === 'Yes'"
             type="text"
-            @click="disableApproval(processesItem)"
+            @click="disableApproval(row)"
           >
             停用
           </el-button>
           <el-button
-            v-if="row.status === 1"
+            v-if="row.useStatus === 'No'"
             type="text"
-            @click="enableApproval(item, processesItem)"
+            @click="enableApproval(row)"
           >
             启用
           </el-button>
           <el-button
             type="text"
-            @click="jumpToDetail(row)"
+            @click="jumpToEdit(row)"
           >
-            查看
+            编辑
           </el-button>
         </template>
       </common-table>
@@ -106,12 +104,12 @@
   </div>
 </template>
 <script>
-import { categoryOptions } from '@/const/approve'
-import { getProcessList, startProcess, stopProcessCategory } from '@/api/apprProcess/apprProcess'
+import { categoryOptions, categoryMap } from '@/const/approve'
+import { getProcessList, startProcess, stopProcess } from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
 const statusDict = {
-  '1': '停用',
-  '0': '正常'
+  No: '停用',
+  Yes: '正常'
 }
 const TABLE_COLUMNS = [
   {
@@ -121,19 +119,19 @@ const TABLE_COLUMNS = [
   },
   {
     label: '状态',
-    prop: 'status',
-    formatter: (row) => statusDict[row.status],
-    minWidth: 120
+    prop: 'useStatus',
+    formatter: (row) => statusDict[row.useStatus],
+    width: 100
   },
   {
     label: '审批类型',
     prop: 'categoryId',
-    formatter: (row) => statusDict[row.status],
-    minWidth: 120
+    formatter: (row) => categoryMap[row.status] || '',
+    width: 120
   },
   {
     label: '适用范围',
-    prop: 'processVisible',
+    prop: 'visibleRange',
     minWidth: 120
   }
 ]
@@ -144,7 +142,7 @@ const TABLE_CONFIG = {
   showIndexColumn: false,
   // enablePagination: true,
   handlerColumn: {
-    minWidth: 50
+    width: 100
   }
 }
 
@@ -165,13 +163,13 @@ const SEARCH_CONFIG = {
     {
       type: 'select',
       data: '',
-      field: 'status',
+      field: 'userStatus',
       label: '状态',
-      config: [
-        { label: '正常', value: 0 },
-        { label: '停用', value: 1 }
-      ],
-      options: []
+
+      options: [
+        { label: '正常', value: 'Yes' },
+        { label: '停用', value: 'No' }
+      ]
     },
     {
       type: 'select',
@@ -201,11 +199,6 @@ export default {
   data() {
     return {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 1000,
-        total: 0
-      },
       searchConfigLocal: SEARCH_CONFIG,
       searchParams: null,
       tableColumns: TABLE_COLUMNS,
@@ -228,20 +221,13 @@ export default {
       })
     },
     // 处理跳转
-    jumpToDetail(row) {
+    jumpToEdit(row) {
       this.$router.push({
-        path: '/apprProcess/apprDetail',
-        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo, preview: true }
+        path: '/process/design',
+        query: {
+          processId: row.processId
+        }
       })
-    },
-
-    handleCurrentPageChange(page) {
-      this.page.currentPage = page
-      this.loadTableData()
-    },
-    handlePageSizeChange(pageSize) {
-      this.page.size = pageSize
-      this.loadTableData()
     },
     handleSearch(searchParams) {
       this.searchParams = _.pickBy(searchParams)
@@ -252,7 +238,7 @@ export default {
      * 停用审批
      */
     disableApproval(data) {
-      stopProcessCategory({ processId: data.processId }).then(() => {
+      stopProcess({ processId: data.processId }).then(() => {
         this.$message.success('停用成功')
         this.refres()
       })
@@ -299,13 +285,8 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        const page = {
-          pageNo: this.page.currentPage,
-          pageSize: this.page.size
-        }
-        const { data, totalNum } = await getProcessList(_.assign(null, page, params))
+        const data = await getProcessList(params)
         this.tableData = data
-        this.page.total = totalNum
         // eslint-disable-next-line no-useless-catch
       } catch (error) {
         throw error

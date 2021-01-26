@@ -26,7 +26,17 @@ export const getMenuTree = (parentId = '0') => {
     }
   })
 }
-
+// 一次性将所有的菜单拉取回来
+export const getMenuAll = (parentId = '0') => {
+  return request({
+    url: '/api/sys/v1/menu/all',
+    method: 'get',
+    params: {
+      parentId,
+      clientId: 'Admin'
+    }
+  })
+}
 export const getMenuInfo = (parentId, query = {}) => {
   if (!query.clientId) query.clientId = 'Admin'
   return request({

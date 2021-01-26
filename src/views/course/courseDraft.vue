@@ -4,6 +4,7 @@
     <page-header title="课程管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_COURSE"
         size="medium"
         type="primary"
         @click="toEstablishCourse"
@@ -128,6 +129,7 @@
 
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="DELETE_COURSE"
                 style="margin-bottom:0;"
                 type="text"
                 @click="() => handleRemoveItems(selection)"
@@ -149,6 +151,7 @@
               slot-scope="{ row }"
             >
               <el-button
+                p="@/course/courseDraft"
                 type="text"
                 @click="todetail(row.id)"
               >
@@ -173,15 +176,9 @@
                 v-for="(item, index) in row.passCondition.split(',')"
                 :key="index"
               >
-                <span
-                  v-if="item == 'a'"
-                >教师评定 {{ row.passCondition.split(',').length >= 2 ? ',' : '' }}
-                </span>
-                <span
-                  v-if="item == 'b'"
-                >考试通过{{ row.passCondition.split(',').length >= 3 ? ',' : '' }}
-                </span>
-                <span v-if="item == 'c'">达到课程学时 </span>
+                <span v-if="item == 'a'">教师评定,</span>
+                <span v-if="item == 'b'">考试通过,</span>
+                <span v-if="item == 'c'">达到课程学时</span>
               </span>
             </template>
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
@@ -224,23 +221,25 @@
             >
               <el-button
                 v-if="scope.row.isTop == 0"
+                v-p="TOP_COURSE"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 1)"
               >
-                &nbsp;&nbsp; 置顶&nbsp;
+                置顶
               </el-button>
               <el-button
                 v-if="scope.row.isTop == 1"
+                v-p="TOP_COURSE"
                 type="text"
                 size="medium"
                 @click.stop="handleConfig(scope.row, 0)"
               >
                 已置顶
               </el-button>
-              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-button
                 v-if="scope.row.isPutaway === 1"
+                v-p="PUTAWAY_COURSE"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 0)"
@@ -249,29 +248,42 @@
               </el-button>
               <el-button
                 v-if="scope.row.isPutaway === 0"
+                v-p="PUTAWAY_COURSE"
                 type="text"
                 size="medium"
                 @click="alterIsPutaway(scope.row.id, 1)"
               >
                 上架
               </el-button>
-              <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
               <el-dropdown
+                v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
                 trigger="hover"
-                style="color: #a0a8ae;"
+                style="color: #a0a8ae"
                 @command="handleCommand($event, scope.row)"
               >
-                <span class="el-dropdown-link">
+                <span
+                  class="el-dropdown-link"
+                  style="margin-left: 10px"
+                >
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="edit">
+                  <el-dropdown-item
+                    v-p="'/course/courseDraft/edit'"
+                    command="edit"
+                  >
                     编辑
                   </el-dropdown-item>
-                  <el-dropdown-item command="del">
+                  <el-dropdown-item
+                    v-p="'/course/courseDraft/delete'"
+                    command="del"
+                  >
                     删除
                   </el-dropdown-item>
-                  <el-dropdown-item command="move">
+                  <el-dropdown-item
+                    v-p="'/course/courseDraft/move'"
+                    command="move"
+                  >
                     移动
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -546,6 +558,15 @@ const FORM_COLUMNS = [
     }
   }
 ]
+import { mapGetters } from 'vuex'
+import {
+  ADD_COURSE,
+  TOP_COURSE,
+  EDIT_COURSE,
+  DELETE_COURSE,
+  MOVE_COURSE,
+  PUTAWAY_COURSE
+} from '@/const/privileges'
 export default {
   // 搜索组件
   components: {
@@ -592,6 +613,30 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableData: [],
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    ADD_COURSE: () => ADD_COURSE,
+    TOP_COURSE: () => TOP_COURSE,
+    EDIT_COURSE: () => EDIT_COURSE,
+    DELETE_COURSE: () => DELETE_COURSE,
+    MOVE_COURSE: () => MOVE_COURSE,
+    PUTAWAY_COURSE: () => PUTAWAY_COURSE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          TOP_COURSE,
+          PUTAWAY_COURSE,
+          EDIT_COURSE,
+          DELETE_COURSE,
+          MOVE_COURSE
+        ])
+      },
+      deep: true
     }
   },
   created() {

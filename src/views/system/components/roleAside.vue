@@ -14,7 +14,10 @@
           />
         </div>
       </div>
-      <div class="bottom-wrap">
+      <div
+        v-p="ADD_ROLE_CATALOG"
+        class="bottom-wrap"
+      >
         <div
           class="bottom-item"
           @click="createNew()"
@@ -76,6 +79,7 @@ const BASE_COLUMNS = [
     required: true
   }
 ]
+import { ADD_ROLE_CATALOG } from '@/const/privileges'
 export default {
   name: 'RoleAside',
   components: {
@@ -119,6 +123,10 @@ export default {
         label: 'orgName'
       }
     }
+  },
+
+  computed: {
+    ADD_ROLE_CATALOG: () => ADD_ROLE_CATALOG
   },
   watch: {
     treeList: {

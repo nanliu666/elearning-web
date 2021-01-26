@@ -4,6 +4,7 @@
     :visible="visible"
     class="course-batch-edit-dialog"
     width="422px"
+    append-to-body
     @close="handleClose"
   >
     <div class="batch_label">
@@ -14,7 +15,7 @@
       :key="index"
       v-model="time.list"
       class="picker"
-      type="daterange"
+      type="datetimerange"
       value-format="yyyy-MM-dd HH:mm:ss"
       range-separator="至"
       start-placeholder="开始时间"
@@ -80,7 +81,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .course-batch-edit-dialog {
   /deep/.el-dialog__header {
     padding-bottom: 16px;

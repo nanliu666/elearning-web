@@ -25,7 +25,7 @@
       <div class="table__handler">
         <el-button
           v-if="status === 'Published'"
-          v-p="'/newsCenter/newsManage/top'"
+          v-p="TOP_NEWS"
           type="text"
           size="medium"
           @click="() => handleTopItemBtnClick(row)"
@@ -37,7 +37,7 @@
 
         <el-button
           v-if="status === STATUS['Draft']"
-          v-p="'/newsCenter/newsManage/edit'"
+          v-p="EDIT_NEWS"
           type="text"
           size="medium"
           @click="() => handleEditItemBtnClick(row)"
@@ -46,7 +46,7 @@
         </el-button>
 
         <el-button
-          v-p="'/newsCenter/newsManage/delete'"
+          v-p="DELETE_NEWS"
           type="text"
           size="medium"
           @click="() => handleRemoveItemBtnClick(row)"
@@ -152,6 +152,7 @@ const SEARCH_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { DELETE_NEWS, EDIT_NEWS, TOP_NEWS } from '@/const/privileges'
 export default {
   name: 'NewTable',
   filters: {
@@ -181,11 +182,6 @@ export default {
       }
     }
   },
-  computed: {
-    tableConfig: () => TABLE_CONFIG,
-
-    ...mapGetters(['userId'])
-  },
   data() {
     return {
       STATUS: ENUMS_STATUS,
@@ -205,7 +201,21 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  computed: {
+    tableConfig: () => TABLE_CONFIG,
+    DELETE_NEWS: () => DELETE_NEWS,
+    EDIT_NEWS: () => EDIT_NEWS,
+    TOP_NEWS: () => TOP_NEWS,
+    ...mapGetters(['userId', 'privileges'])
+  },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_NEWS, EDIT_NEWS, TOP_NEWS])
+      },
+      deep: true
+    },
     search: {
       handler: function(data) {
         // let name = Number(data.name)
@@ -232,17 +242,17 @@ export default {
     },
     handlePublishBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit'
       })
     },
     handlePublishedBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsPublished'
+        path: '/system/newsCenter/newsPublished'
       })
     },
     handleDraftBtnClick() {
       this.$router.push({
-        path: '/newsCenter/newsDrafts'
+        path: '/system/newsCenter/newsDrafts'
       })
     },
     // toggle isTop handler
@@ -267,7 +277,7 @@ export default {
 
     handleEditItemBtnClick({ id }) {
       this.$router.push({
-        path: '/newsCenter/newsEdit',
+        path: '/system/newsCenter/newsEdit',
         query: { id }
       })
     },
@@ -310,7 +320,7 @@ export default {
     // 跳转新闻详情
     handleItemLinkClick({ id }) {
       this.$router.push({
-        path: '/newsCenter/newsDetail',
+        path: '/system/newsCenter/newsDetail',
         query: {
           id,
           userId: this.userId

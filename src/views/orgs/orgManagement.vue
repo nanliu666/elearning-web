@@ -3,6 +3,7 @@
     <page-header title="组织管理">
       <el-dropdown
         slot="rightMenu"
+        v-p="ADD_ORG"
         @command="handleCommand"
       >
         <el-button
@@ -32,6 +33,7 @@
       >
         <template #multiSelectMenu="{selection}">
           <el-button
+            v-p="DELETE_ORG"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -102,19 +104,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="ADD_ORG_CHILD"
               type="text"
               @click="handleCreateChild(row)"
             >
               新建子组织
             </el-button>
             <el-button
+              v-p="EDIT_ORG"
               type="text"
               @click="handleOrgEdit(row)"
             >
               编辑
             </el-button>
             <el-dropdown
-              v-if="row.parentId !== '0'"
+              v-if="row.parentId !== '0' && $p([DELETE_ORG])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -123,7 +127,10 @@
               >
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
-              <el-dropdown-menu slot="dropdown">
+              <el-dropdown-menu
+                slot="dropdown"
+                v-p="DELETE_ORG"
+              >
                 <el-dropdown-item command="deleteOrg">
                   删除
                 </el-dropdown-item>
@@ -192,6 +199,8 @@ const TABLE_CONFIG = {
     width: 160
   }
 }
+import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'OrgManagement',
   components: { SearchPopover, OrgEdit },
@@ -311,6 +320,22 @@ export default {
       createOrgDailog: false,
       orgTypeObj: { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' },
       searchParams: { parentOrgId: 0 }
+    }
+  },
+  computed: {
+    ADD_ORG: () => ADD_ORG,
+    ADD_ORG_CHILD: () => ADD_ORG_CHILD,
+    EDIT_ORG: () => EDIT_ORG,
+    DELETE_ORG: () => DELETE_ORG,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG])
+      },
+      deep: true
     }
   },
   created() {

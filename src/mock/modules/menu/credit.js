@@ -33,12 +33,14 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '删除',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/creditRule/delete'
         },
         {
           menuType: 'Button',
+          menuName: '编辑',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/creditRule/edit'
@@ -46,11 +48,13 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
+          menuName: '停用',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/creditManagement/creditRule/disabled'
+          path: '/creditManagement/creditRule/stop'
         },
         {
           menuType: 'Button',
+          menuName: '新建规则',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/creditRule/add'
@@ -72,9 +76,10 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '启用/停用',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          path: '/creditManagement/systemRule/delete'
+          path: '/creditManagement/systemRule/stop'
         }
       ]
     },
@@ -93,6 +98,7 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '查看详情',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/credit/view'

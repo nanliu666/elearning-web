@@ -18,6 +18,7 @@
         slot-scope="{ selection }"
       >
         <el-button
+          v-p="RESET_USER"
           type="text"
           style="margin-bottom:0;"
           @click="handleReset(selection)"
@@ -83,6 +84,7 @@
         slot-scope="{ row }"
       >
         <el-button
+          v-p="SETTING_USER"
           size="medium"
           type="text"
           @click="handleEditRole(row)"
@@ -90,6 +92,7 @@
           角色设置
         </el-button>
         <el-button
+          v-p="RESET_USER"
           size="medium"
           type="text"
           @click="handleReset(row)"
@@ -107,23 +110,34 @@
           >
             <i class="el-icon-more" />
           </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="edit">
+          <el-dropdown-menu
+            v-if="$p([EDIT_USER, DELETE_USER, END_USER])"
+            slot="dropdown"
+          >
+            <el-dropdown-item
+              v-p="EDIT_USER"
+              command="edit"
+            >
               编辑
             </el-dropdown-item>
             <el-dropdown-item
               v-if="row.userStatus === '1'"
+              v-p="END_USER"
               command="suspend"
             >
               冻结
             </el-dropdown-item>
             <el-dropdown-item
               v-if="row.userStatus === '2'"
+              v-p="END_USER"
               command="unsuspend"
             >
               解冻
             </el-dropdown-item>
-            <el-dropdown-item command="delete">
+            <el-dropdown-item
+              v-p="DELETE_USER"
+              command="delete"
+            >
               删除
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -148,7 +162,8 @@ import {
   getOuterUserList
 } from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
-
+import { mapGetters } from 'vuex'
+import { SETTING_USER, RESET_USER, EDIT_USER, END_USER, DELETE_USER } from '@/const/privileges'
 const COLUMNS = [
   {
     label: '姓名',
@@ -291,7 +306,28 @@ export default {
       editingUser: {}
     }
   },
+  computed: {
+    SETTING_USER: () => SETTING_USER,
+    RESET_USER: () => RESET_USER,
+    EDIT_USER: () => EDIT_USER,
+    END_USER: () => END_USER,
+    DELETE_USER: () => DELETE_USER,
+    ...mapGetters(['privileges'])
+  },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          SETTING_USER,
+          RESET_USER,
+          EDIT_USER,
+          END_USER,
+          DELETE_USER
+        ])
+      },
+      deep: true
+    },
     activeOrg: function() {
       this.page = {
         currentPage: 1,

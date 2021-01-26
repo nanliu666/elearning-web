@@ -6,6 +6,7 @@
       </div>
       <div>
         <el-button
+          v-p="ADD_TRAIN"
           type="primary"
           size="medium"
           @click="goAdd"
@@ -282,6 +283,7 @@
 
               <template #multiSelectMenu="{ selection }">
                 <el-button
+                  v-p="DELETE_TRAIN"
                   style="margin-bottom:0;"
                   type="text"
                   @click="() => handleRemoveItems(selection)"
@@ -317,8 +319,8 @@
                 slot-scope="{ row }"
               >
                 <span v-if="row.trainWay === 1">面授</span>
-                <span v-if="row.trainWay === 2">混合</span>
-                <span v-if="row.trainWay === 3">在线</span>
+                <span v-if="row.trainWay === 2">在线</span>
+                <span v-if="row.trainWay === 3">混合</span>
               </template>
               <!-- 标签 -->
               <template
@@ -343,24 +345,25 @@
               >
                 <div v-if="status === 0">
                   <el-button
+                    v-p="NEXT_TRAIN"
                     type="text"
                     size="medium"
                     @click.stop="handleConfig(scope.row.id)"
                   >
                     开办下一期
                   </el-button>
-                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
-                  <el-button
-                    v-if="scope.row.status !== 0"
-                    type="text"
-                    size="medium"
-                    @click="isstopSchedule(scope.row.id)"
-                  >
-                    结办
-                  </el-button>
-                  <span v-else>结办</span>
-                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
+                  <span v-p="END_TRAIN">
+                    <el-button
+                      v-if="scope.row.status !== 0"
+                      type="text"
+                      size="medium"
+                      @click="isstopSchedule(scope.row.id)"
+                    >
+                      结办
+                    </el-button>
+                  </span>
                   <el-dropdown
+                    v-if="$p([EDIT_TRAIN, DELETE_TRAIN])"
                     trigger="hover"
                     style="color: #a0a8ae;"
                     @command="handleCommand($event, scope.row)"
@@ -369,34 +372,20 @@
                       <i class="el-icon-more" />
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item command="edit">
+                      <el-dropdown-item
+                        v-p="EDIT_TRAIN"
+                        command="edit"
+                      >
                         编辑
                       </el-dropdown-item>
-                      <el-dropdown-item command="del">
+                      <el-dropdown-item
+                        v-p="DELETE_TRAIN"
+                        command="del"
+                      >
                         删除
                       </el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
-                </div>
-
-                <div v-if="status === 1">
-                  <!-- 草稿 -->
-
-                  <el-button
-                    type="text"
-                    size="medium"
-                    @click.stop=""
-                  >
-                    编辑
-                  </el-button>
-                  <span style="color: #a0a8ae;"> &nbsp;&nbsp;|&nbsp;</span>
-                  <el-button
-                    type="text"
-                    size="medium"
-                    @click.stop="isDraftDel(scope)"
-                  >
-                    删除
-                  </el-button>
                 </div>
               </template>
             </common-table>
@@ -424,6 +413,14 @@ import {
   delTrain,
   stopSchedule
 } from '@/api/training/training'
+import {
+  ADD_TRAIN,
+  ADD_GROUNP_TRAIN,
+  DELETE_TRAIN,
+  EDIT_TRAIN,
+  END_TRAIN,
+  NEXT_TRAIN
+} from '@/const/privileges'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -553,6 +550,7 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
+import { mapGetters } from 'vuex'
 
 export default {
   // 搜索组件
@@ -625,8 +623,23 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-
+  computed: {
+    ADD_TRAIN: () => ADD_TRAIN,
+    ADD_GROUNP_TRAIN: () => ADD_GROUNP_TRAIN,
+    DELETE_TRAIN: () => DELETE_TRAIN,
+    EDIT_TRAIN: () => EDIT_TRAIN,
+    NEXT_TRAIN: () => NEXT_TRAIN,
+    END_TRAIN: () => END_TRAIN,
+    ...mapGetters(['privileges'])
+  },
   watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([NEXT_TRAIN, END_TRAIN, EDIT_TRAIN, DELETE_TRAIN])
+      },
+      deep: true
+    },
     filterText(val) {
       this.$refs.tree.filter(val)
     },

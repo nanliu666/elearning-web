@@ -25,7 +25,7 @@
 
 <script>
 import { getCatalogs } from '@/api/learnPlan'
-import { filterTree } from '@/util/util'
+import { filterTree, handleCatalogsData } from '@/util/util'
 export default {
   props: {
     model: {
@@ -36,20 +36,46 @@ export default {
   data() {
     return {
       columns: [
-        {
-          prop: 'coursePlanNo',
-          itemType: 'input',
-          label: '课程安排编号',
-          maxlength: 32,
-          required: true
-        },
+        // {
+        //   prop: 'coursePlanNo',
+        //   itemType: 'input',
+        //   label: '课程安排编号',
+        //   maxlength: 32,
+        //   required: true
+        // },
         {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
           maxlength: 32,
-          required: true,
-          offset: 4
+          required: true
+        },
+        {
+          itemType: 'treeSelect',
+          label: '所属分类',
+          prop: 'categoryId',
+          offset: 4,
+          props: {
+            selectParams: {
+              placeholder: '请选择分类',
+              multiple: false
+            },
+            treeParams: {
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              data: [],
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'label',
+                value: 'id'
+              },
+              required: true
+            }
+          },
+          required: false
         },
         {
           prop: 'timeRange',
@@ -62,43 +88,9 @@ export default {
         {
           prop: 'automaticIntegralCount',
           itemType: 'switch',
-          label: '自动计算积分',
+          label: '自动计算学分',
           required: false,
           offset: 4
-        },
-        {
-          prop: 'endDate',
-          itemType: 'datePicker',
-          label: '学习计划截止日期',
-          required: false
-        },
-        {
-          prop: 'categoryId',
-          itemType: 'cascader',
-          label: '所属分类',
-          options: [],
-          props: {
-            value: 'id',
-            emitPath: false
-          },
-          showAllLevels: false,
-          offset: 4,
-          required: true
-        },
-        {
-          prop: 'creatorName',
-          itemType: 'input',
-          label: '创建者',
-          required: false
-        },
-        {
-          prop: 'createTime',
-          itemType: 'datePicker',
-          type: 'datetime',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          label: '创建时间',
-          offset: 4,
-          required: false
         },
         {
           prop: 'sponsor',
@@ -107,6 +99,21 @@ export default {
           maxlength: 32,
           required: false
         }
+        // {
+        //   prop: 'creatorName',
+        //   itemType: 'input',
+        //   label: '创建者',
+        //   offset: 4,
+        //   required: false
+        // },
+        // {
+        //   prop: 'createTime',
+        //   itemType: 'datePicker',
+        //   type: 'datetime',
+        //   valueFormat: 'yyyy-MM-dd HH:mm:ss',
+        //   label: '创建时间',
+        //   required: false
+        // },
       ],
       categoryData: []
     }
@@ -140,34 +147,9 @@ export default {
     },
     getCategoryData() {
       getCatalogs().then((res) => {
-        let data = []
-        res.group.forEach((item) => {
-          if (!item.id) {
-            return
-          }
-          data.push({
-            id: item.idStr,
-            label: item.name,
-            btnshow: 1,
-            children: [],
-            count: item.count
-          })
-        })
-        data.forEach((item) => {
-          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
-          filterArr = filterArr.map((item) => {
-            return {
-              id: item.idStr,
-              parent_id: item.parentStr,
-              label: item.name,
-              btnshow: 0,
-              count: item.count
-            }
-          })
-          filterArr.length > 0 ? (item.children = filterArr) : ''
-        })
+        const data = handleCatalogsData(res)
         this.categoryData = data
-        this.columns[5].options = data
+        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = data
       })
     }
   }

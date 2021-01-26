@@ -3,6 +3,7 @@
     title="前置条件"
     class="coursePreCourseDialog"
     :visible="visible"
+    append-to-body
     @close="handleClose"
   >
     <div class="precondition_label">
@@ -93,7 +94,7 @@ export default {
           _list.push({
             courseId: course.courseId,
             courseName: course.courseName,
-            required: requiredIdMap[course.id] || 0
+            required: requiredIdMap[course.courseId] || 0
           })
         }
       })
@@ -113,7 +114,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .coursePreCourseDialog {
   /deep/.el-dialog {
     .precondition_label {

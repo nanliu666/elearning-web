@@ -49,7 +49,7 @@
       <template #joinNum>
         <el-radio-group v-model="model.joinNum">
           <div class="flex-flow flex flexcenter">
-            <el-radio :label="0">
+            <el-radio :label="false">
               不限次数
             </el-radio>
             <radio-input
@@ -99,8 +99,8 @@ export default {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
-    // 父实体名称
-    parentEntryCName: {
+    // 实体名称
+    entryCName: {
       type: String,
       default: '培训'
     }
@@ -140,8 +140,7 @@ export default {
               required: true,
               message: '请选择关联用卷',
               trigger: 'blur'
-            },
-            { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
+            }
           ],
           prop: 'testPaper',
           label: '关联用卷'
@@ -233,30 +232,11 @@ export default {
       )
       if (!isLegalBeginTime) {
         callback(
-          new Error(
-            `考试开始日期要在${this.parentEntryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
-          )
+          new Error(`考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`)
         )
       } else if (!isLegalEndTime) {
         callback(
-          new Error(
-            `考试结束日期要在${this.parentEntryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
-          )
-        )
-      } else {
-        callback()
-      }
-    },
-    // 培训结束日期在试卷有效期之前
-    validateTestPaper(rule, value, callback) {
-      const paperExpiredTime = _.find(this.$refs.testPaperRef.optionList, (item) => {
-        return item.id === value
-      }).expiredTime
-      // 培训结束日期在卷子有效期之前
-      const isLegalExpiredTime = moment(this.trainTimeInVuex[1]).isSameOrBefore(paperExpiredTime)
-      if (paperExpiredTime && !isLegalExpiredTime) {
-        callback(
-          new Error(`此卷在${this.parentEntryCName}结束日时（${this.trainTimeInVuex[1]}）已过期`)
+          new Error(`考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`)
         )
       } else {
         callback()

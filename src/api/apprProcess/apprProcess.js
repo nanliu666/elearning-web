@@ -3,7 +3,7 @@ import { del, get, post, put } from '@/router/axios'
  * 审批流程列表查询接口
  * @param {*} params
  */
-export const getProcessList = (params) => get('/appr/v2/appr/user/process/list', params)
+export const getProcessList = (params) => get('/appr/v2/appr/process/all/list', params)
 /**
  * 可发起的课程审批流程列表查询接口
  * @param {*} params
@@ -28,7 +28,12 @@ export const getRecordList = (params) => get('/appr/v2/appr/approve/record/list'
 /**
  * 审批流程停用接口
  */
-export const stopProcessCategory = (params) => post('/appr/v2/appr/process/stop', params)
+export const stopProcess = (params) => post('/appr/v2/appr/process/stop', params)
+
+/**
+ * 审批流程启用接口
+ */
+export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
 
 // 审批历史记录、审批进度
 export const getApprRecord = (params) => get('/appr/v2/appr/apply/record', params)
@@ -132,10 +137,6 @@ export const getProcessTypeList = (params) => get('/appr/v2/appr/process/type', 
  * 审批流程移动接口
  */
 export const moveProcess = (params) => post('/appr/v2/appr/process/move', params)
-/**
- * 审批流程启用接口
- */
-export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
 /**
  * 审批流程发布接口
  */
