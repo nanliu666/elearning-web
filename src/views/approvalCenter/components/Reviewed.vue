@@ -18,7 +18,7 @@
     </template>
 
     <!-- 状态 -->
-    <template #status="{row}">
+    <template #status="{ row }">
       <span
         class="status-span"
         :style="{
@@ -29,12 +29,8 @@
       />
     </template>
     <template slot="handler" slot-scope="scope">
-      <el-button type="text" @click="againFn(scope.row.id)">
-        重新申请
-      </el-button>
-      <el-button type="text" @click="withdrawFn(scope.row)">
-        撤回
-      </el-button>
+      <el-button type="text" @click="againFn(scope.row.id)"> 重新申请 </el-button>
+      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>
     </template>
   </common-table>
 </template>
@@ -133,7 +129,7 @@ export default {
     toDetails(item) {
       this.$router.push({
         path: '/approvalCenter/details',
-        query: { id: item.formId, apprNo: item.apprNo }
+        query: { formId: item.formId, apprNo: item.apprNo }
       })
     },
     // 重新申请
@@ -152,7 +148,6 @@ export default {
     // 获取数据
     async setPitch() {
       let res = await fulllist({ ...this.page, categoryId: '1', status: 'Approve' })
-      window.console.log(res)
       this.tableData = res.data
       this.page.total = res.totalNum
 
