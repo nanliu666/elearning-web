@@ -314,6 +314,7 @@ export default {
       this.buttonMenuId = ''
       this.submitData = []
       this.$emit('setConfig')
+      this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId)
       // if(this.buttonMenuId){
       //
       // }else{
