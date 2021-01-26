@@ -556,7 +556,7 @@ export default {
       // 删除学习计划
       let ids = _(arr)
         .filter((item) => item.status != 2)
-        .map(arr, 'id')
+        .map('id')
         .join(',')
       if (!ids) {
         return
