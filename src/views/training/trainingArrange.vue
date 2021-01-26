@@ -667,7 +667,8 @@ export default {
     },
     // 去开办下一期
     handleConfig(id) {
-      this.$router.push({ path: '/training/trainingEdit?id=' + id })
+      // this.$router.push({ path: '/training/trainingEdit?id=' + id })
+      this.$router.push({ path: '/training/edit', query: { id: id } })
     },
     // 去创建培训
     toCreateTraining() {},

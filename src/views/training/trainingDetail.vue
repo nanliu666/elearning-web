@@ -916,7 +916,8 @@ export default {
   methods: {
     // 去开办下一期
     handleConfig() {
-      this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
+      // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
+      this.$router.push({ path: '/training/edit', query: { id: this.$route.query.id } })
     },
     // 结办
     isstopSchedule() {
