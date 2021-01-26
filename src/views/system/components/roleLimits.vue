@@ -307,7 +307,6 @@ export default {
         roleId: this.roleId,
         privileges: menuIdList
       }
-
       this.loading = true
       await postOrgPrivilege(param)
       this.$message.success('权限添加成功')

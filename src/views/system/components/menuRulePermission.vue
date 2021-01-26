@@ -66,7 +66,8 @@ export default {
           this.filterData(val, filterVal)
           let fiterTree = flatTree(filterVal)
           fiterTree.map((it) => {
-            if (it.isOwn && it.menuType === 'Menu') {
+            // 修复当菜单类型为目录以及菜单都被勾选中
+            if (it.isOwn && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
               this.defaultValue.push(it.menuId)
             }
           })
