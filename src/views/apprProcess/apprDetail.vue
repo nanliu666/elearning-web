@@ -1,10 +1,6 @@
 <template>
   <div v-loading="loading">
-    <page-header
-      :title="`${applyDetail.processName}`"
-      show-back
-      :back="handleBack"
-    />
+    <page-header :title="`${applyDetail.processName}`" show-back :back="handleBack" />
     <basic-container>
       <div class="apply-info-wrap">
         <div class="title">
@@ -40,58 +36,122 @@
     </basic-container>
     <basic-container class="apply-detail-title">
       <div class="title-box">
-        <div class="title">
-          审批详情
-        </div>
+        <div class="title">审批详情</div>
         <div @click="show = !show">
-          <div
-            v-if="show"
-            class="btn-box"
-          >
-            <i
-              class="el-icon-arrow-up icon"
-              style="margin-right: 12px"
-            /> 收起
+          <div v-if="show" class="btn-box">
+            <i class="el-icon-arrow-up icon" style="margin-right: 12px" /> 收起
           </div>
-          <div
-            v-else
-            class="btn-box"
-          >
-            <i
-              class="el-icon-arrow-down icon"
-              style="margin-right: 12px"
-            /> 打开
+          <div v-else class="btn-box">
+            <i class="el-icon-arrow-down icon" style="margin-right: 12px" /> 打开
           </div>
         </div>
       </div>
       <transition name="show">
-        <el-row>
-          <el-col
-            :xl="16"
-            :lg="16"
-            :md="18"
-            :sm="20"
-            :xs="22"
-          >
-            <div
-              v-show="show"
-              class="apply-detail"
-            ></div>
-          </el-col>
-        </el-row>
+        <div v-show="show" class="apply-detail">
+          <!-- 移过来的课程详情 start-->
+          <div class="details_course_detailed">
+            <div class="details_course_detailed_top">
+              <div class="details_course_detailed_img">
+                <img :src="courseData.url" alt="" />
+              </div>
+
+              <div class="details_course_detailed_r">
+                <div class="details_course_detailed_r_title">
+                  {{ courseData.name }}
+                </div>
+                <ul>
+                  <li>
+                    <span class="text">讲师：</span> <span> {{ courseData.teacherId }} </span>
+                  </li>
+                  <li>
+                    <span class="text">所在分类：</span>
+                    <span> {{ courseData.catalogId }} </span>
+                  </li>
+                  <li>
+                    <span class="text">课程类型：</span>
+                    <span>
+                      <span v-show="courseData.type == 1">在线课程</span>
+                      <span v-show="courseData.type == 2">面授课程</span>
+                      <span v-show="courseData.type == 3">直播课程</span>
+                    </span>
+                  </li>
+                  <li>
+                    <span class="text">学时（小时）：</span>
+                    <span> {{ courseData.period }} </span>
+                  </li>
+                  <li>
+                    <span class="text">学分：</span> <span> {{ courseData.credit }} </span>
+                  </li>
+                  <li>
+                    <span class="text">通过条件：</span>
+                    <span v-for="(item, index) in courseData.passCondition" :key="index">
+                      <span v-show="item == 'a'">教师评定 </span>
+                      <span v-show="item == 'b'"
+                        >考试通过
+                        {{ courseData.passCondition.split(',').length >= 3 ? ',' : '' }}</span
+                      >
+                      <span v-show="item == 'c'"
+                        >达到课程学时
+                        {{ courseData.passCondition.split(',').length >= 2 ? ',' : '' }}
+                      </span>
+                    </span>
+                  </li>
+                  <li>
+                    <span class="text">选修类型：</span>
+                    <span>
+                      <span v-show="courseData.electiveType == 1">在线课程</span>
+                      <span v-show="courseData.electiveType == 2">面授课程</span>
+                      <span v-show="courseData.electiveType == 3">直播课程</span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="details_course_detailed_bar">
+              <span :class="{ pitch: pitch == 1 }" @click="setPitch(1)">详细信息</span>
+              <span :class="{ pitch: pitch == 2 }" @click="setPitch(2)">课程内容</span>
+            </div>
+            <div v-show="pitch == 1" class="details_course_detailed_pitch1">
+              <div class="title">
+                <i></i>
+                <span>课程介绍</span>
+              </div>
+              <div class="content">
+                <div v-html="courseData.introduction"></div>
+              </div>
+              <div class="title">
+                <i></i>
+                <span>课前思考</span>
+              </div>
+              <div class="content">
+                <div v-html="courseData.thinkContent"></div>
+              </div>
+            </div>
+            <div v-show="pitch == 2" class="details_course_detailed_pitch2">
+              <ul>
+                <li
+                  v-for="(item, index) in courseData.content"
+                  :key="index"
+                  @click="jumpToLearn(item)"
+                >
+                  <div>
+                    <i>{{ index + 1 }}</i> <span>{{ item.name }}</span>
+                  </div>
+                  <div class="btn">查看内容</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <!-- 移过来的课程详情 end-->
+        </div>
       </transition>
     </basic-container>
     <basic-container style="margin-bottom: 24px">
       <div class="record-wrap">
-        <div class="record-wrap-title">
-          审批流程
-        </div>
+        <div class="record-wrap-title">审批流程</div>
         <steps :progress.sync="progress" />
       </div>
-      <div
-        v-if="!isFished && !isPreview"
-        class="cancel-btn-box"
-      >
+      <div v-if="!isFished && !isPreview" class="cancel-btn-box">
         <el-button
           v-if="!isFished && hasCancel && isApplyUser"
           type="primary"
@@ -106,12 +166,7 @@
           :enterable="false"
           placement="top"
         >
-          <el-button
-            v-if="isApprover"
-            type="primary"
-            size="medium"
-            @click="handelClick('Reject')"
-          >
+          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Reject')">
             拒绝
           </el-button>
         </el-tooltip>
@@ -121,22 +176,12 @@
           :enterable="false"
           placement="top"
         >
-          <el-button
-            v-if="isApprover"
-            type="primary"
-            size="medium"
-            @click="handelClick('Pass')"
-          >
+          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Pass')">
             同意
           </el-button>
         </el-tooltip>
 
-        <el-tooltip
-          effect="dark"
-          content="催一下"
-          :enterable="false"
-          placement="top"
-        >
+        <el-tooltip effect="dark" content="催一下" :enterable="false" placement="top">
           <el-button
             v-if="!isCancel && !isFished && !isReject && isApplyUser"
             type="primary"
@@ -154,7 +199,6 @@
       width="600px"
       top="30vh"
       :modal-append-to-body="false"
-      @close="handleApprFormClose"
     >
       <el-form
         ref="apprForm"
@@ -166,32 +210,15 @@
         label-width="100px"
         class="demo-ruleForm"
       >
-        <el-form-item
-          label="审批意见"
-          :prop="isOpinion ? 'comment' : ''"
-        >
-          <el-input
-            v-model="apprForm.comment"
-            type="textarea"
-            :rows="4"
-            :placeholder="tip"
-          />
+        <el-form-item label="审批意见" :prop="isOpinion ? 'comment' : ''">
+          <el-input v-model="apprForm.comment" type="textarea" :rows="4" :placeholder="tip" />
         </el-form-item>
       </el-form>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button
-          size="medium"
-          @click="dialogVisible = false"
-        >取 消</el-button>
-        <el-button
-          size="medium"
-          type="primary"
-          :loading="btnloading"
-          @click="handelConfirm"
-        >确 定</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="dialogVisible = false">取 消</el-button>
+        <el-button size="medium" type="primary" :loading="btnloading" @click="handelConfirm"
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
   </div>
@@ -213,7 +240,7 @@ import {
 } from '@/api/apprProcess/apprProcess'
 import moment from 'moment'
 import 'moment/locale/zh-cn'
-
+import { listTeacher, getCourse, getCatalog } from '@/api/course/course'
 moment.locale('zh-cn')
 
 // 审批状态
@@ -232,6 +259,9 @@ export default {
   },
   data() {
     return {
+      // 课程详情
+      courseData: {},
+      pitch: 1,
       // 审批进行返回
       applyRecord: {},
       applyDetail: {},
@@ -326,7 +356,7 @@ export default {
     },
 
     // 提交人跟当前用户是否同一个人
-    isApplyUser: function() {
+    isApplyUser: function () {
       return this.userId === this.applyUserId
     },
 
@@ -340,8 +370,63 @@ export default {
   },
   activated() {
     this.loadData()
+    this.getCourseData()
   },
   methods: {
+    formId() {
+      return this.$route.query.formId
+    },
+    // 查看课程内容
+    jumpToLearn(item) {
+      this.$router.push({
+        path: '/approvalCenter/chapter',
+        query: { courseId: item.courseId, chapterId: item.id }
+      })
+    },
+    // 获取课程信息
+    async getCourseData() {
+      let res = await getCourse({ courseId: this.formId() })
+      window.console.log(res)
+      res.introduction = _.unescape(res.introduction)
+      res.thinkContent = _.unescape(res.thinkContent)
+      this.courseData = res
+      // 讲师
+      listTeacher().then((teacherRes) => {
+        teacherRes.map((item) => {
+          if (this.courseData.teacherId == item.idStr) this.courseData.teacherId = item.name
+        })
+      })
+      // 所在分类
+      getCatalog().then((Catalog) => {
+        let CatalogData = this.findPathByLeafId(this.courseData.catalogId, Catalog)
+        this.courseData.catalogId = CatalogData[0]
+      })
+    },
+    //递归实现
+    //@leafId  查找的id，
+    //@nodes   原始Json数据
+    //@path    供递归使用
+    findPathByLeafId(leafId, nodes, path) {
+      if (path === undefined) {
+        path = []
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        let tmpPath = path.concat()
+        tmpPath.push(nodes[i].name)
+        if (leafId == nodes[i].id) {
+          return tmpPath
+        }
+        if (nodes[i].children) {
+          let findResult = this.findPathByLeafId(leafId, nodes[i].children, tmpPath)
+          if (findResult) {
+            return findResult
+          }
+        }
+      }
+    },
+    setPitch(i) {
+      this.pitch = i
+    },
     // 处理重新发起申请
     handleReapplyClick() {
       this.$store.commit('DEL_TAG', this.tag)
@@ -350,6 +435,7 @@ export default {
         query: { processId: this.processId, apprNo: this.apprNo }
       })
     },
+
     // 流程数据通过当前审批节点是否存在当前用户获取流程内的节点
     // 当前审批节点可以有多个
     findCurrentNode(processData) {
@@ -830,6 +916,127 @@ export default {
     line-height: 25px;
     font-weight: bold;
     margin-bottom: 24px;
+  }
+}
+
+.details_course {
+  width: 100%;
+  &_detailed {
+    padding: 0 24px 24px;
+    &_top {
+      display: flex;
+    }
+    &_img {
+      width: 320px;
+      height: 180px;
+      border-radius: 4px;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    &_r {
+      flex: 1;
+      margin-left: 40px;
+      &_title {
+        font-size: 18px;
+        color: #000b15;
+        letter-spacing: 0;
+      }
+      ul {
+        li {
+          width: 50%;
+          float: left;
+          margin-top: 16px;
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          letter-spacing: 0;
+          .text {
+            opacity: 0.45;
+          }
+        }
+      }
+    }
+    &_bar {
+      margin-top: 40px;
+      height: 56px;
+      line-height: 56px;
+      font-size: 16px;
+      color: rgba(0, 11, 21, 0.65);
+      letter-spacing: 0;
+      display: flex;
+      border-bottom: 1px solid #ebeced;
+      .pitch {
+        color: #01aafc;
+        border-bottom: 1px solid #01aafc;
+      }
+      span {
+        margin-right: 40px;
+        cursor: pointer;
+      }
+    }
+    &_pitch1 {
+      .title {
+        margin-top: 24px;
+        display: flex;
+        i {
+          display: inline-block;
+          background: #01aafc;
+          width: 4px;
+          height: 16px;
+          margin-right: 8px;
+        }
+        span {
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          margin-top: -2px;
+        }
+      }
+      .content {
+        margin-top: 16px;
+      }
+    }
+    &_pitch2 {
+      ul {
+        margin-top: 24px;
+        li {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: 1px solid #ebeced;
+          height: 48px;
+          line-height: 48px;
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          letter-spacing: 0;
+          i {
+            font-style: normal;
+            margin-left: 24px;
+          }
+          span {
+            margin-left: 27px;
+          }
+          .btn {
+            opacity: 0.85;
+            font-size: 14px;
+            color: #01aafc;
+            letter-spacing: 0;
+            margin-right: 24px;
+            cursor: pointer;
+            display: none;
+          }
+
+          &:hover {
+            background-color: #f0fafe;
+            .btn {
+              display: block;
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>
