@@ -54,10 +54,12 @@
       >
         <!-- 课程标题 -->
         <template slot="processName" slot-scope="{ row }">
-          <el-button type="text" @click="toDetails(row.id)"> {{ row.processName }} </el-button>
+          <el-button type="text" @click="toDetails(row)">
+            {{ row.processName || '课程标题' }}
+          </el-button>
         </template>
         <!-- 状态 -->
-        <template #status="{row}">
+        <template #status="{ row }">
           <span
             class="status-span"
             :style="{
@@ -160,10 +162,10 @@ export default {
   },
 
   watch: {
-    searchInput: function() {
+    searchInput: function () {
       this.setPitch(this.pitch)
     },
-    statusValue: function() {
+    statusValue: function () {
       this.setPitch(this.pitch)
     }
   },
@@ -185,14 +187,20 @@ export default {
     setPitch(i) {
       this.pitch = i || 1
       fulllist({ ...this.page, categoryId: '1', status: this.statusValue }).then((res) => {
-        console.log(res)
         this.tableData = res.data
         this.page.total = res.totalNum
       })
     },
-    toDetails(id) {
+    // 去详情
+    toDetails(item) {
+      this.$router.push({
+        path: '/approvalCenter/details',
+        query: { formId: item.formId, apprNo: item.apprNo }
+      })
+    },
+    // 重新申请
+    againFn(id) {
       window.console.log(id)
-      this.$router.push({ path: '/approvalCenter/details', query: { id: '123' } })
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
