@@ -170,15 +170,24 @@ export default {
     },
     // 校验允许时间段
     validateTimeList(rule, value, callback) {
-      let overflow = _.some(value, (item) => {
-        let timeRange = item.list
-        if (_.size(this.course.timeRange) < 2) {
-          return false
+      const courseTimeRange = this.course.timeRange
+      // 如果课程时间范围没填写直接跳过校验
+      if (_.size(courseTimeRange) !== 2) {
+        callback()
+        return
+      }
+      // 取出所有的时间段
+      const rangeList = []
+      _.forEach(value, (item) => {
+        if (_.size(item.list) == 2) {
+          rangeList.push(item.list)
         }
+      })
+      // 判断是否超出课程开课时间范围
+      let overflow = _.some(rangeList, (range) => {
         if (
-          _.size(timeRange) == 2 &&
-          (moment(timeRange[0]).isBefore(this.course.timeRange[0]) ||
-            moment(timeRange[1]).isAfter(this.course.timeRange[1]))
+          moment(range[0]).isBefore(courseTimeRange[0]) ||
+          moment(range[1]).isAfter(courseTimeRange[1])
         ) {
           return true
         } else {
@@ -186,8 +195,48 @@ export default {
         }
       })
       if (overflow) {
-        callback(new Error('课程允许时间段不能超出课程的开课时间范围'))
+        callback(new Error('允许时间段不能超出课程的开课时间范围'))
         return
+      }
+      let strs = _.map(rangeList, (item) => JSON.stringify(item))
+      if (new Set(strs).size !== rangeList.length) {
+        callback(new Error('允许时间段不能有完全相同的'))
+        return
+      }
+      // 判断时间范围之间有没有交叉
+      // 两两比较 判断前者的开始和结束时间有没有落在后者的时间范围之内
+      if (rangeList.length == 2) {
+        let crossed = _.some(rangeList[0], (time) => {
+          if (moment(time).isAfter(rangeList[1][0]) && moment(time).isBefore(rangeList[1][1])) {
+            return true
+          } else {
+            return false
+          }
+        })
+        if (crossed) {
+          callback(new Error('允许时间段时间不能有重叠'))
+          return
+        }
+      }
+      // 两两比较 判断前者的开始和结束时间有没有落在后者的时间范围之内
+      if (rangeList.length === 3) {
+        let crossed = _.some(rangeList, (range, index) =>
+          _.some(range, (time) => {
+            let next = index == 2 ? 0 : index + 1
+            if (
+              moment(time).isAfter(rangeList[next][0]) &&
+              moment(time).isBefore(rangeList[next][1])
+            ) {
+              return true
+            } else {
+              return false
+            }
+          })
+        )
+        if (crossed) {
+          callback(new Error('允许时间段时间不能有重叠'))
+          return
+        }
       }
       callback()
     },
