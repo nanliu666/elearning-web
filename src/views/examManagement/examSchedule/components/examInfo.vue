@@ -48,7 +48,6 @@
         <lazy-select
           ref="testPaperRef"
           v-model="model.testPaper"
-          :allow-create="true"
           :searchable="true"
           :load="loadTestPaper"
           :option-props="{
@@ -61,7 +60,6 @@
       <template #certificateId>
         <lazy-select
           v-model="model.certificateId"
-          :allow-create="true"
           :searchable="true"
           :load="loadCertificateList"
           :option-props="{
@@ -74,7 +72,6 @@
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
-          :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
           :option-props="{
