@@ -3,7 +3,7 @@ import { del, get, post, put } from '@/router/axios'
  * 审批流程列表查询接口
  * @param {*} params
  */
-export const getProcessList = (params) => get('/appr/v2/appr/user/process/list', params)
+export const getProcessList = (params) => get('/appr/v2/appr/process/all/list', params)
 /**
  * 可发起的课程审批流程列表查询接口
  * @param {*} params
@@ -28,11 +28,30 @@ export const getRecordList = (params) => get('/appr/v2/appr/approve/record/list'
 /**
  * 审批流程停用接口
  */
-export const stopProcessCategory = (params) => post('/appr/v2/appr/process/stop', params)
+export const stopProcess = (params) => post('/appr/v2/appr/process/stop', params)
+
+/**
+ * 审批流程启用接口
+ */
+export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
 
 // 审批历史记录、审批进度
 export const getApprRecord = (params) => get('/appr/v2/appr/apply/record', params)
-
+/**
+ * 用户申请详情查询接口
+ * @param {object} params 参数
+ * @param {string} params.apprNo 审批编号
+ * @returns {object}
+ */
+export const getApprDetail = (params) => get('/appr/v2/appr/process/apply/detail', params)
+// 同意审批
+export const createApprPass = (params) => post('/appr/v2/appr/apply/pass', params)
+// 审批拒绝
+export const createApprReject = (params) => post('/appr/v2/appr/apply/reject', params)
+// 撤销
+export const createApprCancel = (params) => post('/appr/v2/appr/apply/cancel', params)
+// 催一下
+export const createApprUrge = (params) => post('/appr/v2/appr/apply/urge', params)
 /**
  *
  * 下面的都是OA的旧接口
@@ -59,21 +78,7 @@ export const createApprRreview = (params) => post('/appr/v2/appr/process/preview
  * 获取预览数据
  */
 export const getApprRreview = (params) => get('/appr/v2/appr/process/preview', params)
-/**
- * 用户申请详情查询接口
- * @param {object} params 参数
- * @param {string} params.apprNo 审批编号
- * @returns {object}
- */
-export const getApprDetail = (params) => get('/appr/v2/appr/process/apply/detail', params)
-// 同意审批
-export const createApprPass = (params) => post('/appr/v2/appr/apply/pass', params)
-// 审批拒绝
-export const createApprReject = (params) => post('/appr/v2/appr/apply/reject', params)
-// 撤销
-export const createApprCancel = (params) => post('/appr/v2/appr/apply/cancel', params)
-// 催一下
-export const createApprUrge = (params) => post('/appr/v2/appr/apply/urge', params)
+
 /**
  * 我发起的审批查询接口
  * @param {*} params
@@ -132,10 +137,6 @@ export const getProcessTypeList = (params) => get('/appr/v2/appr/process/type', 
  * 审批流程移动接口
  */
 export const moveProcess = (params) => post('/appr/v2/appr/process/move', params)
-/**
- * 审批流程启用接口
- */
-export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
 /**
  * 审批流程发布接口
  */

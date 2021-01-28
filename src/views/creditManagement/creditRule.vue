@@ -103,10 +103,7 @@ const TABLE_COLUMNS = [
   {
     label: '分值',
     prop: 'score',
-    minWidth: 120,
-    formatter: (row) => {
-      return row.score / 10
-    }
+    minWidth: 120
   },
   {
     label: '每日上限',
@@ -150,6 +147,9 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
+
+import { DELETE_CREDIT, EDIT_CREDIT, STOP_CREDIT, ADD_CREDIT } from '@/const/privileges'
+import { mapGetters } from 'vuex'
 export default {
   name: 'CreditRule',
   components: { SearchPopover, ruleDialog },
@@ -189,7 +189,22 @@ export default {
       searchParams: {}
     }
   },
-  mounted() {},
+  computed: {
+    DELETE_CREDIT: () => DELETE_CREDIT,
+    EDIT_CREDIT: () => EDIT_CREDIT,
+    STOP_CREDIT: () => STOP_CREDIT,
+    ADD_CREDIT: () => ADD_CREDIT,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_CREDIT, EDIT_CREDIT, STOP_CREDIT])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.loadTableData()
   },

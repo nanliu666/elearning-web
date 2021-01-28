@@ -50,7 +50,7 @@ export default {
     },
     {
       menuId: '1590112075692669',
-      menuName: '查看直播回放　　直播回放回传到平台需要一段时间，请耐心等待',
+      menuName: '查看直播回放',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,
@@ -58,6 +58,18 @@ export default {
       code: 'approval_approval',
       alias: 'approval',
       path: '/live/playBackListSingle',
+      icon: 'iconfont iconicon_compile'
+    },
+    {
+      menuId: '1590112075692670',
+      menuName: '播放回放',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'approval_approval',
+      alias: 'approval',
+      path: '/live/replayPlaying',
       icon: 'iconfont iconicon_compile'
     },
     {

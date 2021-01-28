@@ -7,10 +7,17 @@ import './permission' // 权限
 import './error' // 日志
 import './cache' //页面缓存
 import store from './store'
-import { loadStyle } from './util/util'
+import {
+  loadStyle
+} from './util/util'
 import * as urls from '@/config/env'
-import Element, { Message } from 'element-ui'
-import { iconfontUrl, iconfontVersion } from '@/config/env'
+import Element, {
+  Message
+} from 'element-ui'
+import {
+  iconfontUrl,
+  iconfontVersion
+} from '@/config/env'
 import '@/styles/oa-custom/theme/index.css'
 import './styles/common.scss'
 import basicContainer from './components/basic-container/main'
@@ -35,12 +42,8 @@ const $message = (options) => {
     ...options,
     showClose: true
   })
-}
-// 用来开发鉴权，开完完成需要删除
-store.dispatch('GetUserPrivilege', store.getters.userId).then((menu) => {
-  router.$avueRouter.formatRoutes(menu, true)
-})
-;['success', 'warning', 'info', 'error'].forEach((type) => {
+};
+['success', 'warning', 'info', 'error'].forEach((type) => {
   $message[type] = (options) => {
     if (typeof options === 'string') {
       options = {

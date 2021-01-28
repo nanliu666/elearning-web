@@ -5,9 +5,9 @@
       style=" background-image: url('/img/bg/404.svg');"
     />
     <div class="content">
-      <h1>404</h1>
+      <h1>无访问权限</h1>
       <div class="desc">
-        抱歉，你访问的页面不存在
+        抱歉，您无权限访问此页面，请联系管理员！
       </div>
       <div class="actions">
         <router-link :to="{ path: '/' }">

@@ -4,9 +4,6 @@
       ref="form"
       :model="model"
       :columns="columns"
-      :config="{
-        disabled: modelDisabled
-      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -48,9 +45,10 @@
         <lazy-select
           ref="testPaperRef"
           v-model="model.testPaper"
-          :allow-create="true"
+          :disabled="modelDisabled"
           :searchable="true"
           :load="loadTestPaper"
+          :first-option="testPaperDefault"
           :option-props="{
             label: 'name',
             value: 'id',
@@ -61,7 +59,7 @@
       <template #certificateId>
         <lazy-select
           v-model="model.certificateId"
-          :allow-create="true"
+          :disabled="modelDisabled"
           :searchable="true"
           :load="loadCertificateList"
           :option-props="{
@@ -74,7 +72,7 @@
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
-          :allow-create="true"
+          :disabled="false"
           :searchable="true"
           :load="loadCoordinator"
           :option-props="{
@@ -86,7 +84,10 @@
         />
       </template>
       <template #reckonTimeValue>
-        <el-radio-group v-model="model.reckonTime">
+        <el-radio-group
+          v-model="model.reckonTime"
+          :disabled="modelDisabled"
+        >
           <el-radio :label="false">
             不计时
           </el-radio>
@@ -101,7 +102,10 @@
       </template>
 
       <template #joinNumValue>
-        <el-radio-group v-model="model.joinNum">
+        <el-radio-group
+          v-model="model.joinNum"
+          :disabled="modelDisabled"
+        >
           <div class="flex-flow flex flexcenter">
             <el-radio :label="false">
               不限次数
@@ -119,6 +123,7 @@
       <template #integral>
         <checkbox-input
           v-model="model.integral"
+          :disabled="modelDisabled"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
           :default-value="2"
@@ -129,6 +134,7 @@
       <template #publishTime>
         <checkbox-input
           v-model="model.publishTime"
+          :disabled="modelDisabled"
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
@@ -138,6 +144,7 @@
       </template>
       <template #lateBanExam>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.lateBanExam"
           :input-value.sync="model.lateBanExamValue"
           pre-text="迟到"
@@ -146,6 +153,7 @@
       </template>
       <template #answerBanExam>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.answerBanExam"
           :input-value.sync="model.answerBanExamValue"
           pre-text="开始答卷"
@@ -154,6 +162,7 @@
       </template>
       <template #preCreate>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.preCreate"
           :input-value.sync="model.preCreateValue"
           pre-text="试卷最多预生成"
@@ -162,6 +171,7 @@
       </template>
       <template #openResults>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.openResults"
           :input-value.sync="model.openResultsValue"
           pre-text="考生"
@@ -170,6 +180,7 @@
       </template>
       <template #scopeLimit>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.scopeLimit"
           :input-value.sync="model.scopeLimitValue"
           pre-text="最高得分为"
@@ -177,14 +188,21 @@
         />
       </template>
       <template #modifyAnswer>
-        <el-switch v-model="model.modifyAnswer" />
+        <el-switch
+          v-model="model.modifyAnswer"
+          :disabled="modelDisabled"
+        />
       </template>
       <template #autoEvaluate>
-        <el-switch v-model="model.autoEvaluate" />
+        <el-switch
+          v-model="model.autoEvaluate"
+          :disabled="modelDisabled"
+        />
       </template>
       <template #answerMode1>
         <el-radio-group
           v-model="model.multipleChoice"
+          :disabled="modelDisabled"
           class="radio-group-class"
         >
           <el-radio
@@ -224,6 +242,7 @@
       <template #passType>
         <el-radio-group
           v-model="model.passType"
+          :disabled="modelDisabled"
           style="display: flex;"
         >
           <condition-radio-input
@@ -573,22 +592,22 @@ const fixedTimeConfig = {
 }
 const radioList = [
   { value: '完全正确得分' },
-  { value: '按正确选项个数计分' },
-  {
-    value: '每项得扣分',
-    des:
-      '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
-  },
-  {
-    value: '每项答错扣分',
-    des:
-      '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
-  },
-  {
-    value: '每正确项得分',
-    des:
-      '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
-  }
+  { value: '按正确选项个数计分' }
+  // {
+  //   value: '每项得扣分',
+  //   des:
+  //     '每道题答对一个得设置的分数，如设置为0.3分，则答对一选项得0.3，答错扣0.3，且每道题得分不低于0分'
+  // },
+  // {
+  //   value: '每项答错扣分',
+  //   des:
+  //     '（题目的分数/正确答案的选项的个数）*答对的个数 - 错误分数*答错错个数 不完全正确时，答错扣分（每项扣分少于每项得分，总扣分减去得分不小于0，例如设置每项答错扣分0.3，试题分数为8，答案为ABCD，答题为ABC,则得分为（8 / 4）*3-0*0.3=6分；设置每项答错扣分0.3，试题分数为8，答案为ABD，答题为ABC,则得分为（8 / 4）*2-1*0.3=5.7分'
+  // },
+  // {
+  //   value: '每正确项得分',
+  //   des:
+  //     '只有答对的选项中对的个数计分，如设置为0.4，正确答案是ABC，如果考生答题AB，答对两个，则得0.8分，如果答题ABD，则得0分'
+  // }
 ]
 
 export default {
@@ -602,6 +621,7 @@ export default {
   },
   data() {
     return {
+      testPaperDefault: null, // 考卷默认信息
       testPaperExpiredTime: '',
       radioList,
       passCondition: [
@@ -661,6 +681,7 @@ export default {
         passType: 1,
         passScope: 60,
         publishType: 1,
+        paperExpiredTime: '', // 试卷过期时间
         fixedTime: new Date()
       }
     }
@@ -683,7 +704,8 @@ export default {
           return item.id === value
         })
         if (paper) {
-          this.testPaperExpiredTime = paper.expiredTime
+          this.model.paperExpiredTime = paper.expiredTime
+          this.$store.commit('SET_PAPER_TIME', this.model.paperExpiredTime)
         }
       },
       deep: true

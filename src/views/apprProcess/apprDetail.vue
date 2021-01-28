@@ -1,10 +1,6 @@
 <template>
   <div v-loading="loading">
-    <page-header
-      :title="`${applyDetail.processName}`"
-      show-back
-      :back="handleBack"
-    />
+    <page-header :title="`${applyDetail.processName}`" show-back :back="handleBack" />
     <basic-container>
       <div class="apply-info-wrap">
         <div class="title">
@@ -40,61 +36,122 @@
     </basic-container>
     <basic-container class="apply-detail-title">
       <div class="title-box">
-        <div class="title">
-          审批详情
-        </div>
+        <div class="title">审批详情</div>
         <div @click="show = !show">
-          <div
-            v-if="show"
-            class="btn-box"
-          >
-            <i
-              class="el-icon-arrow-up icon"
-              style="margin-right: 12px"
-            /> 收起
+          <div v-if="show" class="btn-box">
+            <i class="el-icon-arrow-up icon" style="margin-right: 12px" /> 收起
           </div>
-          <div
-            v-else
-            class="btn-box"
-          >
-            <i
-              class="el-icon-arrow-down icon"
-              style="margin-right: 12px"
-            /> 打开
+          <div v-else class="btn-box">
+            <i class="el-icon-arrow-down icon" style="margin-right: 12px" /> 打开
           </div>
         </div>
       </div>
       <transition name="show">
-        <el-row>
-          <el-col
-            :xl="16"
-            :lg="16"
-            :md="18"
-            :sm="20"
-            :xs="22"
-          >
-            <div
-              v-show="show"
-              class="apply-detail"
-            ></div>
-          </el-col>
-        </el-row>
+        <div v-show="show" class="apply-detail">
+          <!-- 移过来的课程详情 start-->
+          <div class="details_course_detailed">
+            <div class="details_course_detailed_top">
+              <div class="details_course_detailed_img">
+                <img :src="courseData.url" alt="" />
+              </div>
+
+              <div class="details_course_detailed_r">
+                <div class="details_course_detailed_r_title">
+                  {{ courseData.name }}
+                </div>
+                <ul>
+                  <li>
+                    <span class="text">讲师：</span> <span> {{ courseData.teacherId }} </span>
+                  </li>
+                  <li>
+                    <span class="text">所在分类：</span>
+                    <span> {{ courseData.catalogId }} </span>
+                  </li>
+                  <li>
+                    <span class="text">课程类型：</span>
+                    <span>
+                      <span v-show="courseData.type == 1">在线课程</span>
+                      <span v-show="courseData.type == 2">面授课程</span>
+                      <span v-show="courseData.type == 3">直播课程</span>
+                    </span>
+                  </li>
+                  <li>
+                    <span class="text">学时（小时）：</span>
+                    <span> {{ courseData.period }} </span>
+                  </li>
+                  <li>
+                    <span class="text">学分：</span> <span> {{ courseData.credit }} </span>
+                  </li>
+                  <li>
+                    <span class="text">通过条件：</span>
+                    <span v-for="(item, index) in courseData.passCondition" :key="index">
+                      <span v-show="item == 'a'">教师评定 </span>
+                      <span v-show="item == 'b'"
+                        >考试通过
+                        {{ courseData.passCondition.split(',').length >= 3 ? ',' : '' }}</span
+                      >
+                      <span v-show="item == 'c'"
+                        >达到课程学时
+                        {{ courseData.passCondition.split(',').length >= 2 ? ',' : '' }}
+                      </span>
+                    </span>
+                  </li>
+                  <li>
+                    <span class="text">选修类型：</span>
+                    <span>
+                      <span v-show="courseData.electiveType == 1">在线课程</span>
+                      <span v-show="courseData.electiveType == 2">面授课程</span>
+                      <span v-show="courseData.electiveType == 3">直播课程</span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="details_course_detailed_bar">
+              <span :class="{ pitch: pitch == 1 }" @click="setPitch(1)">详细信息</span>
+              <span :class="{ pitch: pitch == 2 }" @click="setPitch(2)">课程内容</span>
+            </div>
+            <div v-show="pitch == 1" class="details_course_detailed_pitch1">
+              <div class="title">
+                <i></i>
+                <span>课程介绍</span>
+              </div>
+              <div class="content">
+                <div v-html="courseData.introduction"></div>
+              </div>
+              <div class="title">
+                <i></i>
+                <span>课前思考</span>
+              </div>
+              <div class="content">
+                <div v-html="courseData.thinkContent"></div>
+              </div>
+            </div>
+            <div v-show="pitch == 2" class="details_course_detailed_pitch2">
+              <ul>
+                <li
+                  v-for="(item, index) in courseData.content"
+                  :key="index"
+                  @click="jumpToLearn(item)"
+                >
+                  <div>
+                    <i>{{ index + 1 }}</i> <span>{{ item.name }}</span>
+                  </div>
+                  <div class="btn">查看内容</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <!-- 移过来的课程详情 end-->
+        </div>
       </transition>
     </basic-container>
     <basic-container style="margin-bottom: 24px">
       <div class="record-wrap">
-        <div class="record-wrap-title">
-          审批流程
-        </div>
-        <steps
-          :progress.sync="progress"
-          :wait-progress.sync="waitProgress"
-        />
+        <div class="record-wrap-title">审批流程</div>
+        <steps :progress.sync="progress" />
       </div>
-      <div
-        v-if="!isFished && !isPreview"
-        class="cancel-btn-box"
-      >
+      <div v-if="!isFished && !isPreview" class="cancel-btn-box">
         <el-button
           v-if="!isFished && hasCancel && isApplyUser"
           type="primary"
@@ -109,12 +166,7 @@
           :enterable="false"
           placement="top"
         >
-          <el-button
-            v-if="isApprover"
-            type="primary"
-            size="medium"
-            @click="handelClick('Reject')"
-          >
+          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Reject')">
             拒绝
           </el-button>
         </el-tooltip>
@@ -124,22 +176,12 @@
           :enterable="false"
           placement="top"
         >
-          <el-button
-            v-if="isApprover"
-            type="primary"
-            size="medium"
-            @click="handelClick('Pass')"
-          >
+          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Pass')">
             同意
           </el-button>
         </el-tooltip>
 
-        <el-tooltip
-          effect="dark"
-          content="催一下"
-          :enterable="false"
-          placement="top"
-        >
+        <el-tooltip effect="dark" content="催一下" :enterable="false" placement="top">
           <el-button
             v-if="!isCancel && !isFished && !isReject && isApplyUser"
             type="primary"
@@ -157,7 +199,6 @@
       width="600px"
       top="30vh"
       :modal-append-to-body="false"
-      @close="handleApprFormClose"
     >
       <el-form
         ref="apprForm"
@@ -169,32 +210,15 @@
         label-width="100px"
         class="demo-ruleForm"
       >
-        <el-form-item
-          label="审批意见"
-          :prop="isOpinion ? 'comment' : ''"
-        >
-          <el-input
-            v-model="apprForm.comment"
-            type="textarea"
-            :rows="4"
-            :placeholder="tip"
-          />
+        <el-form-item label="审批意见" :prop="isOpinion ? 'comment' : ''">
+          <el-input v-model="apprForm.comment" type="textarea" :rows="4" :placeholder="tip" />
         </el-form-item>
       </el-form>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button
-          size="medium"
-          @click="dialogVisible = false"
-        >取 消</el-button>
-        <el-button
-          size="medium"
-          type="primary"
-          :loading="btnloading"
-          @click="handelConfirm"
-        >确 定</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="dialogVisible = false">取 消</el-button>
+        <el-button size="medium" type="primary" :loading="btnloading" @click="handelConfirm"
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
   </div>
@@ -210,67 +234,39 @@ import {
   createApprPass,
   createApprReject,
   createApprUrge,
-  putApprForm,
   getProcessDetail
   // postOverrule
   // putApprForm,
 } from '@/api/apprProcess/apprProcess'
 import moment from 'moment'
 import 'moment/locale/zh-cn'
-
+import { listTeacher, getCourse, getCatalog } from '@/api/course/course'
 moment.locale('zh-cn')
-import { Base64 } from 'js-base64'
 
 // 审批状态
 const APPROVE_STATUS_TYPE = {
   CANCEL: 'Cancel',
   EMPTY: '',
   PASS: 'Pass',
-  REJECT: 'Reject',
-  RETURN: 'Return'
+  REJECT: 'Reject'
 }
-const { CANCEL, EMPTY, PASS, REJECT, RETURN } = APPROVE_STATUS_TYPE
+const { CANCEL, EMPTY, PASS, REJECT } = APPROVE_STATUS_TYPE
 
 export default {
   name: 'Apprv2Detail',
   components: {
     steps
   },
-  filters: {
-    content(data) {
-      if (data.result !== RETURN) {
-        return data.remark
-      } else {
-        return data.remark.split('|')[0]
-      }
-    },
-    result(data) {
-      let result = {
-        Pass: '审批同意',
-        Reject: '审批拒绝',
-        Cancel: '审批已撤回',
-        Return: ''
-      }
-      if (data.result === RETURN) {
-        result.Return = data.remark.split('|')[1]
-      }
-      return result[data.result] || '审批中'
-    }
-  },
   data() {
     return {
+      // 课程详情
+      courseData: {},
+      pitch: 1,
       // 审批进行返回
       applyRecord: {},
       applyDetail: {},
-      noProgressList: [],
-      waitProgress: [],
-      parallelRecordList: [],
       progress: [],
-      backOffNodeList: [],
       nodeList: [],
-      backOffDialog: false,
-      processData: {}, // 给表单修改的时候暂存流程数据
-      JSONData: {},
       currentApproveNode: [],
       // 审批记录列表（接口返回
       recordList: [],
@@ -326,10 +322,7 @@ export default {
     applyUserId() {
       return _.get(this.applyRecord, 'data[0].userId', null)
     },
-    // 是否是自定义审批 （不同于系统定制审批）
-    isCustomProcess() {
-      return _.isEmpty(_.get(this.applyDetail, 'formKey'))
-    },
+
     // 审批实例ID
     processInstanceId() {
       return _.get(this.applyRecord, 'processInstanceId', null)
@@ -354,11 +347,6 @@ export default {
         (status) => !_.map(this.recordList, 'result').includes(status)
       )
     },
-    // 是否可以退回
-    hasReturn() {
-      // 如果同时包含空与通过，则可以退回该审批
-      return [EMPTY, PASS].every((status) => _.map(this.recordList, 'result').includes(status))
-    },
     // 当前用户是否审批人
     isApprover() {
       // 当前用户是否审批人
@@ -368,26 +356,77 @@ export default {
     },
 
     // 提交人跟当前用户是否同一个人
-    isApplyUser: function() {
+    isApplyUser: function () {
       return this.userId === this.applyUserId
     },
 
     // 是否是预览状态
     isPreview() {
-      return _.get(this.$route.query, 'preview', false)
+      return true
+      // return _.get(this.$route.query, 'preview', false)
     },
 
     ...mapGetters(['userId', 'tag'])
   },
   activated() {
     this.loadData()
+    this.getCourseData()
   },
   methods: {
-    downFile(data) {
-      window.open(data.fileUrl)
+    formId() {
+      return this.$route.query.formId
     },
-    // TODO: 退回指定节点
-
+    // 查看课程内容
+    jumpToLearn(item) {
+      this.$router.push({
+        path: '/approvalCenter/chapter',
+        query: { courseId: item.courseId, chapterId: item.id }
+      })
+    },
+    // 获取课程信息
+    async getCourseData() {
+      let res = await getCourse({ courseId: this.formId() })
+      window.console.log(res)
+      res.introduction = _.unescape(res.introduction)
+      res.thinkContent = _.unescape(res.thinkContent)
+      this.courseData = res
+      // 讲师
+      listTeacher().then((teacherRes) => {
+        teacherRes.map((item) => {
+          if (this.courseData.teacherId == item.idStr) this.courseData.teacherId = item.name
+        })
+      })
+      // 所在分类
+      getCatalog().then((Catalog) => {
+        let CatalogData = this.findPathByLeafId(this.courseData.catalogId, Catalog)
+        this.courseData.catalogId = CatalogData[0]
+      })
+    },
+    //递归实现
+    //@leafId  查找的id，
+    //@nodes   原始Json数据
+    //@path    供递归使用
+    findPathByLeafId(leafId, nodes, path) {
+      if (path === undefined) {
+        path = []
+      }
+      for (let i = 0; i < nodes.length; i++) {
+        let tmpPath = path.concat()
+        tmpPath.push(nodes[i].name)
+        if (leafId == nodes[i].id) {
+          return tmpPath
+        }
+        if (nodes[i].children) {
+          let findResult = this.findPathByLeafId(leafId, nodes[i].children, tmpPath)
+          if (findResult) {
+            return findResult
+          }
+        }
+      }
+    },
+    setPitch(i) {
+      this.pitch = i
+    },
     // 处理重新发起申请
     handleReapplyClick() {
       this.$store.commit('DEL_TAG', this.tag)
@@ -396,34 +435,16 @@ export default {
         query: { processId: this.processId, apprNo: this.apprNo }
       })
     },
+
     // 流程数据通过当前审批节点是否存在当前用户获取流程内的节点
     // 当前审批节点可以有多个
     findCurrentNode(processData) {
       let currentNode = Object.create(null)
       const loop = (node) => {
         if (this.currentApproveNode.includes(node.nodeId)) {
-          // 并行审批存在多个审批人需要选出当前审批人
-          if (node.type === 'parallel') {
-            if (
-              _.findIndex(node.properties.approvers, (item) => {
-                return item.userId === this.userId
-              }) > -1
-            ) {
-              currentNode = node
-            }
-          } else {
-            currentNode = node
-          }
+          currentNode = node
         } else {
           node.childNode && loop(node.childNode)
-          node.conditionNodes &&
-            node.conditionNodes.forEach((conditionNode) => {
-              loop(conditionNode)
-            })
-          node.parallelNodes &&
-            node.parallelNodes.forEach((parallelNode) => {
-              loop(parallelNode)
-            })
         }
       }
       loop(processData)
@@ -447,10 +468,9 @@ export default {
           apprNo: this.$route.query.apprNo
         })
         // 缓存当前审批详情
-        const { apprNo, formData, nodeData } = applyDetail
+        const { apprNo, nodeData } = applyDetail
         this.applyDetail = {
           ...applyDetail,
-          formData: JSON.parse(Base64.decode(formData)),
           nodeData: JSON.parse(nodeData || '[]')
         }
         const applyRecord = await getApprRecord({ apprNo })
@@ -472,7 +492,7 @@ export default {
         }
         this.handleNodeData()
       } catch (error) {
-        this.$message.error(error.message)
+        console.error(error)
       } finally {
         this.loading = false
       }
@@ -488,65 +508,24 @@ export default {
       }
       target.pos = pos
     },
-    tagNode(record, nodeList, idMap) {
+    tagNode(record, nodeList) {
       if (record.nodeId === 'start') {
         this.copyNode(record, nodeList[0], '0')
         return
       }
-      // 审批记录里多级领导人的nodeId是相同的，所以要记录每个nodeId的出现次数
-      idMap.has(record.nodeId)
-        ? idMap.set(record.nodeId, idMap.get(record.nodeId) + 1)
-        : idMap.set(record.nodeId, 0)
       nodeList.forEach((node, index) => {
         if (node.nodeId && node.nodeId.slice(0, 3) === record.nodeId) {
-          // nodeId长度大于3的为多级领导节点，nodeId最后一位标识领导人的级数
-          if (node.nodeId.length > 3) {
-            let id = idMap.get(record.nodeId)
-            let nodeId = `${record.nodeId}${id}`
-            if (nodeId === node.nodeId)
-              this.copyNode(_.assign(record, { nodeId: `${record.nodeId}${id}` }), node, `${index}`)
-            return
-          }
           this.copyNode(record, node, `${index}`)
           return
         }
-        // 并行审批
-        if (Array.isArray(node)) {
-          node.forEach((line, j) => {
-            if (Array.isArray(line)) {
-              line.forEach((item, k) => {
-                if (item.nodeId && item.nodeId.slice(0, 3) === record.nodeId) {
-                  if (item.nodeId.length > 3) {
-                    let id = idMap.get(record.nodeId)
-                    let nodeId = `${record.nodeId}${id}`
-                    if (nodeId === item.nodeId)
-                      this.copyNode(
-                        _.assign(record, { nodeId: `${record.nodeId}${id}` }),
-                        item,
-                        `${index}.${j}.${k}`
-                      )
-                    return
-                  }
-                  this.copyNode(record, item, `${index}.${j}.${k}`)
-                  return
-                }
-              })
-            }
-          })
-        }
       })
-      if (record.result === 'return') {
-        // 如果当前节点为退回，重新开始计数
-        idMap.clear()
-      }
     },
     tagAllNode(recordList, nodeList) {
-      let idMap = new Map()
       recordList.forEach((record) => {
         // TODO: 消除 backParams
         record.createTimeStamp = Date.parse(record.createTime)
         record.approveTimeStamp = Date.parse(record.approveTime || new Date())
-        this.tagNode(record, nodeList, idMap)
+        this.tagNode(record, nodeList)
       })
     },
     handleStatus() {
@@ -620,42 +599,16 @@ export default {
       _.values(posList).forEach((pos) => {
         group[pos] = hqHandler(_.filter(recordList, { pos }))
       })
-      // 用于并行审批节点重命名
-      const parallelIndexs = _.compact(
-        _.map(this.nodeData, (item, index) => {
-          if (Array.isArray(item)) {
-            return `${index}`
-          }
-        })
-      )
+
       let result = []
       _.each(group, (value, key) => {
         const nodeLabel = _.get(value, 'properties.title', '')
         const nodeValue = value.nodeId
-        if (key.includes('.')) {
-          const [i, j, k] = key.split('.')
-          if (!result[i]) {
-            result[i] = {
-              pos: `${i}`,
-              type: 'parallelNode',
-              label: `并行审批${
-                _.size(parallelIndexs) > 1 ? _.indexOf(parallelIndexs, i) + 1 : ''
-              }`,
-              value: 'parallelGateway_' + value.prevId,
-              parallelLines: []
-            }
-          }
-          _.set(result[i], `parallelLines[${j}][${k}]`, {
-            ...value,
-            label: nodeLabel,
-            value: nodeValue
-          })
-        } else {
-          result[key] = {
-            ...value,
-            label: nodeLabel,
-            value: nodeValue
-          }
+
+        result[key] = {
+          ...value,
+          label: nodeLabel,
+          value: nodeValue
         }
       })
       return _.compact(_.map(result))
@@ -681,109 +634,22 @@ export default {
           node.pos = `${index}`
           cc.push(node)
         }
-        if (Array.isArray(node)) {
-          node.forEach((line, j) => {
-            if (Array.isArray(line)) {
-              line.forEach((item, k) => {
-                if (item.type === 'copy') {
-                  item.pos = `${index}.${j}.${k}`
-                  cc.push(item)
-                }
-              })
-            }
-          })
-        }
       })
 
-      // 记录所有退回节点的index
-      const returnNodeIndex = []
-      this.recordList.forEach((record, index) => {
-        if (record.result === 'Return') {
-          returnNodeIndex.push(index)
-        }
-      })
-      // 将审批记录按退回节点切分成二维数组
-      const splitByReturn = _.times(returnNodeIndex.length + 1, (i) => {
-        return this.recordList.slice(
-          returnNodeIndex[i - 1] ? returnNodeIndex[i - 1] + 1 : 0,
-          returnNodeIndex[i] + 1 || Infinity
-        )
-      })
-      // 对切分出来的数组进行处理（添加抄送节点，合并会签节点，合并并行审批节点）
-      this.progress = _.flatten(splitByReturn.map((section) => this.resolveRecordList(section, cc)))
-
-      // 获取可退回的节点数组
-      this.backOffNodeList = _(this.progress)
-        .slice()
-        // 过滤掉开始节点，抄送人节点，审批中节点
-        .filter((node) => !['start', 'copy'].includes(node.type) && node.result !== '')
-        // 多级领导节点只保留一个
-        .reject((item) => _.size(item.nodeId) > 3 && item.nodeId.slice(3) !== '0')
-        .map((item) => {
-          // 多级领导节点重命名
-          if (_.size(item.nodeId) > 3) {
-            return {
-              ...item,
-              label: item.nodeName
-            }
-          } else {
-            return item
-          }
-        })
-        .uniqBy('value')
-        .value()
+      // （添加抄送节点，合并会签节点，合并并行审批节点）
+      this.progress = _.flatten(this.resolveRecordList(this.recordList, cc))
 
       if (this.isReject) {
         return
       }
       const lastIndex = +_.last(this.progress).pos + 1
-      // 如果审批记录里最后一个节点是并行审批节点时，要判断里面的节点是否完整
-      // 不完整时要根据流程设计数据补充节点
-      const lastProgress = _.last(this.progress)
-      if (lastProgress && lastProgress.parallelLines) {
-        if (
-          _.flatten(nodeData[lastProgress.pos]).length >
-          _.flatten(lastProgress.parallelLines).length
-        ) {
-          nodeData[lastProgress.pos].forEach((nodeLine, index) => {
-            nodeLine.forEach((node, k) => {
-              if (!_.get(lastProgress.parallelLines, `[${index}][${k}]`)) {
-                _.set(lastProgress.parallelLines, `[${index}][${k}]`, {
-                  ...node,
-                  pos: `${lastProgress.pos}.${index}.${k}`
-                })
-              }
-            })
-          })
-        }
-      }
-      const parallelIndexs = _.compact(
-        _.map(this.nodeData, (item, index) => {
-          if (Array.isArray(item)) {
-            return index
-          }
-        })
-      )
-
       // 追加审批记录里没有的流程节点
       let addNodes = this.nodeData.slice(lastIndex)
       addNodes = addNodes.map((node, index) => {
-        if (Array.isArray(node)) {
-          return {
-            pos: `${lastIndex + index}`,
-            type: 'parallelNode',
-            // 并行审批名后缀补上index用于区分多个并行
-            label: `并行审批${
-              _.size(parallelIndexs) > 1 ? _.indexOf(parallelIndexs, lastIndex + index) + 1 : ''
-            }`,
-            parallelLines: node
-          }
-        } else {
-          return {
-            ...node,
-            pos: `${lastIndex + index}`,
-            label: node.properties.title
-          }
+        return {
+          ...node,
+          pos: `${lastIndex + index}`,
+          label: node.properties.title
         }
       })
       this.progress = _.concat(this.progress, addNodes)
@@ -795,133 +661,74 @@ export default {
     },
     // 点击撤回
     handleCancelClick() {
-      this.$refs.formParser.validate().then(() => {
-        this.$confirm('确定撤销申请吗?', '撤销申请', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.loading = true
-
-          createApprCancel({ processInstanceId: this.processInstanceId })
-            .then(() => {
-              this.$message.success('撤回成功')
-              this.$router.go(-1)
-            })
-            .finally(() => {
-              this.loading = false
-            })
-        })
-      })
-    },
-    /**
-     * 将需要比较的值做数据调整
-     */
-    pickField(data) {
-      let targetList = []
-      _.each(data, (item) => {
-        targetList.push(
-          _.assign(_.pick(item.__config__, ['label', 'defaultValue', 'type']), { origin: item })
-        )
-      })
-      return targetList
-    },
-    /**
-     * 获取到修改记录
-     */
-    getFixComment() {
-      let comment = ''
-      let that = this
-      if (!_.isEmpty(this.JSONData.formData.fields)) {
-        let prevFields = this.pickField(this.JSONData.formData.fields)
-        let afterFields = this.pickField(this.$refs.formParser.formConfCopy.fields)
-        // 如果之前的与提交参数不一样，apprForm.comment需要修改
-        if (!_.isEqual(prevFields, afterFields)) {
-          _.each(prevFields, (prevItem) => {
-            _.each(afterFields, (afterItem) => {
-              if (
-                prevItem.label === afterItem.label &&
-                !_.isEqual(prevItem.defaultValue, afterItem.defaultValue)
-              ) {
-                comment += `\n修改记录：${
-                  afterItem.label
-                }："${that.$refs.formParser.getFieldContent(
-                  prevItem.origin
-                )}"修改成"${that.$refs.formParser.getFieldContent(afterItem.origin)}"`
-              }
-            })
+      this.$confirm('确定撤销申请吗?', '撤销申请', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        createApprCancel({ processInstanceId: this.processInstanceId })
+          .then(() => {
+            this.$message.success('撤回成功')
+            this.$router.go(-1)
           })
-        }
-      }
-      return comment
+          .finally(() => {
+            this.loading = false
+          })
+      })
     },
     // 点击同意或拒绝按钮展示模态框
     handelClick(type) {
-      this.$refs.formParser.validate().then(async () => {
-        this.apprType = type
-        //TODO: putApprForm 接口需要在此处在调用一次，参数为表格的数据，apprNo，暂时先注释
-        const putParams = {
-          apprNo: this.$route.query.apprNo,
-          formData: Base64.encode(
-            JSON.stringify({
-              formData: this.$refs.formParser.formConfCopy,
-              processData: this.processData
-            })
-          )
-        }
-        await putApprForm(putParams)
-        // 获取审批流程，获取审批意见是否必填，和审批提示语
-        getProcessDetail({ processId: this.processId })
-          .then((res) => {
-            let { isOpinion, tip } = res
-            this.tip = tip
-            this.isOpinion = isOpinion
-            this.dialogVisible = true
-            this.apprForm.comment = ''
-          })
-          .finally(() => {})
-      })
+      // 获取审批流程，获取审批意见是否必填，和审批提示语
+      getProcessDetail({ processId: this.processId })
+        .then((res) => {
+          this.apprType = type
+          let { isOpinion, tip } = res
+          this.tip = tip
+          this.isOpinion = isOpinion
+          this.dialogVisible = true
+          this.apprForm.comment = ''
+        })
+        .finally(() => {})
     },
     // 点击确定审批
     handelConfirm() {
       const { apprType } = this
-      Promise.all([this.$refs.apprForm.validate(), this.$refs.formParser.validate()]).then(
-        (result) => {
-          if (!result) return
-          this.btnloading = true
-          // let { userId, taskId } = this.recordList[this.activeStep]
-          let userId = this.userId
-          let taskId = ''
-          this.recordList.forEach((it) => {
-            userId === it.userId && it.result === '' && (taskId = it.taskId)
-          })
-          let TYPE = {
-            Reject: {
-              api: createApprReject,
-              text: '拒绝'
-            },
-            Pass: {
-              api: createApprPass,
-              text: '同意'
-            }
+      this.$refs.apprForm.validate().then((result) => {
+        if (!result) return
+        this.btnloading = true
+        // let { userId, taskId } = this.recordList[this.activeStep]
+        let userId = this.userId
+        let taskId = ''
+        this.recordList.forEach((it) => {
+          userId === it.userId && it.result === '' && (taskId = it.taskId)
+        })
+        let TYPE = {
+          Reject: {
+            api: createApprReject,
+            text: '拒绝'
+          },
+          Pass: {
+            api: createApprPass,
+            text: '同意'
           }
-          let submitFun = TYPE[apprType].api
-          submitFun({
-            userId,
-            taskId,
-            processInstanceId: this.processInstanceId,
-            comment: this.comment + this.getFixComment()
-          })
-            .then(() => {
-              this.$message.success(`你已${TYPE[apprType].text}这个申请`)
-            })
-            .finally(() => {
-              this.dialogVisible = false
-              this.btnloading = false
-              this.handleBack()
-            })
         }
-      )
+        let submitFun = TYPE[apprType].api
+        submitFun({
+          userId,
+          taskId,
+          processInstanceId: this.processInstanceId,
+          comment: this.comment
+        })
+          .then(() => {
+            this.$message.success(`你已${TYPE[apprType].text}这个申请`)
+          })
+          .finally(() => {
+            this.dialogVisible = false
+            this.btnloading = false
+            this.handleBack()
+          })
+      })
     },
     // 点击催一下
     handelUrgeClick() {
@@ -934,26 +741,14 @@ export default {
           message: '催办成功'
         })
       })
-    },
-    handleApprFormClose() {
-      // 关闭表单的时候重置表单校验数据
-      this.$refs.apprForm.resetFields()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-/deep/ .el-form-item {
-  margin-bottom: 10px;
-}
-
 /deep/ .el-col {
   margin-bottom: 0;
-}
-
-/deep/ .el-form-item__content {
-  line-height: 36px;
 }
 
 // 用户提交的申请
@@ -1063,123 +858,6 @@ export default {
 .apply-detail {
   margin-top: 10px;
   border-bottom: 2px transparent solid;
-
-  /deep/ .detail-box {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-
-    .detail-item {
-      display: flex;
-      font-size: 14px;
-
-      :first-child {
-        margin-right: 15px;
-        font-family: PingFangSC-Regular;
-        color: #718199;
-        text-align: right;
-        width: 246px;
-        vertical-align: middle;
-      }
-
-      :nth-child(2) {
-        max-width: 252px;
-      }
-    }
-  }
-}
-
-// 流程进度
-.progress-wrap {
-  .progress-wrap-title {
-    font-family: PingFangSC-Medium;
-    font-size: 18px;
-    color: #202940;
-    line-height: 25px;
-    font-weight: bold;
-    margin-bottom: 24px;
-  }
-
-  /deep/ .el-step__icon.is-text {
-    border: 0px;
-  }
-
-  /deep/ .el-step__title.is-wait .title {
-    color: #212a3f;
-    font-size: 14px;
-  }
-
-  /deep/ .el-step__title.is-process {
-    font-weight: normal;
-  }
-
-  /deep/ .el-step__title.is-process .title {
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #212a3f;
-  }
-
-  /deep/ .el-step__title.is-finish .title {
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #212a3f;
-  }
-
-  .icon-box {
-    position: relative;
-
-    .tip {
-      position: absolute;
-      top: -30px;
-      left: -20px;
-    }
-
-    .cancel-text {
-      color: red;
-    }
-
-    .reject-text {
-      color: red;
-    }
-
-    .fished-text {
-      color: #368afa;
-    }
-  }
-
-  // 小圆圈
-  .icon {
-    width: 9px;
-    height: 9px;
-    background: #a0a8ae;
-    border-radius: 100%;
-  }
-
-  .description-box {
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #738399;
-  }
-
-  // 催一下
-  .isUrge {
-    font-family: PingFangSC-Regular;
-    font-size: 14px;
-    color: #368afa;
-    cursor: pointer;
-  }
-
-  .active {
-    background: #368afa;
-  }
-
-  .cancel {
-    background: red;
-  }
-
-  .reject {
-    background: red;
-  }
 }
 
 .cancel-btn-box {
@@ -1238,6 +916,127 @@ export default {
     line-height: 25px;
     font-weight: bold;
     margin-bottom: 24px;
+  }
+}
+
+.details_course {
+  width: 100%;
+  &_detailed {
+    padding: 0 24px 24px;
+    &_top {
+      display: flex;
+    }
+    &_img {
+      width: 320px;
+      height: 180px;
+      border-radius: 4px;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    &_r {
+      flex: 1;
+      margin-left: 40px;
+      &_title {
+        font-size: 18px;
+        color: #000b15;
+        letter-spacing: 0;
+      }
+      ul {
+        li {
+          width: 50%;
+          float: left;
+          margin-top: 16px;
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          letter-spacing: 0;
+          .text {
+            opacity: 0.45;
+          }
+        }
+      }
+    }
+    &_bar {
+      margin-top: 40px;
+      height: 56px;
+      line-height: 56px;
+      font-size: 16px;
+      color: rgba(0, 11, 21, 0.65);
+      letter-spacing: 0;
+      display: flex;
+      border-bottom: 1px solid #ebeced;
+      .pitch {
+        color: #01aafc;
+        border-bottom: 1px solid #01aafc;
+      }
+      span {
+        margin-right: 40px;
+        cursor: pointer;
+      }
+    }
+    &_pitch1 {
+      .title {
+        margin-top: 24px;
+        display: flex;
+        i {
+          display: inline-block;
+          background: #01aafc;
+          width: 4px;
+          height: 16px;
+          margin-right: 8px;
+        }
+        span {
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          margin-top: -2px;
+        }
+      }
+      .content {
+        margin-top: 16px;
+      }
+    }
+    &_pitch2 {
+      ul {
+        margin-top: 24px;
+        li {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: 1px solid #ebeced;
+          height: 48px;
+          line-height: 48px;
+          opacity: 0.85;
+          font-size: 14px;
+          color: #000b15;
+          letter-spacing: 0;
+          i {
+            font-style: normal;
+            margin-left: 24px;
+          }
+          span {
+            margin-left: 27px;
+          }
+          .btn {
+            opacity: 0.85;
+            font-size: 14px;
+            color: #01aafc;
+            letter-spacing: 0;
+            margin-right: 24px;
+            cursor: pointer;
+            display: none;
+          }
+
+          &:hover {
+            background-color: #f0fafe;
+            .btn {
+              display: block;
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>

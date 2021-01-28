@@ -295,7 +295,6 @@ export default {
             manualSettings,
             isMulti
           } = res
-          totalScore = totalScore / 10
           this.form = {
             id,
             name,
@@ -309,8 +308,8 @@ export default {
           }
           manualSettings = manualSettings.map((it) => ({
             ...it,
-            score: it.score / 10,
-            Original: it.score / 10
+            score: it.score,
+            Original: it.score
           }))
           const list = _.groupBy(manualSettings, (it) => it.parentSort)
           this.testPaper = []
@@ -355,7 +354,7 @@ export default {
               questionId: item.questionId,
               content: item.content,
               timeLimit: item.timeLimit,
-              score: item.score * 10,
+              score: item.score,
               sort: i + 1,
               title: it.title,
               type: it.type
@@ -363,7 +362,6 @@ export default {
           })
       })
       let form = _.cloneDeep(this.form)
-      form.totalScore = form.totalScore * 10
       let params = {
         ...form,
         manualSettings: manualSettings,
@@ -441,8 +439,8 @@ export default {
         }, 0))
       this.totalScore = totalScore.toFixed(1)
       if (this.form.totalScore) {
-        let score = (this.form.totalScore - this.totalScore) * 10
-        this.surplusScore = (Math.round(score) / 10).toString()
+        let score = this.form.totalScore - this.totalScore
+        this.surplusScore = Math.round(score).toString()
       }
     },
     /**

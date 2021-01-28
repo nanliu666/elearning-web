@@ -40,7 +40,7 @@ export default {
       menuName: '审批详情',
       menuType: 'Menu',
       isOwn: 1,
-      isEnabled: 0, // 是否显示在菜单栏 0：否，1：是
+      isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
       isShow: 0,
       code: 'approval_approval',
       alias: 'approval',

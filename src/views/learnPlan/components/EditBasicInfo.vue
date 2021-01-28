@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import { getCatalogs } from '@/api/learnPlan'
-import { filterTree, handleCatalogsData } from '@/util/util'
+import { getAllCatalog } from '@/api/learnPlan'
+import { filterTree } from '@/util/util'
 export default {
   props: {
     model: {
@@ -36,20 +36,46 @@ export default {
   data() {
     return {
       columns: [
-        {
-          prop: 'coursePlanNo',
-          itemType: 'input',
-          label: '课程安排编号',
-          maxlength: 32,
-          required: true
-        },
+        // {
+        //   prop: 'coursePlanNo',
+        //   itemType: 'input',
+        //   label: '课程安排编号',
+        //   maxlength: 32,
+        //   required: true
+        // },
         {
           prop: 'coursePlanName',
           itemType: 'input',
           label: '课程安排名称',
           maxlength: 32,
-          required: true,
-          offset: 4
+          required: true
+        },
+        {
+          itemType: 'treeSelect',
+          label: '所属分类',
+          prop: 'categoryId',
+          offset: 4,
+          props: {
+            selectParams: {
+              placeholder: '请选择分类',
+              multiple: false
+            },
+            treeParams: {
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              data: [],
+              filterable: false,
+              props: {
+                children: 'list',
+                label: 'name',
+                value: 'id'
+              },
+              required: true
+            }
+          },
+          required: false
         },
         {
           prop: 'timeRange',
@@ -67,54 +93,27 @@ export default {
           offset: 4
         },
         {
-          itemType: 'treeSelect',
-          label: '所属分类',
-          prop: 'categoryId',
-          props: {
-            selectParams: {
-              placeholder: '请选择分类',
-              multiple: false
-            },
-            treeParams: {
-              'check-strictly': true,
-              'default-expand-all': false,
-              'expand-on-click-node': false,
-              clickParent: true,
-              data: [],
-              filterable: false,
-              props: {
-                children: 'children',
-                label: 'label',
-                value: 'id'
-              },
-              required: true
-            }
-          },
-          required: false
-        },
-        {
-          prop: 'creatorName',
-          itemType: 'input',
-          label: '创建者',
-          offset: 4,
-          required: false
-        },
-        {
-          prop: 'createTime',
-          itemType: 'datePicker',
-          type: 'datetime',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          label: '创建时间',
-          required: false
-        },
-        {
           prop: 'sponsor',
           itemType: 'input',
           label: '主办单位',
-          offset: 4,
           maxlength: 32,
           required: false
         }
+        // {
+        //   prop: 'creatorName',
+        //   itemType: 'input',
+        //   label: '创建者',
+        //   offset: 4,
+        //   required: false
+        // },
+        // {
+        //   prop: 'createTime',
+        //   itemType: 'datePicker',
+        //   type: 'datetime',
+        //   valueFormat: 'yyyy-MM-dd HH:mm:ss',
+        //   label: '创建时间',
+        //   required: false
+        // },
       ],
       categoryData: []
     }
@@ -147,8 +146,8 @@ export default {
       })
     },
     getCategoryData() {
-      getCatalogs().then((res) => {
-        const data = handleCatalogsData(res)
+      getAllCatalog().then((res) => {
+        const data = res
         this.categoryData = data
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = data
       })

@@ -378,9 +378,10 @@ export default {
       })[0].label
     },
     typeFilterer(data) {
-      return _.filter(TYPE_STATUS, (item) => {
+      const type = _.filter(TYPE_STATUS, (item) => {
         return item.value === data
-      })[0].label
+      })
+      return type ? '' : type[0].label
     },
     // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>

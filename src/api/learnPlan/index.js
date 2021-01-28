@@ -19,6 +19,12 @@ export const getlearnPlanList = (params) => get('/api/manage/v1/study/plan/query
 export const updatePlan = (params) => put('/api/manage/v1/study/plan/updatePlan', params)
 
 /**
+ * @desc 获取所有分类
+ */
+export const getAllCatalog = (params) =>
+  get('/api/manage/v1/study/plan/catalog/queryAllCatalog', params)
+
+/**
  * 新增分组分类
  * @param {Object} params - 参数
  * */

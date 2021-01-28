@@ -1,10 +1,13 @@
 export default {
   basicSetting: {
-    processName: '入职',
-    processType: 1,
-    approverDistinct: 1,
-    isOpinion: true,
-    tip: '这里是填写提示'
+    icon: 'icondirectories-bicolor',
+    processName: '',
+    processType: '',
+    categoryId: '1',
+    processVisible: [],
+    approverDistinct: 0,
+    isOpinion: '',
+    tip: ''
   },
   processData: {
     type: 'start',

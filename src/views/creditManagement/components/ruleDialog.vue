@@ -187,7 +187,6 @@ export default {
     row: {
       handler(val) {
         let { id_str, stu_name, sys_rule_id_str, day_limit, score, rule_state } = val
-        score = score / 10
         this.form = {
           id: id_str,
           stuName: stu_name,
@@ -224,8 +223,7 @@ export default {
         if (!valid) return
         let form = _.cloneDeep(this.form)
         let params = {
-          ...form,
-          score: form.score * 10
+          ...form
         }
         let rule = form.id ? editStudentsRulus : postAddStudentsRulus
         this.loading = true

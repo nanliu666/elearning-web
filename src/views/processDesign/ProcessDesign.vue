@@ -107,7 +107,7 @@ export default {
       condition: [],
       endNode: [],
       prevData: '', // 一进入暂存数据原先的
-      mockData, // 可选择诸如 $route.param，Ajax获取数据等方式自行注入
+      mockData: _.cloneDeep(mockData), // 可选择诸如 $route.param，Ajax获取数据等方式自行注入
       activeStep: 'basicSetting', // 激活的步骤面板
       processMap: {},
 
@@ -181,7 +181,7 @@ export default {
       Promise.all([p1, p3])
         .then((res) => {
           const param = {
-            basicSetting: res[0].formData,
+            basicSetting: this.mockData.basicSetting,
             processData: res[1].formData
           }
           // 区分预览和发布操作
@@ -248,6 +248,7 @@ export default {
         processData: this.base,
         processMap: this.processMap,
         baseJson: Base64.encode(JSON.stringify(param)),
+        newVersion: 0,
         ...config
       }
 
