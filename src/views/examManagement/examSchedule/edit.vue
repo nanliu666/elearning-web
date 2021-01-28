@@ -170,6 +170,11 @@ export default {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
           this.$refs.examInfo.model = res
+          this.$refs.examInfo.testPaperDefault = {
+            name: res.paperName,
+            id: res.testPaper
+          }
+          this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
           if (res.status === '2' && this.$route.query.type !== 'copy') {
             this.activeStep = 1
           }

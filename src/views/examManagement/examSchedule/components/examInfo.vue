@@ -600,7 +600,7 @@ export default {
   },
   data() {
     return {
-      testPaperDefault: {}, // 考卷默认信息
+      testPaperDefault: null, // 考卷默认信息
       testPaperExpiredTime: '',
       radioList,
       passCondition: [
@@ -660,6 +660,7 @@ export default {
         passType: 1,
         passScope: 60,
         publishType: 1,
+        paperExpiredTime: '', // 试卷过期时间
         fixedTime: new Date()
       }
     }
@@ -682,11 +683,8 @@ export default {
           return item.id === value
         })
         if (paper) {
-          this.testPaperExpiredTime = paper.expiredTime
-        }
-        this.testPaperDefault = {
-          name: this.model.paperName,
-          id: value
+          this.model.paperExpiredTime = paper.expiredTime
+          this.$store.commit('SET_PAPER_TIME', this.model.paperExpiredTime)
         }
       },
       deep: true
