@@ -164,8 +164,8 @@ export default {
         required: false,
         props: {},
         options: [
-          { label: '是', value: true },
-          { label: '否', value: false }
+          { label: '是', value: '1' },
+          { label: '否', value: '0' }
         ]
       },
       {
@@ -207,19 +207,11 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { answerTime, totalScore, name, examTime, score, isPass, status, id } = newVal
-        examTime = examTime.split('~')
-        totalScore = totalScore / 10
-        score = score / 10
+        let { answerTime, examTime, ...others } = newVal
         this.form = {
+          ...others,
           answerTime: answerTime / 60,
-          totalScore,
-          name,
-          examTime,
-          score,
-          isPass: isPass == 0 ? false : true,
-          status,
-          id
+          examTime: examTime.split('~')
         }
       },
       immediate: true,
@@ -236,12 +228,10 @@ export default {
     onsubmit() {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-        let form = _.cloneDeep(this.form)
-        let params = {
-          ...form,
-          totalScore: form.totalScore * 10,
-          score: form.score * 10
-        }
+        let params = _.assign(_.cloneDeep(this.form), {
+          isPass: this.form.isPass == '0' ? false : true
+        })
+        console.log('params==', JSON.stringify(params))
         getExamineeAchievementEdit(params).then(() => {
           this.$message.success('修改成功')
           this.$emit('loadData')
