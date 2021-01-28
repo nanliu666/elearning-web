@@ -161,7 +161,7 @@ export default {
      *
      * */
     handleNextStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      this.$refs[REFS_LIST[0]].getData().then(() => {
         this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
       })
     },
@@ -180,9 +180,6 @@ export default {
           _.each(examInfo.columns, (item) => {
             item.disabled = examInfo.modelDisabled
           })
-          if (res.status === '2' && this.$route.query.type !== 'copy') {
-            this.activeStep = 1
-          }
         })
       }
     },

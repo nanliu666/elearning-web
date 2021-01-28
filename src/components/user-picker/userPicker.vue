@@ -306,13 +306,15 @@ export default {
     handleCheckAllChange(val) {
       this.checkedUsers = val ? this.usersNameList : []
       this.isIndeterminate = false
+      // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
-        this.selected = []
+        _.pullAllBy(this.selected, this.outerData, 'bizId')
       } else {
-        this.selected = []
+        // 全选需要去重
         _.each(this.outerData, (item) => {
           this.handleSelectUser(item)
         })
+        this.selected = _.uniqBy(this.selected, 'bizId')
       }
     },
     // 当前是否切换为半选状态
