@@ -50,6 +50,7 @@
           v-model="model.testPaper"
           :searchable="true"
           :load="loadTestPaper"
+          :first-option="testPaperDefault"
           :option-props="{
             label: 'name',
             value: 'id',
@@ -599,6 +600,7 @@ export default {
   },
   data() {
     return {
+      testPaperDefault: {}, // 考卷默认信息
       testPaperExpiredTime: '',
       radioList,
       passCondition: [
@@ -681,6 +683,10 @@ export default {
         })
         if (paper) {
           this.testPaperExpiredTime = paper.expiredTime
+        }
+        this.testPaperDefault = {
+          name: this.model.paperName,
+          id: value
         }
       },
       deep: true
