@@ -185,8 +185,14 @@ export default {
     },
     //   导航栏btn
     setPitch(i) {
+      if (this.pitch != i) this.searchInput = ''
       this.pitch = i || 1
-      fulllist({ ...this.page, categoryId: '1', status: this.statusValue }).then((res) => {
+      fulllist({
+        ...this.page,
+        categoryId: '1',
+        status: this.statusValue,
+        search: this.searchInput
+      }).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
       })
