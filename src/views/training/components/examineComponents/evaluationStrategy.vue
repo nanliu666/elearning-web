@@ -76,8 +76,8 @@ const defaultValue = {
   scopeLimit: false,
   scopeLimitValue: 100, // 最高分默认值100
   objectiveQuestions: false,
-  decideItem: false
-  // multipleChoice: 0
+  decideItem: false,
+  multipleChoice: 0
 }
 export default {
   name: 'EvaluationStrategy',

@@ -27,7 +27,7 @@
             v-if="paperData.totalScore"
             class="preview-subhead"
           >
-            试卷总分：{{ paperData.totalScore / 10 }}分
+            试卷总分：{{ paperData.totalScore }}分
           </div>
         </div>
         <ul>
@@ -146,7 +146,7 @@ export default {
         return item.score
       })
       const totalScore = this.addScore(scoreList)
-      return totalScore / 10
+      return totalScore
     },
     getHTML(content) {
       return addLine(content)

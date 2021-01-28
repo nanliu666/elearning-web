@@ -10,7 +10,6 @@
         <lazy-select
           ref="testPaperRef"
           v-model="model.testPaper"
-          :allow-create="true"
           :searchable="true"
           :load="loadTestPaper"
           :option-list.sync="testPaperList"
@@ -24,7 +23,6 @@
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
-          :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
           :multiple="true"

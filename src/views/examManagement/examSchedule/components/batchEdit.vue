@@ -59,6 +59,8 @@ const COLUMNS = [
     span: 24
   }
 ]
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'BatchEdit',
   components: {
@@ -82,6 +84,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['paperTimeInVuex']),
     innnerVisible: {
       get: function() {
         return this.visible
@@ -91,17 +94,21 @@ export default {
       }
     }
   },
-  mounted() {
-    let testPaperExpiredTime = this.$parent.testPaperExpiredTime
-    if (testPaperExpiredTime) {
-      this.columns[0].pickerOptions = {
-        disabledDate(time) {
-          return (
-            moment(new Date()).isAfter(time, 'day') ||
-            moment(testPaperExpiredTime).isSameOrBefore(time, 'day')
-          )
+  watch: {
+    paperTimeInVuex: {
+      handler(value) {
+        if (value) {
+          this.columns[0].pickerOptions = {
+            disabledDate(time) {
+              return (
+                moment(new Date()).isAfter(time, 'day') || moment(value).isSameOrBefore(time, 'day')
+              )
+            }
+          }
         }
-      }
+      },
+      deep: true,
+      immediate: true
     }
   },
   methods: {

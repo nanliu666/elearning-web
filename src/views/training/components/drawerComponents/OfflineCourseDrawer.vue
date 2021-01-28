@@ -14,7 +14,6 @@
         <template #courseId>
           <lazy-select
             v-model="model.courseId"
-            :allow-create="true"
             :searchable="true"
             :load="loadCourse"
             :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
@@ -26,7 +25,6 @@
             v-if="model.type === 1"
             v-model="model.lecturerName"
             :disabled="true"
-            :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"

@@ -29,7 +29,6 @@
           <lazy-select
             v-model="model.lecturerName"
             :disabled="true"
-            :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
