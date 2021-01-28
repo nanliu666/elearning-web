@@ -180,9 +180,6 @@ export default {
           _.each(examInfo.columns, (item) => {
             item.disabled = examInfo.modelDisabled
           })
-          if (res.status === '2' && this.$route.query.type !== 'copy') {
-            this.activeStep = 1
-          }
         })
       }
     },
