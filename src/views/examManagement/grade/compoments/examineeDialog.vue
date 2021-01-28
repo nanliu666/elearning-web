@@ -231,7 +231,6 @@ export default {
         let params = _.assign(_.cloneDeep(this.form), {
           isPass: this.form.isPass == '0' ? false : true
         })
-        console.log('params==', JSON.stringify(params))
         getExamineeAchievementEdit(params).then(() => {
           this.$message.success('修改成功')
           this.$emit('loadData')
