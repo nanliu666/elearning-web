@@ -66,7 +66,7 @@
                       v-for="item in tableColumns"
                       :key="item.prop"
                       :label="item.prop"
-                      :disabled="item.prop === 'examName'"
+                      :disabled="item.prop === 'name'"
                       class="originColumn"
                     >
                       {{ item.label }}
