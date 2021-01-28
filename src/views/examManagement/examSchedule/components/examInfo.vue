@@ -4,9 +4,6 @@
       ref="form"
       :model="model"
       :columns="columns"
-      :config="{
-        disabled: modelDisabled
-      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -48,6 +45,7 @@
         <lazy-select
           ref="testPaperRef"
           v-model="model.testPaper"
+          :disabled="modelDisabled"
           :searchable="true"
           :load="loadTestPaper"
           :first-option="testPaperDefault"
@@ -61,6 +59,7 @@
       <template #certificateId>
         <lazy-select
           v-model="model.certificateId"
+          :disabled="modelDisabled"
           :searchable="true"
           :load="loadCertificateList"
           :option-props="{
@@ -73,6 +72,7 @@
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
+          :disabled="false"
           :searchable="true"
           :load="loadCoordinator"
           :option-props="{
@@ -84,7 +84,10 @@
         />
       </template>
       <template #reckonTimeValue>
-        <el-radio-group v-model="model.reckonTime">
+        <el-radio-group
+          v-model="model.reckonTime"
+          :disabled="modelDisabled"
+        >
           <el-radio :label="false">
             不计时
           </el-radio>
@@ -99,7 +102,10 @@
       </template>
 
       <template #joinNumValue>
-        <el-radio-group v-model="model.joinNum">
+        <el-radio-group
+          v-model="model.joinNum"
+          :disabled="modelDisabled"
+        >
           <div class="flex-flow flex flexcenter">
             <el-radio :label="false">
               不限次数
@@ -117,6 +123,7 @@
       <template #integral>
         <checkbox-input
           v-model="model.integral"
+          :disabled="modelDisabled"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
           :default-value="2"
@@ -127,6 +134,7 @@
       <template #publishTime>
         <checkbox-input
           v-model="model.publishTime"
+          :disabled="modelDisabled"
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
@@ -136,6 +144,7 @@
       </template>
       <template #lateBanExam>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.lateBanExam"
           :input-value.sync="model.lateBanExamValue"
           pre-text="迟到"
@@ -144,6 +153,7 @@
       </template>
       <template #answerBanExam>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.answerBanExam"
           :input-value.sync="model.answerBanExamValue"
           pre-text="开始答卷"
@@ -152,6 +162,7 @@
       </template>
       <template #preCreate>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.preCreate"
           :input-value.sync="model.preCreateValue"
           pre-text="试卷最多预生成"
@@ -160,6 +171,7 @@
       </template>
       <template #openResults>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.openResults"
           :input-value.sync="model.openResultsValue"
           pre-text="考生"
@@ -168,6 +180,7 @@
       </template>
       <template #scopeLimit>
         <switch-input
+          :disabled="modelDisabled"
           :switch-value.sync="model.scopeLimit"
           :input-value.sync="model.scopeLimitValue"
           pre-text="最高得分为"
@@ -175,14 +188,21 @@
         />
       </template>
       <template #modifyAnswer>
-        <el-switch v-model="model.modifyAnswer" />
+        <el-switch
+          v-model="model.modifyAnswer"
+          :disabled="modelDisabled"
+        />
       </template>
       <template #autoEvaluate>
-        <el-switch v-model="model.autoEvaluate" />
+        <el-switch
+          v-model="model.autoEvaluate"
+          :disabled="modelDisabled"
+        />
       </template>
       <template #answerMode1>
         <el-radio-group
           v-model="model.multipleChoice"
+          :disabled="modelDisabled"
           class="radio-group-class"
         >
           <el-radio
@@ -222,6 +242,7 @@
       <template #passType>
         <el-radio-group
           v-model="model.passType"
+          :disabled="modelDisabled"
           style="display: flex;"
         >
           <condition-radio-input

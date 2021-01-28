@@ -169,12 +169,17 @@ export default {
       if (this.id) {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
-          this.$refs.examInfo.model = res
-          this.$refs.examInfo.testPaperDefault = {
+          const examInfo = this.$refs.examInfo
+          examInfo.model = res
+          examInfo.testPaperDefault = {
             name: res.paperName,
             id: res.testPaper
           }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
+          // 编辑的时候评卷人可以修改
+          _.each(examInfo.columns, (item) => {
+            item.disabled = examInfo.modelDisabled
+          })
           if (res.status === '2' && this.$route.query.type !== 'copy') {
             this.activeStep = 1
           }

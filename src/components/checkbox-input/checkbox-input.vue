@@ -1,6 +1,7 @@
 <template>
   <el-checkbox
     v-model="checked"
+    :disabled="disabled"
     class="checkbox-input"
   >
     {{ textBefore }}
@@ -9,7 +10,7 @@
       :controls="false"
       :min="0"
       :style="`width:${inputWidth}px`"
-      :disabled="disabled"
+      :disabled="inputDisabled"
       v-bind="inputProps"
     ></el-input-number>
     {{ textAfter }}
@@ -20,6 +21,10 @@
 export default {
   name: 'CheckboxInput',
   props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    },
     value: {
       type: Number,
       default: null
@@ -51,7 +56,7 @@ export default {
     }
   },
   computed: {
-    disabled() {
+    inputDisabled() {
       return this.value === 0
     },
     checked: {
