@@ -318,8 +318,8 @@
                 slot="trainWay"
                 slot-scope="{ row }"
               >
-                <span v-if="row.trainWay === 1">面授</span>
-                <span v-if="row.trainWay === 2">在线</span>
+                <span v-if="row.trainWay === 1">在线</span>
+                <span v-if="row.trainWay === 2">面授</span>
                 <span v-if="row.trainWay === 3">混合</span>
               </template>
               <!-- 标签 -->
@@ -667,7 +667,8 @@ export default {
     },
     // 去开办下一期
     handleConfig(id) {
-      this.$router.push({ path: '/training/trainingEdit?id=' + id })
+      // this.$router.push({ path: '/training/trainingEdit?id=' + id })
+      this.$router.push({ path: '/training/edit', query: { id: id } })
     },
     // 去创建培训
     toCreateTraining() {},

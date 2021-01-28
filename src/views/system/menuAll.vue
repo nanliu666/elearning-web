@@ -156,6 +156,7 @@
 </template>
 
 <script>
+// 留个口子getMenuInfo == > getMenuAll
 import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
 
 // 表格属性

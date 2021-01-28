@@ -85,6 +85,7 @@
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
+          :plan-time-range="formData.timeRange"
           :plan-id="id"
         />
         <EditPerson
@@ -151,6 +152,13 @@ export default {
       formData: _.cloneDeep(defaultFormData)
     }
   },
+  beforeRouteEnter(from, to, next) {
+    let callback
+    if (from.path !== '/examManagement/examSchedule/preview') {
+      callback = (vm) => vm.init()
+    }
+    next(callback)
+  },
   computed: {
     id() {
       return this.$route.query.id
@@ -174,26 +182,21 @@ export default {
       deep: true
     }
   },
-  created() {
-    if (this.id) {
-      this.getPlanDetail()
-    } else {
-      this.setupDefaultFields()
-    }
-  },
-  destroyed() {
-    clearInterval(this.timer)
-  },
+  created() {},
+  destroyed() {},
   methods: {
+    init() {
+      if (this.id) {
+        this.getPlanDetail()
+      } else {
+        this.setupDefaultFields()
+      }
+    },
     setupDefaultFields() {
+      this.formData = _.cloneDeep(defaultFormData)
       this.formData.creatorName = this.userInfo.nick_name
       this.formData.coursePlanNo =
         moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
-      let that = this
-      this.timer = setInterval(() => {
-        if (that.id) return
-        that.formData.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
-      }, 1000)
     },
     exit() {
       this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {
@@ -230,9 +233,8 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
-      let [startTime, endTime] = data.timeRange
-      data.startTime = startTime
-      data.endTime = endTime
+      data.startTime = _.get(data, 'timeRange[0]')
+      data.endTime = _.get(data, 'timeRange[1]')
       data.type = type
       data.courseList = await this.$refs['editCourse'].getData()
       let func
@@ -241,6 +243,7 @@ export default {
       } else {
         data.creatorId = this.userInfo.user_id
         data.creatorName = this.userInfo.nick_name
+        data.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
         func = addPlan
       }
       func(data)
@@ -280,6 +283,7 @@ $header-height: 54px;
 .page {
   width: 100vw;
   height: 100vh;
+  padding: 0;
   padding-top: $header-height;
   box-sizing: border-box;
 
@@ -386,6 +390,7 @@ $header-height: 54px;
     background: #f5f5f7;
     .page__content--inner {
       margin-top: 20px;
+      padding-bottom: 10px;
     }
   }
 }

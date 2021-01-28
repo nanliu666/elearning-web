@@ -103,10 +103,7 @@ const TABLE_COLUMNS = [
   {
     label: '分值',
     prop: 'score',
-    minWidth: 120,
-    formatter: (row) => {
-      return row.score / 10
-    }
+    minWidth: 120
   },
   {
     label: '每日上限',

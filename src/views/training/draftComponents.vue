@@ -307,7 +307,8 @@ export default {
   },
   methods: {
     toTrainingEdit(scope) {
-      this.$router.push({ path: '/training/trainingEdit?id=' + scope.row.id })
+      // this.$router.push({ path: '/training/trainingEdit?id=' + scope.row.id })
+      this.$router.push({ path: '/training/edit', query: { id: scope.row.id } })
     },
     // 去培训详情
     toTrainingDetail(id) {

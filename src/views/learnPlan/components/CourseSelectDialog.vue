@@ -3,6 +3,7 @@
     title="课程列表"
     :visible="visible"
     width="800px"
+    append-to-body
     @close="handleClose"
   >
     <common-table
@@ -141,7 +142,8 @@ export default {
         catalogId: '',
         courseName: '',
         status: 1,
-        courseType: 1
+        courseType: 1,
+        isPutaway: 1
       },
       page: {
         currentPage: 1,

@@ -13,6 +13,7 @@
       </div>
       <div :class="['avue-main', { 'avue-main--fullscreen avue-main--notag': isFullscreen }]">
         <div
+          v-if="!noHeader"
           class="avue-header"
           :class="{ 'header-shadow': isFullscreen }"
         >
@@ -20,7 +21,7 @@
           <top ref="top" />
         </div>
         <!-- 顶部标签卡 -->
-        <tags v-if="!isFullscreen" />
+        <tags v-if="!(isFullscreen || noHeader)" />
         <transition name="fade-scale">
           <search
             v-show="isSearch"
@@ -92,6 +93,9 @@ export default {
     ...mapGetters(['isMenu', 'isLock', 'isCollapse', 'website', 'menu']),
     isFullscreen() {
       return this.$route.meta.fullscreen
+    },
+    noHeader() {
+      return this.$route.meta.noHeader
     }
   },
   created() {

@@ -151,6 +151,9 @@ export default {
         nodeData
       })
     },
+    /**
+     * 组装审批流程数组
+     */
     createNodeLine() {
       const keys = ['type', 'properties', 'nodeId', 'prevId', 'content', 'variable']
       const processData = JSON.parse(Base64.decode(this.process.baseJson)).processData
@@ -175,10 +178,11 @@ export default {
         } else if (node.type === 'copy') {
           userList = node.properties.members
         }
-        userList.push({
-          ..._.pick(processData, keys),
+        nodeLine.push({
+          ..._.pick(node, keys),
           userList
         })
+
         node = node.childNode
       }
       return nodeLine
@@ -201,10 +205,12 @@ export default {
           node = node.childNode
           continue
         }
-        if (userList.length > 1) {
-          map[node.variable] = [...new Set(userList.map((item) => 'taskUser_' + item.userId))]
-        } else {
-          map[node.variable] = 'taskUser_' + _.head(userList).userId
+        if (node.variable) {
+          if (userList.length > 1) {
+            map[node.variable] = [...new Set(userList.map((item) => 'taskUser_' + item.userId))]
+          } else {
+            map[node.variable] = 'taskUser_' + _.head(userList).userId
+          }
         }
         node = node.childNode
       }

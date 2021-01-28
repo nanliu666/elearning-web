@@ -10,36 +10,34 @@
     @current-page-change="handleCurrentPageChange"
     @page-size-change="handlePageSizeChange"
   >
-    <!-- 当前状态 -->
-    <template
-      slot="userName"
-      slot-scope="{ row }"
-    >
-      <span>{{ row.userName }}</span>
-    </template>
-    <template
-      slot="handler"
-      slot-scope="scope"
-    >
-      <el-button
-        type="text"
-        disabled
-        @click="toDetails(scope.row.id)"
-      >
-        查看
+    <!-- 课程标题 -->
+    <template slot="processName" slot-scope="{ row }">
+      <el-button type="text" @click="toDetails(row)">
+        {{ row.processName || '课程标题' }}
       </el-button>
+    </template>
+
+    <!-- 状态 -->
+    <template #status="{ row }">
+      <span
+        class="status-span"
+        :style="{
+          color: statusToText(row.status).color,
+          backgroundColor: statusToText(row.status).backgroundColor
+        }"
+        v-text="statusToText(row.status).text"
+      />
+    </template>
+    <template slot="handler" slot-scope="scope">
+      <el-button type="text" @click="againFn(scope.row.id)"> 重新申请 </el-button>
+      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>
     </template>
   </common-table>
 </template>
 
 <script>
-// import {
-//   waitApproveList,
-//   hasApproveList,
-//   myApproveList,
-//   ccApproveList
-// } from '@/api/approvalCenter/approvalCenter'
-
+import { fulllist, cancel } from '@/api/approvalCenter/approvalCenter'
+import { STATUS_TO_TEXT } from '@/const/approve'
 // 表格属性
 let TABLE_COLUMNS = [
   {
@@ -48,36 +46,33 @@ let TABLE_COLUMNS = [
   },
   {
     label: '课程标题',
-    prop: 'processName'
+    prop: 'processName',
+    slot: true
   },
   {
     label: '审核状态',
-    prop: 'userName',
+    prop: 'status',
     slot: true
   },
   {
     label: '申请人',
-    prop: 'applyTime'
+    prop: 'userName'
   },
   {
     label: '申请时间',
-    prop: 'status'
+    prop: 'applyTime'
   },
   {
     label: '当前审批人',
     prop: 'approveUser' //数组里面的userName   要遍历出来
-  },
-  {
-    label: '操作',
-    prop: 'aprteUser'
   }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 100
+    width: 200
   },
   enablePagination: true,
-  showHandler: false,
+  showHandler: true,
   showIndexColumn: false
 }
 const TABLE_PAGE_CONFIG = {}
@@ -121,16 +116,44 @@ export default {
   },
 
   activated() {
-    this.setPitch(1)
+    this.setPitch()
   },
-  created() {
-    this.setPitch(1)
-  },
-
+  // created() {
+  //   this.setPitch()
+  // },
   methods: {
-    toDetails(id) {
+    statusToText(status) {
+      return STATUS_TO_TEXT[status]
+    },
+    // 去详情
+    toDetails(item) {
+      this.$router.push({
+        path: '/approvalCenter/details',
+        query: { formId: item.formId, apprNo: item.apprNo }
+      })
+    },
+    // 重新申请
+    againFn(id) {
       window.console.log(id)
     },
+    // 撤回
+    withdrawFn(row) {
+      cancel({ processInstanceId: row.processInstanceId }).then(() => {
+        this.$message({
+          message: '撤回成功',
+          type: 'success'
+        })
+      })
+    },
+    // 获取数据
+    async setPitch() {
+      let res = await fulllist({ ...this.page, categoryId: '1', status: 'Approve' })
+      this.tableData = res.data
+      this.page.total = res.totalNum
+
+      this.$emit('titleTotalNum', res.totalNum)
+    },
+
     //  处理页码改变
     handleCurrentPageChange(param) {
       this.page.pageNo = param

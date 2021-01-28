@@ -15,7 +15,7 @@
       @click="open(onlyOneChild)"
     >
       <i
-        v-if="iconKey"
+        v-if="iconKey !== 'icon'"
         :class="onlyOneChild[iconKey]"
       />
       <span
