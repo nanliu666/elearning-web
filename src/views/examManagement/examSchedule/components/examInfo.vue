@@ -4,6 +4,9 @@
       ref="form"
       :model="model"
       :columns="columns"
+      :config="{
+        disabled: modelDisabled
+      }"
     >
       <template #basicTitle>
         <div class="title-box">
@@ -96,7 +99,7 @@
             :input-value.sync="model.reckonTimeValue"
             text-before="限制时长"
             text-after="分钟"
-            :input-props="{ maxLength: 4, disabled: !model.reckonTime }"
+            :input-props="{ maxLength: 4, disabled: modelDisabled || !model.reckonTime }"
           />
         </el-radio-group>
       </template>
@@ -115,7 +118,7 @@
               :input-value.sync="model.joinNumValue"
               text-before="限制次数 不超过"
               text-after="次"
-              :input-props="{ maxLength: 2, disabled: !model.joinNum }"
+              :input-props="{ maxLength: 2, disabled: modelDisabled || !model.joinNum }"
             />
           </div>
         </el-radio-group>
@@ -126,9 +129,9 @@
           :disabled="modelDisabled"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
-          :default-value="2"
+          :default-value="model.integralValue"
           :input-width="60"
-          :input-props="{ maxLength: 4 }"
+          :input-props="{ maxLength: 4, disabled: modelDisabled || !model.integral }"
         ></checkbox-input>
       </template>
       <template #publishTime>
@@ -138,8 +141,8 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
-          :default-value="10"
-          :input-props="{ maxLength: 4 }"
+          :default-value="model.publishTimeValue"
+          :input-props="{ maxLength: 4, disabled: modelDisabled || !model.publishTime }"
         ></checkbox-input>
       </template>
       <template #lateBanExam>
@@ -255,7 +258,7 @@
             :default-value="passCondition[0].passType"
             :number.sync="passCondition[0].passScope"
             :pass-scope="model.passScope"
-            :input-props="{ maxLength: 4 }"
+            :input-props="{ maxLength: 4, disabled: modelDisabled }"
           />
           <condition-radio-input
             v-model="model.passType"
@@ -265,7 +268,7 @@
             :input-width="60"
             :default-value="passCondition[1].passType"
             :number.sync="passCondition[1].passScope"
-            :input-props="{ maxLength: 4 }"
+            :input-props="{ maxLength: 4, disabled: modelDisabled }"
           />
         </el-radio-group>
       </template>
@@ -309,6 +312,7 @@ const EventColumns = [
     itemType: 'input',
     span: 11,
     required: true,
+    disabled: false,
     maxLength: 50,
     prop: 'examName',
     label: '考试名称'
@@ -318,6 +322,7 @@ const EventColumns = [
     span: 11,
     offset: 2,
     required: false,
+    disabled: false,
     options: [],
     prop: 'categoryId',
     label: '考试分类',
@@ -650,9 +655,11 @@ export default {
         reckonTimeValue: 60, // 限制时长60分钟
         joinNum: false,
         joinNumValue: 3, // 默认参加次数，不超过3次
-        integral: 0,
+        integral: false,
+        integralValue: 2,
+        publishTime: false,
+        publishTimeValue: 10,
         strategy: false,
-        publishTime: 0,
         isLimitIp: false,
         isShuffle: false,
         createAnswers: false,
@@ -688,14 +695,33 @@ export default {
   },
   computed: {
     modelDisabled() {
+      // 其他情况不需要置灰
       let flag = false
-      if (this.$route.query.type === 'edit' && this.$route.query.isDraft === 'false') {
+      // 默认为非草稿箱
+      const type = _.get(this.$route, 'query.type', 'edit')
+      //非草稿箱
+      if (
+        type === 'edit' &&
+        this.isDraft === 'false' &&
+        this.model &&
+        (this.model.status === '2' || this.model.status === '3')
+      ) {
+        // 正在进行中的考试以及已结束的考试需要置灰
         flag = true
       }
       return flag
+    },
+    isDraft() {
+      return _.get(this.$route, 'query.isDraft', 'false')
     }
   },
   watch: {
+    modelDisabled: {
+      handler() {
+        // this.setColumnsDisable(value)
+      },
+      deep: true
+    },
     'model.testPaper': {
       handler(value) {
         const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {
@@ -817,6 +843,13 @@ export default {
     })
   },
   methods: {
+    // 设置置灰
+    setColumnsDisable(boolean) {
+      _.each(this.columns, (item) => {
+        item.disabled = boolean
+      })
+      // this.$forceUpdate()
+    },
     loadCoordinator(params) {
       return getAllUserList(params)
     },
@@ -826,16 +859,15 @@ export default {
     loadCertificateList(params) {
       return getCertificateList(_.assign(params, { status: '1' }))
     },
-    getData() {
-      return new Promise((resolve, reject) => {
-        this.$refs['form']
-          .validate()
-          .then(() => {
+    getData(type) {
+      return new Promise((resolve) => {
+        if (type === 'publish') {
+          this.$refs['form'].validate().then(() => {
             resolve(this.model) // TODO 提交表单
           })
-          .catch(() => {
-            reject()
-          })
+        } else {
+          resolve(this.model) // TODO 提交表单
+        }
       })
     }
   }
