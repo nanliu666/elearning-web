@@ -48,8 +48,8 @@
           <div>
             试题设置:
             <span class="tip">
-              <span>（当前总分：{{ totalScore == 0 ? 0 : totalScore }}分</span>
-              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
+              <span>（当前总分：{{ form.totalScore == 0 ? 0 : form.totalScore }}分</span>
+              <span v-if="surplusScore">，剩余分数：{{ surplusScore }}分</span>）
             </span>
           </div>
           <div>
@@ -156,7 +156,7 @@ const BASE_COLUMNS = [
     props: {}
   },
   {
-    prop: 'totalScore',
+    prop: 'planScore',
     itemType: 'inputNumber',
     min: 0,
     precision: 1,
@@ -200,16 +200,24 @@ export default {
       loading: false,
       valid: false,
       columns: BASE_COLUMNS,
-      totalScore: '',
       surplusScore: '',
-      form: {},
+      form: {
+        name: '',
+        categoryId: '',
+        expiredTime: '',
+        totalScore: 0,
+        planScore: 0,
+        remark: '',
+        isScore: '',
+        isShowScore: '',
+        isMulti: ''
+      },
       typeList: [],
       themeBlock: {
         key: 1,
         type: '',
         title: '',
-        tableData: [],
-        totalScore: ''
+        tableData: []
       },
       testPaper: []
     }
@@ -219,15 +227,15 @@ export default {
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
-    'form.totalScore'() {
+    'form.planScore'() {
       this.count()
     },
     'form.isScore'() {
-      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      let planScoreConfig = this.columns.find((it) => it.prop == 'planScore')
       if (this.form.isScore) {
-        totalScore.required = true
+        planScoreConfig.required = true
       } else {
-        totalScore.required = false
+        planScoreConfig.required = false
       }
     }
   },
@@ -236,22 +244,6 @@ export default {
     next()
   },
   activated() {
-    this.form = {
-      name: '',
-      categoryId: '',
-      expiredTime: '',
-      totalScore: undefined,
-      remark: '',
-      isScore: '',
-      isShowScore: '',
-      isMulti: ''
-    }
-    this.totalScore = 0
-    this.surplusScore = ''
-    this.form.isScore = 0
-
-    this.testPaper = []
-    this.score = ''
     !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.copy = this.$route.query.copy
     this.getData()
@@ -283,30 +275,8 @@ export default {
       this.loading = true
       getTestPaper(params)
         .then((res) => {
-          let {
-            id,
-            expiredTime,
-            categoryId,
-            totalScore,
-            remark,
-            name,
-            isScore,
-            isShowScore,
-            manualSettings,
-            isMulti
-          } = res
-          this.form = {
-            id,
-            name,
-            categoryId,
-            expiredTime,
-            totalScore,
-            remark,
-            isScore,
-            isShowScore,
-            isMulti
-          }
-          manualSettings = manualSettings.map((it) => ({
+          this.form = res
+          const manualSettings = res.manualSettings.map((it) => ({
             ...it,
             score: it.score,
             Original: it.score
@@ -322,7 +292,6 @@ export default {
             })
           }
           !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
-
           this.count()
         })
         .finally(() => {
@@ -431,15 +400,15 @@ export default {
         let newData = _.compact(it)
         list.push(...newData)
       })
-      let totalScore = 0
+      let totalScoreTemp = 0
       scoreList = list
       scoreList.length &&
-        (totalScore = scoreList.reduce((prev, cur) => {
+        (totalScoreTemp = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.totalScore = totalScore.toFixed(1)
+      this.form.totalScore = totalScoreTemp.toFixed(1)
       if (this.form.totalScore) {
-        let score = this.form.totalScore - this.totalScore
+        let score = this.form.planScore - this.form.totalScore
         this.surplusScore = Math.round(score).toString()
       }
     },
