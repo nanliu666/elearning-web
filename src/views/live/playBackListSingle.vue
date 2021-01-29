@@ -9,6 +9,7 @@
         v-for="item in playBackListData"
         :key="item.id"
         class="PBLS"
+        @click="goReplay"
       >
         <div class="img">
           <img
@@ -25,67 +26,12 @@
           <span>直播时间：{{ item.startTime }}</span>
         </div>
         <div class="operation">
-          <span
-            v-if="item.lecturerDeleted == '1'"
-            @click="repRecover(item)"
-          >恢复</span>
-          <span
-            v-if="item.shelfStatus == '1'"
-            @click="repRelease(item)"
-          >发布</span>
-          <span
-            v-if="item.shelfStatus == '0'"
-            @click="repOffShelf(item)"
-          >下架</span>
-          <span @click="repDownload(item)">下载</span>
-          <span @click="repDelete(item)">删除</span>
+          <span v-if="item.lecturerDeleted===1" @click.stop="repRecover(item)">恢复</span>
+          <span @click.stop="repRelease(item)">{{item.shelfStatus===0?'下架':'发布'}}</span>
+          <span @click.stop="repDownload(item.localUrl)">下载</span>
+          <span @click.stop="repDelete(item)">删除</span>
         </div>
       </div>
-      <!-- <div class="PBLS">
-        <div class="img">
-          <img
-            src="/img/autol.png"
-            alt=""
-            width="220"
-            height="124"
-          />
-        </div>
-        <div class="text">
-          <h3>直播回放：20200315 设计能力专项提升</h3>
-          <span>直播分类：研发能力中心 > UCD中心</span>
-          <span>讲师：小明</span>
-          <span>直播时间：2020/03/15 08:00:00</span>
-        </div>
-        <div class="operation">
-          <span>恢复</span>
-          <span>发布</span>
-          <span>下载</span>
-          <span>删除</span>
-          <span>下架</span>
-        </div>
-      </div>
-      <div class="PBLS">
-        <div class="img">
-          <img
-            src="/img/autol.png"
-            alt=""
-            width="220"
-            height="124"
-          />
-        </div>
-        <div class="text">
-          <h3>直播回放：20200315 设计能力专项提升</h3>
-          <span>直播分类：研发能力中心 > UCD中心</span>
-          <span>讲师：小明</span>
-          <span>直播时间：2020/03/15 08:00:00</span>
-        </div>
-        <div class="operation">
-          <span>下载</span>
-          <span>删除</span>
-          <span>下架</span>
-        </div>
-      </div> -->
-    </div>
     <div class="pagePbls">
       <el-pagination
         background
@@ -98,6 +44,7 @@
         @current-change="handleCurrentChange"
       />
     </div>
+  </div>
   </div>
 </template>
 <script>
@@ -124,6 +71,14 @@ export default {
     this.initPlayBackData()
   },
   methods: {
+    goReplay(){
+      this.$router.push({
+        path:'/live/replay',
+        query:{
+          id:this.$route.query.liveId
+        }
+      })
+    },
     repRecover(item) {
       // 恢复
       let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
@@ -136,8 +91,8 @@ export default {
       })
     },
     repRelease(item) {
-      // 发布
-      let sendPar = { videoId: item.id.toString(), shelfStatus: '0' }
+      // 发布 下架
+      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus===0?1:0 }
       setReplayStatus(sendPar).then(() => {
         this.initPlayBackData()
         this.$message({
@@ -146,39 +101,26 @@ export default {
         })
       })
     },
-    repDownload(item) {
+    repDownload(url) {
+      if(!url) return
       // 下载
-      if (item.localUrl) {
-        window.open(item.localUrl)
-      } else {
-        this.$message({
-          message: '没有视频文件',
-          type: 'error'
-        })
-      }
+      let x = new XMLHttpRequest();
+      x.open("GET", url, true);
+      x.responseType = "blob";
+      x.onprogress = function(event) {
+      };
+      x.onload = function(e) {
+        let url = window.URL.createObjectURL(x.response);
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = ""; //可以填写默认的下载名称
+        a.click();
+      };
+      x.send();
     },
     repDelete(item) {
       // 删除
-      let sendPar = { videoId: item.id.toString(), isDeleted: '1' }
-      this.$confirm('是否删除该视频?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          setReplayStatus(sendPar).then(() => {
-            this.initPlayBackData()
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
-          })
-        })
-        .catch(() => {})
-    },
-    repOffShelf(item) {
-      // 下架
-      let sendPar = { videoId: item.id.toString(), shelfStatus: '1' }
+      let sendPar = { videoId: item.id.toString(), isDeleted: 1 }
       setReplayStatus(sendPar).then(() => {
         this.initPlayBackData()
         this.$message({
