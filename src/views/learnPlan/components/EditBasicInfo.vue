@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import { getCatalogs } from '@/api/learnPlan'
-import { filterTree, handleCatalogsData } from '@/util/util'
+import { getAllCatalog } from '@/api/learnPlan'
+import { filterTree } from '@/util/util'
 export default {
   props: {
     model: {
@@ -68,8 +68,8 @@ export default {
               data: [],
               filterable: false,
               props: {
-                children: 'children',
-                label: 'label',
+                children: 'list',
+                label: 'name',
                 value: 'id'
               },
               required: true
@@ -146,8 +146,8 @@ export default {
       })
     },
     getCategoryData() {
-      getCatalogs().then((res) => {
-        const data = handleCatalogsData(res)
+      getAllCatalog().then((res) => {
+        const data = res
         this.categoryData = data
         this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = data
       })

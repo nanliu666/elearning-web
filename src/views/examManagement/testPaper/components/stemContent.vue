@@ -296,7 +296,6 @@ export default {
             if (!it.id) {
               it.id = it.key
             }
-            it.score = it.score * 10
           })
           this.selectData = val
         }
@@ -354,16 +353,12 @@ export default {
         item.questionId = item.id
       })
       this.selectData = _.uniqBy([...this.selectData, ...this.selection], 'questionId')
-      console.log('this.selectData==', this.selectData)
     },
     /**
      * @author guanfenda
      * @desc 确认选中
      * */
     onsubmit() {
-      this.selectData.map((it) => {
-        it.score = it.score / 10
-      })
       this.$emit('input', this.selectData)
       this.onClose()
     },

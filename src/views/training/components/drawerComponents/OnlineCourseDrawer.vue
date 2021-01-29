@@ -5,6 +5,7 @@
   >
     <div class="wrapper">
       <common-form
+        v-if="innnerVisible"
         ref="form"
         :model="model"
         class="form"
@@ -24,11 +25,10 @@
             @selectItem="selectContact"
           />
         </template>
-        <template #lecturerId>
+        <template #lecturerName>
           <lazy-select
-            v-model="model.lecturerId"
+            v-model="model.lecturerName"
             :disabled="true"
-            :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
@@ -52,7 +52,6 @@
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
-import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 const EventColumns = [
   {
@@ -64,7 +63,7 @@ const EventColumns = [
     label: '上课日期'
   },
   { itemType: 'slot', span: 24, required: true, prop: 'courseId', label: '关联课程' },
-  { itemType: 'slot', span: 24, required: false, prop: 'lecturerId', label: '讲师' },
+  { itemType: 'slot', span: 24, required: false, prop: 'lecturerName', label: '讲师' },
   {
     itemType: 'radio',
     prop: 'studyType',
@@ -77,7 +76,14 @@ const EventColumns = [
     ]
   }
 ]
-
+const modelCopy = {
+  studyType: 0,
+  courseId: '',
+  courseName: '',
+  lecturerId: null,
+  lecturerName: null,
+  classTime: []
+}
 export default {
   name: 'OnlineCourseDrawer',
   components: {
@@ -94,14 +100,7 @@ export default {
       editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
-      model: {
-        studyType: 0,
-        courseId: '',
-        courseName: '',
-        lecturerId: null,
-        lecturerName: null,
-        classTime: []
-      }
+      model: modelCopy
     }
   },
   computed: {
@@ -123,8 +122,7 @@ export default {
             this.title = '编辑在线课程'
             this.editType = 'edit'
           } else {
-            this.$refs.form && this.$refs.form.resetFields()
-            this.model.id = createUniqueID()
+            this.model = _.assign(_.cloneDeep(modelCopy), { id: _.uniqueId('12454611451154') })
             this.editType = 'add'
           }
         }
@@ -148,7 +146,7 @@ export default {
     submit() {
       this.$refs.form.validate().then(() => {
         this.close()
-        this.$emit('submit', this.model, this.editType)
+        this.$emit('submit', _.cloneDeep(this.model), this.editType)
       })
     }
   }

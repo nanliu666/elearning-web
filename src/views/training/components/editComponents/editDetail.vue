@@ -13,9 +13,7 @@
         <template #headTeacher>
           <lazy-select
             v-model="formData.headTeacher"
-            :allow-create="true"
             :searchable="true"
-            :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />
@@ -23,7 +21,6 @@
         <template #teachAssistant>
           <lazy-select
             v-model="formData.teachAssistant"
-            :allow-create="true"
             :searchable="true"
             :multiple="true"
             :load="loadCoordinator"
@@ -60,7 +57,6 @@
         <template #certificateId>
           <lazy-select
             v-model="formData.certificateId"
-            :allow-create="true"
             :searchable="true"
             :load="loadCertificateList"
             :option-props="{

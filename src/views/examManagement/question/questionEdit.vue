@@ -524,7 +524,7 @@ export default {
         ])
         // 前端保留一位小数，提交时乘以10化为整数，使用时要除以10
         if (data.score) {
-          data.score = parseInt(data.score * 10)
+          data.score = parseInt(data.score)
         }
         data.content = _.escape(this.form.content)
         data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
@@ -595,7 +595,7 @@ export default {
             'timeLimitDate',
             new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
           )
-          this.form.score = res.score ? res.score / 10 : res.score
+          this.form.score = res.score
           this.form.content = _.unescape(res.content)
           this.form.options.forEach((option) => {
             option.key = createUniqueID()

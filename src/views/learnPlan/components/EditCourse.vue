@@ -65,96 +65,14 @@
                 <i class="icon-drag"></i>
               </div>
             </template>
-            <div class="layout_content_detail">
-              <common-form
-                ref="form"
-                :model="course"
-                :columns="formColumns"
-              >
-                <div
-                  slot="courseName"
-                  class="course-name-input"
-                >
-                  <el-input
-                    :value="course.courseName"
-                    @click.native="replaceCourse(course)"
-                  />
-                  <el-tooltip
-                    class="item"
-                    effect="dark"
-                    content="学习当前课程之前需满足的条件"
-                    placement="top"
-                  >
-                    <span
-                      class="precondition"
-                      @click="handleSetPrecondition(course)"
-                    >设置前置条件</span>
-                  </el-tooltip>
-                </div>
-                <template slot="studyFrequency">
-                  <el-input-number
-                    v-model="course.studyFrequency"
-                    controls-position="right"
-                    :min="0"
-                  ></el-input-number>
-                </template>
-                <template slot="timeList">
-                  <el-date-picker
-                    v-for="(time, index) in course.timeList"
-                    :key="index"
-                    v-model="time.list"
-                    type="datetimerange"
-                    value-format="yyyy-MM-dd HH:mm:ss"
-                    range-separator="至"
-                    start-placeholder="开始时间"
-                    end-placeholder="结束时间"
-                  >
-                  </el-date-picker>
-                </template>
-              </common-form>
-              <el-tabs value="first">
-                <el-tab-pane
-                  label="关联考试"
-                  name="first"
-                >
-                  <div
-                    v-for="(exam, indexs) in course.studyExam"
-                    :key="indexs"
-                    class="tab_list clearfix"
-                  >
-                    {{ exam.examName }}
-                    <div class="tab_right">
-                      <span @click="handleViewTextPaper(course, exam)">预览</span>
-                      <span @click="handleExamEdit(course, exam)">编辑</span>
-                      <el-dropdown @command="handleExamCommand(course, indexs, $event)">
-                        <i class="el-icon-more"></i>
-                        <el-dropdown-menu slot="dropdown">
-                          <el-dropdown-item command="del">
-                            删除
-                          </el-dropdown-item>
-                        </el-dropdown-menu>
-                      </el-dropdown>
-                    </div>
-                  </div>
-                  <div
-                    class="exam-add"
-                    @click="handleExamEdit(course)"
-                  >
-                    添加
-                  </div>
-                </el-tab-pane>
-                <el-tab-pane
-                  label="关联练习"
-                  name="second"
-                >
-                </el-tab-pane>
-                <el-tab-pane
-                  label="关联作业"
-                  name="third"
-                >
-                </el-tab-pane>
-              </el-tabs>
-            </div>
+            <CourseItem
+              ref="courseItem"
+              :course="course"
+              :plan-time-range="planTimeRange"
+              @exam-edit="handleExamEdit"
+              @course-pre="handleSetPrecondition"
+              @course-replace="handleReplaceCourse"
+            />
           </el-collapse-item>
         </draggable>
       </el-collapse>
@@ -195,6 +113,7 @@
 import CourseSelectDialog from './CourseSelectDialog'
 import CoursePreCourseDialog from './CoursePreCourseDialog'
 import CourseBatchEditDialog from './CourseBatchEditDialog'
+import CourseItem from './EditCourseItem'
 import EditExamineDrawer from '@/views/training/components/drawerComponents/editExamineDrawer'
 import { getCourseExam } from '@/api/learnPlan/index'
 import { createUniqueID } from '@/util/util'
@@ -214,12 +133,20 @@ export default {
     CourseSelectDialog,
     CoursePreCourseDialog,
     CourseBatchEditDialog,
-    EditExamineDrawer
+    EditExamineDrawer,
+    CourseItem
   },
   props: {
     planId: {
       type: String,
       default: ''
+    },
+    /**
+     * 学习计划时间范围
+     */
+    planTimeRange: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -236,48 +163,6 @@ export default {
       checkAll: false,
       checkedCourseIds: [],
       isIndeterminate: false,
-      formColumns: [
-        {
-          prop: 'courseName',
-          label: '课程名称',
-          itemType: 'slot',
-          required: true
-        },
-        {
-          prop: 'passRule',
-          itemType: 'checkbox',
-          label: '通过条件',
-          options: [
-            { label: '教师评定', value: '1' },
-            { label: '考试通过', value: '2' },
-            { label: '达到课程学时', value: '3' }
-          ],
-          offset: 4,
-          required: true
-        },
-        {
-          prop: 'timeRange',
-          itemType: 'datePicker',
-          type: 'daterange',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          label: '开课时间',
-          required: true
-        },
-        {
-          prop: 'studyFrequency',
-          itemType: 'slot',
-          label: '允许学习次数',
-          offset: 4,
-          desc: '0：表示无限制',
-          required: true
-        },
-        {
-          prop: 'timeList',
-          label: '允许时间段',
-          itemType: 'slot',
-          required: false
-        }
-      ],
       activeCollapses: []
     }
   },
@@ -297,27 +182,12 @@ export default {
         this.editingExam = null
       }
     },
-    handleViewTextPaper(course, exam) {
-      if (exam.testPaperType === 'manual') {
-        this.$router.push({
-          path: '/examManagement/examSchedule/preview',
-          query: { paperId: exam.testPaper, paperType: exam.testPaperType }
-        })
-      } else {
-        this.$message.error('随机试卷不支持预览')
-      }
-    },
     handleExamEdit(course, exam) {
       this.editingExamCourse = course
       this.editingExam = exam || null
       this.examDrawerVisible = true
     },
-    handleExamCommand(course, index, command) {
-      if (command === 'del') {
-        course.studyExam.splice(index, 1)
-      }
-    },
-    replaceCourse(course) {
+    handleReplaceCourse(course) {
       this.replacingCourse = course
       this.courseDialogVisible = true
     },
@@ -336,12 +206,9 @@ export default {
       })
       this.courseList = res
     },
-    // validateForm(form){
-    //   return
-    // }
     getData() {
       return new Promise((resolve, reject) => {
-        Promise.all(_.map(this.$refs.form, (ref) => ref.validate()))
+        Promise.all(_.map(this.$refs.courseItem, (ref) => ref.$refs.form.validate()))
           .then(() => {
             const data = _.map(this.courseList, (course, index) => {
               let _course = {
@@ -352,16 +219,16 @@ export default {
                 studyFrequency: course.studyFrequency,
                 passRule: course.passRule,
                 studyPlanId: this.planId,
-                startTime: course.timeRange[0],
-                endTime: course.timeRange[1],
+                startTime: _.get(course, 'timeRange[0]'),
+                endTime: _.get(course, 'timeRange[1]'),
                 studyExam: _.map(course.studyExam, (exam) => ({
                   ...exam,
                   id: typeof exam.id === 'string' ? exam.id : null,
                   studyPlanCourseId: course.id
                 })),
                 timeList: _.map(course.timeList, (time) => ({
-                  startTime: time.list[0],
-                  endTime: time.list[1],
+                  startTime: _.get(time, 'list[0]'),
+                  endTime: _.get(time, 'list[1]'),
                   id: time.id,
                   studyPlanCourseId: course.id
                 })),
@@ -471,16 +338,7 @@ export default {
   /deep/.el-input-number {
     width: 100%;
   }
-  .course-name-input {
-    position: relative;
-    .precondition {
-      color: #01aafc;
-      cursor: pointer;
-      position: absolute;
-      right: -90px;
-      top: 0;
-    }
-  }
+
   /deep/.el-collapse {
     border-bottom: none;
   }
@@ -547,40 +405,6 @@ export default {
     .is-active {
       .el-icon-arrow-down {
         transform: rotate(0);
-      }
-    }
-    .layout_content_detail {
-      padding-top: 16px;
-      /deep/.el-tabs {
-        .tab_list {
-          height: 40px;
-          line-height: 40px;
-          font-size: 14px;
-          padding-left: 15px;
-          color: rgba(0, 11, 21, 0.85);
-          border-bottom: 1px solid #ebeced;
-          .tab_right {
-            float: right;
-            span {
-              display: inline-block;
-              color: #01aafc;
-              margin-right: 10px;
-              cursor: pointer;
-            }
-            i {
-              cursor: pointer;
-            }
-          }
-        }
-        .exam-add {
-          width: 100%;
-          height: 42px;
-          line-height: 42px;
-          margin-top: 10px;
-          cursor: pointer;
-          text-align: center;
-          border: 1px dashed rgb(230, 218, 218);
-        }
       }
     }
     /deep/.el-collapse-item__arrow {

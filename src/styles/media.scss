@@ -65,8 +65,8 @@
   background: #f2f5f7;
   z-index: 1026;
   #avue-view {
-    // height: calc(100% - 96px);
-    height: 100%;
+    height: calc(100% - 96px);
+    // height: 100%;
   }
   &--fullscreen {
     width: 100%;
@@ -124,16 +124,16 @@
   }
 }
 
-@media screen and (max-width: 1067px) {
-  $sidebarWidth: 176px;
-  .avue-left {
-    width: $sidebarWidth;
-  }
-  .avue-main {
-    left: $sidebarWidth;
-    width: calc(1067px - #{$sidebarWidth});
-  }
-}
+// @media screen and (max-width: 1067px) {
+//   $sidebarWidth: 176px;
+//   .avue-left {
+//     width: $sidebarWidth;
+//   }
+//   .avue-main {
+//     left: $sidebarWidth;
+//     width: calc(1067px - #{$sidebarWidth});
+//   }
+// }
 // @media screen and (max-width: 992px) {
 //   $width: 224px;
 

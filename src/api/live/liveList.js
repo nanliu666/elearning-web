@@ -16,6 +16,17 @@ export const delLive = (params) => del('api/common/v1/live/plan/deleteLivePlan',
 export const toggleLiveStatus = (params) => post('api/common/v1/live/plan/updateIsUsed', params)
 
 /**
+ * 验证当前直播是否处于直播状态
+ * */
+export const getLiveStatus = (params) => get('/api/common/v1/live/plan/verifyIsLiving', params)
+
+/**
+ * 查询创建人列表
+ * */
+export const getCreateUserId = (params) =>
+  get('api/common/v1/live/plan/getLivePlanCreatorList', params)
+
+/**
  * 分类查询接口
  * */
 // export const getCategoryList = (params) => get('/manage/v1/evaluation/category', params)

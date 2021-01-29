@@ -66,22 +66,30 @@
               v-model.trim="outerParams.search"
               placeholder="搜索姓名或手机号码"
             />
-            <ul
-              ref="outerUser"
-              @scroll="debounceOuterScrollHandler"
+            <el-checkbox
+              v-model="checkAll"
+              class="total-check"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
             >
-              <li
-                v-for="item in outerData"
+              全选
+            </el-checkbox>
+            <el-checkbox-group
+              v-model="checkedUsers"
+              class="check-ul"
+              @change="handleCheckedUserChange"
+            >
+              <el-checkbox
+                v-for="(item, index) in usersNameList"
                 :key="item.bizId"
+                class="check-li"
+                :label="item"
+                @change="handleSelectUser(outerData[index])"
               >
-                <el-checkbox
-                  :value="!!_.find(selected, { bizId: item.bizId })"
-                  @change="handleSelectUser(item)"
-                ></el-checkbox>
-
-                {{ item.bizName }}{{ item.phonenum ? `(${item.phonenum})` : '' }}
-              </li>
-            </ul>
+                {{ outerData[index].bizName
+                }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+              </el-checkbox>
+            </el-checkbox-group>
           </div>
         </div>
       </div>
@@ -214,13 +222,17 @@ export default {
   },
   data() {
     return {
+      checkAll: false,
+      checkedUsers: [],
+      usersNameList: [],
+      isIndeterminate: false,
       activeTab: 'Org',
       loading: false,
       orgSearch: '',
       orgSearchData: [],
       outerParams: {
         pageNo: 1,
-        pageSize: 15,
+        pageSize: 10000,
         search: '',
         loaded: false
       },
@@ -290,6 +302,27 @@ export default {
   },
 
   methods: {
+    // 切换全选与全删
+    handleCheckAllChange(val) {
+      this.checkedUsers = val ? this.usersNameList : []
+      this.isIndeterminate = false
+      // 全删除需要过滤组织选的人,组织
+      if (_.isEmpty(this.checkedUsers)) {
+        _.pullAllBy(this.selected, this.outerData, 'bizId')
+      } else {
+        // 全选需要去重
+        _.each(this.outerData, (item) => {
+          this.handleSelectUser(item)
+        })
+        this.selected = _.uniqBy(this.selected, 'bizId')
+      }
+    },
+    // 当前是否切换为半选状态
+    handleCheckedUserChange(value) {
+      let checkedCount = value.length
+      this.checkAll = checkedCount === this.usersNameList.length
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length
+    },
     /**
      * 处理选中单个项
      * @param {object} node 树形组件的node结节
@@ -393,6 +426,7 @@ export default {
             } else {
               this.outerData = _.concat(this.outerData, data)
             }
+            this.usersNameList = _.map(this.outerData, 'name')
           } else {
             this.outerParams.loaded = true
           }
@@ -467,11 +501,16 @@ export default {
   }
 }
 .outer-user {
-  ul {
-    overflow: auto;
+  overflow-y: auto;
+  height: 380px;
+
+  .total-check {
+    padding: 6px;
     padding-top: 8px;
-    height: 340px;
-    li {
+  }
+  .check-ul {
+    .check-li {
+      display: block;
       &:hover {
         background-color: $lightGray;
       }

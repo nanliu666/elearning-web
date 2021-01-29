@@ -85,6 +85,7 @@
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
+          :plan-time-range="formData.timeRange"
           :plan-id="id"
         />
         <EditPerson
@@ -232,9 +233,8 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
-      let [startTime, endTime] = data.timeRange
-      data.startTime = startTime
-      data.endTime = endTime
+      data.startTime = _.get(data, 'timeRange[0]')
+      data.endTime = _.get(data, 'timeRange[1]')
       data.type = type
       data.courseList = await this.$refs['editCourse'].getData()
       let func

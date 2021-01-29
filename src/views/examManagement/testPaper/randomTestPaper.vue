@@ -45,7 +45,7 @@
           <div>
             试题设置:
             <span class="tip">
-              <span>（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分</span>
+              <span>（当前总分数：{{ totalScore == 0 ? 0 : totalScore }}分</span>
               <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
             </span>
           </div>
@@ -591,7 +591,6 @@ export default {
             isMulti
           } = res
           //后台要精确到一位小数，返回是乘以10
-          totalScore = totalScore / 10
           this.form = {
             id,
             name,
@@ -605,9 +604,13 @@ export default {
           }
           randomSettings.map((data) => {
             data.column = _.cloneDeep(this.column)
+            // 前端实现自己组装未分类的数据
+            if (_.isEmpty(data.categoryIds)) {
+              data.categoryIds = ['0']
+            }
             this.getTopicCategory(data.type, data.column)
           })
-          this.tableData = randomSettings.map((it) => ({ ...it, score: it.score / 10 }))
+          this.tableData = randomSettings
           !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
         })
         .finally(() => {
@@ -635,11 +638,10 @@ export default {
       //后台要精确到一位小数，提交是乘以10
       let randomSettings = this.tableData.map((it, index) => ({
         ...it,
-        score: it.score * 10,
+        score: it.score,
         sort: index
       }))
       let form = _.cloneDeep(this.form)
-      form.totalScore = form.totalScore * 10
       let params = {
         ...form,
         randomSettings,
@@ -696,8 +698,8 @@ export default {
         }, 0))
       this.totalScore = totalScore.toFixed(1)
       if (this.form.totalScore) {
-        let score = (this.form.totalScore - this.totalScore) * 10
-        this.surplusScore = (Math.round(score) / 10).toString()
+        let score = this.form.totalScore - this.totalScore
+        this.surplusScore = Math.round(score).toString()
       }
     },
     /**

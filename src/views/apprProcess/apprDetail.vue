@@ -267,7 +267,6 @@ export default {
       applyDetail: {},
       progress: [],
       nodeList: [],
-      processData: {}, // 给表单修改的时候暂存流程数据
       currentApproveNode: [],
       // 审批记录列表（接口返回
       recordList: [],

@@ -1,6 +1,9 @@
 <template>
   <div class="switch-container">
-    <el-switch v-model="innerSwitchValue"></el-switch>
+    <el-switch
+      v-model="innerSwitchValue"
+      :disabled="disabled"
+    ></el-switch>
     <div
       v-if="innerSwitchValue"
       style="margin-left: 10px;"
@@ -8,6 +11,7 @@
       {{ preText }}
       <el-input-number
         v-model="innerInputValue"
+        :disabled="disabled"
         :controls="false"
         :min="min"
         :style="`width:${inputWidth}px; display: inline-block`"
@@ -24,6 +28,10 @@ export default {
     min: {
       type: Number,
       default: 0
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     },
     switchValue: {
       type: Boolean,

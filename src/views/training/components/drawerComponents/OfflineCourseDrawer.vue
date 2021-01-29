@@ -5,6 +5,7 @@
   >
     <div class="wrapper">
       <common-form
+        v-if="innnerVisible"
         ref="form"
         :model="model"
         class="form"
@@ -13,7 +14,6 @@
         <template #courseId>
           <lazy-select
             v-model="model.courseId"
-            :allow-create="true"
             :searchable="true"
             :load="loadCourse"
             :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
@@ -25,7 +25,6 @@
             v-if="model.type === 1"
             v-model="model.lecturerName"
             :disabled="true"
-            :allow-create="true"
             :searchable="true"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
@@ -55,7 +54,6 @@
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
-import { createUniqueID } from '@/util/util'
 import { getTrainCource } from '@/api/train/train'
 import moment from 'moment'
 
@@ -172,7 +170,7 @@ export default {
           } else {
             // 新增的时候重置数据
             this.editType = 'add'
-            this.model.id = createUniqueID()
+            this.model.id = _.uniqueId('12454611451154')
           }
         }
       }

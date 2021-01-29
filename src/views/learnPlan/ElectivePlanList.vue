@@ -125,7 +125,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入课程名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'coursePlanName',
+    field: 'courseName',
     label: '',
     type: 'input'
   }
@@ -174,7 +174,7 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-import { VIEW_ELECTIVE, EDIT_REQUDELETE_ELECTIVEIRED } from '@/const/privileges'
+import { VIEW_ELECTIVE, EDIT_REQUDELETE_ELECTIVEIRED, DELETE_ELECTIVE } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'ElectivePlanList',
@@ -213,6 +213,7 @@ export default {
   },
   computed: {
     VIEW_ELECTIVE: () => VIEW_ELECTIVE,
+    DELETE_ELECTIVE: () => DELETE_ELECTIVE,
     EDIT_REQUDELETE_ELECTIVEIRED: () => EDIT_REQUDELETE_ELECTIVEIRED,
     ...mapGetters(['privileges'])
   },

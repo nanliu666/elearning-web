@@ -28,6 +28,7 @@
       v-model="studyFrequency"
       controls-position="right"
       :min="0"
+      style="width: 100%"
     ></el-input-number>
     <div class="batch_label__tip">
       0：表示无限制
@@ -91,7 +92,7 @@ export default {
   }
   .picker {
     margin-bottom: 8px;
-    width: 100%;
+    width: 100% !important;
   }
   .batch_label {
     margin-bottom: 8px;

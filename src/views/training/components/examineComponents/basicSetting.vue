@@ -10,7 +10,6 @@
         <lazy-select
           ref="testPaperRef"
           v-model="model.testPaper"
-          :allow-create="true"
           :searchable="true"
           :load="loadTestPaper"
           :option-list.sync="testPaperList"
@@ -24,7 +23,6 @@
       <template #reviewer>
         <lazy-select
           v-model="model.reviewer"
-          :allow-create="true"
           :searchable="true"
           :load="loadCoordinator"
           :multiple="true"
@@ -140,7 +138,8 @@ export default {
               required: true,
               message: '请选择关联用卷',
               trigger: 'blur'
-            }
+            },
+            { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
           ],
           prop: 'testPaper',
           label: '关联用卷'
@@ -209,6 +208,9 @@ export default {
       testPaperList: []
     }
   },
+  computed: {
+    ...mapGetters(['trainTimeInVuex'])
+  },
   watch: {
     'model.testPaper': {
       handler(val) {
@@ -216,12 +218,27 @@ export default {
       }
     }
   },
-  computed: {
-    ...mapGetters(['trainTimeInVuex'])
-  },
   methods: {
+    // 考试结束日期在试卷有效期之前
+    validateTestPaper(rule, value, callback) {
+      const paperExpiredTime = _.find(this.$refs.testPaperRef.optionList, (item) => {
+        return item.id === value
+      }).expiredTime
+      // 培训结束日期在卷子有效期之前
+      const isLegalExpiredTime = moment(this.model.examTime[1]).isSameOrBefore(paperExpiredTime)
+      if (paperExpiredTime && !isLegalExpiredTime) {
+        callback(
+          new Error(
+            `此卷结束日${paperExpiredTime}在考试结束日时（${this.model.examTime[1]}）已过期`
+          )
+        )
+      } else {
+        callback()
+      }
+    },
     // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间
     validateExamTime(rule, value, callback) {
+      this.$refs.form.validateField('testPaper')
       // 培训开始时间要在考试时间之前
       const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
         moment(this.model.examTime[0])
