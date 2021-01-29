@@ -779,7 +779,6 @@ export default {
           let { isOpinion, tip } = res
           this.tip = tip
           this.isOpinion = isOpinion
-          this.dialogVisible = true
           this.apprForm.comment = ''
         })
         .finally(() => {})
