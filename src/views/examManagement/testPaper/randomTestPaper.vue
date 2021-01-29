@@ -45,8 +45,8 @@
           <div>
             试题设置:
             <span class="tip">
-              <span>（当前总分数：{{ totalScore == 0 ? 0 : totalScore }}分</span>
-              <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
+              <span>（当前总分：{{ form.totalScore == 0 ? 0 : form.totalScore }}分</span>
+              <span v-if="surplusScore">，剩余分数：{{ surplusScore }}分</span>）
             </span>
           </div>
           <div>
@@ -253,7 +253,7 @@ const BASE_COLUMNS = [
     props: {}
   },
   {
-    prop: 'totalScore',
+    prop: 'planScore',
     itemType: 'inputNumber',
     min: 0,
     precision: 1,
@@ -356,7 +356,8 @@ export default {
         name: '',
         categoryId: '',
         expiredTime: '',
-        totalScore: undefined,
+        totalScore: 0,
+        planScore: 0,
         remark: '',
         isScore: '',
         isShowScore: '',
@@ -399,10 +400,9 @@ export default {
           }
         }
       },
-      totalScore: 0,
       surplusScore: 0,
       valid: false,
-      options: QUESTION_TYPE_MAP,
+      options: [],
       props: { multiple: true },
       tableData: [],
       tableItem: {
@@ -427,35 +427,20 @@ export default {
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
-    'form.totalScore'() {
+    'form.planScore'() {
       this.questionChange()
     },
     'form.isScore'() {
-      let totalScore = this.columns.find((it) => it.prop == 'totalScore')
+      let planScoreConfig = this.columns.find((it) => it.prop == 'planScore')
       if (this.form.isScore) {
-        totalScore.required = true
+        planScoreConfig.required = true
       } else {
-        totalScore.required = false
+        planScoreConfig.required = false
       }
     }
   },
   activated() {
-    this.form = {
-      name: '',
-      categoryId: '',
-      expiredTime: '',
-      totalScore: undefined,
-      remark: '',
-      isScore: '',
-      isShowScore: '',
-      isMulti: ''
-    }
-    this.tableData = []
     this.options = []
-    this.valid = false
-    this.totalScore = 0
-    this.surplusScore = 0
-    this.form.isScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
@@ -578,31 +563,9 @@ export default {
       this.loading = true
       getTestPaper(params)
         .then((res) => {
-          let {
-            id,
-            expiredTime,
-            categoryId,
-            totalScore,
-            remark,
-            name,
-            isScore,
-            isShowScore,
-            randomSettings,
-            isMulti
-          } = res
+          this.form = res
           //后台要精确到一位小数，返回是乘以10
-          this.form = {
-            id,
-            name,
-            categoryId,
-            expiredTime,
-            totalScore,
-            remark,
-            isScore,
-            isShowScore,
-            isMulti
-          }
-          randomSettings.map((data) => {
+          res.randomSettings.map((data) => {
             data.column = _.cloneDeep(this.column)
             // 前端实现自己组装未分类的数据
             if (_.isEmpty(data.categoryIds)) {
@@ -610,7 +573,7 @@ export default {
             }
             this.getTopicCategory(data.type, data.column)
           })
-          this.tableData = randomSettings
+          this.tableData = res.randomSettings
           !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
         })
         .finally(() => {
@@ -655,6 +618,9 @@ export default {
           this.$message.success('提交成功')
           this.handleBack()
         })
+        .catch(() => {
+          window.console.error(JSON.stringify(params))
+        })
         .finally(() => {
           this.loading = false
         })
@@ -690,15 +656,15 @@ export default {
      * */
     questionChange() {
       let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
-      scoreList.length === 0 && (this.surplusScore = this.form.totalScore)
-      let totalScore = 0
+      scoreList.length === 0 && (this.surplusScore = this.form.planScore)
+      let totalScoreTemp = 0
       scoreList.length &&
-        (totalScore = scoreList.reduce((prev, cur) => {
+        (totalScoreTemp = scoreList.reduce((prev, cur) => {
           return Number(prev) + Number(cur)
         }, 0))
-      this.totalScore = totalScore.toFixed(1)
+      this.form.totalScore = totalScoreTemp.toFixed(1)
       if (this.form.totalScore) {
-        let score = this.form.totalScore - this.totalScore
+        let score = this.form.planScore - this.form.totalScore
         this.surplusScore = Math.round(score).toString()
       }
     },
