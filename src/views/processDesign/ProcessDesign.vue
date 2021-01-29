@@ -184,7 +184,7 @@ export default {
             basicSetting: this.mockData.basicSetting,
             processData: res[1].formData
           }
-          // 区分预览和发布操作
+          // 处理发布
           this.sendToServer(param)
         })
         .catch((err) => {
