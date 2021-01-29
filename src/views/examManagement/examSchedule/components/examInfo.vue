@@ -833,7 +833,7 @@ export default {
   created() {
     getCategoryList({
       parentId: 0,
-      type: '0',
+      type: '1', // 0是题库分类 1是试卷分类
       name: ''
     }).then((res) => {
       let categoryId = _.filter(this.columns, (item) => {
