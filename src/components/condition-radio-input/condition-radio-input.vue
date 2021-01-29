@@ -12,7 +12,6 @@
           :controls="false"
           :min="min"
           :style="`width:${inputWidth}px`"
-          :disabled="disabled"
           v-bind="inputProps"
         ></el-input-number>
         {{ textAfter }}
@@ -72,11 +71,7 @@ export default {
       modelNumber: this.number
     }
   },
-  computed: {
-    disabled() {
-      return this.value === 0
-    }
-  },
+
   watch: {
     innerValue(val) {
       this.$emit('input', val)
