@@ -143,9 +143,13 @@ export default {
       }
     },
     jumpStep(index) {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      if (index === 0) {
         this.activeStep = index
-      })
+      } else {
+        this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+          this.activeStep = index
+        })
+      }
     },
     /***
      * @author guanfenda
@@ -182,19 +186,15 @@ export default {
     // 发布区分编辑发布还是新增发布
     publish(type) {
       // 草稿提交不需要校验
-      if (type === 'draft') {
-        this.handleSubmit(type)
-      } else {
-        // 发布提交需要校验
-        const examInfoData = this.$refs.examInfo.getData()
-        const examBatchData = this.$refs.examBatch.getData()
-        Promise.all([examInfoData, examBatchData]).then((res) => {
-          this.handleSubmit(res, type)
-        })
-      }
+      // 发布提交需要校验
+      const examInfoData = this.$refs.examInfo.getData(type)
+      const examBatchData = this.$refs.examBatch.getData(type)
+      Promise.all([examInfoData, examBatchData]).then((res) => {
+        this.handleSubmit(res, type)
+      })
     },
     handleSubmit(res, type) {
-      let params = type === 'draft' ? {} : this.handleParams(res, type)
+      let params = this.handleParams(res, type)
       // 完全新增 无id
       // 复制 有id type为copy
       // 编辑有id 且type为edit
