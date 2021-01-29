@@ -152,7 +152,7 @@ export default {
       formData: _.cloneDeep(defaultFormData)
     }
   },
-  beforeRouteEnter(from, to, next) {
+  beforeRouteEnter(to, from, next) {
     let callback
     if (from.path !== '/examManagement/examSchedule/preview') {
       callback = (vm) => vm.init()
@@ -182,8 +182,6 @@ export default {
       deep: true
     }
   },
-  created() {},
-  destroyed() {},
   methods: {
     init() {
       if (this.id) {

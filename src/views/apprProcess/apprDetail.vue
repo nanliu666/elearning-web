@@ -1,6 +1,10 @@
 <template>
   <div v-loading="loading">
-    <page-header :title="`${applyDetail.processName}`" show-back :back="handleBack" />
+    <page-header
+      :title="`${applyDetail.processName}`"
+      show-back
+      :back="handleBack"
+    />
     <basic-container>
       <div class="apply-info-wrap">
         <div class="title">
@@ -36,23 +40,43 @@
     </basic-container>
     <basic-container class="apply-detail-title">
       <div class="title-box">
-        <div class="title">审批详情</div>
+        <div class="title">
+          审批详情
+        </div>
         <div @click="show = !show">
-          <div v-if="show" class="btn-box">
-            <i class="el-icon-arrow-up icon" style="margin-right: 12px" /> 收起
+          <div
+            v-if="show"
+            class="btn-box"
+          >
+            <i
+              class="el-icon-arrow-up icon"
+              style="margin-right: 12px"
+            /> 收起
           </div>
-          <div v-else class="btn-box">
-            <i class="el-icon-arrow-down icon" style="margin-right: 12px" /> 打开
+          <div
+            v-else
+            class="btn-box"
+          >
+            <i
+              class="el-icon-arrow-down icon"
+              style="margin-right: 12px"
+            /> 打开
           </div>
         </div>
       </div>
       <transition name="show">
-        <div v-show="show" class="apply-detail">
+        <div
+          v-show="show"
+          class="apply-detail"
+        >
           <!-- 移过来的课程详情 start-->
           <div class="details_course_detailed">
             <div class="details_course_detailed_top">
               <div class="details_course_detailed_img">
-                <img :src="courseData.url" alt="" />
+                <img
+                  :src="courseData.url"
+                  alt=""
+                />
               </div>
 
               <div class="details_course_detailed_r">
@@ -84,14 +108,18 @@
                   </li>
                   <li>
                     <span class="text">通过条件：</span>
-                    <span v-for="(item, index) in courseData.passCondition" :key="index">
+                    <span
+                      v-for="(item, index) in courseData.passCondition"
+                      :key="index"
+                    >
                       <span v-show="item == 'a'">教师评定 </span>
-                      <span v-show="item == 'b'"
-                        >考试通过
-                        {{ courseData.passCondition.split(',').length >= 3 ? ',' : '' }}</span
-                      >
-                      <span v-show="item == 'c'"
-                        >达到课程学时
+                      <span
+                        v-show="item == 'b'"
+                      >考试通过
+                        {{ courseData.passCondition.split(',').length >= 3 ? ',' : '' }}</span>
+                      <span
+                        v-show="item == 'c'"
+                      >达到课程学时
                         {{ courseData.passCondition.split(',').length >= 2 ? ',' : '' }}
                       </span>
                     </span>
@@ -108,10 +136,19 @@
               </div>
             </div>
             <div class="details_course_detailed_bar">
-              <span :class="{ pitch: pitch == 1 }" @click="setPitch(1)">详细信息</span>
-              <span :class="{ pitch: pitch == 2 }" @click="setPitch(2)">课程内容</span>
+              <span
+                :class="{ pitch: pitch == 1 }"
+                @click="setPitch(1)"
+              >详细信息</span>
+              <span
+                :class="{ pitch: pitch == 2 }"
+                @click="setPitch(2)"
+              >课程内容</span>
             </div>
-            <div v-show="pitch == 1" class="details_course_detailed_pitch1">
+            <div
+              v-show="pitch == 1"
+              class="details_course_detailed_pitch1"
+            >
               <div class="title">
                 <i></i>
                 <span>课程介绍</span>
@@ -127,7 +164,10 @@
                 <div v-html="courseData.thinkContent"></div>
               </div>
             </div>
-            <div v-show="pitch == 2" class="details_course_detailed_pitch2">
+            <div
+              v-show="pitch == 2"
+              class="details_course_detailed_pitch2"
+            >
               <ul>
                 <li
                   v-for="(item, index) in courseData.content"
@@ -137,7 +177,9 @@
                   <div>
                     <i>{{ index + 1 }}</i> <span>{{ item.name }}</span>
                   </div>
-                  <div class="btn">查看内容</div>
+                  <div class="btn">
+                    查看内容
+                  </div>
                 </li>
               </ul>
             </div>
@@ -148,10 +190,15 @@
     </basic-container>
     <basic-container style="margin-bottom: 24px">
       <div class="record-wrap">
-        <div class="record-wrap-title">审批流程</div>
+        <div class="record-wrap-title">
+          审批流程
+        </div>
         <steps :progress.sync="progress" />
       </div>
-      <div v-if="!isFished && !isPreview" class="cancel-btn-box">
+      <div
+        v-if="!isFished && !isPreview"
+        class="cancel-btn-box"
+      >
         <el-button
           v-if="!isFished && hasCancel && isApplyUser"
           type="primary"
@@ -161,12 +208,31 @@
           撤回
         </el-button>
         <el-tooltip
+          v-if="(isReject && isApplyUser) || (isCancel && isApplyUser)"
+          effect="dark"
+          content="重新申请"
+          placement="top"
+        >
+          <el-button
+            type="primary"
+            size="medium"
+            @click="handleReapplyClick"
+          >
+            重新申请
+          </el-button>
+        </el-tooltip>
+        <!-- <el-tooltip
           effect="dark"
           content="拒绝审批后，该审批将终止"
           :enterable="false"
           placement="top"
         >
-          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Reject')">
+          <el-button
+            v-if="isApprover"
+            type="primary"
+            size="medium"
+            @click="handelClick('Reject')"
+          >
             拒绝
           </el-button>
         </el-tooltip>
@@ -176,12 +242,22 @@
           :enterable="false"
           placement="top"
         >
-          <el-button v-if="isApprover" type="primary" size="medium" @click="handelClick('Pass')">
+          <el-button
+            v-if="isApprover"
+            type="primary"
+            size="medium"
+            @click="handelClick('Pass')"
+          >
             同意
           </el-button>
         </el-tooltip>
 
-        <el-tooltip effect="dark" content="催一下" :enterable="false" placement="top">
+        <el-tooltip
+          effect="dark"
+          content="催一下"
+          :enterable="false"
+          placement="top"
+        >
           <el-button
             v-if="!isCancel && !isFished && !isReject && isApplyUser"
             type="primary"
@@ -190,7 +266,7 @@
           >
             催一下
           </el-button>
-        </el-tooltip>
+        </el-tooltip> -->
       </div>
     </basic-container>
     <el-dialog
@@ -210,15 +286,32 @@
         label-width="100px"
         class="demo-ruleForm"
       >
-        <el-form-item label="审批意见" :prop="isOpinion ? 'comment' : ''">
-          <el-input v-model="apprForm.comment" type="textarea" :rows="4" :placeholder="tip" />
+        <el-form-item
+          label="审批意见"
+          :prop="isOpinion ? 'comment' : ''"
+        >
+          <el-input
+            v-model="apprForm.comment"
+            type="textarea"
+            :rows="4"
+            :placeholder="tip"
+          />
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button size="medium" @click="dialogVisible = false">取 消</el-button>
-        <el-button size="medium" type="primary" :loading="btnloading" @click="handelConfirm"
-          >确 定</el-button
-        >
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          size="medium"
+          @click="dialogVisible = false"
+        >取 消</el-button>
+        <el-button
+          size="medium"
+          type="primary"
+          :loading="btnloading"
+          @click="handelConfirm"
+        >确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -318,6 +411,10 @@ export default {
     apprNo() {
       return _.get(this.applyDetail, 'apprNo', null)
     },
+    // 当前审批详情的审批id
+    formId() {
+      return _.get(this.applyDetail, 'formId', null)
+    },
     // 发起用户的id
     applyUserId() {
       return _.get(this.applyRecord, 'data[0].userId', null)
@@ -356,26 +453,21 @@ export default {
     },
 
     // 提交人跟当前用户是否同一个人
-    isApplyUser: function () {
+    isApplyUser: function() {
       return this.userId === this.applyUserId
     },
 
     // 是否是预览状态
     isPreview() {
-      return true
-      // return _.get(this.$route.query, 'preview', false)
+      return _.get(this.$route.query, 'preview', false)
     },
 
     ...mapGetters(['userId', 'tag'])
   },
   activated() {
     this.loadData()
-    this.getCourseData()
   },
   methods: {
-    formId() {
-      return this.$route.query.formId
-    },
     // 查看课程内容
     jumpToLearn(item) {
       this.$router.push({
@@ -385,8 +477,7 @@ export default {
     },
     // 获取课程信息
     async getCourseData() {
-      let res = await getCourse({ courseId: this.formId() })
-      window.console.log(res)
+      let res = await getCourse({ courseId: this.formId })
       res.introduction = _.unescape(res.introduction)
       res.thinkContent = _.unescape(res.thinkContent)
       this.courseData = res
@@ -429,10 +520,9 @@ export default {
     },
     // 处理重新发起申请
     handleReapplyClick() {
-      this.$store.commit('DEL_TAG', this.tag)
       this.$router.push({
-        path: '/apprProcess/apprSubmit',
-        query: { processId: this.processId, apprNo: this.apprNo }
+        path: '/course/establishCourse',
+        query: { id: this.formId }
       })
     },
 
@@ -481,15 +571,18 @@ export default {
         this.apprForm.processInstanceId = processInstanceId
         this.processId = processId
         this.recordList = data
-        // 当前审批处于审批中状态
-        if (!(this.isCancel || this.isReject || this.isFinished)) {
-          this.apprUserIdList = []
-          this.recordList.forEach((item, index) => {
-            if (index && item.result === EMPTY) {
-              this.apprUserIdList.push(item.userId)
-            }
-          })
-        }
+        // 记录所有审批中节点的用户id
+        this.apprUserIdList = []
+        this.recordList.forEach((item, index) => {
+          if (index && item.result === EMPTY) {
+            this.apprUserIdList.push(item.userId)
+          }
+        })
+        // 获取课程详情
+        this.getCourseData()
+        // 获取审批流程详情
+        this.getProcessDetail()
+        // 处理流程数据
         this.handleNodeData()
       } catch (error) {
         console.error(error)
@@ -678,7 +771,7 @@ export default {
       })
     },
     // 点击同意或拒绝按钮展示模态框
-    handelClick(type) {
+    getProcessDetail(type) {
       // 获取审批流程，获取审批意见是否必填，和审批提示语
       getProcessDetail({ processId: this.processId })
         .then((res) => {
@@ -686,7 +779,6 @@ export default {
           let { isOpinion, tip } = res
           this.tip = tip
           this.isOpinion = isOpinion
-          this.dialogVisible = true
           this.apprForm.comment = ''
         })
         .finally(() => {})

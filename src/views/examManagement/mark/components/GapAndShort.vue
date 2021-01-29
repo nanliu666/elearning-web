@@ -132,6 +132,17 @@ export default {
         if (value) {
           this.columns[1].rules[0].required = true
           this.columns[2].rules[0].required = true
+          switch (value) {
+            case '0':
+              this.formData.scoreUser = Number(this.data.scoreQuestion)
+              break
+            case '1':
+              this.formData.scoreUser = 0
+              break
+            case '2':
+              this.formData.scoreUser = Number(this.data.scoreQuestion) / 2
+              break
+          }
         }
       },
       deep: true

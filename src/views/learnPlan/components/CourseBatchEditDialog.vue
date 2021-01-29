@@ -7,20 +7,30 @@
     append-to-body
     @close="handleClose"
   >
-    <div class="batch_label">
-      允许的时间段
-    </div>
-    <el-date-picker
-      v-for="(time, index) in timeList"
-      :key="index"
-      v-model="time.list"
-      class="picker"
-      type="datetimerange"
-      value-format="yyyy-MM-dd HH:mm:ss"
-      range-separator="至"
-      start-placeholder="开始时间"
-      end-placeholder="结束时间"
-    />
+    <el-form
+      ref="form"
+      label-position="top"
+      :model="{ timeList }"
+    >
+      <el-form-item
+        label="允许的时间段"
+        prop="timeList"
+        :rules="rules"
+      >
+        <el-time-picker
+          v-for="(time, index) in timeList"
+          :key="index"
+          v-model="time.list"
+          class="picker"
+          is-range
+          range-separator="至"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          placeholder="选择时间范围"
+          value-format="HH:mm:ss"
+        />
+      </el-form-item>
+    </el-form>
     <div class="batch_label--study">
       允许学习次数
     </div>
@@ -51,6 +61,8 @@
 </template>
 
 <script>
+import { validateTimeList } from './config'
+const emptyTimeList = [{ list: ['', ''] }, { list: ['', ''] }, { list: ['', ''] }]
 export default {
   name: 'CourseBatchEditDialog',
   props: {
@@ -61,22 +73,25 @@ export default {
   },
   data() {
     return {
-      timeList: [{ list: [] }, { list: [] }, { list: [] }],
-      studyFrequency: 0
+      timeList: _.cloneDeep(emptyTimeList),
+      studyFrequency: 0,
+      rules: [{ validator: validateTimeList }]
     }
   },
   methods: {
     handleClose() {
       this.$emit('update:visible', false)
-      this.timeList = [{ list: [] }, { list: [] }, { list: [] }]
+      this.timeList = _.cloneDeep(emptyTimeList)
       this.studyFrequency = 0
     },
     handleSubmit() {
-      this.$emit('submit', {
-        timeList: this.timeList,
-        studyFrequency: this.studyFrequency
+      this.$refs.form.validate().then(() => {
+        this.$emit('submit', {
+          timeList: this.timeList,
+          studyFrequency: this.studyFrequency
+        })
+        this.handleClose()
       })
-      this.handleClose()
     }
   }
 }

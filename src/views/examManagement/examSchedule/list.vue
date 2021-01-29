@@ -194,13 +194,13 @@ let TABLE_COLUMNS = [
     minWidth: 120
   },
   {
-    label: '考试类型',
+    label: '考试方式',
     slot: true,
     prop: 'examPattern',
     minWidth: 120
   },
   {
-    label: '考试方式',
+    label: '考试类型',
     slot: true,
     prop: 'examType',
     minWidth: 120
@@ -381,7 +381,7 @@ export default {
       const type = _.filter(TYPE_STATUS, (item) => {
         return item.value === data
       })
-      return type ? '' : type[0].label
+      return _.get(type, '[0].label', null)
     },
     // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
@@ -390,9 +390,9 @@ export default {
   data() {
     return {
       activeColor: styles.primaryColor,
-      activeIndex: '0',
       tableLoading: false,
       tableData: [],
+      activeIndex: '0',
       page: {
         currentPage: 1,
         size: 10,
@@ -433,6 +433,8 @@ export default {
     }
   },
   activated() {
+    this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
+    this.handleSelect(this.activeIndex)
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]

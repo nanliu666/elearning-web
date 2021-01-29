@@ -369,6 +369,7 @@ export default {
     },
     handleSubmitSearch(params) {
       this.query = { ...this.query, ...params }
+      this.page.currentPage = 1
       this.loadData()
     },
     handleResetSearch() {

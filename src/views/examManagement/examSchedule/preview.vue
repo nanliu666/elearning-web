@@ -39,9 +39,7 @@
             <div style="margin-bottom: 10px">
               <span>{{ (index + 1) | number2zhcn }}、</span>
               <span>{{ item[0].type | typeFilter }}</span>
-              <span
-                v-if="paperData.type === 'manual'"
-              >（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+              <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
             </div>
             <div
               v-for="(sonitem, sonindex) in item"

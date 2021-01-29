@@ -101,6 +101,7 @@ export default {
   mounted() {
     this.initData()
   },
+
   methods: {
     // 判断是否存在删除按钮
     hasDelete(time) {
@@ -114,23 +115,26 @@ export default {
         })
       }
     },
-    getData() {
+    getData(type) {
       return new Promise((resolve) => {
-        if (_.size(this.batchList) === 0) {
+        if (type === 'publish' && _.size(this.batchList) === 0) {
           this.$message.error('考生批次至少存在一批')
           this.$emit('jump')
         } else {
-          let data = []
-          _.each(this.batchList, ({ examList, examTime, id }, index) => {
-            let examineeIds = []
-            _.each(examList, (item) => {
-              examineeIds.push(item.userId)
-            })
-            data.push({ batchNumber: index, examTime, examineeIds, id })
-          })
-          resolve(data) // TODO 提交表单
+          resolve(this.getHandlerData()) // TODO 提交表单
         }
       })
+    },
+    getHandlerData() {
+      let data = []
+      _.each(this.batchList, ({ examList, examTime, id }, index) => {
+        let examineeIds = []
+        _.each(examList, (item) => {
+          examineeIds.push(item.userId)
+        })
+        data.push({ batchNumber: index, examTime, examineeIds, id })
+      })
+      return data
     },
     // 拉取公司的直属员工，在map中遍历await
     async handlerData(data) {

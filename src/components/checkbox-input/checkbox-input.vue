@@ -10,7 +10,6 @@
       :controls="false"
       :min="0"
       :style="`width:${inputWidth}px`"
-      :disabled="inputDisabled"
       v-bind="inputProps"
     ></el-input-number>
     {{ textAfter }}
@@ -26,7 +25,7 @@ export default {
       default: false
     },
     value: {
-      type: Number,
+      type: [Number, Boolean],
       default: null
     },
     textBefore: {
@@ -56,9 +55,6 @@ export default {
     }
   },
   computed: {
-    inputDisabled() {
-      return this.value === 0
-    },
     checked: {
       get() {
         return !!this.value
