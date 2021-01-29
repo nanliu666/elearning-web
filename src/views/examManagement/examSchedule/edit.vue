@@ -143,9 +143,13 @@ export default {
       }
     },
     jumpStep(index) {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      if (index === 0) {
         this.activeStep = index
-      })
+      } else {
+        this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+          this.activeStep = index
+        })
+      }
     },
     /***
      * @author guanfenda
@@ -176,40 +180,44 @@ export default {
             id: res.testPaper
           }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
-          // 编辑的时候评卷人可以修改
-          _.each(examInfo.columns, (item) => {
-            item.disabled = examInfo.modelDisabled
-          })
         })
       }
     },
     // 发布区分编辑发布还是新增发布
     publish(type) {
-      const examInfoData = this.$refs.examInfo.getData()
-      const examBatchData = this.$refs.examBatch.getData()
+      // 草稿提交不需要校验
+      // 发布提交需要校验
+      const examInfoData = this.$refs.examInfo.getData(type)
+      const examBatchData = this.$refs.examBatch.getData(type)
       Promise.all([examInfoData, examBatchData]).then((res) => {
-        let params = this.handleParams(res, type)
-        // 完全新增 无id
-        // 复制 有id type为copy
-        // 编辑有id 且type为edit
-        let editFun = Object.create(null)
-        if ((this.$route.query && this.$route.query.type === 'copy') || !this.id) {
-          editFun = postExamArrange
-        } else {
-          editFun = putExamArrange
-        }
-        editFun(params)
-          .then(() => {
-            const tips = type === 'draft' ? '已发布草稿' : '已成功创建考试'
-            this.$message.success(`${tips}，1秒后将自动返回考试列表`)
-            setTimeout(() => {
-              this.$router.push({ path: '/examManagement/examSchedule/list' })
-            }, 1000)
-          })
-          .catch(() => {
-            window.console.error(JSON.stringify(params))
-          })
+        this.handleSubmit(res, type)
       })
+    },
+    handleSubmit(res, type) {
+      let params = this.handleParams(res, type)
+      // 完全新增 无id
+      // 复制 有id type为copy
+      // 编辑有id 且type为edit
+      let editFun = Object.create(null)
+      if ((this.$route.query && this.$route.query.type === 'copy') || !this.id) {
+        editFun = postExamArrange
+      } else {
+        editFun = putExamArrange
+      }
+      editFun(params)
+        .then(() => {
+          const tips = type === 'draft' ? '已发布草稿' : '已成功创建考试'
+          this.$message.success(`${tips}，1秒后将自动返回考试列表`)
+          setTimeout(() => {
+            this.$router.push({
+              path: '/examManagement/examSchedule/list',
+              query: { activeIndex: type === 'draft' ? '1' : '0' }
+            })
+          }, 1000)
+        })
+        .catch(() => {
+          window.console.error(JSON.stringify(params))
+        })
     },
     // 统一处理入参
     handleParams(res, type) {

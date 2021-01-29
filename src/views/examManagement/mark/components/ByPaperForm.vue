@@ -33,13 +33,13 @@
           v-model="data.result"
           @change="reslutChange"
         >
-          <el-radio :label="0">
+          <el-radio label="0">
             对
           </el-radio>
-          <el-radio :label="1">
+          <el-radio label="1">
             错
           </el-radio>
-          <el-radio :label="2">
+          <el-radio label="2">
             部分对
           </el-radio>
         </el-radio-group>
@@ -106,14 +106,14 @@ export default {
   methods: {
     reslutChange(value) {
       switch (value) {
-        case 0:
-          this.data.scoreUser = this.data.scoreQuestion
+        case '0':
+          this.data.scoreUser = Number(this.data.scoreQuestion)
           break
-        case 1:
+        case '1':
           this.data.scoreUser = 0
           break
-        case 2:
-          this.data.scoreUser = this.data.scoreQuestion / 2
+        case '2':
+          this.data.scoreUser = Number(this.data.scoreQuestion) / 2
           break
       }
     }
