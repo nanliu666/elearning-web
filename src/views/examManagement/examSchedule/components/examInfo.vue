@@ -688,11 +688,9 @@ export default {
   },
   computed: {
     modelDisabled() {
-      let flag = true
-      if (this.$route.query.isDraft === 'true' || this.$route.query.type === 'copy') {
-        flag = false
-      } else {
-        flag = this.model.status && this.model.status !== '1'
+      let flag = false
+      if (this.$route.query.type === 'edit' && this.$route.query.isDraft === 'false') {
+        flag = true
       }
       return flag
     }

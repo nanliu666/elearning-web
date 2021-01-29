@@ -56,7 +56,7 @@
                 />
               </div>
               <div v-else>
-                <span>{{ sonindex + 1 }}.</span>
+                <span>{{ sonindex + 1 }}</span>
                 <span>
                   <span v-html="getHTML(sonitem.content)" />
                   <ul>

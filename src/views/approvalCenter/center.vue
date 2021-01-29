@@ -185,8 +185,14 @@ export default {
     },
     //   导航栏btn
     setPitch(i) {
+      if (this.pitch != i) this.searchInput = ''
       this.pitch = i || 1
-      fulllist({ ...this.page, categoryId: '1', status: this.statusValue }).then((res) => {
+      fulllist({
+        ...this.page,
+        categoryId: '1',
+        status: this.statusValue,
+        search: this.searchInput
+      }).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
       })
@@ -199,8 +205,9 @@ export default {
       })
     },
     // 重新申请
-    againFn(id) {
-      window.console.log(id)
+    againFn() {
+      // window.console.log(id)
+      this.$router.push({ path: '/course/establishCourse' })
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
