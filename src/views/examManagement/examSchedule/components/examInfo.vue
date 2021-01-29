@@ -824,7 +824,7 @@ export default {
       return getExamList(_.assign(params, { status: 'normal' }))
     },
     loadCertificateList(params) {
-      return getCertificateList(params)
+      return getCertificateList(_.assign(params, { status: '1' }))
     },
     getData() {
       return new Promise((resolve, reject) => {
