@@ -49,6 +49,15 @@
         ></div>
         <!-- 课件 -->
         <div v-if="currentChapter.type == '2'" class="content--iframe">
+          <video
+            v-if="isVideo"
+            ref="video"
+            preload
+            controls
+            :src="currentChapter.content"
+            :height="contentHeight"
+            :width="contentWidth"
+          ></video>
           <iframe
             :src="getContentUrl(currentChapter)"
             width="100%"
@@ -72,9 +81,7 @@
         </div>
         <!--考试-->
         <div v-if="currentChapter.type == '4'" class="content--test">
-          <el-button type="primary" size="medium">
-            前往考试
-          </el-button>
+          <el-button type="primary" size="medium"> 前往考试 </el-button>
         </div>
         <!--视频-->
         <div v-if="currentChapter.type == '5'">
@@ -122,10 +129,10 @@ export default {
   },
   computed: {
     courseId() {
-      return this.$route.query.courseId //传入ID
+      return this.$route.query.courseId
     },
     chapterId() {
-      return this.$route.query.chapterId //传入ID
+      return this.$route.query.chapterId
     },
     contentWidth() {
       return this.$refs.content.offsetWidth
@@ -133,16 +140,19 @@ export default {
     contentHeight() {
       return this.$refs.content.offsetHeight
     },
+    isVideo() {
+      const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+      return regx.test(this.currentChapter.content)
+    },
     COURSE_CHAPTER_TYPE_MAP: () => COURSE_CHAPTER_TYPE_MAP,
     ...mapGetters(['userInfo'])
   },
   watch: {
     currentChapter(newVal, oldVal) {
-      if (oldVal.type == '5' && oldVal.duration) {
-        let progress = Number(((this.$refs.video.currentTime / oldVal.duration) * 100).toFixed())
-        oldVal.progress = progress > oldVal.progress ? progress : oldVal.progress
+      if (this.isChapterVideo(oldVal) && oldVal.duration) {
+        this.updateVideoProgress(oldVal)
       } else {
-        oldVal.progress = 1
+        oldVal.progress = 100
       }
       this.submitLearnRecords()
     }
@@ -154,10 +164,23 @@ export default {
     this.loadNoteList()
     this.setTimer()
   },
-  deactivated() {
+  beforeRouteLeave(from, to, next) {
+    this.updateVideoProgress(this.currentChapter)
+    this.submitLearnRecords()
     clearInterval(this.timer)
+    next()
   },
   methods: {
+    /**
+     * 更新视频播放进度
+     */
+    updateVideoProgress(chapter) {
+      if (!this.isChapterVideo(chapter) || !chapter.duration) {
+        return
+      }
+      let progress = Number(((this.$refs.video.currentTime / chapter.duration) * 100).toFixed())
+      chapter.progress = progress > chapter.progress ? progress : chapter.progress
+    },
     getFileImageUrl(url = '') {
       const fileDict = {
         doc: 'word',
@@ -197,11 +220,15 @@ export default {
     isActive(chapter) {
       return this.currentChapter.contentId === chapter.contentId
     },
+    isChapterVideo(chapter) {
+      const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+      return regx.test(chapter.content)
+    },
     handleChapterClick(chapter) {
       this.currentChapter = chapter
     },
     calcProcess(chapter) {
-      if (chapter.type != '5') {
+      if (!this.isChapterVideo(chapter)) {
         if (chapter.progress == 1) {
           return 100
         } else {
@@ -209,6 +236,26 @@ export default {
         }
       } else {
         return parseInt(chapter.progress)
+      }
+    },
+    getChapterStatus(chapter) {
+      if (this.isActive(chapter)) {
+        return '正在学'
+      }
+      if (!this.isChapterVideo(chapter)) {
+        if (chapter.progress == 100) {
+          return '已学习'
+        } else {
+          return '未学习'
+        }
+      } else {
+        if (chapter.progress == '0') {
+          return '未学习'
+        } else if (chapter.progress == 100) {
+          return '已学习'
+        } else {
+          return '学习中'
+        }
       }
     },
     loadCourseDetail() {
@@ -220,14 +267,15 @@ export default {
       })
     },
     submitLearnRecords() {
-      let params = { contentRecords: '', period: 5, courseId: this.courseId }
+      let params = { period: 5, courseId: this.courseId }
       params.contentRecords = _.map(
         this.chapters,
         (chapter) => `${chapter.contentId}:${chapter.progress}`
       ).join(',')
-      updateLearnRecord(params)
-        .then()
-        .catch()
+      if (!params.contentRecords) {
+        return
+      }
+      updateLearnRecord(params).then().catch()
     },
     loadChapters() {
       if (!this.courseId) {
@@ -236,16 +284,16 @@ export default {
       getLearnRecord({ courseId: this.courseId }).then((res) => {
         this.chapters = _.sortBy(res, 'sort')
         _.forEach(this.chapters, (chapter) => {
-          if (chapter.type == '5') {
+          if (this.isChapterVideo(chapter)) {
             // chapter.content =
             //   'https://oa-file-dev.bestgrand.com.cn/b8a6256a5a31464fa28a3ae46992e850.mp4'
             this.setDuration(chapter).catch()
           }
-          if (chapter.type == '2') {
-            // chapter.content = 'http://ieee802.org:80/secmail/docIZSEwEqHFr.doc'
-            // chapter.content =
-            //   'https://oa-file-dev.bestgrand.com.cn/7f6c5943b4d14733b61f7efaa7b4ec30.txt'
-          }
+          // if (chapter.type == '2') {
+          // chapter.content = 'http://ieee802.org:80/secmail/docIZSEwEqHFr.doc'
+          // chapter.content =
+          //   'https://oa-file-dev.bestgrand.com.cn/7f6c5943b4d14733b61f7efaa7b4ec30.txt'
+          // }
           if (chapter.contentId == this.chapterId) {
             this.currentChapter = chapter
           }

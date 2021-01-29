@@ -52,10 +52,10 @@
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
-        <!-- 课程标题 -->
-        <template slot="processName" slot-scope="{ row }">
+        <!--  -->
+        <template slot="apprNo" slot-scope="{ row }">
           <el-button type="text" @click="toDetails(row)">
-            {{ row.processName || '课程标题' }}
+            {{ row.apprNo }}
           </el-button>
         </template>
         <!-- 状态 -->
@@ -82,12 +82,12 @@ import Reviewed from './components/Reviewed'
 let TABLE_COLUMNS = [
   {
     label: '审批单号',
-    prop: 'apprNo'
+    prop: 'apprNo',
+    slot: true
   },
   {
     label: '课程标题',
-    prop: 'processName',
-    slot: true
+    prop: 'processName'
   },
   {
     label: '申请人',
@@ -162,10 +162,10 @@ export default {
   },
 
   watch: {
-    searchInput: function () {
+    searchInput: function() {
       this.setPitch(this.pitch)
     },
-    statusValue: function () {
+    statusValue: function() {
       this.setPitch(this.pitch)
     }
   },

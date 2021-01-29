@@ -10,10 +10,10 @@
     @current-page-change="handleCurrentPageChange"
     @page-size-change="handlePageSizeChange"
   >
-    <!-- 课程标题 -->
-    <template slot="processName" slot-scope="{ row }">
+    <!--  -->
+    <template slot="apprNo" slot-scope="{ row }">
       <el-button type="text" @click="toDetails(row)">
-        {{ row.processName || '课程标题' }}
+        {{ row.apprNo }}
       </el-button>
     </template>
 
@@ -42,12 +42,12 @@ import { STATUS_TO_TEXT } from '@/const/approve'
 let TABLE_COLUMNS = [
   {
     label: '审批单号',
-    prop: 'apprNo'
+    prop: 'apprNo',
+    slot: true
   },
   {
     label: '课程标题',
-    prop: 'processName',
-    slot: true
+    prop: 'processName'
   },
   {
     label: '审核状态',
@@ -149,6 +149,8 @@ export default {
     // 获取数据
     async setPitch() {
       let res = await fulllist({ ...this.page, categoryId: '1', status: 'Approve' })
+      window.console.log(res)
+
       this.tableData = res.data
       this.page.total = res.totalNum
 
