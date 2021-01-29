@@ -124,7 +124,7 @@ const COURSE_TEMPLATE = {
   studyFrequency: 0, //允许学习次数
   studyExam: [],
   beforeCourse: [], // 前置课程
-  timeList: [{ list: [] }, { list: [] }, { list: [] }]
+  timeList: [{ list: ['', ''] }, { list: ['', ''] }, { list: ['', ''] }]
 }
 export default {
   name: 'EditCourse',

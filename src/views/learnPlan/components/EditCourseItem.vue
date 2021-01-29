@@ -33,17 +33,17 @@
         ></el-input-number>
       </template>
       <template slot="timeList">
-        <el-date-picker
+        <el-time-picker
           v-for="(time, index) in course.timeList"
           :key="index"
           v-model="time.list"
-          type="datetimerange"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          is-range
           range-separator="至"
           start-placeholder="开始时间"
           end-placeholder="结束时间"
-        >
-        </el-date-picker>
+          placeholder="选择时间范围"
+          value-format="HH:mm:ss"
+        />
       </template>
     </common-form>
     <el-tabs value="first">
@@ -93,6 +93,7 @@
 
 <script>
 import moment from 'moment'
+import { validateTimeList } from './config'
 export default {
   name: 'EditCourseItem',
   props: {
@@ -152,7 +153,7 @@ export default {
           prop: 'timeList',
           label: '允许时间段',
           itemType: 'slot',
-          rules: [{ validator: this.validateTimeList }],
+          rules: [{ validator: validateTimeList }],
           required: false
         }
       ]
@@ -167,78 +168,6 @@ export default {
       } else {
         callback()
       }
-    },
-    // 校验允许时间段
-    validateTimeList(rule, value, callback) {
-      const courseTimeRange = this.course.timeRange
-      // 如果课程时间范围没填写直接跳过校验
-      if (_.size(courseTimeRange) !== 2) {
-        callback()
-        return
-      }
-      // 取出所有的时间段
-      const rangeList = []
-      _.forEach(value, (item) => {
-        if (_.size(item.list) == 2) {
-          rangeList.push(item.list)
-        }
-      })
-      // 判断是否超出课程开课时间范围
-      let overflow = _.some(rangeList, (range) => {
-        if (
-          moment(range[0]).isBefore(courseTimeRange[0]) ||
-          moment(range[1]).isAfter(courseTimeRange[1])
-        ) {
-          return true
-        } else {
-          return false
-        }
-      })
-      if (overflow) {
-        callback(new Error('允许时间段不能超出课程的开课时间范围'))
-        return
-      }
-      let strs = _.map(rangeList, (item) => JSON.stringify(item))
-      if (new Set(strs).size !== rangeList.length) {
-        callback(new Error('允许时间段不能有完全相同的'))
-        return
-      }
-      // 判断时间范围之间有没有交叉
-      // 两两比较 判断前者的开始和结束时间有没有落在后者的时间范围之内
-      if (rangeList.length == 2) {
-        let crossed = _.some(rangeList[0], (time) => {
-          if (moment(time).isAfter(rangeList[1][0]) && moment(time).isBefore(rangeList[1][1])) {
-            return true
-          } else {
-            return false
-          }
-        })
-        if (crossed) {
-          callback(new Error('允许时间段时间不能有重叠'))
-          return
-        }
-      }
-      // 两两比较 判断前者的开始和结束时间有没有落在后者的时间范围之内
-      if (rangeList.length === 3) {
-        let crossed = _.some(rangeList, (range, index) =>
-          _.some(range, (time) => {
-            let next = index == 2 ? 0 : index + 1
-            if (
-              moment(time).isAfter(rangeList[next][0]) &&
-              moment(time).isBefore(rangeList[next][1])
-            ) {
-              return true
-            } else {
-              return false
-            }
-          })
-        )
-        if (crossed) {
-          callback(new Error('允许时间段时间不能有重叠'))
-          return
-        }
-      }
-      callback()
     },
     handleExamEdit(course, exam) {
       this.$emit('exam-edit', course, exam)
