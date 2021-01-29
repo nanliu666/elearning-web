@@ -194,13 +194,13 @@ let TABLE_COLUMNS = [
     minWidth: 120
   },
   {
-    label: '考试类型',
+    label: '考试方式',
     slot: true,
     prop: 'examPattern',
     minWidth: 120
   },
   {
-    label: '考试方式',
+    label: '考试类型',
     slot: true,
     prop: 'examType',
     minWidth: 120
@@ -381,7 +381,7 @@ export default {
       const type = _.filter(TYPE_STATUS, (item) => {
         return item.value === data
       })
-      return type ? '' : type[0].label
+      return _.get(type, '[0].label', null)
     },
     // // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
