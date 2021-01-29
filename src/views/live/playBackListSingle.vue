@@ -26,25 +26,28 @@
           <span>直播时间：{{ item.startTime }}</span>
         </div>
         <div class="operation">
-          <span v-if="item.lecturerDeleted===1" @click.stop="repRecover(item)">恢复</span>
-          <span @click.stop="repRelease(item)">{{item.shelfStatus===0?'下架':'发布'}}</span>
+          <span
+            v-if="item.lecturerDeleted === 1"
+            @click.stop="repRecover(item)"
+          >恢复</span>
+          <span @click.stop="repRelease(item)">{{ item.shelfStatus === 0 ? '下架' : '发布' }}</span>
           <span @click.stop="repDownload(item.localUrl)">下载</span>
           <span @click.stop="repDelete(item)">删除</span>
         </div>
       </div>
-    <div class="pagePbls">
-      <el-pagination
-        background
-        :page-sizes="PBLPageObj.pageSizes"
-        :page-size="5"
-        :current-page="PBLPageObj.currentPage"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="PBLPageObj.totalNum"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <div class="pagePbls">
+        <el-pagination
+          background
+          :page-sizes="PBLPageObj.pageSizes"
+          :page-size="5"
+          :current-page="PBLPageObj.currentPage"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="PBLPageObj.totalNum"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
     </div>
-  </div>
   </div>
 </template>
 <script>
@@ -71,11 +74,11 @@ export default {
     this.initPlayBackData()
   },
   methods: {
-    goReplay(){
+    goReplay() {
       this.$router.push({
-        path:'/live/replay',
-        query:{
-          id:this.$route.query.liveId
+        path: '/live/replay',
+        query: {
+          id: this.$route.query.liveId
         }
       })
     },
@@ -92,7 +95,7 @@ export default {
     },
     repRelease(item) {
       // 发布 下架
-      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus===0?1:0 }
+      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
       setReplayStatus(sendPar).then(() => {
         this.initPlayBackData()
         this.$message({
@@ -102,25 +105,43 @@ export default {
       })
     },
     repDownload(url) {
-      if(!url) return
+      if (!url) return
       // 下载
-      let x = new XMLHttpRequest();
-      x.open("GET", url, true);
-      x.responseType = "blob";
-      x.onprogress = function(event) {
-      };
-      x.onload = function(e) {
-        let url = window.URL.createObjectURL(x.response);
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = ""; //可以填写默认的下载名称
-        a.click();
-      };
-      x.send();
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
     },
     repDelete(item) {
       // 删除
-      let sendPar = { videoId: item.id.toString(), isDeleted: 1 }
+      let sendPar = { videoId: item.id.toString(), isDeleted: '1' }
+      this.$confirm('是否删除该视频?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          setReplayStatus(sendPar).then(() => {
+            this.initPlayBackData()
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+          })
+        })
+        .catch(() => {})
+    },
+    repOffShelf(item) {
+      // 下架
+      let sendPar = { videoId: item.id.toString(), shelfStatus: '1' }
       setReplayStatus(sendPar).then(() => {
         this.initPlayBackData()
         this.$message({
