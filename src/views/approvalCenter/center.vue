@@ -207,7 +207,7 @@ export default {
     toDetails(item) {
       this.$router.push({
         path: '/apprProcess/apprDetail',
-        query: { formId: item.formId, apprNo: item.apprNo }
+        query: { apprNo: item.apprNo }
       })
     },
     // 重新申请
