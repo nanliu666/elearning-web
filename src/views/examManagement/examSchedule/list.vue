@@ -390,9 +390,9 @@ export default {
   data() {
     return {
       activeColor: styles.primaryColor,
-      activeIndex: '0',
       tableLoading: false,
       tableData: [],
+      activeIndex: '0',
       page: {
         currentPage: 1,
         size: 10,
@@ -433,6 +433,8 @@ export default {
     }
   },
   activated() {
+    this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
+    this.handleSelect(this.activeIndex)
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
