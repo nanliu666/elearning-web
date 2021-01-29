@@ -147,28 +147,12 @@ export default {
     COURSE_CHAPTER_TYPE_MAP: () => COURSE_CHAPTER_TYPE_MAP,
     ...mapGetters(['userInfo'])
   },
-  watch: {
-    currentChapter(newVal, oldVal) {
-      if (this.isChapterVideo(oldVal) && oldVal.duration) {
-        this.updateVideoProgress(oldVal)
-      } else {
-        oldVal.progress = 100
-      }
-      this.submitLearnRecords()
-    }
-  },
   activated() {
     this.reset()
     this.loadCourseDetail()
     this.loadChapters()
     this.loadNoteList()
     this.setTimer()
-  },
-  beforeRouteLeave(from, to, next) {
-    this.updateVideoProgress(this.currentChapter)
-    this.submitLearnRecords()
-    clearInterval(this.timer)
-    next()
   },
   methods: {
     /**
@@ -275,7 +259,9 @@ export default {
       if (!params.contentRecords) {
         return
       }
-      updateLearnRecord(params).then().catch()
+      updateLearnRecord(params)
+        .then()
+        .catch()
     },
     loadChapters() {
       if (!this.courseId) {

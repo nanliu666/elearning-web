@@ -129,8 +129,8 @@ export default {
     // 去详情
     toDetails(item) {
       this.$router.push({
-        path: '/approvalCenter/details',
-        query: { formId: item.formId, apprNo: item.apprNo }
+        path: '/apprProcess/apprDetail',
+        query: { apprNo: item.apprNo }
       })
     },
     // 重新申请
