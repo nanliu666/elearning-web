@@ -111,7 +111,14 @@
 </template>
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getLiveList, delLive, toggleLiveStatus } from '@/api/live/liveList'
+import { getcategoryTree } from '@/api/live/editLive'
+import {
+  getLiveList,
+  delLive,
+  toggleLiveStatus,
+  getLiveStatus,
+  getCreateUserId
+} from '@/api/live/liveList'
 
 const TABLE_COLUMNS = [
   {
@@ -186,7 +193,7 @@ export default {
         requireOptions: [
           {
             type: 'input',
-            field: 'search',
+            field: 'titleOrNo',
             label: '',
             data: '',
             options: [],
@@ -222,16 +229,16 @@ export default {
             }
           },
           {
-            type: 'input',
+            type: 'select',
             field: 'creatorId',
             label: '创建人',
-            config: { optionLabel: 'name', optionValue: 'userId' },
             data: '',
-            options: []
+            options: [],
+            config: { optionLabel: 'name', optionValue: 'id', placeholder: '请选择' }
           },
           {
             type: 'select',
-            field: 'status',
+            field: 'isUsed',
             label: '状态',
             data: '',
             options: [
@@ -242,12 +249,28 @@ export default {
           }
         ]
       },
-      tableData: []
+      tableData: [],
+      createUserList: [],
+      liveClassification: []
     }
   },
   activated() {
     // 加载数据
     this.loadTableData()
+    // 获取所有直播创建人列表
+    getCreateUserId({
+      source: 'live'
+    }).then((res) => {
+      this.createUserList = res
+      this.searchConfig.popoverOptions[1].options = res
+    })
+    //   获取直播分类
+    getcategoryTree({
+      source: 'live'
+    }).then((res) => {
+      this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      console.log(res)
+    })
   },
   methods: {
     /**
@@ -285,10 +308,10 @@ export default {
       try {
         var params = {}
         if (searchParams) {
-          params = { titleOrNo: searchParams.search }
-          params = { categoryId: searchParams.categoryId }
-          params = { isUsed: searchParams.status }
-          // params = {isUsed: searchParams.status}
+          params.titleOrNo = searchParams.titleOrNo
+          params.categoryId = searchParams.categoryId
+          params.isUsed = searchParams.isUsed
+          params.creatorId = searchParams.creatorId
         }
         this.tableLoading = true
         getLiveList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then((res) => {
@@ -303,22 +326,98 @@ export default {
       }
     },
     handleEdit(row) {
-      this.$router.push({ path: '/live/editLive', query: { id: row.liveId } })
-    },
-    handleLock(row) {
-      var isUsed = ''
-      row.isUsed == 1 ? (isUsed = 0) : (isUsed = 1)
-      toggleLiveStatus({
-        liveId: row.liveId,
-        isUsed: isUsed
-      }).then(() => {
-        row.isUsed == 1 ? (row.isUsed = 0) : (row.isUsed = 1)
+      getLiveStatus({
+        liveId: row.liveId
+      }).then((res) => {
+        if (res) {
+          this.$alert('该直播正在进行，请直播结束后再尝试。', '提醒', {
+            confirmButtonText: '确定',
+            type: 'warning'
+          })
+        } else {
+          this.$router.push({ path: '/live/editLive', query: { id: row.liveId } })
+        }
       })
     },
+    // 直播禁用/启用控制方法，根据不同的状态进行弹窗提示
+    handleLock(row) {
+      if (row.isUsed == 1) {
+        this.$confirm('禁用后，该直播对讲师和学员将不可见，您确定要禁用该直播吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          getLiveStatus({
+            liveId: row.liveId
+          }).then((res) => {
+            // 如果有在进行的直播进行禁用提示
+            if (res) {
+              this.$confirm(
+                '该直播正在进行，禁用后，该直播对讲师和学员将不可见，您确定要禁用该直播吗？',
+                '提醒',
+                {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning'
+                }
+              ).then(() => {
+                toggleLiveStatus({
+                  isUsed: 1,
+                  liveId: row.liveId
+                }).then(() => {
+                  row.isUsed = 0
+                })
+              })
+            } else {
+              toggleLiveStatus({
+                isUsed: 0,
+                liveId: row.liveId
+              }).then(() => {
+                row.isUsed = 0
+              })
+            }
+          })
+        })
+      } else {
+        this.$confirm('启用后，该直播对讲师和学员将可见，您确定要启用该直播吗？', '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          toggleLiveStatus({
+            isUsed: 1,
+            liveId: row.liveId
+          }).then(() => {
+            row.isUsed = 1
+          })
+        })
+      }
+    },
     handleDelete(arr, row) {
-      delLive({ liveId: row.liveId }).then(() => {
-        var index = arr.findIndex((item) => item.liveId == row.liveId)
-        arr.splice(index, 1)
+      getLiveStatus({
+        liveId: row.liveId
+      }).then((res) => {
+        if (res) {
+          this.$alert('该直播正在进行，请直播结束后再尝试。', '提醒', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+        } else {
+          this.$confirm(
+            '删除后，直播相关的信息，直播回放将会删除，您确认要删除该直播吗？',
+            '提醒',
+            {
+              confirmButtonText: '确定',
+              type: 'warning'
+            }
+          ).then(() => {
+            delLive({ liveId: row.liveId }).then(() => {
+              var index = arr.findIndex((item) => item.liveId == row.liveId)
+              arr.splice(index, 1)
+            })
+          })
+        }
       })
     },
     toEstablishCourse() {

@@ -1,6 +1,7 @@
-// 先放着，过两天删了
-
-import { get, post } from '@/router/axios'
+import {
+  get,
+  post
+} from '@/router/axios'
 
 /**
  * 根据课程分类查询下一级分类

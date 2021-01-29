@@ -333,7 +333,7 @@ export default {
     },
     {
       menuId: '15674547683454620582323',
-      menuName: '试卷详情',
+      menuName: '逐人评卷',
       menuType: 'Menu',
       isOwn: 1,
       isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
@@ -347,7 +347,7 @@ export default {
     },
     {
       menuId: '15674547683454620582323',
-      menuName: '试卷详情',
+      menuName: '查看答卷',
       menuType: 'Menu',
       isOwn: 1,
       isEnabled: 1, // 是否显示在菜单栏 0：否，1：是

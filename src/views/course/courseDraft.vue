@@ -14,10 +14,7 @@
     </page-header>
 
     <!-- Dialog无数据 -->
-    <div
-      v-if="!tableData"
-      id="isdialog_show"
-    >
+    <div v-if="!tableData" id="isdialog_show">
       <div>如何创建课程：</div>
       <div>1.先在 <span @click="toCatalog">【课程中心-分类管理】</span> 完善展示的分类配置；</div>
       <div>
@@ -29,14 +26,8 @@
     <div class="course_in">
       <!-- 导航 -->
       <div class="select_bar">
-        <span
-          :class="{ select: status == 1 }"
-          @click="showSelect(1)"
-        >已发布</span>
-        <span
-          :class="{ select: status == 2 }"
-          @click="showSelect(2)"
-        >草稿</span>
+        <span :class="{ select: status == 1 }" @click="showSelect(1)">已发布</span>
+        <span :class="{ select: status == 2 }" @click="showSelect(2)">草稿</span>
       </div>
       <!-- 内容 -->
       <div class="draft">
@@ -78,15 +69,13 @@
                     </el-button>
                   </el-tooltip>
                   <span
+                    v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
                     style="cursor:pointer;"
                     @click="refreshTableData"
-                  >刷新</span>
-                  <el-popover
-                    placement="bottom"
-                    width="40"
-                    trigger="click"
+                    >刷新</span
                   >
+                  <el-popover placement="bottom" width="40" trigger="click">
                     <el-tooltip
                       slot="reference"
                       class="operations__btns--tooltip"
@@ -138,54 +127,32 @@
               </el-button>
             </template>
             <!-- //序号 -->
-            <template
-              slot="index"
-              slot-scope="{ row }"
-            >
+            <template slot="index" slot-scope="{ row }">
               <span>{{ tableData.indexOf(row) + 1 }}</span>
             </template>
 
             <!-- 课程名称 -->
-            <template
-              slot="courseName"
-              slot-scope="{ row }"
-            >
-              <el-button
-                p="@/course/courseDraft"
-                type="text"
-                @click="todetail(row.id)"
-              >
+            <template slot="courseName" slot-scope="{ row }">
+              <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
                 {{ row.courseName }}
               </el-button>
             </template>
             <!-- 课程类型 -->
-            <template
-              slot="type"
-              slot-scope="{ row }"
-            >
+            <template slot="type" slot-scope="{ row }">
               <span v-if="row.type == 1">在线课程</span>
               <span v-if="row.type == 2">面授课程</span>
               <span v-if="row.type == 3">直播课程</span>
             </template>
             <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
-            <template
-              slot="passCondition"
-              slot-scope="{ row }"
-            >
-              <span
-                v-for="(item, index) in row.passCondition.split(',')"
-                :key="index"
-              >
+            <template slot="passCondition" slot-scope="{ row }">
+              <span v-for="(item, index) in row.passCondition.split(',')" :key="index">
                 <span v-if="item == 'a'">教师评定,</span>
                 <span v-if="item == 'b'">考试通过,</span>
                 <span v-if="item == 'c'">达到课程学时</span>
               </span>
             </template>
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
-            <template
-              slot="electiveType"
-              slot-scope="{ row }"
-            >
+            <template slot="electiveType" slot-scope="{ row }">
               <span v-if="row.electiveType === 1">开放选修</span>
               <span v-if="row.electiveType === 2">通过审批</span>
               <span v-if="row.electiveType === 3">禁止选修</span>
@@ -198,27 +165,18 @@
               }}</span>
             </template> -->
             <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
-            <template
-              slot="isRecommend"
-              slot-scope="{ row }"
-            >
+            <template slot="isRecommend" slot-scope="{ row }">
               <span v-if="row.isRecommend == 0">否</span>
               <span v-if="row.isRecommend == 1">是</span>
             </template>
             <!-- // isPutaway	是否上架 (0：下架；1：上架) -->
-            <template
-              slot="isPutaway"
-              slot-scope="{ row }"
-            >
+            <template slot="isPutaway" slot-scope="{ row }">
               <span v-if="row.isPutaway === 0">下架</span>
               <span v-if="row.isPutaway === 1">上架</span>
             </template>
 
             <!-- isTop: 0, //是否置顶（0：否；1：是） -->
-            <template
-              slot="handler"
-              slot-scope="scope"
-            >
+            <template slot="handler" slot-scope="scope">
               <el-button
                 v-if="scope.row.isTop == 0"
                 v-p="TOP_COURSE"
@@ -261,29 +219,17 @@
                 style="color: #a0a8ae"
                 @command="handleCommand($event, scope.row)"
               >
-                <span
-                  class="el-dropdown-link"
-                  style="margin-left: 10px"
-                >
+                <span class="el-dropdown-link" style="margin-left: 10px">
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/edit'"
-                    command="edit"
-                  >
+                  <el-dropdown-item v-p="'/course/courseDraft/edit'" command="edit">
                     编辑
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/delete'"
-                    command="del"
-                  >
+                  <el-dropdown-item v-p="'/course/courseDraft/delete'" command="del">
                     删除
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/move'"
-                    command="move"
-                  >
+                  <el-dropdown-item v-p="'/course/courseDraft/move'" command="move">
                     移动
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -294,32 +240,14 @@
       </div>
     </div>
 
-    <el-dialog
-      title="移动"
-      :visible.sync="dialogFormVisible"
-      append-to-body
-      width="500px"
-    >
-      <div style="margin-bottom: 15px">
-        所在分类：{{ moveKnowledgeRow.catalogName }}
-      </div>
-      <common-form
-        ref="form"
-        :columns="formColumns"
-        :model="formData"
-      >
-      </common-form>
-      <div
-        slot="footer"
-        class="dialog-footer"
-      >
+    <el-dialog title="移动" :visible.sync="dialogFormVisible" append-to-body width="500px">
+      <div style="margin-bottom: 15px">所在分类：{{ moveKnowledgeRow.catalogName }}</div>
+      <common-form ref="form" :columns="formColumns" :model="formData"> </common-form>
+      <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
           取消
         </el-button>
-        <el-button
-          type="primary"
-          @click="isMoveCourse"
-        >
+        <el-button type="primary" @click="isMoveCourse">
           保存
         </el-button>
       </div>

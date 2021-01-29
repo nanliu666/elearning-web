@@ -5,105 +5,68 @@
       <span class="tip">直播回放回传到平台需要一段时间，请耐心等待。</span>
     </div>
     <div>
-      <div class="PBLS">
+      <div
+        v-for="item in playBackListData"
+        :key="item.id"
+        class="PBLS"
+        @click="goReplay"
+      >
         <div class="img">
           <img
-            src="/img/autol.png"
+            :src="item.coverImageUrl ? item.coverImageUrl : '/img/autol.png'"
             alt=""
             width="220"
             height="124"
           />
         </div>
         <div class="text">
-          <h3>直播回放：20200315 设计能力专项提升</h3>
-          <span>直播分类：研发能力中心 > UCD中心</span>
-          <span>讲师：小明</span>
-          <span>直播时间：2020/03/15 08:00:00</span>
+          <h3>直播回放：{{ item.channelName }}</h3>
+          <span>直播分类：{{ item.fullName }}</span>
+          <span>讲师：{{ item.lecturerName }}</span>
+          <span>直播时间：{{ item.startTime }}</span>
         </div>
         <div class="operation">
-          <span @click="recover">恢复</span>
-          <span>发布</span>
-          <span>下载</span>
-          <span>删除</span>
-          <span>下架</span>
+          <span
+            v-if="item.lecturerDeleted === 1"
+            @click.stop="repRecover(item)"
+          >恢复</span>
+          <span @click.stop="repRelease(item)">{{ item.shelfStatus === 0 ? '下架' : '发布' }}</span>
+          <span @click.stop="repDownload(item.localUrl)">下载</span>
+          <span @click.stop="repDelete(item)">删除</span>
         </div>
       </div>
-      <div class="PBLS">
-        <div class="img">
-          <img
-            src="/img/autol.png"
-            alt=""
-            width="220"
-            height="124"
-          />
-        </div>
-        <div class="text">
-          <h3>直播回放：20200315 设计能力专项提升</h3>
-          <span>直播分类：研发能力中心 > UCD中心</span>
-          <span>讲师：小明</span>
-          <span>直播时间：2020/03/15 08:00:00</span>
-        </div>
-        <div class="operation">
-          <span>恢复</span>
-          <span>发布</span>
-          <span>下载</span>
-          <span>删除</span>
-          <span>下架</span>
-        </div>
+      <div class="pagePbls">
+        <el-pagination
+          background
+          :page-sizes="PBLPageObj.pageSizes"
+          :page-size="5"
+          :current-page="PBLPageObj.currentPage"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="PBLPageObj.totalNum"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
       </div>
-      <div class="PBLS">
-        <div class="img">
-          <img
-            src="/img/autol.png"
-            alt=""
-            width="220"
-            height="124"
-          />
-        </div>
-        <div class="text">
-          <h3>直播回放：20200315 设计能力专项提升</h3>
-          <span>直播分类：研发能力中心 > UCD中心</span>
-          <span>讲师：小明</span>
-          <span>直播时间：2020/03/15 08:00:00</span>
-        </div>
-        <div class="operation">
-          <span>下载</span>
-          <span>删除</span>
-          <span>下架</span>
-        </div>
-      </div>
-    </div>
-    <div class="pagePbls">
-      <el-pagination
-        background
-        :page-sizes="pageObj.pageSizes"
-        :page-size="5"
-        :current-page="pageObj.currentPage"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pageObj.totalNum"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
     </div>
   </div>
 </template>
 <script>
-import { getCategoryTree } from '@/api/live/editLive'
+import { liveReplayList, setReplayStatus } from '@/api/live/liveReplay'
 export default {
   name: 'PlayBackListSingle',
   data() {
     return {
       playBackListData: [],
-      pageObj: {
+      PBLParmas: {
+        sourceType: '1',
+        livePlanId: this.$route.query.liveId,
+        pageNo: 1,
+        pageSize: 5
+      },
+      PBLPageObj: {
         pageSizes: [5, 10],
         currentPage: 0,
-        totalNum: 0,
-        parmas: {
-          sourceType: '1',
-          livePlanId: this.$router.query.liveId,
-          pageNo: 1,
-          pageSize: 5
-        }
+        totalNum: 0
       }
     }
   },
@@ -111,31 +74,99 @@ export default {
     this.initPlayBackData()
   },
   methods: {
-    recover() {
-      // 恢复
+    goReplay() {
+      this.$router.push({
+        path: '/live/replay',
+        query: {
+          id: this.$route.query.liveId
+        }
+      })
     },
-
+    repRecover(item) {
+      // 恢复
+      let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
+      setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+      })
+    },
+    repRelease(item) {
+      // 发布 下架
+      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
+      setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+      })
+    },
+    repDownload(url) {
+      if (!url) return
+      // 下载
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
+    },
+    repDelete(item) {
+      // 删除
+      let sendPar = { videoId: item.id.toString(), isDeleted: '1' }
+      this.$confirm('是否删除该视频?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          setReplayStatus(sendPar).then(() => {
+            this.initPlayBackData()
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+          })
+        })
+        .catch(() => {})
+    },
+    repOffShelf(item) {
+      // 下架
+      let sendPar = { videoId: item.id.toString(), shelfStatus: '1' }
+      setReplayStatus(sendPar).then(() => {
+        this.initPlayBackData()
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+      })
+    },
     initPlayBackData() {
       // 初始化直播回放列表
-      getCategoryTree(this.pageObj.parmas).then((res) => {
-        let { data, totalNum, totalPage } = res
+      liveReplayList(this.PBLParmas).then((res) => {
+        let { data, totalNum, totalPage } = res.result
         this.playBackListData = data
-        this.pageObj.totalNum = totalNum
-        this.pageObj.totalPage = totalPage
+        this.PBLPageObj.totalNum = totalNum
+        this.PBLPageObj.totalPage = totalPage
       })
-      // getNoticeCenterList(this.parmas).then((res) => {
-      //   let { data, totalNum, totalPage } = res
-      //   this.noticeList = data
-      //   this.totalNum = totalNum
-      //   this.totalPage = totalPage
-      // })
     },
     handleSizeChange(val) {
-      this.pageObj.parmas.pageSize = val
+      // 改变分页回调
+      this.PBLParmas.pageSize = val
       this.initPlayBackData()
     },
     handleCurrentChange(val) {
-      this.pageObj.parmas.pageNo = val
+      // 改变每页显示条数回调
+      this.PBLParmas.pageNo = val
       this.initPlayBackData()
     }
   }

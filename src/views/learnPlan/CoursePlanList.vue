@@ -406,7 +406,7 @@ export default {
 
       published: {
         searchPopoverConfig: SEARCH_POPOVER_CONFIG,
-        tableColumns: TABLE_COLUMNS,
+        tableColumns: _.cloneDeep(TABLE_COLUMNS),
         tableConfig: TABLE_CONFIG,
         tableData: [],
         tableLoading: false,
@@ -432,13 +432,13 @@ export default {
             {
               config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
               data: '',
-              field: 'name',
+              field: 'coursePlanName',
               label: '',
               type: 'input'
             }
           ]
         },
-        tableColumns: TABLE_COLUMNS,
+        tableColumns: _.cloneDeep(TABLE_COLUMNS),
         tableConfig: TABLE_CONFIG,
         tableData: [],
         tableLoading: false,
@@ -466,7 +466,7 @@ export default {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p([
+        this.published.tableConfig.showHandler = this.$p([
           EDIT_REQUIRED,
           DELETE_REQUIRED,
           VIEW_REQUIRED,
@@ -553,12 +553,12 @@ export default {
       }
     },
     deletePlanFn(arr) {
+      let isDraft = _.head(arr).type === 1
       // 删除学习计划
       let ids = _(arr)
         .filter((item) => item.status != 2)
-        .map(arr, 'id')
+        .map('id')
         .join(',')
-        .value()
       if (!ids) {
         return
       }
@@ -570,8 +570,13 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
-          this.$refs.table.clearSelection()
-          this.loadPublishedData()
+          if (isDraft) {
+            this.$refs.draftTable.clearSelection()
+            this.loadDraftData()
+          } else {
+            this.$refs.table.clearSelection()
+            this.loadPublishedData()
+          }
         })
         .catch()
     },
@@ -603,7 +608,7 @@ export default {
     handleDraftSearch(searchParams) {
       this.draft.queryInfo = _.assign(this.draft.queryInfo, searchParams)
       this.draft.page.currentPage = 1
-      this.loadPublishedData()
+      this.loadDraftData()
     },
     // 跳去详情
     jumpDetail({ id }) {

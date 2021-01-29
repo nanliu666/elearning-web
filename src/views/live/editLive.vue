@@ -9,21 +9,21 @@
           class="schedule1"
           @click="headIndex = 1"
         >
-          <i class="el-icon-info"></i> 直播信息
+          <i class="el-icon-video-camera"></i> 直播信息
         </div>
         <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
           @click="headIndex = 2"
         >
-          <i class="el-icon-s-marketing"></i> 关联讲师及课程
+          <i class="el-icon-document-copy"></i> 关联讲师及课程
         </div>
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
           @click="headIndex = 3"
         >
-          <i class="el-icon-s-tools"></i> 观看条件
+          <i class="el-icon-document-remove"></i> 观看条件
         </div>
       </div>
       <div class="forwardBackward">
@@ -293,6 +293,8 @@
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   value-format="yyyy-MM-dd hh:mm:ss"
+                  :clearable="false"
+                  style="width: 20vw;"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -449,7 +451,7 @@
             <el-col :span="24">
               <el-form-item
                 label="直播介绍"
-                prop="name"
+                prop="introduction"
                 required
                 class="lvie_details"
               >
@@ -736,7 +738,7 @@
                 <el-button
                   type="text"
                   style="float:right;"
-                  @click="dialog_add_student = true"
+                  @click="showDialog_add_student()"
                 >
                   添加学员
                 </el-button>
@@ -872,6 +874,7 @@
                   suffix-icon="el-icon-search"
                 ></el-input>
                 <el-tree
+                  ref="organizationUserTree"
                   :data="organizationUser"
                   show-checkbox
                   :expand-on-click-node="false"
@@ -917,7 +920,7 @@
             <p class="selectNumber">
               已选：{{ dialogSelectStudent.length }}人
             </p>
-            <div>
+            <div class="select_student">
               <p
                 v-for="(item, index) in dialogSelectStudent"
                 :key="index"
@@ -925,7 +928,7 @@
                 <el-tag
                   closable
                   type="info"
-                  @close="delete_dialog_selectStudent(dialogSelectStudent, index)"
+                  @close="delete_dialog_selectStudent(dialogSelectStudent, index, item.id)"
                 >
                   {{ item.name }}({{ item.phone }})
                 </el-tag>
@@ -960,13 +963,16 @@
 <script>
 import {
   postAddLive,
+  postEditLive,
+  // getStudentList,
   getcategoryTree,
   getQueryTeacher,
   getQueryAssistant,
   getQueryCurriculum,
   getOrganizationUser,
   getOtherUser,
-  getUsersByOrgId
+  getUsersByOrgId,
+  getLiveDetails
 } from '@/api/live/editLive'
 
 export default {
@@ -997,7 +1003,7 @@ export default {
         label: 'name',
         children: 'children'
       },
-      toggle_scene: 1, // 直播场景切换
+      toggle_scene: 'ppt', // 直播场景切换
       select_liveStatus_value: 1, //当前选择的状态
       select_liveStatus: [
         // 直播状态
@@ -1047,9 +1053,9 @@ export default {
           end_time: ''
         }
       ],
-      select_mode_time_value: '', // 选择的直播日期
+      select_mode_time_value: [], // 选择的直播日期
       select_mode_time: [], // 直播日期
-      loopTime: '', // 循环日期
+      loopTime: [], // 循环日期
       select_loopCycle_value: '',
       select_loopCycle: [
         // 循环周期
@@ -1115,8 +1121,9 @@ export default {
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
-    // if (this.$route.query.id) {
-    // }
+    if (this.$route.query.id) {
+      this.setLiveDetails(this.$route.query.id)
+    }
     //   获取直播分类
     getcategoryTree({
       source: 'live'
@@ -1167,7 +1174,7 @@ export default {
     },
     // 切换循环周期
     toggle_loopCycle(val) {
-      this.select_mode_time_value = ''
+      this.select_mode_time_value = []
       switch (val) {
         case 'day':
           this.select_mode_time = [
@@ -1304,7 +1311,9 @@ export default {
       }
       this.dialog_relatedCourses_form = true
     },
-
+    showDialog_add_student() {
+      this.dialog_add_student = true
+    },
     // 获取讲师表格中每一行所选的嘉宾或教师组合为一个select
     get_table_teacherSet_teacher(table) {
       var arr = []
@@ -1420,6 +1429,7 @@ export default {
 
     delete_dialog_selectStudent(arr, index) {
       arr.splice(index, 1)
+      // this.$refs.organizationUserTree.getCheckedKeys()
     },
     delete_table_relatedStudents(arr, index) {
       arr.splice(index, 1)
@@ -1469,11 +1479,8 @@ export default {
       }
     },
     // 将选中的组织或学员添加到已选中列表
-    select_organizationUser(data) {
-      var index = this.dialogSelectStudent.findIndex((item) => item.id == data.userId)
-      if (index != -1) {
-        this.dialogSelectStudent.splice(index, 1)
-      } else {
+    select_organizationUser(data, node) {
+      if (node.checkedKeys.indexOf(data.id) != -1) {
         if (data.type == 'user') {
           this.dialogSelectStudent.push({
             name: data.name,
@@ -1483,13 +1490,28 @@ export default {
           })
         } else {
           getUsersByOrgId({ orgId: data.id }).then((res) => {
-            res.forEach((item) => {
-              this.dialogSelectStudent.push({
-                name: item.name,
-                phone: item.phonenum,
-                userCode: item.workNo,
-                id: item.id
-              })
+            res.forEach((resitem) => {
+              var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)
+              if (index == -1) {
+                this.dialogSelectStudent.push({
+                  name: resitem.name,
+                  phone: resitem.phonenum,
+                  userCode: resitem.workNo,
+                  id: resitem.id
+                })
+              }
+            })
+          })
+        }
+      } else {
+        if (data.type == 'user') {
+          var index = this.dialogSelectStudent.findIndex((item) => item.id == data.userId)
+          this.dialogSelectStudent.splice(index, 1)
+        } else {
+          getUsersByOrgId({ orgId: data.id }).then((res) => {
+            res.forEach((resitem) => {
+              var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)
+              this.dialogSelectStudent.splice(index, 1)
             })
           })
         }
@@ -1498,8 +1520,8 @@ export default {
     // 在所属分类中点击树状菜单，将值赋值到option
     liveClassification_nodeClick(data) {
       this.liveClassification_option.label = data.name
-      this.liveClassification_option.value = data.id
-      this.liveClassification_value = data.id
+      this.liveClassification_option.value = data.idStr
+      this.liveClassification_value = data.idStr
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
@@ -1510,9 +1532,10 @@ export default {
         channelName: this.basicForm.title, // 直播标题
         linkMicLimit: this.select_linkNumber_value, //  最大连麦数量
         isUsed: this.select_liveStatus_value, // 直播状态
-        introduction: _.escape(this.ruleForm.introduction), // 直播介绍
+        remark: _.escape(this.ruleForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
-        lecturerId: this.table_teacherSet.nameList_value //  主讲师设置
+        lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
+        coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
       // 提交关联课程数据
@@ -1522,36 +1545,36 @@ export default {
           data.courses.push(item.courseId)
         })
       }
-      // 如果为多次或循环直播添加其他字段
-      switch (data.batchDeclare) {
-        case 'single':
-          data.planTime = []
-          data.planTime.push(this.start_time + '~' + this.end_time)
-          break
-        case 'plural':
-          data.planTime = []
-          this.table_liveTime.forEach((item) => {
-            data.planTime.push(item.start_time + '~' + item.end_time)
-          })
-          break
-        case 'cycle':
-          var cycleTimeArr = []
-          this.select_mode_time_value.forEach((item) => {
-            cycleTimeArr.push(item)
-          })
-
-          data.cycleInfo = {
-            cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
-            cycleMode: this.select_loopCycle_value,
-            cycleTime: cycleTimeArr.toString()
+      // 直播方式，如果为多次或循环直播添加其他字段
+      if (data.batchDeclare == 'cycle') {
+        data.cycleInfo = {
+          cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
+          cycleMode: this.select_loopCycle_value,
+          cycleTime: this.select_mode_time_value.toString()
+        }
+      }
+      if (data.batchDeclare == 'single') {
+        data.liveBatch = []
+        data.liveBatch.push({
+          startTime: this.start_time,
+          endTime: this.end_time
+        })
+      } else {
+        data.liveBatch = []
+        this.table_liveTime.forEach((item) => {
+          if (item.id) {
+            data.liveBatch.push({
+              id: item.id,
+              startTime: item.start_time,
+              endTime: item.end_time
+            })
+          } else {
+            data.liveBatch.push({
+              startTime: item.start_time,
+              endTime: item.end_time
+            })
           }
-
-          data.planTime = []
-          this.table_liveTime.forEach((item) => {
-            data.planTime.push(item.start_time + '~' + item.end_time)
-          })
-
-          break
+        })
       }
 
       // 观众授权方式。直接授权:direct，验证码授权:code, 默认为空表示所有人可见
@@ -1577,13 +1600,112 @@ export default {
             //当authType=code时，需要此参数，其他不需要
             welcomeTitle: this.formLiveTypeForm.title,
             captcha: this.formLiveTypeForm.code,
-            notice: this.formLiveTypeForm.tips
+            notice: this.formLiveTypeForm.tips,
+            QRCodeUrl: this.formLiveTypeForm.imgUrl[this.formLiveTypeForm.imgUrl.length - 1].url
           }
           break
       }
 
-      postAddLive(data).then(() => {
-        this.$router.push({ path: '/live/liveList' })
+      if (this.$route.query.id) {
+        data.liveId = this.$route.query.id
+        postEditLive(data).then(() => {
+          this.$router.push({ path: '/live/liveList' })
+        })
+      } else {
+        postAddLive(data).then(() => {
+          this.$router.push({ path: '/live/liveList' })
+        })
+      }
+    },
+    setLiveDetails(id) {
+      // getStudentList({
+      //   liveId: id,
+      //   pageNo: 1,
+      //   pageSize: 1000
+      // }).then(res=>{
+      //   console.log(res)
+      // })
+      getLiveDetails({
+        liveId: id
+      }).then((res) => {
+        (this.basicForm.title = res.channelName),
+          (this.liveClassification_option.label = res.categoryName)
+        this.liveClassification_option.value = res.categoryId
+        this.liveClassification_value = res.categoryId
+        this.select_liveStatus_value = res.isUsed
+        this.select_linkNumber_value = res.linkMicLimit
+        this.toggle_scene = res.scene
+        this.ruleForm.imageUrl[0].url = res.coverImageUrl
+        this.ruleForm.introduction = _.unescape(res.remark)
+        this.select_mode_value = res.batchDeclare
+        this.teachingTeacherList = [
+          {
+            name: res.lecturerName,
+            id: res.lecturerId
+          }
+        ]
+
+        this.add_relatedCourses_form.teacher.push({
+          name: res.lecturerName,
+          id: res.lecturerId
+        })
+
+        this.table_teacherSet[0].nameList_value = res.lecturerId
+        this.table_relatedCourses = res.courses
+
+        // 直播设置
+        switch (this.select_mode_value) {
+          case 'single':
+            this.start_time = res.liveBatch[0].startTime
+            this.end_time = res.liveBatch[0].endTime
+            break
+          case 'plural':
+            this.table_liveTime = []
+            res.liveBatch.forEach((item) => {
+              this.table_liveTime.push({
+                id: item.id,
+                start_time: item.startTime,
+                end_time: item.endTime
+              })
+            })
+            break
+          case 'cycle':
+            var loopTimeArr = res.cycleInfo.cycleDateRange.split('~')
+            this.loopTime.push(loopTimeArr[0])
+            this.loopTime.push(loopTimeArr[1])
+            this.select_loopCycle_value = res.cycleInfo.cycleMode
+            this.toggle_loopCycle(this.select_loopCycle_value)
+            var arr = res.cycleInfo.cycleTime.split(',')
+            arr.forEach((item) => {
+              this.select_mode_time_value.push(parseInt(item))
+            })
+            this.table_liveTime = []
+            res.liveBatch.forEach((item) => {
+              this.table_liveTime.push({
+                id: item.id,
+                start_time: item.startTime,
+                end_time: item.endTime
+              })
+            })
+
+            break
+        }
+
+        switch (res.authType) {
+          case '':
+            this.radio_connectionMode = 'all'
+            break
+          case 'direct':
+            this.radio_connectionMode = 'direct'
+            break
+          case 'code':
+            this.radio_connectionMode = 'code'
+            this.formLiveTypeForm.title = res.codeLinkInfo.welcomeTitle
+            this.formLiveTypeForm.code = res.codeLinkInfo.captcha
+            this.formLiveTypeForm.tips = res.codeLinkInfo.notice
+            // this.formLiveTypeForm.imgUrl[0].url = res.codeLinkInfo.QRCodeUrl
+            break
+        }
       })
     }
   }
@@ -1721,6 +1843,8 @@ export default {
     > div:last-child {
       > div {
         padding-left: 20px;
+        overflow-y: scroll;
+        height: 500px;
       }
     }
   }

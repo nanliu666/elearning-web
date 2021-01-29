@@ -142,29 +142,6 @@ export default {
      */
     onClosePanel() {
       this.activeData = null
-    },
-
-    // 传formIds 查询指定组件 未传时  判断所有组件
-    isFilledPCon(formIds) {
-      let res = false
-      const loopChild = (parent, callback) => parent.childNode && loop(parent.childNode, callback)
-      const loop = (data, callback) => {
-        if (res || !data) return // 查找到就退出
-        if (Array.isArray(data.conditionNodes)) {
-          const used = data.conditionNodes.some((c) => {
-            const cons = c.properties.conditions || []
-            return Array.isArray(c.conditionNodes)
-              ? loop(c, callback)
-              : Array.isArray(formIds)
-              ? cons.some((item) => formIds.includes(item.formId)) // 查询特定组件
-              : cons.length > 0 // 只要有节点设置了条件 说明就有组件作为条件被使用
-          })
-          used ? callback() : data.conditionNodes.forEach((t) => loopChild(t, callback))
-        }
-        loopChild(data, callback)
-      }
-      loop(this.processData, () => (res = true))
-      return res
     }
   },
   render: function(h) {

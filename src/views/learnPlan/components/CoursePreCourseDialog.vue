@@ -3,6 +3,7 @@
     title="前置条件"
     class="coursePreCourseDialog"
     :visible="visible"
+    append-to-body
     @close="handleClose"
   >
     <div class="precondition_label">
@@ -113,7 +114,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .coursePreCourseDialog {
   /deep/.el-dialog {
     .precondition_label {

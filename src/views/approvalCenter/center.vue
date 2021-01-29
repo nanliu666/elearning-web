@@ -1,35 +1,19 @@
 <template>
   <div class="center">
-    <page-header title="课程审核">
-    </page-header>
+    <page-header title="课程审核"> </page-header>
 
     <div class="center_table">
       <div class="search_bar">
         <div class="search_bar_btn">
-          <span
-            :class="{ pitch: pitch == 1 }"
-            @click="setPitch(1)"
-          >待审核</span>
-          <span
-            class="pitch_icon"
-            @click="setPitch(1)"
-          >（3）</span>
-          <span
-            :class="{ pitch: pitch == 2 }"
-            @click="setPitch(2)"
-          >已审核</span>
+          <span :class="{ pitch: pitch == 1 }" @click="setPitch(1)">待审核</span>
+          <span class="pitch_icon" @click="setPitch(1)">（{{ sonTotalNum || 0 }}）</span>
+          <span :class="{ pitch: pitch == 2 }" @click="setPitch(2)">已审核</span>
         </div>
       </div>
 
       <div class="search_bar_input">
-        <div
-          v-show="pitch == 2"
-          class="search_bar_select"
-        >
-          <el-select
-            v-model="value"
-            placeholder="请选择"
-          >
+        <div v-show="pitch == 2" class="search_bar_select">
+          <el-select v-model="statusValue" placeholder="请选择">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -40,10 +24,7 @@
           </el-select>
         </div>
 
-        <div
-          v-show="pitch == 2"
-          class="search_bar_searchInput"
-        >
+        <div v-show="pitch == 2" class="search_bar_searchInput">
           <el-input
             v-model="searchInput"
             class="searchInput"
@@ -54,10 +35,11 @@
         </div>
 
         <div class="search_bar_Refresh">
-          <span><i class="el-icon-refresh-right"></i>刷新</span>
+          <span @click="upData"><i class="el-icon-refresh-right"></i>刷新</span>
         </div>
       </div>
-      <Reviewed v-show="pitch == 1" />
+      <!-- 第一页 -->
+      <Reviewed @titleTotalNum="titleTotalNum" v-show="pitch == 1" />
       <!-- 第二页 -->
       <common-table
         v-show="pitch == 2"
@@ -70,24 +52,22 @@
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
-        <!-- 当前状态 -->
-        <template
-          slot="userName"
-          slot-scope="{ row }"
-        >
-          <span>{{ row.userName }}</span>
-        </template>
-        <template
-          slot="handler"
-          slot-scope="scope"
-        >
-          <el-button
-            type="text"
-            disabled
-            @click="toDetails(scope.row.id)"
-          >
-            查看
+        <!-- 课程标题 -->
+        <template slot="processName" slot-scope="{ row }">
+          <el-button type="text" @click="toDetails(row)">
+            {{ row.processName || '课程标题' }}
           </el-button>
+        </template>
+        <!-- 状态 -->
+        <template #status="{ row }">
+          <span
+            class="status-span"
+            :style="{
+              color: statusToText(row.status).color,
+              backgroundColor: statusToText(row.status).backgroundColor
+            }"
+            v-text="statusToText(row.status).text"
+          />
         </template>
       </common-table>
     </div>
@@ -95,12 +75,8 @@
 </template>
 
 <script>
-// import {
-//   waitApproveList,
-//   hasApproveList,
-//   myApproveList,
-//   ccApproveList
-// } from '@/api/approvalCenter/approvalCenter'
+import { fulllist } from '@/api/approvalCenter/approvalCenter'
+import { STATUS_TO_TEXT } from '@/const/approve'
 import Reviewed from './components/Reviewed'
 // 表格属性
 let TABLE_COLUMNS = [
@@ -110,12 +86,12 @@ let TABLE_COLUMNS = [
   },
   {
     label: '课程标题',
-    prop: 'processName'
+    prop: 'processName',
+    slot: true
   },
   {
     label: '申请人',
-    prop: 'userName',
-    slot: true
+    prop: 'userName'
   },
   {
     label: '审核时间',
@@ -123,20 +99,21 @@ let TABLE_COLUMNS = [
   },
   {
     label: '完成时间',
-    prop: 'status'
+    prop: 'completeTime'
   },
   {
     label: '状态',
-    prop: 'approveUser' //数组里面的userName   要遍历出来
+    prop: 'status',
+    slot: true
   },
   {
     label: '审核人',
-    prop: 'aprteUser'
+    prop: 'approveUser'
   }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 100
+    // width: 100
   },
   enablePagination: true,
   showHandler: false,
@@ -152,23 +129,24 @@ export default {
   components: { Reviewed },
   data() {
     return {
+      sonTotalNum: '',
       searchInput: '',
       pitch: 1,
       options: [
         {
-          value: 1,
+          value: 'Pass,Reject',
           label: '全部'
         },
         {
-          value: 2,
+          value: 'Pass',
           label: '已通过'
         },
         {
-          value: 3,
+          value: 'Reject',
           label: '已拒绝'
         }
       ],
-      value: '',
+      statusValue: 'Pass,Reject',
 
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -184,7 +162,10 @@ export default {
   },
 
   watch: {
-    searchInput: function() {
+    searchInput: function () {
+      this.setPitch(this.pitch)
+    },
+    statusValue: function () {
       this.setPitch(this.pitch)
     }
   },
@@ -192,17 +173,41 @@ export default {
   activated() {
     this.setPitch(1)
   },
-  created() {
-    this.setPitch(1)
-  },
-
   methods: {
+    upData() {
+      this.setPitch(this.pitch)
+    },
+    statusToText(status) {
+      return STATUS_TO_TEXT[status]
+    },
+    titleTotalNum(data) {
+      this.sonTotalNum = data
+    },
     //   导航栏btn
     setPitch(i) {
-      this.pitch = i
+      if (this.pitch != i) this.searchInput = ''
+      this.pitch = i || 1
+      fulllist({
+        ...this.page,
+        categoryId: '1',
+        status: this.statusValue,
+        search: this.searchInput
+      }).then((res) => {
+        this.tableData = res.data
+        this.page.total = res.totalNum
+      })
     },
-    toDetails(id) {
-      window.console.log(id)
+    // 去详情
+    toDetails(item) {
+      this.$router.push({
+        path: '/approvalCenter/details',
+        query: { formId: item.formId, apprNo: item.apprNo }
+      })
+    },
+    // 重新申请
+    againFn() {
+      // window.console.log(id)
+      this.$router.push({ path: '/course/establishCourse' })
     },
     //  处理页码改变
     handleCurrentPageChange(param) {

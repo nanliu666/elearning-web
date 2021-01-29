@@ -18,7 +18,7 @@ export const addLine = (content) => {
  * @param {string} html
  */
 export const deleteHTMLTag = (html = '') => {
-  return html.replace(/<[^>]+>/g, '')
+  return html.replace(/<[^>]+>/g, '').replace(/&[a-zA-Z]+;/g, '')
 }
 /**
  * 反转义
