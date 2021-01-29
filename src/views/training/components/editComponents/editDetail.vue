@@ -14,7 +14,6 @@
           <lazy-select
             v-model="formData.headTeacher"
             :searchable="true"
-            :multiple="true"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />

@@ -45,7 +45,7 @@
           <div>
             试题设置:
             <span class="tip">
-              <span>（当前总分数{{ totalScore == 0 ? 0 : totalScore }}分</span>
+              <span>（当前总分数：{{ totalScore == 0 ? 0 : totalScore }}分</span>
               <span v-if="form.totalScore">，剩余分数：{{ surplusScore }}分</span>）
             </span>
           </div>
