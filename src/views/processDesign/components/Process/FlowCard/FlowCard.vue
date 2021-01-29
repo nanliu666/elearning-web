@@ -6,11 +6,14 @@ const notEmptyArray = (arr) => Array.isArray(arr) && arr.length > 0
 const hasBranch = (data) => notEmptyArray(data.conditionNodes)
 const stopPro = (ev) => ev.stopPropagation()
 
+// 卡片渲染函数
 function createNormalCard(ctx, conf, h) {
   const classList = ['flow-path-card']
   const afterTrue = (isTrue, name) => (isTrue && classList.push(name), isTrue)
   const isStartNode = afterTrue(NodeUtils.isStartNode(conf), 'start-node')
+  // 审批人
   const isApprNode = afterTrue(NodeUtils.isApproverNode(conf), 'approver')
+  // 抄送人
   const isCopyNode = afterTrue(NodeUtils.isCopyNode(conf), 'copy')
   return (
     <section class={classList.join(' ')} onClick={this.eventLancher.bind(ctx, 'edit', conf)}>
@@ -23,6 +26,14 @@ function createNormalCard(ctx, conf, h) {
             <i class="el-icon-s-promotion" style="font-size:12px;color:white;margin-right:8px;"></i>
           )}
           <span class="title-text">{conf.properties.title}</span>
+          {!isStartNode && (
+            <input
+              vModel_trim={conf.properties.title}
+              class="title-input"
+              style="margin-top:6px;"
+              onClick={stopPro}
+            />
+          )}
         </div>
         <div class="actions" style="margin-right:8px;">
           <i
@@ -41,54 +52,15 @@ function createNormalCard(ctx, conf, h) {
   )
 }
 // arg = ctx, data, h
+// 不同类型设置不同
 const createFunc = (...arg) => createNormalCard.call(arg[0], ...arg)
 let nodes = {
   approver: createFunc,
   copy: createFunc,
-  empty: (_) => '',
-  condition: function(ctx, conf, h) {
-    return (
-      <section class="flow-path-card condition" onClick={this.eventLancher.bind(ctx, 'edit', conf)}>
-        <header class="header">
-          <div class="title-box" style="height: 36px;width:160px;">
-            <span class="title-text">{conf.properties.title}</span>
-            {
-              <input
-                vModel_trim={conf.properties.title}
-                class="title-input"
-                style="margin-top:6px;"
-                onClick={stopPro}
-              />
-            }
-          </div>
-          <span class="priority">优先级{conf.properties.priority + 1}</span>
-          <div class="actions actions_icon">
-            <i
-              class="el-icon-close icon"
-              onClick={this.eventLancher.bind(ctx, 'deleteNode', conf, ctx.data)}
-            ></i>
-          </div>
-        </header>
-        <div class="body">
-          <pre class="text">{conf.content}</pre>
-        </div>
-        <div
-          class="icon-wrapper left"
-          onClick={ctx.eventLancher.bind(ctx, 'increasePriority', conf, ctx.data)}
-        >
-          <i class="el-icon-arrow-left icon left-arrow"></i>
-        </div>
-        <div
-          class="icon-wrapper right"
-          onClick={ctx.eventLancher.bind(ctx, 'decreasePriority', conf, ctx.data)}
-        >
-          <i class="el-icon-arrow-right icon right-arrow"></i>
-        </div>
-      </section>
-    )
-  }
+  empty: (_) => ''
 }
 
+// 节点添加按钮
 function addNodeButton(ctx, data, h, isBranch = false) {
   // 只有非条件节点和条件分支树下面的那个按钮 才能添加新分支树
   let couldAddBranch = !hasBranch(data) || isBranch
@@ -130,11 +102,11 @@ function addNodeButton(ctx, data, h, isBranch = false) {
   )
 }
 
+// 主要渲染函数
 function NodeFactory(ctx, data, h) {
   if (!data) return
   const showErrorTip = ctx.verifyMode && NodeUtils.checkNode(data) === false
   let res = [],
-    branchNode = '',
     selfNode
   if (NodeUtils.isStartNode(data)) {
     selfNode = (
@@ -158,38 +130,8 @@ function NodeFactory(ctx, data, h) {
       </div>
     )
   }
-  if (hasBranch(data)) {
-    // 如果节点是数组 一定为条件分支 添加分支样式包裹
-    // {data.childNode && NodeFactory.call(ctx, ctx, data.childNode, h)}
-    branchNode = (
-      <div class="branch-wrap">
-        <div class="branch-box-wrap">
-          <div class="branch-box  flex justify-center relative">
-            <button class="btn" onClick={this.eventLancher.bind(ctx, 'appendConditionNode', data)}>
-              添加条件
-            </button>
-            {data.conditionNodes.map((d) => NodeFactory.call(ctx, ctx, d, h))}
-          </div>
-        </div>
-        {addNodeButton.call(ctx, ctx, data, h, true)}
-      </div>
-    )
-  }
 
-  if (isCondition(data)) {
-    return (
-      <div class="col-box">
-        <div class="center-line"></div>
-        <div class="top-cover-line"></div>
-        <div class="bottom-cover-line"></div>
-        {selfNode}
-        {branchNode}
-        {NodeFactory.call(ctx, ctx, data.childNode, h)}
-      </div>
-    )
-  }
   res.push(selfNode)
-  branchNode && res.push(branchNode)
   data.childNode && res.push(NodeFactory.call(ctx, ctx, data.childNode, h))
   return res
 }
