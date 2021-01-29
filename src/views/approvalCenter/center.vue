@@ -205,8 +205,9 @@ export default {
       })
     },
     // 重新申请
-    againFn(id) {
-      window.console.log(id)
+    againFn() {
+      // window.console.log(id)
+      this.$router.push({ path: '/course/establishCourse' })
     },
     //  处理页码改变
     handleCurrentPageChange(param) {

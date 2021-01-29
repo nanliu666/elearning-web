@@ -29,7 +29,7 @@
       />
     </template>
     <template slot="handler" slot-scope="scope">
-      <el-button type="text" @click="againFn(scope.row.id)"> 重新申请 </el-button>
+      <el-button type="text" @click="againFn()"> 重新申请 </el-button>
       <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>
     </template>
   </common-table>
@@ -133,8 +133,9 @@ export default {
       })
     },
     // 重新申请
-    againFn(id) {
-      window.console.log(id)
+    againFn() {
+      // window.console.log(id)
+      this.$router.push({ path: '/course/establishCourse' })
     },
     // 撤回
     withdrawFn(row) {

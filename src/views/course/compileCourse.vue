@@ -515,6 +515,7 @@
 </template>
 
 <script>
+import { categoryMap } from '@/const/approve'
 import {
   getCourseTags,
   getCatalog,
