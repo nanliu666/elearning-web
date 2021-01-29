@@ -671,10 +671,10 @@ export default {
         answerBanExamValue: 30, // 最低30分钟才可交卷
         preCreateValue: 10, // 预打印10份
         isDecoil: false,
-        openResults: false,
-        openAnswerSheet: false,
+        openResults: true,
+        openAnswerSheet: true,
         selfMarking: false,
-        publicAnswers: false,
+        publicAnswers: true,
         // openEntrance: false,
         // isExamine: false,
         openResultsValue: 0, // 允许考生查看成绩 默认值0，表示永久
