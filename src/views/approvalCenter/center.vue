@@ -69,6 +69,12 @@
             v-text="statusToText(row.status).text"
           />
         </template>
+
+        <template slot="handler" slot-scope="scope">
+          <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
+      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button> -->
+          <el-button type="text" @click="toDetails(scope.row)"> 查看 </el-button>
+        </template>
       </common-table>
     </div>
   </div>
@@ -116,7 +122,7 @@ const TABLE_CONFIG = {
     // width: 100
   },
   enablePagination: true,
-  showHandler: false,
+  showHandler: true,
   showIndexColumn: false
 }
 const TABLE_PAGE_CONFIG = {}
