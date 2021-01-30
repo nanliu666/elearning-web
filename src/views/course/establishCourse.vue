@@ -463,20 +463,6 @@
                       }}</el-button>
                     </common-upload>
 
-                    <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 3"
-                      v-model="scope.row.upLoad"
-                      :multiple="false"
-                      :before-upload="DataUpload"
-                    >
-                      <el-button type="text">
-                        {{
-                          scope.row.upLoad[0]
-                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : '上传资料'
-                        }}
-                      </el-button>
-                    </common-upload>
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 4"
                       type="text"
@@ -539,7 +525,9 @@
                 </el-button>
 
                 <el-button
-                  v-if="scope.row.saveOrcompile === 1"
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 1
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -547,7 +535,9 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 0
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
