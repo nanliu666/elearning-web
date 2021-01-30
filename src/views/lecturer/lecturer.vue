@@ -198,7 +198,7 @@
                 slot="handler"
                 slot-scope="scope"
               >
-                <el-button
+                <el-button class="marginLine"
                   v-if="scope.row.status == 1"
                   v-p="STOP_LECTURER"
                   type="text"
@@ -207,7 +207,7 @@
                 >
                   停用
                 </el-button>
-                <span
+                <span  class="marginLineColor"
                   v-else
                   v-p="STOP_LECTURER"
                   style=" cursor:pointer; "
@@ -216,8 +216,8 @@
                 >
                   启用
                 </span>
-                &nbsp; &nbsp;
-                <el-button
+               
+                <el-button  class="marginLine"
                   v-p="EDIT_LECTURER"
                   type="text"
                   size="medium"
@@ -225,8 +225,8 @@
                 >
                   编辑
                 </el-button>
-                &nbsp; &nbsp;
-                <el-button
+               
+                <el-button  class="marginLine"
                   v-p="DELETE_LECTURER"
                   type="text"
                   size="medium"
@@ -272,7 +272,7 @@
             :key="index"
             class="item_box"
           >
-            {{ item.catalogName }}
+            {{ item.courseName }}
           </div>
         </div>
       </div>
@@ -1103,4 +1103,15 @@ $color_icon: #A0A8AE
     width: 65px;
   }
 }
+
+.marginLine{
+  margin-left:20px;
+}
+
+.marginLineColor{
+  color:#01aafc;
+  margin-left:20px;
+}
+
+
 </style>
