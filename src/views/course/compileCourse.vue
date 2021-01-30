@@ -538,7 +538,9 @@
                 </el-button>
 
                 <el-button
-                  v-if="scope.row.saveOrcompile === 1"
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 1
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -546,7 +548,9 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 0
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
@@ -556,7 +560,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click="delContent(scope.$index)"
+                  @click="delContent(scope.row, scope.$index)"
                 >
                   删除
                 </el-button>
@@ -957,7 +961,47 @@ export default {
 
     // 发布&草稿
     isAddCourse(status) {
-      this.ruleForm.contents.map((item, index) => {
+      const contents = this.ruleForm.contents
+      // 还有正在上传的文件
+      if (
+        contents.some(
+          (item) => item.file && typeof item.file.percent === 'number' && item.file.percent < 100
+        )
+      ) {
+        // 提示
+        const message =
+          status === 2
+            ? '正在上传附件，上传完成后将自动保存至草稿箱'
+            : '正在上传附件，上传完成后将自动发布'
+        this.$message({
+          message,
+          type: 'warning'
+        })
+        // 保存发布类型
+        contents.addStatus = status
+        // 设置标志位
+        contents.pending = true
+        return
+      }
+
+      delete contents.addStatus
+      delete contents.pending
+      let params = {}
+      Object.keys(this.ruleForm).forEach((key) => {
+        if (key === 'contents') return
+        params[key] = this.ruleForm[key]
+      })
+
+      params.contents = contents.map((item) => {
+        const n = {}
+        Object.keys(item).forEach((key) => {
+          if (key === 'file') return
+          n[key] = item[key]
+        })
+        return n
+      })
+
+      contents.map((item, index) => {
         // console.log(item)
         item.sort = index
         if (item.upLoad.length !== 0) {
@@ -967,14 +1011,14 @@ export default {
             _.escape(item.upLoad[item.upLoad.length - 1].content)
         }
       })
-      this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
-        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].localName
+
+      params.localName = params.imageUrl[params.imageUrl.length - 1]
+        ? params.imageUrl[params.imageUrl.length - 1].localName
         : ''
-      this.ruleForm.url = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
-        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url
+      params.url = params.imageUrl[params.imageUrl.length - 1]
+        ? params.imageUrl[params.imageUrl.length - 1].url
         : ''
 
-      let params = JSON.parse(JSON.stringify(this.ruleForm))
       delete params.imageUrl
       params.contents.forEach((item) => {
         delete item.upLoad

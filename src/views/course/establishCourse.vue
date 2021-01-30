@@ -547,7 +547,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click="delContent(scope.$index)"
+                  @click="delContent(scope.row, scope.$index)"
                 >
                   删除
                 </el-button>
