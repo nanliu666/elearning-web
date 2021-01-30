@@ -17,9 +17,7 @@
     <div v-if="!tableData" id="isdialog_show">
       <div>如何创建课程：</div>
       <div>1.先在 <span @click="toCatalog">【课程中心-分类管理】</span> 完善展示的分类配置；</div>
-      <div>
-        2.开始创建课程。
-      </div>
+      <div>2.开始创建课程。</div>
       <i class="el-icon-close"></i>
     </div>
 
@@ -56,12 +54,13 @@
                     content="刷新"
                     effect="dark"
                     placement="top"
-                    style="color:#acb3b8;"
+                    style="color: #acb3b8"
                   >
                     <el-button
                       class="operations__btns--item"
                       size="mini"
                       icon="el-icon-refresh-right"
+                      style=" font-size: 18px;"
                       type="text"
                       @click="refreshTableData"
                     >
@@ -71,7 +70,7 @@
                   <span
                     v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
-                    style="cursor:pointer;"
+                    style="cursor: pointer; font-size: 18px;"
                     @click="refreshTableData"
                     >刷新</span
                   >
@@ -85,7 +84,7 @@
                     >
                       <i
                         class="el-icon-setting"
-                        style="color:#acb3b8;font-size: 16px;margin-left: -7px; "
+                        style="color: #acb3b8; font-size: 18px; margin-left: 0px"
                       />
                       <!-- <el-button
                         class="operations__btns--item"
@@ -119,7 +118,7 @@
             <template #multiSelectMenu="{ selection }">
               <el-button
                 v-p="DELETE_COURSE"
-                style="margin-bottom:0;"
+                style="margin-bottom: 0"
                 type="text"
                 @click="() => handleRemoveItems(selection)"
               >
@@ -133,7 +132,10 @@
 
             <!-- 课程名称 -->
             <template slot="courseName" slot-scope="{ row }">
-              <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
+              <!-- <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
+                {{ row.courseName }}
+              </el-button> -->
+              <el-button type="text" @click="todetail(row.id)">
                 {{ row.courseName }}
               </el-button>
             </template>
@@ -244,12 +246,8 @@
       <div style="margin-bottom: 15px">所在分类：{{ moveKnowledgeRow.catalogName }}</div>
       <common-form ref="form" :columns="formColumns" :model="formData"> </common-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          取消
-        </el-button>
-        <el-button type="primary" @click="isMoveCourse">
-          保存
-        </el-button>
+        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        <el-button type="primary" @click="isMoveCourse"> 保存 </el-button>
       </div>
     </el-dialog>
   </div>
@@ -1118,72 +1116,84 @@ export default {
   border: none !important;
 }
 </style>
-<style lang="sass" scoped>
 
-/deep/.el-input
-  width: 100%
-/deep/.el-select
-  width: 100%
-/deep/.el-input
+<style lang="scss" scoped>
+/deep/.el-input {
+  width: 100%;
+}
+/deep/.el-select {
+  width: 100%;
+}
+/deep/.el-input .operations__btns {
+  color: #acb3b8;
+  display: flex;
+}
+.text_refresh {
+  color: #acb3b8;
+  margin-right: 20px;
+  $color_icon: #a0a8ae;
+}
 
-.operations__btns
-    color: #acb3b8
+.basic-container--block {
+  height: calc(100% - 92px);
+  min-height: calc(100% - 92px);
+}
+.operations {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  &__column--item {
+    height: 25px;
+  }
+  &__column--visible {
+    height: 200px;
+    overflow: scroll;
+  }
+  &__btns {
+    align-items: center;
     display: flex;
-.text_refresh
-    color: #acb3b8
-    margin-right: 20px
-$color_icon: #A0A8AE
-
-.basic-container--block
-  height: calc(100% - 92px)
-  min-height: calc(100% - 92px)
-.operations
-  align-items: center
-  display: flex
-  justify-content: space-between
-  &__column--item
-    height: 25px
-  &__column--visible
-    height: 200px
-    overflow: scroll
-  &__btns
-    align-items: center
-    display: flex
-    height: 24px
-    justify-content: flex-start
-  &__btns--item
-    margin: 0
-    margin-right: 4px
-    padding: 0
-    height: 24px
-    width: 24px
-    line-height: 24px
-    &:last-child
-      margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-  .iconfont
-    color: $color_icon
-    font-weight: bold
-    font-size: 16px
-
-.Menu
-  // 添加一个分隔号 "｜"
-  .table__handler
-    display: flex
-    justify-content: flex-end
-    > .el-button--text
-      text-align: center
-      padding: 0 8px
-      margin-left: 0px
-      position: relative
-      &:not(:last-child)::after
-        background-color: #e3e7e9
-        content: ''
-        height: 10px
-        position: absolute
-        right: 0
-        top: 50%
-        transform: translateY(-50%)
-        width: 1px
+    height: 24px;
+    justify-content: flex-start;
+  }
+  &__btns--item {
+    margin: 0;
+    margin-right: 4px;
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    &:last-child {
+      margin: 0;
+      // margin-bottom: 8px
+      // margin-right: 8px
+      .iconfont {
+        font-weight: bold;
+        font-size: 16px;
+      }
+      .Menu {
+        // 添加一个分隔号 "｜"
+        .table__handler {
+          display: flex;
+          justify-content: flex-end;
+          > .el-button--text {
+            text-align: center;
+            padding: 0 8px;
+            margin-left: 0px;
+            position: relative;
+            &:not(:last-child)::after {
+              background-color: #e3e7e9;
+              content: '';
+              height: 10px;
+              position: absolute;
+              right: 0;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 1px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
 </style>

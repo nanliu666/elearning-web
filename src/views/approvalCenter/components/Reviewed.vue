@@ -10,10 +10,10 @@
     @current-page-change="handleCurrentPageChange"
     @page-size-change="handlePageSizeChange"
   >
-    <!-- 课程标题 -->
-    <template slot="processName" slot-scope="{ row }">
+    <!--  -->
+    <template slot="apprNo" slot-scope="{ row }">
       <el-button type="text" @click="toDetails(row)">
-        {{ row.processName || '课程标题' }}
+        {{ row.apprNo }}
       </el-button>
     </template>
 
@@ -29,8 +29,9 @@
       />
     </template>
     <template slot="handler" slot-scope="scope">
-      <el-button type="text" @click="againFn()"> 重新申请 </el-button>
-      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>
+      <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
+      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button> -->
+      <el-button type="text" @click="toDetails(scope.row)"> 查看 </el-button>
     </template>
   </common-table>
 </template>
@@ -42,12 +43,12 @@ import { STATUS_TO_TEXT } from '@/const/approve'
 let TABLE_COLUMNS = [
   {
     label: '审批单号',
-    prop: 'apprNo'
+    prop: 'apprNo',
+    slot: true
   },
   {
     label: '课程标题',
-    prop: 'processName',
-    slot: true
+    prop: 'processName'
   },
   {
     label: '审核状态',
@@ -128,8 +129,8 @@ export default {
     // 去详情
     toDetails(item) {
       this.$router.push({
-        path: '/approvalCenter/details',
-        query: { formId: item.formId, apprNo: item.apprNo }
+        path: '/apprProcess/apprDetail',
+        query: { apprNo: item.apprNo }
       })
     },
     // 重新申请
@@ -149,6 +150,8 @@ export default {
     // 获取数据
     async setPitch() {
       let res = await fulllist({ ...this.page, categoryId: '1', status: 'Approve' })
+      window.console.log(res)
+
       this.tableData = res.data
       this.page.total = res.totalNum
 
