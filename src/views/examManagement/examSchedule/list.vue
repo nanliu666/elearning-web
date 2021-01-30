@@ -258,7 +258,96 @@ const WAY_STATUS = [
   { value: 'offline', label: '线下考试' }
 ]
 
-// const SEARCH_CONFIG =
+const SEARCH_CONFIG = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'examName',
+      label: '',
+      data: '',
+      options: [],
+      config: { placeholder: '请输入考试名称搜索', 'suffix-icon': 'el-icon-search' }
+    }
+  ],
+  popoverOptions: [
+    {
+      type: 'select',
+      field: 'status',
+      label: '状态',
+      data: '',
+      options: STATUS_STATUS
+    },
+    {
+      type: 'treeSelect',
+      field: 'categoryId',
+      label: '考试分类',
+      data: '',
+      config: {
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'name',
+            disabled: 'disabled',
+            value: 'id'
+          }
+        }
+      }
+    },
+    {
+      type: 'select',
+      field: 'examType',
+      label: '考试类型',
+      data: '',
+      options: TYPE_STATUS
+    },
+    {
+      type: 'select',
+      field: 'examPattern',
+      label: '考试方式',
+      data: '',
+      options: WAY_STATUS
+    },
+    {
+      data: '',
+      field: 'testPaper',
+      label: '关联试卷',
+      type: 'lazySelect',
+      optionList: [],
+      placeholder: '请选择关联试卷',
+      optionProps: {
+        formatter: (item) => `${item.name}`,
+        key: 'name',
+        value: 'id'
+      },
+      load: (params) => {
+        return getExamList(params)
+      },
+      config: { optionLabel: 'name', optionValue: 'id' }
+    },
+    {
+      type: 'select',
+      field: 'creatorId',
+      data: '',
+      label: '创建人',
+      options: [],
+      config: { optionLabel: 'name', optionValue: 'userId' },
+      loading: false,
+      noMore: false,
+      pageNo: 2,
+      loadMoreFun: {}
+    }
+  ]
+}
 import styles from '@/styles/variables.scss'
 import { ADD_EXAM, EDIT_EXAM, DELETE_EXAM, COPY_EXAM } from '@/const/privileges'
 import { mapGetters } from 'vuex'
@@ -302,111 +391,7 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      searchConfig: {
-        requireOptions: [
-          {
-            type: 'input',
-            field: 'examName',
-            label: '',
-            data: '',
-            options: [],
-            config: { placeholder: '请输入考试名称搜索', 'suffix-icon': 'el-icon-search' }
-          }
-        ],
-        popoverOptions: [
-          {
-            type: 'select',
-            field: 'status',
-            label: '状态',
-            data: '',
-            options: STATUS_STATUS
-          },
-          {
-            type: 'treeSelect',
-            field: 'categoryId',
-            label: '考试分类',
-            data: '',
-            config: {
-              selectParams: {
-                placeholder: '请输入内容',
-                multiple: false
-              },
-              treeParams: {
-                data: [],
-                'check-strictly': true,
-                'default-expand-all': false,
-                'expand-on-click-node': false,
-                clickParent: true,
-                filterable: false,
-                props: {
-                  children: 'children',
-                  label: 'name',
-                  disabled: 'disabled',
-                  value: 'id'
-                }
-              }
-            }
-          },
-          {
-            type: 'select',
-            field: 'examType',
-            label: '考试类型',
-            data: '',
-            options: TYPE_STATUS
-          },
-          {
-            type: 'select',
-            field: 'examPattern',
-            label: '考试方式',
-            data: '',
-            options: WAY_STATUS
-          },
-          {
-            data: '',
-            field: 'testPaper',
-            label: '关联试卷',
-            type: 'lazySelect',
-            optionList: [],
-            placeholder: '请选择关联试卷',
-            optionProps: {
-              formatter: (item) => `${item.name}`,
-              key: 'name',
-              value: 'id'
-            },
-            load: (params) => {
-              return getExamList(params)
-            },
-            config: { optionLabel: 'name', optionValue: 'id' }
-          },
-          {
-            type: 'select',
-            field: 'creatorId',
-            data: '',
-            label: '创建人',
-            options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
-            loading: false,
-            noMore: false,
-            pageNo: 2,
-            loadMoreFun(item) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getCreatUsers({ pageNo: item.pageNo, pageSize: 10, examType: this.activeIndex }).then(
-                (res) => {
-                  if (res.length > 0) {
-                    item.options.push(...res.data)
-                    item.pageNo += 1
-                    item.loading = false
-                  } else {
-                    item.noMore = true
-                    item.loading = false
-                  }
-                }
-              )
-            }
-          }
-        ]
-      },
+      searchConfig: SEARCH_CONFIG,
       data: [],
       createOrgDailog: false,
       queryInfo: {
@@ -443,13 +428,26 @@ export default {
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
-    if (_.size(creatorId.options) === 0) {
-      getCreatUsers({ pageNo: 1, pageSize: 10, examType: this.activeIndex }).then((res) => {
-        if (creatorId) {
-          creatorId.options.push(...res.data)
+    getCreatUsers({ pageNo: 1, pageSize: 10, examType: this.activeIndex }).then((res) => {
+      creatorId.options.push(...res.data)
+    })
+    const loadMoreFun = (item) => {
+      if (item.loading || item.noMore) return
+      item.loading = true
+      getCreatUsers({ pageNo: item.pageNo, pageSize: 10, examType: this.activeIndex }).then(
+        (res) => {
+          if (res.data.length > 0) {
+            item.options.push(...res.data)
+            item.pageNo += 1
+            item.loading = false
+          } else {
+            item.noMore = true
+            item.loading = false
+          }
         }
-      })
+      )
     }
+    creatorId.loadMoreFun = loadMoreFun
     this.setConfig()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
     getCategoryList({ type: 1 }).then((res) => {
