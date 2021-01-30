@@ -3,7 +3,7 @@
     <mark-header-card :data="examineeAchievementDO" />
     <div>
       <el-card
-        v-if="examData.keguan"
+        v-if="examData.keguan && examData.objectiveQuestions"
         class="paper-card"
       >
         <div
