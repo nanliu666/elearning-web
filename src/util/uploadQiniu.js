@@ -11,29 +11,31 @@ import { v4 as uuidv4 } from 'uuid'
  * @param hooks.error {Function}
  * @param hooks.complete {Function}
  */
-export async function uploadQiniu(file, hooks) {
+export async function uploadQiniu(f, hooks) {
+  const file = f.file
   const suffix = file.name.substr(file.name.lastIndexOf('.'))
   const fileName = uuidv4().replace(/-/g, '') + suffix
-
+  let observable
+  let subscription
   const config = {
     useCdnDomain: true
   }
   try {
     // 获取token
     const { uploadToken, domain } = await getQiniuToken()
-    const observable = qiniu.upload(file, fileName, uploadToken, config, {
+    observable = qiniu.upload(file, fileName, uploadToken, config, {
       fname: fileName
     })
+    const completeFn = hooks.complete
+    hooks.complete = function complete(res) {
+      completeFn.call(hooks, { ...res, url: domain + '/' + res.key, fileName })
+    }
     // 注册上传监听
-    observable.subscribe(hooks.next, hooks.error, (res) => {
-      // 上传完成时触发
-      hooks.complete({
-        ...res,
-        url: domain + '/' + res.key,
-        fileName
-      })
-    })
+    subscription = observable.subscribe(hooks)
   } catch (error) {
     hooks.error('token获取失败')
   }
+  observable.hooks = hooks
+  observable.subscription = subscription
+  f.ob = observable
 }
