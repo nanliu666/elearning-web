@@ -860,13 +860,13 @@ export default {
       // this.$router.push({ path: '/course/courseDraft' })
       this.$router.go(-1)
       // this.isdeleteData()
-      this.$refs.ruleForm.clearValidate()
       const contents = this.ruleForm.contents
-      if (!contents.pending) {
-        contents.forEach((c, i) => {
-          this.delContent(c, i)
-        })
-      }
+      if (contents.pending) return
+      this.$refs.ruleForm.clearValidate()
+      contents.forEach((c, i) => {
+        this.delContent(c, i)
+      })
+      this.ruleForm.contents = []
     },
     islistTeacher() {
       listTeacher().then((res) => {
@@ -1216,6 +1216,7 @@ export default {
       const { ob, uploader } = c.file
       ob.subscription.unsubscribe()
       uploader.abort(c.file)
+      uploader.$destroy()
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
