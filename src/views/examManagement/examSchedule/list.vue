@@ -171,9 +171,13 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList, delExamArrange, getExamList } from '@/api/examManage/schedule'
+import {
+  getArrangeList,
+  delExamArrange,
+  getExamList,
+  getCreatUsers
+} from '@/api/examManage/schedule'
 import { getCategoryList } from '@/api/examManage/category'
-import { getCreatUsers } from '@/api/knowledge/knowledge'
 const STATUS_CONFIG = {
   label: '状态',
   prop: 'status',
@@ -340,25 +344,11 @@ const SEARCH_CONFIG = {
       loading: false,
       noMore: false,
       pageNo: 2,
-      loadMoreFun(item) {
-        if (item.loading || item.noMore) return
-        item.loading = true
-        getCreatUsers().then((res) => {
-          if (res.length > 0) {
-            item.options.push(...res)
-            item.pageNo += 1
-            item.loading = false
-          } else {
-            item.noMore = true
-            item.loading = false
-          }
-        })
-      }
+      loadMoreFun: {}
     }
   ]
 }
 import styles from '@/styles/variables.scss'
-
 import { ADD_EXAM, EDIT_EXAM, DELETE_EXAM, COPY_EXAM } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -438,14 +428,26 @@ export default {
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
-    if (_.size(creatorId.options) === 0) {
-      getCreatUsers().then((res) => {
-        if (creatorId) {
-          creatorId.options.push(...res)
+    getCreatUsers({ pageNo: 1, pageSize: 10, examType: this.activeIndex }).then((res) => {
+      creatorId.options.push(...res.data)
+    })
+    const loadMoreFun = (item) => {
+      if (item.loading || item.noMore) return
+      item.loading = true
+      getCreatUsers({ pageNo: item.pageNo, pageSize: 10, examType: this.activeIndex }).then(
+        (res) => {
+          if (res.data.length > 0) {
+            item.options.push(...res.data)
+            item.pageNo += 1
+            item.loading = false
+          } else {
+            item.noMore = true
+            item.loading = false
+          }
         }
-      })
+      )
     }
-    this.loadTableData()
+    creatorId.loadMoreFun = loadMoreFun
     this.setConfig()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
     getCategoryList({ type: 1 }).then((res) => {
@@ -459,6 +461,7 @@ export default {
         res
       )
     })
+    this.loadTableData()
   },
   methods: {
     /**

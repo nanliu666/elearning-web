@@ -110,7 +110,7 @@ export const getV1News = (params) => get('/news/v1/news', params)
  * @param {string} params.userId 创建用户ID
  * @return {Promise<any>} 返回
  */
-export const putV1News = (params) => put('/news/v1/news', params)
+export const putV1News = (params) => put('/manage/v1/news', params)
 
 /**
  * 新闻删除接口	DEL
