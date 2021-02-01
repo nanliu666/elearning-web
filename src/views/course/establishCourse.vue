@@ -812,8 +812,7 @@ export default {
       const uploading = (file.uploading = !file.uploading)
       // 继续上传
       if (uploading) {
-        const subscription = file.ob.subscribe(file.ob.hooks)
-        file.ob.subscription = subscription
+        file.ob.subscription = file.ob.subscribe(file.ob.hooks)
       } else {
         // 暂停上传
         file.uploader.abort(file)
@@ -827,7 +826,7 @@ export default {
         const c = {
           saveOrcompile: 1,
           type: content ? content.type : 2,
-          name: content ? content.name : '社区的商业模式',
+          name: content ? content.name : file.file.name || '社区的商业模式',
           upLoad: [
             {
               localName: file.file.name
