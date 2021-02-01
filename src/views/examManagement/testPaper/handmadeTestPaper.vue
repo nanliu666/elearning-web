@@ -4,7 +4,7 @@
     class="HandmadeTestPaper"
   >
     <page-header
-      :title="form.id && !copy ? '编辑手工试卷' : '新建手工试卷'"
+      :title="_.get(form, 'id', null) && !copy ? '编辑手工试卷' : '新建手工试卷'"
       show-back
     />
     <basic-container
@@ -213,7 +213,7 @@ export default {
         isMulti: ''
       },
       typeList: [],
-      themeBlock: {
+      themeBlockData: {
         key: 1,
         type: '',
         title: '',
@@ -240,14 +240,18 @@ export default {
     }
   },
   beforeRouteLeave(to, from, next) {
+    this.$refs.form && this.$refs.form.resetFields()
+    this.testPaper = []
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
   activated() {
-    !this.$route.query.id && this.testPaper.push(_.cloneDeep(this.themeBlock))
     this.copy = this.$route.query.copy
-    this.getData()
+    this.testPaper = [_.cloneDeep(this.themeBlockData)]
     this.getTestPaperCategory()
+    if (_.get(this, '$route.query.id', null)) {
+      this.getData()
+    }
   },
   methods: {
     /**
@@ -380,10 +384,12 @@ export default {
      * @desc 双向数据绑定（因为for的对象它是引用类型，所以不能通过v-modle，或者$emit('update')，重新指定引用方向）
      * */
     update(data) {
-      this.testPaper.map((it) => {
-        it.key === data.key && (it = Object.assign(it, data))
-      })
-      this.count()
+      if (data) {
+        this.testPaper.map((it) => {
+          it.key === data.key && (it = Object.assign(it, data))
+        })
+        this.count()
+      }
     },
     /**
      * @author guanfenda
@@ -437,8 +443,8 @@ export default {
      *
      * */
     handleAddType() {
-      this.themeBlock.key += 1
-      this.testPaper.push(_.cloneDeep(this.themeBlock))
+      this.themeBlockData.key += 1
+      this.testPaper.push(_.cloneDeep(this.themeBlockData))
       this.$nextTick(() => {
         let scroll = this.$refs.HandmadeTestPaper
         scroll.scrollTop = scroll.scrollHeight

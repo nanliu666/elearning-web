@@ -77,7 +77,7 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { getLivePlanList, getcategoryTree } from '@/api/live/editLive'
+import { getLiveList, getcategoryTree } from '@/api/live/liveList'
 let TABLE_COLUMNS = [
   { type: 'index', label: '序号', width: 100 },
   {
@@ -291,7 +291,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getLivePlanList(this.queryInfo)
+        let { totalNum, data } = await getLiveList(this.queryInfo)
         this.tableLoading = false
         this.tableData = data
         this.page.total = totalNum

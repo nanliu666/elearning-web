@@ -392,10 +392,10 @@ export default {
             try {
               this.submitting = true
               // 需要先存为草稿再发布新闻
-              const params = _.isNull(this.id)
+              _.isNull(this.id)
                 ? await this.postNews(_.pickBy(this._formData), { status: 'Published' })
-                : await this.updateNews(_.pickBy(this._formData))
-              await this.publishNews(params)
+                : await this.updateNews(_.assign(this._formData, { status: 'Published' }))
+              // await this.publishNews(params)
               this.$message.success('发布成功')
               this.hasEdit = false
               this.handleBack()

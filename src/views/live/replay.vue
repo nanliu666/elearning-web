@@ -175,9 +175,10 @@
           sourceType:2,
           ...this.page
         }).then(res=>{
-          let idx = res.result.data.findIndex(item=>item.id===this.$route.query.liveId);
+          let idx = res.result.data.findIndex(item=>item.id===this.$route.query.currentId);
           let first = res.result.data.splice(idx,1)
           this.chapters =  [...first,...res.result.data];
+          this.currentChapter = first[0]
         })
       },
       collapseLeft() {
