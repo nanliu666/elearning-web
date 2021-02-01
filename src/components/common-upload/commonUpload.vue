@@ -64,9 +64,9 @@ export default {
     httpRequest(file) {
       const that = this
       this.$emit('on-start', file)
+      file.uploader = this
       uploadQiniu(file, {
         next({ total }) {
-          file.uploader = that
           file.status = 'success'
           file.uploading = true
           const percent = parseInt(total.percent)

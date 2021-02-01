@@ -157,7 +157,7 @@ export default {
     },
     // 提交
     submit(type) {
-      if (this.checkSameName()) return
+      // if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -166,7 +166,12 @@ export default {
 
             this.form.parentId = this.form.parentId + ''
             this.form.source = 'live'
-            addCategory(this.form)
+
+            const parmas = {
+              name: this.form.name,
+              parentId: this.form.parentId
+            }
+            addCategory(parmas)
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -186,8 +191,12 @@ export default {
           } else {
             this.loading = true
             // console.log('this.form', this.form)
-
-            editCategory(this.form)
+            const parmas = {
+              name: this.form.name,
+              parentId: this.form.parentId,
+              id: this.form.idStr
+            }
+            editCategory(parmas)
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
