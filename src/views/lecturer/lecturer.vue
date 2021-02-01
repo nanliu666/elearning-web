@@ -201,6 +201,7 @@
                 <el-button
                   v-if="scope.row.status == 1"
                   v-p="STOP_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 0)"
@@ -210,24 +211,27 @@
                 <span
                   v-else
                   v-p="STOP_LECTURER"
+                  class="marginLineColor"
                   style=" cursor:pointer; "
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
-                &nbsp; &nbsp;
+
                 <el-button
                   v-p="EDIT_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
-                &nbsp; &nbsp;
+
                 <el-button
                   v-p="DELETE_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="isTeacherdelete(scope.row)"
@@ -272,7 +276,7 @@
             :key="index"
             class="item_box"
           >
-            {{ item.catalogName }}
+            {{ item.courseName }}
           </div>
         </div>
       </div>
@@ -1102,5 +1106,14 @@ $color_icon: #A0A8AE
   /deep/ .el-input {
     width: 65px;
   }
+}
+
+.marginLine {
+  margin-left: 20px;
+}
+
+.marginLineColor {
+  color: #01aafc;
+  margin-left: 20px;
 }
 </style>

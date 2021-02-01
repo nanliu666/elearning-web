@@ -269,6 +269,7 @@
         </el-tooltip> -->
       </div>
     </basic-container>
+    <!--审批意见填写弹窗，这个功能暂时没用上-->
     <el-dialog
       :title="apprTitle"
       :visible.sync="dialogVisible"
@@ -360,15 +361,16 @@ export default {
       applyDetail: {},
       progress: [],
       nodeList: [],
+      // 审批中的节点ID数组
       currentApproveNode: [],
+      // 审批中的用户ID数组
+      apprUserIdList: [],
       // 审批记录列表（接口返回
       recordList: [],
       nodeData: [],
       loading: false,
       // 流程ID
       processId: '',
-      // 当前审批人id
-      apprUserIdList: [],
       // 审批详情
       StatusCN: {
         Approve: '审批中',
@@ -377,8 +379,6 @@ export default {
         Cancel: '已撤回'
       },
       show: true,
-      // 审批进度
-      activeStep: 0,
       // 是否已撤销 已拒绝 已完成
       isCancel: false,
       isFished: false,
@@ -547,7 +547,6 @@ export default {
         return item.result === EMPTY
       })
       currentApproveNodeList.forEach((item) => {
-        // nodeId约定为3位数字，但连续审批内拼接了index，故截取前三位作为当前审批节点的nodeId
         this.currentApproveNode.push(item.nodeId)
       })
     },
@@ -601,6 +600,7 @@ export default {
       }
       target.pos = pos
     },
+    // 遍历nodeData找到对应的节点进行复制
     tagNode(record, nodeList) {
       if (record.nodeId === 'start') {
         this.copyNode(record, nodeList[0], '0')
@@ -613,14 +613,15 @@ export default {
         }
       })
     },
+    // 遍历recordList给每个record补充节点数据
     tagAllNode(recordList, nodeList) {
       recordList.forEach((record) => {
-        // TODO: 消除 backParams
         record.createTimeStamp = Date.parse(record.createTime)
         record.approveTimeStamp = Date.parse(record.approveTime || new Date())
         this.tagNode(record, nodeList)
       })
     },
+    // 设置当前审批流的状态
     handleStatus() {
       // 开始节点的状态即代表整个流程的状态
       const firstNode = _.head(this.recordList)
@@ -638,6 +639,7 @@ export default {
           break
       }
     },
+    // 处理审批记录数组：添加抄送人，合并会签或签节点，去重
     resolveRecordList(recordList, cc) {
       recordList = _.sortBy(recordList, 'pos')
       let recordListWithCC = []
@@ -706,6 +708,7 @@ export default {
       })
       return _.compact(_.map(result))
     },
+    // 合并recordList和nodeData组装流程数据，this.progress
     handleNodeData() {
       let { nodeData } = this.applyDetail
       this.nodeData = _.cloneDeep(nodeData)
@@ -789,7 +792,6 @@ export default {
       this.$refs.apprForm.validate().then((result) => {
         if (!result) return
         this.btnloading = true
-        // let { userId, taskId } = this.recordList[this.activeStep]
         let userId = this.userId
         let taskId = ''
         this.recordList.forEach((it) => {

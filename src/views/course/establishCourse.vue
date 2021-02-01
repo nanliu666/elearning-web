@@ -629,6 +629,7 @@
         </div>
       </div>
     </div>
+    <!-- 审批发起组件 -->
     <appr-submit
       ref="apprSubmit"
       @submit="handleSubmit"
@@ -1060,25 +1061,33 @@ export default {
               type: 'warning'
             })
           } else {
+            // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
             this.$refs.apprSubmit.validate().then(() => {
               this.disabledBtn = true
               // 状态设置为审批中
               params.status = 0
               addCourse(params).then(({ id }) => {
-                this.submitApprApply(id)
+                this.submitApprApply(params.id ? params.id : id)
               })
             })
           }
         })
       }
     },
+    // 审批发起组件的弹窗确认回调
     handleSubmit() {
       this.isAddCourse(1)
     },
     // 提交课程审批
     submitApprApply(courseId) {
       this.$refs.apprSubmit
-        .submit({ formId: courseId, processName: categoryMap['1'] })
+        .submit({
+          formId: courseId,
+          processName: categoryMap['1'],
+          formKey: 'CourseApplyInfo',
+          // 课程标题
+          formTitle: this.ruleForm.name
+        })
         .then(() => {
           this.$message({
             message: '本课程已发布成功',

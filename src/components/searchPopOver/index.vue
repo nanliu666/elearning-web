@@ -19,7 +19,7 @@
           class="elInput"
           :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
-          @input="search"
+          @input="search(item)"
         />
         <el-select
           v-if="item.type === 'select'"
@@ -391,7 +391,8 @@ export default {
       this.$emit('submit', this.produceSearchParams())
       this.popoverShow = false
     },
-    search: _.debounce(function() {
+    search: _.debounce(function(obj) {
+      if (obj.data.match(/^[ ]+$/)) return
       this.submitSearch()
     }, 500),
     change() {
