@@ -441,6 +441,8 @@ export default {
   },
   activated() {
     this.options = []
+    this.surplusScore = 0
+    this.form.totalScore = 0
     for (let key in QUESTION_TYPE_MAP) {
       //这里是格式化题目类型结构
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
@@ -449,10 +451,14 @@ export default {
     this.getData()
     this.getTestPaperCategory()
     if (!this.$route.query.id) {
+      this.tableData = []
       this.pushItem()
     }
   },
   beforeRouteLeave(to, from, next) {
+    this.valid = false
+    this.$refs.form && this.$refs.form.resetFields()
+    this.testPaper = []
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
@@ -479,7 +485,6 @@ export default {
           copy[key] = column[key]
         }
       }
-
       return copy
     },
     /**

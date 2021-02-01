@@ -56,24 +56,26 @@ export default {
   },
   data() {
     return {
-      uploading: false
+      uploading: false,
+      files: []
     }
   },
   methods: {
     httpRequest(file) {
       const that = this
-      that.uploading = true
-      uploadQiniu(file.file, {
+      this.$emit('on-start', file)
+      uploadQiniu(file, {
         next({ total }) {
-          // that.uploadPercent = parseInt(total.percent)
-          file.percent = parseInt(total.percent)
-          const { name, uid } = file.file
-          file.name = name
-          file.uid = uid
+          file.uploader = that
+          file.status = 'success'
+          file.uploading = true
+          const percent = parseInt(total.percent)
+          file.percent = percent
           that.$emit('on-progress', file)
         },
         error(err) {
-          that.uploading = false
+          file.status = 'exception'
+          file.uploading = false
           if (err.code === 614) {
             that.$message.error('上传失败，已存在相同文件')
           } else {
@@ -81,13 +83,8 @@ export default {
             // eslint-disable-next-line
             console.error('upload err:', err)
           }
-          const { name, uid } = file.file
-          file.name = name
-          file.uid = uid
-          that.$emit('on-error', file)
         },
         complete({ url, fileName }) {
-          that.uploading = false
           let newFile = {
             fileUrl: url,
             uid: file.file.uid,
@@ -96,11 +93,21 @@ export default {
             localName: file.file.name
           }
           let newValue = [...that.value, newFile]
+
           that.$emit('input', newValue)
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
-
-          that.$emit('on-complete', newFile)
+          file.isComplete = true
+          that.$emit('on-complete')
+        }
+      })
+    },
+    abort(file) {
+      this.$nextTick(() => {
+        try {
+          this.$refs.upload.abort(file)
+        } catch (e) {
+          // todo
         }
       })
     }

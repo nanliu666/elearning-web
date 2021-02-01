@@ -104,6 +104,7 @@ export default {
     }
   },
   activated() {
+    this.$refs.table.clearSelection()
     this.examName = this.$route.query.examName
     // 现在手动生成
     this.loadTableData('refresh')
@@ -118,6 +119,7 @@ export default {
     },
     // 批量删除
     multipleDeleteClick(selected) {
+      this.$refs.table.clearSelection()
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.previewId)

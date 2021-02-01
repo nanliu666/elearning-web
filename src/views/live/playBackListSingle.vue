@@ -1,6 +1,10 @@
 <template>
   <div class="PlayBackListSingleC">
     <div class="crumbs">
+      <span
+        class="back-btn"
+        @click="$router.back()"
+      > <i class="el-icon-arrow-left"></i></span>
       <span class="title">查看直播回放</span><!-- class="title iconfont  iconimage_icon_leftarrow" -->
       <span class="tip">直播回放回传到平台需要一段时间，请耐心等待。</span>
     </div>
@@ -9,7 +13,7 @@
         v-for="item in playBackListData"
         :key="item.id"
         class="PBLS"
-        @click="goReplay"
+        @click="goReplay(item)"
       >
         <div class="img">
           <img
@@ -26,8 +30,9 @@
           <span>直播时间：{{ item.startTime }}</span>
         </div>
         <div class="operation">
+          <!--讲师删除后 管理员可以进行恢复-->
           <span
-            v-if="item.lecturerDeleted === 1"
+            v-if="item.lecturerDeleted === 1 && identityType === 0"
             @click.stop="repRecover(item)"
           >恢复</span>
           <span @click.stop="repRelease(item)">{{ item.shelfStatus === 0 ? '下架' : '发布' }}</span>
@@ -67,31 +72,41 @@ export default {
         pageSizes: [5, 10],
         currentPage: 0,
         totalNum: 0
-      }
+      },
+      identityType:''
     }
   },
   activated() {
     this.initPlayBackData()
   },
   methods: {
-    goReplay() {
+    goReplay(obj) {
       this.$router.push({
         path: '/live/replay',
         query: {
-          id: this.$route.query.liveId
+          id: this.$route.query.liveId,
+          currentId: obj.id
         }
       })
     },
     repRecover(item) {
       // 恢复
-      let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
-      setReplayStatus(sendPar).then(() => {
-        this.initPlayBackData()
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
+      this.$confirm(`讲师已删除该直播回放，您确定要恢复吗`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
+          setReplayStatus(sendPar).then(() => {
+            this.initPlayBackData()
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            })
+          })
+        })
+
     },
     repRelease(item) {
       // 发布 下架
@@ -105,7 +120,10 @@ export default {
       })
     },
     repDownload(url) {
-      if (!url) return
+      if (!url) {
+        this.$message.error('视频路径不存在');
+        return
+      }
       // 下载
       let x = new XMLHttpRequest()
       x.open('GET', url, true)
@@ -121,14 +139,17 @@ export default {
       x.send()
     },
     repDelete(item) {
-      // 删除
-      let sendPar = { videoId: item.id.toString(), isDeleted: '1' }
-      this.$confirm('是否删除该视频?', '提示', {
+      // 删除  0:管理员删除 1：讲师删除
+      this.$confirm(`${this.identityType===0?'您确定要删除该直播回放吗?':'该直播回放已发布，删除后学员将不可见，您确定要删除该直播回放吗？'}`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
+          let sendPar = {
+            videoId: item.id.toString(),
+            [`${this.identityType?'lecturerDeleted':'isDeleted'}`]:'1'
+          }
           setReplayStatus(sendPar).then(() => {
             this.initPlayBackData()
             this.$message({
@@ -157,6 +178,7 @@ export default {
         this.playBackListData = data
         this.PBLPageObj.totalNum = totalNum
         this.PBLPageObj.totalPage = totalPage
+        this.identityType = res.identityType
       })
     },
     handleSizeChange(val) {
@@ -176,6 +198,19 @@ export default {
 .crumbs {
   overflow: hidden;
   margin: 0 0 20px 0;
+  .back-btn {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 30px;
+    height: 29px;
+    i {
+      font-size: 18px;
+      color: #8c9195;
+      margin-right: 3px;
+      font-weight: 600;
+    }
+  }
 }
 .crumbs span {
   float: left;

@@ -349,8 +349,8 @@
                 class="upload-more"
                 multiple
                 :before-upload="CoursewareUpload"
-                @on-error="onBUError"
-                @on-progress="onBUProgress"
+                @on-progress="onUploadProgress"
+                @on-complete="onUploadComplete"
               >
                 <el-button size="medium">
                   批量上传课件
@@ -434,11 +434,11 @@
               <template slot-scope="scope">
                 <div v-if="scope.row.saveOrcompile === 0">
                   <span
-                    v-if="typeOption[scope.row.type - 1]"
+                    v-if="scope.row.type"
                     size="medium"
                   >
                     <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 1"
+                      v-if="scope.row.type === 1"
                       type="text"
                       @click="AddArticleBtntable(scope.$index, scope.row)"
                     >
@@ -448,33 +448,21 @@
                           : '添加文章'
                       }}
                     </el-button>
+
                     <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 2"
-                      v-model="scope.row.upLoad"
-                      :before-upload="CoursewareUpload"
+                      v-else
+                      :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
                       :multiple="false"
+                      @on-complete="onUploadComplete"
+                      @on-progress="(file) => onUploadProgress(file, scope.row, scope.$index)"
                     >
                       <el-button type="text">{{
                         scope.row.upLoad[0]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : '上传课件'
+                          ? scope.row.upLoad[0].localName
+                          : uploadRef[scope.row.type - 2].tips
                       }}</el-button>
                     </common-upload>
 
-                    <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 3"
-                      v-model="scope.row.upLoad"
-                      :multiple="false"
-                      :before-upload="DataUpload"
-                    >
-                      <el-button type="text">
-                        {{
-                          scope.row.upLoad[0]
-                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : '上传资料'
-                        }}
-                      </el-button>
-                    </common-upload>
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 4"
                       type="text"
@@ -501,64 +489,17 @@
                 </div>
 
                 <div v-if="scope.row.saveOrcompile === 1">
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 1">
-                      <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : ''
-                      }}</span>
-                    </span>
-                  </span>
-
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    <span
-                      v-if="
-                        typeOption[scope.row.type - 1].value === 2 &&
-                          isNaN(scope.row.upLoad[0].percent)
-                      "
-                    >
-                      <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : ''
-                      }}</span>
-                    </span>
-
-                    <span
-                      v-if="
-                        typeOption[scope.row.type - 1].value === 2 &&
-                          !isNaN(scope.row.upLoad[0].percent)
-                      "
-                    >
-                      <el-progress
-                        v-if="scope.row.upLoad[0].percent < 100"
-                        :percentage="scope.row.upLoad[0].percent"
-                        :format="() => progressFormat(scope.row.upLoad[0].percent)"
-                      ></el-progress>
-                      <span v-else>{{ scope.row.upLoad[0].localName }}</span>
-                    </span>
-                  </span>
-
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 3">
-                      <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : ''
-                      }}</span>
-                    </span>
-                  </span>
-
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    <span v-if="typeOption[scope.row.type - 1].value === 5">
-                      <span v-if="scope.row.upLoad">{{
-                        scope.row.upLoad[scope.row.upLoad.length - 1]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : ''
-                      }}</span>
-                    </span>
-                  </span>
+                  <span v-if="scope.row.type === 1">{{ scope.row.upLoad[0].localName }}</span>
+                  <div v-else>
+                    <el-progress
+                      v-if="scope.row.file.percent < 100"
+                      :percentage="scope.row.file.percent"
+                      :status="scope.row.file.status"
+                      :text-inside="scope.row.file.status !== 'exception'"
+                      :stroke-width="18"
+                    ></el-progress>
+                    <span v-else>{{ scope.row.upLoad[0].localName }}</span>
+                  </div>
                 </div>
               </template>
             </el-table-column>
@@ -571,7 +512,22 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="scope.row.saveOrcompile === 1"
+                  v-if="
+                    scope.row.file &&
+                      typeof scope.row.file.percent === 'number' &&
+                      scope.row.file.percent < 100
+                  "
+                  type="text"
+                  size="medium"
+                  @click="controlUpload(scope.$index)"
+                >
+                  {{ scope.row.file.uploading ? '暂停' : '继续' }}
+                </el-button>
+
+                <el-button
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 1
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 0"
@@ -579,7 +535,9 @@
                   编辑
                 </el-button>
                 <el-button
-                  v-if="scope.row.saveOrcompile === 0"
+                  v-if="
+                    (scope.row.content || scope.row.upLoad.length) && scope.row.saveOrcompile === 0
+                  "
                   type="text"
                   size="medium"
                   @click="scope.row.saveOrcompile = 1"
@@ -589,7 +547,7 @@
                 <el-button
                   type="text"
                   size="medium"
-                  @click="delContent(scope.$index)"
+                  @click="delContent(scope.row, scope.$index)"
                 >
                   删除
                 </el-button>
@@ -689,7 +647,6 @@ import {
   listTeacher
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
-
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload'),
@@ -697,6 +654,7 @@ export default {
   },
   data() {
     return {
+      isMultiple: false,
       parentOrgIdLabel: '',
       remember: true,
       disabledBtn: false,
@@ -781,7 +739,17 @@ export default {
       },
       rulesDialog: {
         localName: [{ required: true, message: '请输入标题', trigger: ['blur'] }]
-      }
+      },
+      uploadRef: [
+        {
+          tips: '上传课件',
+          beforeUpload: 'CoursewareUpload'
+        },
+        {
+          tips: '上传资料',
+          beforeUpload: 'DataUpload'
+        }
+      ]
     }
   },
   watch: {
@@ -807,8 +775,21 @@ export default {
     }
   },
 
-  created() {},
+  created() {
+    // 检测断线重连
+    window.addEventListener('online', () => {
+      this.ruleForm.contents.map((c) => {
+        const { isComplete, ob } = c.file || {}
+        if (!isComplete) {
+          ob.subscription = ob.subscribe(ob.hooks)
+        }
+      })
+    })
+  },
   activated() {
+    this.uploadRef.forEach((ref) => {
+      ref.beforeUpload = this[ref.beforeUpload]
+    })
     this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
@@ -818,59 +799,44 @@ export default {
   },
 
   methods: {
-    progressFormat(percentage) {
-      return `已上传 ${percentage}%`
-    },
-    onBUError(file) {
-      const { name, uid } = file
+    onUploadComplete() {
       const contents = this.ruleForm.contents
-      if (!contents.find((item) => item.uid === uid)) {
-        contents.push({
-          url: '',
-          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-          sort: '', //序号
-          type: 2, //章节类型
-          name: '社区的商业模式', // 章节名称
-          content: '', //文章内容
-          upLoad: [
-            {
-              localName: name,
-              uid,
-              percent: 0
-            }
-          ], //[url,localName],  //所有上传的文件
-          saveOrcompile: 1, // 1保存&0编辑
-          uid
-        })
+      if (contents.every((c) => c.file && c.file.isComplete) && contents.pending) {
+        this.isAddCourse(contents.addStatus)
       }
-      this.$forceUpdate()
     },
-    onBUProgress(file) {
-      const { percent, name, uid } = file
-      const contents = this.ruleForm.contents
-      let cur
-      if ((cur = contents.find((item) => item.uid === uid))) {
-        cur.upLoad[0].percent = percent
+    controlUpload(index) {
+      const content = this.ruleForm.contents[index]
+      const file = content.file
+      const uploading = (file.uploading = !file.uploading)
+      // 继续上传
+      if (uploading) {
+        const subscription = file.ob.subscribe(file.ob.hooks)
+        file.ob.subscription = subscription
       } else {
-        contents.push({
-          url: '',
-          localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-          sort: '', //序号
-          type: 2, //章节类型
-          name: '社区的商业模式', // 章节名称
-          content: '', //文章内容
+        // 暂停上传
+        file.uploader.abort(file)
+        file.ob.subscription.unsubscribe()
+      }
+    },
+    // 批量上传课件
+    onUploadProgress(file, content, index) {
+      const contents = this.ruleForm.contents
+      if (!contents.find((c) => c.file === file)) {
+        const c = {
+          saveOrcompile: 1,
+          type: content ? content.type : 2,
+          name: content ? content.name : '社区的商业模式',
           upLoad: [
             {
-              localName: name,
-              uid,
-              percent
+              localName: file.file.name
             }
-          ], //[url,localName],  //所有上传的文件
-          saveOrcompile: 1, // 1保存&0编辑
-          uid
-        })
+          ],
+          file
+        }
+        const i = typeof index === 'number' ? index : contents.length
+        contents.splice(i, 1, c)
       }
-      this.$forceUpdate()
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
@@ -882,9 +848,14 @@ export default {
       // this.$router.push({ path: '/course/courseDraft' })
       this.$router.go(-1)
       // this.isdeleteData()
+      const contents = this.ruleForm.contents
+      if (contents.pending) return
       this.$refs.ruleForm.clearValidate()
+      contents.forEach((c, i) => {
+        this.delContent(c, i)
+      })
+      this.ruleForm.contents = []
     },
-
     islistTeacher() {
       listTeacher().then((res) => {
         this.TeacherData = res
@@ -975,11 +946,51 @@ export default {
 
     // 发布&草稿
     isAddCourse(status) {
+      const contents = this.ruleForm.contents
+      // 还有正在上传的文件
+      if (
+        contents.some(
+          (item) => item.file && typeof item.file.percent === 'number' && item.file.percent < 100
+        )
+      ) {
+        // 提示
+        const message =
+          status === 2
+            ? '正在上传附件，上传完成后将自动保存至草稿箱'
+            : '正在上传附件，上传完成后将自动发布'
+        this.$message({
+          message,
+          type: 'warning'
+        })
+        // 保存发布类型
+        contents.addStatus = status
+        // 设置标志位
+        contents.pending = true
+        return
+      }
+
+      delete contents.addStatus
+      delete contents.pending
+      let params = {}
+      Object.keys(this.ruleForm).forEach((key) => {
+        if (key === 'contents') return
+        params[key] = this.ruleForm[key]
+      })
+
+      params.contents = contents.map((item) => {
+        const n = {}
+        Object.keys(item).forEach((key) => {
+          if (key === 'file') return
+          n[key] = item[key]
+        })
+        return n
+      })
+
       if (this.remember) {
-        this.ruleForm.imageUrl = this.ruleForm.imageUrl.splice(1, 1)
+        params.imageUrl = params.imageUrl.splice(1, 1)
       }
       this.remember = false
-      this.ruleForm.contents.map((item, index) => {
+      params.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
@@ -987,18 +998,17 @@ export default {
             item.upLoad[item.upLoad.length - 1].url || item.upLoad[item.upLoad.length - 1].content
         }
       })
-      this.ruleForm.localName = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
-        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].localName
+      params.localName = params.imageUrl[params.imageUrl.length - 1]
+        ? params.imageUrl[params.imageUrl.length - 1].localName
         : ''
-      this.ruleForm.url = this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1]
-        ? this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url
+      params.url = params.imageUrl[params.imageUrl.length - 1]
+        ? params.imageUrl[params.imageUrl.length - 1].url
         : ''
 
-      let params = JSON.parse(JSON.stringify(this.ruleForm))
-      delete params.imageUrl
       params.contents.forEach((item) => {
         delete item.upLoad
       })
+
       // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
       // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
@@ -1082,7 +1092,7 @@ export default {
             this.$router.push({ path: '/course/courseDraft?status=' + status })
           }, 3000)
         })
-        .catch(console.error)
+        .catch((e) => console.error(e))
     },
     // 清空数据
     isdeleteData() {
@@ -1193,9 +1203,13 @@ export default {
     },
 
     // 删除
-    delContent(index) {
-      // console.log(index)
-      this.ruleForm.contents.splice(index, 1)
+    delContent(c, i) {
+      this.ruleForm.contents.splice(i, 1)
+      if (!c.file) return
+      const { ob, uploader } = c.file
+      ob.subscription.unsubscribe()
+      uploader.abort(c.file)
+      uploader.$destroy()
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
