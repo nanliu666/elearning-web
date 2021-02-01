@@ -141,7 +141,7 @@ export default {
         itemType: 'slot',
         label: '成绩',
         span: 24,
-        required: true,
+        rules: [{ required: true, message: '请输入成绩', trigger: ['blur', 'change'] }],
         props: {
           onlyNumber: true
         }
