@@ -202,7 +202,7 @@
             :key="index"
             class="item_box"
           >
-            {{ item.catalogName }}
+            {{ item.courseName }}
           </div>
         </div>
       </div>
@@ -407,6 +407,7 @@ export default {
             } else {
               // 如果有课程
               this.blockDialogVisible = true
+              debugger
               this.CourseList = res.data
               this.showBtnDel = false
             }

@@ -1,9 +1,4 @@
-import {
-  del,
-  get,
-  post,
-  put
-} from '@/router/axios'
+import { del, get, post, put } from '@/router/axios'
 /**
  * 审批流程列表查询接口
  * @param {*} params
@@ -39,6 +34,11 @@ export const stopProcess = (params) => post('/appr/v2/appr/process/stop', params
  * 审批流程启用接口
  */
 export const startProcess = (params) => post('/appr/v2/appr/process/start', params)
+
+/**
+ * 审批流程删除接口
+ */
+export const deleteProcess = (params) => post('/appr/v2/appr/process/del', params)
 
 // 审批历史记录、审批进度
 export const getApprRecord = (params) => get('/appr/v2/appr/apply/record', params)
@@ -121,11 +121,6 @@ export const renameProcessCategory = (params) => put('/appr/v2/appr/category', p
  * 审批分组删除接口
  */
 export const deleteCategory = (params) => del('/appr/v2/appr/category', params)
-/**
- * 审批流程删除接口
- */
-export const deleteProcess = (params) => post('/appr/v2/appr/process/del', params)
-
 /**
  * 未启用审批流程列表查询接口
  */

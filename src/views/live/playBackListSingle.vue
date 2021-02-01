@@ -73,7 +73,7 @@ export default {
         currentPage: 0,
         totalNum: 0
       },
-      identityType:''
+      identityType: ''
     }
   },
   activated() {
@@ -91,22 +91,20 @@ export default {
     },
     repRecover(item) {
       // 恢复
-      this.$confirm(`讲师已删除该直播回放，您确定要恢复吗`, '提示', {
+      this.$confirm('讲师已删除该直播回放，您确定要恢复吗', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      })
-        .then(() => {
-          let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
-          setReplayStatus(sendPar).then(() => {
-            this.initPlayBackData()
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
+      }).then(() => {
+        let sendPar = { videoId: item.id.toString(), lecturerDeleted: '0' }
+        setReplayStatus(sendPar).then(() => {
+          this.initPlayBackData()
+          this.$message({
+            message: '操作成功',
+            type: 'success'
           })
         })
-
+      })
     },
     repRelease(item) {
       // 发布 下架
@@ -121,7 +119,7 @@ export default {
     },
     repDownload(url) {
       if (!url) {
-        this.$message.error('视频路径不存在');
+        this.$message.error('视频路径不存在')
         return
       }
       // 下载
@@ -140,15 +138,23 @@ export default {
     },
     repDelete(item) {
       // 删除  0:管理员删除 1：讲师删除
-      this.$confirm(`${this.identityType===0?'您确定要删除该直播回放吗?':'该直播回放已发布，删除后学员将不可见，您确定要删除该直播回放吗？'}`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
+      this.$confirm(
+        `${
+          this.identityType === 0
+            ? '您确定要删除该直播回放吗?'
+            : '该直播回放已发布，删除后学员将不可见，您确定要删除该直播回放吗？'
+        }`,
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
         .then(() => {
           let sendPar = {
             videoId: item.id.toString(),
-            [`${this.identityType?'lecturerDeleted':'isDeleted'}`]:'1'
+            [`${this.identityType ? 'lecturerDeleted' : 'isDeleted'}`]: '1'
           }
           setReplayStatus(sendPar).then(() => {
             this.initPlayBackData()

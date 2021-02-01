@@ -180,6 +180,7 @@ export default {
         {}
       )
       this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
+      this.$emit('update:user-list', this.userList)
     }
   }
 }
