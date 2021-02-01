@@ -110,7 +110,7 @@ instance.interceptors.response.use(
         addLoading(res)
       } else {
         Message({
-          message: message,
+          message: '服务请求出错，请联系管理员', // message,
           type: 'error',
           showClose: true
         })
