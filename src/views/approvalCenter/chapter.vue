@@ -1,7 +1,11 @@
 <template>
   <div class="course-learn">
     <div class="course-learn_header">
-      <page-header title="查看章节内容" show-back :back="goBack" />
+      <page-header
+        title="查看章节内容"
+        show-back
+        :back="goBack"
+      />
     </div>
 
     <div class="course-learn__main">
@@ -22,8 +26,7 @@
                       color: _.get(COURSE_CHAPTER_TYPE_MAP, `${chapter.type}.color`, ''),
                       'border-color': _.get(COURSE_CHAPTER_TYPE_MAP, `${chapter.type}.color`, '')
                     }"
-                    >{{ _.get(COURSE_CHAPTER_TYPE_MAP, `${chapter.type}.text`, '') }}</span
-                  >
+                  >{{ _.get(COURSE_CHAPTER_TYPE_MAP, `${chapter.type}.text`, '') }}</span>
                   <span class="chapters__title">{{ chapter.name }}</span>
                 </div>
               </li>
@@ -37,9 +40,18 @@
         :class="['main-content', { fullwidth: leftHidden }]"
         :style="`${currentChapter.type == '5' ? 'overflow:hidden;' : ''}`"
       >
-        <div class="collapse-btn" @click="collapseLeft()">
-          <i v-if="!leftHidden" class="el-icon-d-arrow-left"></i>
-          <i v-else class="el-icon-d-arrow-right"></i>
+        <div
+          class="collapse-btn"
+          @click="collapseLeft()"
+        >
+          <i
+            v-if="!leftHidden"
+            class="el-icon-d-arrow-left"
+          ></i>
+          <i
+            v-else
+            class="el-icon-d-arrow-right"
+          ></i>
         </div>
         <!-- 文章类型 -->
         <div
@@ -48,7 +60,10 @@
           v-html="_.unescape(currentChapter.content)"
         ></div>
         <!-- 课件 -->
-        <div v-if="currentChapter.type == '2'" class="content--iframe">
+        <div
+          v-if="currentChapter.type == '2'"
+          class="content--iframe"
+        >
           <video
             v-if="isVideo"
             ref="video"
@@ -66,7 +81,10 @@
           ></iframe>
         </div>
         <!--资料-->
-        <div v-if="currentChapter.type == '3'" class="content--download">
+        <div
+          v-if="currentChapter.type == '3'"
+          class="content--download"
+        >
           <div class="img-wr">
             <img :src="getFileImageUrl(currentChapter.content)" />
           </div>
@@ -74,14 +92,28 @@
             <div class="file-name">
               {{ currentChapter.localName }}
             </div>
-            <a target="_blank" :href="currentChapter.content">
-              <el-button type="primary" size="medium">立即下载</el-button>
+            <a
+              target="_blank"
+              :href="currentChapter.content"
+            >
+              <el-button
+                type="primary"
+                size="medium"
+              >立即下载</el-button>
             </a>
           </div>
         </div>
         <!--考试-->
-        <div v-if="currentChapter.type == '4'" class="content--test">
-          <el-button type="primary" size="medium"> 前往考试 </el-button>
+        <div
+          v-if="currentChapter.type == '4'"
+          class="content--test"
+        >
+          <el-button
+            type="primary"
+            size="medium"
+          >
+            前往考试
+          </el-button>
         </div>
         <!--视频-->
         <div v-if="currentChapter.type == '5'">
