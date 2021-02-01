@@ -36,12 +36,14 @@
             <li
               v-for="(item, index) in formData.attachments"
               :key="index"
-              style="cursor: pointer;"
+              class="uploader-li"
             >
               <span
-                class="uploader-file"
+                class="uploader-file ellipsis"
                 @click.stop="previewFile(item)"
-              >{{ item.fileName }}</span>
+              >{{
+                item.fileName
+              }}</span>
               <i
                 class="el-icon-close"
                 @click.stop="deleteUpload(item)"
@@ -462,13 +464,17 @@ $color_font_uploader: #a0a8ae;
 }
 .uploader-ul {
   margin-top: 4px;
-  li {
+  .uploader-li {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 4px;
+    cursor: pointer;
     &:hover {
       color: $primaryColor;
+    }
+    .uploader-file {
+      width: 50%;
     }
   }
 }

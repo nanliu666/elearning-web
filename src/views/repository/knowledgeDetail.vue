@@ -78,10 +78,7 @@
               {{ konwledgeDetail.commentNum }}
             </div>
           </li>
-          <li
-            v-if="konwledgeDetail.allowDownload === 1"
-            class="bottom-li"
-          >
+          <li class="bottom-li">
             <div class="bottom-li-title">
               下载人数
             </div>
@@ -123,9 +120,9 @@
               class="image__li"
             >
               <common-image-view
+                :is-download="true"
                 :url="item.url"
                 :file-name="item.fileName"
-                :is-download="konwledgeDetail.allowDownload === 1"
                 :preview-src-list="previewSrcList"
                 @downloadFile="downloadFile"
               />
@@ -138,11 +135,10 @@
             <li class="file-title">
               <span>{{ item.fileName }}</span>
               <i
-                v-if="konwledgeDetail.allowDownload === 1"
                 class="el-icon-download"
                 style="margin-left: 10px; cursor: pointer"
                 @click.stop="downloadFile(item.url)"
-              ></i>
+              />
             </li>
           </ul>
         </section>
