@@ -3,6 +3,7 @@
     <!-- 头部 -->
     <div class="head">
       <i class="el-icon-arrow-left icon" @click="tocourseDraft"></i>
+
       <div class="schedule">
         <div :class="{ sign: headIndex === 1 }" class="schedule1" @click="headIndex = 1">
           <i class="el-icon-info"></i> 填写课程信息
@@ -46,10 +47,7 @@
           <el-col :span="2"> </el-col>
           <el-col :span="11">
             <el-form-item label="讲师" prop="teacherId">
-              <!-- <el-input v-model="ruleForm.teacherId" maxlength="32"></el-input> -->
-              <el-select v-model="ruleForm.teacherId" placeholder="请选择讲师" filterable>
-                <!-- <el-option label="在线课程" :value="1"></el-option> -->
-
+              <el-select v-model="ruleForm.teacherId" placeholder="请选择讲师">
                 <el-option
                   v-for="(item, index) in TeacherData"
                   :key="index"
@@ -60,16 +58,16 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第二行 -->
         <el-row>
           <el-col :span="11">
             <el-form-item label="所在分类" prop="catalogId">
               <!-- <el-cascader
                 v-model="ruleForm.catalogId"
-                :props="{ value: 'id', label: 'name' }"
+                :props="{ value: 'id', label: 'name', checkStrictly: true }"
                 :options="catalogIdoptions"
               ></el-cascader> -->
+
               <el-select v-model="ruleForm.catalogId" :multiple-limit="10" placeholder="请选择">
                 <el-option
                   style="height: auto; padding: 0"
@@ -82,7 +80,8 @@
                     node-key="catalogId"
                     :props="{
                       children: 'children',
-                      label: 'name'
+                      label: 'name',
+                      value: 'id'
                     }"
                     @node-click="handleOrgNodeClick"
                   />
@@ -101,7 +100,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
@@ -113,8 +111,8 @@
               <el-input-number
                 v-model="ruleForm.period"
                 controls-position="right"
-                :max="100"
                 :min="0"
+                :max="100"
                 :step="0.5"
                 @change="handleChange"
               ></el-input-number>
@@ -136,6 +134,7 @@
         </el-row>
 
         <!-- 第四行 -->
+        <!-- {{ruleForm.passCondition}} -->
         <el-row>
           <el-col :span="11">
             <el-form-item label="通过条件" prop="passCondition">
@@ -157,6 +156,7 @@
             </el-form-item>
           </el-col>
         </el-row>
+
         <!-- 第五行 -->
         <!-- <span>添加标签</span> -->
         <el-row class="switch_box">
@@ -184,14 +184,13 @@
                 v-model="ruleForm.isRecommend"
                 active-color="#198cff"
                 inactive-color="#a0a8ae"
-                :active-value="1"
-                :inactive-value="0"
               >
               </el-switch>
             </div>
           </el-col>
         </el-row>
         <!-- 第六行 -->
+
         <el-row>
           <el-col :span="10">
             <el-form-item label="课程封面" prop="imageUrl">
@@ -206,7 +205,9 @@
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">
                   <div>将文件拖到此处，或<em>点击上传</em><br /></div>
-                  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过10MB</div>
+                  <div slot="tip" class="el-upload__tip">
+                    只能上传jpg/jpeg/png文件，且不超过10MB
+                  </div>
                 </div>
                 <img
                   v-if="ruleForm.imageUrl[0]"
@@ -221,13 +222,13 @@
         <!-- 第七行 -->
         <div class="editorTitle">
           <el-form-item label="课程介绍" prop="introduction">
-            <tinymce v-model="ruleForm.introduction" />
+            <tinymce v-model="ruleForm.introduction" :init="{ height: 100 }" />
           </el-form-item>
         </div>
       </el-form>
 
       <!-- 填写课前思考内容 -->
-      <div v-show="headIndex == 2">
+      <div v-show="headIndex === 2">
         <div class="editorTitle">
           <div class="reflectTitle">课前思考</div>
           <tinymce v-model="ruleForm.thinkContent" />
@@ -266,9 +267,7 @@
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile == 1">{{
-                  scope.row.name || scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -297,7 +296,6 @@
             <!-- 第四列 -->
             <el-table-column prop="type" label="内容" width="250">
               <template slot-scope="scope">
-                <!-- {{typeOption[scope.row.type - 1]}} -->
                 <div v-if="scope.row.saveOrcompile == 0">
                   <span v-if="typeOption[scope.row.type - 1]" size="medium">
                     <el-button
@@ -374,7 +372,7 @@
                     <span
                       v-if="
                         typeOption[scope.row.type - 1].value == 2 &&
-                        isNaN(scope.row.upLoad[0].percent)
+                          isNaN(scope.row.upLoad[0].percent)
                       "
                     >
                       <span v-if="scope.row.upLoad">{{
@@ -387,7 +385,7 @@
                     <span
                       v-if="
                         typeOption[scope.row.type - 1].value == 2 &&
-                        !isNaN(scope.row.upLoad[0].percent)
+                          !isNaN(scope.row.upLoad[0].percent)
                       "
                     >
                       <el-progress
@@ -674,7 +672,7 @@ export default {
     onBUError(file) {
       const { name, uid } = file
       const contents = this.ruleForm.contents
-      if (!contents.find((item) => item.uid === uid)) {
+      if (!contents.find((item) => item.uid == uid)) {
         contents.push({
           url: '',
           localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
