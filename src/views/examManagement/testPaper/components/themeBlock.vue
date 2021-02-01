@@ -327,7 +327,8 @@ export default {
             content: it.content,
             timeLimit: it.timeLimit,
             type: it.type,
-            id: it.id
+            id: it.id,
+            questionId: it.questionId
           }
         })
 
@@ -335,7 +336,7 @@ export default {
           key: it.id,
           content: it.content,
           type: it.type,
-          questionId: it.id,
+          questionId: it.questionId,
           score: it.score || undefined,
           Original: it.score || undefined,
           timeLimit: it.timeLimit ? it.timeLimit : '0'
