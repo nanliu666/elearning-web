@@ -10,7 +10,7 @@
     <div class="title_box">
       <div class="title_box_headline">
         <div class="title_box_headline_l">
-          Java编程十大核心思维
+          {{ showTrainDetail.trainName }}
           <span>未开始</span>
         </div>
         <div class="title_box_headline_r">
@@ -30,13 +30,20 @@
             结办
           </el-button>
 
-          <el-dropdown class="isel-dropdown">
+          <el-dropdown
+            class="isel-dropdown"
+            @command="handleCommand($event)"
+          >
             <span class="el-dropdown-link">
               更多<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>编辑</el-dropdown-item>
-              <el-dropdown-item>删除</el-dropdown-item>
+              <el-dropdown-item command="edit">
+                编辑
+              </el-dropdown-item>
+              <el-dropdown-item command="del">
+                删除
+              </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -764,7 +771,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '请输入目录名称搜索' },
+    config: { placeholder: '请输入学员名称搜索' },
     data: '',
     field: 'stuName',
     label: '',
@@ -1063,6 +1070,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
+        this.$router.push({ path: '/training/edit', query: { id: this.$route.query.id } })
       }
       if (e === 'del') {
         // 删除
