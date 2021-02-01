@@ -179,8 +179,8 @@ export default {
       this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.roleId))
     },
     handleUnselectAll() {
-      this.selectList = this.selectList.filter((item) => !this.genClosable(item))
-      this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.roleId))
+      this.selectList = []
+      this.$refs.tree.setCheckedKeys([])
     },
     close() {
       this.clear()

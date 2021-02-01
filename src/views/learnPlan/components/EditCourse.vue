@@ -168,6 +168,10 @@ export default {
   },
   computed: {},
   methods: {
+    // 清空数据
+    reset() {
+      Object.assign(this.$data, this.$options.data())
+    },
     // 考试安排提交后
     handleExamineSubmit(data, type) {
       if (type == 'add') {
@@ -182,15 +186,18 @@ export default {
         this.editingExam = null
       }
     },
+    // 编辑课程考试
     handleExamEdit(course, exam) {
       this.editingExamCourse = course
       this.editingExam = exam || null
       this.examDrawerVisible = true
     },
+    // 替换课程
     handleReplaceCourse(course) {
       this.replacingCourse = course
       this.courseDialogVisible = true
     },
+    // 父组件调用的更新方法,更新已选择的课程并组装数据
     setCourseList(list) {
       const res = _.map(list, (course) => {
         let _course = {
@@ -206,6 +213,7 @@ export default {
       })
       this.courseList = res
     },
+    // 批量校验所有课程，校验通过即返回所有课程数据
     getData() {
       return new Promise((resolve, reject) => {
         Promise.all(_.map(this.$refs.courseItem, (ref) => ref.$refs.form.validate()))
@@ -273,25 +281,30 @@ export default {
         })
       }
     },
+    // 加载课程关联的考试
     loadExamsOfCourse(course) {
       getCourseExam({ id: course.courseId }).then((exams) => {
         course.studyExam.push(..._.map(exams, (exam) => ({ ...exam, id: createUniqueID() })))
       })
     },
+    // 全选回调
     handleCheckAllChange(val) {
-      // 全选回调
       this.checkedCourseIds = val ? this.courseList.map((item) => item.courseId) : []
       this.isIndeterminate = false
     },
+    // 控制全选复选框的状态
     checkboxGroupChange(value) {
       let checkedCount = value.length
+      // 全选状态
       this.checkAll = checkedCount === this.courseList.length && checkedCount !== 0
+      // 半选状态
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.courseList.length
     },
+    // 批量修改
     handleBatchEdit() {
-      // 批量修改
       this.batchDialogVisible = true
     },
+    // 批量修改回调
     handleBatchEditSubmit(data) {
       _.forEach(this.courseList, (course) => {
         if (this.checkedCourseIds.includes(course.courseId)) {
@@ -303,18 +316,19 @@ export default {
         }
       })
     },
-
+    // 设置前置条件
     handleSetPrecondition(course) {
-      // 设置前置条件
       this.settingPreCourse = course
       this.precondDialogVisible = true
       setTimeout(() => {
         this.$refs['preEdit'].update()
       })
     },
+    // 设置前置条件回调
     handleSetPrecondSubmit(list) {
       this.settingPreCourse.beforeCourse = list
     },
+    // 删除课程
     handleDeleteCourse() {
       this.courseList = _.filter(
         this.courseList,
@@ -323,6 +337,7 @@ export default {
       this.checkedCourseIds = []
       this.checkboxGroupChange(this.checkedCourseIds)
     },
+    // 添加课程
     handleAddCourse() {
       this.courseDialogVisible = true
     }

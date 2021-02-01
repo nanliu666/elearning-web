@@ -159,6 +159,11 @@ export default {
     }
     next(callback)
   },
+  beforeRouteLeave(to, from, next) {
+    // 离开时重置课程编辑数据
+    this.$refs.editCourse.reset()
+    next()
+  },
   computed: {
     id() {
       return this.$route.query.id

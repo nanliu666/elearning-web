@@ -198,36 +198,40 @@
                 slot="handler"
                 slot-scope="scope"
               >
-                <el-button class="marginLine"
+                <el-button
                   v-if="scope.row.status == 1"
                   v-p="STOP_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 0)"
                 >
                   停用
                 </el-button>
-                <span  class="marginLineColor"
+                <span
                   v-else
                   v-p="STOP_LECTURER"
+                  class="marginLineColor"
                   style=" cursor:pointer; "
                   size="medium"
                   @click.stop="iseditSysRulus(scope.row, 1)"
                 >
                   启用
                 </span>
-               
-                <el-button  class="marginLine"
+
+                <el-button
                   v-p="EDIT_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="tocompileLecturer(scope.row)"
                 >
                   编辑
                 </el-button>
-               
-                <el-button  class="marginLine"
+
+                <el-button
                   v-p="DELETE_LECTURER"
+                  class="marginLine"
                   type="text"
                   size="medium"
                   @click.stop="isTeacherdelete(scope.row)"
@@ -1104,14 +1108,12 @@ $color_icon: #A0A8AE
   }
 }
 
-.marginLine{
-  margin-left:20px;
+.marginLine {
+  margin-left: 20px;
 }
 
-.marginLineColor{
-  color:#01aafc;
-  margin-left:20px;
+.marginLineColor {
+  color: #01aafc;
+  margin-left: 20px;
 }
-
-
 </style>

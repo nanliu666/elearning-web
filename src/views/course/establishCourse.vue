@@ -848,15 +848,14 @@ export default {
       // this.$router.push({ path: '/course/courseDraft' })
       this.$router.go(-1)
       // this.isdeleteData()
-      this.$refs.ruleForm.clearValidate()
       const contents = this.ruleForm.contents
-      if (!contents.pending) {
-        contents.forEach((c, i) => {
-          this.delContent(c, i)
-        })
-      }
+      if (contents.pending) return
+      this.$refs.ruleForm.clearValidate()
+      contents.forEach((c, i) => {
+        this.delContent(c, i)
+      })
+      this.ruleForm.contents = []
     },
-
     islistTeacher() {
       listTeacher().then((res) => {
         this.TeacherData = res
@@ -1067,7 +1066,7 @@ export default {
               // 状态设置为审批中
               params.status = 0
               addCourse(params).then(({ id }) => {
-                this.submitApprApply(id)
+                this.submitApprApply(params.id ? params.id : id)
               })
             })
           }
@@ -1080,7 +1079,7 @@ export default {
     // 提交课程审批
     submitApprApply(courseId) {
       this.$refs.apprSubmit
-        .submit({ formId: courseId, processName: categoryMap['1'] })
+        .submit({ formId: courseId, processName: categoryMap['1'], formKey: 'CourseApplyInfo' })
         .then(() => {
           this.$message({
             message: '本课程已发布成功',
@@ -1210,6 +1209,7 @@ export default {
       const { ob, uploader } = c.file
       ob.subscription.unsubscribe()
       uploader.abort(c.file)
+      uploader.$destroy()
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {

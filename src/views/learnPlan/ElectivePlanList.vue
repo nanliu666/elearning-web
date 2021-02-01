@@ -285,6 +285,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
+          this.$refs.table.clearSelection()
           this.loadTableData()
         })
         .catch()

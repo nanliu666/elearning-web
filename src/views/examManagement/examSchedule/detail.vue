@@ -125,17 +125,17 @@
               <div class="content">
                 <span>积分：</span>
                 <span>{{
-                  examDetail.integral === 0
+                  !examDetail.integral
                     ? '本考试记录系统没有积分'
-                    : `本考试记录系统积分${examDetail.integral}分`
+                    : `本考试记录系统积分${examDetail.integralValue}分`
                 }}</span>
               </div>
               <div class="content">
                 <span>发布考试：</span>
                 <span>{{
-                  examDetail.publishTime === 0
+                  !examDetail.publishTime
                     ? '马上发布考试'
-                    : `考试开始前${examDetail.publishTime}分钟发布考试信息`
+                    : `考试开始前${examDetail.publishTimeValue}分钟发布考试信息`
                 }}</span>
               </div>
             </div>
@@ -256,7 +256,7 @@
               </div>
               <div class="content">
                 <span>多选题：</span>
-                <span>完全正确得分</span>
+                <span>{{ examDetail.multipleChoice | textFilter }}</span>
               </div>
             </div>
           </li>
@@ -533,6 +533,18 @@ import styles from '@/styles/variables.scss'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
+  filters: {
+    textFilter(key) {
+      const TEXT = {
+        0: '完全正确得分',
+        1: '按正确选项个数计分',
+        2: '每项得扣分',
+        3: '每项答错扣分',
+        4: '每正确项得分'
+      }
+      return TEXT[key]
+    }
+  },
   data() {
     return {
       activeColor: styles.primaryColor,
