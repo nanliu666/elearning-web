@@ -98,6 +98,12 @@
           >
             编辑
           </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(row)"
+          >
+            删除
+          </el-button>
         </template>
       </common-table>
     </basic-container>
@@ -105,7 +111,12 @@
 </template>
 <script>
 import { categoryOptions, categoryMap } from '@/const/approve'
-import { getProcessList, startProcess, stopProcess } from '@/api/apprProcess/apprProcess'
+import {
+  getProcessList,
+  startProcess,
+  stopProcess,
+  deleteProcess
+} from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
 const statusDict = {
   No: '停用',
@@ -234,12 +245,21 @@ export default {
       this.loadTableData()
     },
     /**
+     * 删除审批
+     */
+    handleDelete(data) {
+      deleteProcess({ processId: data.processId }).then(() => {
+        this.$message.success('删除成功')
+        this.refresh()
+      })
+    },
+    /**
      * 停用审批
      */
     disableApproval(data) {
       stopProcess({ processId: data.processId }).then(() => {
         this.$message.success('停用成功')
-        this.refres()
+        this.refresh()
       })
     },
     /**
