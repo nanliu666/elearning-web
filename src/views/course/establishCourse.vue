@@ -629,6 +629,7 @@
         </div>
       </div>
     </div>
+    <!-- 审批发起组件 -->
     <appr-submit
       ref="apprSubmit"
       @submit="handleSubmit"
@@ -1061,6 +1062,7 @@ export default {
               type: 'warning'
             })
           } else {
+            // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
             this.$refs.apprSubmit.validate().then(() => {
               this.disabledBtn = true
               // 状态设置为审批中
@@ -1073,6 +1075,7 @@ export default {
         })
       }
     },
+    // 审批发起组件的弹窗确认回调
     handleSubmit() {
       this.isAddCourse(1)
     },
