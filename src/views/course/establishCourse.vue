@@ -1079,7 +1079,13 @@ export default {
     // 提交课程审批
     submitApprApply(courseId) {
       this.$refs.apprSubmit
-        .submit({ formId: courseId, processName: categoryMap['1'], formKey: 'CourseApplyInfo' })
+        .submit({
+          formId: courseId,
+          processName: categoryMap['1'],
+          formKey: 'CourseApplyInfo',
+          // 课程标题
+          formTitle: this.ruleForm.name
+        })
         .then(() => {
           this.$message({
             message: '本课程已发布成功',
