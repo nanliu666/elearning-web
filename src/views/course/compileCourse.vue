@@ -838,7 +838,7 @@ export default {
         const c = {
           saveOrcompile: 1,
           type: content ? content.type : 2,
-          name: content ? content.name : '社区的商业模式',
+          name: content ? content.name : file.file.name || '社区的商业模式',
           upLoad: [
             {
               localName: file.file.name

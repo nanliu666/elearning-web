@@ -86,7 +86,7 @@
           <div class="menuClass">
             <el-button
               type="text"
-              :disabled="getButtonDisabled(row)"
+              :disabled="row.disabled"
               @click="handleStatus(row)"
             >
               {{ row.status == '1' ? '停用' : '启用' }}
@@ -204,17 +204,18 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 1, label: '启用' },
+              { value: 0, label: '停用' }
             ]
           },
           {
+            placeholder: '请选择',
             type: 'select',
             field: 'id',
             data: '',
             label: '创建人',
             options: [],
-            config: { optionLabel: 'name', optionValue: 'id' }
+            config: { optionLabel: 'name', optionValue: 'id', placeholder: '请选择' }
           }
         ]
       },
@@ -261,7 +262,7 @@ export default {
       let target = {}
       const loop = function(data) {
         _.each(data, (item) => {
-          if (row.parentId === item.id) {
+          if (row.parentIdStr == item.idStr) {
             target = item
           }
           if (!_.isEmpty(item.children)) {
@@ -340,7 +341,7 @@ export default {
         params.source = 'live'
         this.tableLoading = true
         getCategoryTree(params).then((res) => {
-          this.tableData = res
+          this.tableData = this.setDisableStatus(res)
           this.tableLoading = false
         })
         this.$refs.orgEdit.loadOrgTree()
@@ -349,6 +350,15 @@ export default {
       } finally {
         this.tableLoading = false
       }
+    },
+    setDisableStatus(list = [], parent) {
+      list.forEach((item) => {
+        if (parent && parent.status == '0') {
+          item.disabled = true
+        }
+        this.setDisableStatus(item.children, item)
+      })
+      return list
     },
     changevisible(data) {
       this.createOrgDailog = data
@@ -374,7 +384,7 @@ export default {
     handleStatus(row) {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status == '0' ? '停用' : '启用'
+      const statusText = row.status == '0' ? '启用' : '停用'
       const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
