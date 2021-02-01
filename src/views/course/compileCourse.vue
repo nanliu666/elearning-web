@@ -2,30 +2,16 @@
   <div class="establishCourse">
     <!-- 头部 -->
     <div class="head">
-      <i
-        class="el-icon-arrow-left icon"
-        @click="tocourseDraft"
-      ></i>
+      <i class="el-icon-arrow-left icon" @click="tocourseDraft"></i>
+
       <div class="schedule">
-        <div
-          :class="{ sign: headIndex === 1 }"
-          class="schedule1"
-          @click="headIndex = 1"
-        >
+        <div :class="{ sign: headIndex === 1 }" class="schedule1" @click="headIndex = 1">
           <i class="el-icon-info"></i> 填写课程信息
         </div>
-        <div
-          :class="{ sign: headIndex === 2 }"
-          class="schedule2"
-          @click="headIndex = 2"
-        >
+        <div :class="{ sign: headIndex === 2 }" class="schedule2" @click="headIndex = 2">
           <i class="el-icon-s-marketing"></i> 填写课前思考内容
         </div>
-        <div
-          :class="{ sign: headIndex === 3 }"
-          class="schedule3"
-          @click="headIndex = 3"
-        >
+        <div :class="{ sign: headIndex === 3 }" class="schedule3" @click="headIndex = 3">
           <i class="el-icon-s-tools"></i> 上传课程内容
         </div>
       </div>
@@ -33,18 +19,10 @@
         <!-- <el-button size="medium">
           预览
         </el-button> -->
-        <el-button
-          size="medium"
-          @click="isAddCourse(2)"
-        >
+        <el-button size="medium" @click="isAddCourse(2)">
           存草稿
         </el-button>
-        <el-button
-          size="medium"
-          type="primary"
-          :disabled="disabledBtn"
-          @click="isAddCourse(1)"
-        >
+        <el-button size="medium" type="primary" :disabled="disabledBtn" @click="isAddCourse(1)">
           发布
         </el-button>
       </div>
@@ -64,29 +42,15 @@
         <!-- 第一行 -->
         <el-row>
           <el-col :span="11">
-            <el-form-item
-              label="课程名称"
-              prop="name"
-            >
-              <el-input
-                v-model="ruleForm.name"
-                maxlength="32"
-              ></el-input>
+            <el-form-item label="课程名称" prop="name">
+              <el-input v-model="ruleForm.name" maxlength="32"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-          </el-col>
+          <el-col :span="2"> </el-col>
           <el-col :span="11">
-            <el-form-item
-              label="讲师"
-              prop="teacherId"
-            >
+            <el-form-item label="讲师" prop="teacherId">
               <!-- <el-input v-model="ruleForm.teacherId" maxlength="32"></el-input> -->
-              <el-select
-                v-model="ruleForm.teacherId"
-                placeholder="请选择讲师"
-                filterable
-              >
+              <el-select v-model="ruleForm.teacherId" placeholder="请选择讲师" filterable>
                 <!-- <el-option label="在线课程" :value="1"></el-option> -->
 
                 <el-option
@@ -99,24 +63,16 @@
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第二行 -->
         <el-row>
           <el-col :span="11">
-            <el-form-item
-              label="所在分类"
-              prop="catalogId"
-            >
+            <el-form-item label="所在分类" prop="catalogId">
               <!-- <el-cascader
                 v-model="ruleForm.catalogId"
-                :props="{ value: 'id', label: 'name' }"
+                :props="{ value: 'id', label: 'name', checkStrictly: true }"
                 :options="catalogIdoptions"
               ></el-cascader> -->
-              <el-select
-                v-model="ruleForm.catalogId"
-                :multiple-limit="10"
-                placeholder="请选择"
-              >
+              <el-select v-model="ruleForm.catalogId" :multiple-limit="10" placeholder="请选择">
                 <el-option
                   style="height: auto; padding: 0"
                   :value="ruleForm.catalogId"
@@ -128,7 +84,8 @@
                     node-key="catalogId"
                     :props="{
                       children: 'children',
-                      label: 'name'
+                      label: 'name',
+                      value: 'id'
                     }"
                     @node-click="handleOrgNodeClick"
                   />
@@ -136,34 +93,17 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-          </el-col>
+          <el-col :span="2"> </el-col>
           <el-col :span="11">
-            <el-form-item
-              label="课程类型"
-              prop="type"
-            >
-              <el-select
-                v-model="ruleForm.type"
-                placeholder="请选择课程类型"
-              >
-                <el-option
-                  label="在线课程"
-                  :value="1"
-                ></el-option>
-                <el-option
-                  label="面授课程"
-                  :value="2"
-                ></el-option>
-                <el-option
-                  label="直播课程"
-                  :value="3"
-                ></el-option>
+            <el-form-item label="课程类型" prop="type">
+              <el-select v-model="ruleForm.type" placeholder="请选择课程类型">
+                <el-option label="在线课程" :value="1"></el-option>
+                <el-option label="面授课程" :value="2"></el-option>
+                <el-option label="直播课程" :value="3"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
-
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
@@ -175,15 +115,14 @@
               <el-input-number
                 v-model="ruleForm.period"
                 controls-position="right"
-                :max="100"
                 :min="0"
+                :max="100"
                 :step="0.5"
                 @change="handleChange"
               ></el-input-number>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-          </el-col>
+          <el-col :span="2"> </el-col>
           <el-col :span="11">
             <el-form-item prop="credit">
               <el-input-number
@@ -199,16 +138,11 @@
         </el-row>
 
         <!-- 第四行 -->
+        <!-- {{ruleForm.passCondition}} -->
         <el-row>
           <el-col :span="11">
-            <el-form-item
-              label="通过条件"
-              prop="passCondition"
-            >
-              <el-checkbox-group
-                v-model="ruleForm.passCondition"
-                @change="setCheckboxVal"
-              >
+            <el-form-item label="通过条件" prop="passCondition">
+              <el-checkbox-group v-model="ruleForm.passCondition" @change="setCheckboxVal">
                 <el-checkbox label="a">
                   教师评定
                 </el-checkbox>
@@ -221,38 +155,23 @@
               </el-checkbox-group>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-          </el-col>
+          <el-col :span="2"> </el-col>
           <el-col :span="11">
-            <el-form-item
-              label="选修类型"
-              prop="electiveType"
-            >
-              <el-select
-                v-model="ruleForm.electiveType"
-                placeholder="请选择选修类型"
-              >
-                <el-option
-                  label="开放选修"
-                  :value="1"
-                ></el-option>
-                <el-option
-                  label="通过审批"
-                  :value="2"
-                ></el-option>
-                <el-option
-                  label="禁止选修"
-                  :value="3"
-                ></el-option>
+            <el-form-item label="选修类型" prop="electiveType">
+              <el-select v-model="ruleForm.electiveType" placeholder="请选择选修类型">
+                <el-option label="开放选修" :value="1"></el-option>
+                <el-option label="通过审批" :value="2"></el-option>
+                <el-option label="禁止选修" :value="3"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
+
         <!-- 第五行 -->
         <!-- <span>添加标签</span> -->
         <el-row class="switch_box">
           <!-- <el-col :span="11">
-            <el-select
+            <el-selectz
               v-model="ruleForm.tagIds"
               multiple
               placeholder="请选择"
@@ -264,7 +183,7 @@
                 :value="item.tagId"
               >
               </el-option>
-            </el-select>
+            </el-selectz>
           </el-col>
           <el-col :span="2">
           </el-col> -->
@@ -275,20 +194,16 @@
                 v-model="ruleForm.isRecommend"
                 active-color="#198cff"
                 inactive-color="#a0a8ae"
-                :active-value="1"
-                :inactive-value="0"
               >
               </el-switch>
             </div>
           </el-col>
         </el-row>
         <!-- 第六行 -->
+
         <el-row>
           <el-col :span="10">
-            <el-form-item
-              label="课程封面"
-              prop="imageUrl"
-            >
+            <el-form-item label="课程封面" prop="imageUrl">
               <common-upload
                 v-model="ruleForm.imageUrl"
                 class="upload-demo"
@@ -300,10 +215,7 @@
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">
                   <div>将文件拖到此处，或<em>点击上传</em><br /></div>
-                  <div
-                    slot="tip"
-                    class="el-upload__tip"
-                  >
+                  <div slot="tip" class="el-upload__tip">
                     只能上传jpg/png文件，且不超过10MB
                   </div>
                 </div>
@@ -319,17 +231,14 @@
 
         <!-- 第七行 -->
         <div class="editorTitle">
-          <el-form-item
-            label="课程介绍"
-            prop="introduction"
-          >
-            <tinymce v-model="ruleForm.introduction" />
+          <el-form-item label="课程介绍" prop="introduction">
+            <tinymce v-model="ruleForm.introduction" :init="{ height: 100 }" />
           </el-form-item>
         </div>
       </el-form>
 
       <!-- 填写课前思考内容 -->
-      <div v-show="headIndex == 2">
+      <div v-show="headIndex === 2">
         <div class="editorTitle">
           <div class="reflectTitle">
             课前思考
@@ -355,34 +264,18 @@
                   批量上传课件
                 </el-button>
               </common-upload>
-              <el-button
-                type="primary"
-                size="medium"
-                @click="addArticleBtn"
-              >
+              <el-button type="primary" size="medium" @click="addArticleBtn">
                 添加章节
               </el-button>
             </div>
           </div>
 
           <!-- 表格 -->
-          <el-table
-            :data="ruleForm.contents"
-            style="width: 100%"
-          >
+          <el-table :data="ruleForm.contents" style="width: 100%">
             <!-- 第一列 -->
-            <el-table-column
-              label="序号"
-              type="index"
-              width="70"
-            >
-            </el-table-column>
+            <el-table-column label="序号" type="index" width="70"> </el-table-column>
             <!-- 第二列 -->
-            <el-table-column
-              prop="name"
-              label="章节名称"
-              width="380"
-            >
+            <el-table-column prop="name" label="章节名称" width="380">
               <template slot-scope="scope">
                 <el-input
                   v-if="scope.row.saveOrcompile === 0"
@@ -390,22 +283,14 @@
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
-            <el-table-column
-              id="type_select"
-              prop="type"
-              label="章节类型"
-              width="185"
-            >
+            <el-table-column id="type_select" prop="type" label="章节类型" width="185">
               <template slot-scope="scope">
                 <span v-if="scope.row.saveOrcompile === 0">
-                  <el-select
-                    v-model="scope.row.type"
-                    placeholder="请选择"
-                  >
+                  <el-select v-model="scope.row.type" placeholder="请选择">
                     <el-option
                       v-for="item in typeOption"
                       :key="item.value"
@@ -425,17 +310,10 @@
             </el-table-column>
 
             <!-- 第四列 -->
-            <el-table-column
-              prop="type"
-              label="内容"
-              width="250"
-            >
+            <el-table-column prop="type" label="内容" width="250">
               <template slot-scope="scope">
-                <div v-if="scope.row.saveOrcompile === 0">
-                  <span
-                    v-if="scope.row.type"
-                    size="medium"
-                  >
+                <div v-if="scope.row.saveOrcompile == 0">
+                  <span v-if="typeOption[scope.row.type - 1]" size="medium">
                     <el-button
                       v-if="scope.row.type === 1"
                       type="text"
@@ -476,10 +354,9 @@
                         }}
                       </el-button>
                     </common-upload>
-                    <el-button
-                      v-if="typeOption[scope.row.type - 1].value == 4"
-                      type="text"
-                    >关联考试</el-button>
+                    <el-button v-if="typeOption[scope.row.type - 1].value == 4" type="text"
+                      >关联考试</el-button
+                    >
                     <common-upload
                       v-if="typeOption[scope.row.type - 1].value == 5"
                       v-model="scope.row.upLoad"
@@ -495,10 +372,7 @@
                       </el-button>
                     </common-upload>
                   </span>
-                  <span
-                    v-else
-                    size="medium"
-                  > 请选择章节类型 </span>
+                  <span v-else size="medium"> 请选择章节类型 </span>
                 </div>
 
                 <div v-if="scope.row.saveOrcompile === 1">
@@ -518,11 +392,7 @@
             </el-table-column>
 
             <!-- 第五列 -->
-            <el-table-column
-              label="操作"
-              fixed="right"
-              width="170"
-            >
+            <el-table-column label="操作" fixed="right" width="170">
               <template slot-scope="scope">
                 <el-button
                   v-if="
@@ -557,11 +427,7 @@
                 >
                   保存
                 </el-button>
-                <el-button
-                  type="text"
-                  size="medium"
-                  @click="delContent(scope.row, scope.$index)"
-                >
+                <el-button type="text" size="medium" @click="delContent(scope.row, scope.$index)">
                   删除
                 </el-button>
                 <el-button
@@ -605,10 +471,7 @@
                 label-width="60px"
                 class="demo-ruleForm"
               >
-                <el-form-item
-                  label="标题"
-                  prop="localName"
-                >
+                <el-form-item label="标题" prop="localName">
                   <el-input
                     v-model="addArticle.localName"
                     placeholder="请输入标题"
@@ -621,31 +484,19 @@
             <div class="dialog_tinymce">
               <span>内容</span>
               <div>
-                <tinymce
-                  id="tinymceId"
-                  v-model="addArticle.content"
-                />
+                <tinymce id="tinymceId" v-model="addArticle.content" />
               </div>
             </div>
 
-            <span
-              slot="footer"
-              class="dialog-footer"
-            >
+            <span slot="footer" class="dialog-footer">
               <el-button @click="dialogVisible = false">取 消</el-button>
-              <el-button
-                type="primary"
-                @click="isAddArticle()"
-              >确 定</el-button>
+              <el-button type="primary" @click="isAddArticle()">确 定</el-button>
             </span>
           </el-dialog>
         </div>
       </div>
     </div>
-    <appr-submit
-      ref="apprSubmit"
-      @submit="handleSubmit"
-    />
+    <appr-submit ref="apprSubmit" @submit="handleSubmit" />
   </div>
 </template>
 
