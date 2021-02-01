@@ -1066,7 +1066,7 @@ export default {
               // 状态设置为审批中
               params.status = 0
               addCourse(params).then(({ id }) => {
-                this.submitApprApply(id)
+                this.submitApprApply(params.id ? params.id : id)
               })
             })
           }
@@ -1079,7 +1079,7 @@ export default {
     // 提交课程审批
     submitApprApply(courseId) {
       this.$refs.apprSubmit
-        .submit({ formId: courseId, processName: categoryMap['1'] })
+        .submit({ formId: courseId, processName: categoryMap['1'], formKey: 'CourseApplyInfo' })
         .then(() => {
           this.$message({
             message: '本课程已发布成功',
