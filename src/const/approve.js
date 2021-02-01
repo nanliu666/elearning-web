@@ -7,6 +7,9 @@ export const categoryOptions = [
     value: '1'
   }
 ]
+export const formKeyMap = {
+  CourseApplyInfo: '课程审批'
+}
 export const apprStatusCN = {
   Approve: '审批中',
   Pass: '已通过',
