@@ -135,10 +135,14 @@
                     </div>
                   </div>
                 </div>
-                <div v-if="item.remark && !item.userList">
+                <div v-if="item.remark && _.size(item.userList) <= 1">
                   审批意见： <span style="white-space: pre">{{ item | content }}</span>
                 </div>
-                <div v-if="!item.remark && _.get(item, 'userList[0].remark')">
+                <div
+                  v-if="
+                    !item.remark && _.size(item.userList) == 1 && _.get(item, 'userList[0].remark')
+                  "
+                >
                   审批意见：
                   <span style="white-space: pre">{{ item.userList[0].remark | content }}</span>
                 </div>
