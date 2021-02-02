@@ -1,8 +1,9 @@
 <template>
   <div
     id="elective"
-    class="elective Menu fill"
+    class="fill"
   >
+    <page-header title="选修课安排" />
     <!-- 选修课安排 详情页面 -->
     <basic-container block>
       <common-table
@@ -278,7 +279,16 @@ export default {
       })
     },
     handleDelete(selection) {
-      // 删除学习计划
+      this.$confirm('确定要删除选中的选修课程吗？', {
+        showCancelButton: true,
+        callback: (action) => {
+          if (action !== 'cancel') {
+            this.deleteFn(selection)
+          }
+        }
+      })
+    },
+    deleteFn(selection) {
       delLog({ ids: _.map(selection, 'id').join(',') })
         .then(() => {
           this.$message({
@@ -312,6 +322,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+/deep/.basic-container--block {
+  height: calc(100% - 92px);
+  min-height: calc(100% - 92px);
+}
 .elective {
   padding-top: 20px;
 }
