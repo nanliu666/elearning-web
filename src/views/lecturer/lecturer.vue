@@ -5,12 +5,7 @@
         讲师管理
       </div>
       <div>
-        <el-button
-          v-p="ADD_LECTURER"
-          type="primary"
-          size="medium"
-          @click="toAddLecturer"
-        >
+        <el-button v-p="ADD_LECTURER" type="primary" size="medium" @click="toAddLecturer">
           &nbsp; 添加讲师 &nbsp;
         </el-button>
       </div>
@@ -20,10 +15,7 @@
       <!-- 内容 -->
       <div class="draft_issue">
         <div class="issue_l">
-          <my-column
-            :column-interface="columnInterface"
-            @treeClick="treeClick"
-          ></my-column>
+          <my-column :column-interface="columnInterface" @treeClick="treeClick"></my-column>
         </div>
 
         <div class="issue_r">
@@ -73,12 +65,9 @@
                       class="text_refresh"
                       style="font-size: 16px; cursor:pointer;"
                       @click="islistTeacher(undefined)"
-                    >刷新</span>
-                    <el-popover
-                      placement="bottom"
-                      width="40"
-                      trigger="click"
+                      >刷新</span
                     >
+                    <el-popover placement="bottom" width="40" trigger="click">
                       <el-tooltip
                         slot="reference"
                         class="operations__btns--tooltip"
@@ -127,77 +116,50 @@
                 </el-button>
               </template>
               <!-- 培训名称 -->
-              <template
-                slot="name"
-                slot-scope="{ row }"
-              >
-                <el-button
-                  type="text"
-                  @click="toParticularsLecturer(row)"
-                >
+              <template slot="name" slot-scope="{ row }">
+                <el-button type="text" @click="toParticularsLecturer(row)">
                   {{ row.name }}
                 </el-button>
               </template>
 
               <!-- 状态 -->
-              <template
-                slot="status"
-                slot-scope="{ row }"
-              >
+              <template slot="status" slot-scope="{ row }">
                 <span v-if="row.status == 0">停用</span>
                 <span v-if="row.status == 1">正常</span>
               </template>
 
               <!-- 性别 -->
-              <template
-                slot="sex"
-                slot-scope="{ row }"
-              >
+              <template slot="sex" slot-scope="{ row }">
                 <span v-if="row.sex == 0">女</span>
                 <span v-if="row.sex == 1">男</span>
               </template>
 
               <!-- '讲师类型（1：内训，2：外聘）',-->
-              <template
-                slot="type"
-                slot-scope="{ row }"
-              >
+              <template slot="type" slot-scope="{ row }">
                 <span v-if="row.type == 1">内训</span>
                 <span v-if="row.type == 2">外聘</span>
               </template>
 
               <!--  是否推荐（1：是，0：否）',-->
-              <template
-                slot="is_recommend"
-                slot-scope="{ row }"
-              >
+              <template slot="is_recommend" slot-scope="{ row }">
                 <span v-if="row.is_recommend == 1">是</span>
                 <span v-if="row.is_recommend == 0">否</span>
               </template>
 
               <!-- '是否最新讲师（1：是，0：否）', -->
 
-              <template
-                slot="is_latest_teacher"
-                slot-scope="{ row }"
-              >
+              <template slot="is_latest_teacher" slot-scope="{ row }">
                 <span v-if="row.is_latest_teacher == 1">是</span>
                 <span v-if="row.is_latest_teacher == 0">否</span>
               </template>
               <!-- '是否热门讲师（1：是，0：否）', -->
-              <template
-                slot="is_popular_teacher"
-                slot-scope="{ row }"
-              >
+              <template slot="is_popular_teacher" slot-scope="{ row }">
                 <span v-if="row.is_popular_teacher == 1">是</span>
                 <span v-if="row.is_popular_teacher == 0">否</span>
               </template>
 
               <!-- 操作 -->
-              <template
-                slot="handler"
-                slot-scope="scope"
-              >
+              <template slot="handler" slot-scope="scope">
                 <el-button
                   v-if="scope.row.status == 1"
                   v-p="STOP_LECTURER"
@@ -246,29 +208,19 @@
     </div>
 
     <!-- 停用弹框 -->
-    <el-dialog
-      title="提醒"
-      :visible.sync="blockDialogVisible"
-      append-to-body
-      width="420px"
-    >
+    <el-dialog title="提醒" :visible.sync="blockDialogVisible" append-to-body width="420px">
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
-          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span
+          >您选中讲师名下有正在进行或未开始的面授课程或线下培训，
+          <span>{{ showBtnDel ? '删除' : '停用' }}</span
+          >后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span
+          >该讲师吗？</span
+        >
         <div>
-          <div
-            class="showBtn"
-            @click="showBtnData = !showBtnData"
-          >
-            查看关联课程 <i
-              v-show="!showBtnData"
-              class="el-icon-arrow-down"
-            ></i>
-            <i
-              v-show="showBtnData"
-              class="el-icon-arrow-up"
-            ></i>
+          <div class="showBtn" @click="showBtnData = !showBtnData">
+            查看关联课程 <i v-show="!showBtnData" class="el-icon-arrow-down"></i>
+            <i v-show="showBtnData" class="el-icon-arrow-up"></i>
           </div>
           <div
             v-for="(item, index) in CourseList"
@@ -281,25 +233,14 @@
         </div>
       </div>
 
-      <div
-        slot="footer"
-        class="dialog-footer"
-      >
+      <div slot="footer" class="dialog-footer">
         <el-button @click="blockDialogVisible = false">
           取 消
         </el-button>
-        <el-button
-          v-show="!showBtnDel"
-          type="primary"
-          @click="RulusFn(rowData, 0)"
-        >
+        <el-button v-show="!showBtnDel" type="primary" @click="RulusFn(rowData, 0)">
           确 定
         </el-button>
-        <el-button
-          v-show="showBtnDel"
-          type="primary"
-          @click="TeacherdeleteFn(rowData)"
-        >
+        <el-button v-show="showBtnDel" type="primary" @click="TeacherdeleteFn(rowData)">
           确 定
         </el-button>
       </div>
@@ -775,7 +716,7 @@ export default {
       if (!params.categoryId) {
         delete params.categoryId
       }
-      console.log(params)
+      // console.log(params)
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
         this.page.total = res.totalNum || 0

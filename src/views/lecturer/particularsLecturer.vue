@@ -6,65 +6,41 @@
     >
       <i class="el-icon-arrow-left"></i> 讲师详情
     </div> -->
-    <page-header
-      title="讲师详情"
-      :back="() => toLecturer()"
-      show-back
-    />
+    <page-header title="讲师详情" :back="() => toLecturer()" show-back />
 
     <div class="compileLecturerr_head_box">
       <div class="head_box_img">
-        <img
-          :src="teacherData.photo"
-          alt=""
-        />
+        <img :src="teacherData.photo" alt="" />
         <div class="in_img_icon">
           推荐
         </div>
       </div>
       <div class="head_box_content">
         <el-row>
-          <el-col
-            :span="5"
-            style="color:#333;font-size: 18px;"
-          >
+          <el-col :span="5" style="color:#333;font-size: 18px;">
             {{ name }}
           </el-col>
           <el-col :span="8">
-            <span
-              v-if="teacherData.status == 1"
-              class="box_content_icon content_icon1"
-            >正常</span>
-            <span
-              v-if="teacherData.status == 0"
-              class="box_content_icon content_icon1"
-            >停用</span>
-            <span
-              v-if="teacherData.isPopularTeacher == 1"
-              class="box_content_icon content_icon2"
-            >热门</span>
+            <span v-if="teacherData.status == 1" class="box_content_icon content_icon1">正常</span>
+            <span v-if="teacherData.status == 0" class="box_content_icon content_icon1">停用</span>
+            <span v-if="teacherData.isPopularTeacher == 1" class="box_content_icon content_icon2"
+              >热门</span
+            >
 
-            <span
-              v-if="teacherData.isLatestTeacher == 1"
-              class="box_content_icon content_icon3"
-            >最新</span>
+            <span v-if="teacherData.isLatestTeacher == 1" class="box_content_icon content_icon3"
+              >最新</span
+            >
           </el-col>
         </el-row>
 
         <el-row>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             手机号码：
           </el-col>
           <el-col :span="7">
             {{ teacherData.phonenum }}
           </el-col>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             电子邮箱：
           </el-col>
           <el-col :span="7">
@@ -72,20 +48,14 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             性别：
           </el-col>
           <el-col :span="7">
             <span v-if="teacherData.sex == 1">男</span>
             <span v-if="teacherData.sex == 0">女</span>
           </el-col>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             讲师类型：
           </el-col>
           <el-col :span="7">
@@ -94,19 +64,13 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             讲师级别：
           </el-col>
           <el-col :span="7">
             {{ teacherData.teacherLevel }}
           </el-col>
-          <el-col
-            :span="5"
-            style="color:#898989;"
-          >
+          <el-col :span="5" style="color:#898989;">
             讲师职称：
           </el-col>
           <el-col :span="7">
@@ -126,18 +90,10 @@
         </el-row> -->
       </div>
       <div class="head_box_btns">
-        <el-button
-          type="primary"
-          size="medium"
-          @click="tocompileLecturer"
-        >
+        <el-button type="primary" size="medium" @click="tocompileLecturer">
           编辑
         </el-button>
-        <el-button
-          v-show="teacherData.status == 1"
-          size="medium"
-          @click="iseditSysRulus(0)"
-        >
+        <el-button v-show="teacherData.status == 1" size="medium" @click="iseditSysRulus(0)">
           停用
         </el-button>
         <el-button
@@ -148,10 +104,7 @@
         >
           启用
         </el-button>
-        <el-button
-          size="medium"
-          @click="isTeacherdelete"
-        >
+        <el-button size="medium" @click="isTeacherdelete">
           删除
         </el-button>
       </div>
@@ -172,29 +125,19 @@
     </div>
 
     <!-- 停用弹框 -->
-    <el-dialog
-      title="提醒"
-      :visible.sync="blockDialogVisible"
-      append-to-body
-      width="420px"
-    >
+    <el-dialog title="提醒" :visible.sync="blockDialogVisible" append-to-body width="420px">
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
-          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span
+          >您选中讲师名下有正在进行或未开始的面授课程或线下培训，
+          <span>{{ showBtnDel ? '删除' : '停用' }}</span
+          >后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span
+          >该讲师吗？</span
+        >
         <div>
-          <div
-            class="showBtn"
-            @click="showBtnData = !showBtnData"
-          >
-            查看关联课程 <i
-              v-show="!showBtnData"
-              class="el-icon-arrow-down"
-            ></i>
-            <i
-              v-show="showBtnData"
-              class="el-icon-arrow-up"
-            ></i>
+          <div class="showBtn" @click="showBtnData = !showBtnData">
+            查看关联课程 <i v-show="!showBtnData" class="el-icon-arrow-down"></i>
+            <i v-show="showBtnData" class="el-icon-arrow-up"></i>
           </div>
           <div
             v-for="(item, index) in CourseList"
@@ -207,25 +150,14 @@
         </div>
       </div>
 
-      <div
-        slot="footer"
-        class="dialog-footer"
-      >
+      <div slot="footer" class="dialog-footer">
         <el-button @click="blockDialogVisible = false">
           取 消
         </el-button>
-        <el-button
-          v-show="!showBtnDel"
-          type="primary"
-          @click="RulusFn(0)"
-        >
+        <el-button v-show="!showBtnDel" type="primary" @click="RulusFn(0)">
           确 定
         </el-button>
-        <el-button
-          v-show="showBtnDel"
-          type="primary"
-          @click="TeacherdeleteFn()"
-        >
+        <el-button v-show="showBtnDel" type="primary" @click="TeacherdeleteFn()">
           确 定
         </el-button>
       </div>
@@ -509,16 +441,24 @@ export default {
       }
       .in_img_icon {
         position: absolute;
-        top: -11px;
-        left: -45px;
-        background-color: #d6dcff;
-        width: 137px;
-        height: 57px;
-        color: #090e7a;
-        line-height: 76px;
+        top: 8px;
+        right: 63px;
+        // background-color: #d6dcff;
+        // width: 137px;
+        // height: 57px;
+        // color: #090e7a;
+        // line-height: 76px;
+        // text-align: center;
+        // transform: rotate(-45deg);
+        // font-size: 16px;
+        background: #fcba00;
+        border-radius: 4px;
+        width: 40px;
+        height: 20px;
+        line-height: 20px;
         text-align: center;
-        transform: rotate(-45deg);
-        font-size: 16px;
+        font-size: 12px;
+        color: #ffffff;
       }
     }
     .head_box_content {
@@ -554,15 +494,16 @@ export default {
     }
   }
   .compileLecturerr_introduce {
-    padding: 55px 90px;
+    padding: 24px;
     background-color: #fff;
     margin-top: 25px;
     .introduce_title {
-      font-size: 16px;
-      color: #333;
+      font-size: 18px;
+      color: rgba(0, 11, 21, 0.85);
+      letter-spacing: 0;
     }
     .ntroduce_content {
-      padding: 20px 45px;
+      padding-top: 16px;
     }
     .ntroduce_img {
       padding: 0 45px;

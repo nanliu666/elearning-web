@@ -27,26 +27,22 @@
           :default-expanded-keys="expandedKeysData"
           @node-click="treeClickNode"
         >
-          <span
-            slot-scope="{ node, data }"
-            class="custom-tree-node"
-          >
+          <span slot-scope="{ node, data }" class="custom-tree-node">
             <span
+              :class="node.label == '未分类' ? 'paddingRight' : ''"
               v-show="!isEdit || data.id !== isEditId"
-            >{{ node.label }}&nbsp;{{ `(${data.count || 0})` }}</span>
-            <span
-              v-show="isEdit && data.id === isEditId"
-              class="tree_input"
-            >
+              class="custom-tree-node-text"
+              >{{ node.label }}&nbsp;
+              <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
+            </span>
+
+            <span v-show="isEdit && data.id === isEditId" class="tree_input">
               <el-input
                 v-model="dataAddCatalog.input"
                 placeholder="请输入分类名称"
                 maxlength="20"
               ></el-input>
-              <el-button
-                type="text"
-                @click="isaddCatalog(data)"
-              >确认</el-button>&nbsp;
+              &nbsp;<el-button type="text" @click="isaddCatalog(data)">确认</el-button>
               <span @click="isEditFn(data)"> 取消</span>
               <!-- <span @click="isEdit = false"> 取消</span> -->
             </span>
@@ -57,22 +53,16 @@
                 trigger="hover"
                 style="color: #a0a8ae"
                 class="right-content"
-                @command="handleCommandSide($event, data)"
+                @command="handleCommandSide($event, data, node)"
               >
                 <span class="el-dropdown-link more-column">
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item
-                    v-show="data.btnshow"
-                    command="add"
-                  >
+                  <el-dropdown-item v-show="data.btnshow" command="add">
                     新增分类
                   </el-dropdown-item>
-                  <el-dropdown-item
-                    v-show="!data.btnshow"
-                    command="move"
-                  > 移动 </el-dropdown-item>
+                  <el-dropdown-item v-show="!data.btnshow" command="move"> 移动 </el-dropdown-item>
                   <el-dropdown-item command="edit"> 编辑 </el-dropdown-item>
                   <el-dropdown-item command="del"> 删除 </el-dropdown-item>
                 </el-dropdown-menu>
@@ -81,38 +71,23 @@
           </span>
         </el-tree>
 
-        <div
-          v-show="isShowinput"
-          class="isShowinput"
-        >
+        <div v-show="isShowinput" class="isShowinput">
           <el-input
-            id="/training/trainingArrange"
+            id="/lecturer/lecturer"
             v-model="dataAddCatalog.input"
             class="isShowinput_input"
             placeholder="请输入分组名称"
             maxlength="20"
           ></el-input>
-          <span
-            class="isShowinput_yes"
-            @click="isaddCatalog(data)"
-          >确认</span>
-          <span
-            class="isShowinput_no"
-            @click="isShowinputFn"
-          > 取消</span>
+          <span class="isShowinput_yes" @click="isaddCatalog(data)">确认</span>
+          <span class="isShowinput_no" @click="isShowinputFn"> 取消</span>
           <!-- <span @click="isShowinput = false"> 取消</span> -->
         </div>
         <div class="btn_bottom_box">
-          <div
-            v-show="!isShowinput"
-            class="btn_bottom"
-          >
-            <a
-              class="btn1"
-              href="#/training/trainingArrange"
-              @click="adddata"
+          <div v-show="!isShowinput" class="btn_bottom">
+            <a class="btn1" href="#/training/trainingArrange" @click="adddata">
+              <i class="el-icon-plus btn_icon"></i> 新建分组</a
             >
-              <i class="el-icon-plus btn_icon"></i> 新建分组</a>
             <!-- <span class="btn2">新建分类</span> -->
           </div>
         </div>
@@ -120,31 +95,13 @@
     </div>
 
     <!-- 移动选择框 -->
-    <el-dialog
-      title="收货地址"
-      :visible.sync="dialogFormVisible"
-      :modal-append-to-body="false"
-    >
+    <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :modal-append-to-body="false">
       <el-form :model="form">
-        <el-form-item
-          label="分类名称"
-          label-width="120px"
-        >
-          <el-input
-            v-model="form.name"
-            autocomplete="off"
-            maxlength="32"
-            disabled
-          ></el-input>
+        <el-form-item label="分类名称" label-width="120px">
+          <el-input v-model="form.name" autocomplete="off" maxlength="32" disabled></el-input>
         </el-form-item>
-        <el-form-item
-          label="上级分类组"
-          label-width="120px"
-        >
-          <el-select
-            v-model="form.region"
-            placeholder="请选择"
-          >
+        <el-form-item label="上级分类组" label-width="120px">
+          <el-select v-model="form.region" placeholder="请选择">
             <el-option
               v-for="(item, index) in data"
               v-show="item.label !== '未分类'"
@@ -155,17 +112,11 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <div
-        slot="footer"
-        class="dialog-footer"
-      >
+      <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
           取 消
         </el-button>
-        <el-button
-          type="primary"
-          @click="ismove"
-        >
+        <el-button type="primary" @click="ismove">
           确 定
         </el-button>
       </div>
@@ -397,6 +348,7 @@ export default {
                   count: res.group[res.group.length - 1].count,
                   children: []
                 })
+
                 this.dataAddCatalog.input = ''
                 this.isShowinput = false
               }
@@ -424,7 +376,7 @@ export default {
       this.islistTeacherCategory()
     },
     // 增删改查
-    handleCommandSide($event, data) {
+    handleCommandSide($event, data, node) {
       //   编辑
       if ($event === 'edit') {
         this.isEdit = true
@@ -463,7 +415,7 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            this.iddeleteTeacherCatalog(data)
+            this.iddeleteTeacherCatalog(data, node)
           })
           .catch(() => {
             this.$message({
@@ -560,7 +512,8 @@ export default {
       })
     },
     // 删除分组/分类
-    iddeleteTeacherCatalog(data) {
+    iddeleteTeacherCatalog(data, node) {
+      let treeNode = this.$refs.tree.getNode(data.parent_id)
       this.columnInterface.deleteTeacherCatalog({ id: data.id }).then(() => {
         this.$message({
           message: '删除成功',
@@ -574,19 +527,19 @@ export default {
             }
           })
         } else {
-          // this.data.map((item, index) => {
-          //   if (data.parent_id == item.id) {
-          //     item.children.map((itemi, indexi) => {
-          //       if (data.id == itemi.id) {
-          //         this.data[index].children.splice(indexi, 1)
-          //       }
-          //     })
-          //   }
-          // })
-
-          this.islistTeacherCategory()
-          this.expandedKeysData = []
-          if (data.parent_id) this.expandedKeysData.push(data.parent_id)
+          this.data.map((item, index) => {
+            if (data.parent_id == item.id) {
+              item.children.map((itemi, indexi) => {
+                if (data.id == itemi.id) {
+                  this.data[index].children.splice(indexi, 1)
+                  treeNode.setData(treeNode.data)
+                }
+              })
+            }
+          })
+          // this.islistTeacherCategory()
+          // this.expandedKeysData = []
+          // if (data.parent_id) this.expandedKeysData.push(data.parent_id)
         }
       })
     }
@@ -647,13 +600,30 @@ export default {
 }
 
 .custom-tree-node {
+  width: 100%;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
   padding-right: 8px;
+  overflow: hidden;
+  .paddingRight {
+    padding-right: 25px !important;
+  }
 
+  .custom-tree-node-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: relative;
+    padding-right: 17px;
+    .custom-tree-node-text-num {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  }
   // /deep/ .el-icon-more {
   //   transform: rotate(-90deg);
   // }
@@ -681,8 +651,10 @@ export default {
   margin-top: 8px;
   /deep/ input {
     height: 25px;
-    margin-left: -15px;
     z-index: 999;
+  }
+  /deep/.el-input__inner {
+    padding: 10px;
   }
 }
 /deep/ .el-tree-node__content {
