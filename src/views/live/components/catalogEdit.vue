@@ -169,7 +169,8 @@ export default {
 
             const parmas = {
               name: this.form.name,
-              parentId: this.form.parentId
+              parentId: this.form.parentId,
+              source: 'live'
             }
             addCategory(parmas)
               .then((res) => {
@@ -194,7 +195,8 @@ export default {
             const parmas = {
               name: this.form.name,
               parentId: this.form.parentId,
-              id: this.form.idStr
+              id: this.form.idStr,
+              source: 'live'
             }
             editCategory(parmas)
               .then(() => {

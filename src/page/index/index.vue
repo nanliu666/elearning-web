@@ -33,7 +33,13 @@
           v-show="!isSearch"
           id="avue-view"
         >
-          <keep-alive v-if="$route.meta.$keepAlive">
+          <keep-alive
+            v-if="
+              $route.meta.$keepAlive &&
+                $route.path !== '/course/establishCourse' &&
+                $route.path !== '/course/compileCourse'
+            "
+          >
             <router-view
               :key="$route.fullPath"
               class="avue-view"

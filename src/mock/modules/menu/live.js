@@ -81,7 +81,7 @@ export default {
       isShow: 1,
       code: 'approval_approval',
       alias: 'approval',
-      path: '/live/statistics',
+      path: '/live/stat',
       icon: 'iconfont iconicon_compile'
     },
     {
@@ -93,7 +93,19 @@ export default {
       isShow: 0,
       code: 'approval_approval',
       alias: 'approval',
-      path: '/live/statisticsDetails',
+      path: '/live/person-stat-detail',
+      icon: 'iconfont iconicon_compile'
+    },
+    {
+      menuId: '159011207512323692666',
+      menuName: '直播统计详情',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'approval_approval',
+      alias: 'approval',
+      path: '/live/live-stat-detail',
       icon: 'iconfont iconicon_compile'
     }
   ]
