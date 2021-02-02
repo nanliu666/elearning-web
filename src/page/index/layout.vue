@@ -1,7 +1,11 @@
 <template>
   <div class="container">
     <keep-alive
-      v-if="$route.meta.$keepAlive"
+      v-if="
+        $route.meta.$keepAlive &&
+          $route.path !== '/course/establishCourse' &&
+          $route.path !== '/course/compileCourse'
+      "
       :key="$route.fullPath"
     >
       <router-view />

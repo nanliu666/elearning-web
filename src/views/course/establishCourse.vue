@@ -457,7 +457,7 @@
                       @on-progress="(file) => onUploadProgress(file, scope.row, scope.$index)"
                     >
                       <el-button type="text">{{
-                        scope.row.upLoad[0]
+                        scope.row.upLoad[0] && scope.row.upLoad[0].localName
                           ? scope.row.upLoad[0].localName
                           : uploadRef[scope.row.type - 2].tips
                       }}</el-button>
@@ -649,6 +649,7 @@ import {
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 export default {
+  name: 'EstablishCourse',
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload'),
     ApprSubmit
@@ -786,8 +787,6 @@ export default {
         }
       })
     })
-  },
-  activated() {
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
     })
@@ -796,11 +795,14 @@ export default {
     this.isgetCatalog()
     // this.getInfo()
     this.islistTeacher()
-    this.$refs.ruleForm.clearValidate()
   },
-
+  mounted() {
+    this.$nextTick(() => this.$refs.ruleForm.clearValidate())
+  },
   methods: {
-    onUploadComplete() {
+    onUploadComplete(file) {
+      const c = this.ruleForm.contents.find((c) => c.file === file)
+      c.upLoad[0].url = file.url
       const contents = this.ruleForm.contents
       if (contents.every((c) => c.file && c.file.isComplete) && contents.pending) {
         this.isAddCourse(contents.addStatus)
@@ -826,7 +828,7 @@ export default {
         const c = {
           saveOrcompile: 1,
           type: content ? content.type : 2,
-          name: content ? content.name : file.file.name || '社区的商业模式',
+          name: (content && content.name) || file.file.name || '社区的商业模式',
           upLoad: [
             {
               localName: file.file.name
@@ -855,6 +857,7 @@ export default {
         this.delContent(c, i)
       })
       this.ruleForm.contents = []
+      delete contents.status
     },
     islistTeacher() {
       listTeacher().then((res) => {
@@ -1216,8 +1219,8 @@ export default {
       if (!c.file) return
       const { ob, uploader } = c.file
       ob.subscription.unsubscribe()
+      ob.subscription.unsubscribe()
       uploader.abort(c.file)
-      uploader.$destroy()
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
