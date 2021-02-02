@@ -485,16 +485,18 @@ const EventColumns = [
     prop: 'openAnswerSheet',
     label: '允许考生查看答卷'
   },
+  //TODO: 暂时隐藏
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'selfMarking',
+  //   label: '允许考生自己评卷'
+  // },
   {
     itemType: 'switch',
     span: 11,
     offset: 2,
-    prop: 'selfMarking',
-    label: '允许考生自己评卷'
-  },
-  {
-    itemType: 'switch',
-    span: 11,
     prop: 'publicAnswers',
     label: '允许考生查看标准答案'
   },
@@ -518,12 +520,13 @@ const EventColumns = [
     span: 24,
     label: ''
   },
-  {
-    itemType: 'slot',
-    span: 24,
-    prop: 'modifyAnswer',
-    label: '允许评卷人修改考生答案'
-  },
+  //TODO: 暂时隐藏
+  // {
+  //   itemType: 'slot',
+  //   span: 24,
+  //   prop: 'modifyAnswer',
+  //   label: '允许评卷人修改考生答案'
+  // },
   {
     itemType: 'slot',
     span: 11,
@@ -595,6 +598,7 @@ const fixedTimeConfig = {
   prop: 'fixedTime',
   label: '定时发布日期时间'
 }
+//TODO: 暂时隐藏
 const radioList = [
   { value: '完全正确得分' },
   { value: '按正确选项个数计分' }

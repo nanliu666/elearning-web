@@ -19,13 +19,13 @@
           class="elInput"
           :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
-          @input="search"
+          @input="search(item)"
         />
         <el-select
           v-if="item.type === 'select'"
           v-model="item.data"
           v-loadmore="() => item.loadMoreFun && item.loadMoreFun(item)"
-          :placeholder="'请输入' + item.label"
+          :placeholder="'请选择'"
           :multiple="item.config && item.config.multiple"
           :collapse-tags="item.config && item.config.multiple"
           @visible-change="item.firstLoad && item.firstLoad($event, item)"
@@ -163,7 +163,7 @@
                       v-if="item.type === 'select'"
                       v-model="item.data"
                       v-loadmore="() => item.loadMoreFun && item.loadMoreFun(item)"
-                      :placeholder="'请输入' + item.label"
+                      :placeholder="'请选择'"
                       :multiple="item.config && item.config.multiple"
                       :collapse-tags="item.config && item.config.multiple"
                       @visible-change="item.firstLoad && item.firstLoad($event, item)"
@@ -391,7 +391,8 @@ export default {
       this.$emit('submit', this.produceSearchParams())
       this.popoverShow = false
     },
-    search: _.debounce(function() {
+    search: _.debounce(function(obj) {
+      if (obj.data.match(/^[ ]+$/)) return
       this.submitSearch()
     }, 500),
     change() {

@@ -33,8 +33,9 @@
       <div class="page-right">
         <el-button
           v-if="!id"
+          v-loading="submitLoading"
           size="medium"
-          @click="publish('draft')"
+          @click="publishFun('draft')"
         >
           存草稿
         </el-button>
@@ -55,9 +56,10 @@
         </el-button>
         <el-button
           v-if="activeStep === 1"
+          v-loading="submitLoading"
           size="medium"
           type="primary"
-          @click="publish('publish')"
+          @click="publishFun('publish')"
         >
           发布
         </el-button>
@@ -107,6 +109,7 @@ export default {
   },
   data() {
     return {
+      submitLoading: false,
       refsList: REFS_LIST,
       loading: false,
       activeStep: 0,
@@ -184,9 +187,9 @@ export default {
       }
     },
     // 发布区分编辑发布还是新增发布
-    publish(type) {
-      // 草稿提交不需要校验
-      // 发布提交需要校验
+    publishFun(type) {
+      this.submitLoading = true
+      // 草稿提交不需要校验,  发布提交需要校验
       const examInfoData = this.$refs.examInfo.getData(type)
       const examBatchData = this.$refs.examBatch.getData(type)
       Promise.all([examInfoData, examBatchData]).then((res) => {
@@ -207,8 +210,9 @@ export default {
       editFun(params)
         .then(() => {
           const tips = type === 'draft' ? '已发布草稿' : '已成功创建考试'
-          this.$message.success(`${tips}，1秒后将自动返回考试列表`)
+          this.$message.success(`${tips}，1秒后将自动返回`)
           setTimeout(() => {
+            this.submitLoading = false
             this.$router.push({
               path: '/examManagement/examSchedule/list',
               query: { activeIndex: type === 'draft' ? '1' : '0' }
@@ -216,6 +220,7 @@ export default {
           }, 1000)
         })
         .catch(() => {
+          this.submitLoading = false
           window.console.error(JSON.stringify(params))
         })
     },

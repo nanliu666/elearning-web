@@ -103,6 +103,7 @@ export default {
         }
       })
     },
+    // 添加流程的展示数据
     resolveData(process) {
       let data = JSON.parse(Base64.decode(process.baseJson))
       let processLine = '',
@@ -120,6 +121,7 @@ export default {
       }
       this.$set(process, 'line', processLine)
     },
+    // 校验是否只有一个流程
     validate() {
       return new Promise((resolve, reject) => {
         if (!this.process) {
@@ -133,12 +135,14 @@ export default {
     handleClose() {
       this.visible = false
     },
+    // 弹窗的确定回调
     handleSubmit() {
       this.$refs.form.validate().then(() => {
         this.visible = false
         this.$emit('submit', this.currentProcess)
       })
     },
+    // 提交方法
     submit(data) {
       const processMap = this.createProcessMap()
       const nodeData = JSON.stringify(this.createNodeLine())
@@ -187,6 +191,7 @@ export default {
       }
       return nodeLine
     },
+    // 生成流程变量对象
     createProcessMap() {
       if (!this.process) {
         return {}
