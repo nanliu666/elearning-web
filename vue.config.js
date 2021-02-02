@@ -97,14 +97,14 @@ module.exports = {
         // 深圳
         // target: 'http://192.168.40.229/',
         // 广州
-        // target: 'http://192.168.1.100/',
+        target: 'http://192.168.1.100/',
         // 本地环境
         // 开发环境
         // target: 'http://122.112.183.186/',
         // target: 'http://apidev.epro.com.cn/',
 
         // 测试环境
-        target: 'http://139.159.141.248:8081',
+        // target: 'http://139.159.141.248:8081',
 
         // 辛桃发IP
         // target: 'http://192.168.40.134',

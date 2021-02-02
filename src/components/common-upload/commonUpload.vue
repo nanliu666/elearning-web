@@ -98,7 +98,8 @@ export default {
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
           file.isComplete = true
-          that.$emit('on-complete')
+          file.url = url
+          that.$emit('on-complete', file)
         }
       })
     },

@@ -334,7 +334,7 @@
                       @on-progress="(file) => onUploadProgress(file, scope.row, scope.$index)"
                     >
                       <el-button type="text">{{
-                        scope.row.upLoad[0]
+                        scope.row.upLoad[0] && scope.row.upLoad[0].localName
                           ? scope.row.upLoad[0].localName
                           : uploadRef[scope.row.type - 2].tips
                       }}</el-button>
@@ -670,7 +670,9 @@ export default {
     handleSubmit() {
       this.isAddCourse(1)
     },
-    onUploadComplete() {
+    onUploadComplete(file) {
+      const c = this.ruleForm.contents.find((c) => c.file === file)
+      c.upLoad[0].url = file.url
       const contents = this.ruleForm.contents
       if (contents.every((c) => c.file && c.file.isComplete) && contents.pending) {
         this.isAddCourse(contents.addStatus)
@@ -697,7 +699,7 @@ export default {
         const c = {
           saveOrcompile: 1,
           type: content ? content.type : 2,
-          name: content ? content.name : file.file.name || '社区的商业模式',
+          name: (content && content.name) || file.file.name || '社区的商业模式',
           upLoad: [
             {
               localName: file.file.name
@@ -726,6 +728,7 @@ export default {
         this.delContent(c, i)
       })
       this.ruleForm.contents = []
+      delete contents.status
     },
     islistTeacher() {
       listTeacher().then((res) => {
@@ -748,7 +751,10 @@ export default {
         data.imageUrl = [{ localName: '', url: '' }]
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
-        data.contents = data.content
+        data.contents = data.content.map((item) => {
+          item.type = +item.type
+          return item
+        })
         this.catalogName = data.catalogId
         data.catalogId = this.$route.query.catalogName
         data.isRecommend = data.isRecommend == 0 ? false : true
@@ -1078,7 +1084,6 @@ export default {
       const { ob, uploader } = c.file
       ob.subscription.unsubscribe()
       uploader.abort(c.file)
-      uploader.$destroy()
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {

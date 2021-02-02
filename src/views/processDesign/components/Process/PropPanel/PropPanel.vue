@@ -131,7 +131,7 @@ const ASSIGNEE_TYPE = {
 const defaultApproverForm = {
   approvers: [], // 审批人集合
   assigneeType: 'user', // 指定审批人
-  counterSign: false, //是否为会签
+  counterSign: true, //是否为会签
   // 审批类型为自选 出现 optionalMultiUser optionalRange
   optionalMultiUser: false,
   infoForm: {

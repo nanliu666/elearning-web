@@ -265,7 +265,7 @@ export default {
     jumpToDetail(row) {
       this.$router.push({
         path: '/apprProcess/apprDetail',
-        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo, preview: true }
+        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo }
       })
     },
 
