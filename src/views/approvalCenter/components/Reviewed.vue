@@ -11,14 +11,8 @@
     @page-size-change="handlePageSizeChange"
   >
     <!--  -->
-    <template
-      slot="apprNo"
-      slot-scope="{ row }"
-    >
-      <el-button
-        type="text"
-        @click="toDetails(row)"
-      >
+    <template slot="apprNo" slot-scope="{ row }">
+      <el-button type="text" @click="toDetails(row)">
         {{ row.apprNo }}
       </el-button>
     </template>
@@ -34,16 +28,10 @@
         v-text="statusToText(row.status).text"
       />
     </template>
-    <template
-      slot="handler"
-      slot-scope="scope"
-    >
+    <template slot="handler" slot-scope="scope">
       <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
       <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button> -->
-      <el-button
-        type="text"
-        @click="toDetails(scope.row)"
-      >
+      <el-button type="text" @click="toDetails(scope.row)">
         查看
       </el-button>
     </template>
@@ -62,7 +50,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '课程标题',
-    prop: 'processName'
+    prop: 'formTitle'
   },
   {
     label: '审核状态',
