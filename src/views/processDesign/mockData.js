@@ -6,6 +6,7 @@ export default {
     categoryId: '1',
     processVisible: [],
     approverDistinct: 0,
+    approverNull: 0,
     isOpinion: '',
     tip: ''
   },
