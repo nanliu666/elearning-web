@@ -36,11 +36,11 @@
               :load="lazyLoadOrgTree"
               :props="treeProps"
               check-strictly
+              check-on-click-node
               lazy
               node-key="_nodeKey"
               show-checkbox
               @check="handleCheckItem"
-              @node-click="handleClickItem"
             />
             <el-tree
               v-show="orgSearch"
@@ -48,10 +48,10 @@
               :data="orgSearchData"
               :props="treeProps"
               check-strictly
+              check-on-click-node
               lazy
               node-key="_nodeKey"
               show-checkbox
-              @node-click="handleClickItem"
               @check="handleCheckItem"
             />
           </div>
@@ -85,6 +85,10 @@
       <div class="right">
         <div>
           <span class="title">已选：</span>
+          <span
+            v-show="limit"
+            class="selected-tip"
+          >{{ `(${selected.length}/${limit}人)` }}</span>
           <span style="float:right;" />
         </div>
 
@@ -190,20 +194,23 @@ export default {
       default: false
     },
     // org属性用为false时候只能选中用户，不能选中组织
-    org: Boolean,
+    org: {
+      type: Boolean,
+      default: false
+    },
     visible: {
       type: Boolean,
       default: false
     },
 
-    // 是否只显示部门,会在数据中过滤用户类型
-    isDepartmentOnly: Boolean,
     title: {
       type: String,
       default: () => {
         return '请选择审批人'
       }
     },
+    // 选择人数限制
+    limit: { type: Number, default: null },
     //新闻公告的新建公告的发布范围要用到的
     isRange: {
       type: Boolean,
@@ -234,11 +241,11 @@ export default {
   computed: {
     // 树形组件的props属性
     treeProps() {
+      const disabled = this.checkDisabled
       const props = {
-        // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
-        disabled: 'disabled',
+        disabled,
         label: 'bizName',
-        isLeaf: 'isLeaf',
+        isLeaf: ({ type }) => type === NODE_TYPE.User,
         children: 'children'
       }
       return props
@@ -290,7 +297,7 @@ export default {
      */
     handleCheckItem(node, { checkedNodes }) {
       // 如果disabled则不能check项
-      if (_.get(node, this.treeProps.disabled)) return
+      if (this.checkDisabled(node)) return
       if (_.some(checkedNodes, (item) => item.bizId === node.bizId)) {
         this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
         // 如果是单选模式
@@ -310,16 +317,21 @@ export default {
       this.selected = _.reject(this.selected, { bizId })
     },
 
-    handleClickItem(data, node) {
-      node = node.data
-      // 只处理leaf节点
-      if (!_.get(node, this.treeProps.isLeaf)) return
-      const nextSelected = _.includes(this.selected, node)
-        ? _.reject(this.selected, node)
-        : _.concat(this.selected, node)
-      this.handleCheckItem(node, { checkedNodes: nextSelected })
+    // handleClickItem(data, node) {
+    //   node = node.data
+    //   // 只处理leaf节点
+    //   if (!_.get(node, this.treeProps.isLeaf)) return
+    //   //
+    //   if (this.checkDisabled(node)) return
+    //   const nextSelected = _.includes(this.selected, node)
+    //     ? _.reject(this.selected, node)
+    //     : _.concat(this.selected, node)
+    //   this.handleCheckItem(node, { checkedNodes: nextSelected })
+    // },
+    // 判断节点是否可勾选
+    checkDisabled({ disabled }) {
+      return disabled || (this.limit && this.selected.length >= this.limit)
     },
-
     close() {
       this.selected = []
       this.innerVisible = false
@@ -407,10 +419,7 @@ export default {
           )
         )
       }
-      if (this.isDepartmentOnly) {
-        // 只可以选择部门, 过滤所有的User类型
-        arr = _.reject(arr, { type: NODE_TYPE.User })
-      }
+
       return arr
     }
   }
