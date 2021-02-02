@@ -1062,12 +1062,15 @@ export default {
             })
           } else {
             // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
-            this.$refs.apprSubmit.validate().then(() => {
+            this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
-              // 状态设置为审批中
-              params.status = 0
               addCourse(params).then(({ id }) => {
-                this.submitApprApply(params.id ? params.id : id)
+                // 如果没有任何审批流程可选则不需要经过审批
+                if (process) {
+                  // 状态设置为审批中
+                  params.status = 0
+                  this.submitApprApply(params.id ? params.id : id)
+                }
               })
             })
           }

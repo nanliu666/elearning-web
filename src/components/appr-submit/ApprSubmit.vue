@@ -124,10 +124,12 @@ export default {
     // 校验是否只有一个流程
     validate() {
       return new Promise((resolve, reject) => {
-        if (!this.process) {
+        // 只有有符合的流程才需要发布审批,如果没有任何审批可选则不需要经过审批
+        if (!this.process && this.processList.length > 0) {
           this.visible = true
           reject()
         } else {
+          // 返回process用于判断是否需要发布审批,不需要时process为null
           resolve(this.process)
         }
       })
