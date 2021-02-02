@@ -13,25 +13,9 @@
 export default {
   name: 'BasicContainer',
   props: {
-    radius: {
-      type: [String, Number],
-      default: 10
-    },
-    background: {
-      type: String,
-      default: ''
-    },
     block: {
       type: Boolean,
       default: false
-    }
-  },
-  computed: {
-    styleName() {
-      return {
-        borderRadius: this.setPx(this.radius),
-        background: this.background
-      }
     }
   }
 }

@@ -17,7 +17,7 @@
             :searchable="true"
             :load="loadCourse"
             :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
-            @selectItem="selectContact"
+            @select="selectContact"
           />
         </template>
         <template #lecturerName>
