@@ -1,35 +1,19 @@
 <template>
   <div class="center">
-    <page-header title="课程审核">
-    </page-header>
+    <page-header title="课程审核"> </page-header>
 
     <div class="center_table">
       <div class="search_bar">
         <div class="search_bar_btn">
-          <span
-            :class="{ pitch: pitch == 1 }"
-            @click="setPitch(1)"
-          >待审核</span>
-          <span
-            class="pitch_icon"
-            @click="setPitch(1)"
-          >（{{ sonTotalNum || 0 }}）</span>
-          <span
-            :class="{ pitch: pitch == 2 }"
-            @click="setPitch(2)"
-          >已审核</span>
+          <span :class="{ pitch: pitch == 1 }" @click="setPitch(1)">待审核</span>
+          <span class="pitch_icon" @click="setPitch(1)">（{{ sonTotalNum || 0 }}）</span>
+          <span :class="{ pitch: pitch == 2 }" @click="setPitch(2)">已审核</span>
         </div>
       </div>
 
       <div class="search_bar_input">
-        <div
-          v-show="pitch == 2"
-          class="search_bar_select"
-        >
-          <el-select
-            v-model="statusValue"
-            placeholder="请选择"
-          >
+        <div v-show="pitch == 2" class="search_bar_select">
+          <el-select v-model="statusValue" placeholder="请选择">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -40,10 +24,7 @@
           </el-select>
         </div>
 
-        <div
-          v-show="pitch == 2"
-          class="search_bar_searchInput"
-        >
+        <div v-show="pitch == 2" class="search_bar_searchInput">
           <el-input
             v-model="searchInput"
             class="searchInput"
@@ -58,10 +39,7 @@
         </div>
       </div>
       <!-- 第一页 -->
-      <Reviewed
-        v-show="pitch == 1"
-        @titleTotalNum="titleTotalNum"
-      />
+      <Reviewed v-show="pitch == 1" @titleTotalNum="titleTotalNum" />
       <!-- 第二页 -->
       <common-table
         v-show="pitch == 2"
@@ -75,14 +53,8 @@
         @page-size-change="handlePageSizeChange"
       >
         <!--  -->
-        <template
-          slot="apprNo"
-          slot-scope="{ row }"
-        >
-          <el-button
-            type="text"
-            @click="toDetails(row)"
-          >
+        <template slot="apprNo" slot-scope="{ row }">
+          <el-button type="text" @click="toDetails(row)">
             {{ row.apprNo }}
           </el-button>
         </template>
@@ -98,16 +70,10 @@
           />
         </template>
 
-        <template
-          slot="handler"
-          slot-scope="scope"
-        >
+        <template slot="handler" slot-scope="scope">
           <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
       <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button> -->
-          <el-button
-            type="text"
-            @click="toDetails(scope.row)"
-          >
+          <el-button type="text" @click="toDetails(scope.row)">
             查看
           </el-button>
         </template>
@@ -129,7 +95,7 @@ let TABLE_COLUMNS = [
   },
   {
     label: '课程标题',
-    prop: 'processName'
+    prop: 'formTitle'
   },
   {
     label: '申请人',
@@ -233,7 +199,7 @@ export default {
         ...this.page,
         categoryId: '1',
         status: this.statusValue,
-        search: this.searchInput
+        formTitle: this.searchInput
       }).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
