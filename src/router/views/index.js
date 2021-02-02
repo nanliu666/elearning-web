@@ -1,12 +1,13 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
+import establishCourse from '@/views/course/establishCourse'
+import compileCourse from '@/views/course/compileCourse'
 import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
 import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
-export default [
-  {
+export default [{
     path: '/',
     redirect: '/wel'
   },
@@ -30,6 +31,24 @@ export default [
     }
   },
   {
+    path: '/course/establishCourse',
+    name: '创建课程',
+    component: establishCourse,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
+    path: '/course/compileCourse',
+    name: '编辑课程',
+    component: compileCourse,
+    meta: {
+      keepAlive: true,
+      isTab: false
+    }
+  },
+  {
     path: '/examManagement/examSchedule/edit',
     name: '新建考试',
     component: ExamEdit,
@@ -41,8 +60,7 @@ export default [
   {
     path: '/wel',
     component: Layout,
-    children: [
-      {
+    children: [{
         path: '/menuAll',
         name: '平台后台菜单管理',
         component: MenuAll,
@@ -73,8 +91,7 @@ export default [
     path: '/info',
     component: Layout,
     redirect: '/info/index',
-    children: [
-      {
+    children: [{
         path: 'index',
         name: '个人信息',
         meta: {

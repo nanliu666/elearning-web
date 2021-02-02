@@ -322,7 +322,7 @@ export default {
           (res) => {
             // 如果没有课程
             if (res.data.length === 0) {
-              this.$confirm('您确定要启用该讲师吗？', '提示', {
+              this.$confirm('您确定要停用该讲师吗？', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
