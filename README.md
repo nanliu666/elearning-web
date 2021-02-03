@@ -192,6 +192,3 @@ export default ({ mock }) => {
     │    └──personnel // 花名册
     └──main.js // 项目入口
 ```
-
-## 注意事项
-
