@@ -109,6 +109,12 @@ instance.interceptors.response.use(
     if (status !== 200) {
       if (status === 8000) {
         addLoading(res)
+      } else if (String(status).startsWith('5')) {
+        Message({
+          message: '服务请求出错，请联系管理员',
+          type: 'error',
+          showClose: true
+        })
       } else {
         Message({
           message,
