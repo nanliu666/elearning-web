@@ -60,7 +60,7 @@
           type="primary"
           @click="toPublish"
         >
-          发布
+          提交
         </el-button>
       </div>
     </header>
