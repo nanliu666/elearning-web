@@ -221,12 +221,13 @@ export default {
     }
   },
   data() {
+    const activeTab = this.selectType.split(',')[0] || 'Org'
     return {
       checkAll: false,
       checkedUsers: [],
       usersNameList: [],
       isIndeterminate: false,
-      activeTab: 'Org',
+      activeTab,
       loading: false,
       orgSearch: '',
       orgSearchData: [],
