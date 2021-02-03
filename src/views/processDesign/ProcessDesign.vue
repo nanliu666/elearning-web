@@ -115,7 +115,7 @@ export default {
       formKey: null,
       steps: [
         {
-          label: '基础设置',
+          label: '基础信息',
           key: 'basicSetting',
           icon: 'icon-approval-info-outlined'
         },
