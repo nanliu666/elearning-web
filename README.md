@@ -121,7 +121,7 @@ export default ({ mock }) => {
 
 * elTreeSelect 下拉树选择器
 
-* lazySelect 下拉树选择器
+* lazySelect 分页下拉选择器,基于el-select开发，添加滚动翻页功能
 
 * image-viewer 图片预览组件，包括放大缩小旋转等功能
 
