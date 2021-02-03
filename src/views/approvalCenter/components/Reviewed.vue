@@ -10,11 +10,21 @@
     @current-page-change="handleCurrentPageChange"
     @page-size-change="handlePageSizeChange"
   >
-    <!--  -->
+    <!-- 审批单号 -->
     <template slot="apprNo" slot-scope="{ row }">
       <el-button type="text" @click="toDetails(row)">
         {{ row.apprNo }}
       </el-button>
+    </template>
+    <!-- 当前审批人 -->
+    <template slot="approveUser" slot-scope="{ row }">
+      <span v-if="row.approveUser.length == 0"> - - </span>
+      <span v-else>
+        <span v-for="(item, index) in row.approveUser" :key="index"
+          >{{ item.userName }}
+          {{ index != row.approveUser.length - 1 ? ',' : '' }}
+        </span>
+      </span>
     </template>
 
     <!-- 状态 -->
@@ -67,7 +77,8 @@ let TABLE_COLUMNS = [
   },
   {
     label: '当前审批人',
-    prop: 'approveUser' //数组里面的userName   要遍历出来
+    prop: 'approveUser', //数组里面的userName   要遍历出来
+    slot: true
   }
 ]
 const TABLE_CONFIG = {
@@ -152,11 +163,8 @@ export default {
     // 获取数据
     async setPitch() {
       let res = await fulllist({ ...this.page, categoryId: '1', status: 'Approve' })
-      window.console.log(res)
-
       this.tableData = res.data
       this.page.total = res.totalNum
-
       this.$emit('titleTotalNum', res.totalNum)
     },
 

@@ -540,7 +540,7 @@ export default {
       // 填写课程信息
       AddArticleBtntableIndex: '',
       ruleForm: {
-        imageUrl: [{}], //图片
+        imageUrl: [], //图片
         url: '',
         localName: '',
         catalogId: '',
@@ -617,7 +617,20 @@ export default {
     'ruleForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
-          this.$refs.ruleForm.validateField('imageUrl', () => {})
+          if (this.ruleForm.imageUrl.length) {
+            this.$refs.ruleForm.validateField('imageUrl', () => {})
+          }
+        })
+      },
+      immediate: false,
+      deep: true
+    },
+    'ruleForm.passCondition': {
+      handler() {
+        this.$nextTick(() => {
+          if (this.ruleForm.passCondition.length) {
+            this.$refs.ruleForm.validateField('passCondition', () => {})
+          }
         })
       },
       immediate: false,
@@ -808,7 +821,6 @@ export default {
 
     // 发布&草稿
     isAddCourse(status) {
-      console.log(this.ruleForm)
       const contents = this.ruleForm.contents
       // 还有正在上传的文件
       if (
@@ -972,7 +984,7 @@ export default {
     // 清空数据
     isdeleteData() {
       this.ruleForm = {
-        imageUrl: [{}], //图片
+        imageUrl: [], //图片
         url: '',
         localName: '',
         catalogId: '',
