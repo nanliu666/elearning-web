@@ -271,6 +271,16 @@ export default {
   watch: {
     value(val) {
       this.selected = val.slice()
+      const temp = _.map(this.checkedUsers, (item) => {
+        return { name: item }
+      })
+      const diffName = _.differenceBy(temp, val, 'name')
+      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
+        return item === _.get(diffName, '[0].name', '')
+      })
+      if (diffIndex !== -1) {
+        this.checkedUsers.splice(diffIndex, 1)
+      }
     },
     selected(val) {
       const { orgTree, orgTreeSearch } = this.$refs
@@ -350,6 +360,12 @@ export default {
       }
     },
     handleUncheckItem(item, checkedNodes) {
+      const outerIndex = _.findIndex(this.checkedUsers, (userItem) => {
+        return item.name === userItem
+      })
+      if (outerIndex !== -1) {
+        this.checkedUsers.splice(outerIndex, 1)
+      }
       const { bizId } = item
       if (_.find(this.selected, { bizId })) {
         this.selected = _.reject(this.selected, { bizId })
