@@ -1,6 +1,6 @@
 <template>
   <el-checkbox
-    v-model="checked"
+    v-model="checkValue"
     :disabled="disabled"
     class="checkbox-input"
   >
@@ -25,8 +25,8 @@ export default {
       default: false
     },
     value: {
-      type: [Number, Boolean],
-      default: null
+      type: Boolean,
+      default: false
     },
     textBefore: {
       type: String,
@@ -51,24 +51,15 @@ export default {
   },
   data() {
     return {
-      innerValue: this.defaultValue
+      innerValue: this.defaultValue,
+      checkValue: this.value
     }
   },
-  computed: {
-    checked: {
-      get() {
-        return !!this.value
-      },
-      set(val) {
-        if (val) {
-          this.$emit('input', this.innerValue)
-        } else {
-          this.$emit('input', 0)
-        }
-      }
-    }
-  },
+
   watch: {
+    checkValue(val) {
+      this.$emit('input', val)
+    },
     innerValue(val) {
       this.$emit('input', val)
     }
