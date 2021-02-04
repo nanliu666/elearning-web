@@ -10,7 +10,7 @@
         @click="() => (show = true)"
       >
         添加{{ title }}
-      </el-button>
+      </el-button><span class="button-tip">{{ limit ? `最多添加${limit}人` : '' }}</span>
       <div
         class="input-box"
         :class="{ 'as-input': buttonType === 'input' }"
@@ -57,6 +57,7 @@
       :title="'请选择' + title"
       :is-range="isRange"
       v-bind="type"
+      :limit="limit"
       @submit="adduser"
     />
   </div>
@@ -74,6 +75,12 @@ export default {
     event: 'change'
   },
   props: {
+    // TODO: 选择人数限制未完整实现，待完善
+    // 选择人数限制
+    limit: {
+      type: Number,
+      default: null
+    },
     isRange: {
       type: Boolean,
       default: () => {
@@ -121,10 +128,6 @@ export default {
     searchable: {
       type: Boolean,
       default: true
-    },
-    maxNum: {
-      type: Number,
-      default: 99
     },
     tagConfig: {
       type: Object,
@@ -262,6 +265,9 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
+.button-tip{
+  margin-left: 8px;
+}
 .tags {
   .input-box.as-input{
     border: 1px solid #DCDFE6;

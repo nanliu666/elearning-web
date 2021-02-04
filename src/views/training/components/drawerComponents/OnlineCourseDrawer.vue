@@ -22,7 +22,7 @@
               value: 'courseId',
               key: 'courseId'
             }"
-            @selectItem="selectContact"
+            @select="selectContact"
           />
         </template>
         <template #lecturerName>

@@ -40,12 +40,27 @@
       </div>
       <div class="button-group-box">
         <el-button
-          class="publish-btn"
+          v-show="activeStep === 'basicSetting'"
+          size="medium"
+          type="primary"
+          @click="handleNextStep('processDesign')"
+        >
+          下一步
+        </el-button>
+        <el-button
+          v-show="activeStep === 'processDesign'"
+          size="medium"
+          @click="activeStep = 'basicSetting'"
+        >
+          上一步
+        </el-button>
+        <el-button
+          v-show="activeStep === 'processDesign'"
           size="medium"
           type="primary"
           @click="toPublish"
         >
-          发布
+          提交
         </el-button>
       </div>
     </header>
@@ -115,7 +130,7 @@ export default {
       formKey: null,
       steps: [
         {
-          label: '基础设置',
+          label: '基础信息',
           key: 'basicSetting',
           icon: 'icon-approval-info-outlined'
         },
@@ -151,6 +166,11 @@ export default {
   },
   activated() {},
   methods: {
+    handleNextStep(next) {
+      this.$refs[this.activeStep].getData().then(() => {
+        this.activeStep = next
+      })
+    },
     initData() {
       const { processId } = this
       getApprProcess({ processId }).then((res) => {
@@ -579,8 +599,8 @@ export default {
   }
 }
 </script>
-<style lang="stylus" scoped>
-$header-height = 54px;
+<style lang="scss" scoped>
+$header-height: 54px;
 .page {
   width: 100vw;
   height: 100vh;
@@ -590,13 +610,14 @@ $header-height = 54px;
   .page__header {
     width: 100%;
     height: $header-height;
-    flex-center()
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
     /*color: white;*/
     /*background: #3296fa;*/
     background: #fff;
-    color: #757C85;
+    color: #757c85;
     font-size: 14px;
     position: fixed;
     top: 0;
@@ -640,7 +661,7 @@ $header-height = 54px;
           z-index: -1;
           /*background: #4483f2;*/
           background: #fff;
-          transition: transform .5s;
+          transition: transform 0.5s;
 
           &::after {
             content: '';
@@ -666,7 +687,7 @@ $header-height = 54px;
         }
 
         &.disable {
-          opacity: 0.5
+          opacity: 0.5;
         }
 
         > .step-index {
@@ -681,6 +702,9 @@ $header-height = 54px;
         }
       }
     }
+    .button-group-box {
+      margin-right: 20px;
+    }
   }
 
   .page__content {
@@ -688,7 +712,7 @@ $header-height = 54px;
     height: 100%;
     overflow: hidden;
     box-sizing: border-box;
-    background #f5f5f7;
+    background: #f5f5f7;
     padding-top: 15px;
   }
 }

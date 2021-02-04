@@ -53,6 +53,7 @@
             <template #topMenu>
               <div class="operations">
                 <seach-popover
+                  ref="seachPopover"
                   :popover-options="searchPopoverConfig.popoverOptions"
                   :require-options="searchPopoverConfig.requireOptions"
                   @submit="handleSearch"
@@ -169,6 +170,7 @@
               <span v-if="row.type == 2">面授课程</span>
               <span v-if="row.type == 3">直播课程</span>
             </template>
+
             <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
             <template
               slot="passCondition"
@@ -178,11 +180,21 @@
                 v-for="(item, index) in row.passCondition.split(',')"
                 :key="index"
               >
-                <span v-if="item == 'a'">教师评定,</span>
-                <span v-if="item == 'b'">考试通过,</span>
-                <span v-if="item == 'c'">达到课程学时</span>
+                <span
+                  v-if="item == 'a'"
+                >教师评定 {{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}
+                </span>
+                <span
+                  v-if="item == 'b'"
+                >考试通过{{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}
+                </span>
+                <span
+                  v-if="item == 'c'"
+                >达到课程学时
+                  {{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}</span>
               </span>
             </template>
+
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
             <template
               slot="electiveType"
@@ -336,7 +348,8 @@ import {
   putawayOperate,
   getCatalog,
   updateCourseTop,
-  moveCourse
+  moveCourse,
+  getCourseInfoUserList
 } from '@/api/course/course'
 // import { delete } from 'vue/types/umd'
 
@@ -512,7 +525,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '创建人',
     type: 'select',
     options: [],
-    config: { optionLabel: 'creatorName', optionValue: 'creatorName', placeholder: '请选择' }
+    config: { optionLabel: 'creatorName', optionValue: 'creatorId', placeholder: '请选择' }
   }
   // {
   //   config: { placeholder: '请选择' },
@@ -920,6 +933,7 @@ export default {
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
+      params.pageSize = 9999
       getCourseListData(params).then((res) => {
         // 下拉筛选框
         let data1 = JSON.parse(JSON.stringify(res.data))
@@ -930,12 +944,19 @@ export default {
         data2 = this.arrayUnique(data2, 'catalogName')
         data2 = this.arrClearBlank(data2, 'catalogName')
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
-        let data7 = JSON.parse(JSON.stringify(res.data))
-        data7 = this.arrayUnique(data7, 'creatorName')
-        data7 = this.arrClearBlank(data7, 'creatorName')
-        SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+        // let data7 = JSON.parse(JSON.stringify(res.data))
+        // data7 = this.arrayUnique(data7, 'creatorName')
+        // data7 = this.arrClearBlank(data7, 'creatorName')
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
         SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+      })
+      getCourseInfoUserList().then((res) => {
+        let data7 = JSON.parse(JSON.stringify(res))
+        data7 = this.arrayUnique(data7, 'creatorName')
+        data7 = this.arrClearBlank(data7, 'creatorId')
+        SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
         SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
       })
     },
@@ -997,6 +1018,7 @@ export default {
       this.status = index
       this.getInfo()
       this.getScreenInfo()
+      this.$refs.seachPopover.resetForm()
     }
   }
 }

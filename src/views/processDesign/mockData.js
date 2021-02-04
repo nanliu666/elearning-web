@@ -3,9 +3,9 @@ export default {
     icon: 'icondirectories-bicolor',
     processName: '',
     processType: '',
-    categoryId: '1',
+    categoryId: null,
     processVisible: [],
-    approverDistinct: 0,
+    approverDistinct: 1,
     approverNull: 0,
     isOpinion: '',
     tip: ''

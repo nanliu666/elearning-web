@@ -132,9 +132,9 @@ export default {
       // 把当前选中的对象返回出去
       const selectItems = this.optionList.filter((it) => it[this.optionProps.value] === value)
       if (selectItems.length !== 0) {
-        this.$emit('selectItem', selectItems[0])
+        this.$emit('select', selectItems[0])
       } else if (this.allowCreate) {
-        this.$emit('selectItem', { [this.optionProps.label]: value })
+        this.$emit('select', { [this.optionProps.label]: value })
       }
     },
     loadOptionData(refresh = false) {

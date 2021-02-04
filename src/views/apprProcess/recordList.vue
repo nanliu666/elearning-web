@@ -128,7 +128,8 @@ const TABLE_COLUMNS = [
   {
     label: '完成时间',
     minWidth: 100,
-    prop: 'completeTime'
+    prop: 'completeTime',
+    formatter: (record) => record.completeTime || '--'
   },
   {
     label: '当前状态',
@@ -140,7 +141,7 @@ const TABLE_COLUMNS = [
     minWidth: 100,
     prop: 'approveUser',
     formatter(record) {
-      return record.approveUser.map((item) => item.userName).join('+')
+      return record.approveUser.map((item) => item.userName).join('+') || '--'
     }
   }
 ]
@@ -265,7 +266,7 @@ export default {
     jumpToDetail(row) {
       this.$router.push({
         path: '/apprProcess/apprDetail',
-        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo, preview: true }
+        query: { formId: row.formId, formKey: row.formKey, apprNo: row.apprNo }
       })
     },
 

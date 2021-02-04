@@ -2,7 +2,10 @@
   <div class="edit_live">
     <!-- 头部 -->
     <div class="head">
-      <!-- <i class="el-icon-arrow-left icon" @click="tocourseDraft"></i>返回 -->
+      <i
+        class="el-icon-arrow-left icon"
+        @click="tocourseDraft"
+      ></i>
       <div class="schedule">
         <div
           :class="{ sign: headIndex === 1 }"
@@ -63,12 +66,15 @@
         class="tabs1"
       >
         <h3>基本信息</h3>
-        <el-form :model="basicForm">
+        <el-form
+          :model="basicForm"
+          :rules="basicFormRules"
+        >
           <el-row class="block_label">
             <el-col :span="12">
               <el-form-item
                 label="直播标题"
-                required
+                prop="title"
               >
                 <el-input
                   v-model="basicForm.title"
@@ -474,12 +480,14 @@
             讲师设置
           </h3>
           <el-button
+            :disabled="teacherSetButton.guestButton"
             size="mini"
             @click="add_table_teacherSet_guest(2)"
           >
             添加嘉宾
           </el-button>
           <el-button
+            :disabled="teacherSetButton.assistantButton"
             size="mini"
             @click="add_table_teacherSet_guest(3)"
           >
@@ -542,7 +550,7 @@
                 v-if="scope.$index"
                 type="text"
                 size="small"
-                @click="delete_table_teacherSet(table_teacherSet, scope.$index)"
+                @click="delete_table_teacherSet(table_teacherSet, scope.$index, scope.row)"
               >
                 删除
               </el-button>
@@ -737,12 +745,20 @@
               >
                 <el-button
                   type="text"
+                  @click="delete_batchTableStudent()"
+                >
+                  批量删除
+                </el-button>
+
+                <el-button
+                  type="text"
                   style="float:right;"
                   @click="showDialog_add_student()"
                 >
                   添加学员
                 </el-button>
                 <el-table
+                  ref="table_relatedStudents"
                   :data="table_relatedStudents"
                   stripe
                   style="width: 100%"
@@ -785,6 +801,23 @@
                   </el-table-column>
                 </el-table>
               </el-form-item>
+            </el-col>
+
+            <el-col
+              :span="6"
+              :offset="14"
+            >
+              <!-- :current-page.sync="StudentsPage.totalNo" -->
+              <el-pagination
+                layout="total,prev,pager,next,sizes,jumper"
+                :total="dialogSelectStudent.length"
+                :page-size.sync="StudentsPage.pageSize"
+                @current-change="toggle_StudentsPage"
+                @size-change="toggle_StudentsPageSize"
+              >
+                <span class="pageSizeInput">
+                  <el-input class="pageSizeBorder"></el-input>条/页</span>
+              </el-pagination>
             </el-col>
           </el-row>
         </el-form>
@@ -902,6 +935,7 @@
                 <el-tree
                   :data="otherUser"
                   show-checkbox
+                  node-key="id"
                   default-expand-all
                   :expand-on-click-node="false"
                   @check="select_organizationUser"
@@ -991,6 +1025,9 @@ export default {
       basicForm: {
         //基本信息表单
         title: '' // 直播标题
+      },
+      basicFormRules: {
+        title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }]
       },
 
       liveClassification: [],
@@ -1084,6 +1121,11 @@ export default {
           type: 1 //1=主讲，2=助教，3=嘉宾
         }
       ],
+      // 控制讲师设置两个button的启用
+      teacherSetButton: {
+        assistantButton: false,
+        guestButton: false
+      },
       // 要搜索的讲师类型
       index_teacherType: 1,
       teachingTeacherList: [],
@@ -1116,6 +1158,9 @@ export default {
         code: '',
         tips: '',
         imgUrl: [{}]
+      },
+      StudentsPage: {
+        pageSize: 10
       }
     }
   },
@@ -1147,6 +1192,10 @@ export default {
     })
   },
   methods: {
+    // 返回按钮返回上一页
+    tocourseDraft() {
+      this.$router.go(-1)
+    },
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
@@ -1232,9 +1281,7 @@ export default {
       var typeNum = this.get_table_teacherSet_typeNumber(this.table_teacherSet, type)
       switch (type) {
         case 2:
-          if (typeNum == 2) {
-            this.$message.error('最多只能添加2位嘉宾')
-          } else {
+          if (typeNum < 2) {
             this.table_teacherSet.push({
               identity: '嘉宾',
               nameList_value: '',
@@ -1243,11 +1290,14 @@ export default {
               type: 2
             })
           }
+
+          if (typeNum == 1) {
+            this.teacherSetButton.guestButton = true
+          }
+
           break
         case 3:
-          if (typeNum == 2) {
-            this.$message.error('最多只能添加2位助教')
-          } else {
+          if (typeNum < 2) {
             this.table_teacherSet.push({
               identity: '助教',
               nameList_value: '',
@@ -1256,6 +1306,11 @@ export default {
               type: 3
             })
           }
+
+          if (typeNum == 1) {
+            this.teacherSetButton.assistantButton = true
+          }
+
           break
       }
     },
@@ -1270,12 +1325,17 @@ export default {
       })
       return arr.length
     },
-    delete_table_teacherSet(arr, index) {
+    delete_table_teacherSet(arr, index, row) {
       arr.splice(index, 1)
       // 同时在关联课程中的教师列表删除该教师
       this.add_relatedCourses_form.teacher.splice(index, 1)
       arr.forEach((item) => {
-        if (item.num == 2) {
+        if (item.num == 2 && item.type == row.type) {
+          if (row.type == 2) {
+            this.teacherSetButton.guestButton = false
+          } else {
+            this.teacherSetButton.assistantButton = false
+          }
           item.num--
         }
       })
@@ -1313,6 +1373,41 @@ export default {
     },
     showDialog_add_student() {
       this.dialog_add_student = true
+    },
+    // 关联学员表格批量删除
+    delete_batchTableStudent() {
+      this.$confirm('您确定要批量删除所选人员吗？', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var index = ''
+        this.$refs.table_relatedStudents.selection.forEach((item) => {
+          index = this.table_relatedStudents.findIndex((rowItem) => rowItem.id == item.id)
+          this.table_relatedStudents.splice(index, 1)
+        })
+      })
+    },
+    // 关联学员表格的分页跳转
+    toggle_StudentsPage(page) {
+      this.table_relatedStudents = []
+      this.dialogSelectStudent.forEach((item, index) => {
+        if (
+          index >= this.StudentsPage.pageSize * (page - 1) &&
+          index < this.StudentsPage.pageSize * page
+        ) {
+          this.table_relatedStudents.push({
+            userCode: item.userCode,
+            name: item.name,
+            department: item.department,
+            phone: item.phone,
+            id: item.id
+          })
+        }
+      })
+    },
+    toggle_StudentsPageSize(size) {
+      this.StudentsPage.pageSize = size
     },
     // 获取讲师表格中每一行所选的嘉宾或教师组合为一个select
     get_table_teacherSet_teacher(table) {
@@ -1422,6 +1517,11 @@ export default {
           })
           break
         case 3:
+          getQueryAssistant({
+            name: query
+          }).then((res) => {
+            this.teachingTeacherList = res
+          })
           break
       }
     },
@@ -1429,22 +1529,20 @@ export default {
 
     delete_dialog_selectStudent(arr, index) {
       arr.splice(index, 1)
-      // this.$refs.organizationUserTree.getCheckedKeys()
     },
     delete_table_relatedStudents(arr, index) {
-      arr.splice(index, 1)
+      this.$confirm('您确定要删除该人员吗？', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        arr.splice(index, 1)
+      })
     },
     // 添加关联学员
-    add_associateStudents(list, table) {
-      list.forEach((item) => {
-        table.push({
-          userCode: item.userCode,
-          name: item.name,
-          department: item.department,
-          phone: item.phone,
-          id: item.id
-        })
-      })
+    add_associateStudents() {
+      // 获取第一页的数据
+      this.toggle_StudentsPage(1)
       this.dialog_add_student = false
     },
     load_organizationUser(node, resolve) {
@@ -1748,6 +1846,15 @@ export default {
       .schedule3 {
         cursor: pointer;
       }
+    }
+
+    .icon {
+      font-size: 28px;
+      margin-left: 30px;
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      cursor: pointer;
     }
   }
   // 基本信息样式

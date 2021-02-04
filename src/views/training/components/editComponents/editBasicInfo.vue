@@ -14,7 +14,7 @@
             :allow-create="isCreate"
             :searchable="remote"
             :option-props="personOptionProps"
-            @selectItem="selectContact"
+            @select="selectContact"
           >
           </lazySelect>
         </template>

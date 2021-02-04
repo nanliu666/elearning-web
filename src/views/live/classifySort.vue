@@ -137,7 +137,7 @@ export default {
     close() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
       this.data = JSON.parse(JSON.stringify(this.oldData))
-      this.$router.push('/course/catalog')
+      this.$router.push('/live/classify')
     },
     loadSort(arr) {
       arr.forEach((item, index) => {

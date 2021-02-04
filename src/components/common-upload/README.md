@@ -1,6 +1,19 @@
-代码示例：
+## 通用上传组件
 
-template
+内置七牛云上传方法
+
+### Attributes 配置, 另外支持el-upload组件的所有参数
+
+| 参数  | 说明                |  类型   | 默认值 |
+| :---- | :------------------ | :-----: | :----: |
+| value | 绑定值, 支持v-model | Boolean | false  |
+
+### Table-column Scoped Slot
+
+| name | 说明              |
+| :--- | :---------------- |
+| -    | 自定义内容,无参数 |
+| tip  | 说明,无参数       |
 
 ```html
   <common-upload

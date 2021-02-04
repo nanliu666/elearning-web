@@ -447,6 +447,7 @@ export default {
       data.teacherInfo.userEmail = this.$route.query.userEmail
       data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
       data.teacherInfo.phonenum = this.$route.query.phonenum
+      data.teacherInfo.isRecommend = data.teacherInfo.isRecommend == 0 ? false : true
       this.ruleForm = data.teacherInfo
       this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
     },
