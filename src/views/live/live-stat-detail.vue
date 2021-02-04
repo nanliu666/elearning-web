@@ -300,7 +300,7 @@ export default {
     }
   },
   activated() {
-    this.getData2params.livePlanId = this.$route.query.id
+    this.getData2params.livePlanId = this.$route.query.livePlanId
     this.getData()
   },
   methods: {
@@ -309,7 +309,7 @@ export default {
       this.getTableData()
     },
     getSummary() {
-      getSummary({ livePlanId: this.$route.query.id }).then((res) => {
+      getSummary({ livePlanId: this.$route.query.livePlanId }).then((res) => {
         Object.keys(res).forEach((key) => {
           this.data[key] = +res[key]
         })
