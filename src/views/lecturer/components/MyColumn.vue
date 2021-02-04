@@ -15,7 +15,7 @@
             </div> -->
 
        <el-tree
-          ref="tree"
+           ref="tree"
           :data="data"
           node-key="id"
           :expand-on-click-node="false"
@@ -24,8 +24,7 @@
           lazy
           :load="loadNode"
           class="tree"
-          accordion
-          default-expand-all
+          :default-expanded-keys="expandedKeysData"
           @node-click="treeClickNode"
         >
           <span slot-scope="{ node, data }" class="custom-tree-node">
