@@ -143,7 +143,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '包含课程',
-    prop: 'course'
+    prop: 'courses'
   },
   {
     label: '创建人',
