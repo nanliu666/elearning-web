@@ -76,6 +76,7 @@
         <lazy-select
           v-model="model.reviewer"
           :disabled="false"
+          :first-option="reviewerDefault"
           :searchable="true"
           :load="loadCoordinator"
           :option-props="{
@@ -630,7 +631,8 @@ export default {
   },
   data() {
     return {
-      testPaperDefault: null, // 考卷默认信息
+      reviewerDefault: [], // 评卷人默认信息
+      testPaperDefault: [], // 考卷默认信息
       testPaperExpiredTime: '',
       radioList,
       passCondition: [
@@ -644,6 +646,7 @@ export default {
         }
       ],
       columns: EventColumns,
+      modelDisabled: false,
       model: {
         multipleChoice: 0, // 多选选哪个？
         multipleChoiceValue: '', // 多选分值
@@ -697,35 +700,7 @@ export default {
       }
     }
   },
-  computed: {
-    modelDisabled() {
-      // 其他情况不需要置灰
-      let flag = false
-      // 默认为非草稿箱
-      const type = _.get(this.$route, 'query.type', 'edit')
-      //非草稿箱
-      if (
-        type === 'edit' &&
-        this.isDraft === 'false' &&
-        this.model &&
-        (this.model.status === '2' || this.model.status === '3')
-      ) {
-        // 正在进行中的考试以及已结束的考试需要置灰
-        flag = true
-      }
-      return flag
-    },
-    isDraft() {
-      return _.get(this.$route, 'query.isDraft', 'false')
-    }
-  },
   watch: {
-    modelDisabled: {
-      handler() {
-        // this.setColumnsDisable(value)
-      },
-      deep: true
-    },
     'model.testPaper': {
       handler(value) {
         const paper = _.find(this.$refs.testPaperRef.optionList, (item) => {

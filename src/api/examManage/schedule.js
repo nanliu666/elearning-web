@@ -83,6 +83,9 @@ export const getCertificateList = (params) =>
  */
 export const putAchievement = (params) => put('/manage/v1/achievement/publish', params)
 /**
- * 发布考生成绩
+ * 操作发放或者撤回证书
+ * examId: 考试id,
+ * examineeId: 考生id，多人以字符串拼接,
+ * operation: 证书操作类型 grant-发放 revoke-撤销,
  */
 export const putCertificate = (params) => put('/manage/v1/revoke/certificate', params)

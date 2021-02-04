@@ -369,9 +369,16 @@
             <el-button
               type="text"
               icon="el-icon-s-release"
-              @click="resloveCertificate(selection)"
+              @click="handleCertificate(selection, 'revoke')"
             >
               撤回证书
+            </el-button>
+            <el-button
+              type="text"
+              icon="el-icon-s-release"
+              @click="handleCertificate(selection, 'grant')"
+            >
+              发放证书
             </el-button>
           </template>
           <template
@@ -384,6 +391,14 @@
                 @click="pubulishAchievement({ ids: row.id })"
               >
                 发布成绩
+              </el-button>
+              <!-- 开启发放证书功能，且考试通过，开启证书操作按钮 -->
+              <el-button
+                :disabled="!(examDetail.certificate && row.isPass)"
+                type="text"
+                @click="handleCertificate([row], row.gainCertificate ? 'revoke' : 'grant')"
+              >
+                {{ row.gainCertificate ? '撤回证书' : '发放证书' }}
               </el-button>
             </div>
           </template>
@@ -451,9 +466,9 @@ const TABLE_CONFIG = {
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 100
+    minWidth: 150
   }
 }
 const SEARCH_CONFIG = {
@@ -596,18 +611,47 @@ export default {
       })
       this.pubulishAchievement({ ids: ids })
     },
-    resloveCertificate(selection) {
+    // 发放与撤回证书操作放一起
+    handleCertificate(selection, operation) {
+      // 以发放状态分组，gainCertificate：true为已发放，否则为未发放
+      const certificateGroup = _.groupBy(selection, 'gainCertificate')
+      // 以通过与否分组，isPass为true通过了，false为未进入发放证书状态(未通过)
+      const passGroup = _.groupBy(selection, 'isPass')
+      const source = operation === 'grant' ? certificateGroup.false : certificateGroup.true
       let examineeId = []
-      _.each(selection, (item) => {
+      _.each(source, (item) => {
         examineeId.push(item.id)
       })
-      this.$confirm('是否撤回选择的考生的证书?', '提示', {
+      const handleSuccessTips = operation === 'grant' ? '发放' : '撤回'
+      let beforeTips = ''
+      // 选择发放或者撤回证书的提示语句
+      // 所选学员全部进入发放证书阶段，且未获得证书
+      if (_.isEmpty(certificateGroup.true)) {
+        beforeTips = `您确定要为${_.get(selection, '[0].userName')}等${_.size(
+          selection
+        )}个学员${handleSuccessTips}证书吗？`
+      } else {
+        // 所选学员包含未进入可发放证书阶段(未通过考试)，或已获得证书的
+        beforeTips = `您所选择的学员中包含${_.get(
+          certificateGroup.true,
+          '[0].userName'
+        )}等${_.size([
+          ...passGroup.false,
+          ...certificateGroup.true
+        ])}人未进入发放证书阶段或已获得证书阶段，因此不能对其执行“${handleSuccessTips}证书”操作，是否忽略这些人员继续${handleSuccessTips}证书？`
+      }
+      this.$confirm(beforeTips, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        putCertificate({ examId: this.$route.query.id, examineeId }).then(() => {
-          this.$message.success('撤回成功')
+        putCertificate({
+          examId: this.$route.query.id,
+          examineeId: _.join(examineeId, ','),
+          operation
+        }).then(() => {
+          this.$message.success(`${handleSuccessTips}成功`)
+          this.$refs.table.clearSelection()
           this.loadTableData()
         })
       })
