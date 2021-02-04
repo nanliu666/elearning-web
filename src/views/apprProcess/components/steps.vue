@@ -1,19 +1,10 @@
 <template>
   <div>
     <div :class="['newApprove', isParallel ? 'is-parallel' : '']">
-      <el-steps
-        direction="vertical"
-        align-center
-      >
-        <el-step
-          v-for="(item, index) in progress"
-          :key="index"
-        >
+      <el-steps direction="vertical" align-center>
+        <el-step v-for="(item, index) in progress" :key="index">
           <!-- 自定义图标 -->
-          <template
-            slot="icon"
-            class="icon"
-          >
+          <template slot="icon" class="icon">
             <!--                <div class="icon active" />-->
             <div>
               <div class="img-box">
@@ -45,14 +36,8 @@
                   >
                     {{ item | result }}
                   </span>
-                  <span
-                    v-else
-                    class="start"
-                  >
-                    <span
-                      v-if="item.result === 'Cancel'"
-                      class="Cancel"
-                    >审批已撤回</span>
+                  <span v-else class="start">
+                    <span v-if="item.result === 'Cancel'" class="Cancel">审批已撤回</span>
                     <span v-else>发起</span>
                   </span>
                 </span>
@@ -93,25 +78,13 @@
           <div slot="description">
             <div class="content">
               <div v-if="item.parallelLines">
-                <div
-                  v-for="(it, i) in item.parallelLines"
-                  :key="i + 'ii'"
-                  class="tow"
-                >
-                  <steps
-                    v-show="it"
-                    :progress.sync="it"
-                    :is-parallel="true"
-                  />
+                <div v-for="(it, i) in item.parallelLines" :key="i + 'ii'" class="tow">
+                  <steps v-show="it" :progress.sync="it" :is-parallel="true" />
                 </div>
               </div>
               <div v-else>
                 <div v-if="_.size(item.userList) > 1">
-                  <div
-                    v-for="(it, i) in item.userList"
-                    :key="i"
-                    class="infouser"
-                  >
+                  <div v-for="(it, i) in item.userList" :key="i" class="infouser">
                     <div class="infoImg">
                       <el-avatar :src="it.avatarUrl || circleUrl" />
                       <div class="status">
@@ -125,18 +98,15 @@
                         >
                           {{ it | result }}
                         </div>
-                        <div
-                          v-if="it.remark"
-                          class="remark"
-                        >
-                          <span>审批意见：</span><span style="white-space: pre"> {{ it.remark }}</span>
+                        <div v-if="it.remark" class="remark">
+                          <span>审批意见：</span><span> {{ it.remark }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div v-if="item.remark && _.size(item.userList) <= 1">
-                  审批意见： <span style="white-space: pre">{{ item | content }}</span>
+                  审批意见： <span>{{ item | content }}</span>
                 </div>
                 <div
                   v-if="
@@ -144,7 +114,7 @@
                   "
                 >
                   审批意见：
-                  <span style="white-space: pre">{{ item.userList[0].remark | content }}</span>
+                  <span>{{ item.userList[0].remark | content }}</span>
                 </div>
               </div>
             </div>

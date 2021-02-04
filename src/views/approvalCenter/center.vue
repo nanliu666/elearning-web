@@ -69,6 +69,16 @@
             v-text="statusToText(row.status).text"
           />
         </template>
+        <!-- 当前审批人 -->
+        <template slot="approveUser" slot-scope="{ row }">
+          <span v-if="row.approveUser.length == 0"> - - </span>
+          <span v-else>
+            <span v-for="(item, index) in row.approveUser" :key="index"
+              >{{ item.userName }}
+              {{ index != row.approveUser.length - 1 ? ',' : '' }}
+            </span>
+          </span>
+        </template>
 
         <template slot="handler" slot-scope="scope">
           <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
@@ -116,7 +126,8 @@ let TABLE_COLUMNS = [
   },
   {
     label: '审核人',
-    prop: 'approveUser'
+    prop: 'approveUser',
+    slot: true
   }
 ]
 const TABLE_CONFIG = {

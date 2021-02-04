@@ -1,9 +1,6 @@
 <template>
   <div class="addLecturer">
-    <div
-      class="addLecturer_head"
-      @click="toLecturer"
-    >
+    <div class="addLecturer_head" @click="toLecturer">
       <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '添加讲师' }}
     </div>
     <div class="addLecturer_content">
@@ -23,29 +20,14 @@
           <!-- 第一行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="讲师姓名"
-                prop="userId"
-              >
-                <el-input
-                  v-model="ruleForm.userId"
-                  maxlength="32"
-                  disabled
-                ></el-input>
+              <el-form-item label="讲师姓名" prop="userId">
+                <el-input v-model="ruleForm.userId" maxlength="32" disabled></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"> </el-col>
             <el-col :span="10">
-              <el-form-item
-                label="手机号码"
-                prop="phonenum"
-              >
-                <el-input
-                  v-model="ruleForm.phonenum"
-                  maxlength="32"
-                  disabled
-                ></el-input>
+              <el-form-item label="手机号码" prop="phonenum">
+                <el-input v-model="ruleForm.phonenum" maxlength="32" disabled></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -53,36 +35,17 @@
           <!-- 第二行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="电子邮件"
-                prop="userEmail"
-              >
-                <el-input
-                  v-model="ruleForm.userEmail"
-                  maxlength="32"
-                  disabled
-                ></el-input>
+              <el-form-item label="电子邮件" prop="userEmail">
+                <el-input v-model="ruleForm.userEmail" maxlength="32" disabled></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"> </el-col>
             <el-col :span="10">
-              <el-form-item
-                label="性别"
-                prop="sex"
-              >
-                <el-radio
-                  v-model="ruleForm.sex"
-                  :label="1"
-                  disabled
-                >
+              <el-form-item label="性别" prop="sex">
+                <el-radio v-model="ruleForm.sex" :label="1" disabled>
                   男
                 </el-radio>
-                <el-radio
-                  v-model="ruleForm.sex"
-                  :label="0"
-                  disabled
-                >
+                <el-radio v-model="ruleForm.sex" :label="0" disabled>
                   女
                 </el-radio>
               </el-form-item>
@@ -92,27 +55,14 @@
           <!-- 第三行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="讲师类型"
-                prop="type"
-              >
-                <el-select
-                  v-model="ruleForm.type"
-                  placeholder="请选择"
-                >
-                  <el-option
-                    label="内训"
-                    :value="1"
-                  ></el-option>
-                  <el-option
-                    label="外聘"
-                    :value="2"
-                  ></el-option>
+              <el-form-item label="讲师类型" prop="type">
+                <el-select v-model="ruleForm.type" placeholder="请选择">
+                  <el-option label="内训" :value="1"></el-option>
+                  <el-option label="外聘" :value="2"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"> </el-col>
             <el-col :span="10">
               <!-- data -->
 
@@ -129,15 +79,8 @@
               </el-form-item> -->
 
               <!-- 移过来的tree -->
-              <el-form-item
-                label="所属分类"
-                prop="categoryId"
-              >
-                <el-select
-                  v-model="ruleForm.categoryId"
-                  :multiple-limit="10"
-                  placeholder="请选择"
-                >
+              <el-form-item label="所属分类" prop="categoryId">
+                <el-select v-model="ruleForm.categoryId" :multiple-limit="10" placeholder="请选择">
                   <el-option
                     style="height: auto;padding:0"
                     :value="ruleForm.categoryId"
@@ -168,10 +111,7 @@
                 </el-select>
               </el-form-item> -->
 
-              <el-form-item
-                label="讲师级别"
-                prop="teacherLevel"
-              >
+              <el-form-item label="讲师级别" prop="teacherLevel">
                 <el-input
                   v-model="ruleForm.teacherLevel"
                   maxlength="32"
@@ -179,13 +119,9 @@
                 ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"> </el-col>
             <el-col :span="10">
-              <el-form-item
-                label="讲师职称"
-                prop="teacherTitle"
-              >
+              <el-form-item label="讲师职称" prop="teacherTitle">
                 <el-input
                   v-model="ruleForm.teacherTitle"
                   maxlength="32"
@@ -198,10 +134,7 @@
           <!-- 第五行 -->
           <el-row class="switch_box">
             <el-col :span="10">
-              <el-form-item
-                prop="isRecommend"
-                label="是否推荐 "
-              >
+              <el-form-item prop="isRecommend" label="是否推荐 ">
                 <!-- <span style="color:#333;">是否推荐 &nbsp; &nbsp; &nbsp;</span> -->
                 <el-switch
                   v-model="ruleForm.isRecommend"
@@ -211,23 +144,13 @@
                 </el-switch>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"> </el-col>
             <el-col :span="10">
-              <el-form-item
-                label="是否最新讲师"
-                prop="isLatestTeacher"
-              >
-                <el-radio
-                  v-model="ruleForm.isLatestTeacher"
-                  :label="1"
-                >
+              <el-form-item label="是否最新讲师" prop="isLatestTeacher">
+                <el-radio v-model="ruleForm.isLatestTeacher" :label="1">
                   是
                 </el-radio>
-                <el-radio
-                  v-model="ruleForm.isLatestTeacher"
-                  :label="0"
-                >
+                <el-radio v-model="ruleForm.isLatestTeacher" :label="0">
                   否
                 </el-radio>
               </el-form-item>
@@ -237,37 +160,23 @@
           <!-- 两个单选框 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="是否热门讲师"
-                prop="isPopularTeacher"
-              >
-                <el-radio
-                  v-model="ruleForm.isPopularTeacher"
-                  :label="1"
-                >
+              <el-form-item label="是否热门讲师" prop="isPopularTeacher">
+                <el-radio v-model="ruleForm.isPopularTeacher" :label="1">
                   是
                 </el-radio>
-                <el-radio
-                  v-model="ruleForm.isPopularTeacher"
-                  :label="0"
-                >
+                <el-radio v-model="ruleForm.isPopularTeacher" :label="0">
                   否
                 </el-radio>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
-            <el-col :span="10">
-            </el-col>
+            <el-col :span="2"> </el-col>
+            <el-col :span="10"> </el-col>
           </el-row>
 
           <!-- 第六行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="讲师照片"
-                prop="attachments"
-              >
+              <el-form-item label="讲师照片" prop="attachments">
                 <common-upload
                   v-model="ruleForm.attachments"
                   class="upload-demo"
@@ -279,10 +188,7 @@
                   <i class="el-icon-upload"></i>
                   <div class="el-upload__text">
                     将文件拖到此处，或<em>点击上传</em><br />
-                    <div
-                      slot="tip"
-                      class="el-upload__tip"
-                    >
+                    <div slot="tip" class="el-upload__tip">
                       只能上传jpg/jpge/png文件，且不超过5M
                     </div>
                   </div>
@@ -298,10 +204,7 @@
 
           <!-- 第七行 -->
           <div class="editorTitle">
-            <el-form-item
-              label="详细介绍"
-              prop="introduction"
-            >
+            <el-form-item label="详细介绍" prop="introduction">
               <tinymce v-model="ruleForm.introduction" />
             </el-form-item>
           </div>
@@ -309,17 +212,10 @@
       </div>
     </div>
     <div class="bottom_btns">
-      <el-button
-        type="primary"
-        size="medium"
-        @click="isAddTeacher(1)"
-      >
+      <el-button type="primary" size="medium" @click="isAddTeacher(1)">
         完成
       </el-button>
-      <el-button
-        size="medium"
-        @click="isAddTeacher(0)"
-      >
+      <el-button size="medium" @click="isAddTeacher(0)">
         完成并继续添加
       </el-button>
     </div>
@@ -447,6 +343,7 @@ export default {
       data.teacherInfo.userEmail = this.$route.query.userEmail
       data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
       data.teacherInfo.phonenum = this.$route.query.phonenum
+      data.teacherInfo.isRecommend = data.teacherInfo.isRecommend == 0 ? false : true
       this.ruleForm = data.teacherInfo
       this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
     },
