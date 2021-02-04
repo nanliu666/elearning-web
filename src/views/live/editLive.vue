@@ -621,6 +621,7 @@
         <el-form
           ref="ruleForm"
           :model="ruleForm"
+           :rules="rules"
         >
           <el-row>
             <el-col :span="12">
@@ -674,6 +675,7 @@
               <el-form-item
                 label="欢迎标题"
                 required
+                 prop="title"
               >
                 <el-input
                   v-model="formLiveTypeForm.title"
@@ -685,6 +687,7 @@
               <el-form-item
                 label="验证码"
                 required
+                 prop="code"
               >
                 <el-input
                   v-model="formLiveTypeForm.code"
@@ -696,6 +699,7 @@
               <el-form-item
                 label="提示文案"
                 required
+                 prop="tips"
               >
                 <el-input
                   v-model="formLiveTypeForm.tips"
@@ -1158,6 +1162,12 @@ export default {
         code: '',
         tips: '',
         imgUrl: [{}]
+      },
+      rules: {
+        baseTitle: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+        title: [{ required: true, message: '请输入欢迎标题', trigger: 'blur' }],
+        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }],
       },
       StudentsPage: {
         pageSize: 10
