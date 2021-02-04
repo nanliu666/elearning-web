@@ -583,7 +583,12 @@ export default {
               message: '添加成功',
               type: 'success'
             })
-            if (i) {
+
+            setTimeout(() => {
+              this.$refs.ruleForm.clearValidate()
+            }, 100)
+
+            if (i==1) {
               this.toLecturer()
               this.ruleForm = {
                 categoryId: '',
@@ -610,9 +615,7 @@ export default {
                 isLatestTeacher: 0,
                 isPopularTeacher: 0
               }
-              setTimeout(() => {
-                this.$refs.ruleForm.clearValidate()
-              }, 100)
+           
             }
           })
         }

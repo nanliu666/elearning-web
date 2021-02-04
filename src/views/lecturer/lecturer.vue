@@ -15,7 +15,7 @@
       <!-- 内容 -->
       <div class="draft_issue">
         <div class="issue_l">
-          <my-column :column-interface="columnInterface" @treeClick="treeClick"></my-column>
+          <my-column :column-interface="columnInterface" @treeClick="treeClick"  ref="myTree" ></my-column>
         </div>
 
         <div class="issue_r">
@@ -608,6 +608,7 @@ export default {
         })
         this.islistTeacher()
         this.blockDialogVisible = false
+        this.$refs.myTree.islistTeacherCategory()
       })
     },
 
@@ -768,6 +769,7 @@ export default {
           // 删除完成后更新视图
           this.$refs.table.clearSelection()
           this.islistTeacher()
+          this.$refs.myTree.islistTeacherCategory()
         })
     }
   }

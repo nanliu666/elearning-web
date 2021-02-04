@@ -14,7 +14,7 @@
               未分类
             </div> -->
 
-        <el-tree
+       <el-tree
           ref="tree"
           :data="data"
           node-key="id"
@@ -24,7 +24,8 @@
           lazy
           :load="loadNode"
           class="tree"
-          :default-expanded-keys="expandedKeysData"
+          accordion
+          default-expand-all
           @node-click="treeClickNode"
         >
           <span slot-scope="{ node, data }" class="custom-tree-node">

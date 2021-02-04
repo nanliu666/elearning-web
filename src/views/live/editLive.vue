@@ -319,7 +319,7 @@
                   v-model="start_time"
                   type="datetime"
                   placeholder="选择日期时间"
-                  value-format="yyyy-MM-dd hh:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -332,7 +332,7 @@
                   v-model="end_time"
                   type="datetime"
                   placeholder="选择日期时间"
-                  value-format="yyyy-MM-dd hh:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -413,7 +413,7 @@
                         v-model="scope.row.start_time"
                         type="datetime"
                         placeholder="选择日期时间"
-                        value-format="yyyy-MM-dd hh:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -423,7 +423,7 @@
                         v-model="scope.row.end_time"
                         type="datetime"
                         placeholder="选择日期时间"
-                        value-format="yyyy-MM-dd hh:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -1164,6 +1164,9 @@ export default {
       }
     }
   },
+  activated(){
+     this.isgetcategoryTree();
+  },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
@@ -1192,6 +1195,14 @@ export default {
     })
   },
   methods: {
+
+     isgetcategoryTree() {
+      getcategoryTree({
+           source: 'live'
+      }).then((res) => {
+        this.liveClassification = res
+      })
+    },
     // 返回按钮返回上一页
     tocourseDraft() {
       this.$router.go(-1)
@@ -1201,7 +1212,7 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传图片大小不能超过 10MB!')
         return false
       }
       if (!regx.test(file.name)) {
