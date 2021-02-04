@@ -139,7 +139,7 @@ export default {
         100}%)`
     },
     id() {
-      return _.get(this.$route.query, 'id', null)
+      return this.$route.query.id
     }
   },
   mounted() {

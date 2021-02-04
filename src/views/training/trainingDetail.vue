@@ -1070,7 +1070,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
-        this.$router.push({ path: '/training/edit', query: { id: this.$route.query.id } })
+        this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })
       }
       if (e === 'del') {
         // 删除

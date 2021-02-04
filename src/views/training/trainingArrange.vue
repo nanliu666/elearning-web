@@ -268,7 +268,7 @@
                           <el-checkbox
                             v-for="item of tableColumns"
                             :key="item.prop"
-                            :disabled="item.prop === 'name'"
+                            :disabled="item.prop === 'name' || item.prop === 'trainName'"
                             :label="item.prop"
                             class="operations__column--item"
                           >
@@ -312,6 +312,13 @@
                 <span v-if="row.status === 0">已办结</span>
                 <span v-if="row.status === 1">未开始</span>
                 <span v-if="row.status === 2">进行中</span>
+              </template>
+              <!--培训时间-->
+              <template
+                slot="trainBeginTime"
+                slot-scope="{ row }"
+              >
+                <span>{{ `${row.trainBeginTime}~${row.trainEndTime}` }}</span>
               </template>
               <!-- 培训方式 -->
               <template
@@ -444,7 +451,8 @@ const TABLE_COLUMNS = [
   {
     label: '培训时间',
     prop: 'trainBeginTime',
-    minWidth: 180
+    minWidth: 180,
+    slot: true
   },
   {
     label: '计划人数',
@@ -486,7 +494,12 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false
+  showIndexColumn: false,
+  rowKey: (d) => {
+    Object.keys(d).forEach((key) => {
+      d[key] = d[key] || '--'
+    })
+  }
 }
 const TABLE_PAGE_CONFIG = {}
 
