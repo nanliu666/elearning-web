@@ -349,7 +349,7 @@
             第{{ Number(row.batchNumber) + 1 }}次
           </template>
           <template #isTested="{row}">
-            {{ row.isTested ? '通过' : '未通过' }}
+            {{ row.isPass ? '通过' : '未通过' }}
           </template>
           <template #gainCertificate="{row}">
             {{ !row.gainCertificate ? '否' : '是' }}

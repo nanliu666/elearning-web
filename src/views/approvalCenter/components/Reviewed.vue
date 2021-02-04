@@ -11,17 +11,28 @@
     @page-size-change="handlePageSizeChange"
   >
     <!-- 审批单号 -->
-    <template slot="apprNo" slot-scope="{ row }">
-      <el-button type="text" @click="toDetails(row)">
+    <template
+      slot="apprNo"
+      slot-scope="{ row }"
+    >
+      <el-button
+        type="text"
+        @click="toDetails(row)"
+      >
         {{ row.apprNo }}
       </el-button>
     </template>
     <!-- 当前审批人 -->
-    <template slot="approveUser" slot-scope="{ row }">
+    <template
+      slot="approveUser"
+      slot-scope="{ row }"
+    >
       <span v-if="row.approveUser.length == 0"> - - </span>
       <span v-else>
-        <span v-for="(item, index) in row.approveUser" :key="index"
-          >{{ item.userName }}
+        <span
+          v-for="(item, index) in row.approveUser"
+          :key="index"
+        >{{ item.userName }}
           {{ index != row.approveUser.length - 1 ? ',' : '' }}
         </span>
       </span>
@@ -38,10 +49,16 @@
         v-text="statusToText(row.status).text"
       />
     </template>
-    <template slot="handler" slot-scope="scope">
+    <template
+      slot="handler"
+      slot-scope="scope"
+    >
       <!-- <el-button type="text" @click="againFn()"> 重新申请 </el-button>
       <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button> -->
-      <el-button type="text" @click="toDetails(scope.row)">
+      <el-button
+        type="text"
+        @click="toDetails(scope.row)"
+      >
         查看
       </el-button>
     </template>

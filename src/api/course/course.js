@@ -1,9 +1,4 @@
-import {
-  get,
-  post,
-  put,
-  del
-} from '@/router/axios'
+import { get, post, put, del } from '@/router/axios'
 /**
  * del, get, post, put
  * 创建课程数据导出接口
@@ -127,4 +122,5 @@ export const getStudyList = (params) => get('/api/manage/v1/course/getStudyList'
  *  课程管理--创建人信息下拉框
  * @param {Object} params - 参数
  * */
-export const getCourseInfoUserList = (params) => get('/api/manage/v1/course/getCourseInfoUserList', params)
+export const getCourseInfoUserList = (params) =>
+  get('/api/manage/v1/course/getCourseInfoUserList', params)
