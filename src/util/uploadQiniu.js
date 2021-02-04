@@ -11,8 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
  * @param hooks.error {Function}
  * @param hooks.complete {Function}
  */
-export async function uploadQiniu(f, hooks) {
-  const file = f.file || f
+export async function uploadQiniu(file, hooks) {
   const suffix = file.name.substr(file.name.lastIndexOf('.'))
   const fileName = uuidv4().replace(/-/g, '') + suffix
   let observable
@@ -35,8 +34,9 @@ export async function uploadQiniu(f, hooks) {
   } catch (error) {
     hooks.error('token获取失败')
   }
-  if (!f.file) return
-  observable.hooks = hooks
-  observable.subscription = subscription
-  f.ob = observable
+  return {
+    hooks,
+    observable,
+    subscription
+  }
 }

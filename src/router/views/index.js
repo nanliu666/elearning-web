@@ -1,8 +1,8 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
 import TrainingEdit from '@/views/training/trainingEdit'
-import establishCourse from '@/views/course/establishCourse'
-import compileCourse from '@/views/course/compileCourse'
+// import establishCourse from '@/views/course/establishCourse'
+// import compileCourse from '@/views/course/compileCourse'
 import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
 import MenuAll from '@/views/system/menuAll'
@@ -31,24 +31,24 @@ export default [
       isTab: false
     }
   },
-  {
-    path: '/course/establishCourse',
-    name: '创建课程',
-    component: establishCourse,
-    meta: {
-      keepAlive: true,
-      isTab: false
-    }
-  },
-  {
-    path: '/course/compileCourse',
-    name: '编辑课程',
-    component: compileCourse,
-    meta: {
-      keepAlive: true,
-      isTab: false
-    }
-  },
+  // {
+  //   path: '/course/establishCourse',
+  //   name: '创建课程',
+  //   component: establishCourse,
+  //   meta: {
+  //     keepAlive: true,
+  //     isTab: false
+  //   }
+  // },
+  // {
+  //   path: '/course/compileCourse',
+  //   name: '编辑课程',
+  //   component: compileCourse,
+  //   meta: {
+  //     keepAlive: true,
+  //     isTab: false
+  //   }
+  // },
   {
     path: '/examManagement/examSchedule/edit',
     name: '新建考试',
