@@ -622,7 +622,6 @@ export default {
       _.each(source, (item) => {
         examineeId.push(item.id)
       })
-
       const handleSuccessTips = operation === 'grant' ? '发放' : '撤回'
       let beforeTips = ''
       // 选择发放或者撤回证书的提示语句
@@ -652,6 +651,7 @@ export default {
           operation
         }).then(() => {
           this.$message.success(`${handleSuccessTips}成功`)
+          this.$refs.table.clearSelection()
           this.loadTableData()
         })
       })
