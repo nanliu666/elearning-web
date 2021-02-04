@@ -14,7 +14,7 @@
     @visible-change="visibleChange"
   >
     <el-option
-      v-for="item in _.uniqBy(_.compact([firstOption, ...optionList]), optionProps.value)"
+      v-for="item in _.uniqBy(_.compact([...firstOption, ...optionList]), optionProps.value)"
       :key="optionProps.key ? item[optionProps.key] : item[optionProps.value]"
       :label="optionProps.formatter ? optionProps.formatter(item) : item[optionProps.label]"
       :value="item[optionProps.value]"
@@ -78,8 +78,8 @@ export default {
      * 对应值的跟optionProps相匹配
      */
     firstOption: {
-      type: Object,
-      default: null
+      type: Array,
+      default: () => []
     },
     load: {
       type: Function,
@@ -143,7 +143,7 @@ export default {
       }
       const firstOption = this.firstOption
       if (refresh) {
-        this.optionList = firstOption ? [firstOption] : []
+        this.optionList = !_.isEmpty(firstOption) ? firstOption : []
         this.pageNo = 1
       }
       this.loading = true
@@ -151,16 +151,11 @@ export default {
       this.load({ pageNo: this.pageNo, pageSize: this.pageSize, search: this.search })
         .then((res) => {
           this.pageNo += 1
-          if (firstOption) {
-            this.optionList.push(
-              ...res.data.filter(
-                (item) => item[this.optionProps.value] !== firstOption[this.optionProps.value]
-              )
-            )
+          if (!_.isEmpty(firstOption)) {
+            this.optionList = _.uniqBy([...res.data, ...firstOption], this.optionProps.value)
           } else {
             this.optionList.push(...res.data)
           }
-
           if (res.data.length < this.pageSize) {
             this.noMore = true
           } else {

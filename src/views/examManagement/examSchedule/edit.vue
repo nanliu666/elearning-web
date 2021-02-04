@@ -178,12 +178,39 @@ export default {
         getExamArrange({ id: this.id }).then((res) => {
           const examInfo = this.$refs.examInfo
           examInfo.model = res
-          examInfo.testPaperDefault = {
-            name: res.paperName,
-            id: res.testPaper
-          }
+          this.setDisabled(examInfo)
+          this.setLazySelectFisrt(examInfo, res)
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
         })
+      }
+    },
+    // 懒加载的默认值
+    setLazySelectFisrt(examInfo, res) {
+      examInfo.testPaperDefault = [
+        {
+          name: res.paperName,
+          id: res.testPaper
+        }
+      ]
+      _.each(res.reviewerNames, (item, index) => {
+        _.set(examInfo, `reviewerDefault[${index}].name`, item)
+      })
+      _.each(res.reviewer, (item, index) => {
+        _.set(examInfo, `reviewerDefault[${index}].userId`, item)
+      })
+    },
+    // 设置置灰原则
+    setDisabled(examInfo) {
+      const type = _.get(this.$route, 'query.type', 'edit')
+      const isDraft = _.get(this.$route, 'query.isDraft', 'false')
+      //非草稿箱
+      if (
+        type === 'edit' &&
+        isDraft === 'false' &&
+        (examInfo.model.status === '2' || examInfo.model.status === '3')
+      ) {
+        // 正在进行中的考试以及已结束的考试需要置灰
+        examInfo.modelDisabled = true
       }
     },
     // 发布区分编辑发布还是新增发布
