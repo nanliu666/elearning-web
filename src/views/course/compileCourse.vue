@@ -1110,6 +1110,15 @@ export default {
       delete params.record
       delete params.exam
       delete params.trainCenterexam
+      // 查一下章节有没有内容 没有提示一下
+      params.contents.map((item, index) => {
+        if (item.type) {
+          if (item.content === '') {
+            this.$message.error(`第${index + 1}条章节内容没有上传，请重新上传或者删除该章节内容`)
+            return
+          }
+        }
+      })
       // 草稿
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {

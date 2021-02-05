@@ -621,7 +621,7 @@
         <el-form
           ref="ruleForm"
           :model="ruleForm"
-           :rules="rules"
+          :rules="rules"
         >
           <el-row>
             <el-col :span="12">
@@ -675,7 +675,7 @@
               <el-form-item
                 label="欢迎标题"
                 required
-                 prop="title"
+                prop="title"
               >
                 <el-input
                   v-model="formLiveTypeForm.title"
@@ -687,7 +687,7 @@
               <el-form-item
                 label="验证码"
                 required
-                 prop="code"
+                prop="code"
               >
                 <el-input
                   v-model="formLiveTypeForm.code"
@@ -699,7 +699,7 @@
               <el-form-item
                 label="提示文案"
                 required
-                 prop="tips"
+                prop="tips"
               >
                 <el-input
                   v-model="formLiveTypeForm.tips"
@@ -907,8 +907,10 @@
                 name="first"
               >
                 <el-input
+                  v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
+                  @change="valChange(1)"
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -935,7 +937,11 @@
                 name="second"
                 suffix-icon="el-icon-search"
               >
-                <el-input placeholder="请输入用户名称或手机搜索"></el-input>
+                <el-input
+                  v-model="otherUserVal"
+                  placeholder="请输入用户名称或手机搜索"
+                  @change="valChange(2)"
+                ></el-input>
                 <el-tree
                   :data="otherUser"
                   show-checkbox
@@ -1019,6 +1025,8 @@ export default {
   },
   data() {
     return {
+      otherUserVal: '',
+      organizationUserVal: '',
       headIndex: 1, //步骤切换
       ruleForm: {
         imageUrl: [{}], // 图片
@@ -1167,15 +1175,15 @@ export default {
         baseTitle: [{ required: true, message: '请输入标题', trigger: 'blur' }],
         title: [{ required: true, message: '请输入欢迎标题', trigger: 'blur' }],
         code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }],
+        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }]
       },
       StudentsPage: {
         pageSize: 10
       }
     }
   },
-  activated(){
-     this.isgetcategoryTree();
+  activated() {
+    this.isgetcategoryTree()
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
@@ -1205,10 +1213,42 @@ export default {
     })
   },
   methods: {
+    valChange(type) {
+      if (type == 1) {
+        getOrganizationUser({
+          parentId: 1,
+          search: this.organizationUserVal
+        }).then((res) => {
+          res.users.forEach((item) => {
+            item.type = 'user'
+            item.leaf = true
+            item.id = item.userId
+            res.orgs.push(item)
+          })
+          this.organizationUser = res.orgs
+        })
+      } else {
+        // 获取其他用户
+        getOtherUser({
+          search: this.otherUserVal,
+          categoryId: '',
+          pageNo: 1,
+          pageSize: 99999
+        }).then((res) => {
+          this.otherUser = res.data
 
-     isgetcategoryTree() {
+          this.otherUser.forEach((item) => {
+            item.phoneNum = item.phonenum
+            item.userCode = item.workNo
+            item.id = item.userId
+            item.type = 'user'
+          })
+        })
+      }
+    },
+    isgetcategoryTree() {
       getcategoryTree({
-           source: 'live'
+        source: 'live'
       }).then((res) => {
         this.liveClassification = res
       })
@@ -1311,8 +1351,7 @@ export default {
               type: 2
             })
           }
-
-          if (typeNum == 1) {
+          if (this.get_table_teacherSet_typeNumber(this.table_teacherSet, type) >= 2) {
             this.teacherSetButton.guestButton = true
           }
 
@@ -1327,8 +1366,7 @@ export default {
               type: 3
             })
           }
-
-          if (typeNum == 1) {
+          if (this.get_table_teacherSet_typeNumber(this.table_teacherSet, type) >= 2) {
             this.teacherSetButton.assistantButton = true
           }
 
@@ -1350,14 +1388,18 @@ export default {
       arr.splice(index, 1)
       // 同时在关联课程中的教师列表删除该教师
       this.add_relatedCourses_form.teacher.splice(index, 1)
+
       arr.forEach((item) => {
-        if (item.num == 2 && item.type == row.type) {
-          if (row.type == 2) {
-            this.teacherSetButton.guestButton = false
+        if (item.type == row.type) {
+          let currentTypeNum = arr.filter((x) => x.type === row.type)
+          if (row.type === 2) {
+            this.teacherSetButton.guestButton = currentTypeNum.length < 2 ? false : true
           } else {
-            this.teacherSetButton.assistantButton = false
+            this.teacherSetButton.assistantButton = currentTypeNum.length < 2 ? false : true
           }
-          item.num--
+          if (item.num >= 2) {
+            item.num--
+          }
         }
       })
     },
