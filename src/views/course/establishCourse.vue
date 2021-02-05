@@ -1103,6 +1103,17 @@ export default {
       // 富文本要转换传后端
       params.introduction = _.escape(params.introduction)
       params.thinkContent = _.escape(params.thinkContent)
+
+      // 查一下章节有没有内容 没有提示一下
+      params.contents.map((item, index) => {
+        if (item.type) {
+          if (item.content === '') {
+            this.$message.error(`第${index + 1}条章节内容没有上传，请重新上传或者删除该章节内容`)
+            return
+          }
+        }
+      })
+
       // window.console.log(params)
       // 草稿
       if (status === 2) {
