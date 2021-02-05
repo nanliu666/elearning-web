@@ -351,6 +351,7 @@
               <common-upload
                 class="upload-more"
                 multiple
+                need-handler
                 :check-upload="checkUpload"
                 :on-upload-complete="onUploadComplete"
                 :before-upload="CoursewareUpload"
@@ -456,6 +457,7 @@
 
                     <common-upload
                       v-else
+                      need-handler
                       :check-upload="checkUpload"
                       :on-upload-complete="onUploadComplete"
                       :before-upload="uploadRef[scope.row.type - 2].beforeUpload"

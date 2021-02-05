@@ -39,6 +39,10 @@ export default {
       type: Boolean,
       default: false
     },
+    needHandler: {
+      type: Boolean,
+      default: false
+    },
     // 上传前校验
     beforeUpload: {
       type: Function,
@@ -72,6 +76,7 @@ export default {
         uid: file.file.uid,
         name: file.file.name
       }
+      file.uploader = this
       if (this.needHandler) {
         if (this.checkUpload(file)) {
           fileData.status = 'pending'
@@ -79,7 +84,6 @@ export default {
           return
         }
       }
-      file.uploader = this
       const that = this
       uploadQiniu(file.file, {
         next({ total }) {
