@@ -68,17 +68,18 @@ export default {
   },
   methods: {
     httpRequest(file) {
-      file.uploader = this
       const fileData = {
         uid: file.file.uid,
         name: file.file.name
       }
-      if (this.checkUpload(file)) {
-        fileData.status = 'pending'
-        this.$emit('on-pending', fileData)
-        return
+      if (this.needHandler) {
+        if (this.checkUpload(file)) {
+          fileData.status = 'pending'
+          this.$emit('on-pending', fileData)
+          return
+        }
       }
-
+      file.uploader = this
       const that = this
       uploadQiniu(file.file, {
         next({ total }) {
@@ -111,7 +112,9 @@ export default {
           fileData.status = 'complete'
           fileData.url = url
           // that.$emit('on-complete', fileData)
-          that.onUploadComplete(file)
+          if (that.needHandler) {
+            that.onUploadComplete(file)
+          }
         }
       }).then(({ hooks, observable, subscription }) => {
         fileData.hooks = hooks

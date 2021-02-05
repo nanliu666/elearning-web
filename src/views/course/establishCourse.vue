@@ -348,6 +348,7 @@
               <common-upload
                 class="upload-more"
                 multiple
+                need-handler
                 :check-upload="checkUpload"
                 :on-upload-complete="onUploadComplete"
                 :before-upload="CoursewareUpload"
@@ -453,6 +454,7 @@
 
                     <common-upload
                       v-else
+                      need-handler
                       :check-upload="checkUpload"
                       :on-upload-complete="onUploadComplete"
                       :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
@@ -933,6 +935,8 @@ export default {
       })
       this.ruleForm.contents = []
       delete contents.status
+      this.uploadingQueue = []
+      this.pendingQueue = []
     },
     islistTeacher() {
       listTeacher().then((res) => {
@@ -1299,10 +1303,15 @@ export default {
     delContent(c, i) {
       this.ruleForm.contents.splice(i, 1)
       if (!c.fileData.observable) return
-      const uploadIndex = this.uploadingQueue.findIndex((file) => file.file.uid === c.fileData.uid)
-      const pendingIndex = this.pendingQueue.findIndex((file) => file.file.uid === c.fileData.uid)
+      const uploadIndex = this.uploadingQueue.findIndex(
+        (file) => file.file.uid === c.fileData && c.fileData.uid
+      )
+      const pendingIndex = this.pendingQueue.findIndex(
+        (file) => file.file.uid === c.fileData && c.fileData.uid
+      )
       if (uploadIndex > -1) this.uploadingQueue.splice(uploadIndex, 1)
       if (pendingIndex > -1) this.pendingQueue.splice(pendingIndex, 1)
+
       c.fileData.subscription.unsubscribe()
       c.fileData.observable = null
       c.fileData.subscription = null
@@ -1332,7 +1341,6 @@ export default {
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
-
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 5MB!')
         return false
