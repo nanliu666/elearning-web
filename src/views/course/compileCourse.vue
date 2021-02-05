@@ -926,6 +926,8 @@ export default {
         c.fileData = null
         c = null
       })
+      this.uploadingQueue = []
+      this.pendingQueue = []
       this.ruleForm.contents = []
       delete contents.status
     },
