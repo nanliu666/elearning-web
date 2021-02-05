@@ -369,14 +369,14 @@
             <el-button
               type="text"
               icon="el-icon-s-release"
-              @click="handleCertificate(selection, 'revoke')"
+              @click="handleCertificate(selection, 'revoke', 'all')"
             >
               撤回证书
             </el-button>
             <el-button
               type="text"
               icon="el-icon-s-release"
-              @click="handleCertificate(selection, 'grant')"
+              @click="handleCertificate(selection, 'grant', 'all')"
             >
               发放证书
             </el-button>
@@ -396,7 +396,9 @@
               <el-button
                 :disabled="!(examDetail.certificate && row.isPass)"
                 type="text"
-                @click="handleCertificate([row], row.gainCertificate ? 'revoke' : 'grant')"
+                @click="
+                  handleCertificate([row], row.gainCertificate ? 'revoke' : 'grant', 'single')
+                "
               >
                 {{ row.gainCertificate ? '撤回证书' : '发放证书' }}
               </el-button>
@@ -586,6 +588,7 @@ export default {
     }
   },
   activated() {
+    console.log('_.union([3, 1], [1, 2])==', _.union([3, 1], [1, 2]))
     this.initData()
     this.loadTableData()
   },
@@ -612,12 +615,45 @@ export default {
       this.pubulishAchievement({ ids: ids })
     },
     // 发放与撤回证书操作放一起
-    handleCertificate(selection, operation) {
+    handleCertificate(selection, operation, type) {
       // 以发放状态分组，gainCertificate：true为已发放，否则为未发放
       const certificateGroup = _.groupBy(selection, 'gainCertificate')
       // 以通过与否分组，isPass为true通过了，false为未进入发放证书状态(未通过)
       const passGroup = _.groupBy(selection, 'isPass')
-      const source = operation === 'grant' ? certificateGroup.false : certificateGroup.true
+      let source = []
+      // 批量操作
+      if (type === 'all') {
+        // 考试已通过，且未发放可以发放
+        const grantSource = _.intersection(
+          _.get(passGroup, 'true', []),
+          _.get(certificateGroup, 'false', [])
+        )
+        // 考试通过，且已发放可以撤回
+        const revokeSource = _.intersection(
+          _.get(passGroup, 'true', []),
+          _.get(certificateGroup, 'true', [])
+        )
+        if (operation === 'grant') {
+          source = grantSource
+          if (_.size(grantSource) === 0) {
+            this.$message.error('所选考生全不满足发放证书的功能！')
+            return
+          }
+        } else {
+          source = revokeSource
+          if (_.size(revokeSource) === 0) {
+            this.$message.error('所选考生全不满足撤回证书的功能！')
+            return
+          }
+        }
+      } else {
+        // 单个操作
+        source =
+          operation === 'grant'
+            ? _.get(certificateGroup, 'false', [])
+            : _.get(certificateGroup, 'true', [])
+      }
+      // grant发放 revoke撤回
       let examineeId = []
       _.each(source, (item) => {
         examineeId.push(item.id)
@@ -626,19 +662,20 @@ export default {
       let beforeTips = ''
       // 选择发放或者撤回证书的提示语句
       // 所选学员全部进入发放证书阶段，且未获得证书
-      if (_.isEmpty(certificateGroup.true)) {
-        beforeTips = `您确定要为${_.get(selection, '[0].userName')}等${_.size(
-          selection
+      if (_.isEmpty(_.get(certificateGroup, operation === 'grant' ? 'true' : 'false', []))) {
+        beforeTips = `您确定要为${_.get(source, '[0].userName')}等${_.size(
+          source
         )}个学员${handleSuccessTips}证书吗？`
       } else {
-        // 所选学员包含未进入可发放证书阶段(未通过考试)，或已获得证书的
-        beforeTips = `您所选择的学员中包含${_.get(
-          certificateGroup.true,
-          '[0].userName'
-        )}等${_.size([
-          ...passGroup.false,
-          ...certificateGroup.true
-        ])}人未进入发放证书阶段或已获得证书阶段，因此不能对其执行“${handleSuccessTips}证书”操作，是否忽略这些人员继续${handleSuccessTips}证书？`
+        // 发放操作需要提示：所选学员包含未进入可发放证书阶段(未通过考试)或已获得证书
+        // 撤回操作需要提示：所选学员包含未进入可发放证书阶段(未通过考试)或已撤回证书
+        const needTipsList = _.union(
+          _.get(passGroup, 'false', []),
+          _.get(certificateGroup, operation === 'grant' ? 'true' : 'false', [])
+        )
+        beforeTips = `您所选择的学员中包含${_.get(needTipsList, '[0].userName')}等${_.size(
+          needTipsList
+        )}人未进入发放证书阶段或已获得证书阶段，因此不能对其执行“${handleSuccessTips}证书”操作，是否忽略这些人员继续${handleSuccessTips}证书？`
       }
       this.$confirm(beforeTips, '提示', {
         confirmButtonText: '确定',
