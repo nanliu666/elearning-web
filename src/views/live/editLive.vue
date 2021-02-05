@@ -319,7 +319,7 @@
                   v-model="start_time"
                   type="datetime"
                   placeholder="选择日期时间"
-                  value-format="yyyy-MM-dd hh:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -332,7 +332,7 @@
                   v-model="end_time"
                   type="datetime"
                   placeholder="选择日期时间"
-                  value-format="yyyy-MM-dd hh:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -413,7 +413,7 @@
                         v-model="scope.row.start_time"
                         type="datetime"
                         placeholder="选择日期时间"
-                        value-format="yyyy-MM-dd hh:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -423,7 +423,7 @@
                         v-model="scope.row.end_time"
                         type="datetime"
                         placeholder="选择日期时间"
-                        value-format="yyyy-MM-dd hh:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"
                       ></el-date-picker>
                     </template>
                   </el-table-column>
@@ -621,6 +621,7 @@
         <el-form
           ref="ruleForm"
           :model="ruleForm"
+           :rules="rules"
         >
           <el-row>
             <el-col :span="12">
@@ -674,6 +675,7 @@
               <el-form-item
                 label="欢迎标题"
                 required
+                 prop="title"
               >
                 <el-input
                   v-model="formLiveTypeForm.title"
@@ -685,6 +687,7 @@
               <el-form-item
                 label="验证码"
                 required
+                 prop="code"
               >
                 <el-input
                   v-model="formLiveTypeForm.code"
@@ -696,6 +699,7 @@
               <el-form-item
                 label="提示文案"
                 required
+                 prop="tips"
               >
                 <el-input
                   v-model="formLiveTypeForm.tips"
@@ -1159,10 +1163,19 @@ export default {
         tips: '',
         imgUrl: [{}]
       },
+      rules: {
+        baseTitle: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+        title: [{ required: true, message: '请输入欢迎标题', trigger: 'blur' }],
+        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }],
+      },
       StudentsPage: {
         pageSize: 10
       }
     }
+  },
+  activated(){
+     this.isgetcategoryTree();
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
@@ -1192,6 +1205,14 @@ export default {
     })
   },
   methods: {
+
+     isgetcategoryTree() {
+      getcategoryTree({
+           source: 'live'
+      }).then((res) => {
+        this.liveClassification = res
+      })
+    },
     // 返回按钮返回上一页
     tocourseDraft() {
       this.$router.go(-1)
@@ -1201,7 +1222,7 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
-        this.$message.error('上传课件大小不能超过 10MB!')
+        this.$message.error('上传图片大小不能超过 10MB!')
         return false
       }
       if (!regx.test(file.name)) {

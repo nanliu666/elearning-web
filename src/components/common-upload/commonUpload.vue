@@ -24,11 +24,22 @@
 
 <script>
 import { uploadQiniu } from '@/util/uploadQiniu'
-
 export default {
   name: 'CommonUpload',
   props: {
+    checkUpload: {
+      type: Function,
+      default: () => true
+    },
+    onUploadComplete: {
+      type: Function,
+      default: () => true
+    },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    needHandler: {
       type: Boolean,
       default: false
     },
@@ -56,26 +67,31 @@ export default {
   },
   data() {
     return {
-      uploading: false,
-      files: []
+      uploading: false
     }
   },
   methods: {
     httpRequest(file) {
-      const that = this
-      this.$emit('on-start', file)
+      const fileData = {
+        uid: file.file.uid,
+        name: file.file.name
+      }
       file.uploader = this
-      uploadQiniu(file, {
+      if (this.needHandler) {
+        if (this.checkUpload(file)) {
+          fileData.status = 'pending'
+          this.$emit('on-pending', fileData)
+          return
+        }
+      }
+      const that = this
+      uploadQiniu(file.file, {
         next({ total }) {
-          file.status = 'success'
-          file.uploading = true
-          const percent = parseInt(total.percent)
-          file.percent = percent
-          that.$emit('on-progress', file)
+          fileData.percent = parseInt(total.percent)
+          that.$emit('on-progress', fileData)
         },
         error(err) {
-          file.status = 'exception'
-          file.uploading = false
+          fileData.status = 'error'
           if (err.code === 614) {
             that.$message.error('上传失败，已存在相同文件')
           } else {
@@ -97,10 +113,18 @@ export default {
           that.$emit('input', newValue)
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
-          file.isComplete = true
-          file.url = url
-          that.$emit('on-complete', file)
+          fileData.status = 'complete'
+          fileData.url = url
+          // that.$emit('on-complete', fileData)
+          if (that.needHandler) {
+            that.onUploadComplete(file)
+          }
         }
+      }).then(({ hooks, observable, subscription }) => {
+        fileData.hooks = hooks
+        fileData.observable = observable
+        fileData.subscription = subscription
+        this.$emit('on-start', fileData)
       })
     },
     abort(file) {

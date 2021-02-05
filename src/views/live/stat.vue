@@ -197,7 +197,7 @@
           <el-table-column
             v-if="columns[currentTable]['直播编号']"
             align="center"
-            prop="channelId"
+            prop="liveNo"
             label="直播编号"
             :show-overflow-tooltip="true"
             width="180"

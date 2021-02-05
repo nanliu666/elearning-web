@@ -348,9 +348,12 @@
               <common-upload
                 class="upload-more"
                 multiple
+                need-handler
+                :check-upload="checkUpload"
+                :on-upload-complete="onUploadComplete"
                 :before-upload="CoursewareUpload"
                 @on-progress="onUploadProgress"
-                @on-complete="onUploadComplete"
+                @on-pending="onUploadPending"
               >
                 <el-button size="medium">
                   批量上传课件
@@ -451,10 +454,13 @@
 
                     <common-upload
                       v-else
+                      need-handler
+                      :check-upload="checkUpload"
+                      :on-upload-complete="onUploadComplete"
                       :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
                       :multiple="false"
-                      @on-complete="onUploadComplete"
                       @on-progress="(file) => onUploadProgress(file, scope.row, scope.$index)"
+                      @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
                     >
                       <el-button type="text">{{
                         scope.row.upLoad[0] && scope.row.upLoad[0].localName
@@ -472,6 +478,7 @@
                       v-model="scope.row.upLoad"
                       :before-upload="VideoUpload"
                       :multiple="false"
+                      :disabled="scope.row.fileData.status === 'pending'"
                     >
                       <el-button type="text">
                         {{
@@ -492,10 +499,10 @@
                   <span v-if="scope.row.type === 1">{{ scope.row.upLoad[0].localName }}</span>
                   <div v-else>
                     <el-progress
-                      v-if="scope.row.file.percent < 100"
-                      :percentage="scope.row.file.percent"
-                      :status="scope.row.file.status"
-                      :text-inside="scope.row.file.status !== 'exception'"
+                      v-if="scope.row.fileData && scope.row.fileData.percent < 100"
+                      :percentage="scope.row.fileData.percent"
+                      :status="scope.row.fileData.status !== 'error' ? 'success' : 'exception'"
+                      :text-inside="scope.row.fileData.status !== 'exception'"
                       :stroke-width="18"
                     ></el-progress>
                     <span v-else>{{ scope.row.upLoad[0].localName }}</span>
@@ -513,15 +520,15 @@
               <template slot-scope="scope">
                 <el-button
                   v-if="
-                    scope.row.file &&
-                      typeof scope.row.file.percent === 'number' &&
-                      scope.row.file.percent < 100
+                    scope.row.fileData &&
+                      typeof scope.row.fileData.percent === 'number' &&
+                      scope.row.fileData.percent < 100
                   "
                   type="text"
                   size="medium"
                   @click="controlUpload(scope.$index)"
                 >
-                  {{ scope.row.file.uploading ? '暂停' : '继续' }}
+                  {{ scope.row.fileData.status === 'progress' ? '暂停' : '继续' }}
                 </el-button>
 
                 <el-button
@@ -751,7 +758,9 @@ export default {
           tips: '上传资料',
           beforeUpload: 'DataUpload'
         }
-      ]
+      ],
+      pendingQueue: [],
+      uploadingQueue: []
     }
   },
   watch: {
@@ -789,19 +798,20 @@ export default {
       deep: true
     }
   },
-
   created() {
+    this.uploadRef.forEach((ref) => {
+      ref.beforeUpload = this[ref.beforeUpload]
+    })
+  },
+  activated() {
     // 检测断线重连
     window.addEventListener('online', () => {
       this.ruleForm.contents.map((c) => {
-        const { isComplete, ob } = c.file || {}
-        if (!isComplete) {
+        const { status, ob } = c.fileData || {}
+        if (status !== 'complete') {
           ob.subscription = ob.subscribe(ob.hooks)
         }
       })
-    })
-    this.uploadRef.forEach((ref) => {
-      ref.beforeUpload = this[ref.beforeUpload]
     })
     this.isdeleteData()
     this.isgetCourseTags()
@@ -810,58 +820,94 @@ export default {
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
   },
-  activated() {
-    this.uploadRef.forEach((ref) => {
-      ref.beforeUpload = this[ref.beforeUpload]
-    })
-    this.isdeleteData()
-    this.isgetCourseTags()
-    this.isgetCatalog()
-    // this.getInfo()
-    this.islistTeacher()
-  },
-  mounted() {
-    this.$nextTick(() => this.$refs.ruleForm.clearValidate())
-  },
   methods: {
-    onUploadComplete(file) {
-      const c = this.ruleForm.contents.find((c) => c.file === file)
-      c.upLoad[0].url = file.url
+    // typeChange(type) {
+    //   // console.log(type)
+    // },
+    checkUpload(file) {
+      if (this.uploadingQueue.length >= 2) {
+        if (!this.pendingQueue.includes(file)) {
+          this.pendingQueue.push(file)
+        }
+        return true
+      } else {
+        this.uploadingQueue.push(file)
+      }
+      return false
+    },
+    onUploadPending(fileData, content, contentIdx) {
       const contents = this.ruleForm.contents
-      if (contents.every((c) => c.file && c.file.isComplete) && contents.pending) {
+      const spliceIdx = content ? contentIdx : contents.length
+      const c = {
+        saveOrcompile: 1,
+        type: content ? content.type : 2,
+        name: (content && content.name) || fileData.name || '社区的商业模式',
+        upLoad: [
+          {
+            localName: '等待上传...'
+          }
+        ],
+        fileData
+      }
+      contents.splice(spliceIdx, 1, c)
+    },
+    onUploadProgress(fileData, content, contentIdx) {
+      const contents = this.ruleForm.contents
+      let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
+      if (index < 0) {
+        fileData.status = 'progress'
+        const c = {
+          saveOrcompile: 1,
+          type: content ? content.type : 2,
+          name: (content && content.name) || fileData.name || '社区的商业模式',
+          upLoad: [
+            {
+              localName: fileData.name
+            }
+          ],
+          fileData
+        }
+        const spliceIdx = content ? contentIdx : contents.length
+        contents.splice(spliceIdx, 1, c)
+      } else if (!fileData.status) {
+        fileData.status = 'progress'
+        const c = contents[index]
+        c.upLoad = [{ localName: fileData.name }]
+        c.fileData = fileData
+        contents.splice(index, 1, c)
+      }
+    },
+    onUploadComplete(file) {
+      const contents = this.ruleForm.contents
+      const content = contents.find((c) => c.fileData.uid === file.file.uid)
+      content.upLoad[0].url = content.fileData.url
+      if (
+        contents.every((c) => c.fileData && c.fileData.status === 'complete') &&
+        contents.pending
+      ) {
         this.isAddCourse(contents.addStatus)
+      }
+
+      this.uploadingQueue.splice(this.uploadingQueue.indexOf(file), 1)
+      if (this.uploadingQueue.length < 2 && this.pendingQueue.length) {
+        const file = this.pendingQueue.pop()
+        file.uploader.httpRequest(file)
       }
     },
     controlUpload(index) {
       const content = this.ruleForm.contents[index]
-      const file = content.file
-      const uploading = (file.uploading = !file.uploading)
+      let { status, observable, subscription, hooks } = content.fileData
+      if (status === 'progress') {
+        status = content.fileData.status = 'pending'
+      } else {
+        status = content.fileData.status = 'progress'
+      }
       // 继续上传
-      if (uploading) {
-        file.ob.subscription = file.ob.subscribe(file.ob.hooks)
+      if (status === 'progress') {
+        content.fileData.subscription = observable.subscribe(hooks)
       } else {
         // 暂停上传
-        file.uploader.abort(file)
-        file.ob.subscription.unsubscribe()
-      }
-    },
-    // 批量上传课件
-    onUploadProgress(file, content, index) {
-      const contents = this.ruleForm.contents
-      if (!contents.find((c) => c.file === file)) {
-        const c = {
-          saveOrcompile: 1,
-          type: content ? content.type : 2,
-          name: (content && content.name) || file.file.name || '社区的商业模式',
-          upLoad: [
-            {
-              localName: file.file.name
-            }
-          ],
-          file
-        }
-        const i = typeof index === 'number' ? index : contents.length
-        contents.splice(i, 1, c)
+        subscription.unsubscribe()
       }
     },
     handleOrgNodeClick(data) {
@@ -877,11 +923,20 @@ export default {
       const contents = this.ruleForm.contents
       if (contents.pending) return
       this.$refs.ruleForm.clearValidate()
-      contents.forEach((c, i) => {
-        this.delContent(c, i)
+      contents.forEach((c) => {
+        if (!c.fileData) return
+        if (!c.fileData.observable) return
+        c.fileData.subscription.unsubscribe()
+        c.fileData.observable = null
+        c.fileData.subscription = null
+        c.fileData.hooks = null
+        c.fileData = null
+        c = null
       })
       this.ruleForm.contents = []
       delete contents.status
+      this.uploadingQueue = []
+      this.pendingQueue = []
     },
     islistTeacher() {
       listTeacher().then((res) => {
@@ -977,7 +1032,10 @@ export default {
       // 还有正在上传的文件
       if (
         contents.some(
-          (item) => item.file && typeof item.file.percent === 'number' && item.file.percent < 100
+          (item) =>
+            item.fileData &&
+            typeof item.fileData.percent === 'number' &&
+            item.fileData.percent < 100
         )
       ) {
         // 提示
@@ -1007,7 +1065,7 @@ export default {
       params.contents = contents.map((item) => {
         const n = {}
         Object.keys(item).forEach((key) => {
-          if (key === 'file') return
+          if (key === 'fileData') return
           n[key] = item[key]
         })
         return n
@@ -1131,7 +1189,6 @@ export default {
             this.$router.push({ path: '/course/courseDraft?status=' + status })
           }, 3000)
         })
-        .catch((e) => console.error(e))
     },
     // 清空数据
     isdeleteData() {
@@ -1233,7 +1290,8 @@ export default {
         url: '',
         content: '', //文章内容
         upLoad: [], //[url,localName],  //所有上传的文件
-        saveOrcompile: 0 // 1保存&0编辑
+        saveOrcompile: 0, // 1保存&0编辑
+        fileData: {}
       }
       this.ruleForm.contents.push(item)
     },
@@ -1244,11 +1302,22 @@ export default {
     // 删除
     delContent(c, i) {
       this.ruleForm.contents.splice(i, 1)
-      if (!c.file) return
-      const { ob, uploader } = c.file
-      ob.subscription.unsubscribe()
-      ob.subscription.unsubscribe()
-      uploader.abort(c.file)
+      if (!c.fileData.observable) return
+      const uploadIndex = this.uploadingQueue.findIndex(
+        (file) => file.file.uid === c.fileData && c.fileData.uid
+      )
+      const pendingIndex = this.pendingQueue.findIndex(
+        (file) => file.file.uid === c.fileData && c.fileData.uid
+      )
+      if (uploadIndex > -1) this.uploadingQueue.splice(uploadIndex, 1)
+      if (pendingIndex > -1) this.pendingQueue.splice(pendingIndex, 1)
+
+      c.fileData.subscription.unsubscribe()
+      c.fileData.observable = null
+      c.fileData.subscription = null
+      c.fileData.hooks = null
+      c.fileData = null
+      c = null
     },
     //数组元素互换位置方法
     swapArray(arr, index1, index2) {
@@ -1272,7 +1341,6 @@ export default {
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
-
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 5MB!')
         return false

@@ -14,8 +14,8 @@
               未分类
             </div> -->
 
-        <el-tree
-          ref="tree"
+       <el-tree
+           ref="tree"
           :data="data"
           node-key="id"
           :expand-on-click-node="false"
