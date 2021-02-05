@@ -280,6 +280,8 @@ export default {
       })
       if (diffIndex !== -1) {
         this.checkedUsers.splice(diffIndex, 1)
+        this.checkAll = false
+        this.isIndeterminate = true
       }
     },
     selected(val) {
@@ -315,7 +317,7 @@ export default {
   methods: {
     // 切换全选与全删
     handleCheckAllChange(val) {
-      this.checkedUsers = val ? this.usersNameList : []
+      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : []
       this.isIndeterminate = false
       // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
