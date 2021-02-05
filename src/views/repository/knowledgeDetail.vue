@@ -78,7 +78,10 @@
               {{ konwledgeDetail.commentNum }}
             </div>
           </li>
-          <li class="bottom-li">
+          <li
+            v-if="konwledgeDetail.allowDownload"
+            class="bottom-li"
+          >
             <div class="bottom-li-title">
               下载人数
             </div>
