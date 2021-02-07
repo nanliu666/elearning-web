@@ -746,7 +746,7 @@
           <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
               <el-form-item
-                :label="'关联学员：' + table_relatedStudents.length + '人（仅关联学员可以观看）'"
+                :label="'关联学员：' + dialogSelectStudent.length + '人（仅关联学员可以观看）'"
               >
                 <el-button
                   type="text"
@@ -1703,6 +1703,24 @@ export default {
     },
     // 提交直播信息
     async submit_live_data() {
+      let otherData=[];
+      let slef=this;
+      this.table_teacherSet.forEach(function(item, index){
+        if(item.type===2 ||item.type===3 ){
+          let teacher={}
+          slef.teachingTeacherList.forEach(function(currentValue,index1){
+            if(currentValue.id==item.nameList_value){
+               teacher.nickName=currentValue.name
+            }
+          })
+         
+          teacher.userActor =item.identity,
+          teacher.roleName =item.role,
+          teacher.userId =item.nameList_value
+          otherData.push(teacher) 
+        }
+        
+      })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
         categoryId: this.liveClassification_value, // 所属分类
@@ -1712,6 +1730,7 @@ export default {
         remark: _.escape(this.ruleForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
+        otherTeachers:otherData,
         coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
@@ -1762,11 +1781,11 @@ export default {
         case 'direct':
           data.authType = this.radio_connectionMode
           // 提交关联学员数据
-          if (this.table_relatedStudents.length) {
+          if (this.dialogSelectStudent.length) {
             data.userAndOrgIds = {
               users: []
             }
-            this.table_relatedStudents.forEach((item) => {
+            this.dialogSelectStudent.forEach((item) => {
               data.userAndOrgIds.users.push(item.id)
             })
           }
@@ -1849,8 +1868,31 @@ export default {
           name: res.lecturerName,
           id: res.lecturerId
         })
-
+        let self= this;
         this.table_teacherSet[0].nameList_value = res.lecturerId
+        res.otherTeachers.forEach(function(item,index){
+          let teacherVaue={}
+           if(item.roleName=='嘉宾'){
+            teacherVaue.identity= '嘉宾',
+            teacherVaue.nameList_value= item.userId,
+            //teacherVaue.role= '嘉宾',
+            teacherVaue.num='嘉宾' + (index+1),
+            teacherVaue.type= 2
+          }
+          if(item.roleName=='助教'){
+            teacherVaue.identity= '助教',
+            teacherVaue.nameList_value= item.userId,
+          //  teacherVaue.role= '助教',
+            teacherVaue.num='助教' + (index+1),
+            teacherVaue.type= 2
+          }
+            self.table_teacherSet.push(teacherVaue)
+
+        })
+       // this.table_teacherSet.push(res.otherTeachers)
+      
+        console.log(this.table_teacherSet)
+        debugger
         this.table_relatedCourses = res.courses
 
         // 直播设置
