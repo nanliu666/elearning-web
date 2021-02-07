@@ -10,21 +10,21 @@
         <div
           :class="{ sign: headIndex === 1 }"
           class="schedule1"
-          @click="headIndex = 1"
+          @click=""
         >
           <i class="el-icon-video-camera"></i> 直播信息
         </div>
         <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
-          @click="headIndex = 2"
+          @click=""
         >
           <i class="el-icon-document-copy"></i> 关联讲师及课程
         </div>
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
-          @click="headIndex = 3"
+          @click=""
         >
           <i class="el-icon-document-remove"></i> 观看条件
         </div>
@@ -43,7 +43,7 @@
           size="mini"
           class="backward"
           type="primary"
-          @click="headIndex++"
+          @click="liveNextTable(headIndex)"
         >
           下一步
         </el-button>
@@ -67,6 +67,7 @@
       >
         <h3>基本信息</h3>
         <el-form
+          ref="basicForm"
           :model="basicForm"
           :rules="basicFormRules"
         >
@@ -620,7 +621,7 @@
       >
         <el-form
           ref="ruleForm"
-          :model="ruleForm"
+          :model="formLiveTypeForm"
           :rules="rules"
         >
           <el-row>
@@ -1213,6 +1214,22 @@ export default {
     })
   },
   methods: {
+    //直播信息填写 下一步校验
+    liveNextTable(type){
+      let formName = type==1?'basicForm':(type==2?'':'ruleForm')
+      if(!formName){
+        this.headIndex += 1
+        return false
+      }
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.headIndex += 1
+        } else {
+          return false;
+        }
+      });
+
+    },
     valChange(type) {
       if (type == 1) {
         getOrganizationUser({
@@ -1686,97 +1703,105 @@ export default {
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
-    submit_live_data() {
-      var data = {
-        batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
-        categoryId: this.liveClassification_value, // 所属分类
-        channelName: this.basicForm.title, // 直播标题
-        linkMicLimit: this.select_linkNumber_value, //  最大连麦数量
-        isUsed: this.select_liveStatus_value, // 直播状态
-        remark: _.escape(this.ruleForm.introduction), // 直播介绍
-        scene: this.toggle_scene, // 直播场景
-        lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
-        coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
-      }
+    async submit_live_data() {
+      //校验第三步是否填写
+      let res= await this.$refs['ruleForm'].validate((valid) => {
+        if (valid) {
+          var data = {
+            batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
+            categoryId: this.liveClassification_value, // 所属分类
+            channelName: this.basicForm.title, // 直播标题
+            linkMicLimit: this.select_linkNumber_value, //  最大连麦数量
+            isUsed: this.select_liveStatus_value, // 直播状态
+            remark: _.escape(this.ruleForm.introduction), // 直播介绍
+            scene: this.toggle_scene, // 直播场景
+            lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
+            coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
+          }
 
-      // 提交关联课程数据
-      if (this.table_relatedCourses.length > 0) {
-        data.courses = []
-        this.table_relatedCourses.forEach((item) => {
-          data.courses.push(item.courseId)
-        })
-      }
-      // 直播方式，如果为多次或循环直播添加其他字段
-      if (data.batchDeclare == 'cycle') {
-        data.cycleInfo = {
-          cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
-          cycleMode: this.select_loopCycle_value,
-          cycleTime: this.select_mode_time_value.toString()
-        }
-      }
-      if (data.batchDeclare == 'single') {
-        data.liveBatch = []
-        data.liveBatch.push({
-          startTime: this.start_time,
-          endTime: this.end_time
-        })
-      } else {
-        data.liveBatch = []
-        this.table_liveTime.forEach((item) => {
-          if (item.id) {
+          // 提交关联课程数据
+          if (this.table_relatedCourses.length > 0) {
+            data.courses = []
+            this.table_relatedCourses.forEach((item) => {
+              data.courses.push(item.courseId)
+            })
+          }
+          // 直播方式，如果为多次或循环直播添加其他字段
+          if (data.batchDeclare == 'cycle') {
+            data.cycleInfo = {
+              cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
+              cycleMode: this.select_loopCycle_value,
+              cycleTime: this.select_mode_time_value.toString()
+            }
+          }
+          if (data.batchDeclare == 'single') {
+            data.liveBatch = []
             data.liveBatch.push({
-              id: item.id,
-              startTime: item.start_time,
-              endTime: item.end_time
+              startTime: this.start_time,
+              endTime: this.end_time
             })
           } else {
-            data.liveBatch.push({
-              startTime: item.start_time,
-              endTime: item.end_time
+            data.liveBatch = []
+            this.table_liveTime.forEach((item) => {
+              if (item.id) {
+                data.liveBatch.push({
+                  id: item.id,
+                  startTime: item.start_time,
+                  endTime: item.end_time
+                })
+              } else {
+                data.liveBatch.push({
+                  startTime: item.start_time,
+                  endTime: item.end_time
+                })
+              }
             })
           }
-        })
-      }
 
-      // 观众授权方式。直接授权:direct，验证码授权:code, 默认为空表示所有人可见
-      switch (this.radio_connectionMode) {
-        case 'all':
-          data.authType = ''
-          break
-        case 'direct':
-          data.authType = this.radio_connectionMode
-          // 提交关联学员数据
-          if (this.table_relatedStudents.length) {
-            data.userAndOrgIds = {
-              users: []
-            }
-            this.table_relatedStudents.forEach((item) => {
-              data.userAndOrgIds.users.push(item.id)
+          // 观众授权方式。直接授权:direct，验证码授权:code, 默认为空表示所有人可见
+          switch (this.radio_connectionMode) {
+            case 'all':
+              data.authType = ''
+              break
+            case 'direct':
+              data.authType = this.radio_connectionMode
+              // 提交关联学员数据
+              if (this.table_relatedStudents.length) {
+                data.userAndOrgIds = {
+                  users: []
+                }
+                this.table_relatedStudents.forEach((item) => {
+                  data.userAndOrgIds.users.push(item.id)
+                })
+              }
+              break
+            case 'code':
+              data.authType = this.radio_connectionMode
+              data.codeLinkInfo = {
+                //当authType=code时，需要此参数，其他不需要
+                welcomeTitle: this.formLiveTypeForm.title,
+                captcha: this.formLiveTypeForm.code,
+                notice: this.formLiveTypeForm.tips,
+                QRCodeUrl: this.formLiveTypeForm.imgUrl[this.formLiveTypeForm.imgUrl.length - 1].url
+              }
+              break
+          }
+
+          if (this.$route.query.id) {
+            data.liveId = this.$route.query.id
+            postEditLive(data).then(() => {
+              this.$router.push({ path: '/live/liveList' })
+            })
+          } else {
+            postAddLive(data).then(() => {
+              this.$router.push({ path: '/live/liveList' })
             })
           }
-          break
-        case 'code':
-          data.authType = this.radio_connectionMode
-          data.codeLinkInfo = {
-            //当authType=code时，需要此参数，其他不需要
-            welcomeTitle: this.formLiveTypeForm.title,
-            captcha: this.formLiveTypeForm.code,
-            notice: this.formLiveTypeForm.tips,
-            QRCodeUrl: this.formLiveTypeForm.imgUrl[this.formLiveTypeForm.imgUrl.length - 1].url
-          }
-          break
-      }
+        } else {
+          return false;
+        }
+      });
 
-      if (this.$route.query.id) {
-        data.liveId = this.$route.query.id
-        postEditLive(data).then(() => {
-          this.$router.push({ path: '/live/liveList' })
-        })
-      } else {
-        postAddLive(data).then(() => {
-          this.$router.push({ path: '/live/liveList' })
-        })
-      }
     },
     setLiveDetails(id) {
       // getStudentList({
