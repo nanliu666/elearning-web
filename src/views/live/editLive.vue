@@ -10,21 +10,18 @@
         <div
           :class="{ sign: headIndex === 1 }"
           class="schedule1"
-          @click=""
         >
           <i class="el-icon-video-camera"></i> 直播信息
         </div>
         <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
-          @click=""
         >
           <i class="el-icon-document-copy"></i> 关联讲师及课程
         </div>
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
-          @click=""
         >
           <i class="el-icon-document-remove"></i> 观看条件
         </div>
@@ -1239,8 +1236,10 @@ export default {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
+            item.name=item.name
             res.orgs.push(item)
           })
+          
           this.organizationUser = res.orgs
         })
       } else {
@@ -1470,7 +1469,7 @@ export default {
     // 关联学员表格的分页跳转
     toggle_StudentsPage(page) {
       this.table_relatedStudents = []
-      this.dialogSelectStudent.forEach((item, index) => {
+      this.dialogSelectStudent.forEach((item, index) => {  
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1625,10 +1624,12 @@ export default {
       this.dialog_add_student = false
     },
     load_organizationUser(node, resolve) {
+      
       if (node.level === 0) {
         getOrganizationUser({
           parentId: 1
         }).then((res) => {
+
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
@@ -1674,7 +1675,8 @@ export default {
                   name: resitem.name,
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
-                  id: resitem.id
+                  id: resitem.id,
+                  department: data.name,
                 })
               }
             })
@@ -1892,7 +1894,7 @@ export default {
        // this.table_teacherSet.push(res.otherTeachers)
       
         console.log(this.table_teacherSet)
-        debugger
+        
         this.table_relatedCourses = res.courses
 
         // 直播设置
