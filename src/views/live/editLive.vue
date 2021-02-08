@@ -1713,7 +1713,6 @@ export default {
               teacher.nickName = currentValue.name
             }
           })
-
           ;(teacher.userActor = item.identity),
             (teacher.roleName = item.role),
             (teacher.userId = item.nameList_value)

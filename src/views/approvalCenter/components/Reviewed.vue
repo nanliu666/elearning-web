@@ -180,12 +180,11 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(()=>{
-        this.$router.push({ path: '/course/establishCourse', query: { id: obj.formId } })
-      }).catch(()=>{
-
       })
-
+        .then(() => {
+          this.$router.push({ path: '/course/establishCourse', query: { id: obj.formId } })
+        })
+        .catch(() => {})
     },
     // 撤回
     withdrawFn(row) {
@@ -193,18 +192,17 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(()=>{
-        cancel({ processInstanceId: row.processInstanceId }).then(() => {
-          this.setPitch()
-          this.$message({
-            message: '撤回成功',
-            type: 'success'
+      })
+        .then(() => {
+          cancel({ processInstanceId: row.processInstanceId }).then(() => {
+            this.setPitch()
+            this.$message({
+              message: '撤回成功',
+              type: 'success'
+            })
           })
         })
-      }).catch(()=>{
-
-      })
-
+        .catch(() => {})
     },
     // 获取数据
     async setPitch() {

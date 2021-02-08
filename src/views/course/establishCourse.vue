@@ -964,7 +964,7 @@ export default {
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
         data.contents = []
-        data.passCondition = data.passCondition.split(",")
+        data.passCondition = data.passCondition.split(',')
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -1171,8 +1171,7 @@ export default {
                   // 状态设置为审批中
                   params.status = 0
                   this.submitApprApply(params.id ? params.id : id)
-                }
-                else{
+                } else {
                   this.$message({
                     message: '课程发布成功',
                     type: 'success'
