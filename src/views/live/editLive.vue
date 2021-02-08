@@ -743,7 +743,7 @@
           <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
               <el-form-item
-                :label="'关联学员：' + dialogSelectStudent.length + '人（仅关联学员可以观看）'"
+                :label="'关联学员：' + totalNum+ '人（仅关联学员可以观看）'"
               >
                 <el-button
                   type="text"
@@ -812,7 +812,7 @@
               <!-- :current-page.sync="StudentsPage.totalNo" -->
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
-                :total="dialogSelectStudent.length"
+                :total="totalNum"
                 :page-size.sync="StudentsPage.pageSize"
                 @current-change="toggle_StudentsPage"
                 @size-change="toggle_StudentsPageSize"
@@ -1014,7 +1014,8 @@ import {
   getOrganizationUser,
   getOtherUser,
   getUsersByOrgId,
-  getLiveDetails
+  getLiveDetails,
+  getStudentByLiveId,
 } from '@/api/live/editLive'
 
 export default {
@@ -1023,6 +1024,7 @@ export default {
   },
   data() {
     return {
+      totalNum:0,
       otherUserVal: '',
       organizationUserVal: '',
       headIndex: 1, //步骤切换
@@ -1182,11 +1184,14 @@ export default {
   },
   activated() {
     this.isgetcategoryTree()
+   // this.getStudentInfoList();
+
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
+      this.getStudentInfoList();
     }
     //   获取直播分类
     getcategoryTree({
@@ -1211,6 +1216,26 @@ export default {
     })
   },
   methods: {
+    getStudentInfoList(){
+      getStudentByLiveId({
+          liveId:this.$route.query.id,
+          pageNo:1,
+          pageSize: this.StudentsPage.pageSize
+        }).then((res) => {   
+          debugger
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)  
+          })     
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
+        })
+    },
+
     //直播信息填写 下一步校验
     liveNextTable(type) {
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'ruleForm'
@@ -1467,9 +1492,11 @@ export default {
       })
     },
     // 关联学员表格的分页跳转
-    toggle_StudentsPage(page) {
+    toggle_StudentsPage(page) {//添加学员
       this.table_relatedStudents = []
-      this.dialogSelectStudent.forEach((item, index) => {  
+      if(this.dialogSelectStudent.length>0){
+          this.totalNum =this.dialogSelectStudent.length
+          this.dialogSelectStudent.forEach((item, index) => {  
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1483,6 +1510,29 @@ export default {
           })
         }
       })
+      }else{//编辑入口
+         getStudentByLiveId({
+          liveId:this.$route.query.id,
+          pageNo:page,
+          pageSize: this.StudentsPage.pageSize
+        }).then((res) => {   
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)  
+          })     
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
+        })
+
+
+
+      }
+     
+      
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size

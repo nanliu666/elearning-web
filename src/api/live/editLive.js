@@ -54,3 +54,9 @@ export const delCategory = (params) => del('/manage/v1/evaluation/category', par
  * 分类查询接口
  * */
 export const ableCategory = (params) => put('/manage/v1/evaluation/category/able', params)
+
+/**
+ * 
+ * 讲师直播详情-学员列表
+ */
+export const getStudentByLiveId = (params) => get('/common/v1/live/student', params)
