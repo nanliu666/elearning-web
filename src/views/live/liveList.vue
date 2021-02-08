@@ -362,7 +362,7 @@ export default {
                 }
               ).then(() => {
                 toggleLiveStatus({
-                  isUsed: 1,
+                  isUsed: 0,
                   liveId: row.liveId
                 }).then(() => {
                   row.isUsed = 0

@@ -816,7 +816,7 @@ export default {
     this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
-    // this.getInfo()
+    this.getInfo()
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
   },

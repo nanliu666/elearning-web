@@ -191,7 +191,7 @@ export default {
             this.$refs.editBasicInfo.formData = basicInfo
             this.$refs.editDetail.formData = detailData
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
-            trainOnlineCourse.forEach(item=>{
+            trainOnlineCourse.forEach((item) => {
               item.courseId = item.course
             })
             this.$refs.editArrangement.course.data = trainOnlineCourse
