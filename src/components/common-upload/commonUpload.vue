@@ -35,6 +35,10 @@ export default {
       type: Function,
       default: () => true
     },
+    onUploadProgress: {
+      type: Function,
+      default: () => true
+    },
     disabled: {
       type: Boolean,
       default: false
@@ -79,7 +83,6 @@ export default {
       file.uploader = this
       if (this.needHandler) {
         if (this.checkUpload(file)) {
-          fileData.status = 'pending'
           this.$emit('on-pending', fileData)
           return
         }
@@ -88,7 +91,9 @@ export default {
       uploadQiniu(file.file, {
         next({ total }) {
           fileData.percent = parseInt(total.percent)
-          that.$emit('on-progress', fileData)
+          if (that.needHandler) {
+            that.onUploadProgress(fileData)
+          }
         },
         error(err) {
           fileData.status = 'error'
@@ -113,11 +118,9 @@ export default {
           that.$emit('input', newValue)
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
-          fileData.status = 'complete'
-          fileData.url = url
           // that.$emit('on-complete', fileData)
           if (that.needHandler) {
-            that.onUploadComplete(file)
+            that.onUploadComplete(file, url)
           }
         }
       }).then(({ hooks, observable, subscription }) => {
