@@ -176,18 +176,35 @@ export default {
     // 重新申请
     againFn(obj) {
       // window.console.log(id)  compileCourse  establishCourse
-      debugger
-      this.$router.push({ path: '/course/establishCourse',query:{id:obj.formId} })
+      this.$confirm('您确定要对课程进行修改并重新申请?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(()=>{
+        this.$router.push({ path: '/course/establishCourse', query: { id: obj.formId } })
+      }).catch(()=>{
+
+      })
+
     },
     // 撤回
     withdrawFn(row) {
-      cancel({ processInstanceId: row.processInstanceId }).then(() => {
-        this.setPitch()
-        this.$message({
-          message: '撤回成功',
-          type: 'success'
+      this.$confirm('撤回后课程将进入草稿箱，您确定要对课程进行撤回?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(()=>{
+        cancel({ processInstanceId: row.processInstanceId }).then(() => {
+          this.setPitch()
+          this.$message({
+            message: '撤回成功',
+            type: 'success'
+          })
         })
+      }).catch(()=>{
+
       })
+
     },
     // 获取数据
     async setPitch() {

@@ -156,7 +156,7 @@ const loadOrgTree = async ({ parentId, search, isRange }) => {
   const { orgs, users } = data
   const ORG_PROPS = { type: NODE_TYPE.Org }
   const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
-  if(isRange){
+  if (isRange) {
     return _.concat(
       _.map(orgs, (item) =>
         _.assign(
@@ -165,7 +165,7 @@ const loadOrgTree = async ({ parentId, search, isRange }) => {
           ORG_PROPS
         )
       )
-      )
+    )
   }
   return _.concat(
     _.map(orgs, (item) =>
@@ -289,7 +289,7 @@ export default {
     orgSearch: _.debounce(function(search) {
       if (!search) return
       this.loading = true
-      loadOrgTree({ search,isRange:this.isRange })
+      loadOrgTree({ search, isRange: this.isRange })
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>
             _.assign({ isLeaf: true }, item)

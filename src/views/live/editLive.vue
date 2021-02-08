@@ -1236,7 +1236,7 @@ export default {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
-            item.name=item.name
+            item.name = item.name
             res.orgs.push(item)
           })
 
@@ -1624,12 +1624,10 @@ export default {
       this.dialog_add_student = false
     },
     load_organizationUser(node, resolve) {
-
       if (node.level === 0) {
         getOrganizationUser({
           parentId: 1
         }).then((res) => {
-
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
@@ -1676,7 +1674,7 @@ export default {
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
                   id: resitem.id,
-                  department: data.name,
+                  department: data.name
                 })
               }
             })
@@ -1705,23 +1703,22 @@ export default {
     },
     // 提交直播信息
     submit_live_data() {
-      let otherData=[];
-      let slef=this;
-      this.table_teacherSet.forEach(function(item, index){
-        if(item.type===2 ||item.type===3 ){
-          let teacher={}
-          slef.teachingTeacherList.forEach(function(currentValue,index1){
-            if(currentValue.id==item.nameList_value){
-               teacher.nickName=currentValue.name
+      let otherData = []
+      let slef = this
+      this.table_teacherSet.forEach(function(item, index) {
+        if (item.type === 2 || item.type === 3) {
+          let teacher = {}
+          slef.teachingTeacherList.forEach(function(currentValue, index1) {
+            if (currentValue.id == item.nameList_value) {
+              teacher.nickName = currentValue.name
             }
           })
 
-          teacher.userActor =item.identity,
-          teacher.roleName =item.role,
-          teacher.userId =item.nameList_value
+          ;(teacher.userActor = item.identity),
+            (teacher.roleName = item.role),
+            (teacher.userId = item.nameList_value)
           otherData.push(teacher)
         }
-
       })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -1732,7 +1729,7 @@ export default {
         remark: _.escape(this.ruleForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
-        otherTeachers:otherData,
+        otherTeachers: otherData,
         coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
@@ -1803,7 +1800,7 @@ export default {
           }
           break
       }
-      if(this.radio_connectionMode==="code"){
+      if (this.radio_connectionMode === 'code') {
         //校验第三步是否填写
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
@@ -1821,8 +1818,7 @@ export default {
             return false
           }
         })
-      }
-      else{
+      } else {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
           postEditLive(data).then(() => {
@@ -1834,9 +1830,6 @@ export default {
           })
         }
       }
-
-
-
     },
     setLiveDetails(id) {
       // getStudentList({
@@ -1870,28 +1863,27 @@ export default {
           name: res.lecturerName,
           id: res.lecturerId
         })
-        let self= this;
+        let self = this
         this.table_teacherSet[0].nameList_value = res.lecturerId
-        res.otherTeachers.forEach(function(item,index){
-          let teacherVaue={}
-           if(item.roleName=='嘉宾'){
-            teacherVaue.identity= '嘉宾',
-            teacherVaue.nameList_value= item.userId,
-            //teacherVaue.role= '嘉宾',
-            teacherVaue.num='嘉宾' + (index+1),
-            teacherVaue.type= 2
+        res.otherTeachers.forEach(function(item, index) {
+          let teacherVaue = {}
+          if (item.roleName == '嘉宾') {
+            (teacherVaue.identity = '嘉宾'),
+              (teacherVaue.nameList_value = item.userId),
+              //teacherVaue.role= '嘉宾',
+              (teacherVaue.num = '嘉宾' + (index + 1)),
+              (teacherVaue.type = 2)
           }
-          if(item.roleName=='助教'){
-            teacherVaue.identity= '助教',
-            teacherVaue.nameList_value= item.userId,
-          //  teacherVaue.role= '助教',
-            teacherVaue.num='助教' + (index+1),
-            teacherVaue.type= 2
+          if (item.roleName == '助教') {
+            (teacherVaue.identity = '助教'),
+              (teacherVaue.nameList_value = item.userId),
+              //  teacherVaue.role= '助教',
+              (teacherVaue.num = '助教' + (index + 1)),
+              (teacherVaue.type = 2)
           }
-            self.table_teacherSet.push(teacherVaue)
-
+          self.table_teacherSet.push(teacherVaue)
         })
-       // this.table_teacherSet.push(res.otherTeachers)
+        // this.table_teacherSet.push(res.otherTeachers)
 
         console.log(this.table_teacherSet)
 
