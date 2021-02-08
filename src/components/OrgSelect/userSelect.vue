@@ -148,7 +148,7 @@ const NODE_TYPE = {
   Org: 'Org',
   User: 'User'
 }
-const loadOrgTree = async ({ parentId, search }) => {
+const loadOrgTree = async ({ parentId, search, isRange }) => {
   search = _.trim(search)
   // 只能传入一个参数 当传入search的时候不使用parentId
   const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
@@ -156,6 +156,17 @@ const loadOrgTree = async ({ parentId, search }) => {
   const { orgs, users } = data
   const ORG_PROPS = { type: NODE_TYPE.Org }
   const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
+  if (isRange) {
+    return _.concat(
+      _.map(orgs, (item) =>
+        _.assign(
+          { _nodeKey: `${parentId || '0'}_${item.id}`, bizId: item.id, bizName: item.name },
+          item,
+          ORG_PROPS
+        )
+      )
+    )
+  }
   return _.concat(
     _.map(orgs, (item) =>
       _.assign(
@@ -278,7 +289,7 @@ export default {
     orgSearch: _.debounce(function(search) {
       if (!search) return
       this.loading = true
-      loadOrgTree({ search })
+      loadOrgTree({ search, isRange: this.isRange })
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>
             _.assign({ isLeaf: true }, item)

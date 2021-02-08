@@ -1296,10 +1296,10 @@ export default {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
-            item.name=item.name
+            item.name = item.name
             res.orgs.push(item)
           })
-          
+
           this.organizationUser = res.orgs
         })
       } else {
@@ -1709,12 +1709,10 @@ export default {
       this.dialog_add_student = false
     },
     load_organizationUser(node, resolve) {
-      
       if (node.level === 0) {
         getOrganizationUser({
           parentId: 1
         }).then((res) => {
-
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
@@ -1761,7 +1759,6 @@ export default {
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
                   id: resitem.id,
-                  department: data.name,
                 })
               }
             })
@@ -1789,9 +1786,10 @@ export default {
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
-    async submit_live_data() {
-      let otherData=[];
-      let slef=this;
+
+    submit_live_data() {
+      let otherData = []
+      let slef = this
       this.table_teacherSet.forEach(function(item, index){
         if(item.type===2 ||item.type===3 ){
           let teacher={}
@@ -1888,9 +1886,11 @@ export default {
           }
           break
       }
-      if(this.radio_connectionMode==="code"){
+
+      if (this.radio_connectionMode === 'code') {
         //校验第三步是否填写
-        let res = await this.$refs['ruleForm'].validate((valid) => {
+        let res =  this.$refs['ruleForm'].validate((valid) => {
+
           if (valid) {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
@@ -1906,8 +1906,7 @@ export default {
             return false
           }
         })
-      }
-      else{
+      }else {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
           postEditLive(data).then(() => {
@@ -1919,9 +1918,6 @@ export default {
           })
         }
       }
-
-
-
     },
     setLiveDetails(id) {
       // getStudentList({
@@ -1958,12 +1954,13 @@ export default {
           name: res.lecturerName,
           id: res.lecturerId
         })
-        let self= this;
+
         this.table_teacherSet[0].nameList_value = res.lecturerId
          getQueryAssistant().then((res) => {
           this.teachingTeacherList = res
         })
-        res.otherTeachers.forEach(function(item,index){
+        let self = this
+         res.otherTeachers.forEach(function(item,index){
           let teacherVaue={}
            if(item.roleName=='嘉宾'){
             teacherVaue.identity= '嘉宾',
@@ -1982,8 +1979,8 @@ export default {
             self.table_teacherSet.push(teacherVaue)
 
         })
-       // this.table_teacherSet.push(res.otherTeachers)
-      
+       
+
         console.log(this.table_teacherSet)
         
         this.table_relatedCourses = res.courses
