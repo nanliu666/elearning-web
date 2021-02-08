@@ -972,6 +972,7 @@ export default {
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
         data.contents = []
+        data.passCondition = data.passCondition.split(',')
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -1162,12 +1163,21 @@ export default {
             // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
             this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
+              params.status = 1
               addCourse(params).then(({ id }) => {
+                //发布成功清除数据
+                this.isdeleteData()
                 // 如果没有任何审批流程可选则不需要经过审批
                 if (process) {
                   // 状态设置为审批中
                   params.status = 0
                   this.submitApprApply(params.id ? params.id : id)
+                } else {
+                  this.$message({
+                    message: '课程发布成功',
+                    type: 'success'
+                  })
+                  this.$router.back()
                 }
               })
             })
@@ -1235,6 +1245,9 @@ export default {
           // }
         ]
       }
+      this.$refs.ruleForm.clearValidate()
+      this.headIndex = 1
+      this.parentOrgIdLabel = ''
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
