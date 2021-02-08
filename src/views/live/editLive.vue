@@ -1222,7 +1222,6 @@ export default {
           pageNo:1,
           pageSize: this.StudentsPage.pageSize
         }).then((res) => {   
-          debugger
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
