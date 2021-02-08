@@ -908,7 +908,7 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
-                  @change="valChange(1)"
+                 
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -938,7 +938,7 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
-                  @change="valChange(2)"
+                
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1187,6 +1187,24 @@ export default {
    // this.getStudentInfoList();
 
   },
+
+  watch:{
+    
+    // 在组织架构下使用查询参数
+    organizationUserVal: _.debounce(function() {
+      this.loading = true
+      this.valChange(1);
+    }),
+
+    //其他人员
+    otherUserVal: _.debounce(function() {
+      this.loading = true
+      this.valChange(2);
+    })
+    
+
+
+  },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
@@ -1216,6 +1234,24 @@ export default {
     })
   },
   methods: {
+
+       // 数据处理中间函数
+    thruHandler(arr) {
+      // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
+      if (!this.org) {
+        // 不可以选择组织的时候将disable所有的type不为user类型的项
+        arr = _.map(arr, (item) =>
+          _.assign(
+            {
+              disabled: !_.eq(item.type, NODE_TYPE.User)
+            },
+            item
+          )
+        )
+      }
+
+      return arr
+    },
     getStudentInfoList(){
       getStudentByLiveId({
           liveId:this.$route.query.id,
@@ -1895,6 +1931,9 @@ export default {
       // }).then(res=>{
       //   console.log(res)
       // })
+
+     
+
       getLiveDetails({
         liveId: id
       }).then((res) => {
@@ -1921,6 +1960,9 @@ export default {
         })
         let self= this;
         this.table_teacherSet[0].nameList_value = res.lecturerId
+         getQueryAssistant().then((res) => {
+          this.teachingTeacherList = res
+        })
         res.otherTeachers.forEach(function(item,index){
           let teacherVaue={}
            if(item.roleName=='嘉宾'){
