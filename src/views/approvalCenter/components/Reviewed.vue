@@ -53,8 +53,18 @@
       slot="handler"
       slot-scope="scope"
     >
-      <el-button type="text" @click="againFn()"> 重新申请 </el-button>
-      <el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>
+      <el-button
+        type="text"
+        @click="againFn(scope.row)"
+      >
+        重新申请
+      </el-button>
+      <el-button
+        type="text"
+        @click="withdrawFn(scope.row)"
+      >
+        撤回
+      </el-button>
       <el-button
         type="text"
         @click="toDetails(scope.row)"
@@ -164,13 +174,15 @@ export default {
       })
     },
     // 重新申请
-    againFn() {
-      // window.console.log(id)
-      this.$router.push({ path: '/course/establishCourse' })
+    againFn(obj) {
+      // window.console.log(id)  compileCourse  establishCourse
+      debugger
+      this.$router.push({ path: '/course/establishCourse',query:{id:obj.formId} })
     },
     // 撤回
     withdrawFn(row) {
       cancel({ processInstanceId: row.processInstanceId }).then(() => {
+        this.setPitch()
         this.$message({
           message: '撤回成功',
           type: 'success'

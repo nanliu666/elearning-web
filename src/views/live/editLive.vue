@@ -1239,7 +1239,7 @@ export default {
             item.name=item.name
             res.orgs.push(item)
           })
-          
+
           this.organizationUser = res.orgs
         })
       } else {
@@ -1469,7 +1469,7 @@ export default {
     // 关联学员表格的分页跳转
     toggle_StudentsPage(page) {
       this.table_relatedStudents = []
-      this.dialogSelectStudent.forEach((item, index) => {  
+      this.dialogSelectStudent.forEach((item, index) => {
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1624,7 +1624,7 @@ export default {
       this.dialog_add_student = false
     },
     load_organizationUser(node, resolve) {
-      
+
       if (node.level === 0) {
         getOrganizationUser({
           parentId: 1
@@ -1704,7 +1704,7 @@ export default {
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
-    async submit_live_data() {
+    submit_live_data() {
       let otherData=[];
       let slef=this;
       this.table_teacherSet.forEach(function(item, index){
@@ -1715,13 +1715,13 @@ export default {
                teacher.nickName=currentValue.name
             }
           })
-         
+
           teacher.userActor =item.identity,
           teacher.roleName =item.role,
           teacher.userId =item.nameList_value
-          otherData.push(teacher) 
+          otherData.push(teacher)
         }
-        
+
       })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -1805,7 +1805,7 @@ export default {
       }
       if(this.radio_connectionMode==="code"){
         //校验第三步是否填写
-        let res = await this.$refs['ruleForm'].validate((valid) => {
+        this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
@@ -1892,9 +1892,9 @@ export default {
 
         })
        // this.table_teacherSet.push(res.otherTeachers)
-      
+
         console.log(this.table_teacherSet)
-        
+
         this.table_relatedCourses = res.courses
 
         // 直播设置
