@@ -208,7 +208,7 @@
           撤回
         </el-button>
         <el-tooltip
-          v-if="(isReject && isApplyUser) || (isCancel && isApplyUser)"
+          v-if="isApplyUser && !hasCancel"
           effect="dark"
           content="重新申请"
           placement="top"
@@ -477,7 +477,8 @@ export default {
     },
     // 获取课程信息
     async getCourseData() {
-      let res = await getCourse({ courseId: this.formId })
+      let { id } = JSON.parse(this.applyDetail.formData)
+      let res = await getCourse({ courseId: id })
       res.introduction = _.unescape(res.introduction)
       res.thinkContent = _.unescape(res.thinkContent)
       this.courseData = res
@@ -520,10 +521,16 @@ export default {
     },
     // 处理重新发起申请
     handleReapplyClick() {
-      this.$router.push({
-        path: '/course/establishCourse',
-        query: { id: this.formId }
+      this.$confirm('您确定要对课程进行修改并重新申请?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          let { id } = JSON.parse(this.applyDetail.formData)
+          this.$router.push({ path: '/course/establishCourse', query: { id: id } })
+        })
+        .catch(() => {})
     },
 
     // 流程数据通过当前审批节点是否存在当前用户获取流程内的节点
@@ -748,7 +755,11 @@ export default {
           label: node.properties.title
         }
       })
-      this.progress = _.concat(this.progress, addNodes)
+
+      this.progress = _.concat(
+        this.progress.filter((item) => item.remark !== '自动通过'),
+        addNodes
+      )
     },
 
     handleBack() {
@@ -766,7 +777,8 @@ export default {
         createApprCancel({ processInstanceId: this.processInstanceId })
           .then(() => {
             this.$message.success('撤回成功')
-            this.$router.go(-1)
+            // this.$router.go(-1)
+            this.loadData()
           })
           .finally(() => {
             this.loading = false

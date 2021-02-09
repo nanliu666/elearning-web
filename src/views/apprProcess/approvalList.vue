@@ -248,18 +248,30 @@ export default {
      * 删除审批
      */
     handleDelete(data) {
-      deleteProcess({ processId: data.processId }).then(() => {
-        this.$message.success('删除成功')
-        this.refresh()
+      this.$confirm('您确定要删除该审批流程吗?', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteProcess({ processId: data.processId }).then(() => {
+          this.$message.success('删除成功')
+          this.refresh()
+        })
       })
     },
     /**
      * 停用审批
      */
     disableApproval(data) {
-      stopProcess({ processId: data.processId }).then(() => {
-        this.$message.success('停用成功')
-        this.refresh()
+      this.$confirm('停用后当前进行的流程审批不受影响。您确定要停用该审批流程吗?', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        stopProcess({ processId: data.processId }).then(() => {
+          this.$message.success('停用成功')
+          this.refresh()
+        })
       })
     },
     /**

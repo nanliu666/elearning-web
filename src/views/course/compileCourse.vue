@@ -1117,6 +1117,7 @@ export default {
       delete params.exam
       delete params.trainCenterexam
       // 草稿
+
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
           confirmButtonText: '保存',
@@ -1148,12 +1149,22 @@ export default {
               type: 'warning'
             })
           } else {
-            this.$refs.apprSubmit.validate().then(() => {
+            this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
               // 状态设置为审批中
-              params.status = 0
+              params.status = process ? 0 : 1
               editCourseInfo(params).then(({ id }) => {
-                this.submitApprApply(id)
+                if (process) {
+                  this.submitApprApply(id)
+                } else {
+                  //发布成功清除数据
+                  this.isdeleteData()
+                  this.$message({
+                    message: '课程发布成功',
+                    type: 'success'
+                  })
+                  this.$router.back()
+                }
               })
             })
           }
@@ -1162,18 +1173,27 @@ export default {
     },
     // 提交课程审批
     submitApprApply(courseId) {
-      this.$refs.apprSubmit.submit({ formId: courseId, processName: categoryMap['1'] }).then(() => {
-        this.$message({
-          message: '本课程已发布成功',
-          type: 'success'
+      this.$refs.apprSubmit
+        .submit({
+          formId: courseId,
+          processName: categoryMap['1'],
+          formKey: 'CourseApplyInfo',
+          // 课程标题
+          formTitle: this.ruleForm.name,
+          formData: JSON.stringify(this.ruleForm)
         })
-        setTimeout(() => {
-          this.isdeleteData()
-          this.disabledBtn = false
-          // this.$router.go(-1)
-          this.$router.push({ path: '/course/courseDraft?status=' + status })
-        }, 3000)
-      })
+        .then(() => {
+          this.$message({
+            message: '本课程已发布成功',
+            type: 'success'
+          })
+          setTimeout(() => {
+            this.isdeleteData()
+            this.disabledBtn = false
+            // this.$router.go(-1)
+            this.$router.push({ path: '/course/courseDraft?status=' + status })
+          }, 3000)
+        })
     },
     // 清空数据
     isdeleteData() {
