@@ -53,18 +53,18 @@
       slot="handler"
       slot-scope="scope"
     >
-      <el-button
-        type="text"
-        @click="againFn(scope.row)"
-      >
-        重新申请
-      </el-button>
-      <el-button
-        type="text"
-        @click="withdrawFn(scope.row)"
-      >
-        撤回
-      </el-button>
+      <!--<el-button-->
+      <!--type="text"-->
+      <!--@click="againFn(scope.row)"-->
+      <!--&gt;-->
+      <!--重新申请-->
+      <!--</el-button>-->
+      <!--<el-button-->
+      <!--type="text"-->
+      <!--@click="withdrawFn(scope.row)"-->
+      <!--&gt;-->
+      <!--撤回-->
+      <!--</el-button>-->
       <el-button
         type="text"
         @click="toDetails(scope.row)"

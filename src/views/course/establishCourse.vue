@@ -1118,6 +1118,7 @@ export default {
 
       // window.console.log(params)
       // 草稿
+
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
           confirmButtonText: '保存',
@@ -1163,16 +1164,15 @@ export default {
             // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
             this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
-              params.status = 1
+              params.status = process ? 0 : 1
               addCourse(params).then(({ id }) => {
-                //发布成功清除数据
-                this.isdeleteData()
                 // 如果没有任何审批流程可选则不需要经过审批
                 if (process) {
                   // 状态设置为审批中
-                  params.status = 0
                   this.submitApprApply(params.id ? params.id : id)
                 } else {
+                  //发布成功清除数据
+                  this.isdeleteData()
                   this.$message({
                     message: '课程发布成功',
                     type: 'success'
@@ -1200,6 +1200,8 @@ export default {
           formTitle: this.ruleForm.name
         })
         .then(() => {
+          //发布成功清除数据
+          this.isdeleteData()
           this.$message({
             message: '本课程已发布成功',
             type: 'success'
