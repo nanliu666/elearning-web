@@ -956,7 +956,6 @@ export default {
     getInfo() {
       let id = this.$route.query.id
       getCourse({ courseId: id }).then((res) => {
-        const form = this.ruleForm
         const {
           localName,
           url,
@@ -966,8 +965,8 @@ export default {
           content,
           catalogId
         } = res
-        form.passCondition = passCondition.split(',')
-        form.contents = content.map((c) => {
+        res.passCondition = passCondition.split(',')
+        res.contents = content.map((c) => {
           const item = {}
           const { localName = '', content = '' } = c
           item.upLoad = [{ localName, content: _.unescape(content) }]
@@ -976,17 +975,19 @@ export default {
           item.fileData = {}
           return item
         })
-        form.imageUrl = [{ localName, url }]
+        res.imageUrl = [{ localName, url }]
         this.catalogName = catalogId
-        form.catalogId = this.$route.query.catalogName
+        res.catalogId = this.$route.query.catalogName
 
         // 富方本回显
         if (introduction) {
-          form.introduction = _.unescape(introduction)
+          res.introduction = _.unescape(introduction)
         }
         if (thinkContent) {
-          form.thinkContent = _.unescape(thinkContent)
+          res.thinkContent = _.unescape(thinkContent)
         }
+
+        this.ruleForm = res
       })
     },
     // 拿到列表数据
