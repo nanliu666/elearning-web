@@ -21,10 +21,10 @@
             <div class="content-item">
               <span class="item-label">密保手机：</span>
               <span class="item-value">{{ perosonnalInfo.phonenum }}</span>
-              <span
+              <!-- <span
                 class="edit-item"
                 @click="editPhone()"
-              >修改</span>
+              >修改</span> -->
             </div>
             <div class="content-item">
               <span class="item-label">密保邮箱：</span>
