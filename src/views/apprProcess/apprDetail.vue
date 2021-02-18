@@ -196,59 +196,58 @@
         <steps :progress.sync="progress" />
       </div>
       <div
-        v-if=" !isPreview"
+        v-if="!isPreview"
         class="cancel-btn-box"
       >
         <!--<div-->
-          <!--v-if="!isFished && !isPreview"-->
-          <!--class="cancel-btn-box"-->
+        <!--v-if="!isFished && !isPreview"-->
+        <!--class="cancel-btn-box"-->
         <!--&gt;-->
         <!--<el-button-->
-          <!--v-if="!isFished && hasCancel && isApplyUser"-->
-          <!--type="primary"-->
-          <!--size="medium"-->
-          <!--@click="handleCancelClick"-->
+        <!--v-if="!isFished && hasCancel && isApplyUser"-->
+        <!--type="primary"-->
+        <!--size="medium"-->
+        <!--@click="handleCancelClick"-->
         <!--&gt;-->
-          <!--撤回-->
+        <!--撤回-->
         <!--</el-button>-->
         <!--<el-tooltip-->
-          <!--v-if="isApplyUser && !hasCancel"-->
-          <!--effect="dark"-->
-          <!--content="重新申请"-->
-          <!--placement="top"-->
+        <!--v-if="isApplyUser && !hasCancel"-->
+        <!--effect="dark"-->
+        <!--content="重新申请"-->
+        <!--placement="top"-->
         <!--&gt;-->
-          <!--<el-button-->
-            <!--type="primary"-->
-            <!--size="medium"-->
-            <!--@click="handleReapplyClick"-->
-          <!--&gt;-->
-            <!--重新申请-->
-          <!--</el-button>-->
+        <!--<el-button-->
+        <!--type="primary"-->
+        <!--size="medium"-->
+        <!--@click="handleReapplyClick"-->
+        <!--&gt;-->
+        <!--重新申请-->
+        <!--</el-button>-->
         <!--</el-tooltip>-->
         <el-button
-        v-if="!isFished && isApplyUser"
-        type="primary"
-        size="medium"
-        :disabled="setDisabled"
-        @click="handleCancelClick"
+          v-if="!isFished && isApplyUser"
+          type="primary"
+          size="medium"
+          :disabled="setDisabled"
+          @click="handleCancelClick"
         >
-        撤回
+          撤回
         </el-button>
         <el-tooltip
-        v-if="isApplyUser && applyDetail.status==='Cancel'"
-        effect="dark"
-        content="重新申请"
-        placement="top"
+          v-if="isApplyUser && applyDetail.status === 'Cancel'"
+          effect="dark"
+          content="重新申请"
+          placement="top"
         >
-        <el-button
-        type="primary"
-        size="medium"
-        @click="handleReapplyClick"
-        >
-        重新申请
-        </el-button>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="handleReapplyClick"
+          >
+            重新申请
+          </el-button>
         </el-tooltip>
-
 
         <!-- <el-tooltip
           effect="dark"
@@ -437,7 +436,7 @@ export default {
   },
 
   computed: {
-    setDisabled(){
+    setDisabled() {
       return !this.hasCancel
     },
     // 当前审批详情的审批id
@@ -511,10 +510,9 @@ export default {
     // 获取课程信息
     async getCourseData() {
       let id
-      if(this.applyDetail.formId){
+      if (this.applyDetail.formId) {
         id = this.applyDetail.formId
-      }
-      else{
+      } else {
         id = JSON.parse(this.applyDetail.formData).id
       }
       let res = await getCourse({ courseId: id })
@@ -566,8 +564,11 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          let { id,catalogName } = JSON.parse(this.applyDetail.formData)
-          this.$router.push({ path: '/course/compileCourse', query: { 'id': id,'catalogName':catalogName } })
+          let { id, catalogName } = JSON.parse(this.applyDetail.formData)
+          this.$router.push({
+            path: '/course/compileCourse',
+            query: { id: id, catalogName: catalogName }
+          })
         })
         .catch(() => {})
     },

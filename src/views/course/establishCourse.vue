@@ -1136,7 +1136,6 @@ export default {
               })
               this.isdeleteData()
               setTimeout(() => {
-
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
                 // this.$router.go(-1)
@@ -1209,7 +1208,6 @@ export default {
           })
           this.isdeleteData()
           setTimeout(() => {
-
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
