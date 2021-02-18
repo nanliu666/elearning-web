@@ -956,28 +956,37 @@ export default {
     getInfo() {
       let id = this.$route.query.id
       getCourse({ courseId: id }).then((res) => {
-        let data = res
-        data.passCondition = data.passCondition.split(',')
-        data.content.map((item) => {
-          item.upLoad = [{ localName: '', content: '' }]
-          item.upLoad[0].localName = item.localName
-          item.upLoad[0].content = _.unescape(item.content)
+        const form = this.ruleForm
+        const {
+          localName,
+          url,
+          introduction,
+          thinkContent,
+          passCondition = '',
+          content,
+          catalogId
+        } = res
+        form.passCondition = passCondition.split(',')
+        form.contents = content.map((c) => {
+          const item = {}
+          const { localName = '', content = '' } = c
+          item.upLoad = [{ localName, content: _.unescape(content) }]
           item.saveOrcompile = 1
-        })
-        data.imageUrl = [{ localName: '', url: '' }]
-        data.imageUrl[0].localName = data.localName
-        data.imageUrl[0].url = data.url
-        data.contents = data.content.map((item) => {
-          item.type = +item.type
+          item.type = +c.type
+          item.fileData = {}
           return item
         })
-        this.catalogName = data.catalogId
-        data.catalogId = this.$route.query.catalogName
+        form.imageUrl = [{ localName, url }]
+        this.catalogName = catalogId
+        form.catalogId = this.$route.query.catalogName
+
         // 富方本回显
-        data.introduction = _.unescape(data.introduction)
-        data.thinkContent = _.unescape(data.thinkContent)
-        this.ruleForm = data
-        this.$forceUpdate()
+        if (introduction) {
+          form.introduction = _.unescape(introduction)
+        }
+        if (thinkContent) {
+          form.thinkContent = _.unescape(thinkContent)
+        }
       })
     },
     // 拿到列表数据
