@@ -1134,8 +1134,9 @@ export default {
                 message: '保存成功',
                 type: 'success'
               })
+              this.isdeleteData()
               setTimeout(() => {
-                this.isdeleteData()
+
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
                 // this.$router.go(-1)
@@ -1206,8 +1207,9 @@ export default {
             message: '本课程已发布成功',
             type: 'success'
           })
+          this.isdeleteData()
           setTimeout(() => {
-            this.isdeleteData()
+
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
@@ -1248,6 +1250,7 @@ export default {
         ]
       }
       this.$refs.ruleForm.clearValidate()
+      this.$refs.apprSubmit.handleClose()
       this.headIndex = 1
       this.parentOrgIdLabel = ''
     },

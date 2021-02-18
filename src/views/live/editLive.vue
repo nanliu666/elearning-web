@@ -908,7 +908,7 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
-                 
+
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -938,7 +938,7 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
-                
+
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1189,7 +1189,7 @@ export default {
   },
 
   watch:{
-    
+
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
@@ -1201,7 +1201,7 @@ export default {
       this.loading = true
       this.valChange(2);
     })
-    
+
 
 
   },
@@ -1257,15 +1257,15 @@ export default {
           liveId:this.$route.query.id,
           pageNo:1,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
               studentData.userCode=item.userNo,
               studentData.department=item.orgName,
               studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)  
-          })     
+              this.table_relatedStudents.push(studentData)
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1531,7 +1531,7 @@ export default {
       this.table_relatedStudents = []
       if(this.dialogSelectStudent.length>0){
           this.totalNum =this.dialogSelectStudent.length
-          this.dialogSelectStudent.forEach((item, index) => {  
+          this.dialogSelectStudent.forEach((item, index) => {
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1550,15 +1550,15 @@ export default {
           liveId:this.$route.query.id,
           pageNo:page,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
               studentData.userCode=item.userNo,
               studentData.department=item.orgName,
               studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)  
-          })     
+              this.table_relatedStudents.push(studentData)
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1566,8 +1566,8 @@ export default {
 
 
       }
-     
-      
+
+
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
@@ -1798,13 +1798,13 @@ export default {
                teacher.nickName=currentValue.name
             }
           })
-         
+
           teacher.userActor =item.identity,
           teacher.roleName =item.role,
           teacher.userId =item.nameList_value
-          otherData.push(teacher) 
+          otherData.push(teacher)
         }
-        
+
       })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -1928,7 +1928,7 @@ export default {
       //   console.log(res)
       // })
 
-     
+
 
       getLiveDetails({
         liveId: id
@@ -1979,10 +1979,10 @@ export default {
             self.table_teacherSet.push(teacherVaue)
 
         })
-       
+
 
         console.log(this.table_teacherSet)
-        
+
         this.table_relatedCourses = res.courses
 
         // 直播设置

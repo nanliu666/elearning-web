@@ -1132,8 +1132,8 @@ export default {
               message: '保存成功',
               type: 'success'
             })
+            this.isdeleteData()
             setTimeout(() => {
-              this.isdeleteData()
               this.disabledBtn = false
               // this.$router.go(-1)
               this.$router.push({ path: '/course/courseDraft?status=' + status })
@@ -1155,7 +1155,7 @@ export default {
               params.status = process ? 0 : 1
               editCourseInfo(params).then(({ id }) => {
                 if (process) {
-                  this.submitApprApply(id)
+                  this.submitApprApply(params.id)
                 } else {
                   //发布成功清除数据
                   this.isdeleteData()
@@ -1187,8 +1187,9 @@ export default {
             message: '本课程已发布成功',
             type: 'success'
           })
+          this.isdeleteData()
           setTimeout(() => {
-            this.isdeleteData()
+
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
@@ -1228,6 +1229,7 @@ export default {
           // }
         ]
       }
+      this.$refs.apprSubmit.handleClose()
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
