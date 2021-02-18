@@ -986,7 +986,6 @@ export default {
         if (thinkContent) {
           res.thinkContent = _.unescape(thinkContent)
         }
-
         this.ruleForm = res
       })
     },
