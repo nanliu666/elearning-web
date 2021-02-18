@@ -742,7 +742,9 @@
 
           <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
-              <el-form-item :label="'关联学员：' + totalNum + '人（仅关联学员可以观看）'">
+              <el-form-item
+                :label="'关联学员：' + totalNum+ '人（仅关联学员可以观看）'"
+              >
                 <el-button
                   type="text"
                   @click="delete_batchTableStudent()"
@@ -906,6 +908,7 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
+
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -935,6 +938,7 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
+
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1011,7 +1015,7 @@ import {
   getOtherUser,
   getUsersByOrgId,
   getLiveDetails,
-  getStudentByLiveId
+  getStudentByLiveId,
 } from '@/api/live/editLive'
 
 export default {
@@ -1020,7 +1024,7 @@ export default {
   },
   data() {
     return {
-      totalNum: 0,
+      totalNum:0,
       otherUserVal: '',
       organizationUserVal: '',
       headIndex: 1, //步骤切换
@@ -1180,27 +1184,32 @@ export default {
   },
   activated() {
     this.isgetcategoryTree()
-    // this.getStudentInfoList();
+   // this.getStudentInfoList();
+
   },
 
-  watch: {
+  watch:{
+
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
-      this.valChange(1)
+      this.valChange(1);
     }),
 
     //其他人员
     otherUserVal: _.debounce(function() {
       this.loading = true
-      this.valChange(2)
+      this.valChange(2);
     })
+
+
+
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
-      this.getStudentInfoList()
+      this.getStudentInfoList();
     }
     //   获取直播分类
     getcategoryTree({
@@ -1225,7 +1234,8 @@ export default {
     })
   },
   methods: {
-    // 数据处理中间函数
+
+       // 数据处理中间函数
     thruHandler(arr) {
       // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
       if (!this.org) {
@@ -1233,7 +1243,7 @@ export default {
         arr = _.map(arr, (item) =>
           _.assign(
             {
-              disabled: !_.eq(item.type)
+              disabled: !_.eq(item.type, NODE_TYPE.User)
             },
             item
           )
@@ -1242,23 +1252,23 @@ export default {
 
       return arr
     },
-    getStudentInfoList() {
+    getStudentInfoList(){
       getStudentByLiveId({
-        liveId: this.$route.query.id,
-        pageNo: 1,
-        pageSize: this.StudentsPage.pageSize
-      }).then((res) => {
-        res.data.forEach((item) => {
-          let studentData = {}
-          ;(studentData.phone = item.phoneNum),
-            (studentData.userCode = item.userNo),
-            (studentData.department = item.orgName),
-            (studentData.name = item.userName)
-          this.table_relatedStudents.push(studentData)
+          liveId:this.$route.query.id,
+          pageNo:1,
+          pageSize: this.StudentsPage.pageSize
+        }).then((res) => {
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)
+          })
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
         })
-        this.totalNum = res.totalNum
-        this.totalPage = res.totalPage
-      })
     },
 
     //直播信息填写 下一步校验
@@ -1286,7 +1296,7 @@ export default {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
-            // item.name = item.name
+            item.name = item.name
             res.orgs.push(item)
           })
 
@@ -1517,44 +1527,47 @@ export default {
       })
     },
     // 关联学员表格的分页跳转
-    toggle_StudentsPage(page) {
-      //添加学员
+    toggle_StudentsPage(page) {//添加学员
       this.table_relatedStudents = []
-      if (this.dialogSelectStudent.length > 0) {
-        this.totalNum = this.dialogSelectStudent.length
-        this.dialogSelectStudent.forEach((item, index) => {
-          if (
-            index >= this.StudentsPage.pageSize * (page - 1) &&
-            index < this.StudentsPage.pageSize * page
-          ) {
-            this.table_relatedStudents.push({
-              userCode: item.userCode,
-              name: item.name,
-              department: item.department,
-              phone: item.phone,
-              id: item.id
-            })
-          }
-        })
-      } else {
-        //编辑入口
-        getStudentByLiveId({
-          liveId: this.$route.query.id,
-          pageNo: page,
+      if(this.dialogSelectStudent.length>0){
+          this.totalNum =this.dialogSelectStudent.length
+          this.dialogSelectStudent.forEach((item, index) => {
+        if (
+          index >= this.StudentsPage.pageSize * (page - 1) &&
+          index < this.StudentsPage.pageSize * page
+        ) {
+          this.table_relatedStudents.push({
+            userCode: item.userCode,
+            name: item.name,
+            department: item.department,
+            phone: item.phone,
+            id: item.id
+          })
+        }
+      })
+      }else{//编辑入口
+         getStudentByLiveId({
+          liveId:this.$route.query.id,
+          pageNo:page,
           pageSize: this.StudentsPage.pageSize
         }).then((res) => {
-          res.data.forEach((item) => {
-            let studentData = {}
-            ;(studentData.phone = item.phoneNum),
-              (studentData.userCode = item.userNo),
-              (studentData.department = item.orgName),
-              (studentData.name = item.userName)
-            this.table_relatedStudents.push(studentData)
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)
           })
-          this.totalNum = res.totalNum
-          this.totalPage = res.totalPage
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
         })
+
+
+
       }
+
+
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
@@ -1745,7 +1758,7 @@ export default {
                   name: resitem.name,
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
-                  id: resitem.id
+                  id: resitem.id,
                 })
               }
             })
@@ -1777,19 +1790,21 @@ export default {
     submit_live_data() {
       let otherData = []
       let slef = this
-      this.table_teacherSet.forEach(function(item) {
-        if (item.type === 2 || item.type === 3) {
-          let teacher = {}
-          slef.teachingTeacherList.forEach(function(currentValue) {
-            if (currentValue.id == item.nameList_value) {
-              teacher.nickName = currentValue.name
+      this.table_teacherSet.forEach(function(item, index){
+        if(item.type===2 ||item.type===3 ){
+          let teacher={}
+          slef.teachingTeacherList.forEach(function(currentValue,index1){
+            if(currentValue.id==item.nameList_value){
+               teacher.nickName=currentValue.name
             }
           })
-          ;(teacher.userActor = item.identity),
-            (teacher.roleName = item.role),
-            (teacher.userId = item.nameList_value)
+
+          teacher.userActor =item.identity,
+          teacher.roleName =item.role,
+          teacher.userId =item.nameList_value
           otherData.push(teacher)
         }
+
       })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -1800,7 +1815,7 @@ export default {
         remark: _.escape(this.ruleForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
-        otherTeachers: otherData,
+        otherTeachers:otherData,
         coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
@@ -1874,7 +1889,8 @@ export default {
 
       if (this.radio_connectionMode === 'code') {
         //校验第三步是否填写
-        this.$refs['ruleForm'].validate((valid) => {
+        let res =  this.$refs['ruleForm'].validate((valid) => {
+
           if (valid) {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
@@ -1890,7 +1906,7 @@ export default {
             return false
           }
         })
-      } else {
+      }else {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
           postEditLive(data).then(() => {
@@ -1911,6 +1927,8 @@ export default {
       // }).then(res=>{
       //   console.log(res)
       // })
+
+
 
       getLiveDetails({
         liveId: id
@@ -1938,28 +1956,30 @@ export default {
         })
 
         this.table_teacherSet[0].nameList_value = res.lecturerId
-        getQueryAssistant().then((res) => {
+         getQueryAssistant().then((res) => {
           this.teachingTeacherList = res
         })
         let self = this
-        res.otherTeachers.forEach(function(item, index) {
-          let teacherVaue = {}
-          if (item.roleName == '嘉宾') {
-            (teacherVaue.identity = '嘉宾'),
-              (teacherVaue.nameList_value = item.userId),
-              //teacherVaue.role= '嘉宾',
-              (teacherVaue.num = '嘉宾' + (index + 1)),
-              (teacherVaue.type = 2)
+         res.otherTeachers.forEach(function(item,index){
+          let teacherVaue={}
+           if(item.roleName=='嘉宾'){
+            teacherVaue.identity= '嘉宾',
+            teacherVaue.nameList_value= item.userId,
+            //teacherVaue.role= '嘉宾',
+            teacherVaue.num='嘉宾' + (index+1),
+            teacherVaue.type= 2
           }
-          if (item.roleName == '助教') {
-            (teacherVaue.identity = '助教'),
-              (teacherVaue.nameList_value = item.userId),
-              //  teacherVaue.role= '助教',
-              (teacherVaue.num = '助教' + (index + 1)),
-              (teacherVaue.type = 2)
+          if(item.roleName=='助教'){
+            teacherVaue.identity= '助教',
+            teacherVaue.nameList_value= item.userId,
+          //  teacherVaue.role= '助教',
+            teacherVaue.num='助教' + (index+1),
+            teacherVaue.type= 2
           }
-          self.table_teacherSet.push(teacherVaue)
+            self.table_teacherSet.push(teacherVaue)
+
         })
+
 
         console.log(this.table_teacherSet)
 
