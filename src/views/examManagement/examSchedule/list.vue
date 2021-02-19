@@ -191,7 +191,6 @@ let TABLE_COLUMNS = [
     slot: true,
     minWidth: 150
   },
-
   {
     label: '考试分类',
     prop: 'category',
@@ -494,7 +493,9 @@ export default {
           TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
         }
       } else {
-        TABLE_COLUMNS.splice(statusIndex, 1)
+        if (statusIndex !== -1) {
+          TABLE_COLUMNS.splice(statusIndex, 1)
+        }
       }
       this.tableColumns = TABLE_COLUMNS
       this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
