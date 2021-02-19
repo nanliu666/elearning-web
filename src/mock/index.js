@@ -46,7 +46,7 @@ export default (enable) => {
   Mock.setup({
     timeout: 500
   })
-  menu({ mock: true })
+  menu({ mock: false })
   credit({ mock: false })
   questions({ mock: false })
   achievement({ mock: false })
