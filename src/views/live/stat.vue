@@ -238,12 +238,12 @@
           <el-table-column
             v-if="columns[currentTable]['状态']"
             align="center"
-            prop="status"
+            prop="isUsed"
             :show-overflow-tooltip="true"
             label="状态"
           >
             <template slot-scope="scope">
-              {{ scope.row.status == 1 ? '正常' : '停用' }}
+              {{ scope.row.isUsed == '1' ? '正常' : '停用' }}
             </template>
           </el-table-column>
           <el-table-column
