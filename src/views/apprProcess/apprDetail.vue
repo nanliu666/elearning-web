@@ -196,31 +196,54 @@
         <steps :progress.sync="progress" />
       </div>
       <div
-        v-if="!isFished && !isPreview"
+        v-if="!isPreview"
         class="cancel-btn-box"
       >
+        <!--<div-->
+        <!--v-if="!isFished && !isPreview"-->
+        <!--class="cancel-btn-box"-->
+        <!--&gt;-->
+        <!--<el-button-->
+        <!--v-if="!isFished && hasCancel && isApplyUser"-->
+        <!--type="primary"-->
+        <!--size="medium"-->
+        <!--@click="handleCancelClick"-->
+        <!--&gt;-->
+        <!--撤回-->
+        <!--</el-button>-->
+        <!--<el-tooltip-->
+        <!--v-if="isApplyUser && !hasCancel"-->
+        <!--effect="dark"-->
+        <!--content="重新申请"-->
+        <!--placement="top"-->
+        <!--&gt;-->
+        <!--<el-button-->
+        <!--type="primary"-->
+        <!--size="medium"-->
+        <!--@click="handleReapplyClick"-->
+        <!--&gt;-->
+        <!--重新申请-->
+        <!--</el-button>-->
+        <!--</el-tooltip>-->
         <el-button
-          v-if="!isFished && hasCancel && isApplyUser"
+          v-if="!isFished && isApplyUser"
           type="primary"
           size="medium"
+          :disabled="setDisabled"
           @click="handleCancelClick"
         >
           撤回
         </el-button>
-        <el-tooltip
-          v-if="(isReject && isApplyUser) || (isCancel && isApplyUser)"
-          effect="dark"
-          content="重新申请"
-          placement="top"
+
+        <el-button
+          v-if="isApplyUser && applyDetail.status === 'Cancel'"
+          type="primary"
+          size="medium"
+          @click="handleReapplyClick"
         >
-          <el-button
-            type="primary"
-            size="medium"
-            @click="handleReapplyClick"
-          >
-            重新申请
-          </el-button>
-        </el-tooltip>
+          重新申请
+        </el-button>
+
         <!-- <el-tooltip
           effect="dark"
           content="拒绝审批后，该审批将终止"
@@ -325,6 +348,7 @@ import {
   getApprDetail,
   getApprRecord,
   createApprCancel,
+  cancelCourseApply,
   createApprPass,
   createApprReject,
   createApprUrge,
@@ -407,6 +431,9 @@ export default {
   },
 
   computed: {
+    setDisabled() {
+      return !this.hasCancel
+    },
     // 当前审批详情的审批id
     apprNo() {
       return _.get(this.applyDetail, 'apprNo', null)
@@ -477,7 +504,13 @@ export default {
     },
     // 获取课程信息
     async getCourseData() {
-      let res = await getCourse({ courseId: this.formId })
+      let id
+      if (this.applyDetail.formId) {
+        id = this.applyDetail.formId
+      } else {
+        id = JSON.parse(this.applyDetail.formData).id
+      }
+      let res = await getCourse({ courseId: id })
       res.introduction = _.unescape(res.introduction)
       res.thinkContent = _.unescape(res.thinkContent)
       this.courseData = res
@@ -520,10 +553,20 @@ export default {
     },
     // 处理重新发起申请
     handleReapplyClick() {
-      this.$router.push({
-        path: '/course/establishCourse',
-        query: { id: this.formId }
+      let self = this
+      this.$confirm('您确定要对课程进行修改并重新申请?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(function() {
+          let { id, catalogName } = JSON.parse(self.applyDetail.formData)
+          self.$router.push({
+            path: '/course/compileCourse',
+            query: { id: id, catalogName: catalogName }
+          })
+        })
+        .catch(() => {})
     },
 
     // 流程数据通过当前审批节点是否存在当前用户获取流程内的节点
@@ -748,7 +791,11 @@ export default {
           label: node.properties.title
         }
       })
-      this.progress = _.concat(this.progress, addNodes)
+
+      this.progress = _.concat(
+        this.progress.filter((item) => item.remark !== '自动通过'),
+        addNodes
+      )
     },
 
     handleBack() {
@@ -757,16 +804,17 @@ export default {
     },
     // 点击撤回
     handleCancelClick() {
-      this.$confirm('确定撤销申请吗?', '撤销申请', {
+      this.$confirm('撤回后，课程将进入草稿箱，您确定要课程进行撤回?', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.loading = true
-        createApprCancel({ processInstanceId: this.processInstanceId })
+        cancelCourseApply({ processInstanceId: this.processInstanceId })
           .then(() => {
             this.$message.success('撤回成功')
-            this.$router.go(-1)
+            // this.$router.go(-1)
+            this.loadData()
           })
           .finally(() => {
             this.loading = false

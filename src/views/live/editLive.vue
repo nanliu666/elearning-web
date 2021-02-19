@@ -10,21 +10,18 @@
         <div
           :class="{ sign: headIndex === 1 }"
           class="schedule1"
-          @click="headIndex = 1"
         >
           <i class="el-icon-video-camera"></i> 直播信息
         </div>
         <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
-          @click="headIndex = 2"
         >
           <i class="el-icon-document-copy"></i> 关联讲师及课程
         </div>
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
-          @click="headIndex = 3"
         >
           <i class="el-icon-document-remove"></i> 观看条件
         </div>
@@ -43,7 +40,7 @@
           size="mini"
           class="backward"
           type="primary"
-          @click="headIndex++"
+          @click="liveNextTable(headIndex)"
         >
           下一步
         </el-button>
@@ -67,6 +64,7 @@
       >
         <h3>基本信息</h3>
         <el-form
+          ref="basicForm"
           :model="basicForm"
           :rules="basicFormRules"
         >
@@ -620,8 +618,8 @@
       >
         <el-form
           ref="ruleForm"
-          :model="ruleForm"
-           :rules="rules"
+          :model="formLiveTypeForm"
+          :rules="rules"
         >
           <el-row>
             <el-col :span="12">
@@ -675,7 +673,7 @@
               <el-form-item
                 label="欢迎标题"
                 required
-                 prop="title"
+                prop="title"
               >
                 <el-input
                   v-model="formLiveTypeForm.title"
@@ -687,7 +685,7 @@
               <el-form-item
                 label="验证码"
                 required
-                 prop="code"
+                prop="code"
               >
                 <el-input
                   v-model="formLiveTypeForm.code"
@@ -699,7 +697,7 @@
               <el-form-item
                 label="提示文案"
                 required
-                 prop="tips"
+                prop="tips"
               >
                 <el-input
                   v-model="formLiveTypeForm.tips"
@@ -745,7 +743,7 @@
           <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
               <el-form-item
-                :label="'关联学员：' + table_relatedStudents.length + '人（仅关联学员可以观看）'"
+                :label="'关联学员：' + totalNum+ '人（仅关联学员可以观看）'"
               >
                 <el-button
                   type="text"
@@ -814,7 +812,7 @@
               <!-- :current-page.sync="StudentsPage.totalNo" -->
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
-                :total="dialogSelectStudent.length"
+                :total="totalNum"
                 :page-size.sync="StudentsPage.pageSize"
                 @current-change="toggle_StudentsPage"
                 @size-change="toggle_StudentsPageSize"
@@ -907,8 +905,10 @@
                 name="first"
               >
                 <el-input
+                  v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
+
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -935,7 +935,11 @@
                 name="second"
                 suffix-icon="el-icon-search"
               >
-                <el-input placeholder="请输入用户名称或手机搜索"></el-input>
+                <el-input
+                  v-model="otherUserVal"
+                  placeholder="请输入用户名称或手机搜索"
+
+                ></el-input>
                 <el-tree
                   :data="otherUser"
                   show-checkbox
@@ -1010,7 +1014,8 @@ import {
   getOrganizationUser,
   getOtherUser,
   getUsersByOrgId,
-  getLiveDetails
+  getLiveDetails,
+  getStudentByLiveId,
 } from '@/api/live/editLive'
 
 export default {
@@ -1019,6 +1024,9 @@ export default {
   },
   data() {
     return {
+      totalNum:0,
+      otherUserVal: '',
+      organizationUserVal: '',
       headIndex: 1, //步骤切换
       ruleForm: {
         imageUrl: [{}], // 图片
@@ -1167,20 +1175,41 @@ export default {
         baseTitle: [{ required: true, message: '请输入标题', trigger: 'blur' }],
         title: [{ required: true, message: '请输入欢迎标题', trigger: 'blur' }],
         code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }],
+        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }]
       },
       StudentsPage: {
         pageSize: 10
       }
     }
   },
-  activated(){
-     this.isgetcategoryTree();
+  activated() {
+    this.isgetcategoryTree()
+   // this.getStudentInfoList();
+
+  },
+
+  watch:{
+
+    // 在组织架构下使用查询参数
+    organizationUserVal: _.debounce(function() {
+      this.loading = true
+      this.valChange(1);
+    }),
+
+    //其他人员
+    otherUserVal: _.debounce(function() {
+      this.loading = true
+      this.valChange(2);
+    })
+
+
+
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
+      this.getStudentInfoList();
     }
     //   获取直播分类
     getcategoryTree({
@@ -1206,9 +1235,95 @@ export default {
   },
   methods: {
 
-     isgetcategoryTree() {
+       // 数据处理中间函数
+    thruHandler(arr) {
+      // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
+      if (!this.org) {
+        // 不可以选择组织的时候将disable所有的type不为user类型的项
+        arr = _.map(arr, (item) =>
+          _.assign(
+            {
+              disabled: !_.eq(item.type, NODE_TYPE.User)
+            },
+            item
+          )
+        )
+      }
+
+      return arr
+    },
+    getStudentInfoList(){
+      getStudentByLiveId({
+          liveId:this.$route.query.id,
+          pageNo:1,
+          pageSize: this.StudentsPage.pageSize
+        }).then((res) => {
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)
+          })
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
+        })
+    },
+
+    //直播信息填写 下一步校验
+    liveNextTable(type) {
+      let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'ruleForm'
+      if (!formName) {
+        this.headIndex += 1
+        return false
+      }
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.headIndex += 1
+        } else {
+          return false
+        }
+      })
+    },
+    valChange(type) {
+      if (type == 1) {
+        getOrganizationUser({
+          parentId: 1,
+          search: this.organizationUserVal
+        }).then((res) => {
+          res.users.forEach((item) => {
+            item.type = 'user'
+            item.leaf = true
+            item.id = item.userId
+            item.name = item.name
+            res.orgs.push(item)
+          })
+
+          this.organizationUser = res.orgs
+        })
+      } else {
+        // 获取其他用户
+        getOtherUser({
+          search: this.otherUserVal,
+          categoryId: '',
+          pageNo: 1,
+          pageSize: 99999
+        }).then((res) => {
+          this.otherUser = res.data
+
+          this.otherUser.forEach((item) => {
+            item.phoneNum = item.phonenum
+            item.userCode = item.workNo
+            item.id = item.userId
+            item.type = 'user'
+          })
+        })
+      }
+    },
+    isgetcategoryTree() {
       getcategoryTree({
-           source: 'live'
+        source: 'live'
       }).then((res) => {
         this.liveClassification = res
       })
@@ -1311,8 +1426,7 @@ export default {
               type: 2
             })
           }
-
-          if (typeNum == 1) {
+          if (this.get_table_teacherSet_typeNumber(this.table_teacherSet, type) >= 2) {
             this.teacherSetButton.guestButton = true
           }
 
@@ -1327,8 +1441,7 @@ export default {
               type: 3
             })
           }
-
-          if (typeNum == 1) {
+          if (this.get_table_teacherSet_typeNumber(this.table_teacherSet, type) >= 2) {
             this.teacherSetButton.assistantButton = true
           }
 
@@ -1350,14 +1463,18 @@ export default {
       arr.splice(index, 1)
       // 同时在关联课程中的教师列表删除该教师
       this.add_relatedCourses_form.teacher.splice(index, 1)
+
       arr.forEach((item) => {
-        if (item.num == 2 && item.type == row.type) {
-          if (row.type == 2) {
-            this.teacherSetButton.guestButton = false
+        if (item.type == row.type) {
+          let currentTypeNum = arr.filter((x) => x.type === row.type)
+          if (row.type === 2) {
+            this.teacherSetButton.guestButton = currentTypeNum.length < 2 ? false : true
           } else {
-            this.teacherSetButton.assistantButton = false
+            this.teacherSetButton.assistantButton = currentTypeNum.length < 2 ? false : true
           }
-          item.num--
+          if (item.num >= 2) {
+            item.num--
+          }
         }
       })
     },
@@ -1410,9 +1527,11 @@ export default {
       })
     },
     // 关联学员表格的分页跳转
-    toggle_StudentsPage(page) {
+    toggle_StudentsPage(page) {//添加学员
       this.table_relatedStudents = []
-      this.dialogSelectStudent.forEach((item, index) => {
+      if(this.dialogSelectStudent.length>0){
+          this.totalNum =this.dialogSelectStudent.length
+          this.dialogSelectStudent.forEach((item, index) => {
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1426,6 +1545,29 @@ export default {
           })
         }
       })
+      }else{//编辑入口
+         getStudentByLiveId({
+          liveId:this.$route.query.id,
+          pageNo:page,
+          pageSize: this.StudentsPage.pageSize
+        }).then((res) => {
+          res.data.forEach(item=>{
+              let studentData ={}
+              studentData.phone=item.phoneNum,
+              studentData.userCode=item.userNo,
+              studentData.department=item.orgName,
+              studentData.name=item.userName
+              this.table_relatedStudents.push(studentData)
+          })
+             this.totalNum=res.totalNum
+             this.totalPage=res.totalPage
+        })
+
+
+
+      }
+
+
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
@@ -1616,7 +1758,7 @@ export default {
                   name: resitem.name,
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
-                  id: resitem.id
+                  id: resitem.id,
                 })
               }
             })
@@ -1644,7 +1786,26 @@ export default {
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
+
     submit_live_data() {
+      let otherData = []
+      let slef = this
+      this.table_teacherSet.forEach(function(item, index){
+        if(item.type===2 ||item.type===3 ){
+          let teacher={}
+          slef.teachingTeacherList.forEach(function(currentValue,index1){
+            if(currentValue.id==item.nameList_value){
+               teacher.nickName=currentValue.name
+            }
+          })
+
+          teacher.userActor =item.identity,
+          teacher.roleName =item.role,
+          teacher.userId =item.nameList_value
+          otherData.push(teacher)
+        }
+
+      })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
         categoryId: this.liveClassification_value, // 所属分类
@@ -1654,6 +1815,7 @@ export default {
         remark: _.escape(this.ruleForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
+        otherTeachers:otherData,
         coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
@@ -1704,11 +1866,11 @@ export default {
         case 'direct':
           data.authType = this.radio_connectionMode
           // 提交关联学员数据
-          if (this.table_relatedStudents.length) {
+          if (this.dialogSelectStudent.length) {
             data.userAndOrgIds = {
               users: []
             }
-            this.table_relatedStudents.forEach((item) => {
+            this.dialogSelectStudent.forEach((item) => {
               data.userAndOrgIds.users.push(item.id)
             })
           }
@@ -1725,15 +1887,36 @@ export default {
           break
       }
 
-      if (this.$route.query.id) {
-        data.liveId = this.$route.query.id
-        postEditLive(data).then(() => {
-          this.$router.push({ path: '/live/liveList' })
+      if (this.radio_connectionMode === 'code') {
+        //校验第三步是否填写
+        let res =  this.$refs['ruleForm'].validate((valid) => {
+
+          if (valid) {
+            if (this.$route.query.id) {
+              data.liveId = this.$route.query.id
+              postEditLive(data).then(() => {
+                this.$router.push({ path: '/live/liveList' })
+              })
+            } else {
+              postAddLive(data).then(() => {
+                this.$router.push({ path: '/live/liveList' })
+              })
+            }
+          } else {
+            return false
+          }
         })
-      } else {
-        postAddLive(data).then(() => {
-          this.$router.push({ path: '/live/liveList' })
-        })
+      }else {
+        if (this.$route.query.id) {
+          data.liveId = this.$route.query.id
+          postEditLive(data).then(() => {
+            this.$router.push({ path: '/live/liveList' })
+          })
+        } else {
+          postAddLive(data).then(() => {
+            this.$router.push({ path: '/live/liveList' })
+          })
+        }
       }
     },
     setLiveDetails(id) {
@@ -1744,6 +1927,9 @@ export default {
       // }).then(res=>{
       //   console.log(res)
       // })
+
+
+
       getLiveDetails({
         liveId: id
       }).then((res) => {
@@ -1770,6 +1956,33 @@ export default {
         })
 
         this.table_teacherSet[0].nameList_value = res.lecturerId
+         getQueryAssistant().then((res) => {
+          this.teachingTeacherList = res
+        })
+        let self = this
+         res.otherTeachers.forEach(function(item,index){
+          let teacherVaue={}
+           if(item.roleName=='嘉宾'){
+            teacherVaue.identity= '嘉宾',
+            teacherVaue.nameList_value= item.userId,
+            //teacherVaue.role= '嘉宾',
+            teacherVaue.num='嘉宾' + (index+1),
+            teacherVaue.type= 2
+          }
+          if(item.roleName=='助教'){
+            teacherVaue.identity= '助教',
+            teacherVaue.nameList_value= item.userId,
+          //  teacherVaue.role= '助教',
+            teacherVaue.num='助教' + (index+1),
+            teacherVaue.type= 2
+          }
+            self.table_teacherSet.push(teacherVaue)
+
+        })
+
+
+        console.log(this.table_teacherSet)
+
         this.table_relatedCourses = res.courses
 
         // 直播设置

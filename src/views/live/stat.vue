@@ -363,15 +363,15 @@ export default {
       },
       initForm: {
         live: {
-          search: '',
+          titleOrNo: '',
           categoryId: '',
           creatorId: '',
-          status: 1,
+          isUsed: '1',
           pageNo: 1,
           pageSize: 10
         },
         person: {
-          search: '',
+          titleOrNo: '',
           orgId: '',
           pageNo: 1,
           pageSize: 10
@@ -379,15 +379,15 @@ export default {
       },
       filterForm: {
         live: {
-          search: '',
+          titleOrNo: '',
           categoryId: '',
           creatorId: '',
-          status: 1,
+          isUsed: '1',
           pageNo: 1,
           pageSize: 10
         },
         person: {
-          search: '',
+          titleOrNo: '',
           orgId: '',
           pageNo: 1,
           pageSize: 10

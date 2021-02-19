@@ -351,8 +351,8 @@
                 need-handler
                 :check-upload="checkUpload"
                 :on-upload-complete="onUploadComplete"
+                :on-upload-progress="onUploadProgress"
                 :before-upload="CoursewareUpload"
-                @on-progress="onUploadProgress"
                 @on-pending="onUploadPending"
               >
                 <el-button size="medium">
@@ -452,42 +452,34 @@
                       }}
                     </el-button>
 
-                    <common-upload
-                      v-else
-                      need-handler
-                      :check-upload="checkUpload"
-                      :on-upload-complete="onUploadComplete"
-                      :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
-                      :multiple="false"
-                      @on-progress="(file) => onUploadProgress(file, scope.row, scope.$index)"
-                      @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
-                    >
-                      <el-button type="text">{{
-                        scope.row.upLoad[0] && scope.row.upLoad[0].localName
-                          ? scope.row.upLoad[0].localName
-                          : uploadRef[scope.row.type - 2].tips
-                      }}</el-button>
-                    </common-upload>
-
                     <el-button
                       v-if="typeOption[scope.row.type - 1].value === 4"
                       type="text"
                     >关联考试</el-button>
-                    <common-upload
-                      v-if="typeOption[scope.row.type - 1].value === 5"
-                      v-model="scope.row.upLoad"
-                      :before-upload="VideoUpload"
-                      :multiple="false"
-                      :disabled="scope.row.fileData.status === 'pending'"
-                    >
-                      <el-button type="text">
-                        {{
-                          scope.row.upLoad[0]
-                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : '上传视频'
-                        }}
-                      </el-button>
-                    </common-upload>
+
+                    <span v-else>
+                      <span v-if="scope.row.fileData.status === 'pending'">
+                        等待上传...
+                      </span>
+                      <common-upload
+                        v-else
+                        need-handler
+                        :on-upload-progress="
+                          (fileData) => onUploadProgress(fileData, scope.row, scope.$index)
+                        "
+                        :check-upload="checkUpload"
+                        :on-upload-complete="onUploadComplete"
+                        :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
+                        :multiple="false"
+                        @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
+                      >
+                        <el-button type="text">{{
+                          scope.row.upLoad[0] && scope.row.upLoad[0].localName
+                            ? scope.row.upLoad[0].localName
+                            : uploadRef[scope.row.type - 2].tips
+                        }}</el-button>
+                      </common-upload>
+                    </span>
                   </span>
                   <span
                     v-else
@@ -498,14 +490,17 @@
                 <div v-if="scope.row.saveOrcompile === 1">
                   <span v-if="scope.row.type === 1">{{ scope.row.upLoad[0].localName }}</span>
                   <div v-else>
+                    <span v-if="scope.row.fileData.status === 'pending'">等待上传...</span>
                     <el-progress
-                      v-if="scope.row.fileData && scope.row.fileData.percent < 100"
+                      v-if="scope.row.fileData.status === 'progress'"
                       :percentage="scope.row.fileData.percent"
                       :status="scope.row.fileData.status !== 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status !== 'exception'"
+                      :text-inside="scope.row.fileData.status !== 'error'"
                       :stroke-width="18"
                     ></el-progress>
-                    <span v-else>{{ scope.row.upLoad[0].localName }}</span>
+                    <span v-if="scope.row.fileData.status === 'complete'">{{
+                      scope.row.upLoad[0].localName
+                    }}</span>
                   </div>
                 </div>
               </template>
@@ -519,16 +514,12 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="
-                    scope.row.fileData &&
-                      typeof scope.row.fileData.percent === 'number' &&
-                      scope.row.fileData.percent < 100
-                  "
+                  v-if="scope.row.fileData.status === 'progress'"
                   type="text"
                   size="medium"
                   @click="controlUpload(scope.$index)"
                 >
-                  {{ scope.row.fileData.status === 'progress' ? '暂停' : '继续' }}
+                  {{ scope.row.fileData.paused ? '继续' : '暂停' }}
                 </el-button>
 
                 <el-button
@@ -807,9 +798,10 @@ export default {
     // 检测断线重连
     window.addEventListener('online', () => {
       this.ruleForm.contents.map((c) => {
-        const { status, ob } = c.fileData || {}
-        if (status !== 'complete') {
-          ob.subscription = ob.subscribe(ob.hooks)
+        if (!c.fileData) return
+        const { status, hooks, observable } = c.fileData || {}
+        if (status && status !== 'complete') {
+          c.fileData.subscription = observable.subscribe(hooks)
         }
       })
     })
@@ -821,9 +813,11 @@ export default {
     this.$refs.ruleForm.clearValidate()
   },
   methods: {
-    // typeChange(type) {
-    //   // console.log(type)
-    // },
+    typeChange(c) {
+      if (c.type === 1) return
+      c.upLoad = [{}]
+      c.fileData = {}
+    },
     checkUpload(file) {
       if (this.uploadingQueue.length >= 2) {
         if (!this.pendingQueue.includes(file)) {
@@ -836,6 +830,7 @@ export default {
       return false
     },
     onUploadPending(fileData, content, contentIdx) {
+      fileData.status = 'pending'
       const contents = this.ruleForm.contents
       const spliceIdx = content ? contentIdx : contents.length
       const c = {
@@ -844,7 +839,7 @@ export default {
         name: (content && content.name) || fileData.name || '社区的商业模式',
         upLoad: [
           {
-            localName: '等待上传...'
+            localName: fileData.name
           }
         ],
         fileData
@@ -856,6 +851,7 @@ export default {
       let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
       if (index < 0) {
         fileData.status = 'progress'
+        fileData.paused = false
         const c = {
           saveOrcompile: 1,
           type: content ? content.type : 2,
@@ -869,45 +865,57 @@ export default {
         }
         const spliceIdx = content ? contentIdx : contents.length
         contents.splice(spliceIdx, 1, c)
-      } else if (!fileData.status) {
+      } else if (fileData.paused === undefined) {
         fileData.status = 'progress'
+        fileData.paused = false
         const c = contents[index]
         c.upLoad = [{ localName: fileData.name }]
         c.fileData = fileData
         contents.splice(index, 1, c)
       }
     },
-    onUploadComplete(file) {
+    onUploadComplete(file, url) {
       const contents = this.ruleForm.contents
       const content = contents.find((c) => c.fileData.uid === file.file.uid)
-      content.upLoad[0].url = content.fileData.url
-      if (
-        contents.every((c) => c.fileData && c.fileData.status === 'complete') &&
-        contents.pending
-      ) {
+      content.upLoad[0].url = url
+      content.fileData.status = 'complete'
+      if (contents.every((c) => c.fileData.status === 'complete') && contents.pending) {
         this.isAddCourse(contents.addStatus)
       }
 
-      this.uploadingQueue.splice(this.uploadingQueue.indexOf(file), 1)
-      if (this.uploadingQueue.length < 2 && this.pendingQueue.length) {
-        const file = this.pendingQueue.pop()
-        file.uploader.httpRequest(file)
-      }
+      this.continueUploading(file)
     },
     controlUpload(index) {
       const content = this.ruleForm.contents[index]
-      let { status, observable, subscription, hooks } = content.fileData
-      if (status === 'progress') {
-        status = content.fileData.status = 'pending'
-      } else {
-        status = content.fileData.status = 'progress'
-      }
+      const { observable, subscription, hooks } = content.fileData
+      const paused = (content.fileData.paused = !content.fileData.paused)
       // 继续上传
-      if (status === 'progress') {
+      if (!paused) {
         content.fileData.subscription = observable.subscribe(hooks)
       } else {
         // 暂停上传
         subscription.unsubscribe()
+        if (this.pendingQueue.length) {
+          content.fileData.status = 'pending'
+          const file = this.uploadingQueue.find((f) => f.file.uid === content.fileData.uid)
+          this.pendingQueue.unshift(file)
+          this.continueUploading(file)
+        }
+      }
+    },
+    continueUploading(abortFile) {
+      this.uploadingQueue.splice(this.uploadingQueue.indexOf(abortFile), 1)
+      if (this.pendingQueue.length) {
+        const f = this.pendingQueue.pop()
+        const content = this.ruleForm.contents.find((c) => c.fileData.uid === f.file.uid)
+        if (typeof content.fileData.paused === 'boolean') {
+          content.fileData.paused = false
+          const { observable, hooks } = content.fileData
+          content.fileData.status = 'progress'
+          content.fileData.subscription = observable.subscribe(hooks)
+        } else {
+          f.uploader.httpRequest(f)
+        }
       }
     },
     handleOrgNodeClick(data) {
@@ -964,6 +972,7 @@ export default {
         data.imageUrl[0].localName = data.localName
         data.imageUrl[0].url = data.url
         data.contents = []
+        data.passCondition = data.passCondition.split(',')
         this.ruleForm = data
         this.$forceUpdate()
       })
@@ -1030,14 +1039,7 @@ export default {
     isAddCourse(status) {
       const contents = this.ruleForm.contents
       // 还有正在上传的文件
-      if (
-        contents.some(
-          (item) =>
-            item.fileData &&
-            typeof item.fileData.percent === 'number' &&
-            item.fileData.percent < 100
-        )
-      ) {
+      if (contents.some((item) => item.fileData.status === 'progress')) {
         // 提示
         const message =
           status === 2
@@ -1103,8 +1105,20 @@ export default {
       // 富文本要转换传后端
       params.introduction = _.escape(params.introduction)
       params.thinkContent = _.escape(params.thinkContent)
+
+      // 查一下章节有没有内容 没有提示一下
+      params.contents.map((item, index) => {
+        if (item.type) {
+          if (item.content === '') {
+            this.$message.error(`第${index + 1}条章节内容没有上传，请重新上传或者删除该章节内容`)
+            return
+          }
+        }
+      })
+
       // window.console.log(params)
       // 草稿
+
       if (status === 2) {
         this.$confirm('您可以将草稿暂存在“草稿”分组下，可以再次编辑，是否保存草稿?', '提示', {
           confirmButtonText: '保存',
@@ -1120,8 +1134,8 @@ export default {
                 message: '保存成功',
                 type: 'success'
               })
+              this.isdeleteData()
               setTimeout(() => {
-                this.isdeleteData()
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
                 // this.$router.go(-1)
@@ -1150,12 +1164,20 @@ export default {
             // validate方法返回Promise,校验是否可发起，如果可发起Promise直接resolve
             this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
+              params.status = process ? 0 : 1
               addCourse(params).then(({ id }) => {
                 // 如果没有任何审批流程可选则不需要经过审批
                 if (process) {
                   // 状态设置为审批中
-                  params.status = 0
                   this.submitApprApply(params.id ? params.id : id)
+                } else {
+                  //发布成功清除数据
+                  this.isdeleteData()
+                  this.$message({
+                    message: '课程发布成功',
+                    type: 'success'
+                  })
+                  this.$router.back()
                 }
               })
             })
@@ -1178,12 +1200,14 @@ export default {
           formTitle: this.ruleForm.name
         })
         .then(() => {
+          //发布成功清除数据
+          this.isdeleteData()
           this.$message({
             message: '本课程已发布成功',
             type: 'success'
           })
+          this.isdeleteData()
           setTimeout(() => {
-            this.isdeleteData()
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
@@ -1223,6 +1247,10 @@ export default {
           // }
         ]
       }
+      this.$refs.ruleForm.clearValidate()
+      this.$refs.apprSubmit.handleClose()
+      this.headIndex = 1
+      this.parentOrgIdLabel = ''
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
@@ -1302,20 +1330,18 @@ export default {
     // 删除
     delContent(c, i) {
       this.ruleForm.contents.splice(i, 1)
-      if (!c.fileData.observable) return
-      const uploadIndex = this.uploadingQueue.findIndex(
-        (file) => file.file.uid === c.fileData && c.fileData.uid
-      )
-      const pendingIndex = this.pendingQueue.findIndex(
-        (file) => file.file.uid === c.fileData && c.fileData.uid
-      )
+      // 文章类型
+      if (c.type === 1) return
+      const uploadIndex = this.uploadingQueue.findIndex((file) => file.file.uid === c.fileData.uid)
+      const pendingIndex = this.pendingQueue.findIndex((file) => file.file.uid === c.fileData.uid)
       if (uploadIndex > -1) this.uploadingQueue.splice(uploadIndex, 1)
       if (pendingIndex > -1) this.pendingQueue.splice(pendingIndex, 1)
-
-      c.fileData.subscription.unsubscribe()
-      c.fileData.observable = null
-      c.fileData.subscription = null
-      c.fileData.hooks = null
+      if (c.fileData.observable) {
+        c.fileData.subscription.unsubscribe()
+        c.fileData.observable = null
+        c.fileData.subscription = null
+        c.fileData.hooks = null
+      }
       c.fileData = null
       c = null
     },

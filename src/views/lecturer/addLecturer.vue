@@ -588,7 +588,7 @@ export default {
               this.$refs.ruleForm.clearValidate()
             }, 100)
 
-            if (i==1) {
+            if (i == 1) {
               this.toLecturer()
               this.ruleForm = {
                 categoryId: '',
@@ -615,7 +615,6 @@ export default {
                 isLatestTeacher: 0,
                 isPopularTeacher: 0
               }
-           
             }
           })
         }
