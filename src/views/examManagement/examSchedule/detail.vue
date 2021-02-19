@@ -392,9 +392,11 @@
               >
                 发布成绩
               </el-button>
-              <!-- 开启发放证书功能，且考试通过，开启证书操作按钮 -->
+              <!-- 显示条件：开启发放证书功能 -->
+              <!-- 置灰条件：考试未通过 -->
               <el-button
-                :disabled="!(examDetail.certificate && row.isPass)"
+                v-if="examDetail.certificate"
+                :disabled="!row.isPass"
                 type="text"
                 @click="
                   handleCertificate([row], row.gainCertificate ? 'revoke' : 'grant', 'single')
@@ -588,7 +590,6 @@ export default {
     }
   },
   activated() {
-    console.log('_.union([3, 1], [1, 2])==', _.union([3, 1], [1, 2]))
     this.initData()
     this.loadTableData()
   },
