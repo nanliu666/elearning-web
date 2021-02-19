@@ -504,12 +504,20 @@ export default {
       })
     },
     closePlan(row) {
-      updateStatus({ id: row.id }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '结办成功!'
-        })
-        this.refreshPublished()
+      // 结办
+      this.$confirm('您确定要提前结办该课程安排吗？', {
+        showCancelButton: true,
+        callback: (action) => {
+          if (action !== 'cancel') {
+            updateStatus({ id: row.id }).then(() => {
+              this.$message({
+                type: 'success',
+                message: '结办成功!'
+              })
+              this.refreshPublished()
+            })
+          }
+        }
       })
     },
     refreshPublished() {
@@ -675,7 +683,6 @@ export default {
     .content {
       // padding: 24px;
       height: calc(100% - 34px);
-      overflow: auto;
       position: relative;
       &.published {
         display: flex;
@@ -696,7 +703,7 @@ export default {
           // width: ;
           margin-left: 33px;
           height: 100%;
-          width: calc(100% - 33px - 300px);
+          width: calc(100% - 35px - 300px);
         }
       }
     }
