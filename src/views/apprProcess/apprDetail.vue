@@ -234,20 +234,15 @@
         >
           撤回
         </el-button>
-        <el-tooltip
+
+        <el-button
           v-if="isApplyUser && applyDetail.status === 'Cancel'"
-          effect="dark"
-          content="重新申请"
-          placement="top"
+          type="primary"
+          size="medium"
+          @click="handleReapplyClick"
         >
-          <el-button
-            type="primary"
-            size="medium"
-            @click="handleReapplyClick"
-          >
-            重新申请
-          </el-button>
-        </el-tooltip>
+          重新申请
+        </el-button>
 
         <!-- <el-tooltip
           effect="dark"
@@ -558,14 +553,15 @@ export default {
     },
     // 处理重新发起申请
     handleReapplyClick() {
+      let self = this
       this.$confirm('您确定要对课程进行修改并重新申请?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          let { id, catalogName } = JSON.parse(this.applyDetail.formData)
-          this.$router.push({
+        .then(function() {
+          let { id, catalogName } = JSON.parse(self.applyDetail.formData)
+          self.$router.push({
             path: '/course/compileCourse',
             query: { id: id, catalogName: catalogName }
           })

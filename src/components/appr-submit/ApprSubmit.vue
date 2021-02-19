@@ -92,7 +92,6 @@ export default {
   },
   methods: {
     getProcessList() {
-      debugger
       getCourseProcessList({ categoryId: this.categoryId }).then((res) => {
         this.processList = res
         _.forEach(this.processList, this.resolveData)
