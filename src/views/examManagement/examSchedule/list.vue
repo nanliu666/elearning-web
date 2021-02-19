@@ -503,6 +503,10 @@ export default {
     // 切换nav
     handleSelect(key) {
       this.$refs.table.clearSelection()
+      this.$router.replace({
+        path: '/examManagement/examSchedule/list',
+        query: { activeIndex: key }
+      })
       this.activeIndex = key
       this.handleSearch({ type: Number(key) })
       this.setConfig()
