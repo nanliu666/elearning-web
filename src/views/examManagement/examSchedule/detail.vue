@@ -360,6 +360,7 @@
             slot-scope="{ selection }"
           >
             <el-button
+              v-if="!examDetail.autoEvaluate"
               type="text"
               icon="el-icon-sold-out"
               @click="pubulishAllAchievement(selection)"
@@ -387,6 +388,7 @@
           >
             <div class="menuClass">
               <el-button
+                v-if="!examDetail.autoEvaluate"
                 type="text"
                 @click="pubulishAchievement({ ids: row.id })"
               >
@@ -785,6 +787,10 @@ export default {
     initData() {
       getExamArrange({ id: this.$route.query.id }).then((res) => {
         this.examDetail = res
+        // 未开启发放证书并且是自动评分，关闭操作列
+        if (this.examDetail.autoEvaluate && !this.examDetail.certificate) {
+          this.tableConfig.showHandler = false
+        }
       })
       let fieldOrgId = _.find(this.searchConfig.popoverOptions, { field: 'orgId' })
       let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
