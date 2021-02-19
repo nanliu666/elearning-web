@@ -130,7 +130,7 @@
           :disabled="modelDisabled"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
-          :default-value="model.integralValue"
+          :default-value.sync="model.integralValue"
           :input-width="60"
           :input-props="{ maxLength: 4, disabled: modelDisabled || !model.integral }"
         ></checkbox-input>
@@ -142,7 +142,7 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
-          :default-value="model.publishTimeValue"
+          :default-value.sync="model.publishTimeValue"
           :input-props="{ maxLength: 4, disabled: modelDisabled || !model.publishTime }"
         ></checkbox-input>
       </template>
