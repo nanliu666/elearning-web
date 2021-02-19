@@ -55,6 +55,8 @@ export const createApprPass = (params) => post('/appr/v2/appr/apply/pass', param
 export const createApprReject = (params) => post('/appr/v2/appr/apply/reject', params)
 // 撤销
 export const createApprCancel = (params) => post('/appr/v2/appr/apply/cancel', params)
+// 撤销2    课程审批撤销
+export const cancelCourseApply = (params) => get('api/appr/v2/appr/approve/course/cancel', params)
 // 催一下
 export const createApprUrge = (params) => post('/appr/v2/appr/apply/urge', params)
 /**

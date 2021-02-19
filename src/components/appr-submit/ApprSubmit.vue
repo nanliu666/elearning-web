@@ -92,6 +92,7 @@ export default {
   },
   methods: {
     getProcessList() {
+      debugger
       getCourseProcessList({ categoryId: this.categoryId }).then((res) => {
         this.processList = res
         _.forEach(this.processList, this.resolveData)
@@ -136,6 +137,8 @@ export default {
     },
     handleClose() {
       this.visible = false
+      this.process = null
+      this.processId = null
     },
     // 弹窗的确定回调
     handleSubmit() {
@@ -157,6 +160,7 @@ export default {
         nodeData
       })
     },
+
     /**
      * 组装审批流程数组
      */

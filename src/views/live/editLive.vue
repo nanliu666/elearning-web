@@ -84,11 +84,11 @@
             <el-col :span="12">
               <el-form-item
                 label="所属分类"
-                prop="liveClassification_value"
+                required
               >
                 <el-select
-                
-                  v-model="basicForm.liveClassification_value"
+                  ref="ref_liveClassification"
+                  v-model="liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
                 >
@@ -109,10 +109,10 @@
             <el-col :span="12">
               <el-form-item
                 label="直播状态"
-                prop="select_liveStatus_value"
+                required
               >
                 <el-select
-                  v-model="basicForm.select_liveStatus_value"
+                  v-model="select_liveStatus_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -127,7 +127,7 @@
             <el-col :span="12">
               <el-form-item
                 label="连麦数量"
-                 prop="select_linkNumber_value"
+                required
               >
                 <el-tooltip placement="top">
                   <div
@@ -155,7 +155,7 @@
                   </el-button>
                 </el-tooltip>
                 <el-select
-                  v-model="basicForm.select_linkNumber_value"
+                  v-model="select_linkNumber_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -209,11 +209,11 @@
             <el-col :span="24">
               <el-form-item
                 label="课程封面"
+                required
                 class="live_upload_img"
-                 prop="imageUrl"
               >
                 <common-upload
-                  v-model="basicForm.imageUrl"
+                  v-model="ruleForm.imageUrl"
                   class="upload-demo"
                   drag
                   :show-file-list="false"
@@ -231,15 +231,15 @@
                     </div>
                   </div>
                   <img
-                    v-if="basicForm.imageUrl[0]"
-                    :src="basicForm.imageUrl[basicForm.imageUrl.length - 1].url"
+                    v-if="ruleForm.imageUrl[0]"
+                    :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
                     class="avatar"
                   />
                 </common-upload>
               </el-form-item>
             </el-col>
           </el-row>
-        <!--</el-form> -->
+        </el-form>
 
         <h3>
           <span style="margin-right: 10px;">直播预告</span>
@@ -258,18 +258,18 @@
             </el-button>
           </el-tooltip>
         </h3>
-       <!-- <el-form
+        <el-form
           ref="ruleForm"
           :model="ruleForm"
-        > -->
+        >
           <el-row class="block_label">
             <el-col :span="12">
               <el-form-item
                 label="直播方式"
-                prop="select_mode_value"
+                required
               >
                 <el-select
-                  v-model="basicForm.select_mode_value"
+                  v-model="select_mode_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -445,12 +445,12 @@
               </el-form-item>
             </el-col>
           </el-row>
-      <!--  </el-form> -->
+        </el-form>
         <h3>直播详情</h3>
-      <!--  <el-form
+        <el-form
           ref="ruleForm"
           :model="ruleForm"
-        > -->
+        >
           <el-row>
             <el-col :span="24">
               <el-form-item
@@ -460,7 +460,7 @@
                 class="lvie_details"
               >
                 <tinymce
-                  v-model="basicForm.introduction"
+                  v-model="ruleForm.introduction"
                   :init="{ height: 100 }"
                 />
               </el-form-item>
@@ -908,7 +908,7 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
-                 
+
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -938,7 +938,7 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
-                
+
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1028,37 +1028,22 @@ export default {
       otherUserVal: '',
       organizationUserVal: '',
       headIndex: 1, //步骤切换
-      // ruleForm: {
-      //   imageUrl: [{}], // 图片
-      //   introduction: '' // 富文本
-      // },
+      ruleForm: {
+        imageUrl: [{}], // 图片
+        introduction: '' // 富文本
+      },
 
       /** tabs 1 的提交数据 */
       basicForm: {
         //基本信息表单
-        title: '', // 直播标题
-        liveClassification_value:'',
-        select_liveStatus_value:'',
-        select_linkNumber_value:'',
-        select_mode_value: '', // 当前选择的方式
-        introduction:'',
-        imageUrl: [{}],
-        
+        title: '' // 直播标题
       },
       basicFormRules: {
-        title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }],
-        liveClassification_value: [{ required: true, message: '请选择所属分类', trigger: ['blur', 'change'] }],
-        select_liveStatus_value: [{ required: true, message: '请选择直播状态', trigger: ['blur', 'change'] }],
-        select_linkNumber_value: [{ required: true, message: '请选择连麦数', trigger: ['blur', 'change'] }],
-        select_mode_value: [{ required: true, message: '请选择直播方式', trigger: ['blur', 'change'] }],
-        introduction: [{ required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] }],
-        imageUrl: [
-          { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
-        ],
+        title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }]
       },
 
       liveClassification: [],
-    //  liveClassification_value: '',
+      liveClassification_value: '',
       liveClassification_option: {
         label: '',
         value: ''
@@ -1068,7 +1053,7 @@ export default {
         children: 'children'
       },
       toggle_scene: 'ppt', // 直播场景切换
-    //  select_liveStatus_value: 1, //当前选择的状态
+      select_liveStatus_value: 1, //当前选择的状态
       select_liveStatus: [
         // 直播状态
         {
@@ -1080,7 +1065,7 @@ export default {
           label: '禁用'
         }
       ],
-     // select_linkNumber_value: '', // 当前选择的数量
+      select_linkNumber_value: '', // 当前选择的数量
       select_linkNumber: [
         // 连麦数量
         {
@@ -1092,7 +1077,7 @@ export default {
           label: '1v7~16'
         }
       ],
-     // select_mode_value: 'single', // 当前选择的方式
+      select_mode_value: 'single', // 当前选择的方式
       select_mode: [
         //直播方式
         {
@@ -1204,7 +1189,7 @@ export default {
   },
 
   watch:{
-    
+
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
@@ -1215,19 +1200,8 @@ export default {
     otherUserVal: _.debounce(function() {
       this.loading = true
       this.valChange(2);
-    }),
-    
-    'basicForm.imageUrl': {
-      handler() {
-        this.$nextTick(() => {
-          if (this.basicForm.imageUrl.length) {
-            this.$refs.basicForm.validateField('imageUrl', () => {})
-          }
-        })
-      },
-      immediate: false,
-      deep: true
-    },
+    })
+
 
 
   },
@@ -1283,15 +1257,15 @@ export default {
           liveId:this.$route.query.id,
           pageNo:1,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
               studentData.userCode=item.userNo,
               studentData.department=item.orgName,
               studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)  
-          })     
+              this.table_relatedStudents.push(studentData)
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1299,7 +1273,6 @@ export default {
 
     //直播信息填写 下一步校验
     liveNextTable(type) {
-      debugger
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'ruleForm'
       if (!formName) {
         this.headIndex += 1
@@ -1558,7 +1531,7 @@ export default {
       this.table_relatedStudents = []
       if(this.dialogSelectStudent.length>0){
           this.totalNum =this.dialogSelectStudent.length
-          this.dialogSelectStudent.forEach((item, index) => {  
+          this.dialogSelectStudent.forEach((item, index) => {
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1577,15 +1550,15 @@ export default {
           liveId:this.$route.query.id,
           pageNo:page,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
               studentData.userCode=item.userNo,
               studentData.department=item.orgName,
               studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)  
-          })     
+              this.table_relatedStudents.push(studentData)
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1593,8 +1566,8 @@ export default {
 
 
       }
-     
-      
+
+
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
@@ -1809,7 +1782,7 @@ export default {
     liveClassification_nodeClick(data) {
       this.liveClassification_option.label = data.name
       this.liveClassification_option.value = data.idStr
-      this.basicForm.liveClassification_value = data.idStr
+      this.liveClassification_value = data.idStr
       this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
@@ -1825,13 +1798,13 @@ export default {
                teacher.nickName=currentValue.name
             }
           })
-         
+
           teacher.userActor =item.identity,
           teacher.roleName =item.role,
           teacher.userId =item.nameList_value
-          otherData.push(teacher) 
+          otherData.push(teacher)
         }
-        
+
       })
       var data = {
         batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -1843,7 +1816,7 @@ export default {
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
         otherTeachers:otherData,
-        coverImageUrl: this.basicForm.imageUrl[this.basicForm.imageUrl.length - 1].url // 直播封面图
+        coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
       }
 
       // 提交关联课程数据
@@ -1955,7 +1928,7 @@ export default {
       //   console.log(res)
       // })
 
-     
+
 
       getLiveDetails({
         liveId: id
@@ -2006,10 +1979,10 @@ export default {
             self.table_teacherSet.push(teacherVaue)
 
         })
-       
+
 
         console.log(this.table_teacherSet)
-        
+
         this.table_relatedCourses = res.courses
 
         // 直播设置
