@@ -20,7 +20,7 @@
           <div class="operate-left">
             <div class="input-wrapper">
               <el-input
-                v-model="filterForm[currentTable].search"
+                v-model="filterForm[currentTable].titleOrNo"
                 :disabled="loading[currentTable]"
                 clearable
                 size="medium"
@@ -94,7 +94,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        search: filterForm[currentTable].search
+                        titleOrNo: filterForm[currentTable].titleOrNo
                       }
                     "
                   >
@@ -135,7 +135,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        search: filterForm[currentTable].search
+                        titleOrNo: filterForm[currentTable].titleOrNo
                       }
                     "
                   >
@@ -406,7 +406,7 @@ export default {
   },
   computed: {
     searchValWatcher() {
-      return this.filterForm[this.currentTable].search
+      return this.filterForm[this.currentTable].titleOrNo
     }
   },
   watch: {
