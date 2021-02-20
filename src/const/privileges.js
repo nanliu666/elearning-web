@@ -97,6 +97,9 @@ export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
 export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
 export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
+// 组织管理的组织详情的鉴权
+export const EDIT_ORGDETAIL = '/orgs/orgDetail/edit' // 编辑
+export const DELETE_ORGDELETE = '/orgs/orgDetail/delete' // 删除
 // 用户管理的鉴权
 export const ADD_USER = '/system/user/add' // 新建用户
 export const SETTING_USER = '/system/user/setting' // 角色设置
