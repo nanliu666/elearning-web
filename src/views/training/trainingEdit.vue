@@ -138,6 +138,9 @@ export default {
       return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
         100}%)`
     },
+    isNext() {
+      return _.get(this.$route, 'query.type', null)
+    },
     id() {
       return this.$route.query.id
     }
@@ -196,6 +199,13 @@ export default {
             })
             this.$refs.editArrangement.course.data = trainOnlineCourse
             this.$refs.editArrangement.examine.data = trainExam
+            // 开办下一期，培训时间清除
+            if (this.isNext === 'next') {
+              this.$refs.editBasicInfo.formData.trainTime = []
+              this.$nextTick(() => {
+                this.$refs.editBasicInfo.$refs.form.clearValidate()
+              })
+            }
           })
           .catch((error) => {
             this.$message.error(error)
@@ -215,6 +225,10 @@ export default {
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
         let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
+        // 开办下一期，创建接口
+        if (this.isNext === 'next') {
+          editFun = createTrain
+        }
         editFun(params)
           .then(() => {
             this.$message.success('发布成功')
