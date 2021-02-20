@@ -318,7 +318,11 @@ export default {
       const notBatNorExe = _.some(TYPE_LIST, (item) => {
         return item === fileType
       })
+      const isEmpty = file.size === 0
       const isLimitLength = _.size(this.formData.attachments) < this.limit
+      if (isEmpty) {
+        this.$message.error('上传文件不能为空!')
+      }
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
       }
@@ -328,7 +332,7 @@ export default {
       if (notBatNorExe) {
         this.$message.error('不允许上传.exe .bat类型文件')
       }
-      return isLt100M && isLimitLength && !notBatNorExe
+      return isLt100M && isLimitLength && !notBatNorExe && !isEmpty
     },
     // 预览附件
     previewFile(data) {

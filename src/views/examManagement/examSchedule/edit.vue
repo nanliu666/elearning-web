@@ -33,7 +33,7 @@
       <div class="page-right">
         <el-button
           v-if="!id"
-          v-loading="submitLoading"
+          v-loading="submitLoading && publishType === 'draft'"
           size="medium"
           @click="publishFun('draft')"
         >
@@ -56,7 +56,7 @@
         </el-button>
         <el-button
           v-if="activeStep === 1"
-          v-loading="submitLoading"
+          v-loading="submitLoading && publishType === 'publish'"
           size="medium"
           type="primary"
           @click="publishFun('publish')"
@@ -110,6 +110,7 @@ export default {
   data() {
     return {
       submitLoading: false,
+      publishType: 'publish',
       refsList: REFS_LIST,
       loading: false,
       activeStep: 0,
@@ -215,6 +216,7 @@ export default {
     },
     // 发布区分编辑发布还是新增发布
     publishFun(type) {
+      this.publishType = type
       this.submitLoading = true
       // 草稿提交不需要校验,  发布提交需要校验
       const examInfoData = this.$refs.examInfo.getData(type)

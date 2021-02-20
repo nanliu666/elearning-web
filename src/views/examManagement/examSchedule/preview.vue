@@ -130,7 +130,7 @@ export default {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
-  created() {
+  activated() {
     this.initData()
   },
   methods: {

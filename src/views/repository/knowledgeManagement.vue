@@ -118,53 +118,54 @@
           </div>
         </template>
         <template #handler="{row}">
-          <el-button
-            v-p="TOP_REP"
-            type="text"
-            class="top-button"
-            @click="handleTop(row)"
-          >
-            {{ row.topTime ? '已置顶' : '置顶' }}
-          </el-button>
-          <el-button
-            v-p="PUTAWAY_REP"
-            type="text"
-            @click="handleStatus(row)"
-          >
-            {{ row.status === '0' ? '下架' : '上架' }}
-          </el-button>
-          <el-dropdown
-            v-if="$p([EDIT_REP, DELETE_REP, MOVE_REP])"
-            style="margin-left: 4px"
-            @command="handleCommand($event, row)"
-          >
+          <div class="handle__button">
             <el-button
+              v-p="TOP_REP"
               type="text"
-              style="margin-left: 10px"
+              class="top__button"
+              @click="handleTop(row)"
             >
-              <i class="el-icon-arrow-down el-icon-more" />
+              {{ row.topTime ? '已置顶' : '置顶' }}
             </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item
-                v-p="EDIT_REP"
-                command="editKnow"
+            <el-button
+              v-p="PUTAWAY_REP"
+              type="text"
+              @click="handleStatus(row)"
+            >
+              {{ row.status === '0' ? '下架' : '上架' }}
+            </el-button>
+            <el-dropdown
+              v-if="$p([EDIT_REP, DELETE_REP, MOVE_REP])"
+              @command="handleCommand($event, row)"
+            >
+              <el-button
+                type="text"
+                style="margin-left: 10px"
               >
-                编辑
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-p="DELETE_REP"
-                command="deleteKnow"
-              >
-                删除
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-p="MOVE_REP"
-                command="moveKnow"
-              >
-                移动
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
+                <i class="el-icon-arrow-down el-icon-more" />
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item
+                  v-p="EDIT_REP"
+                  command="editKnow"
+                >
+                  编辑
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-p="DELETE_REP"
+                  command="deleteKnow"
+                >
+                  删除
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-p="MOVE_REP"
+                  command="moveKnow"
+                >
+                  移动
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
         </template>
       </common-table>
     </basic-container>
@@ -629,8 +630,12 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.top-button {
-  width: 40px;
+.handle__button {
+  display: flex;
+  justify-content: space-between;
+  .top__button {
+    width: 30px;
+  }
 }
 .operations-right {
   i {

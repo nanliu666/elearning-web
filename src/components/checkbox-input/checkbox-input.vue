@@ -51,16 +51,21 @@ export default {
   },
   data() {
     return {
-      innerValue: this.defaultValue,
       checkValue: this.value
     }
   },
-
+  computed: {
+    innerValue: {
+      get() {
+        return this.defaultValue
+      },
+      set(value) {
+        this.$emit('update:defaultValue', value)
+      }
+    }
+  },
   watch: {
     checkValue(val) {
-      this.$emit('input', val)
-    },
-    innerValue(val) {
       this.$emit('input', val)
     }
   },

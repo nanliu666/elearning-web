@@ -163,6 +163,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/ .is-checked {
+  background-color: #f2f5f7;
+}
 .roletree {
   height: 100%;
 

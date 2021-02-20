@@ -80,7 +80,7 @@
           {{ row.classTime[0] }} 至 {{ row.classTime[1] }}
         </template>
         <template #studyType="{row}">
-          {{ row.studyType === '0' ? '必修' : '选修' }}
+          {{ row.studyType == 0 ? '必修' : '选修' }}
         </template>
         <template #handler="{row}">
           <el-button

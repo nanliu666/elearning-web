@@ -360,6 +360,7 @@
             slot-scope="{ selection }"
           >
             <el-button
+              v-if="!examDetail.autoEvaluate"
               type="text"
               icon="el-icon-sold-out"
               @click="pubulishAllAchievement(selection)"
@@ -387,14 +388,17 @@
           >
             <div class="menuClass">
               <el-button
+                v-if="!examDetail.autoEvaluate"
                 type="text"
                 @click="pubulishAchievement({ ids: row.id })"
               >
                 发布成绩
               </el-button>
-              <!-- 开启发放证书功能，且考试通过，开启证书操作按钮 -->
+              <!-- 显示条件：开启发放证书功能 -->
+              <!-- 置灰条件：考试未通过 -->
               <el-button
-                :disabled="!(examDetail.certificate && row.isPass)"
+                v-if="examDetail.certificate"
+                :disabled="!row.isPass"
                 type="text"
                 @click="
                   handleCertificate([row], row.gainCertificate ? 'revoke' : 'grant', 'single')
@@ -588,7 +592,6 @@ export default {
     }
   },
   activated() {
-    console.log('_.union([3, 1], [1, 2])==', _.union([3, 1], [1, 2]))
     this.initData()
     this.loadTableData()
   },
@@ -784,6 +787,10 @@ export default {
     initData() {
       getExamArrange({ id: this.$route.query.id }).then((res) => {
         this.examDetail = res
+        // 未开启发放证书并且是自动评分，关闭操作列
+        if (this.examDetail.autoEvaluate && !this.examDetail.certificate) {
+          this.tableConfig.showHandler = false
+        }
       })
       let fieldOrgId = _.find(this.searchConfig.popoverOptions, { field: 'orgId' })
       let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })

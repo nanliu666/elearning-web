@@ -191,7 +191,6 @@ let TABLE_COLUMNS = [
     slot: true,
     minWidth: 150
   },
-
   {
     label: '考试分类',
     prop: 'category',
@@ -494,7 +493,9 @@ export default {
           TABLE_COLUMNS.splice(examNameIndex + 1, 0, STATUS_CONFIG)
         }
       } else {
-        TABLE_COLUMNS.splice(statusIndex, 1)
+        if (statusIndex !== -1) {
+          TABLE_COLUMNS.splice(statusIndex, 1)
+        }
       }
       this.tableColumns = TABLE_COLUMNS
       this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
@@ -502,6 +503,10 @@ export default {
     // 切换nav
     handleSelect(key) {
       this.$refs.table.clearSelection()
+      this.$router.replace({
+        path: '/examManagement/examSchedule/list',
+        query: { activeIndex: key }
+      })
       this.activeIndex = key
       this.handleSearch({ type: Number(key) })
       this.setConfig()

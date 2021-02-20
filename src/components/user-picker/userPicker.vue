@@ -323,11 +323,16 @@ export default {
       if (_.isEmpty(this.checkedUsers)) {
         _.pullAllBy(this.selected, this.outerData, 'bizId')
       } else {
-        // 全选需要去重
-        _.each(this.outerData, (item) => {
-          this.handleSelectUser(item)
-        })
-        this.selected = _.uniqBy(this.selected, 'bizId')
+        // 半选换全选需要把未选上的加入
+        if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
+          this.selected = _.cloneDeep(this.outerData)
+        } else {
+          // 全选需要去重
+          _.each(this.outerData, (item) => {
+            this.handleSelectUser(item)
+          })
+          this.selected = _.uniqBy(this.selected, 'bizId')
+        }
       }
     },
     // 当前是否切换为半选状态

@@ -493,7 +493,6 @@ export default {
      * @param relateType 试题类型 column 试题来源potions
      * */
     getTopicCategory(relateType = '', column) {
-      //single_choice
       let params = {
         type: '0',
         relateType: relateType,
@@ -504,7 +503,7 @@ export default {
 
         let categoryObject = await this.category(relateType)
         column.props.treeParams.data = [
-          { id: 0, name: '未分类', relatedNum: categoryObject.totalNum },
+          { id: '0', name: '未分类', relatedNum: categoryObject.totalNum },
           ...res
         ]
       })
@@ -569,7 +568,6 @@ export default {
       getTestPaper(params)
         .then((res) => {
           this.form = res
-          //后台要精确到一位小数，返回是乘以10
           res.randomSettings.map((data) => {
             data.column = _.cloneDeep(this.column)
             // 前端实现自己组装未分类的数据

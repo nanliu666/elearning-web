@@ -185,7 +185,13 @@ export default {
         const params = this.searchParams
         this.tableLoading = true
         getListSysRulus(_.assign(params)).then((res) => {
-          this.tableData = res
+          const hasRule = ['登录学分', '在线学习学分', '知识库学分', '资源共享学分']
+          const temp = _.filter(res, (item) => {
+            return _.some(hasRule, (ruleItem) => {
+              return item.sysRuleSource === ruleItem
+            })
+          })
+          this.tableData = temp
           this.tableLoading = false
         })
       } catch (error) {

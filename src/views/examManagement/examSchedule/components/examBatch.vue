@@ -3,6 +3,7 @@
     <header class="batch-header">
       <span class="header-title">考生批次</span>
       <el-button
+        :disabled="addDisabled"
         size="medium"
         type="primary"
         @click="addBatch"
@@ -16,6 +17,13 @@
         v-else
         class="batch-ul"
       >
+        <el-alert
+          v-if="addDisabled"
+          title="试卷已过期无法添加考试批次！"
+          type="error"
+          style="margin-bottom: 10px"
+          :closable="false"
+        />
         <li
           v-for="(item, index) in batchList"
           :key="index"
@@ -80,6 +88,7 @@ import moment from 'moment'
 import BatchEdit from './batchEdit'
 import ComEmpty from '@/components/common-empty/empty'
 import { getBatchexaminee } from '@/api/examManage/schedule'
+import { mapGetters } from 'vuex'
 export default {
   name: 'ExamBatch',
   components: {
@@ -98,10 +107,16 @@ export default {
       batchList: []
     }
   },
+  computed: {
+    ...mapGetters(['paperTimeInVuex']),
+    addDisabled() {
+      // 存在试卷过期时间，并且今天在过期时间之前才可以添加考生批次
+      return !_.isEmpty(this.paperTimeInVuex) && moment(new Date()).isAfter(this.paperTimeInVuex)
+    }
+  },
   mounted() {
     this.initData()
   },
-
   methods: {
     // 判断是否存在删除按钮
     hasDelete(time) {

@@ -16,6 +16,7 @@
             v-model="model.courseId"
             :allow-create="isCreate"
             :searchable="remote"
+            :first-option="courseDefault"
             :load="loadCourse"
             :option-props="{
               label: 'courseName',
@@ -95,6 +96,7 @@ export default {
   },
   data() {
     return {
+      courseDefault: [],
       remote: true,
       isCreate: true,
       editType: 'add',
@@ -119,6 +121,12 @@ export default {
         if (val) {
           if (!_.isEmpty(this.course)) {
             this.model = _.cloneDeep(this.course)
+            this.courseDefault = [
+              {
+                courseName: _.get(this.model, 'courseName', null),
+                courseId: _.get(this.model, 'courseId', null)
+              }
+            ]
             this.title = '编辑在线课程'
             this.editType = 'edit'
           } else {
