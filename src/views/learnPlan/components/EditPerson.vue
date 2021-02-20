@@ -126,7 +126,6 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  mounted() {},
   methods: {
     handleAddUser() {
       this.userPicking = true
@@ -150,9 +149,9 @@ export default {
                 bizId: item.userId,
                 bizName: item.name,
                 orgName: item.orgName,
-                department: item.orgName,
+                department: item.orgName || '-',
                 departmentId: item.orgId,
-                phonenum: item.phoneNum,
+                phonenum: item.phoneNum || '-',
                 studyPlanId: this.planId,
                 type: 'User',
                 isLeaf: true

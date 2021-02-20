@@ -330,7 +330,11 @@ export default {
     },
     // 删除课程
     handleDeleteCourse() {
-      this.$confirm('是否批量删除?', '提示', {
+      if (!this.checkedCourseIds.length) {
+        this.$message.warning('请选择要删除的课程')
+        return
+      }
+      this.$confirm('是否删除已选中的课程?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -342,6 +346,10 @@ export default {
           )
           this.checkedCourseIds = []
           this.checkboxGroupChange(this.checkedCourseIds)
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          })
         })
         .catch(() => {})
     },

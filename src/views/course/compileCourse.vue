@@ -365,7 +365,7 @@
               <el-button
                 type="primary"
                 size="medium"
-                @click="addArticleBtn"
+                @click.native="addArticleBtn"
               >
                 添加章节
               </el-button>
@@ -1302,7 +1302,7 @@ export default {
         localName: '', //文章标题
         url: '',
         content: '', //文章内容
-        upLoad: [], //[url,localName],  //所有上传的文件
+        upLoad: [{ url: '', localName: '', name: '' }], //[url,localName],  //所有上传的文件
         saveOrcompile: 0, // 1保存&0编辑
         fileData: {}
       }
