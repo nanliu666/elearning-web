@@ -393,11 +393,11 @@
               <template slot-scope="scope">
                 <el-input
                   v-if="scope.row.saveOrcompile === 0"
-                  v-model="scope.row.name"
+                  v-model="scope.row.upLoad[0].name"
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile == 1">{{ scope.row.upLoad[0].name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -501,9 +501,7 @@
                       :text-inside="scope.row.fileData.status !== 'error'"
                       :stroke-width="18"
                     ></el-progress>
-                    <span v-if="scope.row.fileData.status === 'complete'">{{
-                      scope.row.upLoad[0].localName
-                    }}</span>
+                    <span v-else>{{ scope.row.upLoad[0].localName }}</span>
                   </div>
                 </div>
               </template>
@@ -968,8 +966,8 @@ export default {
         res.passCondition = passCondition.split(',')
         res.contents = content.map((c) => {
           const item = {}
-          const { localName = '', content = '' } = c
-          item.upLoad = [{ localName, content: _.unescape(content) }]
+          const { localName = '', content = '', name = '' } = c
+          item.upLoad = [{ localName, content: _.unescape(content), name }]
           item.saveOrcompile = 1
           item.type = +c.type
           item.fileData = {}
@@ -1162,7 +1160,7 @@ export default {
               this.disabledBtn = true
               // 状态设置为审批中
               params.status = process ? 0 : 1
-              editCourseInfo(params).then(({ id }) => {
+              editCourseInfo(params).then(() => {
                 if (process) {
                   this.submitApprApply(params.id)
                 } else {
