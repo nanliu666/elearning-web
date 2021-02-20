@@ -87,7 +87,7 @@
                 prop="liveClassification_value"
               >
                 <el-select
-                
+
                   v-model="basicForm.liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
@@ -420,7 +420,7 @@
               <el-form-item
                 label="直播设置"
                 required
-                prop="table_liveTime"
+                prop="table_liveTime_str"
               >
                 <el-button
                   type="text"
@@ -550,6 +550,7 @@
                   :key="item.id"
                   :label="item.name"
                   :value="item.id"
+                  :disabled="item.disabled"
                 ></el-option>
               </el-select>
             </template>
@@ -706,7 +707,6 @@
             <el-col :span="12">
               <el-form-item
                 label="欢迎标题"
-                required
                 prop="title"
               >
                 <el-input
@@ -718,7 +718,6 @@
             <el-col :span="12">
               <el-form-item
                 label="验证码"
-                required
                 prop="code"
               >
                 <el-input
@@ -730,7 +729,6 @@
             <el-col :span="12">
               <el-form-item
                 label="提示文案"
-                required
                 prop="tips"
               >
                 <el-input
@@ -744,7 +742,7 @@
               <el-form-item
                 label="公众号二维码"
                 class="live_upload_img"
-               
+
               >
                 <common-upload
                   v-model="formLiveTypeForm.imgUrl"
@@ -943,7 +941,7 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
-                 
+
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -973,7 +971,7 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
-                
+
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1058,14 +1056,14 @@ export default {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   data() {
-      
+
      var checkTimes = (rule, value, callback) => {
         value.forEach(item=>{
           if(item.start_time=='' || item.end_time=='' ){
              return callback(new Error('请选择时间'));
           }
         })
-    
+
       };
 
     return {
@@ -1098,7 +1096,7 @@ export default {
         select_loopCycle_value: '',
         loopTime:[],
         select_mode_time_value: [],
-      
+        table_liveTime_str:[]
       },
       basicFormRules: {
         title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }],
@@ -1116,7 +1114,7 @@ export default {
         end_time:  [
           {required: true, message: '请选择结束时间', trigger: ['blur', 'change'] }
         ],
-      
+
          select_loopCycle_value: [
            {required: true, message: '请选择循环周期', trigger: ['blur', 'change'] }
          ],
@@ -1126,10 +1124,11 @@ export default {
          loopTime: [
            { required: true, message: '请选择循环日期', trigger: ['blur', 'change'] }
          ],
-         table_liveTime: [
-            { validator: checkTimes,trigger: 'blur' }
-          ]
-       
+        table_liveTime_str:[
+           { required: true, message: '请选择时间', trigger: ['blur', 'change'] }
+         ],
+
+
       },
 
       liveClassification: [],
@@ -1282,7 +1281,7 @@ export default {
   },
 
   watch:{
-    
+
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
@@ -1294,7 +1293,7 @@ export default {
       this.loading = true
       this.valChange(2);
     }),
-    
+
     'basicForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
@@ -1306,7 +1305,20 @@ export default {
       immediate: false,
       deep: true
     },
-
+    'basicForm.table_liveTime': {
+      handler(newval,oldval) {
+        let str = newval.reduce((pre,cur)=>{
+          if(cur.start_time&&cur.end_time){
+            pre += 1
+          }
+          return pre
+        },0)
+        this.basicForm.table_liveTime_str = str===newval.length?"1":null
+        console.log(this.basicForm)
+      },
+      immediate: false,
+      deep: true
+    },
 
   },
   created() {
@@ -1320,11 +1332,11 @@ export default {
       source: 'live'
     }).then((res) => {
      //this.liveClassification = res
-     
+
        res.forEach(item => {
           if(item.status===1){
             this.liveClassification.push(item)
-          } 
+          }
       });
     })
     // 获取其他用户
@@ -1367,7 +1379,7 @@ export default {
           liveId:this.$route.query.id,
           pageNo:1,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
@@ -1375,9 +1387,9 @@ export default {
               studentData.department=item.orgName,
               studentData.name=item.userName,
               studentData.id =item.userId,
-              this.table_relatedStudents.push(studentData)  
+              this.table_relatedStudents.push(studentData)
               this.dialogSelectStudent=this.table_relatedStudents
-          })     
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1392,15 +1404,24 @@ export default {
           spationArr = ["start_time","end_time"]
           break;
         case "plural":
-           spationArr = ["table_liveTime"]
+           spationArr = ["table_liveTime_str"]
            break;
         case 'cycle':
-         spationArr = ["select_loopCycle_value","loopTime","select_mode_time_value"]
+         spationArr = ["table_liveTime_str","select_loopCycle_value","loopTime","select_mode_time_value"]
          break;
       }
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'formLiveTypeForm'
+
       if (!formName) {
-        this.headIndex += 1
+        if(this.table_teacherSet.filter(x=>x.nameList_value).length===this.table_teacherSet.length){
+          this.headIndex += 1
+        }
+        else{
+          this.$message({
+            message: '请完善讲师设置',
+            type: 'error'
+          })
+        }
         return false
       }
       let resLength = 0,resArr = [...base,...spationArr]
@@ -1411,8 +1432,6 @@ export default {
           if(resLength===resArr.length){
             this.headIndex += 1
           }
-          
-          console.log(this.headIndex,0)
         } else {
           return false
         }
@@ -1459,7 +1478,7 @@ export default {
           res.forEach(item => {
           if(item.status===1){
             this.liveClassification.push(item)
-          } 
+          }
       });
       })
     },
@@ -1483,7 +1502,7 @@ export default {
     },
     // 多次直播和循环直播添加多个时间段
     add_table_liveTime(table) {
-      
+
       table.push({
         start_time: '',
         end_time: ''
@@ -1492,6 +1511,9 @@ export default {
     // 多次直播和循环直播删除时间段
     delete_table_liveTime(arr, index) {
       arr.splice(index, 1)
+      if(arr.length==0){
+        this.basicForm.table_liveTime_str = null
+      }
     },
     // 切换循环周期
     toggle_loopCycle(val) {
@@ -1550,7 +1572,6 @@ export default {
     },
     // 为讲师设置中添加助教或者嘉宾 type==2 为嘉宾，type==3为助教
     add_table_teacherSet_guest(type) {
-      debugger
       var typeNum = this.get_table_teacherSet_typeNumber(this.table_teacherSet, type)
       switch (type) {
         case 2:
@@ -1668,7 +1689,7 @@ export default {
       this.table_relatedStudents = []
       if(this.dialogSelectStudent.length>0){
           this.totalNum =this.dialogSelectStudent.length
-          this.dialogSelectStudent.forEach((item, index) => {  
+          this.dialogSelectStudent.forEach((item, index) => {
         if (
           index >= this.StudentsPage.pageSize * (page - 1) &&
           index < this.StudentsPage.pageSize * page
@@ -1687,15 +1708,15 @@ export default {
           liveId:this.$route.query.id,
           pageNo:page,
           pageSize: this.StudentsPage.pageSize
-        }).then((res) => {   
+        }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
               studentData.phone=item.phoneNum,
               studentData.userCode=item.userNo,
               studentData.department=item.orgName,
               studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)  
-          })     
+              this.table_relatedStudents.push(studentData)
+          })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
         })
@@ -1703,8 +1724,8 @@ export default {
 
 
       }
-     
-      
+
+
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
@@ -1777,7 +1798,6 @@ export default {
       this.dialog_relatedCourses_form = false
     },
     get_teacherType(type) {
-      debugger
       this.index_teacherType = type
       if (type == 1 && this.teachingTeacherList != []) {
         getQueryTeacher().then((res) => {
@@ -1785,13 +1805,23 @@ export default {
         })
       } else if (type != 1 && this.teachingTeacherList != []) {
         getQueryAssistant().then((res) => {
+          //已经选择过的  不能被选择
+          this.table_teacherSet.forEach((item,index)=>{
+            if(item.nameList_value){
+              res.some(x=>{
+                if(x.id===item.nameList_value){
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
           this.teachingTeacherList = res
         })
       }
     },
     // 将讲师设置中所选的教师添加到教师列表供关联课程使用
     add_teacherList(val, list, index) {
-
       var data = list.find((item) => {
         return item.id == val
       })
@@ -1799,7 +1829,6 @@ export default {
         this.add_relatedCourses_form.teacher[index] = data
       } else {
         this.add_relatedCourses_form.teacher.push(data)
-        
       }
     },
     // 查询教师列表
@@ -1883,10 +1912,10 @@ export default {
     },
     // 将选中的组织或学员添加到已选中列表
     select_organizationUser(data, node) {
-      debugger
       if (node.checkedKeys.indexOf(data.id) != -1) {
         if (data.type == 'user') {
           this.dialogSelectStudent.push({
+            department:data.orgName,
             name: data.name,
             phone: data.phoneNum,
             userCode: data.workNo,
@@ -1898,6 +1927,7 @@ export default {
               var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)
               if (index == -1) {
                 this.dialogSelectStudent.push({
+                  department:resitem.orgFullName,
                   name: resitem.name,
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
@@ -1941,13 +1971,13 @@ export default {
                teacher.nickName=currentValue.name
             }
           })
-         
+
           teacher.userActor =item.identity,
           teacher.roleName =item.role,
           teacher.userId =item.nameList_value
-          otherData.push(teacher) 
+          otherData.push(teacher)
         }
-        
+
       })
       var data = {
         batchDeclare: this.basicForm.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
@@ -2066,7 +2096,7 @@ export default {
     setLiveDetails(id) {
       getLiveDetails({
         liveId: id
-      }).then((res) => {       
+      }).then((res) => {
         (this.basicForm.title = res.channelName),
           (this.liveClassification_option.label = res.categoryName)
         this.liveClassification_option.value = res.categoryId
@@ -2119,16 +2149,16 @@ export default {
             self.table_teacherSet.push(teacherVaue)
 
         })
-       
+
 
         console.log(this.table_teacherSet)
-        
+
         this.table_relatedCourses = res.courses
 
         // 直播设置
         switch (this.basicForm.select_mode_value) {
-          
-          case 'single': 
+
+          case 'single':
             this.basicForm.start_time = res.liveBatch[0].startTime
             this.basicForm.end_time = res.liveBatch[0].endTime
             break
