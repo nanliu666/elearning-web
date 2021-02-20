@@ -108,6 +108,9 @@ const certificateFormColumns = [
 const personOptionProps = {
   label: 'name',
   value: 'userId',
+  formatter: function(item) {
+    return `${item.name}(${item.phonenum})`
+  },
   key: 'userId'
 }
 
