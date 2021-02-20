@@ -59,6 +59,13 @@
             </div>
           </div>
         </template>
+        <template
+          slot="isUsed"
+          slot-scope="{ row }"
+        >
+          <span v-if="row.isUsed === 0">禁用</span>
+          <span v-if="row.isUsed === 1">正常</span>
+        </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
@@ -110,7 +117,8 @@ let TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'isUsed',
-    minWidth: 120
+    minWidth: 120,
+    slot: true
   }
 ]
 const TABLE_CONFIG = {

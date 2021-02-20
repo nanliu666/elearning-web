@@ -1,23 +1,45 @@
 <template>
-  <div id="requiredSchedule" class="requiredSchedule Menu fill">
+  <div
+    id="requiredSchedule"
+    class="requiredSchedule Menu fill"
+  >
     <!-- 必修课安排 页面 -->
     <page-header>
       <template slot="title">
         必修课程安排
       </template>
       <template slot="rightMenu">
-        <el-button v-p="ADD_REQUIRED" type="primary" size="medium" @click="jumpEdit">
+        <el-button
+          v-p="ADD_REQUIRED"
+          type="primary"
+          size="medium"
+          @click="jumpEdit"
+        >
           新建课程安排
         </el-button>
       </template>
     </page-header>
-    <basic-container block class="basicContainer clearfix">
+    <basic-container
+      block
+      class="basicContainer clearfix"
+    >
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="已发布" name="published"> </el-tab-pane>
-        <el-tab-pane label="草稿" name="draft"> </el-tab-pane>
+        <el-tab-pane
+          label="已发布"
+          name="published"
+        >
+        </el-tab-pane>
+        <el-tab-pane
+          label="草稿"
+          name="draft"
+        >
+        </el-tab-pane>
       </el-tabs>
 
-      <div v-show="activeTab === 'published'" class="content published">
+      <div
+        v-show="activeTab === 'published'"
+        class="content published"
+      >
         <!-- <div class="left-container"> -->
         <!-- <leftColumn
             :search="true"
@@ -27,7 +49,10 @@
             @refreshTree="getCategoryData"
           ></leftColumn> -->
 
-        <my-column :column-interface="columnInterface" @treeClick="treeClick"></my-column>
+        <my-column
+          :column-interface="columnInterface"
+          @treeClick="treeClick"
+        ></my-column>
         <!-- </div> -->
         <div class="divider"></div>
         <common-table
@@ -50,12 +75,23 @@
                 @submit="handlePublishedSearch"
               />
               <div class="operations-right">
-                <div class="refresh-container" @click="refreshPublished">
+                <div
+                  class="refresh-container"
+                  @click="refreshPublished"
+                >
                   <i class="el-icon-refresh-right" />
                   <span>刷新</span>
                 </div>
-                <el-popover placement="bottom" width="40" trigger="click">
-                  <i slot="reference" style="cursor: pointer;" class="el-icon-setting" />
+                <el-popover
+                  placement="bottom"
+                  width="40"
+                  trigger="click"
+                >
+                  <i
+                    slot="reference"
+                    style="cursor: pointer;"
+                    class="el-icon-setting"
+                  />
                   <!-- 设置表格列可见性 -->
                   <div class="operations__column--visible">
                     <el-checkbox-group v-model="published.columnsVisible">
@@ -73,7 +109,10 @@
               </div>
             </div>
           </template>
-          <template slot="multiSelectMenu" slot-scope="{ selection }">
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
             <el-button
               v-p="DELETE_REQUIRED"
               type="text"
@@ -125,7 +164,10 @@
         </common-table>
       </div>
 
-      <div v-show="activeTab === 'draft'" class="content">
+      <div
+        v-show="activeTab === 'draft'"
+        class="content"
+      >
         <common-table
           ref="draftTable"
           class="draftTable"
@@ -145,12 +187,23 @@
                 @submit="handleDraftSearch"
               />
               <div class="operations-right">
-                <div class="refresh-container" @click="loadDraftData">
+                <div
+                  class="refresh-container"
+                  @click="loadDraftData"
+                >
                   <i class="el-icon-refresh-right" />
                   <span>刷新</span>
                 </div>
-                <el-popover placement="bottom" width="40" trigger="click">
-                  <i slot="reference" style="cursor: pointer;" class="el-icon-setting" />
+                <el-popover
+                  placement="bottom"
+                  width="40"
+                  trigger="click"
+                >
+                  <i
+                    slot="reference"
+                    style="cursor: pointer;"
+                    class="el-icon-setting"
+                  />
                   <!-- 设置表格列可见性 -->
                   <div class="operations__column--visible">
                     <el-checkbox-group v-model="draft.columnsVisible">
@@ -168,7 +221,10 @@
               </div>
             </div>
           </template>
-          <template slot="multiSelectMenu" slot-scope="{ selection }">
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
             <el-button
               v-p="DELETE_REQUIRED"
               type="text"
@@ -180,10 +236,18 @@
             </el-button>
           </template>
           <template #handler="{row}">
-            <el-button v-p="EDIT_REQUIRED" type="text" @click="jumpEdit(row)">
+            <el-button
+              v-p="EDIT_REQUIRED"
+              type="text"
+              @click="jumpEdit(row)"
+            >
               编辑
             </el-button>
-            <el-button v-p="DELETE_REQUIRED" type="text" @click="handleDelete(row)">
+            <el-button
+              v-p="DELETE_REQUIRED"
+              type="text"
+              @click="handleDelete(row)"
+            >
               删除
             </el-button>
           </template>
@@ -267,6 +331,12 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     type: 'input',
     field: 'coursePlanNo',
     label: '课程编号',
+    data: ''
+  },
+  {
+    type: 'input',
+    field: 'coursePlanName',
+    label: '课程安排名称',
     data: ''
   },
   // {
@@ -434,12 +504,20 @@ export default {
       })
     },
     closePlan(row) {
-      updateStatus({ id: row.id }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '结办成功!'
-        })
-        this.refreshPublished()
+      // 结办
+      this.$confirm('您确定要提前结办该课程安排吗？', {
+        showCancelButton: true,
+        callback: (action) => {
+          if (action !== 'cancel') {
+            updateStatus({ id: row.id }).then(() => {
+              this.$message({
+                type: 'success',
+                message: '结办成功!'
+              })
+              this.refreshPublished()
+            })
+          }
+        }
       })
     },
     refreshPublished() {
@@ -605,7 +683,6 @@ export default {
     .content {
       // padding: 24px;
       height: calc(100% - 34px);
-      overflow: auto;
       position: relative;
       &.published {
         display: flex;
@@ -626,7 +703,7 @@ export default {
           // width: ;
           margin-left: 33px;
           height: 100%;
-          width: calc(100% - 33px - 300px);
+          width: calc(100% - 35px - 300px);
         }
       }
     }

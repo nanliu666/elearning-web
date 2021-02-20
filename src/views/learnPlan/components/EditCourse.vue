@@ -330,12 +330,20 @@ export default {
     },
     // 删除课程
     handleDeleteCourse() {
-      this.courseList = _.filter(
-        this.courseList,
-        (item) => !this.checkedCourseIds.includes(item.courseId)
-      )
-      this.checkedCourseIds = []
-      this.checkboxGroupChange(this.checkedCourseIds)
+      this.$confirm('是否批量删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.courseList = _.filter(
+            this.courseList,
+            (item) => !this.checkedCourseIds.includes(item.courseId)
+          )
+          this.checkedCourseIds = []
+          this.checkboxGroupChange(this.checkedCourseIds)
+        })
+        .catch(() => {})
     },
     // 添加课程
     handleAddCourse() {

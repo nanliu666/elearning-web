@@ -254,6 +254,7 @@ export default {
           const tips = type === 1 ? '已发布草稿' : '已成功发布课程安排'
           this.$message.success(`${tips}，1秒后将自动返回课程安排列表`)
           setTimeout(() => {
+            this.activeStep = 0
             this.$router.push({ path: '/learnPlan/CoursePlanList' })
             this.resetData()
           }, 1000)
