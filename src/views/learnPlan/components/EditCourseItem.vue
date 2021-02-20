@@ -190,7 +190,19 @@ export default {
     },
     handleExamCommand(course, index, command) {
       if (command === 'del') {
-        course.studyExam.splice(index, 1)
+        this.$confirm('您确定要删除当前关联的考试吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            course.studyExam.splice(index, 1)
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+          .catch(() => {})
       }
     }
   }

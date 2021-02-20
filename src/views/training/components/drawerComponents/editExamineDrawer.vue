@@ -39,6 +39,7 @@
         <achievementPublish
           v-show="currentIndex === 4"
           ref="achievementPublishRef"
+          style="height: 100%;"
         />
       </div>
       <div class="footer">

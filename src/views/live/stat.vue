@@ -51,7 +51,7 @@
                     style="width: 202px;"
                     placeholder="请选择所属分类"
                     :options="categoryData"
-                    :props="{ checkStrictly: true, label: 'creatorName', value: 'idStr' }"
+                    :props="{ checkStrictly: true, label: 'name', value: 'idStr' }"
                     clearable
                   ></el-cascader>
                 </el-form-item>
