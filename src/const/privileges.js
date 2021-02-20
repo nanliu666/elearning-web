@@ -19,6 +19,7 @@ export const DELETE_TRAIN = '/training/trainingArrange/delete' // 删除
 export const EDIT_TRAIN = '/training/trainingArrange/edit' //编辑
 export const NEXT_TRAIN = '/training/trainingArrange/next' // 开办下一期
 export const END_TRAIN = '/training/trainingArrange/end' // 结办
+export const VIEW_TRAIN = '/training/trainingArrange/view' // 查看详情
 // 知识库的分类管理的鉴权
 export const ADD_REP_CATALOG = '/repository/catalogManagement/add' // 新增分类
 export const STOP_REP_CATALOG = '/repository/catalogManagement/stop' // 停用分类
@@ -50,6 +51,7 @@ export const COPY_TESTPAPER = '/examManagement/testPaper/testPaper/copy' // 复�
 export const ADD_TESTPAPER = '/examManagement/testPaper/testPaper/add' // 创建试卷
 export const DELETE_TESTPAPER = '/examManagement/testPaper/testPaper/delete' // 删除
 export const EDIT_TESTPAPER = '/examManagement/testPaper/testPaper/edit' // 编辑
+export const PREVIEW_TESTPAPER = '/examManagement/testPaper/testPaper/preview' // 预览
 // 考评管理的考试安排的鉴权
 export const ADD_EXAM = '/examManagement/examSchedule/list/add' // 创建考试
 export const EDIT_EXAM = '/examManagement/examSchedule/list/edit' // 编辑
