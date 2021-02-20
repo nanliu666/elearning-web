@@ -79,6 +79,8 @@ export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
 export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
 // 学分明细的鉴权
 export const VIEW_CREDIT = '/creditManagement/credit/view' // 查看详情
+// 学分明细的查看详情的鉴权
+export const DELETE_CREDIT_DETAIL = '/creditManagement/creditDetails/delete' // 删除
 // 讲师管理的鉴权
 export const ADD_LECTURER = '/lecturer/lecturer/add' // 添加讲师
 export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用

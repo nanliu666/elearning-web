@@ -99,6 +99,9 @@
 <script>
 import { getListSysRulus, getListScoreDetails, deleteScoreDetails } from '@/api/credit/credit'
 import SearchPopover from '@/components/searchPopOver/index'
+import { DELETE_CREDIT_DETAIL } from '@/const/privileges'
+import { mapGetters } from 'vuex'
+
 const TABLE_COLUMNS = [
   {
     prop: 'code',
@@ -148,7 +151,7 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: true, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 50
   }
 }
 export default {
@@ -208,6 +211,19 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {}
+    }
+  },
+  computed: {
+    DELETE_CREDIT_DETAIL: () => DELETE_CREDIT_DETAIL,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([DELETE_CREDIT_DETAIL])
+      },
+      deep: true
     }
   },
   mounted() {
