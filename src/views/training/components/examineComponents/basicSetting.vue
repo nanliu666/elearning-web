@@ -65,9 +65,9 @@
           v-model="model.integral"
           text-before="本考试记录系统积分，积分值为"
           text-after="分"
-          :default-value="2"
+          :default-value.sync="model.integralValue"
           :input-width="60"
-          :input-props="{ maxLength: 4 }"
+          :input-props="{ maxLength: 4, disabled: !model.integral }"
         ></checkbox-input>
       </template>
       <template #publishTime>
@@ -76,6 +76,8 @@
           text-before="考试开始前"
           text-after="分钟发布考试信息"
           :input-width="60"
+          :default-value.sync="model.publishTimeValue"
+          :input-props="{ maxLength: 4, disabled: !model.publishTime }"
         ></checkbox-input>
       </template>
     </common-form>
@@ -144,7 +146,7 @@ export default {
           prop: 'testPaper',
           label: '关联用卷'
         },
-        { itemType: 'slot', span: 24, required: false, prop: 'reviewer', label: '评卷人' },
+        { itemType: 'slot', span: 24, required: true, prop: 'reviewer', label: '评卷人' },
         {
           itemType: 'radio',
           prop: 'answerMode',
@@ -201,9 +203,11 @@ export default {
         reckonTimeValue: 60, // 限制时长60分钟
         joinNum: false,
         joinNumValue: 3, // 默认参加次数，不超过3次
-        integral: 0,
+        integral: false,
+        integralValue: 2,
         strategy: 0,
-        publishTime: 0
+        publishTime: false,
+        publishTimeValue: 10
       },
       testPaperList: []
     }
