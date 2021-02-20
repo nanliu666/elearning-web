@@ -109,7 +109,7 @@ export default {
       menuId: '1259073412671256735032',
       menuName: '学分详情',
       menuType: 'Menu',
-      isEnabled: 0,
+      isEnabled: 1,
       isOwn: 1,
       isShow: 0,
       code: 'creditDetails',
@@ -117,7 +117,15 @@ export default {
       path: '/creditManagement/creditDetails',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
-      children: []
+      children: [
+        {
+          menuType: 'Button',
+          menuName: '删除',
+          isOwn: 1,
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/creditManagement/creditDetails/delete'
+        }
+      ]
     }
   ]
 }

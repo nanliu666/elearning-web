@@ -11,7 +11,7 @@ export const STOP_COURSE_CATALOG = '/course/catalog/stop' // 停用/启用
 export const AUTH_COURSE_CATALOG = '/course/catalog/author' // 权限配置
 export const EDIT_COURSE_CATALOG = '/course/catalog/edit' // 编辑
 export const DELETE_COURSE_CATALOG = '/course/catalog/delete' // 删除
-export const ADD_GROUNP_COURSE_CATALOG = '/course/catalog/addNewGroup' // 新增分组
+export const ADD_GROUNP_COURSE_CATALOG = '/course/catalog/addNewGroup' // 新增子分类
 // 培训中心的鉴权
 export const ADD_TRAIN = '/training/trainingArrange/add' // 新增培训
 export const ADD_GROUNP_TRAIN = '/training/trainingArrange/addGroup' // 新增分组
@@ -19,6 +19,7 @@ export const DELETE_TRAIN = '/training/trainingArrange/delete' // 删除
 export const EDIT_TRAIN = '/training/trainingArrange/edit' //编辑
 export const NEXT_TRAIN = '/training/trainingArrange/next' // 开办下一期
 export const END_TRAIN = '/training/trainingArrange/end' // 结办
+export const VIEW_TRAIN = '/training/trainingArrange/view' // 查看详情
 // 知识库的分类管理的鉴权
 export const ADD_REP_CATALOG = '/repository/catalogManagement/add' // 新增分类
 export const STOP_REP_CATALOG = '/repository/catalogManagement/stop' // 停用分类
@@ -50,6 +51,7 @@ export const COPY_TESTPAPER = '/examManagement/testPaper/testPaper/copy' // 复�
 export const ADD_TESTPAPER = '/examManagement/testPaper/testPaper/add' // 创建试卷
 export const DELETE_TESTPAPER = '/examManagement/testPaper/testPaper/delete' // 删除
 export const EDIT_TESTPAPER = '/examManagement/testPaper/testPaper/edit' // 编辑
+export const PREVIEW_TESTPAPER = '/examManagement/testPaper/testPaper/preview' // 预览
 // 考评管理的考试安排的鉴权
 export const ADD_EXAM = '/examManagement/examSchedule/list/add' // 创建考试
 export const EDIT_EXAM = '/examManagement/examSchedule/list/edit' // 编辑
@@ -79,6 +81,8 @@ export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
 export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
 // 学分明细的鉴权
 export const VIEW_CREDIT = '/creditManagement/credit/view' // 查看详情
+// 学分明细的查看详情的鉴权
+export const DELETE_CREDIT_DETAIL = '/creditManagement/creditDetails/delete' // 删除
 // 讲师管理的鉴权
 export const ADD_LECTURER = '/lecturer/lecturer/add' // 添加讲师
 export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
@@ -97,6 +101,9 @@ export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
 export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
 export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
+// 组织管理的组织详情的鉴权
+export const EDIT_ORGDETAIL = '/orgs/orgDetail/edit' // 编辑
+export const DELETE_ORGDELETE = '/orgs/orgDetail/delete' // 删除
 // 用户管理的鉴权
 export const ADD_USER = '/system/user/add' // 新建用户
 export const SETTING_USER = '/system/user/setting' // 角色设置

@@ -86,7 +86,22 @@ export default {
           path: '/orgs/orgSort',
           icon: 'iconfont icon-caidanguanli',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '编辑',
+              isEnabled: 1,
+              path: '/orgs/orgDetail/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/orgs/orgDetail/delete'
+            }
+          ]
         },
         {
           menuId: '1260118573335265281',

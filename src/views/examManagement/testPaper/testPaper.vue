@@ -98,12 +98,19 @@
         </template>
         <template #name="{row}">
           <el-link
+            v-if="$p(PREVIEW_TESTPAPER)"
             type="primary"
             style="line-height: 22px"
             @click="handleDetails(row)"
           >
             {{ row.name }}
           </el-link>
+          <div
+            v-else
+            style="line-height: 22px"
+          >
+            {{ row.name }}
+          </div>
         </template>
         <template #categoryName="{row}">
           {{ row.categoryName ? row.categoryName : '--' }}
@@ -211,7 +218,13 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
-import { COPY_TESTPAPER, ADD_TESTPAPER, DELETE_TESTPAPER, EDIT_TESTPAPER } from '@/const/privileges'
+import {
+  COPY_TESTPAPER,
+  ADD_TESTPAPER,
+  DELETE_TESTPAPER,
+  EDIT_TESTPAPER,
+  PREVIEW_TESTPAPER
+} from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'TestPaper',
@@ -318,6 +331,7 @@ export default {
     ADD_TESTPAPER: () => ADD_TESTPAPER,
     DELETE_TESTPAPER: () => DELETE_TESTPAPER,
     EDIT_TESTPAPER: () => EDIT_TESTPAPER,
+    PREVIEW_TESTPAPER: () => PREVIEW_TESTPAPER,
     ...mapGetters(['privileges'])
   },
   watch: {

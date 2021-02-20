@@ -297,11 +297,15 @@
                 slot-scope="{ row }"
               >
                 <el-button
+                  v-if="$p(VIEW_TRAIN)"
                   type="text"
                   @click="toTrainingDetail(row)"
                 >
                   {{ row.trainName }}
                 </el-button>
+                <div v-else>
+                  {{ row.trainName }}
+                </div>
               </template>
 
               <!-- 状态 -->
@@ -426,7 +430,8 @@ import {
   DELETE_TRAIN,
   EDIT_TRAIN,
   END_TRAIN,
-  NEXT_TRAIN
+  NEXT_TRAIN,
+  VIEW_TRAIN
 } from '@/const/privileges'
 // 表格属性
 const TABLE_COLUMNS = [
@@ -637,6 +642,7 @@ export default {
     }
   },
   computed: {
+    VIEW_TRAIN: () => VIEW_TRAIN,
     ADD_TRAIN: () => ADD_TRAIN,
     ADD_GROUNP_TRAIN: () => ADD_GROUNP_TRAIN,
     DELETE_TRAIN: () => DELETE_TRAIN,

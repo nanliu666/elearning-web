@@ -79,6 +79,13 @@ export default {
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/training/trainingArrange/next'
         },
+        // {
+        //   menuType: 'Button',
+        //   isOwn: 1,
+        //   menuName: '查看详情',
+        //   isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+        //   path: '/training/trainingArrange/view'
+        // },
         {
           menuType: 'Button',
           isOwn: 1,

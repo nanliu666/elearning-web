@@ -33,6 +33,7 @@
             <h3>{{ orgData.orgName }}</h3>
             <div class="btnBox">
               <el-button
+                v-p="EDIT_ORGDETAIL"
                 size="medium"
                 type="text"
                 icon="el-icon-edit-outline"
@@ -42,6 +43,7 @@
               </el-button>
               <el-button
                 v-if="orgData.parentId !== '0'"
+                v-p="DELETE_ORGDELETE"
                 type="text"
                 size="medium"
                 icon="el-icon-delete"
@@ -102,6 +104,7 @@
 import { getOrgTree, deleteOrg } from '@/api/org/org'
 import OrgEdit from './components/orgEdit'
 import OrgLeaders from './components/orgLeaders'
+import { EDIT_ORGDETAIL, DELETE_ORGDELETE } from '@/const/privileges'
 
 export default {
   name: 'OrgDetail',
@@ -121,11 +124,16 @@ export default {
       loading: false
     }
   },
+  computed: {
+    EDIT_ORGDETAIL: () => EDIT_ORGDETAIL,
+    DELETE_ORGDELETE: () => DELETE_ORGDELETE
+  },
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val)
     }
   },
+
   activated() {
     this.originOrgId = this.$route.query.orgId
     this.loadData()

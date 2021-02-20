@@ -147,6 +147,13 @@ export default {
       children: [
         {
           menuType: 'Button',
+          menuName: '预览',
+          isOwn: 1,
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/examManagement/testPaper/testPaper/preview'
+        },
+        {
+          menuType: 'Button',
           menuName: '复制',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
