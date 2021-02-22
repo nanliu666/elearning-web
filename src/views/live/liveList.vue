@@ -1,8 +1,9 @@
 <template>
   <div class="fill">
-    <page-header title="直播列表">
+    <page-header title="直播安排">
       <el-button
         slot="rightMenu"
+        v-p="ADD_LIVE"
         type="primary"
         size="medium"
         @click="toEstablishCourse"
@@ -85,12 +86,14 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="EDIT_LIVE"
               type="text"
               @click="handleEdit(row)"
             >
               编辑
             </el-button>
             <el-button
+              v-p="STOP_LIVE"
               type="text"
               @click="handleLock(row)"
             >
@@ -98,6 +101,7 @@
               <span v-show="row.isUsed == 0">启用</span>
             </el-button>
             <el-button
+              v-p="DELETE_LIVE"
               type="text"
               @click="handleDelete(tableData, row)"
             >
@@ -110,6 +114,8 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
+import { ADD_LIVE, STOP_LIVE, EDIT_LIVE, DELETE_LIVE } from '@/const/privileges'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/live/editLive'
 import {
@@ -252,6 +258,22 @@ export default {
       tableData: [],
       createUserList: [],
       liveClassification: []
+    }
+  },
+  computed: {
+    ADD_LIVE: () => ADD_LIVE,
+    STOP_LIVE: () => STOP_LIVE,
+    EDIT_LIVE: () => EDIT_LIVE,
+    DELETE_LIVE: () => DELETE_LIVE,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_LIVE, EDIT_LIVE, DELETE_LIVE])
+      },
+      deep: true
     }
   },
   activated() {

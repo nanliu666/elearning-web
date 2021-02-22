@@ -137,3 +137,23 @@ export const ADD_APPROVAL = '/apprProcess/approvalList/add' // 创建审批流�
 export const STOP_APPROVAL = '/apprProcess/approvalList/stop' // 启用/停用
 export const EIDT_APPROVAL = '/apprProcess/approvalList/eidt' // 编辑
 export const DELETE_APPROVAL = '/apprProcess/approvalList/delete' // 删除
+// 直播中心的分类管理的鉴权
+export const ADD_LIVE_CLASSIFY = '/live/classify/add' // 新建分类
+export const STOP_LIVE_CLASSIFY = '/live/classify/stop' // 启用/停用
+export const AUTH_LIVE_CLASSIFY = '/live/classify/auth' // 权限配置
+export const EDIT_LIVE_CLASSIFY = '/live/classify/eidt' // 编辑
+export const DELETE_LIVE_CLASSIFY = '/live/classify/delete' // 删除
+export const ADD_NEW_GROUNP_LIVE_CLASSIFY = '/live/classify/addNewGroup' // 新建子分类
+export const SORT_LIVE_CLASSIFY = '/live/classify/sort' // 调整排序
+// 直播中心的直播安排的鉴权
+export const ADD_LIVE = '/live/liveList/add' // 创建直播
+export const STOP_LIVE = '/live/liveList/stop' // 禁用
+export const EDIT_LIVE = '/live/liveList/edit' // 编辑
+export const DELETE_LIVE = '/live/liveList/delete' // 删除
+// 直播中心的直播回放的鉴权
+export const PUBLISH_LIVE_BACK = '/live/playBackListSingle/publish' // 恢复
+export const PUTAWAY_LIVE_BACK = '/live/playBackListSingle/putaway' // 发布/下架
+export const DELETE_LIVE_BACK = '/live/playBackListSingle/delete' // 删除
+export const DOWNLOAD_LIVE_BACK = '/live/playBackListSingle/download' // 下载
+// 直播中心的数据统计的鉴权
+export const CONCAT_LIVE_START = '/live/live-stat-detail/concat' // 合并同一用户

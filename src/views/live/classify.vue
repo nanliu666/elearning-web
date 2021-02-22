@@ -3,6 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_LIVE_CLASSIFY"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -31,6 +32,7 @@
                   @submit="handleSearch"
                 />
                 <div
+                  v-p="SORT_LIVE_CLASSIFY"
                   class="search-sort-box"
                   @click="toSort"
                 >
@@ -79,12 +81,16 @@
             批量删除
           </el-button>
         </template> -->
-        <template #status="{row}">
+        <template
+          #status="{row}"
+          v-p="STOP_LIVE_CLASSIFY"
+        >
           {{ row.status == '0' ? '已停用' : '已启用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
+              v-p="STOP_LIVE_CLASSIFY"
               type="text"
               :disabled="row.disabled"
               @click="handleStatus(row)"
@@ -92,6 +98,7 @@
               {{ row.status == '1' ? '停用' : '启用' }}
             </el-button>
             <el-button
+              v-p="AUTH_LIVE_CLASSIFY"
               type="text"
               @click="handleAuth(row)"
             >
@@ -104,14 +111,23 @@
               >
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
-              <el-dropdown-menu slot="dropdown">
+              <el-dropdown-menu
+                slot="dropdown"
+                v-p="EDIT_LIVE_CLASSIFY"
+              >
                 <el-dropdown-item command="edit">
                   编辑
                 </el-dropdown-item>
-                <el-dropdown-item command="delete">
+                <el-dropdown-item
+                  v-p="DELETE_LIVE_CLASSIFY"
+                  command="delete"
+                >
                   删除
                 </el-dropdown-item>
-                <el-dropdown-item command="addChild">
+                <el-dropdown-item
+                  v-p="ADD_NEW_GROUNP_LIVE_CLASSIFY"
+                  command="addChild"
+                >
                   新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -130,6 +146,16 @@
 </template>
 
 <script>
+import {
+  ADD_LIVE_CLASSIFY,
+  STOP_LIVE_CLASSIFY,
+  EDIT_LIVE_CLASSIFY,
+  DELETE_LIVE_CLASSIFY,
+  ADD_NEW_GROUNP_LIVE_CLASSIFY,
+  AUTH_LIVE_CLASSIFY,
+  SORT_LIVE_CLASSIFY
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 import { getCategoryTree, deleteCategory, updateCategoryStatus, getCreatorList } from '@/api/live'
@@ -224,9 +250,33 @@ export default {
       searchParams: {}
     }
   },
+  computed: {
+    ADD_LIVE_CLASSIFY: () => ADD_LIVE_CLASSIFY,
+    STOP_LIVE_CLASSIFY: () => STOP_LIVE_CLASSIFY,
+    EDIT_LIVE_CLASSIFY: () => EDIT_LIVE_CLASSIFY,
+    DELETE_LIVE_CLASSIFY: () => DELETE_LIVE_CLASSIFY,
+    ADD_NEW_GROUNP_LIVE_CLASSIFY: () => ADD_NEW_GROUNP_LIVE_CLASSIFY,
+    SORT_LIVE_CLASSIFY: () => SORT_LIVE_CLASSIFY,
+    AUTH_LIVE_CLASSIFY: () => AUTH_LIVE_CLASSIFY,
+    ...mapGetters(['privileges'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([
+          AUTH_LIVE_CLASSIFY,
+          STOP_LIVE_CLASSIFY,
+          EDIT_LIVE_CLASSIFY,
+          DELETE_LIVE_CLASSIFY,
+          ADD_NEW_GROUNP_LIVE_CLASSIFY
+        ])
+      },
+      deep: true
+    }
+  },
   activated() {
     this.getCreatorList()
-
     this.loadTableData()
   },
   methods: {
