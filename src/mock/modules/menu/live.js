@@ -14,15 +14,66 @@ export default {
   children: [
     {
       menuId: '1590112075692666',
-      menuName: '直播列表',
+      menuName: '分类管理',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,
       isShow: 1,
       code: 'approval_approval',
       alias: 'approval',
-      path: '/live/liveList',
-      icon: 'iconfont iconicon_compile'
+      path: '/live/classify',
+      icon: 'iconfont iconicon_compile',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '启用/停用',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/stop'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '权限配置',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/auth'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '新建子分类',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/addNewGroup'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '调整排序',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/classify/sort'
+        }
+      ]
     },
     {
       menuId: '1590112075692666',
@@ -33,7 +84,7 @@ export default {
       isShow: 1,
       code: 'approval_approval',
       alias: 'approval',
-      path: '/learnPlan/CoursePlanList',
+      path: '/live/liveList',
       icon: 'iconfont iconicon_compile'
     },
     {

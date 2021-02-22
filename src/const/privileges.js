@@ -137,3 +137,11 @@ export const ADD_APPROVAL = '/apprProcess/approvalList/add' // 创建审批流�
 export const STOP_APPROVAL = '/apprProcess/approvalList/stop' // 启用/停用
 export const EIDT_APPROVAL = '/apprProcess/approvalList/eidt' // 编辑
 export const DELETE_APPROVAL = '/apprProcess/approvalList/delete' // 删除
+// 直播中心的分类管理的鉴权
+export const ADD_LIVE_CLASSIFY = '/live/classify/add' // 新建分类
+export const STOP_LIVE_CLASSIFY = '/live/classify/stop' // 启用/停用
+export const AUTH_LIVE_CLASSIFY = '/live/classify/auth' // 权限配置
+export const EDIT_LIVE_CLASSIFY = '/live/classify/eidt' // 编辑
+export const DELETE_LIVE_CLASSIFY = '/live/classify/delete' // 删除
+export const ADD_NEW_GROUNP_LIVE_CLASSIFY = '/live/classify/addNewGroup' // 新建子分类
+export const SORT_LIVE_CLASSIFY = '/live/classify/sort' // 调整排序
