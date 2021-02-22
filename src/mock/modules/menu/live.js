@@ -85,7 +85,37 @@ export default {
       code: 'approval_approval',
       alias: 'approval',
       path: '/live/liveList',
-      icon: 'iconfont iconicon_compile'
+      icon: 'iconfont iconicon_compile',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '创建直播',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/liveList/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/liveList/edit'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '禁用',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/liveList/stop'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/liveList/delete'
+        }
+      ]
     },
     {
       menuId: '1590112075692668',

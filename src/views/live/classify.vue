@@ -250,11 +250,6 @@ export default {
       searchParams: {}
     }
   },
-  activated() {
-    this.getCreatorList()
-
-    this.loadTableData()
-  },
   computed: {
     ADD_LIVE_CLASSIFY: () => ADD_LIVE_CLASSIFY,
     STOP_LIVE_CLASSIFY: () => STOP_LIVE_CLASSIFY,
@@ -279,6 +274,10 @@ export default {
       },
       deep: true
     }
+  },
+  activated() {
+    this.getCreatorList()
+    this.loadTableData()
   },
   methods: {
     // 查询创建人列表
