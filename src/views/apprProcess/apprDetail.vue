@@ -793,18 +793,15 @@ export default {
       })
 
       //过滤自动审批通过的节点（一般是被冻结或被删除的账号）
-      this.progress.forEach((item,index,arr)=>{
-        if(item.type==='approver'){
-          item.userList = item.userList.filter(x=>x.userName)
-        }
-        if(item.userList.length===0&&!item.userName){
-          arr.splice(index,1)
-        }
-      })
-      this.progress = _.concat(
-        this.progress,
-        addNodes
-      )
+      // this.progress.forEach((item,index,arr)=>{
+      //   if(item.type==='approver'){
+      //     item.userList = item.userList.filter(x=>x.userName)
+      //   }
+      //   if(item.userList.length===0&&!item.userName){
+      //     arr.splice(index,1)
+      //   }
+      // })
+      this.progress = _.concat(this.progress, addNodes)
     },
 
     handleBack() {
