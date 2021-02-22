@@ -1191,13 +1191,17 @@ export default {
     },
     // 提交课程审批
     submitApprApply(courseId) {
+      //创建课程  直接发布  给ruleForm 添加id,catalogName字段
+      this.ruleForm.id = courseId
+      this.ruleForm.catalogName = this.parentOrgIdLabel
       this.$refs.apprSubmit
         .submit({
           formId: courseId,
           processName: categoryMap['1'],
           formKey: 'CourseApplyInfo',
           // 课程标题
-          formTitle: this.ruleForm.name
+          formTitle: this.ruleForm.name,
+          formData: JSON.stringify(this.ruleForm)
         })
         .then(() => {
           //发布成功清除数据
