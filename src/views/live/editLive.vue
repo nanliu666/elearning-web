@@ -1514,6 +1514,7 @@ export default {
       if(arr.length==0){
         this.basicForm.table_liveTime_str = null
       }
+       
     },
     // 切换循环周期
     toggle_loopCycle(val) {
@@ -1682,7 +1683,9 @@ export default {
           index = this.table_relatedStudents.findIndex((rowItem) => rowItem.id == item.id)
           this.table_relatedStudents.splice(index, 1)
         })
+         this.totalNum =this.dialogSelectStudent.length
       })
+
     },
     // 关联学员表格的分页跳转
     toggle_StudentsPage(page) {//添加学员
@@ -1845,14 +1848,39 @@ export default {
           getQueryAssistant({
             name: query
           }).then((res) => {
-            this.teachingTeacherList = res
+          //  this.teachingTeacherList = res
+           //已经选择过的  输入置灰
+          this.table_teacherSet.forEach((item,index)=>{
+            if(item.nameList_value){
+              res.some(x=>{
+                if(x.id===item.nameList_value){
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
+          this.teachingTeacherList = res
+
           })
           break
         case 3:
           getQueryAssistant({
             name: query
           }).then((res) => {
-            this.teachingTeacherList = res
+           // this.teachingTeacherList = res
+            //已经选择过的  输入置灰
+          this.table_teacherSet.forEach((item,index)=>{
+            if(item.nameList_value){
+              res.some(x=>{
+                if(x.id===item.nameList_value){
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
+          this.teachingTeacherList = res
           })
           break
       }
@@ -1869,6 +1897,7 @@ export default {
         type: 'warning'
       }).then(() => {
         arr.splice(index, 1)
+          this.totalNum =this.dialogSelectStudent.length
       })
     },
     // 添加关联学员
@@ -2047,6 +2076,7 @@ export default {
             this.dialogSelectStudent.forEach((item) => {
               data.userAndOrgIds.users.push(item.id)
             })
+             this.totalNum= data.userAndOrgIds.users.length
           }
           break
         case 'code':
