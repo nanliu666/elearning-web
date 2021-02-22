@@ -150,3 +150,8 @@ export const ADD_LIVE = '/live/liveList/add' // 创建直播
 export const STOP_LIVE = '/live/liveList/stop' // 禁用
 export const EDIT_LIVE = '/live/liveList/edit' // 编辑
 export const DELETE_LIVE = '/live/liveList/delete' // 删除
+// 直播中心的直播回放的鉴权
+export const PUBLISH_LIVE_BACK = '/live/playBackListSingle/publish' // 恢复
+export const PUTAWAY_LIVE_BACK = '/live/playBackListSingle/putaway' // 发布/下架
+export const DELETE_LIVE_BACK = '/live/playBackListSingle/delete' // 删除
+export const DOWNLOAD_LIVE_BACK = '/live/playBackListSingle/download' // 下载

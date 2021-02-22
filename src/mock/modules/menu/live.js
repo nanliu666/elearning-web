@@ -139,7 +139,37 @@ export default {
       code: 'approval_approval',
       alias: 'approval',
       path: '/live/playBackListSingle',
-      icon: 'iconfont iconicon_compile'
+      icon: 'iconfont iconicon_compile',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '恢复',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/playBackListSingle/publish'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '发布/下架',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/playBackListSingle/putaway'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/playBackListSingle/delete'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '下载',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/playBackListSingle/download'
+        }
+      ]
     },
     {
       menuId: '1590112075692670',

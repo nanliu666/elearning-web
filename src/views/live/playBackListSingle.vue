@@ -33,11 +33,23 @@
           <!--讲师删除后 管理员可以进行恢复-->
           <span
             v-if="item.lecturerDeleted === 1 && identityType === 0"
+            v-p="PUBLISH_LIVE_BACK"
             @click.stop="repRecover(item)"
           >恢复</span>
-          <span @click.stop="repRelease(item)">{{ item.shelfStatus === 0 ? '下架' : '发布' }}</span>
-          <span @click.stop="repDownload(item.localUrl)">下载</span>
-          <span @click.stop="repDelete(item)">删除</span>
+          <span
+            v-p="PUTAWAY_LIVE_BACK"
+            @click.stop="repRelease(item)"
+          >{{
+            item.shelfStatus === 0 ? '下架' : '发布'
+          }}</span>
+          <span
+            v-p="DOWNLOAD_LIVE_BACK"
+            @click.stop="repDownload(item.localUrl)"
+          >下载</span>
+          <span
+            v-p="DELETE_LIVE_BACK"
+            @click.stop="repDelete(item)"
+          >删除</span>
         </div>
       </div>
       <div class="pagePbls">
@@ -57,6 +69,12 @@
 </template>
 <script>
 import { liveReplayList, setReplayStatus } from '@/api/live/liveReplay'
+import {
+  PUBLISH_LIVE_BACK,
+  PUTAWAY_LIVE_BACK,
+  DELETE_LIVE_BACK,
+  DOWNLOAD_LIVE_BACK
+} from '@/const/privileges'
 export default {
   name: 'PlayBackListSingle',
   data() {
@@ -75,6 +93,12 @@ export default {
       },
       identityType: ''
     }
+  },
+  computed: {
+    PUBLISH_LIVE_BACK: () => PUBLISH_LIVE_BACK,
+    PUTAWAY_LIVE_BACK: () => PUTAWAY_LIVE_BACK,
+    DELETE_LIVE_BACK: () => DELETE_LIVE_BACK,
+    DOWNLOAD_LIVE_BACK: () => DOWNLOAD_LIVE_BACK
   },
   activated() {
     this.initPlayBackData()
