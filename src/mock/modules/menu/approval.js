@@ -21,7 +21,37 @@ export default {
       code: 'approval_approval',
       alias: 'approval',
       path: '/apprProcess/approvalList',
-      icon: 'iconfont iconicon_compile'
+      icon: 'iconfont iconicon_compile',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '创建审批流程',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/apprProcess/approvalList/add'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '启用/停用',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/apprProcess/approvalList/stop'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '编辑',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/apprProcess/approvalList/eidt'
+        },
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '删除',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/apprProcess/approvalList/delete'
+        }
+      ]
     },
     {
       menuId: '15901120756920',

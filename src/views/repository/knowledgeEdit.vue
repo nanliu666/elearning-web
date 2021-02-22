@@ -322,15 +322,19 @@ export default {
       const isLimitLength = _.size(this.formData.attachments) < this.limit
       if (isEmpty) {
         this.$message.error('上传文件不能为空!')
+        return false
       }
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 10MB!')
+        return false
       }
       if (!isLimitLength) {
         this.$message.error('上传文件数量超过限制!')
+        return false
       }
       if (notBatNorExe) {
         this.$message.error('不允许上传.exe .bat类型文件')
+        return false
       }
       return isLt100M && isLimitLength && !notBatNorExe && !isEmpty
     },

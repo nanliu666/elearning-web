@@ -283,19 +283,19 @@
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/edit'"
+                    v-p="EDIT_COURSE"
                     command="edit"
                   >
                     编辑
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/delete'"
+                    v-p="DELETE_COURSE"
                     command="del"
                   >
                     删除
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/move'"
+                    v-p="MOVE_COURSE"
                     command="move"
                   >
                     移动

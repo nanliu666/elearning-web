@@ -217,6 +217,7 @@ export default {
     // 发布区分编辑发布还是新增发布
     publishFun(type) {
       this.publishType = type
+      if (this.submitLoading) return
       this.submitLoading = true
       // 草稿提交不需要校验,  发布提交需要校验
       const examInfoData = this.$refs.examInfo.getData(type)
