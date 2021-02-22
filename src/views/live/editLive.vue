@@ -846,6 +846,7 @@
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
                 :total="totalNum"
+                :current-page="StudentsPage.currentPage"
                 :page-size.sync="StudentsPage.pageSize"
                 @current-change="toggle_StudentsPage"
                 @size-change="toggle_StudentsPageSize"
@@ -1270,7 +1271,8 @@ export default {
         ],
       },
       StudentsPage: {
-        pageSize: 10
+        pageSize: 10,
+        currentPage:1
       }
     }
   },
@@ -1356,7 +1358,6 @@ export default {
     })
   },
   methods: {
-
        // 数据处理中间函数
     thruHandler(arr) {
       // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
@@ -1378,17 +1379,19 @@ export default {
       getStudentByLiveId({
           liveId:this.$route.query.id,
           pageNo:1,
-          pageSize: this.StudentsPage.pageSize
+          pageSize: 9999999
         }).then((res) => {
           res.data.forEach(item=>{
               let studentData ={}
-              studentData.phone=item.phoneNum,
-              studentData.userCode=item.userNo,
-              studentData.department=item.orgName,
-              studentData.name=item.userName,
-              studentData.id =item.userId,
-              this.table_relatedStudents.push(studentData)
-              this.dialogSelectStudent=this.table_relatedStudents
+              studentData.phone=item.phoneNum
+              studentData.userCode=item.userNo
+              studentData.department=item.orgName
+              studentData.name=item.userName
+              studentData.id =item.userId
+              if(this.table_relatedStudents.length<10){
+                this.table_relatedStudents.push(studentData)
+              }
+              this.dialogSelectStudent.push(studentData)
           })
              this.totalNum=res.totalNum
              this.totalPage=res.totalPage
@@ -1514,7 +1517,7 @@ export default {
       if(arr.length==0){
         this.basicForm.table_liveTime_str = null
       }
-       
+
     },
     // 切换循环周期
     toggle_loopCycle(val) {
@@ -1673,17 +1676,22 @@ export default {
     },
     // 关联学员表格批量删除
     delete_batchTableStudent() {
+      let self = this
       this.$confirm('您确定要批量删除所选人员吗？', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        var index = ''
-        this.$refs.table_relatedStudents.selection.forEach((item) => {
-          index = this.table_relatedStudents.findIndex((rowItem) => rowItem.id == item.id)
-          this.table_relatedStudents.splice(index, 1)
+      }).then(()=> {
+        // var index = ''
+        self.$refs.table_relatedStudents.selection.forEach((item) => {
+          self.dialogSelectStudent.some((x,idx,arr)=>{
+            if(x.id === item.id){
+              arr.splice(idx,1)
+              return true
+            }
+          })
         })
-         this.totalNum =this.dialogSelectStudent.length
+        this.toggle_StudentsPage(1)
       })
 
     },
@@ -1706,6 +1714,7 @@ export default {
           })
         }
       })
+       this.StudentsPage.currentPage = page
       }else{//编辑入口
          getStudentByLiveId({
           liveId:this.$route.query.id,
@@ -1896,8 +1905,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        arr.splice(index, 1)
-          this.totalNum =this.dialogSelectStudent.length
+          this.dialogSelectStudent.some((item,idx,list)=>{
+            if(item.id === arr[index].id){
+              list.splice(idx,1)
+              return true
+            }
+          })
+          this.toggle_StudentsPage(1)
       })
     },
     // 添加关联学员
@@ -1993,7 +2007,6 @@ export default {
       let otherData = []
       let slef = this
       this.table_teacherSet.forEach(function(item, index){
-        debugger
         if(item.type===2 ||item.type===3 ){
           let teacher={}
           slef.teachingTeacherList.forEach(function(currentValue,index1){
