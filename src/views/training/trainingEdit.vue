@@ -192,6 +192,11 @@ export default {
             basicInfo['introduction'] = _.unescape(basicInfo['introduction'])
             const detailData = _.pick(trainInfo, detailKeyList)
             this.$refs.editBasicInfo.formData = basicInfo
+            const { headTeacher, teachAssistant } = detailData
+            this.$refs.editDetail.teacherDefault = [headTeacher]
+            this.$refs.editDetail.teachAssistantDefault = teachAssistant
+            detailData.headTeacher = detailData.headTeacher.userId
+            detailData.teachAssistant = _.map(detailData.teachAssistant, 'userId')
             this.$refs.editDetail.formData = detailData
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
             trainOnlineCourse.forEach((item) => {
