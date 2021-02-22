@@ -217,7 +217,16 @@ export default {
       code: 'approval_approval',
       alias: 'approval',
       path: '/live/live-stat-detail',
-      icon: 'iconfont iconicon_compile'
+      icon: 'iconfont iconicon_compile',
+      children: [
+        {
+          menuType: 'Button',
+          isOwn: 1,
+          menuName: '合并同一用户',
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          path: '/live/live-stat-detail/concat'
+        }
+      ]
     }
   ]
 }

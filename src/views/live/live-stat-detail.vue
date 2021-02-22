@@ -164,6 +164,7 @@
           <div class="operate-area">
             <el-checkbox
               v-model="getData2params.isMerge"
+              v-p="CONCAT_LIVE_START"
               class="checkbox"
             >
               合并同一用户
@@ -247,6 +248,7 @@
 import { parseTime } from '@/util/util'
 import Pagination from '@/components/common-pagination'
 import { getSummary, getAudience } from '@/api/live'
+import { CONCAT_LIVE_START } from '@/const/privileges'
 
 export default {
   name: 'LiveStatDetail',
@@ -286,6 +288,9 @@ export default {
       getData2Date: ''
     }
   },
+  computed: {
+    CONCAT_LIVE_START: () => CONCAT_LIVE_START
+  },
   watch: {
     getData2Date(val) {
       const [startDate = '', endDate = ''] = val || []
@@ -299,6 +304,7 @@ export default {
       deep: true
     }
   },
+
   activated() {
     this.getData2params.livePlanId = this.$route.query.livePlanId
     this.getData()

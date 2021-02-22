@@ -155,3 +155,5 @@ export const PUBLISH_LIVE_BACK = '/live/playBackListSingle/publish' // 恢复
 export const PUTAWAY_LIVE_BACK = '/live/playBackListSingle/putaway' // 发布/下架
 export const DELETE_LIVE_BACK = '/live/playBackListSingle/delete' // 删除
 export const DOWNLOAD_LIVE_BACK = '/live/playBackListSingle/download' // 下载
+// 直播中心的数据统计的鉴权
+export const CONCAT_LIVE_START = '/live/live-stat-detail/concat' // 合并同一用户
