@@ -3,6 +3,7 @@
     <page-header title="审批流程">
       <template #rightMenu>
         <el-button
+          v-p="ADD_APPROVAL"
           type="primary"
           size="medium"
           @click="jumpCreate"
@@ -80,6 +81,7 @@
         <template #handler="{row}">
           <el-button
             v-if="row.useStatus === 'Yes'"
+            v-p="STOP_APPROVAL"
             type="text"
             @click="disableApproval(row)"
           >
@@ -87,18 +89,21 @@
           </el-button>
           <el-button
             v-if="row.useStatus === 'No'"
+            v-p="STOP_APPROVAL"
             type="text"
             @click="enableApproval(row)"
           >
             启用
           </el-button>
           <el-button
+            v-p="EIDT_APPROVAL"
             type="text"
             @click="jumpToEdit(row)"
           >
             编辑
           </el-button>
           <el-button
+            v-p="DELETE_APPROVAL"
             type="text"
             @click="handleDelete(row)"
           >
@@ -117,6 +122,7 @@ import {
   stopProcess,
   deleteProcess
 } from '@/api/apprProcess/apprProcess'
+import { ADD_APPROVAL, STOP_APPROVAL, EIDT_APPROVAL, DELETE_APPROVAL } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 const statusDict = {
   No: '停用',
@@ -220,7 +226,20 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userId'])
+    ADD_APPROVAL: () => ADD_APPROVAL,
+    STOP_APPROVAL: () => STOP_APPROVAL,
+    EIDT_APPROVAL: () => EIDT_APPROVAL,
+    DELETE_APPROVAL: () => DELETE_APPROVAL,
+    ...mapGetters(['privileges', 'userId'])
+  },
+  watch: {
+    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
+    privileges: {
+      handler() {
+        this.tableConfig.showHandler = this.$p([STOP_APPROVAL, EIDT_APPROVAL, DELETE_APPROVAL])
+      },
+      deep: true
+    }
   },
   activated() {
     this.refresh()
