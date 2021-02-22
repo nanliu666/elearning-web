@@ -148,5 +148,5 @@ export const SORT_LIVE_CLASSIFY = '/live/classify/sort' // 调整排序
 // 直播中心的直播安排的鉴权
 export const ADD_LIVE = '/live/liveList/add' // 创建直播
 export const STOP_LIVE = '/live/liveList/stop' // 禁用
-export const EDIT_LIVE = '/live/liveList/eidt' // 编辑
+export const EDIT_LIVE = '/live/liveList/edit' // 编辑
 export const DELETE_LIVE = '/live/liveList/delete' // 删除
