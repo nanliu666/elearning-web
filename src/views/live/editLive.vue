@@ -1993,6 +1993,7 @@ export default {
       let otherData = []
       let slef = this
       this.table_teacherSet.forEach(function(item, index){
+        debugger
         if(item.type===2 ||item.type===3 ){
           let teacher={}
           slef.teachingTeacherList.forEach(function(currentValue,index1){
@@ -2002,7 +2003,7 @@ export default {
           })
 
           teacher.userActor =item.identity,
-          teacher.roleName =item.role,
+          teacher.roleName =item.role==='嘉宾'?'Guest':item.role==='助教'?'Assistant':'',
           teacher.userId =item.nameList_value
           otherData.push(teacher)
         }
@@ -2160,7 +2161,7 @@ export default {
         let self = this
          res.otherTeachers.forEach(function(item,index){
           let teacherVaue={}
-           if(item.roleName=='嘉宾'){
+           if(item.roleName=='Guest'){
             teacherVaue.identity= '嘉宾',
             teacherVaue.nameList_value= item.userId
             //teacherVaue.role= '嘉宾',
@@ -2168,10 +2169,10 @@ export default {
             teacherVaue.num='嘉宾' + (arr_jb.length+1),
             teacherVaue.type= 2
           }
-          if(item.roleName=='助教'){
+          if(item.roleName=='Assistant'){
             teacherVaue.identity= '助教',
             teacherVaue.nameList_value= item.userId
-          //  teacherVaue.role= '助教',
+            //teacherVaue.role= '助教',
            let arr_zj = self.table_teacherSet.filter(x=>x.type==3)
             teacherVaue.num='助教' + (arr_zj.length+1),
             teacherVaue.type= 3
