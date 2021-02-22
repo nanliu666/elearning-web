@@ -1514,6 +1514,7 @@ export default {
       if(arr.length==0){
         this.basicForm.table_liveTime_str = null
       }
+       
     },
     // 切换循环周期
     toggle_loopCycle(val) {
@@ -1682,7 +1683,9 @@ export default {
           index = this.table_relatedStudents.findIndex((rowItem) => rowItem.id == item.id)
           this.table_relatedStudents.splice(index, 1)
         })
+         this.totalNum =this.dialogSelectStudent.length
       })
+
     },
     // 关联学员表格的分页跳转
     toggle_StudentsPage(page) {//添加学员
@@ -1845,14 +1848,39 @@ export default {
           getQueryAssistant({
             name: query
           }).then((res) => {
-            this.teachingTeacherList = res
+          //  this.teachingTeacherList = res
+           //已经选择过的  输入置灰
+          this.table_teacherSet.forEach((item,index)=>{
+            if(item.nameList_value){
+              res.some(x=>{
+                if(x.id===item.nameList_value){
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
+          this.teachingTeacherList = res
+
           })
           break
         case 3:
           getQueryAssistant({
             name: query
           }).then((res) => {
-            this.teachingTeacherList = res
+           // this.teachingTeacherList = res
+            //已经选择过的  输入置灰
+          this.table_teacherSet.forEach((item,index)=>{
+            if(item.nameList_value){
+              res.some(x=>{
+                if(x.id===item.nameList_value){
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
+          this.teachingTeacherList = res
           })
           break
       }
@@ -1869,6 +1897,7 @@ export default {
         type: 'warning'
       }).then(() => {
         arr.splice(index, 1)
+          this.totalNum =this.dialogSelectStudent.length
       })
     },
     // 添加关联学员
@@ -1964,6 +1993,7 @@ export default {
       let otherData = []
       let slef = this
       this.table_teacherSet.forEach(function(item, index){
+        debugger
         if(item.type===2 ||item.type===3 ){
           let teacher={}
           slef.teachingTeacherList.forEach(function(currentValue,index1){
@@ -1973,7 +2003,7 @@ export default {
           })
 
           teacher.userActor =item.identity,
-          teacher.roleName =item.role,
+          teacher.roleName =item.role==='嘉宾'?'Guest':item.role==='助教'?'Assistant':'',
           teacher.userId =item.nameList_value
           otherData.push(teacher)
         }
@@ -2047,6 +2077,7 @@ export default {
             this.dialogSelectStudent.forEach((item) => {
               data.userAndOrgIds.users.push(item.id)
             })
+             this.totalNum= data.userAndOrgIds.users.length
           }
           break
         case 'code':
@@ -2130,7 +2161,7 @@ export default {
         let self = this
          res.otherTeachers.forEach(function(item,index){
           let teacherVaue={}
-           if(item.roleName=='嘉宾'){
+           if(item.roleName=='Guest'){
             teacherVaue.identity= '嘉宾',
             teacherVaue.nameList_value= item.userId
             //teacherVaue.role= '嘉宾',
@@ -2138,10 +2169,10 @@ export default {
             teacherVaue.num='嘉宾' + (arr_jb.length+1),
             teacherVaue.type= 2
           }
-          if(item.roleName=='助教'){
+          if(item.roleName=='Assistant'){
             teacherVaue.identity= '助教',
             teacherVaue.nameList_value= item.userId
-          //  teacherVaue.role= '助教',
+            //teacherVaue.role= '助教',
            let arr_zj = self.table_teacherSet.filter(x=>x.type==3)
             teacherVaue.num='助教' + (arr_zj.length+1),
             teacherVaue.type= 3
