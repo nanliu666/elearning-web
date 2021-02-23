@@ -1706,7 +1706,7 @@ export default {
           ) {
             this.table_relatedStudents.push({
               userCode: item.userCode,
-              //name: item.name,
+              name: item.name,
               department: item.department,
               phone: item.phone,
               id: item.id
@@ -1736,6 +1736,7 @@ export default {
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
+      this.toggle_StudentsPage(1)
     },
     // 获取讲师表格中每一行所选的嘉宾或教师组合为一个select
     get_table_teacherSet_teacher(table) {
