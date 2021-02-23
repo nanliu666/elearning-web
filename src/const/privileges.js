@@ -132,7 +132,7 @@ export const DELETE_PERMISSION = '/system/permissionConfig/delete' // 删除
 // 角色管理的查看用户的鉴权
 export const ADD_ROLE_USER = '/system/roleUsers/add' // 添加用户
 export const DELETE_ROLE_USER = '/system/roleUsers/delete' // 删除
-// 角色管理的查看用户的鉴权
+// 流程管理的审批流程的鉴权
 export const ADD_APPROVAL = '/apprProcess/approvalList/add' // 创建审批流程
 export const STOP_APPROVAL = '/apprProcess/approvalList/stop' // 启用/停用
 export const EIDT_APPROVAL = '/apprProcess/approvalList/eidt' // 编辑
