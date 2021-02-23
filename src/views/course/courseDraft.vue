@@ -233,75 +233,95 @@
               slot="handler"
               slot-scope="scope"
             >
-              <el-button
-                v-if="scope.row.isTop == 0"
-                v-p="TOP_COURSE"
-                type="text"
-                size="medium"
-                @click.stop="handleConfig(scope.row, 1)"
-              >
-                置顶
-              </el-button>
-              <el-button
-                v-if="scope.row.isTop == 1"
-                v-p="TOP_COURSE"
-                type="text"
-                size="medium"
-                @click.stop="handleConfig(scope.row, 0)"
-              >
-                已置顶
-              </el-button>
-              <el-button
-                v-if="scope.row.isPutaway === 1"
-                v-p="PUTAWAY_COURSE"
-                type="text"
-                size="medium"
-                @click="alterIsPutaway(scope.row.id, 0)"
-              >
-                下架
-              </el-button>
-              <el-button
-                v-if="scope.row.isPutaway === 0"
-                v-p="PUTAWAY_COURSE"
-                type="text"
-                size="medium"
-                @click="alterIsPutaway(scope.row.id, 1)"
-              >
-                上架
-              </el-button>
-              <el-dropdown
-                v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
-                trigger="hover"
-                style="color: #a0a8ae"
-                @command="handleCommand($event, scope.row)"
-              >
-                <span
-                  class="el-dropdown-link"
-                  style="margin-left: 10px"
+              <!-- 已发布 -->
+              <div v-show="status == 1">
+                <el-button
+                  v-if="scope.row.isTop == 0"
+                  v-p="TOP_COURSE"
+                  type="text"
+                  size="medium"
+                  @click.stop="handleConfig(scope.row, 1)"
                 >
-                  <i class="el-icon-more" />
-                </span>
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/edit'"
-                    command="edit"
+                  置顶
+                </el-button>
+                <el-button
+                  v-if="scope.row.isTop == 1"
+                  v-p="TOP_COURSE"
+                  type="text"
+                  size="medium"
+                  @click.stop="handleConfig(scope.row, 0)"
+                >
+                  已置顶
+                </el-button>
+                <el-button
+                  v-if="scope.row.isPutaway === 1"
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  size="medium"
+                  @click="alterIsPutaway(scope.row.id, 0)"
+                >
+                  下架
+                </el-button>
+                <el-button
+                  v-if="scope.row.isPutaway === 0"
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  size="medium"
+                  @click="alterIsPutaway(scope.row.id, 1)"
+                >
+                  上架
+                </el-button>
+                <el-dropdown
+                  v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
+                  trigger="hover"
+                  style="color: #a0a8ae"
+                  @command="handleCommand($event, scope.row)"
+                >
+                  <span
+                    class="el-dropdown-link"
+                    style="margin-left: 10px"
                   >
-                    编辑
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/delete'"
-                    command="del"
-                  >
-                    删除
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="'/course/courseDraft/move'"
-                    command="move"
-                  >
-                    移动
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
+                    <i class="el-icon-more" />
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item
+                      v-p="EDIT_COURSE"
+                      command="edit"
+                    >
+                      编辑
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      v-p="DELETE_COURSE"
+                      command="del"
+                    >
+                      删除
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      v-p="MOVE_COURSE"
+                      command="move"
+                    >
+                      移动
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </div>
+              <!-- 草稿 -->
+              <div v-show="status == 2">
+                <el-button
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  @click="handleCommand('edit', scope.row)"
+                >
+                  编辑
+                </el-button>
+                <el-button
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  @click="handleCommand('del', scope.row)"
+                >
+                  删除
+                </el-button>
+              </div>
             </template>
           </common-table>
         </basic-container>
@@ -619,7 +639,7 @@ export default {
         pageSize: 10,
         total: 0
       },
-      searchParams:'',
+      searchParams: '',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -980,7 +1000,6 @@ export default {
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
-      console.log(params);
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
