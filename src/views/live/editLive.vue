@@ -808,11 +808,19 @@
                     class="depmetSpan"
                     prop="department"
                     label="所在部门"
-                  ></el-table-column>
+                  >
+                    <template slot-scope="scope">
+                      {{ scope.row.department || '-' }}
+                    </template>
+                  </el-table-column>
                   <el-table-column
                     prop="phone"
                     label="手机号码"
-                  ></el-table-column>
+                  >
+                    <template slot-scope="scope">
+                      {{ scope.row.phone || '-' }}
+                    </template>
+                  </el-table-column>
                   <el-table-column
                     label="操作"
                     fixed="right"
