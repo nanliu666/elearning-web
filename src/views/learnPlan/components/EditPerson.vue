@@ -126,6 +126,17 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  watch: {
+    userList: {
+      handler(list) {
+        list.forEach((item) => {
+          item.orgName = item.orgName || '-'
+          item.phoneNum = item.phoneNum || '-'
+        })
+      },
+      deep: true
+    }
+  },
   methods: {
     handleAddUser() {
       this.userPicking = true

@@ -226,8 +226,7 @@ export default {
           .then(() => {
             this.activeStep++
           })
-          .catch((err) => {
-            console.error(err)
+          .catch(() => {
             if (this.activeStep === 1) {
               this.$message.error('请先完善课程信息')
             }
@@ -239,10 +238,17 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
+
       data.startTime = _.get(data, 'timeRange[0]')
       data.endTime = _.get(data, 'timeRange[1]')
       data.type = type
       data.courseList = await this.$refs['editCourse'].getData()
+      data.courseList.forEach((c) => {
+        c.studyExam.forEach((s) => {
+          s.integral = +s.integral
+          s.publishTime = +s.publishTime
+        })
+      })
       let func
       if (this.id) {
         func = updatePlan
