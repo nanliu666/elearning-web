@@ -63,7 +63,7 @@ export default {
       }
     },
     value: {
-      type: [String, Boolean, Array],
+      type: [String, Boolean, Array, Object],
       default: ''
     },
     // 允许创建条目

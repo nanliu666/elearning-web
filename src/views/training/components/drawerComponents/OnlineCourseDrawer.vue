@@ -14,7 +14,6 @@
         <template #courseId>
           <lazy-select
             v-model="model.courseId"
-            :allow-create="isCreate"
             :searchable="remote"
             :first-option="courseDefault"
             :load="loadCourse"
@@ -98,7 +97,6 @@ export default {
     return {
       courseDefault: [],
       remote: true,
-      isCreate: true,
       editType: 'add',
       columns: EventColumns,
       title: '添加在线课程',
