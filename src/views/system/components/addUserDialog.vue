@@ -348,7 +348,8 @@ export default {
     resolveTree(tree) {
       if (tree.orgs.length > 0) {
         tree.orgs.forEach((node) => {
-          if (['Enterprise', 'Company', 'Department'].includes(node.type)) node.disabled = true
+          if (['Enterprise', 'Company', 'Department', 'Group'].includes(node.type))
+            node.disabled = true
         })
       }
       if (tree.users.length > 0) {
