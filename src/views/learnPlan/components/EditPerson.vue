@@ -185,6 +185,7 @@ export default {
             'update:user-list',
             _.filter(this.userList, (user) => user.userId !== row.userId)
           )
+          this.$message.success('删除成功')
         })
         .catch(() => {})
     },
@@ -205,6 +206,7 @@ export default {
           )
           this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
           this.$emit('update:user-list', this.userList)
+          this.$message.success('删除成功')
         })
         .catch(() => {})
     }
