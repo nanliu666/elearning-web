@@ -18,7 +18,7 @@
           {{ item }}
         </li>
       </ul>
-      <div class="form">
+      <div class="form__box">
         <basicSetting
           v-show="currentIndex === 0"
           ref="basicSettingRef"
@@ -211,14 +211,14 @@ export default {
       }
     }
   }
-  .form {
+
+  .form__box {
     flex: 1;
     padding: 0 30px;
     overflow-y: auto;
     overflow-x: hidden;
     height: calc(100vh - 208px);
   }
-
   .footer {
     display: flex;
     padding: 20px 10px;
