@@ -325,7 +325,7 @@ export default {
       } else {
         // 半选换全选需要把未选上的加入
         if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
-          this.selected = _.cloneDeep(this.outerData)
+          this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'bizId')
         } else {
           // 全选需要去重
           _.each(this.outerData, (item) => {
