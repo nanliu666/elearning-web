@@ -14,6 +14,7 @@
           <lazy-select
             v-model="formData.headTeacher"
             :searchable="true"
+            :first-option="teacherDefault"
             :load="loadCoordinator"
             :option-props="personOptionProps"
           />
@@ -21,6 +22,7 @@
         <template #teachAssistant>
           <lazy-select
             v-model="formData.teachAssistant"
+            :first-option="teachAssistantDefault"
             :searchable="true"
             :multiple="true"
             :load="loadCoordinator"
@@ -139,6 +141,8 @@ export default {
   },
   data() {
     return {
+      teachAssistantDefault: [],
+      teacherDefault: [],
       assessFormColumns,
       certificateFormColumns,
       personFormColumns,
