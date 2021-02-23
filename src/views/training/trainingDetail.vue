@@ -1025,6 +1025,7 @@ export default {
       // let id = '1332136482139570178'
       getTrainDetail({ trainId: id }).then((res) => {
         this.showTrainDetail = res
+        this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction)
       })
     },
 

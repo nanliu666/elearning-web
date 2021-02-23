@@ -129,7 +129,7 @@
               </el-form-item> -->
 
               <!-- 移过来的tree -->
-  
+
               <el-form-item
                 label="所属分类"
                 prop="categoryId"
@@ -395,7 +395,7 @@ export default {
     //   }
     // immediate: true,  //刷新加载 立马触发一次handler
     // deep: true  // 可以深度检测到 person 对象的属性值的变化
-    // }  
+    // }
   },
   created() {
     this.isgetTeacher()
@@ -408,7 +408,6 @@ export default {
     this.islistTeacherCategory()
   },
   methods: {
- 
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
@@ -441,7 +440,6 @@ export default {
     // 拿到数据
     async isgetTeacher() {
       let data = await getTeacher({ id: this.$route.query.id })
-      console.log(data);
       // 存userId
       this.userIdData = data.teacherInfo.userId
       data.teacherInfo.attachments = []
@@ -520,11 +518,7 @@ export default {
           }
         }
         this.data.splice(0, 1)
-        // 回显
-      // parentOrgIdLabel
-      console.log(res);
       })
-      
     },
 
     // 查询添加讲师的数据
@@ -559,10 +553,7 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      this.ruleForm.categoryId = this.ruleForm.catalogId 
-    
-      console.log(this.ruleForm);
-      
+      this.ruleForm.categoryId = this.ruleForm.catalogId
 
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {

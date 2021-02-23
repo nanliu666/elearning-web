@@ -283,19 +283,19 @@
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/edit'"
+                    v-p="EDIT_COURSE"
                     command="edit"
                   >
                     编辑
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/delete'"
+                    v-p="DELETE_COURSE"
                     command="del"
                   >
                     删除
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="'/course/courseDraft/move'"
+                    v-p="MOVE_COURSE"
                     command="move"
                   >
                     移动
@@ -619,7 +619,7 @@ export default {
         pageSize: 10,
         total: 0
       },
-      searchParams:'',
+      searchParams: '',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -980,7 +980,6 @@ export default {
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
-      console.log(params);
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
