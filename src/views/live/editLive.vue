@@ -1057,16 +1057,6 @@ export default {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   data() {
-
-     var checkTimes = (rule, value, callback) => {
-        value.forEach(item=>{
-          if(item.start_time=='' || item.end_time=='' ){
-             return callback(new Error('请选择时间'));
-          }
-        })
-
-      };
-
     return {
       totalNum:0,
       otherUserVal: '',
@@ -1859,7 +1849,7 @@ export default {
           }).then((res) => {
           //  this.teachingTeacherList = res
            //已经选择过的  输入置灰
-          this.table_teacherSet.forEach((item,index)=>{
+          this.table_teacherSet.forEach((item)=>{
             if(item.nameList_value){
               res.some(x=>{
                 if(x.id===item.nameList_value){
@@ -1879,7 +1869,7 @@ export default {
           }).then((res) => {
            // this.teachingTeacherList = res
             //已经选择过的  输入置灰
-          this.table_teacherSet.forEach((item,index)=>{
+          this.table_teacherSet.forEach((item)=>{
             if(item.nameList_value){
               res.some(x=>{
                 if(x.id===item.nameList_value){
@@ -2006,10 +1996,10 @@ export default {
     submit_live_data() {
       let otherData = []
       let slef = this
-      this.table_teacherSet.forEach(function(item, index){
+      this.table_teacherSet.forEach(function(item ){
         if(item.type===2 ||item.type===3 ){
           let teacher={}
-          slef.teachingTeacherList.forEach(function(currentValue,index1){
+          slef.teachingTeacherList.forEach(function(currentValue){
             if(currentValue.id==item.nameList_value){
                teacher.nickName=currentValue.name
             }
@@ -2172,7 +2162,7 @@ export default {
           this.teachingTeacherList = res
         })
         let self = this
-         res.otherTeachers.forEach(function(item,index){
+         res.otherTeachers.forEach(function(item){
           let teacherVaue={}
            if(item.roleName=='Guest'){
             teacherVaue.identity= '嘉宾',
