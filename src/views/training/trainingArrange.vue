@@ -313,7 +313,7 @@
                 slot="status"
                 slot-scope="{ row }"
               >
-                <span v-if="row.status === 0">已办结</span>
+                <span v-if="row.status === 3">已结束</span>
                 <span v-if="row.status === 1">未开始</span>
                 <span v-if="row.status === 2">进行中</span>
               </template>
@@ -526,9 +526,10 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 0, label: '已办结' },
+      { value: 3, label: '已办结' },
       { value: 1, label: '未开始' },
-      { value: 2, label: '进行中' }
+      { value: 2, label: '进行中' },
+      { value: '', label: '全部' },
     ]
   },
   {
@@ -546,7 +547,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     options: [
       { value: 1, label: '面授' },
       { value: 2, label: '混合' },
-      { value: 3, label: '在线' }
+      { value: 3, label: '在线' },
+      { value: '', label: '全部' },
     ]
   },
   {

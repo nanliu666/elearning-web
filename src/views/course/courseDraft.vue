@@ -283,19 +283,19 @@
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-p="EDIT_COURSE"
+                    v-p="'/course/courseDraft/edit'"
                     command="edit"
                   >
                     编辑
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="DELETE_COURSE"
+                    v-p="'/course/courseDraft/delete'"
                     command="del"
                   >
                     删除
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-p="MOVE_COURSE"
+                    v-p="'/course/courseDraft/move'"
                     command="move"
                   >
                     移动
@@ -619,7 +619,7 @@ export default {
         pageSize: 10,
         total: 0
       },
-
+      searchParams:'',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -818,7 +818,7 @@ export default {
       if (e === 'edit') {
         // 去编辑
         this.$router.push({
-          path: '/course/compileCourse?id=' + row.id + '&catalogName=' + row.catalogName
+          path: '/course/establishCourse?id=' + row.id + '&catalogName=' + row.catalogName
         })
       }
       if (e === 'del') {
@@ -862,6 +862,7 @@ export default {
     },
 
     handleSearch(searchParams) {
+      this.searchParams = searchParams
       this.getInfo(searchParams)
     },
 
@@ -962,8 +963,8 @@ export default {
     },
 
     // 拿数据
-    getInfo(courseName) {
-      if (courseName) {
+    getInfo(searchParams) {
+      if (searchParams) {
         this.page.pageNo = 1
         this.page.pageSize = 10
       }
@@ -973,44 +974,16 @@ export default {
         status: ''
       }
 
-      params = { ...this.page, ...courseName }
+      params = { ...this.page, ...this.searchParams }
       params.status = this.status
 
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
-
+      console.log(params);
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
-        // 下拉筛选框
-        // let data1 = JSON.parse(JSON.stringify(res.data))
-        // data1 = this.arrayUnique(data1, 'teacherName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
-        // let data2 = JSON.parse(JSON.stringify(res.data))
-        // data2 = this.arrayUnique(data2, 'catalogName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
-        // let data7 = JSON.parse(JSON.stringify(res.data))
-        // data7 = this.arrayUnique(data7, 'creatorName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
-        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
-
-        // this.tableData.forEach((item) => {
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-        //     value: item.teacherName,
-        //     label: item.teacherName
-        //   }) //讲师
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-        //     value: item.catalogName,
-        //     label: item.catalogName
-        //   }) //所在目录
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
-        //     value: item.creatorName,
-        //     label: item.creatorName
-        //   }) //创建人
-        // })
       })
     },
     // 导航

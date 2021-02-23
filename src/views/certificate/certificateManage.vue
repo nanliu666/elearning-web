@@ -2,7 +2,12 @@
   <div class="Menu fill">
     <page-header title="证书管理">
       <template slot="rightMenu">
-        <el-button v-p="ADD_CERTIFICATE" type="primary" size="medium" @click="toAddCertificate">
+        <el-button
+          v-p="ADD_CERTIFICATE"
+          type="primary"
+          size="medium"
+          @click="toAddCertificate"
+        >
           新建模板
         </el-button>
       </template>
@@ -28,12 +33,23 @@
               @submit="handleSearch"
             />
             <div class="operations-right">
-              <div class="refresh-container" @click="loadTableData">
+              <div
+                class="refresh-container"
+                @click="loadTableData"
+              >
                 <i class="el-icon-refresh-right" />
                 <span>刷新</span>
               </div>
-              <el-popover placement="bottom" width="40" trigger="click">
-                <i slot="reference" style="cursor: pointer;" class="el-icon-setting" />
+              <el-popover
+                placement="bottom"
+                width="40"
+                trigger="click"
+              >
+                <i
+                  slot="reference"
+                  style="cursor: pointer;"
+                  class="el-icon-setting"
+                />
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
@@ -53,7 +69,10 @@
           </div>
         </template>
 
-        <template slot="multiSelectMenu" slot-scope="{ selection }">
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
           <el-button
             v-p="DELETE_CERTIFICATE"
             type="text"
@@ -79,25 +98,45 @@
           >
             停用
           </el-button>
-          <span v-else v-p="STOP_CERTIFICATE" class="startBtn" @click.stop="blockStart(row.id, 1)"
-            >启用 &nbsp;
-          </span>
+          <el-button
+            v-else
+            v-p="STOP_CERTIFICATE"
+            type="text"
+            @click.stop="blockStart(row.id, 1)"
+          >启用 &nbsp;
+          </el-button>
           <!-- 预览框 -->
-          <el-tooltip v-p="PREVIEW_CERTIFICATE" placement="top" effect="light">
-            <div slot="content" class="preview">
+          <el-tooltip
+            v-p="PREVIEW_CERTIFICATE"
+            placement="top"
+            effect="light"
+          >
+            <div
+              slot="content"
+              class="preview"
+            >
               <div class="previewTitle">
                 <span>预览</span>
               </div>
               <div class="previewContent">
                 <div class="preview_right_box">
-                  <img :src="preview.backUrl" alt="" class="bgimg" />
+                  <img
+                    :src="preview.backUrl"
+                    alt=""
+                    class="bgimg"
+                  />
                   <div class="name">
                     {{ preview.name }}
                   </div>
                   <div class="text">
                     {{ preview.text }}
                   </div>
-                  <img v-if="preview.logoUrl" :src="preview.logoUrl" alt="" class="logo" />
+                  <img
+                    v-if="preview.logoUrl"
+                    :src="preview.logoUrl"
+                    alt=""
+                    class="logo"
+                  />
                   <div class="studentName">
                     张三
                   </div>
@@ -120,7 +159,11 @@
             </el-button>
           </el-tooltip>
 
-          <el-button v-p="DELETE_CERTIFICATE" type="text" @click="handleRemove(row)">
+          <el-button
+            v-p="DELETE_CERTIFICATE"
+            type="text"
+            @click="handleRemove(row)"
+          >
             删除
           </el-button>
         </template>
@@ -391,7 +434,7 @@ export default {
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '已取消删除'
+            message: '已取消操作'
           })
         })
     },
@@ -456,10 +499,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.startBtn {
-  color: #d7d7d7;
-  cursor: pointer;
-}
+
 
 .preview_right_box {
   position: relative;
