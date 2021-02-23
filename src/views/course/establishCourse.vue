@@ -35,6 +35,7 @@
           预览
         </el-button> -->
         <el-button
+          v-show="!this.$route.query.id"
           size="medium"
           @click="isAddCourse(2)"
         >
