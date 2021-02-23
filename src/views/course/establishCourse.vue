@@ -391,11 +391,11 @@
               <template slot-scope="scope">
                 <el-input
                   v-if="scope.row.saveOrcompile === 0"
-                  v-model="scope.row.name"
+                  v-model="scope.row.upLoad[0].name"
                   placeholder="请输入内容"
                   maxlength="32"
                 ></el-input>
-                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.name }}</span>
+                <span v-if="scope.row.saveOrcompile === 1">{{ scope.row.upLoad[0].name }}</span>
               </template>
             </el-table-column>
             <!-- 第三列 -->
@@ -494,9 +494,7 @@
                       :text-inside="scope.row.fileData.status !== 'error'"
                       :stroke-width="18"
                     ></el-progress>
-                    <span v-if="scope.row.fileData.status === 'complete'">{{
-                      scope.row.upLoad[0].localName
-                    }}</span>
+                    <span v-else>{{ scope.row.upLoad[0].localName }}</span>
                   </div>
                 </div>
               </template>
