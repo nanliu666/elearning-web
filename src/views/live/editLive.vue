@@ -75,7 +75,7 @@
                 prop="title"
               >
                 <el-input
-                  v-model="basicForm.title"
+                  v-model.trim="basicForm.title"
                   maxlength="32"
                   placeholder="请输入"
                 ></el-input>
@@ -84,11 +84,10 @@
             <el-col :span="12">
               <el-form-item
                 label="所属分类"
-                required
+                prop="liveClassification_value"
               >
                 <el-select
-                  ref="ref_liveClassification"
-                  v-model="liveClassification_value"
+                  v-model="basicForm.liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
                 >
@@ -109,10 +108,10 @@
             <el-col :span="12">
               <el-form-item
                 label="直播状态"
-                required
+                prop="select_liveStatus_value"
               >
                 <el-select
-                  v-model="select_liveStatus_value"
+                  v-model="basicForm.select_liveStatus_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -127,7 +126,7 @@
             <el-col :span="12">
               <el-form-item
                 label="连麦数量"
-                required
+                prop="select_linkNumber_value"
               >
                 <el-tooltip placement="top">
                   <div
@@ -155,7 +154,7 @@
                   </el-button>
                 </el-tooltip>
                 <el-select
-                  v-model="select_linkNumber_value"
+                  v-model="basicForm.select_linkNumber_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -206,14 +205,14 @@
                 </el-row>
               </el-form-item>
             </el-col>
-            <el-col :span="24">
+            <!-- <el-col :span="24">
               <el-form-item
                 label="课程封面"
-                required
                 class="live_upload_img"
+                 prop="imageUrl"
               >
                 <common-upload
-                  v-model="ruleForm.imageUrl"
+                  v-model="basicForm.imageUrl"
                   class="upload-demo"
                   drag
                   :show-file-list="false"
@@ -231,45 +230,77 @@
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.imageUrl[0]"
-                    :src="ruleForm.imageUrl[ruleForm.imageUrl.length - 1].url"
+                    v-if="basicForm.imageUrl[0]"
+                    :src="basicForm.imageUrl[basicForm.imageUrl.length - 1].url"
+                    class="avatar"
+                  />
+                </common-upload>
+              </el-form-item>
+            </el-col>  -->
+            <el-col :span="10">
+              <el-form-item
+                class="live_upload_img"
+                label="课程封面"
+                prop="imageUrl"
+              >
+                <common-upload
+                  v-model="basicForm.imageUrl"
+                  class="upload-demo"
+                  drag
+                  :show-file-list="false"
+                  :before-upload="beforeAvatarUpload"
+                  :multiple="false"
+                >
+                  <i class="el-icon-upload"></i>
+                  <div class="el-upload__text">
+                    <div>将文件拖到此处，或<em>点击上传</em><br /></div>
+                    <div
+                      slot="tip"
+                      class="el-upload__tip"
+                    >
+                      只能上传jpg/jpeg/png文件，且不超过10MB
+                    </div>
+                  </div>
+                  <img
+                    v-if="basicForm.imageUrl[0]"
+                    :src="basicForm.imageUrl[basicForm.imageUrl.length - 1].url"
                     class="avatar"
                   />
                 </common-upload>
               </el-form-item>
             </el-col>
           </el-row>
-        </el-form>
+          <!--</el-form> -->
 
-        <h3>
-          <span style="margin-right: 10px;">直播预告</span>
-          <el-tooltip placement="top">
-            <div
-              slot="content"
-              style="width:300px;"
-            >
-              <p>实际开播时间由讲师控制，该预告作用为前台展示</p>
-            </div>
-            <el-button
-              type="text"
-              style="color:#606266;"
-            >
-              <i class="el-icon-question"></i>
-            </el-button>
-          </el-tooltip>
-        </h3>
-        <el-form
+          <h3>
+            <span style="margin-right: 10px;">直播预告</span>
+            <el-tooltip placement="top">
+              <div
+                slot="content"
+                style="width:300px;"
+              >
+                <p>实际开播时间由讲师控制，该预告作用为前台展示</p>
+              </div>
+              <el-button
+                type="text"
+                style="color:#606266;"
+              >
+                <i class="el-icon-question"></i>
+              </el-button>
+            </el-tooltip>
+          </h3>
+          <!-- <el-form
           ref="ruleForm"
           :model="ruleForm"
-        >
+        > -->
           <el-row class="block_label">
             <el-col :span="12">
               <el-form-item
                 label="直播方式"
-                required
+                prop="select_mode_value"
               >
                 <el-select
-                  v-model="select_mode_value"
+                  v-model="basicForm.select_mode_value"
                   placeholder="请选择"
                 >
                   <el-option
@@ -283,38 +314,38 @@
             </el-col>
 
             <el-col
-              v-show="select_mode_value == 'cycle'"
+              v-show="basicForm.select_mode_value == 'cycle'"
               :span="12"
             >
               <el-form-item
                 label="循环日期"
-                required
+                prop="loopTime"
               >
                 <el-date-picker
-                  v-model="loopTime"
+                  v-model="basicForm.loopTime"
                   type="datetimerange"
                   range-separator="至"
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   value-format="yyyy-MM-dd hh:mm:ss"
                   :clearable="false"
-                  style="width: 20vw;"
+                  style="width: 22vw;"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row
-            v-show="select_mode_value == 'single'"
+            v-show="basicForm.select_mode_value == 'single'"
             class="block_label"
           >
             <el-col :span="12">
               <el-form-item
                 label="开播时间"
-                required
+                prop="start_time"
               >
                 <el-date-picker
-                  v-model="start_time"
+                  v-model="basicForm.start_time"
                   type="datetime"
                   placeholder="选择日期时间"
                   value-format="yyyy-MM-dd HH:mm:ss"
@@ -324,10 +355,10 @@
             <el-col :span="12">
               <el-form-item
                 label="结束时间"
-                required
+                prop="end_time"
               >
                 <el-date-picker
-                  v-model="end_time"
+                  v-model="basicForm.end_time"
                   type="datetime"
                   placeholder="选择日期时间"
                   value-format="yyyy-MM-dd HH:mm:ss"
@@ -337,18 +368,18 @@
           </el-row>
 
           <el-row
-            v-show="select_mode_value == 'cycle'"
+            v-show="basicForm.select_mode_value == 'cycle'"
             class="block_label"
           >
             <el-col :span="12">
               <el-form-item
                 label="循环周期"
-                required
+                prop="select_loopCycle_value"
               >
                 <el-select
-                  v-model="select_loopCycle_value"
+                  v-model="basicForm.select_loopCycle_value"
                   placeholder="请选择"
-                  @change="toggle_loopCycle(select_loopCycle_value)"
+                  @change="toggle_loopCycle(basicForm.select_loopCycle_value)"
                 >
                   <el-option
                     v-for="item in select_loopCycle"
@@ -362,10 +393,10 @@
             <el-col :span="12">
               <el-form-item
                 label="直播日期"
-                required
+                prop="select_mode_time_value"
               >
                 <el-select
-                  v-model="select_mode_time_value"
+                  v-model="basicForm.select_mode_time_value"
                   multiple
                   filterable
                   allow-create
@@ -382,21 +413,22 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row v-show="select_mode_value !== 'single'">
+          <el-row v-if="basicForm.select_mode_value !== 'single'">
             <el-col :span="24">
               <el-form-item
                 label="直播设置"
                 required
+                prop="table_liveTime_str"
               >
                 <el-button
                   type="text"
                   style="float:right;"
-                  @click="add_table_liveTime(table_liveTime)"
+                  @click="add_table_liveTime(basicForm.table_liveTime)"
                 >
                   添加直播
                 </el-button>
                 <el-table
-                  :data="table_liveTime"
+                  :data="basicForm.table_liveTime"
                   stripe
                   style="width: 100%"
                 >
@@ -435,7 +467,7 @@
                       <el-button
                         type="text"
                         size="small"
-                        @click="delete_table_liveTime(table_liveTime, scope.$index)"
+                        @click="delete_table_liveTime(basicForm.table_liveTime, scope.$index)"
                       >
                         删除
                       </el-button>
@@ -445,12 +477,12 @@
               </el-form-item>
             </el-col>
           </el-row>
-        </el-form>
-        <h3>直播详情</h3>
-        <el-form
+          <!--  </el-form> -->
+          <h3>直播详情</h3>
+          <!--  <el-form
           ref="ruleForm"
           :model="ruleForm"
-        >
+        > -->
           <el-row>
             <el-col :span="24">
               <el-form-item
@@ -460,7 +492,7 @@
                 class="lvie_details"
               >
                 <tinymce
-                  v-model="ruleForm.introduction"
+                  v-model.trim="basicForm.introduction"
                   :init="{ height: 100 }"
                 />
               </el-form-item>
@@ -516,6 +548,7 @@
                   :key="item.id"
                   :label="item.name"
                   :value="item.id"
+                  :disabled="item.disabled"
                 ></el-option>
               </el-select>
             </template>
@@ -617,7 +650,7 @@
         class="tabs3"
       >
         <el-form
-          ref="ruleForm"
+          ref="formLiveTypeForm"
           :model="formLiveTypeForm"
           :rules="rules"
         >
@@ -672,11 +705,10 @@
             <el-col :span="12">
               <el-form-item
                 label="欢迎标题"
-                required
                 prop="title"
               >
                 <el-input
-                  v-model="formLiveTypeForm.title"
+                  v-model.trim="formLiveTypeForm.title"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -684,11 +716,10 @@
             <el-col :span="12">
               <el-form-item
                 label="验证码"
-                required
                 prop="code"
               >
                 <el-input
-                  v-model="formLiveTypeForm.code"
+                  v-model.trim="formLiveTypeForm.code"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -696,11 +727,10 @@
             <el-col :span="12">
               <el-form-item
                 label="提示文案"
-                required
                 prop="tips"
               >
                 <el-input
-                  v-model="formLiveTypeForm.tips"
+                  v-model.trim="formLiveTypeForm.tips"
                   maxlength="32"
                 ></el-input>
               </el-form-item>
@@ -709,7 +739,6 @@
             <el-col :span="24">
               <el-form-item
                 label="公众号二维码"
-                required
                 class="live_upload_img"
               >
                 <common-upload
@@ -742,9 +771,7 @@
 
           <el-row v-show="radio_connectionMode == 'direct'">
             <el-col :span="24">
-              <el-form-item
-                :label="'关联学员：' + totalNum+ '人（仅关联学员可以观看）'"
-              >
+              <el-form-item :label="'关联学员：' + totalNum + '人（仅关联学员可以观看）'">
                 <el-button
                   type="text"
                   @click="delete_batchTableStudent()"
@@ -778,13 +805,22 @@
                     label="姓名"
                   ></el-table-column>
                   <el-table-column
+                    class="depmetSpan"
                     prop="department"
                     label="所在部门"
-                  ></el-table-column>
+                  >
+                    <template slot-scope="scope">
+                      {{ scope.row.department || '-' }}
+                    </template>
+                  </el-table-column>
                   <el-table-column
                     prop="phone"
                     label="手机号码"
-                  ></el-table-column>
+                  >
+                    <template slot-scope="scope">
+                      {{ scope.row.phone || '-' }}
+                    </template>
+                  </el-table-column>
                   <el-table-column
                     label="操作"
                     fixed="right"
@@ -813,6 +849,7 @@
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
                 :total="totalNum"
+                :current-page="StudentsPage.currentPage"
                 :page-size.sync="StudentsPage.pageSize"
                 @current-change="toggle_StudentsPage"
                 @size-change="toggle_StudentsPageSize"
@@ -908,7 +945,6 @@
                   v-model="organizationUserVal"
                   placeholder="搜索组织或用户名称"
                   suffix-icon="el-icon-search"
-
                 ></el-input>
                 <el-tree
                   ref="organizationUserTree"
@@ -938,7 +974,6 @@
                 <el-input
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
-
                 ></el-input>
                 <el-tree
                   :data="otherUser"
@@ -1015,35 +1050,85 @@ import {
   getOtherUser,
   getUsersByOrgId,
   getLiveDetails,
-  getStudentByLiveId,
+  getStudentByLiveId
 } from '@/api/live/editLive'
-
+const NODE_TYPE = {
+  All: 'All',
+  Org: 'Org',
+  User: 'User'
+}
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   data() {
     return {
-      totalNum:0,
+      totalNum: 0,
       otherUserVal: '',
       organizationUserVal: '',
       headIndex: 1, //步骤切换
-      ruleForm: {
-        imageUrl: [{}], // 图片
-        introduction: '' // 富文本
-      },
+      // ruleForm: {
+      //   imageUrl: [{}], // 图片
+      //   introduction: '' // 富文本
+      // },
 
       /** tabs 1 的提交数据 */
+
       basicForm: {
         //基本信息表单
-        title: '' // 直播标题
+        title: '', // 直播标题
+        liveClassification_value: '',
+        select_liveStatus_value: '',
+        select_linkNumber_value: '',
+        select_mode_value: 'single', // 当前选择的方式
+        introduction: '',
+        imageUrl: [],
+        start_time: '', // 单次直播开始时间
+        end_time: '', // 单次直播结束时间
+        table_liveTime: [
+          {
+            start_time: '',
+            end_time: ''
+          }
+        ],
+        select_loopCycle_value: '',
+        loopTime: [],
+        select_mode_time_value: [],
+        table_liveTime_str: []
       },
       basicFormRules: {
-        title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }]
+        title: [{ required: true, message: '请输入直播标题', trigger: ['blur', 'change'] }],
+        liveClassification_value: [
+          { required: true, message: '请选择所属分类', trigger: ['blur', 'change'] }
+        ],
+        select_liveStatus_value: [
+          { required: true, message: '请选择直播状态', trigger: ['blur', 'change'] }
+        ],
+        select_linkNumber_value: [
+          { required: true, message: '请选择连麦数', trigger: ['blur', 'change'] }
+        ],
+        select_mode_value: [
+          { required: true, message: '请选择直播方式', trigger: ['blur', 'change'] }
+        ],
+        introduction: [{ required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] }],
+        imageUrl: [
+          { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
+        ],
+        start_time: [{ required: true, message: '请选择开播时间', trigger: ['blur', 'change'] }],
+        end_time: [{ required: true, message: '请选择结束时间', trigger: ['blur', 'change'] }],
+
+        select_loopCycle_value: [
+          { required: true, message: '请选择循环周期', trigger: ['blur', 'change'] }
+        ],
+        select_mode_time_value: [
+          { required: true, message: '请选择直播日期', trigger: ['blur', 'change'] }
+        ],
+        loopTime: [{ required: true, message: '请选择循环日期', trigger: ['blur', 'change'] }],
+        table_liveTime_str: [{ required: true, message: '请选择时间', trigger: ['blur', 'change'] }]
       },
 
       liveClassification: [],
-      liveClassification_value: '',
+      //  liveClassification_value: '',
       liveClassification_option: {
         label: '',
         value: ''
@@ -1053,7 +1138,7 @@ export default {
         children: 'children'
       },
       toggle_scene: 'ppt', // 直播场景切换
-      select_liveStatus_value: 1, //当前选择的状态
+      //  select_liveStatus_value: 1, //当前选择的状态
       select_liveStatus: [
         // 直播状态
         {
@@ -1065,7 +1150,7 @@ export default {
           label: '禁用'
         }
       ],
-      select_linkNumber_value: '', // 当前选择的数量
+      // select_linkNumber_value: '', // 当前选择的数量
       select_linkNumber: [
         // 连麦数量
         {
@@ -1077,7 +1162,7 @@ export default {
           label: '1v7~16'
         }
       ],
-      select_mode_value: 'single', // 当前选择的方式
+      // select_mode_value: 'single', // 当前选择的方式
       select_mode: [
         //直播方式
         {
@@ -1093,8 +1178,8 @@ export default {
           label: '循环直播'
         }
       ],
-      start_time: '', // 单次直播开始时间
-      end_time: '', // 单次直播结束时间
+      // start_time: '', // 单次直播开始时间
+      //  end_time: '', // 单次直播结束时间
       table_liveTime: [
         // 直播设置时间段
         {
@@ -1102,10 +1187,10 @@ export default {
           end_time: ''
         }
       ],
-      select_mode_time_value: [], // 选择的直播日期
+      //   select_mode_time_value: [], // 选择的直播日期
       select_mode_time: [], // 直播日期
-      loopTime: [], // 循环日期
-      select_loopCycle_value: '',
+      // loopTime: [], // 循环日期
+      //  select_loopCycle_value: '',
       select_loopCycle: [
         // 循环周期
         {
@@ -1175,47 +1260,74 @@ export default {
         baseTitle: [{ required: true, message: '请输入标题', trigger: 'blur' }],
         title: [{ required: true, message: '请输入欢迎标题', trigger: 'blur' }],
         code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }]
+        tips: [{ required: true, message: '请输入提示文案', trigger: 'blur' }],
+        imgUrl: [
+          { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
+        ]
       },
       StudentsPage: {
-        pageSize: 10
+        pageSize: 10,
+        currentPage: 1
       }
     }
   },
-  activated() {
-    this.isgetcategoryTree()
-   // this.getStudentInfoList();
-
-  },
-
-  watch:{
-
+  watch: {
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
-      this.valChange(1);
+      this.valChange(1)
     }),
 
     //其他人员
     otherUserVal: _.debounce(function() {
       this.loading = true
-      this.valChange(2);
-    })
+      this.valChange(2)
+    }),
 
-
-
+    'basicForm.imageUrl': {
+      handler() {
+        this.$nextTick(() => {
+          if (this.basicForm.imageUrl.length) {
+            this.$refs.basicForm.validateField('imageUrl', () => {})
+          }
+        })
+      },
+      immediate: false,
+      deep: true
+    },
+    'basicForm.table_liveTime': {
+      handler(newval) {
+        let str = newval.reduce((pre, cur) => {
+          if (cur.start_time && cur.end_time) {
+            pre += 1
+          }
+          return pre
+        }, 0)
+        this.basicForm.table_liveTime_str = str === newval.length ? '1' : null
+      },
+      immediate: false,
+      deep: true
+    }
+  },
+  activated() {
+    this.isgetcategoryTree()
+    // this.getStudentInfoList();
   },
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
-      this.getStudentInfoList();
+      this.getStudentInfoList()
     }
     //   获取直播分类
     getcategoryTree({
       source: 'live'
     }).then((res) => {
-      this.liveClassification = res
+      res.forEach((item) => {
+        if (item.status === 1) {
+          this.liveClassification.push(item)
+        }
+      })
     })
     // 获取其他用户
     getOtherUser({
@@ -1234,8 +1346,7 @@ export default {
     })
   },
   methods: {
-
-       // 数据处理中间函数
+    // 数据处理中间函数
     thruHandler(arr) {
       // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
       if (!this.org) {
@@ -1252,35 +1363,80 @@ export default {
 
       return arr
     },
-    getStudentInfoList(){
+    getStudentInfoList() {
       getStudentByLiveId({
-          liveId:this.$route.query.id,
-          pageNo:1,
-          pageSize: this.StudentsPage.pageSize
-        }).then((res) => {
-          res.data.forEach(item=>{
-              let studentData ={}
-              studentData.phone=item.phoneNum,
-              studentData.userCode=item.userNo,
-              studentData.department=item.orgName,
-              studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)
-          })
-             this.totalNum=res.totalNum
-             this.totalPage=res.totalPage
+        liveId: this.$route.query.id,
+        pageNo: 1,
+        pageSize: 9999999
+      }).then((res) => {
+        res.data.forEach((item) => {
+          let studentData = {}
+          studentData.phone = item.phoneNum
+          studentData.userCode = item.userNo
+          studentData.department = item.orgName
+          studentData.name = item.userName
+          studentData.id = item.userId
+          if (this.table_relatedStudents.length < 10) {
+            this.table_relatedStudents.push(studentData)
+          }
+          this.dialogSelectStudent.push(studentData)
         })
+        this.totalNum = res.totalNum
+        this.totalPage = res.totalPage
+      })
     },
 
     //直播信息填写 下一步校验
     liveNextTable(type) {
-      let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'ruleForm'
+      let base = [
+        'title',
+        'liveClassification_value',
+        'select_liveStatus_value',
+        'select_linkNumber_value',
+        'introduction',
+        'imageUrl'
+      ]
+      let spationArr = []
+      switch (this.basicForm.select_mode_value) {
+        case 'single':
+          spationArr = ['start_time', 'end_time']
+          break
+        case 'plural':
+          spationArr = ['table_liveTime_str']
+          break
+        case 'cycle':
+          spationArr = [
+            'table_liveTime_str',
+            'select_loopCycle_value',
+            'loopTime',
+            'select_mode_time_value'
+          ]
+          break
+      }
+      let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'formLiveTypeForm'
+
       if (!formName) {
-        this.headIndex += 1
+        if (
+          this.table_teacherSet.filter((x) => x.nameList_value).length ===
+          this.table_teacherSet.length
+        ) {
+          this.headIndex += 1
+        } else {
+          this.$message({
+            message: '请完善讲师设置',
+            type: 'error'
+          })
+        }
         return false
       }
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.headIndex += 1
+      let resLength = 0,
+        resArr = [...base, ...spationArr]
+      this.$refs[formName].validateField(resArr, (errmsg) => {
+        if (!errmsg) {
+          resLength += 1
+          if (resLength === resArr.length) {
+            this.headIndex += 1
+          }
         } else {
           return false
         }
@@ -1288,18 +1444,20 @@ export default {
     },
     valChange(type) {
       if (type == 1) {
-        getOrganizationUser({
-          parentId: 1,
-          search: this.organizationUserVal
-        }).then((res) => {
+        let params = this.organizationUserVal
+          ? {
+              search: this.organizationUserVal
+            }
+          : {
+              parentId: 1
+            }
+        getOrganizationUser(params).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
-            item.name = item.name
             res.orgs.push(item)
           })
-
           this.organizationUser = res.orgs
         })
       } else {
@@ -1325,11 +1483,16 @@ export default {
       getcategoryTree({
         source: 'live'
       }).then((res) => {
-        this.liveClassification = res
+        res.forEach((item) => {
+          if (item.status === 1) {
+            this.liveClassification.push(item)
+          }
+        })
       })
     },
     // 返回按钮返回上一页
     tocourseDraft() {
+      this.initData()
       this.$router.go(-1)
     },
     beforeAvatarUpload(file) {
@@ -1356,10 +1519,13 @@ export default {
     // 多次直播和循环直播删除时间段
     delete_table_liveTime(arr, index) {
       arr.splice(index, 1)
+      if (arr.length == 0) {
+        this.basicForm.table_liveTime_str = null
+      }
     },
     // 切换循环周期
     toggle_loopCycle(val) {
-      this.select_mode_time_value = []
+      this.basicForm.select_mode_time_value = []
       switch (val) {
         case 'day':
           this.select_mode_time = [
@@ -1514,63 +1680,68 @@ export default {
     },
     // 关联学员表格批量删除
     delete_batchTableStudent() {
+      let self = this
       this.$confirm('您确定要批量删除所选人员吗？', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        var index = ''
-        this.$refs.table_relatedStudents.selection.forEach((item) => {
-          index = this.table_relatedStudents.findIndex((rowItem) => rowItem.id == item.id)
-          this.table_relatedStudents.splice(index, 1)
+        // var index = ''
+        self.$refs.table_relatedStudents.selection.forEach((item) => {
+          self.dialogSelectStudent.some((x, idx, arr) => {
+            if (x.id === item.id) {
+              arr.splice(idx, 1)
+              return true
+            }
+          })
         })
+        this.toggle_StudentsPage(1)
       })
     },
     // 关联学员表格的分页跳转
-    toggle_StudentsPage(page) {//添加学员
+    toggle_StudentsPage(page) {
+      //添加学员
       this.table_relatedStudents = []
-      if(this.dialogSelectStudent.length>0){
-          this.totalNum =this.dialogSelectStudent.length
-          this.dialogSelectStudent.forEach((item, index) => {
-        if (
-          index >= this.StudentsPage.pageSize * (page - 1) &&
-          index < this.StudentsPage.pageSize * page
-        ) {
-          this.table_relatedStudents.push({
-            userCode: item.userCode,
-            name: item.name,
-            department: item.department,
-            phone: item.phone,
-            id: item.id
-          })
-        }
-      })
-      }else{//编辑入口
-         getStudentByLiveId({
-          liveId:this.$route.query.id,
-          pageNo:page,
+      if (this.dialogSelectStudent.length >= 0) {
+        this.totalNum = this.dialogSelectStudent.length
+        this.dialogSelectStudent.forEach((item, index) => {
+          if (
+            index >= this.StudentsPage.pageSize * (page - 1) &&
+            index < this.StudentsPage.pageSize * page
+          ) {
+            this.table_relatedStudents.push({
+              userCode: item.userCode,
+              name: item.name,
+              department: item.department,
+              phone: item.phone,
+              id: item.id
+            })
+          }
+        })
+        this.StudentsPage.currentPage = page
+      } else {
+        //编辑入口
+        getStudentByLiveId({
+          liveId: this.$route.query.id,
+          pageNo: page,
           pageSize: this.StudentsPage.pageSize
         }).then((res) => {
-          res.data.forEach(item=>{
-              let studentData ={}
-              studentData.phone=item.phoneNum,
-              studentData.userCode=item.userNo,
-              studentData.department=item.orgName,
-              studentData.name=item.userName
-              this.table_relatedStudents.push(studentData)
+          res.data.forEach((item) => {
+            let studentData = {}
+            ;(studentData.phone = item.phoneNum),
+              (studentData.userCode = item.userNo),
+              (studentData.department = item.orgName),
+              (studentData.name = item.userName)
+            this.table_relatedStudents.push(studentData)
           })
-             this.totalNum=res.totalNum
-             this.totalPage=res.totalPage
+          this.totalNum = res.totalNum
+          this.totalPage = res.totalPage
         })
-
-
-
       }
-
-
     },
     toggle_StudentsPageSize(size) {
       this.StudentsPage.pageSize = size
+      this.toggle_StudentsPage(1)
     },
     // 获取讲师表格中每一行所选的嘉宾或教师组合为一个select
     get_table_teacherSet_teacher(table) {
@@ -1647,6 +1818,17 @@ export default {
         })
       } else if (type != 1 && this.teachingTeacherList != []) {
         getQueryAssistant().then((res) => {
+          //已经选择过的  不能被选择
+          this.table_teacherSet.forEach((item) => {
+            if (item.nameList_value) {
+              res.some((x) => {
+                if (x.id === item.nameList_value) {
+                  x.disabled = true
+                  return true
+                }
+              })
+            }
+          })
           this.teachingTeacherList = res
         })
       }
@@ -1676,6 +1858,18 @@ export default {
           getQueryAssistant({
             name: query
           }).then((res) => {
+            //  this.teachingTeacherList = res
+            //已经选择过的  输入置灰
+            this.table_teacherSet.forEach((item) => {
+              if (item.nameList_value) {
+                res.some((x) => {
+                  if (x.id === item.nameList_value) {
+                    x.disabled = true
+                    return true
+                  }
+                })
+              }
+            })
             this.teachingTeacherList = res
           })
           break
@@ -1683,6 +1877,18 @@ export default {
           getQueryAssistant({
             name: query
           }).then((res) => {
+            // this.teachingTeacherList = res
+            //已经选择过的  输入置灰
+            this.table_teacherSet.forEach((item) => {
+              if (item.nameList_value) {
+                res.some((x) => {
+                  if (x.id === item.nameList_value) {
+                    x.disabled = true
+                    return true
+                  }
+                })
+              }
+            })
             this.teachingTeacherList = res
           })
           break
@@ -1699,7 +1905,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        arr.splice(index, 1)
+        this.dialogSelectStudent.some((item, idx, list) => {
+          if (item.id === arr[index].id) {
+            list.splice(idx, 1)
+            return true
+          }
+        })
+        this.toggle_StudentsPage(1)
       })
     },
     // 添加关联学员
@@ -1717,6 +1929,7 @@ export default {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
+            item.name = item.orgName
             res.orgs.push(item)
           })
           this.organizationUser = res.orgs
@@ -1744,6 +1957,7 @@ export default {
       if (node.checkedKeys.indexOf(data.id) != -1) {
         if (data.type == 'user') {
           this.dialogSelectStudent.push({
+            department: data.orgName,
             name: data.name,
             phone: data.phoneNum,
             userCode: data.workNo,
@@ -1755,10 +1969,11 @@ export default {
               var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)
               if (index == -1) {
                 this.dialogSelectStudent.push({
+                  department: resitem.orgFullName,
                   name: resitem.name,
                   phone: resitem.phonenum,
                   userCode: resitem.workNo,
-                  id: resitem.id,
+                  id: resitem.id
                 })
               }
             })
@@ -1782,41 +1997,40 @@ export default {
     liveClassification_nodeClick(data) {
       this.liveClassification_option.label = data.name
       this.liveClassification_option.value = data.idStr
-      this.liveClassification_value = data.idStr
-      this.$refs.ref_liveClassification.blur()
+      this.basicForm.liveClassification_value = data.idStr
+      //  this.$refs.ref_liveClassification.blur()
     },
     // 提交直播信息
 
     submit_live_data() {
       let otherData = []
       let slef = this
-      this.table_teacherSet.forEach(function(item, index){
-        if(item.type===2 ||item.type===3 ){
-          let teacher={}
-          slef.teachingTeacherList.forEach(function(currentValue,index1){
-            if(currentValue.id==item.nameList_value){
-               teacher.nickName=currentValue.name
+      this.table_teacherSet.forEach(function(item) {
+        if (item.type === 2 || item.type === 3) {
+          let teacher = {}
+          slef.teachingTeacherList.forEach(function(currentValue) {
+            if (currentValue.id == item.nameList_value) {
+              teacher.nickName = currentValue.name
             }
           })
-
-          teacher.userActor =item.identity,
-          teacher.roleName =item.role,
-          teacher.userId =item.nameList_value
+          ;(teacher.userActor = item.identity),
+            (teacher.roleName =
+              item.role === '嘉宾' ? 'Guest' : item.role === '助教' ? 'Assistant' : ''),
+            (teacher.userId = item.nameList_value)
           otherData.push(teacher)
         }
-
       })
       var data = {
-        batchDeclare: this.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
-        categoryId: this.liveClassification_value, // 所属分类
+        batchDeclare: this.basicForm.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
+        categoryId: this.basicForm.liveClassification_value, // 所属分类
         channelName: this.basicForm.title, // 直播标题
-        linkMicLimit: this.select_linkNumber_value, //  最大连麦数量
-        isUsed: this.select_liveStatus_value, // 直播状态
-        remark: _.escape(this.ruleForm.introduction), // 直播介绍
+        linkMicLimit: this.basicForm.select_linkNumber_value, //  最大连麦数量
+        isUsed: this.basicForm.select_liveStatus_value, // 直播状态
+        remark: _.escape(this.basicForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
-        otherTeachers:otherData,
-        coverImageUrl: this.ruleForm.imageUrl[this.ruleForm.imageUrl.length - 1].url // 直播封面图
+        otherTeachers: otherData,
+        coverImageUrl: this.basicForm.imageUrl[this.basicForm.imageUrl.length - 1].url // 直播封面图
       }
 
       // 提交关联课程数据
@@ -1829,20 +2043,20 @@ export default {
       // 直播方式，如果为多次或循环直播添加其他字段
       if (data.batchDeclare == 'cycle') {
         data.cycleInfo = {
-          cycleDateRange: this.loopTime[0] + '~' + this.loopTime[1],
-          cycleMode: this.select_loopCycle_value,
-          cycleTime: this.select_mode_time_value.toString()
+          cycleDateRange: this.basicForm.loopTime[0] + '~' + this.basicForm.loopTime[1],
+          cycleMode: this.basicForm.select_loopCycle_value,
+          cycleTime: this.basicForm.select_mode_time_value.toString()
         }
       }
       if (data.batchDeclare == 'single') {
         data.liveBatch = []
         data.liveBatch.push({
-          startTime: this.start_time,
-          endTime: this.end_time
+          startTime: this.basicForm.start_time,
+          endTime: this.basicForm.end_time
         })
       } else {
         data.liveBatch = []
-        this.table_liveTime.forEach((item) => {
+        this.basicForm.table_liveTime.forEach((item) => {
           if (item.id) {
             data.liveBatch.push({
               id: item.id,
@@ -1873,6 +2087,7 @@ export default {
             this.dialogSelectStudent.forEach((item) => {
               data.userAndOrgIds.users.push(item.id)
             })
+            this.totalNum = data.userAndOrgIds.users.length
           }
           break
         case 'code':
@@ -1889,16 +2104,17 @@ export default {
 
       if (this.radio_connectionMode === 'code') {
         //校验第三步是否填写
-        let res =  this.$refs['ruleForm'].validate((valid) => {
-
+        this.$refs['formLiveTypeForm'].validate((valid) => {
           if (valid) {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
               postEditLive(data).then(() => {
+                this.initData()
                 this.$router.push({ path: '/live/liveList' })
               })
             } else {
               postAddLive(data).then(() => {
+                this.initData()
                 this.$router.push({ path: '/live/liveList' })
               })
             }
@@ -1906,43 +2122,42 @@ export default {
             return false
           }
         })
-      }else {
+      } else {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
           postEditLive(data).then(() => {
+            this.initData()
             this.$router.push({ path: '/live/liveList' })
           })
         } else {
           postAddLive(data).then(() => {
+            this.initData()
             this.$router.push({ path: '/live/liveList' })
           })
         }
       }
     },
+    initData() {
+      this.headIndex = 1
+    },
     setLiveDetails(id) {
-      // getStudentList({
-      //   liveId: id,
-      //   pageNo: 1,
-      //   pageSize: 1000
-      // }).then(res=>{
-      //   console.log(res)
-      // })
-
-
-
       getLiveDetails({
         liveId: id
       }).then((res) => {
         (this.basicForm.title = res.channelName),
           (this.liveClassification_option.label = res.categoryName)
         this.liveClassification_option.value = res.categoryId
-        this.liveClassification_value = res.categoryId
-        this.select_liveStatus_value = res.isUsed
-        this.select_linkNumber_value = res.linkMicLimit
+        this.basicForm.liveClassification_value = res.categoryId
+        this.basicForm.select_liveStatus_value = res.isUsed
+        this.basicForm.select_linkNumber_value = res.linkMicLimit
         this.toggle_scene = res.scene
-        this.ruleForm.imageUrl[0].url = res.coverImageUrl
-        this.ruleForm.introduction = _.unescape(res.remark)
-        this.select_mode_value = res.batchDeclare
+        let imgArr = []
+        imgArr.push({
+          url: res.coverImageUrl
+        })
+        this.basicForm.imageUrl = imgArr
+        this.basicForm.introduction = _.unescape(res.remark)
+        this.basicForm.select_mode_value = res.batchDeclare
         this.teachingTeacherList = [
           {
             name: res.lecturerName,
@@ -1956,45 +2171,39 @@ export default {
         })
 
         this.table_teacherSet[0].nameList_value = res.lecturerId
-         getQueryAssistant().then((res) => {
+        getQueryAssistant().then((res) => {
           this.teachingTeacherList = res
         })
         let self = this
-         res.otherTeachers.forEach(function(item,index){
-          let teacherVaue={}
-           if(item.roleName=='嘉宾'){
-            teacherVaue.identity= '嘉宾',
-            teacherVaue.nameList_value= item.userId,
+        res.otherTeachers.forEach(function(item) {
+          let teacherVaue = {}
+          if (item.roleName == 'Guest') {
+            (teacherVaue.identity = '嘉宾'), (teacherVaue.nameList_value = item.userId)
             //teacherVaue.role= '嘉宾',
-            teacherVaue.num='嘉宾' + (index+1),
-            teacherVaue.type= 2
+            let arr_jb = self.table_teacherSet.filter((x) => x.type == 2)
+            ;(teacherVaue.num = '嘉宾' + (arr_jb.length + 1)), (teacherVaue.type = 2)
           }
-          if(item.roleName=='助教'){
-            teacherVaue.identity= '助教',
-            teacherVaue.nameList_value= item.userId,
-          //  teacherVaue.role= '助教',
-            teacherVaue.num='助教' + (index+1),
-            teacherVaue.type= 2
+          if (item.roleName == 'Assistant') {
+            (teacherVaue.identity = '助教'), (teacherVaue.nameList_value = item.userId)
+            //teacherVaue.role= '助教',
+            let arr_zj = self.table_teacherSet.filter((x) => x.type == 3)
+            ;(teacherVaue.num = '助教' + (arr_zj.length + 1)), (teacherVaue.type = 3)
           }
-            self.table_teacherSet.push(teacherVaue)
-
+          self.table_teacherSet.push(teacherVaue)
         })
-
-
-        console.log(this.table_teacherSet)
 
         this.table_relatedCourses = res.courses
 
         // 直播设置
-        switch (this.select_mode_value) {
+        switch (this.basicForm.select_mode_value) {
           case 'single':
-            this.start_time = res.liveBatch[0].startTime
-            this.end_time = res.liveBatch[0].endTime
+            this.basicForm.start_time = res.liveBatch[0].startTime
+            this.basicForm.end_time = res.liveBatch[0].endTime
             break
           case 'plural':
-            this.table_liveTime = []
+            this.basicForm.table_liveTime = []
             res.liveBatch.forEach((item) => {
-              this.table_liveTime.push({
+              this.basicForm.table_liveTime.push({
                 id: item.id,
                 start_time: item.startTime,
                 end_time: item.endTime
@@ -2003,17 +2212,17 @@ export default {
             break
           case 'cycle':
             var loopTimeArr = res.cycleInfo.cycleDateRange.split('~')
-            this.loopTime.push(loopTimeArr[0])
-            this.loopTime.push(loopTimeArr[1])
-            this.select_loopCycle_value = res.cycleInfo.cycleMode
-            this.toggle_loopCycle(this.select_loopCycle_value)
+            this.basicForm.loopTime.push(loopTimeArr[0])
+            this.basicForm.loopTime.push(loopTimeArr[1])
+            this.basicForm.select_loopCycle_value = res.cycleInfo.cycleMode
+            this.toggle_loopCycle(this.basicForm.select_loopCycle_value)
             var arr = res.cycleInfo.cycleTime.split(',')
             arr.forEach((item) => {
-              this.select_mode_time_value.push(parseInt(item))
+              this.basicForm.select_mode_time_value.push(parseInt(item))
             })
-            this.table_liveTime = []
+            this.basicForm.table_liveTime = []
             res.liveBatch.forEach((item) => {
-              this.table_liveTime.push({
+              this.basicForm.table_liveTime.push({
                 id: item.id,
                 start_time: item.startTime,
                 end_time: item.endTime
@@ -2190,7 +2399,6 @@ export default {
     }
   }
 }
-
 .select_liveClassification {
   .el-select-dropdown__item {
     height: auto;

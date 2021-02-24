@@ -146,7 +146,14 @@ export default {
           prop: 'testPaper',
           label: '关联用卷'
         },
-        { itemType: 'slot', span: 24, required: true, prop: 'reviewer', label: '评卷人' },
+        {
+          itemType: 'slot',
+          span: 24,
+          required: true,
+          trigger: ['blur', 'change'],
+          prop: 'reviewer',
+          label: '评卷人'
+        },
         {
           itemType: 'radio',
           prop: 'answerMode',

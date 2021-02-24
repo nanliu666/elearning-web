@@ -35,6 +35,7 @@
           预览
         </el-button> -->
         <el-button
+          v-show="!this.$route.query.id"
           size="medium"
           @click="isAddCourse(2)"
         >
@@ -452,11 +453,6 @@
                       }}
                     </el-button>
 
-                    <el-button
-                      v-if="typeOption[scope.row.type - 1].value === 4"
-                      type="text"
-                    >关联考试</el-button>
-
                     <span v-else>
                       <span v-if="scope.row.fileData.status === 'pending'">
                         等待上传...
@@ -475,7 +471,7 @@
                       >
                         <el-button type="text">{{
                           scope.row.upLoad[0] && scope.row.upLoad[0].localName
-                            ? scope.row.upLoad[0].localName
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
                             : uploadRef[scope.row.type - 2].tips
                         }}</el-button>
                       </common-upload>
@@ -487,19 +483,21 @@
                   > 请选择章节类型 </span>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile === 1">
-                  <span v-if="scope.row.type === 1">{{ scope.row.upLoad[0].localName }}</span>
+                <div v-if="scope.row.saveOrcompile == 1">
+                  <span v-if="scope.row.type == 3 || scope.row.type == 2 || scope.row.type == 1">{{
+                    scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                  }}</span>
                   <div v-else>
-                    <span v-if="scope.row.fileData.status === 'pending'">等待上传...</span>
+                    <span v-if="scope.row.fileData.status == 'pending'">等待上传...</span>
                     <el-progress
-                      v-if="scope.row.fileData.status === 'progress'"
+                      v-if="scope.row.fileData.status == 'progress'"
                       :percentage="scope.row.fileData.percent"
-                      :status="scope.row.fileData.status !== 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status !== 'error'"
+                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
+                      :text-inside="scope.row.fileData.status != 'error'"
                       :stroke-width="18"
                     ></el-progress>
-                    <span v-if="scope.row.fileData.status === 'complete'">{{
-                      scope.row.upLoad[0].localName
+                    <span v-if="scope.row.fileData.status == 'complete'">{{
+                      scope.row.upLoad[scope.row.upLoad.length - 1].localName
                     }}</span>
                   </div>
                 </div>
@@ -640,7 +638,7 @@ import { categoryMap } from '@/const/approve'
 import {
   getCourseTags,
   getCatalog,
-  getCourseContents,
+  // getCourseContents,
   getCourse,
   addCourse,
   listTeacher
@@ -808,7 +806,7 @@ export default {
     this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
-    // this.getInfo()
+    this.getInfo()
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
   },
@@ -956,25 +954,40 @@ export default {
     // 编辑页面的数据后
     getInfo() {
       let id = this.$route.query.id
-      getCourseContents({ courseId: id }).then((res) => {
-        let data = res
-        data.map((item) => {
-          item.upLoad = [{ localName: '', url: '' }]
-          item.upLoad[0].localName = item.localName
-          item.upLoad[0].url = item.url
-        })
-
-        this.ruleForm.contents = data
-      })
+      if (!id) return
       getCourse({ courseId: id }).then((res) => {
-        let data = res
-        data.imageUrl = [{ localName: '', url: '' }]
-        data.imageUrl[0].localName = data.localName
-        data.imageUrl[0].url = data.url
-        data.contents = []
-        data.passCondition = data.passCondition.split(',')
-        this.ruleForm = data
-        this.$forceUpdate()
+        const {
+          localName,
+          url,
+          introduction,
+          thinkContent,
+          passCondition = '',
+          content,
+          catalogId
+        } = res
+        res.passCondition = passCondition.split(',')
+        res.contents = content.map((c) => {
+          const item = {}
+          const { localName = '', content = '', name = '' } = c
+          item.upLoad = [{ localName, content: _.unescape(content), name }]
+          item.saveOrcompile = 1
+          item.type = +c.type
+          item.fileData = {}
+          item.name = c.name
+          return item
+        })
+        res.imageUrl = [{ localName, url }]
+        this.catalogName = catalogId
+        res.catalogId = this.$route.query.catalogName
+
+        // 富方本回显
+        if (introduction) {
+          res.introduction = _.unescape(introduction)
+        }
+        if (thinkContent) {
+          res.thinkContent = _.unescape(thinkContent)
+        }
+        this.ruleForm = res
       })
     },
 
@@ -1077,6 +1090,7 @@ export default {
       //   params.imageUrl = params.imageUrl.splice(1, 1)
       // }
       // this.remember = false
+
       params.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
@@ -1101,22 +1115,25 @@ export default {
       // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
+      params.catalogId =
+        this.$route.query.catalogName == params.catalogId ? this.catalogName : params.catalogId
       // params.tagIds = params.tagIds.join(',')
       // 富文本要转换传后端
       params.introduction = _.escape(params.introduction)
       params.thinkContent = _.escape(params.thinkContent)
 
-      // 查一下章节有没有内容 没有提示一下
+      // 查一下章节有没有内容 做一下校验
+      let upIndexArr = []
       params.contents.map((item, index) => {
-        if (item.type) {
-          if (item.content === '') {
-            this.$message.error(`第${index + 1}条章节内容没有上传，请重新上传或者删除该章节内容`)
-            return
-          }
+        if (item.localName == '' || item.name == '' || item.type == '') {
+          upIndexArr.push(index + 1)
         }
       })
+      if (upIndexArr.length) {
+        this.$message.error(`第${upIndexArr}条章节内容或有遗漏，请重新编辑或者删除该章节内容`)
+      }
+      if (upIndexArr.length) return
 
-      // window.console.log(params)
       // 草稿
 
       if (status === 2) {
@@ -1191,26 +1208,29 @@ export default {
     },
     // 提交课程审批
     submitApprApply(courseId) {
+      //创建课程  直接发布  给ruleForm 添加id,catalogName字段
+      this.ruleForm.id = courseId
+      this.ruleForm.catalogName = this.parentOrgIdLabel
       this.$refs.apprSubmit
         .submit({
           formId: courseId,
           processName: categoryMap['1'],
           formKey: 'CourseApplyInfo',
           // 课程标题
-          formTitle: this.ruleForm.name
+          formTitle: this.ruleForm.name,
+          formData: JSON.stringify(this.ruleForm)
         })
         .then(() => {
-          //发布成功清除数据
-          this.isdeleteData()
           this.$message({
             message: '本课程已发布成功',
             type: 'success'
           })
-          this.isdeleteData()
           setTimeout(() => {
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
+            //发布成功清除数据
+            this.isdeleteData()
           }, 3000)
         })
     },
@@ -1251,6 +1271,7 @@ export default {
       this.$refs.apprSubmit.handleClose()
       this.headIndex = 1
       this.parentOrgIdLabel = ''
+      this.$refs.ruleForm.resetFields()
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/

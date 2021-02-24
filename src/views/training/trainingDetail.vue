@@ -11,7 +11,9 @@
       <div class="title_box_headline">
         <div class="title_box_headline_l">
           {{ showTrainDetail.trainName }}
-          <span>未开始</span>
+          <span v-if="showTrainDetail.status === 3">已结束</span>
+          <span v-if="showTrainDetail.status === 1">未开始</span>
+          <span v-if="showTrainDetail.status === 2">进行中</span>
         </div>
         <div class="title_box_headline_r">
           <el-button
@@ -201,11 +203,13 @@
         <div class="introduce_title_r">
           <span
             v-show="isShowIntroduce"
+            style="cursor:pointer;"
             @click="isShowIntroduce = false"
           >
             <i class="el-icon-arrow-up"></i>&nbsp;收起</span>
           <span
             v-show="!isShowIntroduce"
+            style="cursor:pointer;"
             @click="isShowIntroduce = true"
           >
             <i class="el-icon-arrow-down"></i>&nbsp;展开</span>
@@ -231,14 +235,17 @@
       <div class="select_bar">
         <span
           :class="{ select: status === 1 }"
+          style="cursor:pointer;"
           @click="status = 1"
         >学员概况</span>
         <span
           :class="{ select: status === 2 }"
+          style="cursor:pointer;"
           @click="status = 2"
         >培训安排</span>
         <span
           :class="{ select: status === 3 }"
+          style="cursor:pointer;"
           @click="status = 3"
         >评估结果</span>
       </div>
@@ -267,7 +274,7 @@
                   :require-options="searchPopoverConfig.requireOptions"
                   @submit="handleSearch"
                 />
-                <div class="operations__btns">
+                <!-- <div class="operations__btns">
                   <el-tooltip
                     class="operations__btns--tooltip"
                     content="刷新"
@@ -282,15 +289,10 @@
                       type="text"
                       @click="refreshTableData"
                     >
-                      <!-- <i class="iconfont iconicon_refresh" /> -->
                     </el-button>
                   </el-tooltip>
-                  <span class="text_refresh">刷新</span>
-                  <el-popover
-                    placement="bottom"
-                    width="40"
-                    trigger="click"
-                  >
+                  <span class="text_refresh"  style="cursor:pointer;">刷新</span>
+                  <el-popover placement="bottom" width="40" trigger="click">
                     <el-tooltip
                       slot="reference"
                       class="operations__btns--tooltip"
@@ -305,11 +307,8 @@
                         icon="el-icon-setting"
                         style="color:#acb3b8;"
                       >
-                        <!-- <i class="iconfont iconicon_setting" /> -->
                       </el-button>
                     </el-tooltip>
-
-                    <!-- 设置表格列可见性 -->
                     <div class="operations__column--visible">
                       <el-checkbox-group v-model="columnsVisible">
                         <el-checkbox
@@ -324,7 +323,7 @@
                       </el-checkbox-group>
                     </div>
                   </el-popover>
-                </div>
+                </div> -->
               </div>
             </template>
 
@@ -332,9 +331,16 @@
               <el-button
                 style="margin-bottom:0;"
                 type="text"
-                @click="() => handleRemoveItems(selection)"
+                @click="() => handleRemoveItems(selection, 1)"
               >
-                批量删除
+                发放证书
+              </el-button>
+              <el-button
+                style="margin-bottom:0;"
+                type="text"
+                @click="() => handleRemoveItems(selection, 0)"
+              >
+                撤回证书
               </el-button>
             </template>
 
@@ -343,7 +349,10 @@
               slot="stuName"
               slot-scope="{ row }"
             >
-              <el-button type="text">
+              <el-button
+                type="text"
+                @click="toUserDetail(row)"
+              >
                 {{ row.stuName }}
               </el-button>
             </template>
@@ -352,14 +361,14 @@
               slot="electiveProgress"
               slot-scope="{ row }"
             >
-              <el-progress :percentage="row.electiveProgress"></el-progress>
+              <el-progress :percentage="row.electiveProgress || 0"></el-progress>
             </template>
             <!-- 在线学习进度(必修) -->
             <template
               slot="onlineProgress"
               slot-scope="{ row }"
             >
-              <el-progress :percentage="row.onlineProgress"></el-progress>
+              <el-progress :percentage="row.onlineProgress || 0"></el-progress>
             </template>
 
             <!-- 考试情况 // 1：已通过；2：未通过；3：未开始）-->
@@ -683,7 +692,6 @@
 
 <script>
 // 培训详情
-import { deleteMenuInfo, getMenuInfo } from '@/api/system/menu'
 import { delCourseInfo } from '@/api/course/course'
 import { getOfflineTodo } from '@/api/training/training'
 import {
@@ -745,26 +753,14 @@ const TABLE_COLUMNS = [
   }
 ]
 const TABLE_CONFIG = {
+  rowKey: 'stuId',
   handlerColumn: {
     width: 100
   },
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false,
-
-  // 树形结构懒加载
-  lazy: true,
-  load: async (row, treeNode, resolve) => {
-    try {
-      let items = await getMenuInfo(row.menuId)
-      resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
-    } catch (err) {
-      resolve([])
-    }
-  },
-  rowKey: 'menuId',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  showIndexColumn: false
 }
 const TABLE_PAGE_CONFIG = {}
 
@@ -907,6 +903,18 @@ export default {
   },
 
   created() {
+    // this.refreshTableData()
+    // this.isStudentList({ trainId: 1 })
+    // this.isGetOnlineCourse()
+    // // this.isGetCatalogs()
+    // this.isGetOfflineTodo()
+    // this.isGetTrainDetail()
+    // this.isgetTrainEvaluate()
+    // this.isExamList()
+  },
+  activated() {
+    // this.loadData()
+    // this.getInfo()
     this.refreshTableData()
     this.isStudentList({ trainId: 1 })
     this.isGetOnlineCourse()
@@ -916,11 +924,11 @@ export default {
     this.isgetTrainEvaluate()
     this.isExamList()
   },
-  activated() {
-    // this.loadData()
-    // this.getInfo()
-  },
   methods: {
+    // 去用户详情
+    toUserDetail(row) {
+      this.$router.push({ path: '/system/userDetail', query: { userId: row.stuId } })
+    },
     // 去开办下一期
     handleConfig() {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
@@ -1025,6 +1033,7 @@ export default {
       // let id = '1332136482139570178'
       getTrainDetail({ trainId: id }).then((res) => {
         this.showTrainDetail = res
+        this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction)
       })
     },
 
@@ -1113,16 +1122,52 @@ export default {
       this.isStudentList(searchParams)
     },
 
-    handleRemoveItems(selection) {
-      this.$confirm('确定将选择数据删除?', {
-        type: 'warning'
-      })
-        .then(() => deleteMenuInfo(_.map(selection, ({ menuId }) => menuId).join(',')))
+    handleRemoveItems(selection, i) {
+      let idData = _.map(selection, ({ stuId }) => stuId).join(',')
+
+      this.$confirm(
+        `您确定要为${selection[0].stuName}等${selection.length}个学员${
+          i ? '发放证书' : '撤回证书'
+        }吗？`,
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
         .then(() => {
-          // 删除完成后更新视图
-          this.$refs.table.clearSelection()
-          this.refreshTableData()
+          this.batchFn(idData, i)
         })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          })
+        })
+    },
+
+    // 批量发放证书&撤回证书
+    batchFn(idData, i) {
+      if (i) {
+        grantCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(() => {
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          })
+          this.$refs.table.clearSelection()
+          this.isStudentList()
+        })
+      } else {
+        revokeCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(() => {
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          })
+          this.$refs.table.clearSelection()
+          this.isStudentList()
+        })
+      }
     },
 
     // 刷新列表数据

@@ -20,7 +20,7 @@
           <div class="operate-left">
             <div class="input-wrapper">
               <el-input
-                v-model="filterForm[currentTable].search"
+                v-model="filterForm[currentTable].titleOrNo"
                 :disabled="loading[currentTable]"
                 clearable
                 size="medium"
@@ -46,13 +46,14 @@
                 style="padding: 24px;"
               >
                 <el-form-item label="所属分类">
-                  <el-input
+                  <el-cascader
                     v-model="filterForm[currentTable].categoryId"
-                    clearable
                     style="width: 202px;"
-                    placeholder="请输入所属分类"
-                  >
-                  </el-input>
+                    placeholder="请选择所属分类"
+                    :options="categoryData"
+                    :props="{ checkStrictly: true, label: 'name', value: 'idStr' }"
+                    clearable
+                  ></el-cascader>
                 </el-form-item>
 
                 <el-form-item label="创建人">
@@ -66,17 +67,17 @@
                 </el-form-item>
                 <el-form-item label="状态">
                   <el-select
-                    v-model="filterForm[currentTable].examStatus"
+                    v-model="filterForm[currentTable].isUsed"
                     clearable
                     placeholder="请选择状态"
                   >
                     <el-option
                       label="正常"
-                      :value="1"
+                      value="1"
                     ></el-option>
                     <el-option
                       label="停用"
-                      :value="0"
+                      value="0"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -94,7 +95,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        search: filterForm[currentTable].search
+                        titleOrNo: filterForm[currentTable].titleOrNo
                       }
                     "
                   >
@@ -135,7 +136,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        search: filterForm[currentTable].search
+                        titleOrNo: filterForm[currentTable].titleOrNo
                       }
                     "
                   >
@@ -238,12 +239,12 @@
           <el-table-column
             v-if="columns[currentTable]['状态']"
             align="center"
-            prop="status"
+            prop="isUsed"
             :show-overflow-tooltip="true"
             label="状态"
           >
             <template slot-scope="scope">
-              {{ scope.row.status == 1 ? '正常' : '停用' }}
+              {{ scope.row.isUsed == '1' ? '正常' : '停用' }}
             </template>
           </el-table-column>
           <el-table-column
@@ -334,7 +335,7 @@
 
 <script>
 import Pagination from '@/components/common-pagination'
-import { getLiveList, getAudienceListPerson } from '@/api/live'
+import { getLiveList, getAudienceListPerson, getCategoryTree } from '@/api/live'
 import { getOrgTree } from '@/api/org/org'
 export default {
   name: 'LiveStat',
@@ -366,7 +367,7 @@ export default {
           titleOrNo: '',
           categoryId: '',
           creatorId: '',
-          isUsed: '1',
+          isUsed: '',
           pageNo: 1,
           pageSize: 10
         },
@@ -382,7 +383,7 @@ export default {
           titleOrNo: '',
           categoryId: '',
           creatorId: '',
-          isUsed: '1',
+          isUsed: '',
           pageNo: 1,
           pageSize: 10
         },
@@ -401,12 +402,13 @@ export default {
         live: true,
         person: true
       },
-      orgData: []
+      orgData: [],
+      categoryData: []
     }
   },
   computed: {
     searchValWatcher() {
-      return this.filterForm[this.currentTable].search
+      return this.filterForm[this.currentTable].titleOrNo
     }
   },
   watch: {
@@ -420,8 +422,14 @@ export default {
   created() {
     this.getList()
     this.getOrgTree()
+    this.getCategoryTree()
   },
   methods: {
+    getCategoryTree() {
+      getCategoryTree({ source: 'live' }).then((res) => {
+        this.categoryData = res
+      })
+    },
     getOrgTree() {
       getOrgTree({ parentOrgId: 0 }).then((res) => {
         this.orgData = res

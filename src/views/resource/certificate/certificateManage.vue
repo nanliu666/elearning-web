@@ -98,13 +98,14 @@
           >
             停用
           </el-button>
-          <span
+          <el-button
             v-else
             v-p="STOP_CERTIFICATE"
-            class="startBtn"
+            type="text"
             @click.stop="blockStart(row.id, 1)"
-          >启用 &nbsp;
-          </span>
+          >
+            启用 &nbsp;
+          </el-button>
           <!-- 预览框 -->
           <el-tooltip
             v-p="PREVIEW_CERTIFICATE"
@@ -434,7 +435,7 @@ export default {
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '已取消删除'
+            message: '已取消操作'
           })
         })
     },
@@ -499,11 +500,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.startBtn {
-  color: #d7d7d7;
-  cursor: pointer;
-}
-
 .preview_right_box {
   position: relative;
   border: 1px solid #d9dbdc;

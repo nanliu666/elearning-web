@@ -126,7 +126,17 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  mounted() {},
+  watch: {
+    userList: {
+      handler(list) {
+        list.forEach((item) => {
+          item.orgName = item.orgName || '-'
+          item.phoneNum = item.phoneNum || '-'
+        })
+      },
+      deep: true
+    }
+  },
   methods: {
     handleAddUser() {
       this.userPicking = true
@@ -150,9 +160,9 @@ export default {
                 bizId: item.userId,
                 bizName: item.name,
                 orgName: item.orgName,
-                department: item.orgName,
+                department: item.orgName || '-',
                 departmentId: item.orgId,
-                phonenum: item.phoneNum,
+                phonenum: item.phoneNum || '-',
                 studyPlanId: this.planId,
                 type: 'User',
                 isLeaf: true
@@ -165,22 +175,40 @@ export default {
       })
     },
     handleDelete(row) {
-      this.$emit(
-        'update:user-list',
-        _.filter(this.userList, (user) => user.userId !== row.userId)
-      )
+      this.$confirm('你确定要删除该人员?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$emit(
+            'update:user-list',
+            _.filter(this.userList, (user) => user.userId !== row.userId)
+          )
+          this.$message.success('删除成功')
+        })
+        .catch(() => {})
     },
     handleMultiDelete(selection) {
-      let selectedIdMap = _.reduce(
-        selection,
-        (pre, cur) => {
-          pre[cur.userId] = 1
-          return pre
-        },
-        {}
-      )
-      this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
-      this.$emit('update:user-list', this.userList)
+      this.$confirm('你确定要批量删除所选人员?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          let selectedIdMap = _.reduce(
+            selection,
+            (pre, cur) => {
+              pre[cur.userId] = 1
+              return pre
+            },
+            {}
+          )
+          this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
+          this.$emit('update:user-list', this.userList)
+          this.$message.success('删除成功')
+        })
+        .catch(() => {})
     }
   }
 }

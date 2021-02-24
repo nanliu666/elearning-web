@@ -1118,4 +1118,7 @@ $color_icon: #A0A8AE
   color: #01aafc;
   margin-left: 20px;
 }
+/deep/.el-table__empty-block {
+  text-align: left;
+}
 </style>

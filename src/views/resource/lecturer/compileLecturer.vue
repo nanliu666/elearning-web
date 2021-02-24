@@ -129,6 +129,7 @@
               </el-form-item> -->
 
               <!-- 移过来的tree -->
+
               <el-form-item
                 label="所属分类"
                 prop="categoryId"
@@ -448,6 +449,8 @@ export default {
       data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
       data.teacherInfo.phonenum = this.$route.query.phonenum
       data.teacherInfo.isRecommend = data.teacherInfo.isRecommend == 0 ? false : true
+      data.teacherInfo.categoryId = data.teacherInfo.categoryIdStr
+      this.parentOrgIdLabel = data.teacherInfo.categoryName
       this.ruleForm = data.teacherInfo
       this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
     },
@@ -538,12 +541,6 @@ export default {
 
     // 添加讲师
     isAddTeacher(i) {
-      // let categoryId = []
-      // categoryId.push(
-      //   this.ruleForm.categoryId
-      //     ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
-      //     : ''
-      // )
       this.ruleForm.categoryId = this.ruleForm.categoryId
         ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
         : ''
@@ -556,6 +553,7 @@ export default {
         )
       this.ruleForm.attachments = attachments
       this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
+      this.ruleForm.categoryId = this.ruleForm.catalogId
 
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {

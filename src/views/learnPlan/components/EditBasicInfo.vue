@@ -127,6 +127,11 @@ export default {
           this.$set(this.model, 'categoryName', node.label)
         }
       }
+    },
+    $route(to) {
+      if (to.path === '/learnPlan/CoursePlanList') {
+        this.$refs.form.resetFields()
+      }
     }
   },
   created() {

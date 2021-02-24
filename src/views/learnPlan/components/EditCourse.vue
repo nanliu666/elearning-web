@@ -330,12 +330,28 @@ export default {
     },
     // 删除课程
     handleDeleteCourse() {
-      this.courseList = _.filter(
-        this.courseList,
-        (item) => !this.checkedCourseIds.includes(item.courseId)
-      )
-      this.checkedCourseIds = []
-      this.checkboxGroupChange(this.checkedCourseIds)
+      if (!this.checkedCourseIds.length) {
+        this.$message.warning('请选择要删除的课程')
+        return
+      }
+      this.$confirm('是否删除已选中的课程?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.courseList = _.filter(
+            this.courseList,
+            (item) => !this.checkedCourseIds.includes(item.courseId)
+          )
+          this.checkedCourseIds = []
+          this.checkboxGroupChange(this.checkedCourseIds)
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          })
+        })
+        .catch(() => {})
     },
     // 添加课程
     handleAddCourse() {

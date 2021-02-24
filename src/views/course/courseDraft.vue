@@ -233,75 +233,95 @@
               slot="handler"
               slot-scope="scope"
             >
-              <el-button
-                v-if="scope.row.isTop == 0"
-                v-p="TOP_COURSE"
-                type="text"
-                size="medium"
-                @click.stop="handleConfig(scope.row, 1)"
-              >
-                置顶
-              </el-button>
-              <el-button
-                v-if="scope.row.isTop == 1"
-                v-p="TOP_COURSE"
-                type="text"
-                size="medium"
-                @click.stop="handleConfig(scope.row, 0)"
-              >
-                已置顶
-              </el-button>
-              <el-button
-                v-if="scope.row.isPutaway === 1"
-                v-p="PUTAWAY_COURSE"
-                type="text"
-                size="medium"
-                @click="alterIsPutaway(scope.row.id, 0)"
-              >
-                下架
-              </el-button>
-              <el-button
-                v-if="scope.row.isPutaway === 0"
-                v-p="PUTAWAY_COURSE"
-                type="text"
-                size="medium"
-                @click="alterIsPutaway(scope.row.id, 1)"
-              >
-                上架
-              </el-button>
-              <el-dropdown
-                v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
-                trigger="hover"
-                style="color: #a0a8ae"
-                @command="handleCommand($event, scope.row)"
-              >
-                <span
-                  class="el-dropdown-link"
-                  style="margin-left: 10px"
+              <!-- 已发布 -->
+              <div v-show="status == 1">
+                <el-button
+                  v-if="scope.row.isTop == 0"
+                  v-p="TOP_COURSE"
+                  type="text"
+                  size="medium"
+                  @click.stop="handleConfig(scope.row, 1)"
                 >
-                  <i class="el-icon-more" />
-                </span>
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item
-                    v-p="EDIT_COURSE"
-                    command="edit"
+                  置顶
+                </el-button>
+                <el-button
+                  v-if="scope.row.isTop == 1"
+                  v-p="TOP_COURSE"
+                  type="text"
+                  size="medium"
+                  @click.stop="handleConfig(scope.row, 0)"
+                >
+                  已置顶
+                </el-button>
+                <el-button
+                  v-if="scope.row.isPutaway === 1"
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  size="medium"
+                  @click="alterIsPutaway(scope.row.id, 0)"
+                >
+                  下架
+                </el-button>
+                <el-button
+                  v-if="scope.row.isPutaway === 0"
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  size="medium"
+                  @click="alterIsPutaway(scope.row.id, 1)"
+                >
+                  上架
+                </el-button>
+                <el-dropdown
+                  v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
+                  trigger="hover"
+                  style="color: #a0a8ae"
+                  @command="handleCommand($event, scope.row)"
+                >
+                  <span
+                    class="el-dropdown-link"
+                    style="margin-left: 10px"
                   >
-                    编辑
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="DELETE_COURSE"
-                    command="del"
-                  >
-                    删除
-                  </el-dropdown-item>
-                  <el-dropdown-item
-                    v-p="MOVE_COURSE"
-                    command="move"
-                  >
-                    移动
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
+                    <i class="el-icon-more" />
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item
+                      v-p="EDIT_COURSE"
+                      command="edit"
+                    >
+                      编辑
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      v-p="DELETE_COURSE"
+                      command="del"
+                    >
+                      删除
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      v-p="MOVE_COURSE"
+                      command="move"
+                    >
+                      移动
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </div>
+              <!-- 草稿 -->
+              <div v-show="status == 2">
+                <el-button
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  @click="handleCommand('edit', scope.row)"
+                >
+                  编辑
+                </el-button>
+                <el-button
+                  v-p="PUTAWAY_COURSE"
+                  type="text"
+                  @click="handleCommand('del', scope.row)"
+                >
+                  删除
+                </el-button>
+              </div>
             </template>
           </common-table>
         </basic-container>
@@ -619,7 +639,7 @@ export default {
         pageSize: 10,
         total: 0
       },
-
+      searchParams: '',
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
@@ -818,7 +838,7 @@ export default {
       if (e === 'edit') {
         // 去编辑
         this.$router.push({
-          path: '/course/compileCourse?id=' + row.id + '&catalogName=' + row.catalogName
+          path: '/course/establishCourse?id=' + row.id + '&catalogName=' + row.catalogName
         })
       }
       if (e === 'del') {
@@ -862,6 +882,7 @@ export default {
     },
 
     handleSearch(searchParams) {
+      this.searchParams = searchParams
       this.getInfo(searchParams)
     },
 
@@ -962,8 +983,8 @@ export default {
     },
 
     // 拿数据
-    getInfo(courseName) {
-      if (courseName) {
+    getInfo(searchParams) {
+      if (searchParams) {
         this.page.pageNo = 1
         this.page.pageSize = 10
       }
@@ -973,44 +994,15 @@ export default {
         status: ''
       }
 
-      params = { ...this.page, ...courseName }
+      params = { ...this.page, ...this.searchParams }
       params.status = this.status
 
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
-
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
-        // 下拉筛选框
-        // let data1 = JSON.parse(JSON.stringify(res.data))
-        // data1 = this.arrayUnique(data1, 'teacherName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
-        // let data2 = JSON.parse(JSON.stringify(res.data))
-        // data2 = this.arrayUnique(data2, 'catalogName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
-        // let data7 = JSON.parse(JSON.stringify(res.data))
-        // data7 = this.arrayUnique(data7, 'creatorName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        // SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
-        // SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
-
-        // this.tableData.forEach((item) => {
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push({
-        //     value: item.teacherName,
-        //     label: item.teacherName
-        //   }) //讲师
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-        //     value: item.catalogName,
-        //     label: item.catalogName
-        //   }) //所在目录
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push({
-        //     value: item.creatorName,
-        //     label: item.creatorName
-        //   }) //创建人
-        // })
       })
     },
     // 导航
