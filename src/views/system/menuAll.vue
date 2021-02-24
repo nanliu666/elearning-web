@@ -156,7 +156,7 @@
 </template>
 
 <script>
-// 留个口子getMenuInfo == > getMenuAll
+//TODO 留个口子getMenuInfo == > getMenuAll
 import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
 
 // 表格属性
@@ -261,7 +261,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-  // defaultExpandAll: true,
+  // defaultExpandAll: true, //TODO: 开发预留
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
@@ -411,7 +411,6 @@ export default {
     },
 
     // 加载表格数据
-    // TODO: 分页还未实现
     async loadTableData(param = {}, page) {
       if (this.tableLoading) {
         return
@@ -427,12 +426,12 @@ export default {
         }))
         // 更新分页器数据
         this.page.total = _.size(tableData)
-        // 用来批量增加鉴权
-        // _.each(this.tableData, item => {
+        // TODO:用来批量增加鉴权
+        // _.each(this.tableData, (item) => {
         //   const loop = (node) => {
         //     node.hasChildren = false
-        //     if(_.isEmpty(item.children)) return
-        //     _.each(node.children, child => {
+        //     if (_.isEmpty(item.children)) return
+        //     _.each(node.children, (child) => {
         //       loop(child)
         //     })
         //   }

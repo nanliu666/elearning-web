@@ -1,15 +1,25 @@
 <template>
   <div class="Menu fill">
-    <page-header title="证书管理">
+    <page-header title="证书发放明细">
       <template slot="rightMenu">
         <el-button
-          v-p="ADD_CERTIFICATE"
+          v-p="EXPORT_CERTIFICATE"
           type="primary"
           size="medium"
-          @click="toAddCertificate"
+          @click="isexportGrantExcel"
         >
-          新建模板
+          <!-- <el-button type="primary" size="small" @click="downloadTable" class="button">
+            <a :href="url" ref="file" :download="downloadName"></a>
+            <i class="el-icon-upload"></i> 导出
+          </el-button> -->
+
+          导出Excel
         </el-button>
+        <a
+          ref="file"
+          :href="downloadurl"
+          :download="downloadurl"
+        ></a>
       </template>
     </page-header>
     <basic-container block>
@@ -37,19 +47,19 @@
                 class="refresh-container"
                 @click="loadTableData"
               >
-                <i class="el-icon-refresh-right" />
-                <span>刷新</span>
+                <!-- <i class="el-icon-refresh-right" />
+                <span>调整排序</span> -->
               </div>
               <el-popover
                 placement="bottom"
                 width="40"
                 trigger="click"
               >
-                <i
+                <!-- <i
                   slot="reference"
                   style="cursor: pointer;"
                   class="el-icon-setting"
-                />
+                /> -->
                 <!-- 设置表格列可见性 -->
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
@@ -58,7 +68,6 @@
                       :key="item.prop"
                       :label="item.prop"
                       class="operations__column--item"
-                      :disabled="item.label == '编号' || item.label == '模板名称'"
                     >
                       {{ item.label }}
                     </el-checkbox>
@@ -74,7 +83,7 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="DELETE_CERTIFICATE"
+            v-p="'/certificate/certificateDetail/deleteAll'"
             type="text"
             size="medium"
             icon="el-icon-delete"
@@ -84,89 +93,11 @@
           </el-button>
         </template>
 
-        <!-- 状态 -->
-        <template #status="{row}">
-          {{ row.status === 0 ? '停用' : '正常' }}
-        </template>
-
-        <template #handler="{row}">
-          <el-button
-            v-if="row.status"
-            v-p="STOP_CERTIFICATE"
-            type="text"
-            @click.stop="blockStart(row.id, 0)"
-          >
-            停用
-          </el-button>
-          <el-button
-            v-else
-            v-p="STOP_CERTIFICATE"
-            type="text"
-            @click.stop="blockStart(row.id, 1)"
-          >启用 &nbsp;
-          </el-button>
-          <!-- 预览框 -->
-          <el-tooltip
-            v-p="PREVIEW_CERTIFICATE"
-            placement="top"
-            effect="light"
-          >
-            <div
-              slot="content"
-              class="preview"
-            >
-              <div class="previewTitle">
-                <span>预览</span>
-              </div>
-              <div class="previewContent">
-                <div class="preview_right_box">
-                  <img
-                    :src="preview.backUrl"
-                    alt=""
-                    class="bgimg"
-                  />
-                  <div class="name">
-                    {{ preview.name }}
-                  </div>
-                  <div class="text">
-                    {{ preview.text }}
-                  </div>
-                  <img
-                    v-if="preview.logoUrl"
-                    :src="preview.logoUrl"
-                    alt=""
-                    class="logo"
-                  />
-                  <div class="studentName">
-                    张三
-                  </div>
-                  <div class="serial">
-                    <div>证书编号:</div>
-                    <div>YB-20201130-0001</div>
-                    <div>{{ preview.createTime }}</div>
-                  </div>
-                </div>
-              </div>
-              <!-- <div class="previewBtn">
-                <el-button>取消</el-button>
-                <el-button type="primary">
-                  确定
-                </el-button>
-              </div> -->
-            </div>
-            <el-button type="text">
-              <span @mouseover="previewMouseOver(row.id)">预览</span>
-            </el-button>
-          </el-tooltip>
-
-          <el-button
-            v-p="DELETE_CERTIFICATE"
-            type="text"
-            @click="handleRemove(row)"
-          >
-            删除
-          </el-button>
-        </template>
+        <!-- <template slot="resName" slot-scope="{ row }">
+          <div class="ellipsis title" @click="jumpDetail(row)">
+            {{ row.resName }}
+          </div>
+        </template> -->
       </common-table>
     </basic-container>
   </div>
@@ -175,44 +106,48 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 import {
-  getCertificateList,
-  getSingleCertificate,
-  updateStatus,
-  delTemplate
+  delTemplate,
+  getCertificateGrantList,
+  delGrantDetails,
+  exportGrantExcel
 } from '@/api/certificate/certificate'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 70,
-    type: 'index'
+    label: '学员编号',
+    width: 150,
+    prop: 'stuNo'
   },
   {
-    label: '模板名称',
-    width: 180,
-    prop: 'name'
+    label: '姓名',
+    width: 100,
+    prop: 'stuName'
   },
   {
-    label: '文案',
-    prop: 'text',
-    width: 300
+    label: '部门',
+    prop: 'deptName	',
+    width: 200
   },
   {
-    label: '颁发机构',
-    prop: 'awardAgency',
-    minWidth: 100
+    label: '证书编号',
+    prop: 'certificateNo',
+    minWidth: 150
   },
   {
-    label: '状态',
-    slot: true,
-    prop: 'status',
-    minWidth: 100
+    label: '模版名称',
+    prop: 'templateName',
+    minWidth: 150
+  },
+  {
+    label: '发放时间',
+    prop: 'grantTime',
+    minWidth: 150
   }
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
-  showHandler: true,
+  //   showHandler: true,
   enableMultiSelect: true,
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
@@ -222,72 +157,35 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入模板名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入证书编号/姓名进行搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'stuName',
     label: '',
-    type: 'input'
+    type: 'input',
+    width: 300
   }
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'input',
-    field: 'agency',
-    label: '颁发机构',
-    data: ''
-    // config: { optionLabel: 'name', optionValue: 'id' }
+    type: 'dataPicker',
+    label: '日期范围',
+    data: '',
+    field: 'beginEntryDate,endEntryDate',
+    config: { type: 'daterange', 'range-separator': '至' }
   },
   {
-    type: 'select',
-    field: 'status',
-    label: '状态',
-    data: '',
-    options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
-    ]
+    config: { placeholder: '请输入证书模版名称' },
+    type: 'input',
+    field: 'templateName',
+    label: '证书模版',
+    data: ''
   }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
-import {
-  ADD_CERTIFICATE,
-  STOP_CERTIFICATE,
-  PREVIEW_CERTIFICATE,
-  DELETE_CERTIFICATE
-} from '@/const/privileges'
-import { mapGetters } from 'vuex'
+import { EXPORT_CERTIFICATE } from '@/const/privileges'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -300,9 +198,10 @@ export default {
   },
   data() {
     return {
+      downloadurl: '',
+      downloadName: '',
       preview: {},
       moveKnowledgeRow: {},
-      formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
       },
@@ -331,120 +230,39 @@ export default {
     }
   },
   computed: {
-    ADD_CERTIFICATE: () => ADD_CERTIFICATE,
-    STOP_CERTIFICATE: () => STOP_CERTIFICATE,
-    PREVIEW_CERTIFICATE: () => PREVIEW_CERTIFICATE,
-    DELETE_CERTIFICATE: () => DELETE_CERTIFICATE,
-    ...mapGetters(['privileges'])
-  },
-  watch: {
-    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
-    privileges: {
-      handler() {
-        this.tableConfig.showHandler = this.$p([
-          ADD_CERTIFICATE,
-          STOP_CERTIFICATE,
-          PREVIEW_CERTIFICATE,
-          DELETE_CERTIFICATE
-        ])
-      },
-      deep: true
-    }
+    EXPORT_CERTIFICATE: () => EXPORT_CERTIFICATE
   },
   activated() {
     // this.initSearchData()
     this.refreshTableData()
   },
   methods: {
+    //   导出证书发放列表Excel
+    async isexportGrantExcel() {
+      this.downloadurl = await exportGrantExcel(this.queryInfo)
+      this.$refs.file.click()
+    },
     // 去新建证书
     toAddCertificate() {
-      this.$router.push({ path: '/certificate/addCertificate' })
+      this.$router.push({ path: '/resource/certificate/addCertificate' })
     },
     // 批量删除
-    multipleDeleteClick(selected) {
+    async multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      // 提示
-      this.$confirm('您确定要删除选中的证书模版吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(async () => {
-          await delTemplate({ templateIds: selectedIds.join(',') })
-          this.$message.success('删除成功')
-          this.loadTableData()
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
+      await delGrantDetails({ grantIds: selectedIds.join(',') })
+      this.$message.success('删除成功')
+      this.loadTableData()
     },
     // 删除
-    handleRemove(row) {
-      let info = `${
-        row.status ? '该证书模版处于启用状态，请停用后删除。' : '您确定要删除选中的证书模版吗？'
-      }`
-      // 提示
-      this.$confirm(info, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          if (!row.status) {
-            delTemplate({ templateIds: row.id }).then(() => {
-              this.$message.success('删除成功')
-              this.loadTableData()
-            })
-          } else {
-            this.$message.error('删除失败!')
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
-    },
-    // 停用&启用
-    blockStart(id, i) {
-      let info = `${
-        i
-          ? '您确定要启用该证书模版吗？'
-          : '您确定要停用该证书模版吗？停用后，该证书模版将暂停使用。'
-      }`
-
-      this.$confirm(info, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          updateStatus({ templateId: id, choice: i }).then(() => {
-            this.$message.success(`${i ? '启用' : '停用'}成功`)
-            this.loadTableData()
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消操作'
-          })
-        })
-    },
-    //   预览Btn
-    previewMouseOver(id) {
-      getSingleCertificate({ templateId: id }).then((res) => {
-        this.preview = res
+    handleRemove(id) {
+      delTemplate({ templateIds: id }).then(() => {
+        this.$message.success('删除成功')
+        this.loadTableData()
       })
     },
-
     /**
      * 处理页码改变
      */
@@ -463,7 +281,11 @@ export default {
      * 搜索
      */
     handleSearch(searchParams) {
-      for (let i in searchParams) {
+      let params = searchParams
+      if (searchParams.beginEntryDate) {
+        params.dateRange = searchParams.beginEntryDate + '~' + searchParams.endEntryDate
+      }
+      for (let i in params) {
         this.queryInfo[i] = searchParams[i]
       }
       this.loadTableData()
@@ -486,11 +308,11 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getCertificateList(this.queryInfo)
+        let { totalNum, data } = await getCertificateGrantList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
-        // window.console.log(error)
+        window.console.log(error)
       } finally {
         this.tableLoading = false
       }
@@ -499,8 +321,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-
-
 .preview_right_box {
   position: relative;
   border: 1px solid #d9dbdc;
@@ -520,8 +340,6 @@ export default {
     font-size: 30px;
     font-weight: 700;
     transform: translateX(-50%);
-    text-align: center;
-    width: 85%;
   }
   .text {
     position: absolute;
@@ -534,7 +352,6 @@ export default {
     width: 50%;
     height: 28%;
     text-align: center;
-    word-wrap: break-word;
   }
   .logo {
     position: absolute;
@@ -554,17 +371,16 @@ export default {
   }
   .serial {
     position: absolute;
-    right: 9%;
-    bottom: 9%;
+    right: 6%;
+    bottom: 6%;
     color: #8b8a8a;
     font-size: 8px;
   }
 }
-
 .preview {
   z-index: 999;
   width: 422px;
-  height: 360px;
+  height: 441px;
   border-radius: 4px;
   background: #ffffff;
   box-shadow: 0 2px 12px 0;
@@ -581,13 +397,13 @@ export default {
     display: flex;
     justify-content: space-between;
     height: 40px;
-    // border-bottom: 1px solid #ebeced;
+    border-bottom: 1px solid #ebeced;
   }
   .previewContent {
     width: 374px;
     height: 280px;
     overflow: hidden;
-    margin-top: -5px;
+    margin-top: 15px;
     img {
       width: 100%;
       height: 100%;

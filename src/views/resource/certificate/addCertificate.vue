@@ -237,7 +237,7 @@ export default {
 
             addCertificate(params).then(() => {
               this.$message.success('保存成功')
-              this.$router.push({ path: '/certificate/certificateManage' })
+              this.$router.push({ path: '/resource/certificate/certificateManage' })
               this.form = {
                 awardAgency: '',
                 name: '',
@@ -251,7 +251,7 @@ export default {
             this.$message.error('请补充信息！！！')
           })
       } else {
-        this.$router.push({ path: '/certificate/certificateManage' })
+        this.$router.push({ path: '/resource/certificate/certificateManage' })
         this.form = {
           awardAgency: '',
           name: '',

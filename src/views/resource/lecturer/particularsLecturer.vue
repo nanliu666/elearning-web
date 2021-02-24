@@ -426,7 +426,7 @@ export default {
       row.user_id_str = this.$route.query.user_id_str
 
       this.$router.push({
-        path: '/lecturer/compileLecturer',
+        path: '/resource/lecturer/compileLecturer',
         query: {
           id: row.idStr,
           name: row.name,
@@ -439,7 +439,7 @@ export default {
     },
     // 去讲师列表
     toLecturer() {
-      this.$router.push({ path: '/lecturer/lecturer' })
+      this.$router.push({ path: '/resource/lecturer/lecturer' })
     },
     // 拿数据
     isgetTeacher() {

@@ -536,7 +536,7 @@ export default {
     },
     // 去讲师列表
     toLecturer() {
-      this.$router.push({ path: '/lecturer/lecturer' })
+      this.$router.push({ path: '/resource/lecturer/lecturer' })
     },
 
     // 添加讲师

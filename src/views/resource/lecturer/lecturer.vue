@@ -624,12 +624,12 @@ export default {
     isgetCatalogs() {},
     // 去添加
     toAddLecturer() {
-      this.$router.push({ path: '/lecturer/addLecturer' })
+      this.$router.push({ path: '/resource/lecturer/addLecturer' })
     },
     // 去详情
     toParticularsLecturer(row) {
       this.$router.push({
-        path: '/lecturer/particularsLecturer',
+        path: '/resource/lecturer/particularsLecturer',
         query: {
           id: row.idStr,
           name: row.name,
@@ -642,9 +642,8 @@ export default {
     },
     // 去编辑
     tocompileLecturer(row) {
-      // this.$router.push({ path: `/lecturer/compileLecturer?id= ${row.user_id_str}&name =${row.name}&userEmail=${row.user_email}&sex=${row.sex}` })
       this.$router.push({
-        path: '/lecturer/compileLecturer',
+        path: '/resource/lecturer/compileLecturer',
         query: {
           id: row.idStr,
           name: row.name,
