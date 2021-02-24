@@ -1309,10 +1309,11 @@ export default {
       deep: true
     }
   },
-  activated() {
-    this.isgetcategoryTree()
-    // this.getStudentInfoList();
-  },
+//   activated() {
+//    // this.isgetcategoryTree()
+//     //this.getStudentInfoList();
+//  },
+
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
@@ -1479,6 +1480,7 @@ export default {
       getcategoryTree({
         source: 'live'
       }).then((res) => {
+        debugger
         res.forEach((item) => {
           if (item.status === 1) {
             this.liveClassification.push(item)
