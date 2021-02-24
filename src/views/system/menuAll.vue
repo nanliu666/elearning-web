@@ -156,8 +156,8 @@
 </template>
 
 <script>
-// 留个口子getMenuInfo == > getMenuAll
-import { deleteMenuInfo, getMenuInfo, postMenuInfo, putMenuInfo } from '@/api/system/menu'
+//TODO 留个口子getMenuInfo == > getMenuAll
+import { deleteMenuInfo, getMenuAll, postMenuInfo, putMenuInfo } from '@/api/system/menu'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -261,12 +261,12 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   showIndexColumn: false,
-  // defaultExpandAll: true,
+  defaultExpandAll: true, //TODO: 开发预留
   // 树形结构懒加载
   lazy: true,
   load: async (row, treeNode, resolve) => {
     try {
-      let items = await getMenuInfo(row.menuId)
+      let items = await getMenuAll(row.menuId)
       resolve(_.map(items, (i) => ({ ...i, hasChildren: true })))
     } catch (err) {
       resolve([])
@@ -419,7 +419,7 @@ export default {
       this.tableLoading = true
       try {
         const query = _.assign(null, _.omit(param, 'parentId'), page)
-        const tableData = await getMenuInfo(param.parentId || '0', query)
+        const tableData = await getMenuAll(param.parentId || '0', query)
         this.tableData = _.map(tableData, (t) => ({
           children: [],
           hasChildren: true,
@@ -427,17 +427,17 @@ export default {
         }))
         // 更新分页器数据
         this.page.total = _.size(tableData)
-        // 用来批量增加鉴权
-        // _.each(this.tableData, item => {
-        //   const loop = (node) => {
-        //     node.hasChildren = false
-        //     if(_.isEmpty(item.children)) return
-        //     _.each(node.children, child => {
-        //       loop(child)
-        //     })
-        //   }
-        //   loop(item)
-        // })
+        // TODO:用来批量增加鉴权
+        _.each(this.tableData, (item) => {
+          const loop = (node) => {
+            node.hasChildren = false
+            if (_.isEmpty(item.children)) return
+            _.each(node.children, (child) => {
+              loop(child)
+            })
+          }
+          loop(item)
+        })
       } catch (error) {
         window.console.log(error)
       } finally {

@@ -27,7 +27,7 @@ export default {
       isShow: 1,
       code: 'org_user',
       alias: 'user',
-      path: '/lecturer/lecturer',
+      path: '/resource/lecturer/lecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: [
@@ -77,7 +77,7 @@ export default {
       isShow: 0,
       code: 'org_user',
       alias: 'user',
-      path: '/lecturer/addLecturer',
+      path: '/resource/lecturer/addLecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: []
@@ -91,7 +91,7 @@ export default {
       isShow: 0,
       code: 'org_user',
       alias: 'user',
-      path: '/lecturer/compileLecturer',
+      path: '/resource/lecturer/compileLecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: []
@@ -105,7 +105,7 @@ export default {
       isShow: 0,
       code: 'org_user',
       alias: 'user',
-      path: '/lecturer/particularsLecturer',
+      path: '/resource/lecturer/particularsLecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: []
@@ -119,7 +119,7 @@ export default {
       isShow: 1,
       code: 'org_user',
       alias: 'user',
-      path: '/certificate/certificateManage',
+      path: '/resource/certificate/certificateManage',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: [
@@ -162,7 +162,7 @@ export default {
       isShow: 0,
       code: 'org_user',
       alias: 'user',
-      path: '/certificate/addCertificate',
+      path: '/resource/certificate/addCertificate',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: []
@@ -176,7 +176,7 @@ export default {
       isShow: 1,
       code: 'org_user',
       alias: 'user',
-      path: '/certificate/certificateDetail',
+      path: '/resource/certificate/certificateDetail',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: [

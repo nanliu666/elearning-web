@@ -27,11 +27,18 @@
                 label="讲师姓名"
                 prop="userId"
               >
-                <el-input
+                <el-select
                   v-model="ruleForm.userId"
-                  maxlength="32"
-                  disabled
-                ></el-input>
+                  placeholder="请选择"
+                  filterable
+                >
+                  <el-option
+                    v-for="item in Teacherlist"
+                    :key="item.userId"
+                    :label="item.name"
+                    :value="item.userId"
+                  ></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="2">
@@ -73,14 +80,14 @@
               >
                 <el-radio
                   v-model="ruleForm.sex"
-                  :label="1"
+                  label="1"
                   disabled
                 >
                   男
                 </el-radio>
                 <el-radio
                   v-model="ruleForm.sex"
-                  :label="0"
+                  label="0"
                   disabled
                 >
                   女
@@ -115,17 +122,16 @@
             </el-col>
             <el-col :span="10">
               <!-- data -->
-
               <!-- <el-form-item
                 label="所属分类"
                 prop="categoryId"
               >
                 <el-cascader
                   v-model="ruleForm.categoryId"
-                  :props="{ value: 'id' }"
                   :options="data"
-                  @change="treeClickNode"
+                  :props="props"
                 ></el-cascader>
+
               </el-form-item> -->
 
               <!-- 移过来的tree -->
@@ -287,8 +293,8 @@
                     </div>
                   </div>
                   <img
-                    v-if="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl !== ''"
-                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
+                    v-if="ruleForm.attachments.length > 0 && ruleForm.attachments[0].fileUrl"
+                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].url"
                     class="avatar"
                   />
                 </common-upload>
@@ -327,8 +333,14 @@
 </template>
 
 <script>
-import { queryTeacherlist, listTeacherCategory, getTeacher, update } from '@/api/lecturer/lecturer'
+import {
+  addTeacher,
+  queryTeacherlist,
+  listTeacherCategory,
+  getTeacher
+} from '@/api/lecturer/lecturer'
 // import { uploadQiniu } from '@/util/uploadQiniu'
+
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
@@ -344,22 +356,18 @@ export default {
           }
         }
       },
-      userIdData: '',
+
+      disableDdata: {
+        disabledPhonenum: false,
+        disabledUserEmail: false,
+        disabledSex: false
+      },
       Teacherlist: [], //讲师的数据
       data: [], //分类列表
       checkboxVal: [],
       // 添加标签
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        },
-        {
-          value: '选项2',
-          label: '双皮奶'
-        }
-      ],
-      // 填写信息
+      options: [],
+      // 填写课程信息
       ruleForm: {
         categoryId: '',
         userId: '',
@@ -379,29 +387,36 @@ export default {
     }
   },
   watch: {
-    // 'ruleForm.name': {
-    //   handler(n) {
-    //     this.Teacherlist.forEach((item, index) => {
-    //       if (item.userId == n) {
-    //         this.ruleForm.phonenum = this.Teacherlist[index].phonenum
-    //         this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
-    //         this.ruleForm.userEmail = this.Teacherlist[index].userEmail
-    //         this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
-    //         this.ruleForm.sex = this.Teacherlist[index].sex
-    //         this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
-    //       }
-    //     })
-    //   }
-    // immediate: true,  //刷新加载 立马触发一次handler
-    // deep: true  // 可以深度检测到 person 对象的属性值的变化
-    // }
+    'ruleForm.userId': {
+      handler(n) {
+        this.$nextTick(() => {
+          this.$refs.ruleForm.validateField('userId', () => {})
+        })
+        this.Teacherlist.forEach((item, index) => {
+          if (item.userId == n) {
+            this.ruleForm.phonenum = this.Teacherlist[index].phonenum
+            this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
+            this.ruleForm.userEmail = this.Teacherlist[index].userEmail
+            this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
+            this.ruleForm.sex = this.Teacherlist[index].sex
+            this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
+          }
+        })
+      }
+      // immediate: true,  //刷新加载 立马触发一次handler
+      // deep: true  // 可以深度检测到 person 对象的属性值的变化
+    },
+
+    'ruleForm.type': {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.ruleForm.validateField('type', () => {})
+        })
+      },
+      immediate: false
+    }
   },
   created() {
-    this.isgetTeacher()
-    this.isqueryTeacherlist()
-    this.islistTeacherCategory()
-  },
-  activated() {
     this.isgetTeacher()
     this.isqueryTeacherlist()
     this.islistTeacherCategory()
@@ -410,6 +425,7 @@ export default {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
+        this.ruleForm.categoryId = data.id
         this.parentOrgIdLabel = data.label
       }
     },
@@ -419,7 +435,6 @@ export default {
         return resolve([{ name: 'region' }])
       }
       if (node.level > 1) return resolve([])
-      // console.log(node);
       let res = await listTeacherCategory({ parentId: node.data.id })
       let filterArr = res.son.map((item) => {
         return {
@@ -431,25 +446,27 @@ export default {
       })
 
       node.data.children = filterArr
-      // console.log(node);
-
       resolve(filterArr)
     },
 
     // 拿到数据
-    async isgetTeacher() {
-      let data = await getTeacher({ id: this.$route.query.id })
-      // 存userId
-      this.userIdData = data.teacherInfo.userId
-      data.teacherInfo.attachments = []
-      data.teacherInfo.attachments.push({ fileUrl: data.teacherInfo.photo })
-      data.teacherInfo.userId = this.$route.query.name
-      data.teacherInfo.userEmail = this.$route.query.userEmail
-      data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
-      data.teacherInfo.phonenum = this.$route.query.phonenum
-      data.teacherInfo.isRecommend = data.teacherInfo.isRecommend == 0 ? false : true
-      this.ruleForm = data.teacherInfo
-      this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
+    isgetTeacher() {
+      let params = {
+        id: ''
+      }
+
+      params.id = this.$route.query.id
+      if (params.id) {
+        params.id = params.id.trim()
+        getTeacher(params).then((res) => {
+          let data = res.teacherInfo
+          // this.ruleForm = res.teacherInfo
+          // this.ruleForm.attachments.push({ fileUrl: res.teacherInfo.photo })
+          data.attachments = []
+          data.attachments.push({ fileUrl: res.teacherInfo.photo })
+          this.ruleForm = data
+        })
+      }
     },
 
     // 点击节点
@@ -528,12 +545,11 @@ export default {
 
       queryTeacherlist(params).then((res) => {
         this.Teacherlist = res.data
-        // console.log(res)
       })
     },
     // 去讲师列表
     toLecturer() {
-      this.$router.push({ path: '/lecturer/lecturer' })
+      this.$router.push({ path: '/resource/lecturer/lecturer' })
     },
 
     // 添加讲师
@@ -544,9 +560,6 @@ export default {
       //     ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
       //     : ''
       // )
-      this.ruleForm.categoryId = this.ruleForm.categoryId
-        ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
-        : ''
       let attachments = []
       if (this.ruleForm.attachments.length !== 0)
         attachments.push(
@@ -564,11 +577,18 @@ export default {
             type: 'warning'
           })
         } else {
-          this.ruleForm.teacherId = this.$route.query.id
-          this.ruleForm.userId = this.userIdData
           this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
-          update(this.ruleForm).then(() => {
-            if (i) {
+          addTeacher(this.ruleForm).then(() => {
+            this.$message({
+              message: '添加成功',
+              type: 'success'
+            })
+
+            setTimeout(() => {
+              this.$refs.ruleForm.clearValidate()
+            }, 100)
+
+            if (i == 1) {
               this.toLecturer()
               this.ruleForm = {
                 categoryId: '',
@@ -581,7 +601,9 @@ export default {
                 isLatestTeacher: 0,
                 isPopularTeacher: 0
               }
+              this.parentOrgIdLabel = ''
             } else {
+              this.parentOrgIdLabel = ''
               this.ruleForm = {
                 categoryId: '',
                 userId: '',
@@ -601,7 +623,7 @@ export default {
 
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png)$/
+      const regx = /^.*\.(jpg|jpeg|png)$/
       const isLt10M = file.size / 1024 / 1024 < 5
 
       if (!isLt10M) {
@@ -641,10 +663,9 @@ export default {
   .addLecturer_head {
     height: 60px;
     line-height: 60px;
-    font-size: 16px;
-    color: #333;
     font-size: 18px;
     font-weight: bold;
+    color: #333;
   }
   .addLecturer_content {
     background-color: #fff;
