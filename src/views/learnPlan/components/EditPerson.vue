@@ -131,7 +131,7 @@ export default {
       handler(list) {
         list.forEach((item) => {
           item.orgName = item.orgName || '-'
-          item.phoneNum = item.phoneNum || '-'
+          item.phoneNum = item.phoneNum || item.phonenum || '-'
         })
       },
       deep: true

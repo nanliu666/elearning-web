@@ -484,22 +484,17 @@
                 </div>
 
                 <div v-if="scope.row.saveOrcompile == 1">
-                  <span v-if="scope.row.type == 3 || scope.row.type == 2 || scope.row.type == 1">{{
+                  <span v-if="scope.row.type == 1 || scope.row.fileData.status == 'complete'">{{
                     scope.row.upLoad[scope.row.upLoad.length - 1].localName
                   }}</span>
-                  <div v-else>
-                    <span v-if="scope.row.fileData.status == 'pending'">等待上传...</span>
-                    <el-progress
-                      v-if="scope.row.fileData.status == 'progress'"
-                      :percentage="scope.row.fileData.percent"
-                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status != 'error'"
-                      :stroke-width="18"
-                    ></el-progress>
-                    <span v-if="scope.row.fileData.status == 'complete'">{{
-                      scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                    }}</span>
-                  </div>
+                  <span v-else-if="scope.row.fileData.status == 'pending'">等待上传...</span>
+                  <el-progress
+                    v-else-if="scope.row.fileData.status == 'progress'"
+                    :percentage="scope.row.fileData.percent"
+                    :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
+                    :text-inside="scope.row.fileData.status != 'error'"
+                    :stroke-width="18"
+                  ></el-progress>
                 </div>
               </template>
             </el-table-column>
