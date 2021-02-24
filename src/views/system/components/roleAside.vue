@@ -177,7 +177,7 @@ export default {
     // 删除分类提示
     delCate(node, data) {
       const baseTips = '您确定要删除该分类吗？'
-      const roleTips = '<br/> 删除后，该分类下的角色也会同步清除'
+      const roleTips = '<br/> 分类下有角色，无法删除，请先删除所有角色'
       const tips = data.roleNum === 0 ? baseTips : `${baseTips}${roleTips}`
       this.$confirm(tips, '提示', {
         confirmButtonText: '确定',
