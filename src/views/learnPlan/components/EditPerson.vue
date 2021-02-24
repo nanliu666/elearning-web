@@ -126,6 +126,17 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  watch: {
+    userList: {
+      handler(list) {
+        list.forEach((item) => {
+          item.orgName = item.orgName || '-'
+          item.phoneNum = item.phoneNum || '-'
+        })
+      },
+      deep: true
+    }
+  },
   methods: {
     handleAddUser() {
       this.userPicking = true
@@ -174,6 +185,7 @@ export default {
             'update:user-list',
             _.filter(this.userList, (user) => user.userId !== row.userId)
           )
+          this.$message.success('删除成功')
         })
         .catch(() => {})
     },
@@ -194,6 +206,7 @@ export default {
           )
           this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
           this.$emit('update:user-list', this.userList)
+          this.$message.success('删除成功')
         })
         .catch(() => {})
     }

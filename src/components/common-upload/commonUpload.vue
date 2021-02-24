@@ -111,6 +111,7 @@ export default {
             uid: file.file.uid,
             url: url, // 新增url字段，为与移动端上传回显一致
             fileName,
+            size: file.file.size,
             localName: file.file.name
           }
           let newValue = [...that.value, newFile]

@@ -46,7 +46,10 @@
                         v-for="(item, index) in formData.attachment"
                         :key="index"
                       >
-                        <span class="ellipsis files__name">{{ item.localName }}</span>
+                        <div class="files__left">
+                          <span class="ellipsis files__name">{{ item.localName }}</span>
+                          <span class="files__size">{{ item.size | filterSize }}</span>
+                        </div>
                         <i
                           class="el-icon-close"
                           @click.stop="handleRemoveAttachment(index)"
@@ -193,7 +196,20 @@ export default {
     CommonUpload,
     SelectUser
   },
-
+  filters: {
+    filterSize(data) {
+      // 小于1k，显示B 1024
+      // 小于1M显示KB 1024 * 1024
+      // 大于1M显示M
+      if (data < 1024) {
+        return `${data}B`
+      } else if (data > 1024 && data < 1024 * 1024) {
+        return `${(data / 1024).toFixed(2)}KB`
+      } else if (data > 1024 * 1024) {
+        return `${(data / (1024 * 1024)).toFixed(2)}M`
+      }
+    }
+  },
   data() {
     const FORM_COLUMNS = [
       {
@@ -602,6 +618,18 @@ export default {
   .uploader__btn {
     text-align: center;
   }
+  .files__left {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    .files__name {
+      width: 50%;
+      display: inline-block;
+    }
+    .files__size {
+      margin-left: 10px;
+    }
+  }
 }
 </style>
 <style lang="sass" scoped>
@@ -651,6 +679,7 @@ $color_font_uploader: #A0A8AE
   padding-left: 10px
 .upload__files
   margin-top: 4px
+  min-width: 500px;
   li
     display: flex
     justify-content: space-between
@@ -664,7 +693,6 @@ $color_font_uploader: #A0A8AE
     .files__name
       color: #292a29;
       font-weight: 550
-      width: 60%;
 .select
   width: 194px
 </style>
