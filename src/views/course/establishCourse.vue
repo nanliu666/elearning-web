@@ -471,7 +471,7 @@
                       >
                         <el-button type="text">{{
                           scope.row.upLoad[0] && scope.row.upLoad[0].localName
-                            ? scope.row.upLoad[0].localName
+                            ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
                             : uploadRef[scope.row.type - 2].tips
                         }}</el-button>
                       </common-upload>
@@ -483,19 +483,21 @@
                   > 请选择章节类型 </span>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile === 1">
-                  <span v-if="scope.row.type === 1">{{ scope.row.upLoad[0].localName }}</span>
+                <div v-if="scope.row.saveOrcompile == 1">
+                  <span v-if="scope.row.type == 3 || scope.row.type == 2 || scope.row.type == 1">{{
+                    scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                  }}</span>
                   <div v-else>
-                    <span v-if="scope.row.fileData.status === 'pending'">等待上传...</span>
+                    <span v-if="scope.row.fileData.status == 'pending'">等待上传...</span>
                     <el-progress
-                      v-if="scope.row.fileData.status === 'progress'"
+                      v-if="scope.row.fileData.status == 'progress'"
                       :percentage="scope.row.fileData.percent"
-                      :status="scope.row.fileData.status !== 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status !== 'error'"
+                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
+                      :text-inside="scope.row.fileData.status != 'error'"
                       :stroke-width="18"
                     ></el-progress>
-                    <span v-if="scope.row.fileData.status === 'complete'">{{
-                      scope.row.upLoad[0].localName
+                    <span v-if="scope.row.fileData.status == 'complete'">{{
+                      scope.row.upLoad[scope.row.upLoad.length - 1].localName
                     }}</span>
                   </div>
                 </div>
@@ -971,6 +973,7 @@ export default {
           item.saveOrcompile = 1
           item.type = +c.type
           item.fileData = {}
+          item.name = c.name
           return item
         })
         res.imageUrl = [{ localName, url }]
@@ -1218,17 +1221,16 @@ export default {
           formData: JSON.stringify(this.ruleForm)
         })
         .then(() => {
-          //发布成功清除数据
-          this.isdeleteData()
           this.$message({
             message: '本课程已发布成功',
             type: 'success'
           })
-          this.isdeleteData()
           setTimeout(() => {
             this.disabledBtn = false
             // this.$router.go(-1)
             this.$router.push({ path: '/course/courseDraft?status=' + status })
+            //发布成功清除数据
+            this.isdeleteData()
           }, 3000)
         })
     },
