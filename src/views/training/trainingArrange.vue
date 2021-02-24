@@ -220,7 +220,7 @@
                       content="刷新"
                       effect="dark"
                       placement="top"
-                      style="color:#acb3b8;"
+                      style="color:#acb3b8; cursor:pointer;"
                       @click="refreshTableData"
                     >
                       <el-button
@@ -237,6 +237,7 @@
                     <span
                       v-if="!status"
                       class="text_refresh"
+                      style="cursor:pointer;"
                       @click="refreshTableData"
                     >刷新</span>
                     <el-popover
@@ -499,12 +500,12 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false,
-  rowKey: (d) => {
-    Object.keys(d).forEach((key) => {
-      d[key] = d[key] || '--'
-    })
-  }
+  showIndexColumn: false
+  // rowKey: (d) => {
+  //   Object.keys(d).forEach((key) => {
+  //     d[key] = d[key] || '--'
+  //   })
+  // }
 }
 const TABLE_PAGE_CONFIG = {}
 
@@ -529,7 +530,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: 3, label: '已办结' },
       { value: 1, label: '未开始' },
       { value: 2, label: '进行中' },
-      { value: '', label: '全部' },
+      { value: '', label: '全部' }
     ]
   },
   {
@@ -548,7 +549,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: 1, label: '面授' },
       { value: 2, label: '混合' },
       { value: 3, label: '在线' },
-      { value: '', label: '全部' },
+      { value: '', label: '全部' }
     ]
   },
   {
