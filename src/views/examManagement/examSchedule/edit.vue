@@ -204,6 +204,7 @@ export default {
     setDisabled(examInfo) {
       const type = _.get(this.$route, 'query.type', 'edit')
       const isDraft = _.get(this.$route, 'query.isDraft', 'false')
+      let disable = false
       //非草稿箱
       if (
         type === 'edit' &&
@@ -211,8 +212,13 @@ export default {
         (examInfo.model.status === '2' || examInfo.model.status === '3')
       ) {
         // 正在进行中的考试以及已结束的考试需要置灰
-        examInfo.modelDisabled = true
+        disable = true
+      } else {
+        // 草稿与未开始的考试不要置灰
+        disable = false
       }
+      examInfo.modelDisabled = disable
+      examInfo.setColumnsDisable(disable)
     },
     // 发布区分编辑发布还是新增发布
     publishFun(type) {

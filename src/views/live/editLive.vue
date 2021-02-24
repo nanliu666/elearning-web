@@ -1445,10 +1445,14 @@ export default {
     },
     valChange(type) {
       if (type == 1) {
-        getOrganizationUser({
-          // parentId: 1,
-          search: this.organizationUserVal
-        }).then((res) => {
+        let params = this.organizationUserVal
+          ? {
+              search: this.organizationUserVal
+            }
+          : {
+              parentId: 1
+            }
+        getOrganizationUser(params).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
@@ -1490,6 +1494,7 @@ export default {
     },
     // 返回按钮返回上一页
     tocourseDraft() {
+      this.initData()
       this.$router.go(-1)
     },
     beforeAvatarUpload(file) {
@@ -1699,7 +1704,7 @@ export default {
     toggle_StudentsPage(page) {
       //添加学员
       this.table_relatedStudents = []
-      if (this.dialogSelectStudent.length > 0) {
+      if (this.dialogSelectStudent.length >= 0) {
         this.totalNum = this.dialogSelectStudent.length
         this.dialogSelectStudent.forEach((item, index) => {
           if (
@@ -2106,10 +2111,12 @@ export default {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
               postEditLive(data).then(() => {
+                this.initData()
                 this.$router.push({ path: '/live/liveList' })
               })
             } else {
               postAddLive(data).then(() => {
+                this.initData()
                 this.$router.push({ path: '/live/liveList' })
               })
             }
@@ -2121,14 +2128,19 @@ export default {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
           postEditLive(data).then(() => {
+            this.initData()
             this.$router.push({ path: '/live/liveList' })
           })
         } else {
           postAddLive(data).then(() => {
+            this.initData()
             this.$router.push({ path: '/live/liveList' })
           })
         }
       }
+    },
+    initData() {
+      this.headIndex = 1
     },
     setLiveDetails(id) {
       getLiveDetails({

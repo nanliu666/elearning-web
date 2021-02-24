@@ -4,10 +4,10 @@
       ref="form"
       :model="model"
       :columns="columns"
-      :config="{
-        disabled: modelDisabled
-      }"
     >
+      <!-- :config="{
+        disabled: modelDisabled
+      }" -->
       <template #basicTitle>
         <div class="title-box">
           基础信息
@@ -589,16 +589,6 @@ const passTypeConfig = {
   prop: 'passType',
   label: '通过条件'
 }
-const fixedTimeConfig = {
-  itemType: 'datePicker',
-  span: 11,
-  offset: 2,
-  type: 'datetime',
-  required: true,
-  valueFormat: 'yyyy-MM-dd HH:mm:ss',
-  prop: 'fixedTime',
-  label: '定时发布日期时间'
-}
 //TODO: 暂时隐藏
 const radioList = [
   { value: '完全正确得分' },
@@ -645,6 +635,16 @@ export default {
           passScope: 80
         }
       ],
+      fixedTimeConfig: {
+        itemType: 'datePicker',
+        span: 11,
+        offset: 2,
+        type: 'datetime',
+        required: true,
+        valueFormat: 'yyyy-MM-dd HH:mm:ss',
+        prop: 'fixedTime',
+        label: '定时发布日期时间'
+      },
       columns: EventColumns,
       modelDisabled: false,
       model: {
@@ -734,7 +734,7 @@ export default {
           }
         } else {
           if (fixedTimeIndex === -1) {
-            this.columns.splice(publishRulesIndex + 1, 0, fixedTimeConfig)
+            this.columns.splice(publishRulesIndex + 1, 0, this.fixedTimeConfig)
           }
         }
       },
@@ -825,9 +825,9 @@ export default {
     // 设置置灰
     setColumnsDisable(boolean) {
       _.each(this.columns, (item) => {
-        item.disabled = boolean
+        _.set(item, 'disabled', boolean)
       })
-      // this.$forceUpdate()
+      this.fixedTimeConfig = boolean
     },
     loadCoordinator(params) {
       return getAllUserList(params)
@@ -842,10 +842,10 @@ export default {
       return new Promise((resolve) => {
         if (type === 'publish') {
           this.$refs['form'].validate().then(() => {
-            resolve(this.model) // TODO 提交表单
+            resolve(this.model)
           })
         } else {
-          resolve(this.model) // TODO 提交表单
+          resolve(this.model)
         }
       })
     }
