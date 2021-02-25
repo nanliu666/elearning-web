@@ -51,6 +51,11 @@
               个人中心
             </div>
           </el-dropdown-item>
+          <el-dropdown-item>
+            <div @click="toFront">
+              用户前台
+            </div>
+          </el-dropdown-item>
           <el-dropdown-item
             divided
             @click.native="logout"
@@ -103,6 +108,10 @@ export default {
     listenfullscreen(this.setScreen)
   },
   methods: {
+    toFront() {
+      // 跳转到前台
+      window.location.href = 'http://139.159.141.248:7071'
+    },
     showUserCenter() {
       this.$router.push('/info/securitySetting')
     },
