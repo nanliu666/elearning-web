@@ -333,12 +333,12 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程编号',
     data: ''
   },
-  {
-    type: 'input',
-    field: 'coursePlanName',
-    label: '课程安排名称',
-    data: ''
-  },
+  // {
+  //   type: 'input',
+  //   field: 'coursePlanName',
+  //   label: '课程安排名称',
+  //   data: ''
+  // },
   // {
   //   type: 'input',
   //   field: 'coursePlanName',

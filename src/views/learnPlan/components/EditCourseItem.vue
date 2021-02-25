@@ -88,14 +88,41 @@
       >
       </el-tab-pane>
     </el-tabs>
+
+    <!-- 预览框 -->
+    <el-dialog
+      title="预览试卷"
+      :visible.sync="dialogVisible"
+      width="60%"
+      :modal-append-to-body="false"
+    >
+      <Preview
+        :paper-id="paperId"
+        :paper-type="paperType"
+      />
+
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >返回</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import Preview from '@/views/examManagement/examSchedule/previewlearnPlan'
 import moment from 'moment'
 import { validateTimeList } from './config'
 export default {
   name: 'EditCourseItem',
+  components: {
+    Preview
+  },
   props: {
     course: { type: Object, default: null },
     /**
@@ -108,6 +135,9 @@ export default {
   },
   data() {
     return {
+      dialogVisible: false,
+      paperId: '',
+      paperType: '',
       columns: [
         {
           prop: 'courseName',
@@ -180,10 +210,14 @@ export default {
     },
     handleViewTextPaper(course, exam) {
       if (exam.testPaperType === 'manual') {
-        this.$router.push({
-          path: '/examManagement/examSchedule/preview',
-          query: { paperId: exam.testPaper, paperType: exam.testPaperType }
-        })
+        this.paperId = exam.testPaper
+        this.paperType = exam.testPaperType
+        // this.$router.push({
+        //   path: '/examManagement/examSchedule/preview',
+        //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }
+        // })
+
+        this.dialogVisible = true
       } else {
         this.$message.error('随机试卷不支持预览')
       }
@@ -252,6 +286,9 @@ export default {
       text-align: center;
       border: 1px dashed rgb(230, 218, 218);
     }
+  }
+  /deep/.el-card {
+    border: none;
   }
 }
 </style>
