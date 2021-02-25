@@ -114,7 +114,7 @@
           >
             <a
               class="btn1"
-              href="#/lecturer/lecturer"
+              href="#/resource/lecturer/lecturer"
               @click="adddata"
             >
               <i class="el-icon-plus btn_icon"></i> 新建分组</a>
