@@ -117,7 +117,7 @@ export default {
         Group: false
       },
       form: {
-        parentId: '0',
+        parentId: '',
         name: '',
         type: ''
       },
