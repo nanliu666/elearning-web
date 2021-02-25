@@ -198,7 +198,8 @@ const SEARCH_CONFIG = {
         label: 'name',
         value: 'userId'
       },
-      load: getUserWorkList
+      load: getUserWorkList,
+      searchable:true
     }
   ]
 }
