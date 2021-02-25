@@ -883,7 +883,9 @@ export default {
 
     handleSearch(searchParams) {
       this.searchParams = searchParams
-      this.getInfo(searchParams)
+      this.page.pageNo = 1
+      this.page.currentPage = 1
+      this.getInfo()
     },
 
     handleRemoveItems(selection) {
@@ -983,11 +985,11 @@ export default {
     },
 
     // 拿数据
-    getInfo(searchParams) {
-      if (searchParams) {
-        this.page.pageNo = 1
-        this.page.pageSize = 10
-      }
+    getInfo() {
+      // if (this.searchParams) {
+      //   this.page.pageNo = 1
+      //   this.page.pageSize = 10
+      // }
       let params = {
         currentPage: '',
         size: '',

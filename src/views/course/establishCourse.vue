@@ -1147,11 +1147,9 @@ export default {
                 type: 'success'
               })
               this.isdeleteData()
-              setTimeout(() => {
-                this.$router.push({ path: '/course/courseDraft?status=' + status })
-                this.disabledBtn = false
-                // this.$router.go(-1)
-              }, 3000)
+              this.$router.push({ path: '/course/courseDraft?status=' + status })
+              this.disabledBtn = false
+              // this.$router.go(-1)
             })
           })
           .catch(() => {
@@ -1220,13 +1218,12 @@ export default {
             message: '本课程已发布成功',
             type: 'success'
           })
-          setTimeout(() => {
-            this.disabledBtn = false
-            // this.$router.go(-1)
-            this.$router.push({ path: '/course/courseDraft?status=' + status })
-            //发布成功清除数据
-            this.isdeleteData()
-          }, 3000)
+
+          this.disabledBtn = false
+          // this.$router.go(-1)
+          this.$router.push({ path: '/course/courseDraft?status=' + status })
+          //发布成功清除数据
+          this.isdeleteData()
         })
     },
     // 清空数据
