@@ -21,17 +21,21 @@
     </el-card>
     <classroom-classify v-show="activeIndex === '1'" />
     <classroom-list v-show="activeIndex === '2'" />
+    <classroom-reserve v-show="activeIndex === '3'" />
   </div>
 </template>
 <script>
 import styles from '@/styles/variables.scss'
 import ClassroomClassify from './classify'
 import ClassroomList from './list'
+import ClassroomReserve from './reserve'
+
 export default {
   name: '',
   components: {
     ClassroomClassify,
-    ClassroomList
+    ClassroomList,
+    ClassroomReserve
   },
   data() {
     return {
