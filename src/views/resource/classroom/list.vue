@@ -77,6 +77,14 @@
             批量删除
           </el-button>
         </template>
+        <template #category="{row}">
+          <div
+            class="ellipsis title"
+            @click="jumpDetail(row)"
+          >
+            {{ row.category }}
+          </div>
+        </template>
         <template #status="{row}">
           {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
@@ -111,16 +119,13 @@
 </template>
 
 <script>
-import {
-  getKnowledgeCatalogList,
-  deleteKnowledgeCatalog,
-  updateStatusKnowledgeCatalog
-} from '@/api/knowledge/knowledge'
+import { deleteKnowledgeCatalog, updateStatusKnowledgeCatalog } from '@/api/knowledge/knowledge'
+import { getArrangeList } from '@/api/examManage/schedule'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '编号',
-    prop: 'name',
+    prop: 'category',
     slot: true,
     minWidth: 150
   },
@@ -169,7 +174,6 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
-  defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
   enableMultiSelect: true,
@@ -217,12 +221,12 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'treeSelect',
-      field: 'categoryId1',
+      field: 'orgId',
       label: '所属组织',
       data: '',
       config: {
         selectParams: {
-          placeholder: '请选择',
+          placeholder: '请输入内容',
           multiple: false
         },
         treeParams: {
@@ -234,9 +238,9 @@ const SEARCH_CONFIG = {
           filterable: false,
           props: {
             children: 'children',
-            label: 'name',
+            label: 'orgName',
             disabled: 'disabled',
-            value: 'id'
+            value: 'orgId'
           }
         }
       }
@@ -294,9 +298,9 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: SEARCH_CONFIG,
-      data: [],
-      createOrgDailog: false,
-      searchParams: {}
+      searchParams: {
+        type: 0 //状态:0-已发布，1-草稿箱
+      }
     }
   },
   computed: {
@@ -339,6 +343,10 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 跳转详情
+    jumpDetail(row) {
+      this.$router.push({ path: '/resource/classroom/detail', query: { id: row.id } })
+    },
     // 创建教室
     createClassroom() {},
     // 编辑
@@ -403,8 +411,8 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
-          this.tableData = res
+        getArrangeList(params).then((res) => {
+          this.tableData = res.data
           this.tableLoading = false
         })
       } catch (error) {
@@ -412,9 +420,6 @@ export default {
       } finally {
         this.tableLoading = false
       }
-    },
-    changevisible(data) {
-      this.createOrgDailog = data
     },
     // 搜索
     handleSearch(params) {
@@ -453,6 +458,10 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
+  }
 }
 .originColumn {
   height: 25px;
