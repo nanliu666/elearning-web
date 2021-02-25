@@ -388,6 +388,8 @@ export default {
             this.$nextTick(() => {
               this.clearValidate()
             })
+            _.assign(this.$data, this.$options.data())
+            this.pageTitle = this.id ? '编辑资源' : '创建资源'
           }
         } catch (error) {
           this.$message.error(error.message)

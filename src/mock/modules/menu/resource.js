@@ -19,6 +19,48 @@ export default {
   ],
   children: [
     {
+      menuId: '1212437546742158',
+      menuName: '教室管理',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 1,
+      code: 'org_user',
+      alias: 'user',
+      path: '/resource/classroom/index',
+      icon: 'iconfont iconicon_boss',
+      dataPrivileges: [],
+      children: []
+    },
+    {
+      menuId: '1212437546742158',
+      menuName: '创建教室',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'org_user',
+      alias: 'user',
+      path: '/resource/classroom/edit',
+      icon: 'iconfont iconicon_boss',
+      dataPrivileges: [],
+      children: []
+    },
+    {
+      menuId: '1212437546742158',
+      menuName: '教室详情',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'org_user',
+      alias: 'user',
+      path: '/resource/classroom/detail',
+      icon: 'iconfont iconicon_boss',
+      dataPrivileges: [],
+      children: []
+    },
+    {
       menuId: '12591231312434234658',
       menuName: '讲师管理',
       menuType: 'Menu',

@@ -1,12 +1,7 @@
 <template>
   <el-dialog
-    :title="
-      type === 'create'
-        ? `新建${currentType}分类`
-        : type === 'createChild'
-          ? `新建${currentType}子分类`
-          : `编辑${currentType}分类`
-    "
+    v-loading="loading"
+    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="550px"
     :modal-append-to-body="false"
@@ -44,7 +39,7 @@
               :label="parentOrgIdLabel"
             >
               <el-tree
-                ref="orgTree"
+                ref="orgTreeRef"
                 :data="orgTree"
                 node-key="orgId"
                 :props="{
@@ -55,7 +50,10 @@
               />
             </el-option>
           </el-select>
-          <div class="select-tips">
+          <div
+            v-if="type !== 'createChild'"
+            class="select-tips"
+          >
             可通过选择上级分类为其构建子分类
           </div>
         </el-col>
@@ -67,14 +65,14 @@
       class="dialog-footer"
     >
       <el-button
-        size="medium"
-        @click="handleClose"
-      >取消</el-button>
-      <el-button
         type="primary"
         size="medium"
-        @click="submit('refresh')"
+        @click="submit('add')"
       >完成</el-button>
+      <el-button
+        size="medium"
+        @click="submit('toCreate')"
+      >完成并创建资源</el-button>
     </span>
     <span
       v-else
@@ -88,15 +86,18 @@
       <el-button
         type="primary"
         size="medium"
-        @click="submit('refresh')"
+        @click="submit('add')"
       >保存</el-button>
     </span>
   </el-dialog>
 </template>
 
 <script>
-const CLIENT_TYPE = ['题库', '试卷/考试']
-import { getCategoryList, putCategory, postCategory } from '@/api/examManage/category'
+import {
+  updateKnowledgeCatalog,
+  addKnowledgeCatalog,
+  getKnowledgeCatalogList
+} from '@/api/knowledge/knowledge'
 import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
@@ -108,8 +109,6 @@ export default {
   },
   data() {
     return {
-      currentType: '',
-      CLIENT_TYPE,
       type: 'create',
       radioDisable: {
         Company: false,
@@ -117,29 +116,22 @@ export default {
         Group: false
       },
       form: {
-        parentId: '',
-        name: '',
-        type: ''
+        parentId: ''
       },
       parentOrgIdLabel: '',
       rules: {
         name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
-      orgTree: []
+      orgTree: [],
+      loading: false
     }
   },
   computed: {
     ...mapGetters(['userId'])
   },
   methods: {
-    // 当主页面修改后，编辑页面的加载函数修改
     async loadOrgTree() {
-      let paramsform = {
-        parentId: '0',
-        name: '',
-        type: this.$parent.searchParams.type
-      }
-      let res = await getCategoryList(paramsform)
+      let res = await getKnowledgeCatalogList()
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
     },
     // 过滤当前选择编辑的分类的子类
@@ -150,7 +142,7 @@ export default {
           if (!_.isEmpty(item.children)) {
             loop(item.children)
           }
-          // 父级组织类型 ==== 当前组织的类型
+          // 父级组织类型 === 当前组织的类型
           if (this.form.id === item.id) {
             item.children = []
           }
@@ -172,27 +164,40 @@ export default {
       return hasSameName
     },
     // 提交
-    submit() {
+    submit(type) {
       if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
-            postCategory(
-              _.assign(
-                this.form,
-                { createUser: this.userId },
-                { type: this.$parent.searchParams.type }
-              )
-            ).then(() => {
-              this.$message.success('创建成功')
-              this.$emit('refresh')
-              this.$emit('changevisible', false)
-            })
+            this.loading = true
+            addKnowledgeCatalog(_.assign(this.form, { creatorId: this.userId }))
+              .then((res) => {
+                this.$message.success('创建成功')
+                this.loading = false
+                this.$emit('changevisible', false)
+                if (type === 'add') {
+                  this.$emit('refresh')
+                } else {
+                  this.$router.push({
+                    path: '/repository/knowledgeEdit',
+                    query: { catalogId: res.id }
+                  })
+                }
+              })
+              .catch(() => {
+                this.loading = false
+              })
           } else {
-            putCategory(_.assign(this.form, { type: this.$parent.searchParams.type })).then(() => {
-              this.$message.success('修改成功')
-              this.$emit('refresh')
-            })
+            this.loading = true
+            updateKnowledgeCatalog(this.form)
+              .then(() => {
+                this.$message.success('修改成功')
+                this.$emit('refresh')
+                this.loading = false
+              })
+              .catch(() => {
+                this.loading = false
+              })
             this.$emit('changevisible', false)
           }
         } else {
@@ -202,8 +207,7 @@ export default {
       })
     },
     // 新建分类
-    create(type) {
-      this.currentType = this.CLIENT_TYPE[type]
+    create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)

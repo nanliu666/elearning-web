@@ -67,6 +67,7 @@
               placeholder="搜索姓名或手机号码"
             />
             <el-checkbox
+              v-if="!_.isEmpty(usersNameList)"
               v-model="checkAll"
               class="total-check"
               :indeterminate="isIndeterminate"
@@ -90,6 +91,10 @@
                 }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
               </el-checkbox>
             </el-checkbox-group>
+            <com-empty
+              v-if="_.isEmpty(usersNameList)"
+              height="31vh"
+            />
           </div>
         </div>
       </div>
@@ -147,6 +152,7 @@
 </template>
 <script>
 import { getOrgUserChild, getOuterUser } from '@/api/system/user'
+import ComEmpty from '@/components/common-empty/empty'
 import _ from 'lodash'
 const SEARCH_DELAY = 200
 const NODE_TYPE = {
@@ -189,6 +195,9 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
 }
 export default {
   name: 'UserPicker',
+  components: {
+    ComEmpty
+  },
   props: {
     // 只选人，选了组织在右侧会显示人
     onlyUser: {
@@ -452,6 +461,7 @@ export default {
             }
             this.usersNameList = _.map(this.outerData, 'name')
           } else {
+            this.usersNameList = []
             this.outerParams.loaded = true
           }
           this.outerParams.pageNo = pageNo + 1
