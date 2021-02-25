@@ -153,6 +153,7 @@
 <script>
 import { getOrgUserChild, getOuterUser } from '@/api/system/user'
 import ComEmpty from '@/components/common-empty/empty'
+import _ from 'lodash'
 const SEARCH_DELAY = 200
 const NODE_TYPE = {
   All: 'All',
