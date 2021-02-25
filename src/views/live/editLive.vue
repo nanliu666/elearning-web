@@ -1934,6 +1934,7 @@ export default {
             item.name = item.orgName
             res.orgs.push(item)
           })
+          debugger
           this.organizationUser = res.orgs
         })
       } else {
