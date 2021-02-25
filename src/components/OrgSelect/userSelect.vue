@@ -150,25 +150,21 @@ const NODE_TYPE = {
 }
 const loadOrgTree = async ({ parentId, search, isRange }) => {
   search = _.trim(search)
-  // 只能传入一个参数 当传入search的时候不使用parentId
-  const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
+  let data
+  if(isRange){
+     data = await getOrgUserChild({parentId:parentId,search:search})
+  }
+  else{
+    // 只能传入一个参数 当传入search的时候不使用parentId
+     data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
+  }
+
   //过滤被冻结的用户
   data.users = data.users.filter((x) => x.userStatus !== '2')
   // 在这里处理两个数组为树形组件需要的结构
   const { orgs, users } = data
   const ORG_PROPS = { type: NODE_TYPE.Org }
   const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
-  if (isRange) {
-    return _.concat(
-      _.map(orgs, (item) =>
-        _.assign(
-          { _nodeKey: `${parentId || '0'}_${item.id}`, bizId: item.id, bizName: item.name },
-          item,
-          ORG_PROPS
-        )
-      )
-    )
-  }
   return _.concat(
     _.map(orgs, (item) =>
       _.assign(
@@ -291,7 +287,15 @@ export default {
     orgSearch: _.debounce(function(search) {
       if (!search) return
       this.loading = true
-      loadOrgTree({ search, isRange: this.isRange })
+      //如果查询范围内的  添加parentId
+      let params = this.isRange?{
+        search,
+        isRange: this.isRange,
+        parentId:1
+      }:{
+        search
+      }
+      loadOrgTree(params)
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>
             _.assign({ isLeaf: true }, item)

@@ -87,6 +87,7 @@
                 prop="liveClassification_value"
               >
                 <el-select
+                  ref="setliveClassificationValue"
                   v-model="basicForm.liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
@@ -1283,7 +1284,14 @@ export default {
       this.loading = true
       this.valChange(2)
     }),
-
+    'basicForm.liveClassification_value':{
+      handler(newval,oldval) {
+        //选择完成  隐藏选项
+        this.$refs.setliveClassificationValue.blur()
+      },
+      immediate: false,
+      deep: true
+    },
     'basicForm.imageUrl': {
       handler() {
         this.$nextTick(() => {

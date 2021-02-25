@@ -1179,7 +1179,7 @@ export default {
                 // 如果没有任何审批流程可选则不需要经过审批
                 if (process) {
                   // 状态设置为审批中
-                  this.submitApprApply(params.id ? params.id : id)
+                  this.submitApprApply(id)
                 } else {
                   //发布成功清除数据
                   this.isdeleteData()
