@@ -1492,7 +1492,6 @@ export default {
       getcategoryTree({
         source: 'live'
       }).then((res) => {
-        debugger
         res.forEach((item) => {
           if (item.status === 1) {
             this.liveClassification.push(item)
