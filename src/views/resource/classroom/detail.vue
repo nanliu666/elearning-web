@@ -83,6 +83,18 @@
               @submit="handleSearch"
             />
           </template>
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
+            <el-button
+              type="text"
+              icon="el-icon-delete"
+              @click="exportSelected(selection)"
+            >
+              批量导出
+            </el-button>
+          </template>
         </common-table>
       </div>
     </basic-container>
@@ -221,6 +233,8 @@ export default {
     this.loadTableData()
   },
   methods: {
+    // 批量导出
+    exportSelected() {},
     /**
      * 处理页码改变
      */
