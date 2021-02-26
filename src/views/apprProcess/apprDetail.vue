@@ -127,9 +127,9 @@
                   <li>
                     <span class="text">选修类型：</span>
                     <span>
-                      <span v-show="courseData.electiveType == 1">在线课程</span>
-                      <span v-show="courseData.electiveType == 2">面授课程</span>
-                      <span v-show="courseData.electiveType == 3">直播课程</span>
+                      <span v-show="courseData.electiveType == 1">开放选修</span>
+                      <span v-show="courseData.electiveType == 2">通过审批</span>
+                      <span v-show="courseData.electiveType == 3">禁止选修</span>
                     </span>
                   </li>
                 </ul>
@@ -640,7 +640,7 @@ export default {
       // 或签不copy userlist（最开始的逻辑）
       // 或签显示userList(2021.2.25  与测试确认)
       // if (target.nodeType !== 'or') {
-        target.userList = origin.userList
+      target.userList = origin.userList
       // }
       target.pos = pos
     },
