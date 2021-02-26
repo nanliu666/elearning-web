@@ -410,6 +410,7 @@
                   <el-select
                     v-model="scope.row.type"
                     placeholder="请选择"
+                    @change="scope.row.upLoad = []"
                   >
                     <el-option
                       v-for="item in typeOption"
@@ -636,7 +637,8 @@ import {
   // getCourseContents,
   getCourse,
   addCourse,
-  listTeacher
+  listTeacher,
+  editCourseInfo
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 export default {
@@ -786,6 +788,7 @@ export default {
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
     })
+    this.isdeleteData()
   },
   activated() {
     // 检测断线重连
@@ -804,6 +807,7 @@ export default {
     this.getInfo()
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
+    this.disabledBtn = false
   },
   methods: {
     typeChange(c) {
@@ -1027,8 +1031,6 @@ export default {
             localName: this.addArticle.localName,
             content: _.escape(this.addArticle.content)
           }
-          // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
-          // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
           this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
           this.addArticle.localName = ''
           this.addArticle.content = ''
@@ -1140,17 +1142,32 @@ export default {
           .then(() => {
             params.status = status
 
-            addCourse(params).then(() => {
-              // editCourseInfo(this.ruleForm).then(() => {
-              this.$message({
-                message: '保存成功',
-                type: 'success'
+            // 判断是新增还是编辑
+            if (this.$route.query.id) {
+              editCourseInfo(params).then(() => {
+                // editCourseInfo(this.ruleForm).then(() => {
+                this.$message({
+                  message: '保存成功',
+                  type: 'success'
+                })
+                this.isdeleteData()
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
+                this.disabledBtn = false
+                // this.$router.go(-1)
               })
-              this.isdeleteData()
-              this.$router.push({ path: '/course/courseDraft?status=' + status })
-              this.disabledBtn = false
-              // this.$router.go(-1)
-            })
+            } else {
+              addCourse(params).then(() => {
+                // editCourseInfo(this.ruleForm).then(() => {
+                this.$message({
+                  message: '保存成功',
+                  type: 'success'
+                })
+                this.isdeleteData()
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
+                this.disabledBtn = false
+                // this.$router.go(-1)
+              })
+            }
           })
           .catch(() => {
             this.$message({
@@ -1175,21 +1192,41 @@ export default {
             this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
               params.status = process ? 0 : 1
-              addCourse(params).then(({ id }) => {
-                // 如果没有任何审批流程可选则不需要经过审批
-                if (process) {
-                  // 状态设置为审批中
-                  this.submitApprApply(id)
-                } else {
-                  //发布成功清除数据
-                  this.isdeleteData()
-                  this.$message({
-                    message: '课程发布成功',
-                    type: 'success'
-                  })
-                  this.$router.back()
-                }
-              })
+
+              // 判断是编辑还是新增
+              if (this.$route.query.id) {
+                editCourseInfo(params).then(({ id }) => {
+                  // 如果没有任何审批流程可选则不需要经过审批
+                  if (process) {
+                    // 状态设置为审批中
+                    this.submitApprApply(params.id ? params.id : id)
+                  } else {
+                    //发布成功清除数据
+                    this.isdeleteData()
+                    this.$message({
+                      message: '课程发布成功',
+                      type: 'success'
+                    })
+                    this.$router.back()
+                  }
+                })
+              } else {
+                addCourse(params).then(({ id }) => {
+                  // 如果没有任何审批流程可选则不需要经过审批
+                  if (process) {
+                    // 状态设置为审批中
+                    this.submitApprApply(params.id ? params.id : id)
+                  } else {
+                    //发布成功清除数据
+                    this.isdeleteData()
+                    this.$message({
+                      message: '课程发布成功',
+                      type: 'success'
+                    })
+                    this.$router.back()
+                  }
+                })
+              }
             })
           }
         })
@@ -1234,8 +1271,8 @@ export default {
         localName: '',
         catalogId: '',
         electiveType: '',
-        thinkContent: '', //课前思考内容
-        introduction: '', //课程介绍
+        thinkContent: ' ', //课前思考内容
+        introduction: ' ', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
