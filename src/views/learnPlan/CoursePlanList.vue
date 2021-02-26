@@ -495,7 +495,7 @@ export default {
     },
     jumpUserList(row) {
       // 查看完成率
-      this.$router.push({ path: '/learnPlan/CourseUserList', query: { planId: row.id } })
+      this.$router.push({ path: '/learnPlan/CourseUserList', query: { id: row.id } })
     },
     jumpEdit(row) {
       this.$router.push({
