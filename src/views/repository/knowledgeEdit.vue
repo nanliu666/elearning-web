@@ -28,7 +28,7 @@
                 slot="tip"
                 style="color: #a1a8ae; font-size:12px"
               >
-                单个文件大小＜10MB，最多{{ limit }}个文件
+                图片文件大小＜10MB，其他类型文件大小＜2G，最多{{ limit }}个文件
               </div>
             </template>
           </common-upload>
@@ -313,8 +313,14 @@ export default {
     beforeUpload(file) {
       const fileTypeIndex = file.name.lastIndexOf('.')
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
-      const isLt100M = file.size / 1024 / 1024 < 10
+      const imageSizeLimit = file.size / 1024 / 1024 < 10 //图片限制10M
+      const othersSizeLimit = file.size / 1024 / 1024 / 1024 < 2 // 其余文件限制大小为2G
       const TYPE_LIST = ['exe', 'bat']
+      const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP']
+      const isImage = _.some(IMAGE_TYPE, (item) => {
+        return item === fileType
+      })
+      let isLtFileSize = isImage ? imageSizeLimit : othersSizeLimit
       const notBatNorExe = _.some(TYPE_LIST, (item) => {
         return item === fileType
       })
@@ -324,8 +330,10 @@ export default {
         this.$message.error('上传文件不能为空!')
         return false
       }
-      if (!isLt100M) {
-        this.$message.error('上传文件大小不能超过 10MB!')
+      if (!isLtFileSize) {
+        this.$message.error(
+          `上传${isImage ? '图片' : ''}文件大小不能超过${isImage ? '10M' : '2G'}!`
+        )
         return false
       }
       if (!isLimitLength) {
@@ -336,7 +344,7 @@ export default {
         this.$message.error('不允许上传.exe .bat类型文件')
         return false
       }
-      return isLt100M && isLimitLength && !notBatNorExe && !isEmpty
+      return isLtFileSize && isLimitLength && !notBatNorExe && !isEmpty
     },
     // 预览附件
     previewFile(data) {
