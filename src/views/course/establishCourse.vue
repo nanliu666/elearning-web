@@ -485,9 +485,13 @@
                 </div>
 
                 <div v-if="scope.row.saveOrcompile == 1">
-                  <span v-if="scope.row.type == 1 || scope.row.fileData.status == 'complete'">{{
-                    scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                  }}</span>
+                  <span
+                    v-if="
+                      scope.row.type == 1 ||
+                        !scope.row.fileData.status ||
+                        scope.row.fileData.status == 'complete'
+                    "
+                  >{{ scope.row.upLoad[scope.row.upLoad.length - 1].localName }}</span>
                   <span v-else-if="scope.row.fileData.status == 'pending'">等待上传...</span>
                   <el-progress
                     v-else-if="scope.row.fileData.status == 'progress'"
