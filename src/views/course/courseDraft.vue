@@ -465,9 +465,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: '0', label: '下架' },
+      { value: '2', label: '全部' },
       { value: '1', label: '上架' },
-      { value: '2', label: '全部' }
+      { value: '0', label: '下架' }
     ]
   },
   {
