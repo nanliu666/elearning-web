@@ -1064,6 +1064,7 @@ export default {
   },
   data() {
     return {
+      oldOrgUserData:[],
       totalNum: 0,
       otherUserVal: '',
       organizationUserVal: '',
@@ -1276,7 +1277,10 @@ export default {
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
-      this.valChange(1)
+    
+         this.valChange(1)
+      
+      
     }),
 
     //其他人员
@@ -1453,13 +1457,7 @@ export default {
     },
     valChange(type) {
       if (type == 1) {
-        let params = this.organizationUserVal
-          ? {
-              search: this.organizationUserVal
-            }
-          : {
-              parentId: 1
-            }
+        let params = this.organizationUserVal? {search: this.organizationUserVal }: { parentId: 0 }
         getOrganizationUser(params).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
@@ -1467,6 +1465,7 @@ export default {
             item.id = item.userId
             res.orgs.push(item)
           })
+          
           this.organizationUser = res.orgs
         })
       } else {
@@ -1928,26 +1927,30 @@ export default {
       // 获取第一页的数据
       this.toggle_StudentsPage(1)
       this.dialog_add_student = false
+      this.$refs.organizationUserTree.setCheckedKeys([])
     },
     load_organizationUser(node, resolve) {
       if (node.level === 0) {
         getOrganizationUser({
-          parentId: 1
+          parentId: 0
         }).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
             item.name = item.orgName
-            res.orgs.push(item)
-          })
+           //res.orgs.push(item)
+          }) 
+          
           this.organizationUser = res.orgs
+          this.oldOrgUserData=res.orgs
         })
       } else {
         if (node.data.type != 'user') {
           getOrganizationUser({
             parentId: node.data.id
           }).then((res) => {
+
             res.users.forEach((item) => {
               item.type = 'user'
               item.leaf = true

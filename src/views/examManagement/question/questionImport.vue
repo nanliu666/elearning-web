@@ -19,12 +19,12 @@
           <a
             target="_blank"
             download="题库导入模板.xsl"
-            :href="QUESTION_IMPORT_URL"
+            :href="'https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls'"
           >
             <el-button
               size="medium"
             ><i
-              class="iconimage_icon_download iconfont "
+              class="iconimage_icon_download iconfont"
               style="margin-right: 10px"
             ></i>下载导入模板</el-button>
           </a>
@@ -211,7 +211,9 @@ export default {
         .catch()
     },
     downloadFile() {
+      debugger
       exportErrorReport().then((res) => {
+        debugger
         const { data, headers } = res
         const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
         const blob = new Blob([data], { type: headers['content-type'] })
