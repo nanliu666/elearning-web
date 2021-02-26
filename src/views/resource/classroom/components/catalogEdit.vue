@@ -72,7 +72,7 @@
       <el-button
         size="medium"
         @click="submit('toCreate')"
-      >完成并创建资源</el-button>
+      >完成并创建教室</el-button>
     </span>
     <span
       v-else
@@ -93,11 +93,7 @@
 </template>
 
 <script>
-import {
-  updateKnowledgeCatalog,
-  addKnowledgeCatalog,
-  getKnowledgeCatalogList
-} from '@/api/knowledge/knowledge'
+import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
@@ -131,7 +127,7 @@ export default {
   },
   methods: {
     async loadOrgTree() {
-      let res = await getKnowledgeCatalogList()
+      let res = await getCategoryTree({ source: 'classroom' })
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
     },
     // 过滤当前选择编辑的分类的子类
@@ -143,7 +139,7 @@ export default {
             loop(item.children)
           }
           // 父级组织类型 === 当前组织的类型
-          if (this.form.id === item.id) {
+          if (this.form.id === item.idStr) {
             item.children = []
           }
           return tree
@@ -170,7 +166,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addKnowledgeCatalog(_.assign(this.form, { creatorId: this.userId }))
+            addCategory(_.assign(this.form, { creatorId: this.userId, source: 'classroom' }))
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -179,7 +175,7 @@ export default {
                   this.$emit('refresh')
                 } else {
                   this.$router.push({
-                    path: '/repository/knowledgeEdit',
+                    path: '/resource/classroom/edit',
                     query: { catalogId: res.id }
                   })
                 }
@@ -189,7 +185,7 @@ export default {
               })
           } else {
             this.loading = true
-            updateKnowledgeCatalog(this.form)
+            editCategory(_.assign(this.form, { source: 'classroom' }))
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
@@ -216,16 +212,21 @@ export default {
     // 新建子分类
     createChild(row) {
       this.type = 'createChild'
-      this.form = _.cloneDeep(row)
-      this.form.parentId = row.id
+      this.form = _.pick(_.cloneDeep(row), ['name', 'parentId', 'source'])
+      this.form.parentId = row.idStr
       this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
     },
     edit(row) {
       this.type = 'edit'
-      this.form = _.cloneDeep(row)
-      this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
+      const { idStr, parentId, name } = row
+      this.form = {
+        id: idStr,
+        parentId,
+        name
+      }
+      this.parentOrgIdLabel = row.parentId == '0' ? '顶级' : this.findOrg(row.parentIdStr).name
       this.$emit('changevisible', true)
       this.loadOrgTree()
     },
@@ -233,7 +234,7 @@ export default {
       let org = {}
       function deep(arr) {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].id === id) {
+          if (arr[i].idStr === id) {
             org = arr[i]
             return
           }
@@ -257,7 +258,7 @@ export default {
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.form.parentId = data.id
+        this.form.parentId = data.idStr
         this.parentOrgIdLabel = data.name
       }
     }

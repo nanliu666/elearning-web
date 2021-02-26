@@ -178,9 +178,14 @@ export default {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
           const examInfo = this.$refs.examInfo
-          examInfo.model = res
-          this.setDisabled(examInfo)
-          this.setLazySelectFisrt(examInfo, res)
+          //TODO: 不知为何测试环境不能置灰，先测试下
+          if (examInfo) {
+            examInfo.model = res
+            this.$nextTick(() => {
+              this.setDisabled(examInfo)
+            })
+            this.setLazySelectFisrt(examInfo, res)
+          }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
         })
       }

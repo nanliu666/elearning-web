@@ -4,7 +4,7 @@
       <common-table
         id="demo"
         ref="table"
-        :columns="columnsVisible | columnsFilter"
+        :columns="tableColumns"
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
@@ -32,20 +32,8 @@
             </div>
           </div>
         </template>
-        <template
-          slot="multiSelectMenu"
-          slot-scope="{ selection }"
-        >
-          <el-button
-            type="text"
-            icon="el-icon-delete"
-            @click="deleteSelected(selection)"
-          >
-            批量删除
-          </el-button>
-        </template>
         <template #status="{row}">
-          {{ row.status === '0' ? '已启用' : '已停用' }}
+          {{ row.status == 0 ? '已启用' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -55,7 +43,7 @@
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status === '0' ? '停用' : '启用' }}
+              {{ row.status == 0 ? '停用' : '启用' }}
             </el-button>
             <el-button
               v-p="AUTH_REP_CATALOG"
@@ -109,12 +97,8 @@
 </template>
 
 <script>
-import {
-  getKnowledgeCatalogList,
-  getCreatUsers,
-  deleteKnowledgeCatalog,
-  updateStatusKnowledgeCatalog
-} from '@/api/knowledge/knowledge'
+import { getCategoryTree, deleteCategory, updateCategoryStatus, getCreatorList } from '@/api/live'
+
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
@@ -143,12 +127,12 @@ const TABLE_COLUMNS = [
   }
 ]
 const TABLE_CONFIG = {
-  rowKey: 'id',
+  rowKey: 'idStr',
   showHandler: true,
   defaultExpandAll: true,
   showIndexColumn: false,
   enablePagination: true,
-  // enableMultiSelect: true, // TODO：树无法做批量选择,暂时关闭多选
+  treeProps: { hasChildren: 'hasChildren', children: 'children' },
   handlerColumn: {
     minWidth: 100
   }
@@ -165,18 +149,12 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'ClassroomClassify',
   components: { SearchPopover, CatalogEdit },
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
   data() {
     return {
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: {
         requireOptions: [
@@ -214,7 +192,7 @@ export default {
             loadMoreFun(item) {
               if (item.loading || item.noMore) return
               item.loading = true
-              getCreatUsers().then((res) => {
+              getCreatorList({ source: 'classroom' }).then((res) => {
                 if (res.length > 0) {
                   item.options.push(...res)
                   item.pageNo += 1
@@ -230,7 +208,9 @@ export default {
       },
       data: [],
       createOrgDailog: false,
-      searchParams: {}
+      searchParams: {
+        source: 'classroom'
+      }
     }
   },
   computed: {
@@ -258,7 +238,7 @@ export default {
     }
   },
   activated() {
-    getCreatUsers().then((res) => {
+    getCreatorList({ source: 'classroom' }).then((res) => {
       this.searchConfig.popoverOptions[1].options.push(...res)
     })
     this.loadTableData()
@@ -269,7 +249,7 @@ export default {
       let target = {}
       const loop = function(data) {
         _.each(data, (item) => {
-          if (row.parentId === item.id) {
+          if (row.parentIdStr === item.idStr) {
             target = item
           }
           if (!_.isEmpty(item.children)) {
@@ -278,7 +258,7 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status == '1' ? true : false
       return isDisabled
     },
     // 权限配置窗口
@@ -296,7 +276,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteKnowledgeCatalog({ id }).then(() => {
+      deleteCategory({ id }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
@@ -316,34 +296,25 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.deleteFun(row.id)
+          this.deleteFun(row.idStr)
         })
-      }
-    },
-    // 批量删除
-    deleteSelected(selected) {
-      let someOneHasChilren = _.some(selected, (row) => {
-        return !_.isEmpty(row.children)
-      })
-      if (someOneHasChilren) {
-        this.$message.error('很抱歉，您选中的分类下存在子分类，请先将子分类调整后再删除!')
-      } else {
-        let selectedIds = []
-        _.each(selected, (item) => {
-          selectedIds.push(item.id)
-        })
-        this.deleteFun(selectedIds.join(','))
       }
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
-        const params = this.searchParams
         this.tableLoading = true
-        getKnowledgeCatalogList(params).then((res) => {
+        getCategoryTree(this.searchParams).then((res) => {
+          const loop = (tree) => {
+            _.each(tree, (item) => {
+              item.hasChildren = false
+              if (!_.isEmpty(item.children)) {
+                loop(item.children)
+              }
+            })
+          }
+          loop(res)
           this.tableData = res
           this.tableLoading = false
         })
@@ -359,7 +330,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.searchParams = params
+      this.searchParams = _.assign(this.searchParams, params)
       this.loadTableData()
     },
     // 添加子分类
@@ -376,20 +347,19 @@ export default {
     handleStatus(row) {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status === '0' ? '停用' : '启用'
+      const statusText = row.status == 0 ? '停用' : '启用'
       const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
-      // 获取到当前分类以及子分类的id集合
-      let ids = this.getDeepIds(row)
-      const params = { ids, status: row.status === '0' ? 1 : 0 }
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
-      this.$confirm(`${row.status === '0' ? stopContent : startContent}`, '提醒', {
+      // 获取到当前分类以及子分类的id集合
+      const params = { id: row.idStr, status: row.status == 0 ? 1 : 0 }
+      this.$confirm(`${row.status == 0 ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        updateStatusKnowledgeCatalog(params).then(() => {
+        updateCategoryStatus(params).then(() => {
           this.loadTableData()
           this.$message({
             type: 'success',
@@ -397,20 +367,6 @@ export default {
           })
         })
       })
-    },
-    // 递归获取所有的停启用的id集合
-    getDeepIds(row) {
-      let ids = []
-      const deep = function(row) {
-        ids.push(row.id)
-        if (!_.isEmpty(row.children)) {
-          _.each(row.children, (item) => {
-            deep(item)
-          })
-        }
-      }
-      deep(row)
-      return ids
     }
   }
 }
