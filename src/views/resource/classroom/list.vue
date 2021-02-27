@@ -1,5 +1,16 @@
 <template>
   <div>
+    <page-header title="分类管理">
+      <el-button
+        slot="rightMenu"
+        v-p="ADD_REP_CATALOG"
+        type="primary"
+        size="medium"
+        @click="createClassroom"
+      >
+        创建教室
+      </el-button>
+    </page-header>
     <basic-container block>
       <common-table
         id="demo"
@@ -30,7 +41,7 @@
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin:0 20px 0 10px"
+                  style="margin:0 0px 0 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
@@ -52,15 +63,6 @@
                     style="cursor: pointer;"
                   />
                 </el-popover>
-                <el-button
-                  slot="rightMenu"
-                  v-p="ADD_REP_CATALOG"
-                  type="primary"
-                  size="medium"
-                  @click="createClassroom"
-                >
-                  创建教室
-                </el-button>
               </div>
             </div>
           </div>
