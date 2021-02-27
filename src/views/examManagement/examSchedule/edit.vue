@@ -229,11 +229,12 @@ export default {
     publishFun(type) {
       this.publishType = type
       if (this.submitLoading) return
-      this.submitLoading = true
+     
       // 草稿提交不需要校验,  发布提交需要校验
       const examInfoData = this.$refs.examInfo.getData(type)
       const examBatchData = this.$refs.examBatch.getData(type)
       Promise.all([examInfoData, examBatchData]).then((res) => {
+        this.submitLoading = true
         this.handleSubmit(res, type)
       })
     },
