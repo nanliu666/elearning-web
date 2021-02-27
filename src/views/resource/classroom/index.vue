@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       activeColor: styles.primaryColor,
-      activeIndex: '2'
+      activeIndex: '1'
     }
   },
   created() {},
