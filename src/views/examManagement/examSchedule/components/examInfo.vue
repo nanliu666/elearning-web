@@ -839,13 +839,14 @@ export default {
       return getCertificateList(_.assign(params, { status: '1' }))
     },
     getData(type) {
+      // 如果是草稿不需要校验，如果是提交或者下一步需要校验
       return new Promise((resolve) => {
-        if (type === 'publish') {
+        if (type === 'draft') {
+          resolve(this.model)
+        } else {
           this.$refs['form'].validate().then(() => {
             resolve(this.model)
           })
-        } else {
-          resolve(this.model)
         }
       })
     }
