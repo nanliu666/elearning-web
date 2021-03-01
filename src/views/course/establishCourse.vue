@@ -15,13 +15,13 @@
         >
           <i class="el-icon-info"></i> 填写课程信息
         </div>
-        <div
+        <!-- <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
           @click="headIndex = 2"
         >
           <i class="el-icon-s-marketing"></i> 填写课前思考内容
-        </div>
+        </div> -->
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
@@ -331,18 +331,20 @@
       </el-form>
 
       <!-- 填写课前思考内容 -->
-      <div v-show="headIndex === 2">
+      <!-- <div v-show="headIndex === 2">
         <div class="editorTitle">
           <div class="reflectTitle">
             课前思考
           </div>
           <tinymce v-model="ruleForm.thinkContent" />
         </div>
-      </div>
+      </div> -->
 
       <!-- 上传课程内容 -->
       <div v-show="headIndex === 3">
         <div id="upContent">
+          课前思考
+
           <div class="up_head">
             <span>章节内容</span>
             <div>
@@ -1488,7 +1490,7 @@ export default {
     }
     .schedule {
       margin: 0 auto;
-      width: 60%;
+      width: 40%;
       display: flex;
       justify-content: space-around;
       .schedule1,
@@ -1569,8 +1571,10 @@ export default {
     margin: 10px 0 10px;
   }
   #upContent {
-    margin-left: -7vw;
+    margin-left: -10vw;
+    margin-top: -5vh;
     width: 60vw;
+    padding-bottom: 5vh;
     .up_head {
       display: flex;
       justify-content: space-between;

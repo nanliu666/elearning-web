@@ -3,7 +3,7 @@
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
-    width="550px"
+    width="800px"
     :modal-append-to-body="false"
     @close="handleClose"
   >
@@ -55,6 +55,13 @@
           </div>
         </el-col>
       </el-form-item>
+      <!-- 可见范围 -->
+      <el-form-item label="可见范围">
+        <div>
+          <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+        </div>
+        {{ userList }}
+      </el-form-item>
     </el-form>
     <span
       v-if="type === 'create'"
@@ -90,9 +97,13 @@
 </template>
 
 <script>
+import UserOrgTree from './UserOrgTree'
 import { getCatalog, addCatalog, editCatalog } from '@/api/course/course'
 export default {
   name: 'CatalogEdit',
+  components: {
+    UserOrgTree
+  },
   props: {
     visible: {
       type: Boolean,
@@ -101,6 +112,7 @@ export default {
   },
   data() {
     return {
+      userList: [],
       type: 'create',
       radioDisable: {
         Company: false,
@@ -118,7 +130,12 @@ export default {
       loading: false
     }
   },
+
   methods: {
+    // 可见范围返回数据
+    getUserList(val) {
+      this.userList = val
+    },
     async loadOrgTree() {
       let res = await getCatalog()
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
