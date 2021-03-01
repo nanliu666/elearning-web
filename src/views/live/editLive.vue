@@ -1064,7 +1064,7 @@ export default {
   },
   data() {
     return {
-      oldOrgUserData:[],
+      oldOrgUserData: [],
       totalNum: 0,
       otherUserVal: '',
       organizationUserVal: '',
@@ -1277,10 +1277,8 @@ export default {
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
-    
-         this.valChange(1)
-      
-      
+
+      this.valChange(1)
     }),
 
     //其他人员
@@ -1288,8 +1286,8 @@ export default {
       this.loading = true
       this.valChange(2)
     }),
-    'basicForm.liveClassification_value':{
-      handler(newval,oldval) {
+    'basicForm.liveClassification_value': {
+      handler() {
         //选择完成  隐藏选项
         this.$refs.setliveClassificationValue.blur()
       },
@@ -1321,10 +1319,10 @@ export default {
       deep: true
     }
   },
-//   activated() {
-//    // this.isgetcategoryTree()
-//     //this.getStudentInfoList();
-//  },
+  //   activated() {
+  //    // this.isgetcategoryTree()
+  //     //this.getStudentInfoList();
+  //  },
 
   created() {
     // 通过查看id是否存在判断是否是编辑
@@ -1457,7 +1455,9 @@ export default {
     },
     valChange(type) {
       if (type == 1) {
-        let params = this.organizationUserVal? {search: this.organizationUserVal }: { parentId: 0 }
+        let params = this.organizationUserVal
+          ? { search: this.organizationUserVal }
+          : { parentId: 0 }
         getOrganizationUser(params).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
@@ -1465,7 +1465,7 @@ export default {
             item.id = item.userId
             res.orgs.push(item)
           })
-          
+
           this.organizationUser = res.orgs
         })
       } else {
@@ -1922,6 +1922,7 @@ export default {
         this.toggle_StudentsPage(1)
       })
     },
+
     // 添加关联学员
     add_associateStudents() {
       // 获取第一页的数据
@@ -1939,18 +1940,17 @@ export default {
             item.leaf = true
             item.id = item.userId
             item.name = item.orgName
-           //res.orgs.push(item)
-          }) 
-          
+            //res.orgs.push(item)
+          })
+
           this.organizationUser = res.orgs
-          this.oldOrgUserData=res.orgs
+          this.oldOrgUserData = res.orgs
         })
       } else {
         if (node.data.type != 'user') {
           getOrganizationUser({
             parentId: node.data.id
           }).then((res) => {
-
             res.users.forEach((item) => {
               item.type = 'user'
               item.leaf = true
