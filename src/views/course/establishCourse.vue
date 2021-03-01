@@ -15,13 +15,13 @@
         >
           <i class="el-icon-info"></i> 填写课程信息
         </div>
-        <div
+        <!-- <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
           @click="headIndex = 2"
         >
           <i class="el-icon-s-marketing"></i> 填写课前思考内容
-        </div>
+        </div> -->
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
@@ -331,18 +331,20 @@
       </el-form>
 
       <!-- 填写课前思考内容 -->
-      <div v-show="headIndex === 2">
+      <!-- <div v-show="headIndex === 2">
         <div class="editorTitle">
           <div class="reflectTitle">
             课前思考
           </div>
           <tinymce v-model="ruleForm.thinkContent" />
         </div>
-      </div>
+      </div> -->
 
       <!-- 上传课程内容 -->
       <div v-show="headIndex === 3">
         <div id="upContent">
+          课前思考
+
           <div class="up_head">
             <span>章节内容</span>
             <div>
@@ -410,6 +412,7 @@
                   <el-select
                     v-model="scope.row.type"
                     placeholder="请选择"
+                    @change="scope.row.upLoad = []"
                   >
                     <el-option
                       v-for="item in typeOption"
@@ -484,22 +487,21 @@
                 </div>
 
                 <div v-if="scope.row.saveOrcompile == 1">
-                  <span v-if="scope.row.type == 3 || scope.row.type == 2 || scope.row.type == 1">{{
-                    scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                  }}</span>
-                  <div v-else>
-                    <span v-if="scope.row.fileData.status == 'pending'">等待上传...</span>
-                    <el-progress
-                      v-if="scope.row.fileData.status == 'progress'"
-                      :percentage="scope.row.fileData.percent"
-                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status != 'error'"
-                      :stroke-width="18"
-                    ></el-progress>
-                    <span v-if="scope.row.fileData.status == 'complete'">{{
-                      scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                    }}</span>
-                  </div>
+                  <span
+                    v-if="
+                      scope.row.type == 1 ||
+                        !scope.row.fileData.status ||
+                        scope.row.fileData.status == 'complete'
+                    "
+                  >{{ scope.row.upLoad[scope.row.upLoad.length - 1].localName }}</span>
+                  <span v-else-if="scope.row.fileData.status == 'pending'">等待上传...</span>
+                  <el-progress
+                    v-else-if="scope.row.fileData.status == 'progress'"
+                    :percentage="scope.row.fileData.percent"
+                    :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
+                    :text-inside="scope.row.fileData.status != 'error'"
+                    :stroke-width="18"
+                  ></el-progress>
                 </div>
               </template>
             </el-table-column>
@@ -641,7 +643,8 @@ import {
   // getCourseContents,
   getCourse,
   addCourse,
-  listTeacher
+  listTeacher,
+  editCourseInfo
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 export default {
@@ -791,6 +794,7 @@ export default {
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
     })
+    this.isdeleteData()
   },
   activated() {
     // 检测断线重连
@@ -809,6 +813,7 @@ export default {
     this.getInfo()
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
+    this.disabledBtn = false
   },
   methods: {
     typeChange(c) {
@@ -1032,8 +1037,6 @@ export default {
             localName: this.addArticle.localName,
             content: _.escape(this.addArticle.content)
           }
-          // this.ruleForm.contents[this.AddArticleBtntableIndex].localName = this.addArticle.localName
-          // this.ruleForm.contents[this.AddArticleBtntableIndex].content = this.addArticle.content
           this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
           this.addArticle.localName = ''
           this.addArticle.content = ''
@@ -1145,19 +1148,32 @@ export default {
           .then(() => {
             params.status = status
 
-            addCourse(params).then(() => {
-              // editCourseInfo(this.ruleForm).then(() => {
-              this.$message({
-                message: '保存成功',
-                type: 'success'
-              })
-              this.isdeleteData()
-              setTimeout(() => {
+            // 判断是新增还是编辑
+            if (this.$route.query.id) {
+              editCourseInfo(params).then(() => {
+                // editCourseInfo(this.ruleForm).then(() => {
+                this.$message({
+                  message: '保存成功',
+                  type: 'success'
+                })
+                this.isdeleteData()
                 this.$router.push({ path: '/course/courseDraft?status=' + status })
                 this.disabledBtn = false
                 // this.$router.go(-1)
-              }, 3000)
-            })
+              })
+            } else {
+              addCourse(params).then(() => {
+                // editCourseInfo(this.ruleForm).then(() => {
+                this.$message({
+                  message: '保存成功',
+                  type: 'success'
+                })
+                this.isdeleteData()
+                this.$router.push({ path: '/course/courseDraft?status=' + status })
+                this.disabledBtn = false
+                // this.$router.go(-1)
+              })
+            }
           })
           .catch(() => {
             this.$message({
@@ -1182,21 +1198,41 @@ export default {
             this.$refs.apprSubmit.validate().then((process) => {
               this.disabledBtn = true
               params.status = process ? 0 : 1
-              addCourse(params).then(({ id }) => {
-                // 如果没有任何审批流程可选则不需要经过审批
-                if (process) {
-                  // 状态设置为审批中
-                  this.submitApprApply(params.id ? params.id : id)
-                } else {
-                  //发布成功清除数据
-                  this.isdeleteData()
-                  this.$message({
-                    message: '课程发布成功',
-                    type: 'success'
-                  })
-                  this.$router.back()
-                }
-              })
+
+              // 判断是编辑还是新增
+              if (this.$route.query.id) {
+                editCourseInfo(params).then(({ id }) => {
+                  // 如果没有任何审批流程可选则不需要经过审批
+                  if (process) {
+                    // 状态设置为审批中
+                    this.submitApprApply(params.id ? params.id : id)
+                  } else {
+                    //发布成功清除数据
+                    this.isdeleteData()
+                    this.$message({
+                      message: '课程发布成功',
+                      type: 'success'
+                    })
+                    this.$router.back()
+                  }
+                })
+              } else {
+                addCourse(params).then(({ id }) => {
+                  // 如果没有任何审批流程可选则不需要经过审批
+                  if (process) {
+                    // 状态设置为审批中
+                    this.submitApprApply(params.id ? params.id : id)
+                  } else {
+                    //发布成功清除数据
+                    this.isdeleteData()
+                    this.$message({
+                      message: '课程发布成功',
+                      type: 'success'
+                    })
+                    this.$router.back()
+                  }
+                })
+              }
             })
           }
         })
@@ -1225,13 +1261,12 @@ export default {
             message: '本课程已发布成功',
             type: 'success'
           })
-          setTimeout(() => {
-            this.disabledBtn = false
-            // this.$router.go(-1)
-            this.$router.push({ path: '/course/courseDraft?status=' + status })
-            //发布成功清除数据
-            this.isdeleteData()
-          }, 3000)
+
+          this.disabledBtn = false
+          // this.$router.go(-1)
+          this.$router.push({ path: '/course/courseDraft?status=' + status })
+          //发布成功清除数据
+          this.isdeleteData()
         })
     },
     // 清空数据
@@ -1242,8 +1277,8 @@ export default {
         localName: '',
         catalogId: '',
         electiveType: '',
-        thinkContent: '', //课前思考内容
-        introduction: '', //课程介绍
+        thinkContent: ' ', //课前思考内容
+        introduction: ' ', //课程介绍
         // tagIds: [], //标签
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
@@ -1455,7 +1490,7 @@ export default {
     }
     .schedule {
       margin: 0 auto;
-      width: 60%;
+      width: 40%;
       display: flex;
       justify-content: space-around;
       .schedule1,
@@ -1536,8 +1571,10 @@ export default {
     margin: 10px 0 10px;
   }
   #upContent {
-    margin-left: -7vw;
+    margin-left: -10vw;
+    margin-top: -5vh;
     width: 60vw;
+    padding-bottom: 5vh;
     .up_head {
       display: flex;
       justify-content: space-between;

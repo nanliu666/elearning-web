@@ -415,12 +415,6 @@ const TABLE_COLUMNS = [
     prop: 'electiveType',
     slot: true
   },
-
-  // {
-  //   label: '标签',
-  //   prop: 'atags',
-  //   slot: true
-  // },
   {
     label: '是否推荐',
     prop: 'isRecommend',
@@ -471,9 +465,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: '0', label: '下架' },
+      { value: '2', label: '全部' },
       { value: '1', label: '上架' },
-      { value: '2', label: '全部' }
+      { value: '0', label: '下架' }
     ]
   },
   {
@@ -883,7 +877,9 @@ export default {
 
     handleSearch(searchParams) {
       this.searchParams = searchParams
-      this.getInfo(searchParams)
+      this.page.pageNo = 1
+      this.page.currentPage = 1
+      this.getInfo()
     },
 
     handleRemoveItems(selection) {
@@ -960,34 +956,50 @@ export default {
         let data1 = JSON.parse(JSON.stringify(res.data))
         data1 = this.arrayUnique(data1, 'teacherName')
         data1 = this.arrClearBlank(data1, 'teacherName')
-        SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+
         let data2 = JSON.parse(JSON.stringify(res.data))
         data2 = this.arrayUnique(data2, 'catalogName')
         data2 = this.arrClearBlank(data2, 'catalogName')
-        SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+
         // let data7 = JSON.parse(JSON.stringify(res.data))
         // data7 = this.arrayUnique(data7, 'creatorName')
         // data7 = this.arrClearBlank(data7, 'creatorName')
         // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
-        SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        if (this.status == 1) {
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
+          SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
+        } else {
+          SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[0].options.push(...data1)
+          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data2)
+        }
+
         // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
       })
       getCourseInfoUserList().then((res) => {
         let data7 = JSON.parse(JSON.stringify(res))
         data7 = this.arrayUnique(data7, 'creatorName')
         data7 = this.arrClearBlank(data7, 'creatorId')
-        SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+
+        if (this.status == 1) {
+          SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+        } else {
+          SEARCH_POPOVER_POPOVER_OPTIONS[6].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[6].options.push(...data7)
+        }
       })
     },
 
     // 拿数据
-    getInfo(searchParams) {
-      if (searchParams) {
-        this.page.pageNo = 1
-        this.page.pageSize = 10
-      }
+    getInfo() {
+      // if (this.searchParams) {
+      //   this.page.pageNo = 1
+      //   this.page.pageSize = 10
+      // }
       let params = {
         currentPage: '',
         size: '',
@@ -1011,6 +1023,32 @@ export default {
       this.getInfo()
       this.getScreenInfo()
       this.$refs.seachPopover.resetForm()
+
+      // 草稿没有状态
+      if (this.status == 1) {
+        // 已发布
+        TABLE_COLUMNS[3] = {
+          label: '状态',
+          prop: 'isPutaway',
+          slot: true
+        }
+        SEARCH_POPOVER_POPOVER_OPTIONS.unshift({
+          config: { placeholder: '请选择' },
+          data: '',
+          field: 'isPutaway',
+          label: '状态',
+          type: 'select',
+          options: [
+            { value: '0', label: '下架' },
+            { value: '1', label: '上架' },
+            { value: '2', label: '全部' }
+          ]
+        })
+      } else {
+        // 草稿
+        SEARCH_POPOVER_POPOVER_OPTIONS.splice(0, 1)
+        TABLE_COLUMNS[3] = {}
+      }
     }
   }
 }

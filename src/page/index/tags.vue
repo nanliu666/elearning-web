@@ -59,12 +59,12 @@
           <!-- <el-dropdown-item @click.native="$parent.isSearch = true">
            搜索
           </el-dropdown-item> -->
-          <el-dropdown-item @click.native="closeOthersTags">
+          <!-- <el-dropdown-item @click.native="closeOthersTags">
             关闭其它
           </el-dropdown-item>
           <el-dropdown-item @click.native="closeAllTags">
             关闭所有
-          </el-dropdown-item>
+          </el-dropdown-item> -->
           <el-dropdown-item @click.native="clearCacheTags">
             清除缓存
           </el-dropdown-item>

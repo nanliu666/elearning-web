@@ -313,15 +313,15 @@
       <el-button
         type="primary"
         size="medium"
-        @click="isAddTeacher(1)"
+        @click="isAddTeacher()"
       >
-        完成
+        确定
       </el-button>
       <el-button
         size="medium"
-        @click="isAddTeacher(0)"
+        @click="toLecturer()"
       >
-        完成并继续添加
+        取消
       </el-button>
     </div>
   </div>
@@ -536,11 +536,22 @@ export default {
     },
     // 去讲师列表
     toLecturer() {
+      this.ruleForm = {
+        categoryId: '',
+        userId: '',
+        userEmail: '',
+        phonenum: '',
+        sex: '',
+        attachments: [],
+        isRecommend: false,
+        isLatestTeacher: 0,
+        isPopularTeacher: 0
+      }
       this.$router.push({ path: '/resource/lecturer/lecturer' })
     },
 
     // 添加讲师
-    isAddTeacher(i) {
+    isAddTeacher() {
       this.ruleForm.categoryId = this.ruleForm.categoryId
         ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
         : ''
@@ -566,36 +577,13 @@ export default {
           this.ruleForm.userId = this.userIdData
           this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
           update(this.ruleForm).then(() => {
-            if (i) {
-              this.toLecturer()
-              this.ruleForm = {
-                categoryId: '',
-                userId: '',
-                userEmail: '',
-                phonenum: '',
-                sex: '',
-                attachments: [],
-                isRecommend: false,
-                isLatestTeacher: 0,
-                isPopularTeacher: 0
-              }
-            } else {
-              this.ruleForm = {
-                categoryId: '',
-                userId: '',
-                userEmail: '',
-                phonenum: '',
-                sex: '',
-                attachments: [],
-                isRecommend: false,
-                isLatestTeacher: 0,
-                isPopularTeacher: 0
-              }
-            }
+            this.toLecturer()
           })
         }
       })
     },
+
+    // 清除数据跳转
 
     // 图片校验
     beforeAvatarUpload(file) {

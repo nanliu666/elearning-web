@@ -333,12 +333,12 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程编号',
     data: ''
   },
-  {
-    type: 'input',
-    field: 'coursePlanName',
-    label: '课程安排名称',
-    data: ''
-  },
+  // {
+  //   type: 'input',
+  //   field: 'coursePlanName',
+  //   label: '课程安排名称',
+  //   data: ''
+  // },
   // {
   //   type: 'input',
   //   field: 'coursePlanName',
@@ -495,7 +495,7 @@ export default {
     },
     jumpUserList(row) {
       // 查看完成率
-      this.$router.push({ path: '/learnPlan/CourseUserList', query: { planId: row.id } })
+      this.$router.push({ path: '/learnPlan/CourseUserList', query: { id: row.id } })
     },
     jumpEdit(row) {
       this.$router.push({

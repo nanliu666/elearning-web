@@ -207,6 +207,7 @@ export default {
       this.tableLoading = true
       try {
         let { totalNum, data } = await queryPercentageComplete({
+          id: this.$route.query.id,
           ...this.queryInfo,
           pageSize: this.page.size,
           pageNo: this.page.currentPage

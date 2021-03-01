@@ -87,6 +87,7 @@
                 prop="liveClassification_value"
               >
                 <el-select
+                  ref="setliveClassificationValue"
                   v-model="basicForm.liveClassification_value"
                   popper-class="select_liveClassification"
                   placeholder="请选择"
@@ -1063,6 +1064,7 @@ export default {
   },
   data() {
     return {
+      oldOrgUserData: [],
       totalNum: 0,
       otherUserVal: '',
       organizationUserVal: '',
@@ -1275,6 +1277,7 @@ export default {
     // 在组织架构下使用查询参数
     organizationUserVal: _.debounce(function() {
       this.loading = true
+
       this.valChange(1)
     }),
 
@@ -1283,7 +1286,14 @@ export default {
       this.loading = true
       this.valChange(2)
     }),
-
+    'basicForm.liveClassification_value': {
+      handler() {
+        //选择完成  隐藏选项
+        this.$refs.setliveClassificationValue.blur()
+      },
+      immediate: false,
+      deep: true
+    },
     'basicForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
@@ -1309,10 +1319,11 @@ export default {
       deep: true
     }
   },
-  activated() {
-    this.isgetcategoryTree()
-    // this.getStudentInfoList();
-  },
+  //   activated() {
+  //    // this.isgetcategoryTree()
+  //     //this.getStudentInfoList();
+  //  },
+
   created() {
     // 通过查看id是否存在判断是否是编辑
     if (this.$route.query.id) {
@@ -1445,12 +1456,8 @@ export default {
     valChange(type) {
       if (type == 1) {
         let params = this.organizationUserVal
-          ? {
-              search: this.organizationUserVal
-            }
-          : {
-              parentId: 1
-            }
+          ? { search: this.organizationUserVal }
+          : { parentId: 0 }
         getOrganizationUser(params).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
@@ -1458,6 +1465,7 @@ export default {
             item.id = item.userId
             res.orgs.push(item)
           })
+
           this.organizationUser = res.orgs
         })
       } else {
@@ -1914,25 +1922,29 @@ export default {
         this.toggle_StudentsPage(1)
       })
     },
+
     // 添加关联学员
     add_associateStudents() {
       // 获取第一页的数据
       this.toggle_StudentsPage(1)
       this.dialog_add_student = false
+      this.$refs.organizationUserTree.setCheckedKeys([])
     },
     load_organizationUser(node, resolve) {
       if (node.level === 0) {
         getOrganizationUser({
-          parentId: 1
+          parentId: 0
         }).then((res) => {
           res.users.forEach((item) => {
             item.type = 'user'
             item.leaf = true
             item.id = item.userId
             item.name = item.orgName
-            res.orgs.push(item)
+            //res.orgs.push(item)
           })
+
           this.organizationUser = res.orgs
+          this.oldOrgUserData = res.orgs
         })
       } else {
         if (node.data.type != 'user') {

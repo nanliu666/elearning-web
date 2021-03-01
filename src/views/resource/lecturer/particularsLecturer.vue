@@ -318,8 +318,16 @@ export default {
     isTeacherdelete(id) {
       getCourseListData({ teacherId: this.teacherData.userId, pageNo: 1, pageSize: 999 }).then(
         (res) => {
-          // 如果没有课程
-          if (res.data.length === 0) {
+          // 过滤在线课程
+          let countIndex = 0
+          res.data.map((item) => {
+            if (item.type == 1) {
+              // 在线课程
+              ++countIndex
+            }
+          })
+          // 如果没有课程&在线课程
+          if (res.data.length == 0 || res.data.length == countIndex) {
             this.$confirm('您确定要删除该讲师吗？', '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
@@ -388,8 +396,16 @@ export default {
 
         getCourseListData({ teacherId: this.teacherData.userId, pageNo: 1, pageSize: 999 }).then(
           (res) => {
-            // 如果没有课程
-            if (res.data.length === 0) {
+            // 过滤在线课程
+            let countIndex = 0
+            res.data.map((item) => {
+              if (item.type == 1) {
+                // 在线课程
+                ++countIndex
+              }
+            })
+            // 如果没有课程&在线课程
+            if (res.data.length == 0 || res.data.length == countIndex) {
               this.$confirm('您确定要停用该讲师吗？', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',

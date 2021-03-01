@@ -60,7 +60,7 @@
             <i
               class="el-icon-arrow-down icon"
               style="margin-right: 12px"
-            /> 打开
+            /> 展开
           </div>
         </div>
       </div>
@@ -127,9 +127,9 @@
                   <li>
                     <span class="text">选修类型：</span>
                     <span>
-                      <span v-show="courseData.electiveType == 1">在线课程</span>
-                      <span v-show="courseData.electiveType == 2">面授课程</span>
-                      <span v-show="courseData.electiveType == 3">直播课程</span>
+                      <span v-show="courseData.electiveType == 1">开放选修</span>
+                      <span v-show="courseData.electiveType == 2">通过审批</span>
+                      <span v-show="courseData.electiveType == 3">禁止选修</span>
                     </span>
                   </li>
                 </ul>
@@ -402,7 +402,7 @@ export default {
         Reject: '已拒绝',
         Cancel: '已撤回'
       },
-      show: true,
+      show: false,
       // 是否已撤销 已拒绝 已完成
       isCancel: false,
       isFished: false,
@@ -637,10 +637,11 @@ export default {
       target.type = origin.type
       target.prevId = origin.prevId
       target.properties = origin.properties
-      // 或签不copy userlist
-      if (target.nodeType !== 'or') {
-        target.userList = origin.userList
-      }
+      // 或签不copy userlist（最开始的逻辑）
+      // 或签显示userList(2021.2.25  与测试确认)
+      // if (target.nodeType !== 'or') {
+      target.userList = origin.userList
+      // }
       target.pos = pos
     },
     // 遍历nodeData找到对应的节点进行复制

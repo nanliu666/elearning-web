@@ -94,11 +94,11 @@
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
-              v-p="AUTH_COURSE_CATALOG"
+              v-p="EDIT_COURSE_CATALOG"
               type="text"
-              @click="handleAuth(row)"
+              @click="handleCommand('edit', row)"
             >
-              权限配置
+              编辑
             </el-button>
             <el-dropdown
               v-if="$p([EDIT_COURSE_CATALOG, DELETE_COURSE_CATALOG, ADD_GROUNP_COURSE_CATALOG])"
@@ -112,22 +112,16 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="EDIT_COURSE_CATALOG"
-                  command="edit"
+                  v-p="ADD_GROUNP_COURSE_CATALOG"
+                  command="addChild"
                 >
-                  编辑
+                  新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_COURSE_CATALOG"
                   command="delete"
                 >
                   删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="ADD_GROUNP_COURSE_CATALOG"
-                  command="addChild"
-                >
-                  新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -317,10 +311,6 @@ export default {
       loop(this.tableData)
       const isDisabled = !_.isEmpty(target) && target.status === '1' ? true : false
       return isDisabled
-    },
-    // 权限配置窗口
-    handleAuth() {
-      this.$message.warning('正在开发中...')
     },
     // 多种操作
     async handleCommand($event, row) {
