@@ -1,5 +1,16 @@
 <template>
   <div>
+    <page-header title="分类管理">
+      <el-button
+        slot="rightMenu"
+        v-p="ADD_REP_CATALOG"
+        type="primary"
+        size="medium"
+        @click="$refs.orgEdit.create()"
+      >
+        新建分类
+      </el-button>
+    </page-header>
     <basic-container block>
       <common-table
         id="demo"
@@ -19,15 +30,6 @@
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSearch"
                 />
-                <el-button
-                  slot="rightMenu"
-                  v-p="ADD_REP_CATALOG"
-                  type="primary"
-                  size="medium"
-                  @click="$refs.orgEdit.create()"
-                >
-                  新建分类
-                </el-button>
               </div>
             </div>
           </div>
