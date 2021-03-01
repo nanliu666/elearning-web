@@ -1,5 +1,16 @@
 <template>
   <div>
+    <page-header title="分类管理">
+      <el-button
+        slot="rightMenu"
+        v-p="ADD_REP_CATALOG"
+        type="primary"
+        size="medium"
+        @click="createClassroom"
+      >
+        创建教室
+      </el-button>
+    </page-header>
     <basic-container block>
       <common-table
         id="demo"
@@ -30,7 +41,7 @@
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin:0 20px 0 10px"
+                  style="margin:0 0px 0 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
@@ -52,15 +63,6 @@
                     style="cursor: pointer;"
                   />
                 </el-popover>
-                <el-button
-                  slot="rightMenu"
-                  v-p="ADD_REP_CATALOG"
-                  type="primary"
-                  size="medium"
-                  @click="createClassroom"
-                >
-                  创建教室
-                </el-button>
               </div>
             </div>
           </div>
@@ -119,8 +121,8 @@
 </template>
 
 <script>
-import { deleteKnowledgeCatalog, updateStatusKnowledgeCatalog } from '@/api/knowledge/knowledge'
-import { getArrangeList } from '@/api/examManage/schedule'
+import { queryClassroom, deleteClassroom, updateClassroomStatus } from '@/api/resource/classroom'
+import { getCategoryTree } from '@/api/live'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
@@ -280,7 +282,6 @@ import {
   ADD_CHILD_REP_CATALOG
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
-import { getCategoryList } from '@/api/examManage/category'
 export default {
   name: 'ClassroomList',
   components: { SearchPopover },
@@ -298,9 +299,7 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: SEARCH_CONFIG,
-      searchParams: {
-        type: 0 //状态:0-已发布，1-草稿箱
-      }
+      searchParams: {}
     }
   },
   computed: {
@@ -329,7 +328,7 @@ export default {
   },
   activated() {
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryList({ type: 1 }).then((res) => {
+    getCategoryTree({ source: 'classroom' }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -348,10 +347,12 @@ export default {
       this.$router.push({ path: '/resource/classroom/detail', query: { id: row.id } })
     },
     // 创建教室
-    createClassroom() {},
+    createClassroom() {
+      this.$router.push({ path: '/resource/classroom/edit' })
+    },
     // 编辑
-    editClassroom() {
-      this.$message.warning('正在开发中...')
+    editClassroom(row) {
+      this.$router.push({ path: '/resource/classroom/edit', query: { id: row.id } })
     },
     // 删除
     deleteClassroom(row) {
@@ -376,7 +377,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteKnowledgeCatalog({ id }).then(() => {
+      deleteClassroom({ id }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
@@ -411,7 +412,7 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getArrangeList(params).then((res) => {
+        queryClassroom(params).then((res) => {
           this.tableData = res.data
           this.tableLoading = false
         })
@@ -441,7 +442,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        updateStatusKnowledgeCatalog(params).then(() => {
+        updateClassroomStatus(params).then(() => {
           this.loadTableData()
           this.$message({
             type: 'success',

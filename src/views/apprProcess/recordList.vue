@@ -199,7 +199,7 @@ const SEARCH_CONFIG = {
         value: 'userId'
       },
       load: getUserWorkList,
-      searchable:true
+      searchable: true
     }
   ]
 }

@@ -151,12 +151,11 @@ const NODE_TYPE = {
 const loadOrgTree = async ({ parentId, search, isRange }) => {
   search = _.trim(search)
   let data
-  if(isRange){
-     data = await getOrgUserChild({parentId:parentId,search:search})
-  }
-  else{
+  if (isRange) {
+    data = await getOrgUserChild({ parentId: parentId, search: search })
+  } else {
     // 只能传入一个参数 当传入search的时候不使用parentId
-     data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
+    data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
   }
 
   //过滤被冻结的用户
@@ -288,13 +287,15 @@ export default {
       if (!search) return
       this.loading = true
       //如果查询范围内的  添加parentId
-      let params = this.isRange?{
-        search,
-        isRange: this.isRange,
-        parentId:1
-      }:{
-        search
-      }
+      let params = this.isRange
+        ? {
+            search,
+            isRange: this.isRange,
+            parentId: 1
+          }
+        : {
+            search
+          }
       loadOrgTree(params)
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>

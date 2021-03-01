@@ -46,21 +46,27 @@
                     {{ item | result }}
                   </span>
                   <!--審批提示信息放上來-->
-                  <span class="tip" v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false">
                   <span
-                  v-if="
-                  (item.nodeType === 'and' || _.get(item, 'properties.counterSign') == true) &&
-                  _.size(item.userList) > 1
-                  "
+                    v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false"
+                    class="tip"
                   >
-                  需所有审批人同意
-                  </span>
-                  <span
-                  v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false"
-                  class="tip"
-                  >
-                  一人同意即可
-                  </span>
+                    <span
+                      v-if="
+                        (item.nodeType === 'and' ||
+                          _.get(item, 'properties.counterSign') == true) &&
+                          _.size(item.userList) > 1
+                      "
+                    >
+                      需所有审批人同意
+                    </span>
+                    <span
+                      v-if="
+                        item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false
+                      "
+                      class="tip"
+                    >
+                      一人同意即可
+                    </span>
                   </span>
 
                   <span
@@ -89,20 +95,20 @@
                   </span>
                 </span>
                 <!--<span class="tip">-->
-                  <!--<span-->
-                    <!--v-if="-->
-                      <!--(item.nodeType === 'and' || _.get(item, 'properties.counterSign') == true) &&-->
-                        <!--_.size(item.userList) > 1-->
-                    <!--"-->
-                  <!--&gt;-->
-                    <!--需所有审批人同意-->
-                  <!--</span>-->
-                  <!--<span-->
-                    <!--v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false"-->
-                    <!--class="tip"-->
-                  <!--&gt;-->
-                    <!--一人同意即可-->
-                  <!--</span>-->
+                <!--<span-->
+                <!--v-if="-->
+                <!--(item.nodeType === 'and' || _.get(item, 'properties.counterSign') == true) &&-->
+                <!--_.size(item.userList) > 1-->
+                <!--"-->
+                <!--&gt;-->
+                <!--需所有审批人同意-->
+                <!--</span>-->
+                <!--<span-->
+                <!--v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false"-->
+                <!--class="tip"-->
+                <!--&gt;-->
+                <!--一人同意即可-->
+                <!--</span>-->
                 <!--</span>-->
               </div>
             </div>
@@ -125,14 +131,19 @@
               </div>
               <div v-else>
                 <!--或签展示审批人节点信息-->
-                <div v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false">
-                  <div v-if="_.size(item.userList) > 1" class="userlist">
+                <div
+                  v-if="item.nodeType === 'or' || _.get(item, 'properties.counterSign') == false"
+                >
+                  <div
+                    v-if="_.size(item.userList) > 1"
+                    class="userlist"
+                  >
                     <div
                       v-for="(it, i) in item.userList"
                       :key="i"
                       class="infouser"
                     >
-                      <div class="infoImg" >
+                      <div class="infoImg">
                         <el-avatar :src="it.avatarUrl || circleUrl" />
                         <div class="status">
                           <div>
@@ -140,10 +151,10 @@
                             <span class="time">{{ it.approveTime }}</span>
                           </div>
                           <!--<div-->
-                            <!--v-if="item.type !== 'copy'"-->
-                            <!--:class="[it.result, !it.result ? 'result' : '']"-->
+                          <!--v-if="item.type !== 'copy'"-->
+                          <!--:class="[it.result, !it.result ? 'result' : '']"-->
                           <!--&gt;-->
-                            <!--{{ it | result }}-->
+                          <!--{{ it | result }}-->
                           <!--</div>-->
                           <div
                             v-if="it.remark"
@@ -153,19 +164,23 @@
                           </div>
                         </div>
                       </div>
-                      <span v-if="i<item.userList.length-1" class="division">/</span>
+                      <span
+                        v-if="i < item.userList.length - 1"
+                        class="division"
+                      >/</span>
                     </div>
                     <div>
                       <el-tag v-if="item.result">
                         <div
                           v-if="item.nodeId !== 'start'"
                           :class="[item.result, !item.result ? 'result' : '']"
-                          class="status">
+                          class="status"
+                        >
                           {{ item | result }}
                         </div>
                       </el-tag>
                       <div v-if="item.remark">
-                        审批意见： <span>{{ item.remark}}</span>
+                        审批意见： <span>{{ item.remark }}</span>
                       </div>
                     </div>
                   </div>
@@ -175,8 +190,10 @@
                   </div>
                   <div
                     v-if="
-                    !item.remark && _.size(item.userList) == 1 && _.get(item, 'userList[0].remark')
-                  "
+                      !item.remark &&
+                        _.size(item.userList) == 1 &&
+                        _.get(item, 'userList[0].remark')
+                    "
                   >
                     审批意见：
                     <span>{{ item.userList[0].remark | content }}</span>
@@ -218,8 +235,10 @@
                   </div>
                   <div
                     v-if="
-                    !item.remark && _.size(item.userList) == 1 && _.get(item, 'userList[0].remark')
-                  "
+                      !item.remark &&
+                        _.size(item.userList) == 1 &&
+                        _.get(item, 'userList[0].remark')
+                    "
                   >
                     审批意见：
                     <span>{{ item.userList[0].remark | content }}</span>
@@ -361,19 +380,19 @@ export default {
     min-height: 0;
   }
 }
-.userlist{
+.userlist {
   padding: 10px 0;
   display: flex;
   display: -webkit-flex;
   display: -ms-flex;
   display: -moz-box;
   background-color: #f7f8fa;
-  .infouser{
+  .infouser {
     position: relative;
     .infoImg {
       background: rgba(247, 248, 250, 1);
       padding-left: 6px;
-      flex:1;
+      flex: 1;
       font-size: 14px;
       display: flex;
       justify-content: center;
@@ -388,7 +407,7 @@ export default {
         }
       }
     }
-    .division{
+    .division {
       position: absolute;
       right: 0;
       top: 15px;

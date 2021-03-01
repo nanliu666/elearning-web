@@ -127,7 +127,7 @@ export default {
   },
   methods: {
     async loadOrgTree() {
-      let res = await getCategoryTree({ source: 'classroom' })
+      let res = await getCategoryTree({ source: 'classroom', addFlag: '1' })
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
     },
     // 过滤当前选择编辑的分类的子类
