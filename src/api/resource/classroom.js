@@ -15,13 +15,9 @@ export const addClassroom = (params) => get('/manage/v1/classroom/addClassroom',
  */
 export const queryClassroomInfo = (params) => get('/manage/v1/classroom/queryClassroomInfo', params)
 /**
- * 教室名称是否已存在
+ * 编辑教室
  */
 export const editClassroom = (params) => get('/manage/v1/classroom/updateClassroom', params)
-/**
- * 创建教室
- */
-export const postExamArrange = (params) => get('/manage/v1/classroom/updateClassroom', params)
 /**
  * 权限配置-保存配置
  */

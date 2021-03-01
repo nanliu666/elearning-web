@@ -25,9 +25,9 @@
           </div>
         </template>
 
-        <template #resName2>
+        <template #roomArea>
           <el-input
-            v-model="formData.resName2"
+            v-model="formData.roomArea"
             placeholder="请输入"
           >
             <template slot="append">
@@ -48,10 +48,11 @@
             </el-tooltip>
           </div>
         </template>
-        <template #attachments>
+        <template #photoPath>
           <common-upload
+            v-model="formData.photoPath"
             :before-upload="beforeUpload"
-            @getValue="getValue"
+            :drag="true"
           >
             <template #default>
               <div class="upload__wrapper">
@@ -89,12 +90,8 @@
 </template>
 
 <script>
-import {
-  addKnowledgeList,
-  updateKnowledge,
-  getKnowledgeCatalogList,
-  getKnowledgeManageDetails
-} from '@/api/knowledge/knowledge'
+import { addClassroom, editClassroom, queryClassroomInfo } from '@/api/resource/classroom'
+import { getCategoryTree } from '@/api/live'
 import { mapGetters } from 'vuex'
 import CommonUpload from '@/components/common-upload/commonUpload'
 const FORM_COLUMNS = [
@@ -107,7 +104,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'input',
     label: '教室名称',
-    prop: 'resName',
+    prop: 'roomName',
     required: true,
     span: 11,
     offset: 0
@@ -143,13 +140,13 @@ const FORM_COLUMNS = [
   {
     itemType: 'input',
     label: '地址',
-    prop: 'providerName',
+    prop: 'roomAddr',
     span: 11
   },
   {
     itemType: 'inputNumber',
     label: '最大容纳人数',
-    prop: 'providerName1',
+    prop: 'maxCapacity',
     offset: 1,
     span: 11
   },
@@ -162,7 +159,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'input',
     label: '投影仪',
-    prop: 'resName1',
+    prop: 'hasProjector',
     placeholder: '请输入',
     span: 11,
     offset: 0
@@ -170,7 +167,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'slot',
     label: '面积',
-    prop: 'resName2',
+    prop: 'roomArea',
     span: 11,
     offset: 1
   },
@@ -183,7 +180,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'slot',
     label: '',
-    prop: 'attachments',
+    prop: 'photoPath',
     props: {
       label: 'jobName',
       value: 'id'
@@ -193,7 +190,7 @@ const FORM_COLUMNS = [
   }
 ]
 export default {
-  name: 'KnowledgeEdit',
+  name: 'ClassroomEdit',
   components: {
     CommonUpload
   },
@@ -202,12 +199,13 @@ export default {
       pageTitle: '创建教室',
       formColumns: FORM_COLUMNS,
       formData: {
-        resName: '',
+        roomName: '',
         catalogId: '',
-        providerName: '',
-        uploadType: 0, // 0本地文件 1链接文件
-        resUrl: '',
-        allowDownload: 0 //是否运行下载 0允许 1不允许
+        roomAddr: '',
+        hasProjector: '', // 是否有投影仪：0：没有；1：有
+        maxCapacity: null,
+        roomArea: null,
+        photoPath: []
       },
       submitting: false
     }
@@ -242,74 +240,53 @@ export default {
     this.initData()
   },
   methods: {
-    // 新增附件时，直接赋值
-    getValue(value) {
-      _.each(value, (item) => {
-        item.fileName = item.localName
-      })
-      let index = _.findIndex(
-        this.formData.attachments,
-        (item) => item.fileName === value[0].fileName
-      )
-      if (index > -1) {
-        this.$message.error('附件已存在，请勿重复上传')
-      }
-      this.formData.attachments = _.uniqBy([...this.formData.attachments, ...value], 'fileName')
-    },
     // 预览附件
     previewFile(data) {
       window.open(data.fileUrl)
     },
     // 删除上传文件
-    deleteUpload(data) {
-      let index = _.findIndex(this.formData.attachments, (item) => {
-        return item.uid === data.uid
-      })
-      this.formData.attachments.splice(index, 1)
-    },
+    deleteUpload() {},
     // 上传格式校验
     beforeUpload(file) {
       const fileTypeIndex = file.name.lastIndexOf('.')
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
       const imageSizeLimit = file.size / 1024 / 1024 < 10 //图片限制10M
-      const othersSizeLimit = file.size / 1024 / 1024 / 1024 < 2 // 其余文件限制大小为2G
       const TYPE_LIST = ['exe', 'bat']
       const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP']
       const isImage = _.some(IMAGE_TYPE, (item) => {
         return item === fileType
       })
-      let isLtFileSize = isImage ? imageSizeLimit : othersSizeLimit
+      let isLtFileSize = imageSizeLimit
       const notBatNorExe = _.some(TYPE_LIST, (item) => {
         return item === fileType
       })
       const isEmpty = file.size === 0
-      const isLimitLength = _.size(this.formData.attachments) < this.limit
+      if (!isImage) {
+        this.$message.error('不能上传图片类型以外的文件!')
+        return false
+      }
       if (isEmpty) {
         this.$message.error('上传文件不能为空!')
         return false
       }
       if (!isLtFileSize) {
-        this.$message.error(
-          `上传${isImage ? '图片' : ''}文件大小不能超过${isImage ? '10M' : '2G'}!`
-        )
-        return false
-      }
-      if (!isLimitLength) {
-        this.$message.error('上传文件数量超过限制!')
+        this.$message.error('上传图片大小不能超过10M!')
         return false
       }
       if (notBatNorExe) {
         this.$message.error('不允许上传.exe .bat类型文件')
         return false
       }
-      return isLtFileSize && isLimitLength && !notBatNorExe && !isEmpty
+      return !isImage && isLtFileSize && !notBatNorExe && !isEmpty
     },
     /**
      * 初始选择数据
      */
     initData() {
       let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
-      getKnowledgeCatalogList().then((res) => (catalogId.props.treeParams.data = res))
+      getCategoryTree({ source: 'classroom' }).then(
+        (res) => (catalogId.props.treeParams.data = res)
+      )
       if (this.id) {
         this.loadDetail()
       }
@@ -338,11 +315,10 @@ export default {
     },
     // 加载详细
     async loadDetail(id = this.id) {
-      const data = await getKnowledgeManageDetails({ id })
+      const data = await queryClassroomInfo({ id })
       for (let key in data) {
         this.$set(this.formData, key, data[key])
       }
-      this.formData.introduction = _.unescape(this.formData.introduction) // 反转义获取 dom
     },
     validate(...args) {
       // const BRIEF_MIN_LEN = 10 // 限制最小输入长度
@@ -358,26 +334,16 @@ export default {
     clearValidate(...args) {
       return this.$refs.form.clearValidate(...args)
     },
-    // 新增资源
+    // 创建教室
     async createKnowledgeFun(params) {
-      const data = await addKnowledgeList(params)
+      const data = await addClassroom(params)
       return data
     },
     // 更新数据
     async updateKnowledgeFun(params) {
-      const API_PARAMS = [
-        'allowDownload',
-        'catalogId',
-        'introduction',
-        'knowledgeId',
-        'providerName',
-        'resName',
-        'resUrl',
-        'updateTime',
-        'uploadType'
-      ]
+      const API_PARAMS = ['catalogId', 'knowledgeId', 'roomAddr', 'roomName']
       const param = _.assign({ knowledgeId: this.id }, _.pick(params, API_PARAMS))
-      await updateKnowledge(param)
+      await editClassroom(param)
       return { knowledgeId: this.id }
     }
   }
@@ -389,11 +355,11 @@ $color_active: #368afa;
 $color_border: #e3e7e9;
 $color_placeholder: #757c85;
 $color_font_uploader: #a0a8ae;
-.upload__wrapper {
-  width: calc(100%);
-  border: 1px solid #e4e4e4;
+/deep/ .el-upload-dragger {
   padding: 20px;
-  border-radius: 4px;
+  height: 200px;
+}
+.upload__wrapper {
   .wrapper__icon {
     font-size: 100px;
   }
