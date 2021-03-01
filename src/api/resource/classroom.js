@@ -11,6 +11,10 @@ export const checkClassroomName = (params) => post('/manage/v1/classroom/updateC
  */
 export const addClassroom = (params) => get('/manage/v1/classroom/addClassroom', params)
 /**
+ * 查询教室详情
+ */
+export const queryClassroomInfo = (params) => get('/manage/v1/classroom/queryClassroomInfo', params)
+/**
  * 教室名称是否已存在
  */
 export const editClassroom = (params) => get('/manage/v1/classroom/updateClassroom', params)
