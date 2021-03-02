@@ -393,11 +393,11 @@ export default {
         getCategoryTree(params).then((res) => {
           this.tableData = this.setDisableStatus(res)
           this.tableData.forEach((item) => {
-            item.hasChildren=false
+            item.hasChildren = false
           })
-       
+
           console.log(this.tableData)
-        // this.tableData = res;
+          // this.tableData = res;
           this.tableLoading = false
         })
         this.$refs.orgEdit.loadOrgTree()

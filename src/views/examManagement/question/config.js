@@ -1,5 +1,6 @@
 //export const QUESTION_IMPORT_URL = '"https://oa-file-dev.bestgrand.com.cn/题库导入模板.xls"'
-export const QUESTION_IMPORT_URL ='"https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls"'
+export const QUESTION_IMPORT_URL =
+  '"https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls"'
 /**
  * 选择题配置
  */

@@ -343,11 +343,89 @@
       <!-- 上传课程内容 -->
       <div v-show="headIndex === 3">
         <div id="upContent">
-          课前思考
+          <div class="reflection">
+            <div class="reflection_title">
+              <span>课前思考</span>
+              <el-button
+                type="primary"
+                size="medium"
+                :disabled="reflectionData.length != 0"
+                @click="addReflectionData"
+              >
+                添加课前思考
+              </el-button>
+            </div>
+            <div class="reflection_table">
+              <el-table
+                :data="reflectionData"
+                style="width: 100%"
+              >
+                <el-table-column
+                  type="index"
+                  label="序号"
+                  width="70"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="name"
+                  label="章节名称"
+                  width="380"
+                >
+                  <template slot-scope="scope">
+                    <el-input
+                      v-model="scope.row.name"
+                      placeholder="请输入内容"
+                      maxlength="32"
+                    ></el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  label="章节类型"
+                  width="185"
+                >
+                  <el-button
+                    disabled
+                    size="medium"
+                  >
+                    课前思考
+                  </el-button>
+                </el-table-column>
+                <el-table-column
+                  label="内容"
+                  width="250"
+                >
+                  <el-button
+                    type="text"
+                    @click="reflectionVisible = true"
+                  >
+                    修改课前思考
+                  </el-button>
+                </el-table-column>
+                <el-table-column
+                  label="操作"
+                  fixed="right"
+                  width="170"
+                >
+                  <el-button
+                    type="text"
+                    @click="reflectionData = []"
+                  >
+                    删除
+                  </el-button>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
 
           <div class="up_head">
             <span>章节内容</span>
-            <div>
+            <div class="up_head_title_btn">
+              <el-button
+                size="medium"
+                @click="addTask"
+              >
+                添加作业
+              </el-button>
               <common-upload
                 class="upload-more"
                 multiple
@@ -408,26 +486,35 @@
               width="185"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row.saveOrcompile === 0">
-                  <el-select
-                    v-model="scope.row.type"
-                    placeholder="请选择"
-                    @change="scope.row.upLoad = []"
-                  >
-                    <el-option
-                      v-for="item in typeOption"
-                      :key="item.value"
-                      :label="item.name"
-                      :value="item.value"
+                <span v-if="scope.row.taskBtn !== 'task'">
+                  <span v-if="scope.row.saveOrcompile === 0">
+                    <el-select
+                      v-model="scope.row.type"
+                      placeholder="请选择"
+                      @change="scope.row.upLoad = []"
                     >
-                    </el-option>
-                  </el-select>
-                </span>
-
-                <span v-if="scope.row.saveOrcompile === 1">
-                  <span v-if="typeOption[scope.row.type - 1]">
-                    {{ typeOption[scope.row.type - 1].name }}
+                      <el-option
+                        v-for="item in typeOption"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value"
+                      >
+                      </el-option>
+                    </el-select>
                   </span>
+
+                  <span v-if="scope.row.saveOrcompile === 1">
+                    <span v-if="typeOption[scope.row.type - 1]">
+                      {{ typeOption[scope.row.type - 1].name }}
+                    </span>
+                  </span></span>
+
+                <span v-else>
+                  <el-button
+                    size="medium"
+                    disabled
+                  >作业 <span class="taskBtnBox"></span>
+                  </el-button>
                 </span>
               </template>
             </el-table-column>
@@ -439,69 +526,99 @@
               width="250"
             >
               <template slot-scope="scope">
-                <div v-if="scope.row.saveOrcompile === 0">
-                  <span
-                    v-if="scope.row.type"
-                    size="medium"
-                  >
-                    <el-button
-                      v-if="scope.row.type === 1"
-                      type="text"
-                      @click="AddArticleBtntable(scope.$index, scope.row)"
+                <div v-if="scope.row.taskBtn !== 'task'">
+                  <div v-if="scope.row.saveOrcompile === 0">
+                    <span
+                      v-if="scope.row.type"
+                      size="medium"
                     >
-                      {{
-                        scope.row.upLoad[0]
-                          ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                          : '添加文章'
-                      }}
-                    </el-button>
-
-                    <span v-else>
-                      <span v-if="scope.row.fileData.status === 'pending'">
-                        等待上传...
-                      </span>
-                      <common-upload
-                        v-else
-                        need-handler
-                        :on-upload-progress="
-                          (fileData) => onUploadProgress(fileData, scope.row, scope.$index)
-                        "
-                        :check-upload="checkUpload"
-                        :on-upload-complete="onUploadComplete"
-                        :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
-                        :multiple="false"
-                        @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
+                      <el-button
+                        v-if="scope.row.type === 1"
+                        type="text"
+                        @click="AddArticleBtntable(scope.$index, scope.row)"
                       >
-                        <el-button type="text">{{
-                          scope.row.upLoad[0] && scope.row.upLoad[0].localName
+                        {{
+                          scope.row.upLoad[0]
                             ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
-                            : uploadRef[scope.row.type - 2].tips
-                        }}</el-button>
-                      </common-upload>
+                            : '添加文章'
+                        }}
+                      </el-button>
+
+                      <span v-else>
+                        <span v-if="scope.row.fileData.status === 'pending'">
+                          等待上传...
+                        </span>
+                        <common-upload
+                          v-else
+                          need-handler
+                          :on-upload-progress="
+                            (fileData) => onUploadProgress(fileData, scope.row, scope.$index)
+                          "
+                          :check-upload="checkUpload"
+                          :on-upload-complete="onUploadComplete"
+                          :before-upload="uploadRef[scope.row.type - 2].beforeUpload"
+                          :multiple="false"
+                          @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
+                        >
+                          <el-button type="text">{{
+                            scope.row.upLoad[0] && scope.row.upLoad[0].localName
+                              ? scope.row.upLoad[scope.row.upLoad.length - 1].localName
+                              : uploadRef[scope.row.type - 2].tips
+                          }}</el-button>
+                        </common-upload>
+                      </span>
                     </span>
-                  </span>
-                  <span
-                    v-else
-                    size="medium"
-                  > 请选择章节类型 </span>
+                    <span
+                      v-else
+                      size="medium"
+                    > 请选择章节类型 </span>
+                  </div>
+
+                  <div v-if="scope.row.saveOrcompile == 1">
+                    <span
+                      v-if="
+                        scope.row.type == 1 ||
+                          !scope.row.fileData.status ||
+                          scope.row.fileData.status == 'complete'
+                      "
+                    >{{ scope.row.upLoad[scope.row.upLoad.length - 1].localName }}</span>
+                    <span v-else-if="scope.row.fileData.status == 'pending'">等待上传...</span>
+                    <el-progress
+                      v-else-if="scope.row.fileData.status == 'progress'"
+                      :percentage="scope.row.fileData.percent"
+                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
+                      :text-inside="scope.row.fileData.status != 'error'"
+                      :stroke-width="18"
+                    ></el-progress>
+                  </div>
                 </div>
 
-                <div v-if="scope.row.saveOrcompile == 1">
-                  <span
-                    v-if="
-                      scope.row.type == 1 ||
-                        !scope.row.fileData.status ||
-                        scope.row.fileData.status == 'complete'
+                <div v-else>
+                  <common-upload
+                    need-handler
+                    :on-upload-progress="
+                      (fileData) => onUploadProgress(fileData, scope.row, scope.$index)
                     "
-                  >{{ scope.row.upLoad[scope.row.upLoad.length - 1].localName }}</span>
-                  <span v-else-if="scope.row.fileData.status == 'pending'">等待上传...</span>
-                  <el-progress
-                    v-else-if="scope.row.fileData.status == 'progress'"
-                    :percentage="scope.row.fileData.percent"
-                    :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
-                    :text-inside="scope.row.fileData.status != 'error'"
-                    :stroke-width="18"
-                  ></el-progress>
+                    :check-upload="checkUpload"
+                    :on-upload-complete="onUploadComplete"
+                    :before-upload="taskUpload"
+                    :multiple="false"
+                    @on-pending="(file) => onUploadPending(file, scope.row, scope.$index)"
+                  >
+                    <el-button
+                      v-if="scope.row.upLoad.length != 0"
+                      type="text"
+                      size="medium"
+                    >
+                      修改作业
+                    </el-button>
+                    <el-button
+                      v-else
+                      type="text"
+                    >
+                      上传附件
+                    </el-button>
+                  </common-upload>
                 </div>
               </template>
             </el-table-column>
@@ -624,6 +741,29 @@
               >确 定</el-button>
             </span>
           </el-dialog>
+
+          <!-- 课前思考dialog -->
+          <el-dialog
+            title="添加课前思考"
+            :visible.sync="reflectionVisible"
+            width="50%"
+            :modal-append-to-body="false"
+            :before-close="handleClose"
+          >
+            <div class="reflection_content">
+              <tinymce v-model="ruleForm.thinkContent" />
+            </div>
+            <span
+              slot="footer"
+              class="dialog-footer"
+            >
+              <el-button
+                type="primary"
+                @click="reflectionVisible = false"
+              >确 定</el-button>
+              <el-button @click="reflectionVisible = false">取 消</el-button>
+            </span>
+          </el-dialog>
         </div>
       </div>
     </div>
@@ -647,6 +787,7 @@ import {
   editCourseInfo
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
+// import { logout } from '@/api/user'
 export default {
   name: 'EstablishCourse',
   components: {
@@ -655,6 +796,8 @@ export default {
   },
   data() {
     return {
+      reflectionData: [],
+      reflectionVisible: false,
       isMultiple: false,
       parentOrgIdLabel: '',
       remember: true,
@@ -749,6 +892,10 @@ export default {
         {
           tips: '上传资料',
           beforeUpload: 'DataUpload'
+        },
+        {
+          tips: '上传作业',
+          beforeUpload: 'taskUpload'
         }
       ],
       pendingQueue: [],
@@ -794,7 +941,11 @@ export default {
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
     })
-    this.isdeleteData()
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.isdeleteData()
+    })
   },
   activated() {
     // 检测断线重连
@@ -816,6 +967,38 @@ export default {
     this.disabledBtn = false
   },
   methods: {
+    beforeTaskUpload() {},
+    handleClose() {},
+    // 添加作业btn
+    addTask() {
+      let item = {
+        sort: '', //序号
+        type: '', //章节类型
+        name: '', // 章节名称
+        localName: '', //文章标题
+        url: '',
+        content: '', //文章内容
+        upLoad: [], //[url,localName],  //所有上传的文件
+        saveOrcompile: 0, // 1保存&0编辑
+        fileData: {},
+        taskBtn: 'task'
+      }
+      this.ruleForm.contents.push(item)
+    },
+    // 添加课前思考
+    addReflectionData() {
+      let data = {
+        url: '',
+        localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+        sort: '', //序号
+        type: '', //章节类型
+        name: '', // 章节名称
+        content: '', //文章内容
+        upLoad: [], //[url,localName],  //所有上传的文件
+        saveOrcompile: 0 // 1保存&0编辑
+      }
+      this.reflectionData.push(data)
+    },
     typeChange(c) {
       if (c.type === 1) return
       c.upLoad = [{}]
@@ -851,14 +1034,16 @@ export default {
     },
     onUploadProgress(fileData, content, contentIdx) {
       const contents = this.ruleForm.contents
+      console.log(contents)
       let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
       if (index < 0) {
         fileData.status = 'progress'
         fileData.paused = false
         const c = {
+          taskBtn: content ? content.taskBtn : '',
           saveOrcompile: 1,
           type: content ? content.type : 2,
-          name: (content && content.name) || fileData.name || '社区的商业模式',
+          name: (content && content.name) || fileData.name,
           upLoad: [
             {
               localName: fileData.name
@@ -1303,10 +1488,20 @@ export default {
         ]
       }
       this.$refs.ruleForm.clearValidate()
+
       this.$refs.apprSubmit.handleClose()
       this.headIndex = 1
       this.parentOrgIdLabel = ''
       this.$refs.ruleForm.resetFields()
+    },
+    // 作业上传校验
+    taskUpload(file) {
+      const isLt10M = file.size / 1024 / 1024 < 20
+      if (!isLt10M) {
+        this.$message.error('上传资料大小不能超过 20MB!')
+        return false
+      }
+      return true
     },
     DataUpload(file) {
       const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
@@ -1579,9 +1774,15 @@ export default {
       display: flex;
       justify-content: space-between;
       margin-bottom: 12px;
+      margin-top: 50px;
       .upload-more {
         margin-right: 5px;
         display: inline-block;
+      }
+      &_title_btn {
+        width: 330px;
+        display: flex;
+        justify-content: space-between;
       }
     }
 
@@ -1631,5 +1832,21 @@ export default {
   top: 15px;
   left: 20px;
   cursor: pointer;
+}
+.reflection {
+  &_title {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+}
+.reflection_content {
+  border-top: 1px solid #ccc;
+  margin: -25px -20px 0;
+  padding: 20px;
+}
+.taskBtnBox {
+  width: 93px;
+  display: inline-block;
 }
 </style>

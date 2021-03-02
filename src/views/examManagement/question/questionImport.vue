@@ -211,9 +211,7 @@ export default {
         .catch()
     },
     downloadFile() {
-      debugger
       exportErrorReport().then((res) => {
-        debugger
         const { data, headers } = res
         const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
         const blob = new Blob([data], { type: headers['content-type'] })
