@@ -236,7 +236,7 @@ export default {
       return this.$route.query.categoryId || null
     },
     id() {
-      return this.$route.query.id || null
+      return _.get(this.$route, 'query.id')
     },
     ...mapGetters(['tag'])
   },
@@ -305,7 +305,7 @@ export default {
         try {
           this.submitting = true
           // 区分是编辑还是新增
-          _.isNull(this.id)
+          !this.id
             ? await await addClassroom(this.formData)
             : await await editClassroom(this.formData)
           this.$message.success('发布成功')

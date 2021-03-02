@@ -19,6 +19,10 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
+        :page-config="tablePageConfig"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template #topMenu>
           <div class="transitionBox">
@@ -292,6 +296,12 @@ export default {
   },
   data() {
     return {
+      tablePageConfig: {},
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
@@ -345,6 +355,25 @@ export default {
     this.loadTableData()
   },
   methods: {
+    /**
+     * 处理页码改变
+     */
+    handleCurrentPageChange(param) {
+      this.queryInfo.pageNo = param
+      this.loadTableData()
+    },
+    /**
+     * 处理页码大小更改
+     */
+    handlePageSizeChange(param) {
+      this.queryInfo.pageSize = param
+      this.loadTableData()
+    },
+    // 搜索
+    handleSearch(params) {
+      this.queryInfo = _.assign(this.queryInfo, params)
+      this.loadTableData()
+    },
     // 跳转详情
     jumpDetail(row) {
       this.$router.push({ path: '/resource/classroom/detail', query: { id: row.id } })
@@ -421,11 +450,6 @@ export default {
       } finally {
         this.tableLoading = false
       }
-    },
-    // 搜索
-    handleSearch(params) {
-      this.searchParams = _.assign(this.searchParams, params)
-      this.loadTableData()
     },
     /**
      * 处理停用启用
