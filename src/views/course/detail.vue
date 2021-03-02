@@ -165,8 +165,12 @@
     </div>
 
     <div class="examinee_list">
+      <div class="litle_bar">
+        学习情况
+      </div>
+      <detailList />
       <!-- 表格内容 -->
-      <basic-container block>
+      <!-- <basic-container block>
         <common-table
           ref="table"
           :columns="columnsVisible | columnsFilter"
@@ -198,19 +202,12 @@
                     type="text"
                     @click="refreshTableData"
                   >
-                    <!-- <i class="iconfont iconicon_refresh" /> -->
                   </el-button>
                 </el-tooltip>
-                <span
-                  class="text_refresh"
-                  style="cursor:pointer;"
-                  @click="refreshTableData"
-                >刷新</span>
-                <el-popover
-                  placement="bottom"
-                  width="40"
-                  trigger="click"
+                <span class="text_refresh" style="cursor:pointer;" @click="refreshTableData"
+                  >刷新</span
                 >
+                <el-popover placement="bottom" width="40" trigger="click">
                   <el-tooltip
                     slot="reference"
                     class="operations__btns--tooltip"
@@ -225,11 +222,9 @@
                       icon="el-icon-setting"
                       style="color:#acb3b8;"
                     >
-                      <!-- <i class="iconfont iconicon_setting" /> -->
                     </el-button>
                   </el-tooltip>
 
-                  <!-- 设置表格列可见性 -->
                   <div class="operations__column--visible">
                     <el-checkbox-group v-model="columnsVisible">
                       <el-checkbox
@@ -248,22 +243,11 @@
             </div>
           </template>
 
-          <!-- 状态 -->
-          <!-- （2：已通过；3：未通过；4：未考试；5：缺考） -->
-          <template
-            slot="examStatus"
-            slot-scope="{ row }"
-          >
+          <template slot="examStatus" slot-scope="{ row }">
             <el-progress :percentage="row.examStatus"></el-progress>
           </template>
-
-          <!-- 是否及格 -->
-          <!-- <template slot="examPass" slot-scope="{ row }">
-            <span v-if="row.examPass === 0">不及格</span>
-            <span v-if="row.examPass === 1">及格</span>
-          </template> -->
         </common-table>
-      </basic-container>
+      </basic-container> -->
     </div>
   </div>
 </template>
@@ -271,6 +255,7 @@
 <script>
 import { getCourseStudyDetail, getStudyList } from '@/api/course/course'
 // 表格属性
+import detailList from './detailComponents/detailList'
 const TABLE_COLUMNS = [
   {
     label: '姓名',
@@ -308,6 +293,9 @@ export default {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+  },
+  components: {
+    detailList
   },
 
   data() {
@@ -499,256 +487,11 @@ export default {
   .examinee_list {
     background-color: #fff;
     margin-top: 20px;
-
-    // 以下是拷贝过来的
-    #isdialog_show {
-      width: 100%;
-      height: 100px;
-      background-color: #6b6b6b;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      padding: 20px;
-      color: #fff;
-      position: relative;
-      span {
-        color: #a0b5fd;
-      }
-      i {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 22px;
-      }
-    }
-    .addUser {
-      font-size: 14px;
-      display: inline-block;
-      color: #757c85;
-      line-height: 14px;
-      cursor: pointer;
-      padding-right: 12px;
-      border-right: 0.5px solid #e9e9e9;
-    }
-    .icon {
-      margin-left: 12px;
+    .litle_bar {
       font-size: 18px;
-      color: #a0a8ae;
-      cursor: pointer;
-    }
-    .course_in {
-      position: relative;
-      background-color: #fff;
-      .select_bar {
-        height: 50px;
-        border-bottom: 1px solid #ccc;
-        display: flex;
-        span {
-          height: 50px;
-          line-height: 50px;
-          margin-left: 30px;
-        }
-        .select {
-          border-bottom: 2px solid #1677ff;
-        }
-      }
-      .draft {
-        padding: 25px;
-      }
-    }
-    .dialog {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 999;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      .el-icon-close {
-        position: absolute;
-        top: 35px;
-        right: 35px;
-        font-size: 35px;
-        color: #fff;
-      }
-      .guide {
-        p {
-          font-size: 20px;
-          text-align: center;
-          margin-bottom: 45px;
-        }
-        .box_all {
-          display: flex;
-          .bxo {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            border: 1px solid #fff;
-            .bxo_x {
-              position: absolute;
-              top: -30px;
-              right: 75px;
-              width: 1px;
-              height: 210px;
-              background-color: #fff;
-              transform: rotate(45deg);
-            }
-            .bxo_y {
-              position: absolute;
-              top: -30px;
-              right: 74px;
-              width: 1px;
-              height: 210px;
-              background-color: #fff;
-              transform: rotate(135deg);
-            }
-            .number {
-              position: absolute;
-              top: 65px;
-              right: 65px;
-              background-color: #616263;
-              width: 20px;
-              height: 20px;
-              border-radius: 50%;
-              text-align: center;
-              line-height: 20px;
-            }
-          }
-          .arrows {
-            position: relative;
-            width: 220px;
-            height: 150px;
-            .el-icon-caret-right {
-              font-size: 30px;
-              position: absolute;
-              top: 65px;
-              right: 28px;
-            }
-            .wire {
-              position: absolute;
-              top: 78px;
-              right: 45px;
-              width: 130px;
-              height: 5px;
-              background-color: #fff;
-            }
-          }
-        }
-        .describe {
-          margin-top: 20px;
-          display: flex;
-          justify-content: space-between;
-          span {
-            width: 150px;
-            text-align: center;
-          }
-        }
-        .btn_b {
-          margin-top: 45px;
-          text-align: center;
-        }
-      }
-    }
-    /deep/ #recommend {
-      position: relative;
-      /deep/ .icon_rec {
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: rotate(-45deg);
-        font-size: 10px !important;
-        text-align: center;
-        line-height: 24px;
-      }
-      /deep/ #triangle_topleft {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 0;
-        height: 0;
-        border-top: 30px solid #d6dcfd;
-        border-right: 30px solid transparent;
-      }
-      /deep/ #recommend_info {
-        padding-left: 15px;
-      }
-    }
-    /deep/.page-wrap[data-v-793409ea] {
-      margin-right: 70px;
+      font-weight: bold;
+      padding: 25px 25px 0;
     }
   }
 }
-</style>
-
-<style lang="sass" scoped>
-
-/deep/.el-input
-  width: 100%
-/deep/.el-select
-  width: 100%
-/deep/.el-input
-
-.operations__btns
-    color: #acb3b8
-    display: flex;
-.text_refresh
-    color: #acb3b8
-    margin-right: 20px
-$color_icon: #A0A8AE
-
-.basic-container--block
-  height: calc(100% - 92px)
-  min-height: calc(100% - 92px)
-.operations
-  align-items: center
-  display: flex
-  justify-content: space-between
-  &__column--item
-    height: 25px
-  &__column--visible
-    height: 200px
-    overflow: scroll
-  &__btns
-    align-items: center
-    display: flex
-    height: 24px
-    justify-content: flex-start
-  &__btns--item
-    margin: 0
-    margin-right: 4px
-    padding: 0
-    height: 24px
-    width: 24px
-    line-height: 24px
-    &:last-child
-      margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
-  .iconfont
-    color: $color_icon
-    font-weight: bold
-    font-size: 16px
-
-.Menu
-  // 添加一个分隔号 "｜"
-  .table__handler
-    display: flex
-    justify-content: flex-end
-    > .el-button--text
-      text-align: center
-      padding: 0 8px
-      margin-left: 0px
-      position: relative
-      &:not(:last-child)::after
-        background-color: #e3e7e9
-        content: ''
-        height: 10px
-        position: absolute
-        right: 0
-        top: 50%
-        transform: translateY(-50%)
-        width: 1px
 </style>
