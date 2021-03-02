@@ -5,11 +5,11 @@ import { del, get, post, put } from '@/router/axios'
  * roomName 教室名称
  * id  教室主键，编辑状态下必传，创建状态下不需要
  */
-export const checkClassroomName = (params) => post('/manage/v1/classroom/updateClassroom', params)
+export const checkClassroomName = (params) => post('/manage/v1/classroom/roomNameIsExit', params)
 /**
  * 创建教室
  */
-export const addClassroom = (params) => get('/manage/v1/classroom/addClassroom', params)
+export const addClassroom = (params) => post('/manage/v1/classroom/addClassroom', params)
 /**
  * 查询教室详情
  */
@@ -40,4 +40,4 @@ export const deleteClassroom = (params) => get('/manage/v1/classroom/deleteClass
 /**
  * 查询教室管理列表
  */
-export const queryClassroom = (params) => get('/manage/v1/classroom/queryClassroom', params)
+export const queryClassroom = (params) => get('/manage/v1/classroom/queryClassroomList', params)
