@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header title="分类管理">
+    <page-header title="教室列表">
       <el-button
         slot="rightMenu"
         v-p="ADD_REP_CATALOG"
@@ -299,7 +299,10 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: SEARCH_CONFIG,
-      searchParams: {}
+      searchParams: {
+        pageSize: 1,
+        pageNo: 10
+      }
     }
   },
   computed: {
@@ -406,13 +409,10 @@ export default {
     },
     // 加载函数
     async loadTableData() {
-      if (this.tableLoading) {
-        return
-      }
+      if (this.tableLoading) return
       try {
-        const params = this.searchParams
         this.tableLoading = true
-        queryClassroom(params).then((res) => {
+        queryClassroom(this.searchParams).then((res) => {
           this.tableData = res.data
           this.tableLoading = false
         })
@@ -424,7 +424,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.searchParams = params
+      this.searchParams = _.assign(this.searchParams, params)
       this.loadTableData()
     },
     /**

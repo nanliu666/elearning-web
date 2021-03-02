@@ -26,7 +26,6 @@ export default {
       isEnabled: 1,
       isOwn: 1,
       isShow: 1,
-      path: '/resource/classroom/index1',
       code: 'org_user',
       alias: 'user',
       icon: 'iconfont iconicon_boss',
