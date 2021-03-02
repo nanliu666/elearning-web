@@ -51,12 +51,45 @@
             </el-option>
           </el-select>
           <div class="select-tips">
-            <!-- 可通过选择上级分类为其构建子分类 -->
+            可通过选择上级类目为其创建子分类，子分类可见范围跟随父分类
           </div>
         </el-col>
       </el-form-item>
+      <el-form-item>
+        <template slot="label">
+          <div>
+            是否公开
+
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="此选项可以选择该分类是否展示给其他子公司"
+              placement="top-start"
+            >
+              <i class="el-icon-question"></i>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-select
+          v-model="form.region"
+          placeholder="请选择"
+        >
+          <el-option
+            label="否"
+            value="0"
+          ></el-option>
+          <el-option
+            label="是"
+            value="1"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+
       <!-- 可见范围 -->
-      <el-form-item label="可见范围">
+      <el-form-item
+        v-show="!parentOrgIdLabel"
+        label="可见范围"
+      >
         <div>
           <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
         </div>
