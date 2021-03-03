@@ -24,7 +24,7 @@
 
         <template #roomArea>
           <el-input
-            v-model="formData.roomArea"
+            v-model.number="formData.roomArea"
             placeholder="请输入"
           >
             <template slot="append">
@@ -146,7 +146,7 @@ const FORM_COLUMNS = [
         props: {
           children: 'children',
           label: 'name',
-          value: 'id'
+          value: 'idStr'
         },
         required: true
       }
@@ -173,10 +173,14 @@ const FORM_COLUMNS = [
     label: ''
   },
   {
-    itemType: 'input',
+    itemType: 'select',
     label: '投影仪',
     prop: 'hasProjector',
-    placeholder: '请输入',
+    placeholder: '请选择',
+    options: [
+      { label: '有', value: 1 },
+      { label: '没有', value: 0 }
+    ],
     span: 11,
     offset: 0
   },
@@ -184,6 +188,22 @@ const FORM_COLUMNS = [
     itemType: 'slot',
     label: '面积',
     prop: 'roomArea',
+    rules: [
+      {
+        validator: (rule, value, callback) => {
+          if (_.isNumber(value)) {
+            if (value >= 0) {
+              callback()
+            } else {
+              return callback(new Error('面积必须为正整数'))
+            }
+          } else {
+            return callback(new Error('面积必须填数字'))
+          }
+        },
+        trigger: ['blur', 'change']
+      }
+    ],
     span: 11,
     offset: 1
   },
@@ -215,7 +235,7 @@ export default {
         roomName: '',
         categoryId: '',
         roomAddr: '',
-        hasProjector: '', // 是否有投影仪：0：没有；1：有
+        hasProjector: 0, // 是否有投影仪：0：没有；1：有
         maxCapacity: null,
         roomArea: null,
         picReqList: []
