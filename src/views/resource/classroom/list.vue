@@ -83,16 +83,16 @@
             批量删除
           </el-button>
         </template>
-        <template #category="{row}">
+        <template #roomName="{row}">
           <div
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
-            {{ row.category }}
+            {{ row.roomName }}
           </div>
         </template>
         <template #status="{row}">
-          {{ row.status === '0' ? '已启用' : '已停用' }}
+          {{ row.status == 0 ? '已停用' : '已启用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -101,7 +101,7 @@
               type="text"
               @click="handleStatus(row)"
             >
-              {{ row.status === '0' ? '停用' : '启用' }}
+              {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
             <el-button
               v-p="AUTH_REP_CATALOG"
@@ -113,7 +113,7 @@
             <el-button
               v-p="AUTH_REP_CATALOG"
               type="text"
-              @click="deleteClassroom(row)"
+              @click="deleteClassroomFun(row)"
             >
               删除
             </el-button>
@@ -131,13 +131,13 @@ import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
     label: '编号',
-    prop: 'category',
-    slot: true,
+    prop: 'roomNo',
     minWidth: 150
   },
   {
     label: '教室名称',
-    prop: 'creatorName',
+    prop: 'roomName',
+    slot: true,
     minWidth: 120
   },
   {
@@ -149,31 +149,25 @@ const TABLE_COLUMNS = [
   {
     label: '最大容纳人数',
     slot: true,
-    prop: 'updateTime',
+    prop: 'maxCapacity',
     minWidth: 120
   },
   {
     label: '分类',
     slot: true,
-    prop: 'updateTime1',
+    prop: 'categoryName',
     minWidth: 150
-  },
-  {
-    label: '所属组织',
-    slot: true,
-    prop: 'updateTime2',
-    minWidth: 120
   },
   {
     label: '地址',
     slot: true,
-    prop: 'updateTime3',
+    prop: 'roomArea',
     minWidth: 120
   },
   {
     label: '创建时间',
     slot: true,
-    prop: 'updateTime4',
+    prop: 'createTime',
     minWidth: 120
   }
 ]
@@ -191,7 +185,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'name',
+      field: 'roomName',
       label: '',
       data: '',
       options: [],
@@ -226,35 +220,9 @@ const SEARCH_CONFIG = {
       }
     },
     {
-      type: 'treeSelect',
-      field: 'orgId',
-      label: '所属组织',
-      data: '',
-      config: {
-        selectParams: {
-          placeholder: '请输入内容',
-          multiple: false
-        },
-        treeParams: {
-          data: [],
-          'check-strictly': true,
-          'default-expand-all': false,
-          'expand-on-click-node': false,
-          clickParent: true,
-          filterable: false,
-          props: {
-            children: 'children',
-            label: 'orgName',
-            disabled: 'disabled',
-            value: 'orgId'
-          }
-        }
-      }
-    },
-    {
       config: { placeholder: '请输入' },
       data: '',
-      field: 'teacher_title',
+      field: 'roomAddr',
       label: '地址',
       type: 'input'
     },
@@ -271,7 +239,7 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'numInterval',
-      field: 'minUserNum,maxUserNum',
+      field: 'minCapacity,maxCapacity',
       data: { min: '', max: '' },
       label: '最大容纳人数'
     }
@@ -309,9 +277,9 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: SEARCH_CONFIG,
-      searchParams: {
-        pageSize: 1,
-        pageNo: 10
+      queryInfo: {
+        pageSize: 10,
+        pageNo: 1
       }
     }
   },
@@ -387,8 +355,8 @@ export default {
       this.$router.push({ path: '/resource/classroom/edit', query: { id: row.id } })
     },
     // 删除
-    deleteClassroom(row) {
-      if (row.isReserveTips) {
+    deleteClassroomFun(row) {
+      if (row.isReserve) {
         const reserveTips = '该教室已被预订，无法删除'
         this.$confirm(reserveTips, '提示', {
           confirmButtonText: '我知道了',
@@ -441,8 +409,10 @@ export default {
       if (this.tableLoading) return
       try {
         this.tableLoading = true
-        queryClassroom(this.searchParams).then((res) => {
-          this.tableData = res.data
+        queryClassroom(this.queryInfo).then((res) => {
+          const { data, totalNum } = res
+          this.tableData = data
+          this.page.total = totalNum
           this.tableLoading = false
         })
       } catch (error) {
@@ -455,13 +425,13 @@ export default {
      * 处理停用启用
      */
     handleStatus(row) {
-      const statusText = row.status === '0' ? '停用' : '启用'
+      const statusText = row.status == 0 ? '停用' : '启用'
       const stopContent = '您确定要停用该教室吗？'
       const reserveTips = '该教室已被预订，停用后，后续不可再预订，确定继续此操作吗？'
-      const stopTips = row.isReserveTips ? reserveTips : stopContent
-      const startContent = '您确定要启用该分类吗？'
-      const params = { status: row.status === '0' ? 1 : 0 }
-      this.$confirm(`${row.status === '0' ? stopTips : startContent}`, '提醒', {
+      const stopTips = row.isReserve ? reserveTips : stopContent
+      const startContent = '您确定要启用该教室吗？'
+      const params = { status: row.status == 0 ? 1 : 0, id: row.id }
+      this.$confirm(`${row.status == 0 ? stopTips : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
