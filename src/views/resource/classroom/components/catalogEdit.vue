@@ -3,7 +3,7 @@
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
-    width="550px"
+    width="800px"
     :modal-append-to-body="false"
     @close="handleClose"
   >
@@ -58,6 +58,16 @@
           </div>
         </el-col>
       </el-form-item>
+      <!-- 可见范围 -->
+      <el-form-item
+        v-show="parentOrgIdLabel === '' || parentOrgIdLabel === '顶级'"
+        label="可见范围"
+      >
+        <div>
+          <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+        </div>
+        {{ userList }}
+      </el-form-item>
     </el-form>
     <span
       v-if="type === 'create'"
@@ -95,8 +105,10 @@
 <script>
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 import { mapGetters } from 'vuex'
+import UserOrgTree from '@/views/course/components/UserOrgTree'
 export default {
   name: 'CatalogEdit',
+  components: { UserOrgTree },
   props: {
     visible: {
       type: Boolean,
@@ -106,11 +118,7 @@ export default {
   data() {
     return {
       type: 'create',
-      radioDisable: {
-        Company: false,
-        Department: false,
-        Group: false
-      },
+      userList: [],
       form: {
         parentId: ''
       },
@@ -123,9 +131,16 @@ export default {
     }
   },
   computed: {
+    orgIds() {
+      return _.join(_.map(this.userList, 'id'), ',')
+    },
     ...mapGetters(['userId'])
   },
   methods: {
+    // 可见范围返回数据
+    getUserList(val) {
+      this.userList = val
+    },
     async loadOrgTree() {
       let res = await getCategoryTree({ source: 'classroom', addFlag: '1' })
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
@@ -166,7 +181,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addCategory(_.assign(this.form, { creatorId: this.userId, source: 'classroom' }))
+            addCategory(_.assign(this.form, { orgIds: this.orgIds, source: 'classroom' }))
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -204,6 +219,7 @@ export default {
     },
     // 新建分类
     create() {
+      this.userList = []
       this.type = 'create'
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
@@ -211,6 +227,7 @@ export default {
     },
     // 新建子分类
     createChild(row) {
+      this.userList = []
       this.type = 'createChild'
       this.form = _.pick(_.cloneDeep(row), ['name', 'parentId', 'source'])
       this.form.parentId = row.idStr
@@ -219,6 +236,7 @@ export default {
       this.$emit('changevisible', true)
     },
     edit(row) {
+      this.userList = []
       this.type = 'edit'
       const { idStr, parentId, name } = row
       this.form = {
@@ -248,11 +266,6 @@ export default {
     },
     handleClose() {
       this.form = { parentId: '' }
-      this.radioDisable = {
-        Company: false,
-        Department: false,
-        Group: false
-      }
       this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
