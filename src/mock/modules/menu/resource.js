@@ -43,7 +43,43 @@ export default {
           path: '/resource/classroom/classify',
           icon: 'iconfont iconicon_boss',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              menuName: '新建分类',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/classify/add'
+            },
+            {
+              menuType: 'Button',
+              menuName: '启用/停用',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/classify/stop'
+            },
+            {
+              menuType: 'Button',
+              menuName: '编辑',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/classify/eidt'
+            },
+            {
+              menuType: 'Button',
+              menuName: '删除',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/classify/delete'
+            },
+            {
+              menuType: 'Button',
+              menuName: '新建子分类',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/classify/addNewGroup'
+            }
+          ]
         },
         {
           menuId: '1212437546742158',
@@ -57,7 +93,43 @@ export default {
           path: '/resource/classroom/list',
           icon: 'iconfont iconicon_boss',
           dataPrivileges: [],
-          children: []
+          children: [
+            {
+              menuType: 'Button',
+              menuName: '创建教室',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/list/add'
+            },
+            {
+              menuType: 'Button',
+              menuName: '查看教室',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/list/view'
+            },
+            {
+              menuType: 'Button',
+              menuName: '启用/停用',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/list/stop'
+            },
+            {
+              menuType: 'Button',
+              menuName: '编辑',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/list/eidt'
+            },
+            {
+              menuType: 'Button',
+              menuName: '删除',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/classroom/list/delete'
+            }
+          ]
         },
         {
           menuId: '1212437546742158',

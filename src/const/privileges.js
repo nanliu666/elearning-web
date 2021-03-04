@@ -157,3 +157,15 @@ export const DELETE_LIVE_BACK = '/live/playBackListSingle/delete' // 删除
 export const DOWNLOAD_LIVE_BACK = '/live/playBackListSingle/download' // 下载
 // 直播中心的数据统计的鉴权
 export const CONCAT_LIVE_START = '/live/live-stat-detail/concat' // 合并同一用户
+// 教室管理的分类管理的鉴权
+export const ADD_CLASSROOM_CLASSIFY = '/resource/classroom/classify/add' // 新建分类
+export const STOP_CLASSROOM_CLASSIFY = '/resource/classroom/classify/stop' // 启用/停用
+export const EDIT_CLASSROOM_CLASSIFY = '/resource/classroom/classify/eidt' // 编辑
+export const DELETE_CLASSROOM_CLASSIFY = '/resource/classroom/classify/delete' // 删除
+export const ADD_NEW_GROUNP_CLASSROOM_CLASSIFY = '/resource/classroom/classify/addNewGroup' // 新建子分类
+// 教室管理的教室列表的鉴权
+export const ADD_CLASSROOM = '/resource/classroom/list/add' // 创建教室
+export const VIEW_CLASSROOM = '/resource/classroom/list/view' // 查看教室
+export const STOP_CLASSROOM = '/resource/classroom/list/stop' // 启用/停用
+export const EDIT_CLASSROOM = '/resource/classroom/list/eidt' // 编辑
+export const DELETE_CLASSROOM = '/resource/classroom/list/delete' // 删除

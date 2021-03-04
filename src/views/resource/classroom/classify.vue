@@ -3,7 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
-        v-p="ADD_REP_CATALOG"
+        v-p="ADD_CLASSROOM_CLASSIFY"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -40,7 +40,7 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="STOP_REP_CATALOG"
+              v-p="STOP_CLASSROOM_CLASSIFY"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -48,14 +48,14 @@
               {{ row.status == 0 ? '停用' : '启用' }}
             </el-button>
             <el-button
-              v-p="EDIT_REP_CATALOG"
+              v-p="EDIT_CLASSROOM_CLASSIFY"
               type="text"
               @click="handleOrgEdit(row)"
             >
               编辑
             </el-button>
             <el-dropdown
-              v-if="$p([DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
+              v-if="$p([DELETE_CLASSROOM_CLASSIFY, ADD_NEW_GROUNP_CLASSROOM_CLASSIFY])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -66,13 +66,13 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="ADD_CHILD_REP_CATALOG"
+                  v-p="ADD_NEW_GROUNP_CLASSROOM_CLASSIFY"
                   command="addChild"
                 >
                   新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
-                  v-p="DELETE_REP_CATALOG"
+                  v-p="DELETE_CLASSROOM_CLASSIFY"
                   command="delete"
                 >
                   删除
@@ -134,12 +134,11 @@ const TABLE_CONFIG = {
   }
 }
 import {
-  ADD_REP_CATALOG,
-  STOP_REP_CATALOG,
-  AUTH_REP_CATALOG,
-  EDIT_REP_CATALOG,
-  DELETE_REP_CATALOG,
-  ADD_CHILD_REP_CATALOG
+  ADD_CLASSROOM_CLASSIFY,
+  STOP_CLASSROOM_CLASSIFY,
+  EDIT_CLASSROOM_CLASSIFY,
+  DELETE_CLASSROOM_CLASSIFY,
+  ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -210,12 +209,11 @@ export default {
     }
   },
   computed: {
-    ADD_REP_CATALOG: () => ADD_REP_CATALOG,
-    STOP_REP_CATALOG: () => STOP_REP_CATALOG,
-    AUTH_REP_CATALOG: () => AUTH_REP_CATALOG,
-    EDIT_REP_CATALOG: () => EDIT_REP_CATALOG,
-    DELETE_REP_CATALOG: () => DELETE_REP_CATALOG,
-    ADD_CHILD_REP_CATALOG: () => ADD_CHILD_REP_CATALOG,
+    ADD_CLASSROOM_CLASSIFY: () => ADD_CLASSROOM_CLASSIFY,
+    STOP_CLASSROOM_CLASSIFY: () => STOP_CLASSROOM_CLASSIFY,
+    EDIT_CLASSROOM_CLASSIFY: () => EDIT_CLASSROOM_CLASSIFY,
+    DELETE_CLASSROOM_CLASSIFY: () => DELETE_CLASSROOM_CLASSIFY,
+    ADD_NEW_GROUNP_CLASSROOM_CLASSIFY: () => ADD_NEW_GROUNP_CLASSROOM_CLASSIFY,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -223,11 +221,10 @@ export default {
     privileges: {
       handler() {
         this.tableConfig.showHandler = this.$p([
-          STOP_REP_CATALOG,
-          AUTH_REP_CATALOG,
-          EDIT_REP_CATALOG,
-          DELETE_REP_CATALOG,
-          ADD_CHILD_REP_CATALOG
+          STOP_CLASSROOM_CLASSIFY,
+          EDIT_CLASSROOM_CLASSIFY,
+          DELETE_CLASSROOM_CLASSIFY,
+          ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
         ])
       },
       deep: true
