@@ -3,7 +3,7 @@
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
-    width="550px"
+    width="800px"
     :modal-append-to-body="false"
     @close="handleClose"
   >
@@ -54,9 +54,49 @@
             v-if="type !== 'createChild'"
             class="select-tips"
           >
-            可通过选择上级分类为其构建子分类
+            可通过选择上级类目为其创建子分类，子分类可见范围跟随父分类
           </div>
         </el-col>
+      </el-form-item>
+      <el-form-item>
+        <template slot="label">
+          <div>
+            是否公开
+
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="此选项可以选择该分类是否展示给其他子公司"
+              placement="top-start"
+            >
+              <i class="el-icon-question"></i>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-select
+          v-model="form.region"
+          placeholder="请选择"
+        >
+          <el-option
+            label="否"
+            value="0"
+          ></el-option>
+          <el-option
+            label="是"
+            value="1"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+
+      <!-- 可见范围 -->
+      <el-form-item
+        v-show="!parentOrgIdLabel"
+        label="可见范围"
+      >
+        <div>
+          <OrgTree @selectedValue="getUserList"></OrgTree>
+        </div>
+        {{ userList }}
       </el-form-item>
     </el-form>
     <span
@@ -99,8 +139,13 @@ import {
   getKnowledgeCatalogList
 } from '@/api/knowledge/knowledge'
 import { mapGetters } from 'vuex'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
+
 export default {
   name: 'CatalogEdit',
+  components: {
+    OrgTree
+  },
   props: {
     visible: {
       type: Boolean,
@@ -109,6 +154,7 @@ export default {
   },
   data() {
     return {
+      userList: '',
       type: 'create',
       radioDisable: {
         Company: false,
@@ -130,6 +176,10 @@ export default {
     ...mapGetters(['userId'])
   },
   methods: {
+    // 可见范围返回数据
+    getUserList(val) {
+      this.userList = val
+    },
     async loadOrgTree() {
       let res = await getKnowledgeCatalogList()
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res

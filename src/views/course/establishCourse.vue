@@ -418,7 +418,19 @@
           </div>
 
           <div class="up_head">
-            <span>章节内容</span>
+            <span>章节内容
+              <el-tooltip
+                class="item"
+                effect="dark"
+                placement="top-start"
+              >
+                <div slot="content">
+                  1.可根据章节类型添加内容<br />2.演示课件支持上传文档、ppt、pdf和视频，每个文件大小不超过10M；<br />3.资源下载是提供给学员的附件材料，学员可以在前端学习页面进行下载
+                  。
+                </div>
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+            </span>
             <div class="up_head_title_btn">
               <el-button
                 size="medium"

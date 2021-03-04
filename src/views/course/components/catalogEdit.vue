@@ -91,7 +91,7 @@
         label="可见范围"
       >
         <div>
-          <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+          <OrgTree @selectedValue="getUserList"></OrgTree>
         </div>
         {{ userList }}
       </el-form-item>
@@ -130,12 +130,12 @@
 </template>
 
 <script>
-import UserOrgTree from './UserOrgTree'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCatalog, addCatalog, editCatalog } from '@/api/course/course'
 export default {
   name: 'CatalogEdit',
   components: {
-    UserOrgTree
+    OrgTree
   },
   props: {
     visible: {
