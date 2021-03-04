@@ -232,7 +232,6 @@ export default {
       const examInfoData = this.$refs.examInfo.getData(type)
       const examBatchData = this.$refs.examBatch.getData(type)
       Promise.all([examInfoData, examBatchData]).then((res) => {
-        this.submitLoading = true
         this.handleSubmit(res, type)
       })
     },
