@@ -410,7 +410,7 @@ export default {
       blockDialogVisible: false,
       showBtnData: false,
       showBtnDel: false,
-      activeIndex: '1',
+      activeIndex: '0',
       activeColor: styles.primaryColor,
       tableLoading: false,
       tableData: [],
