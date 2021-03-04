@@ -376,27 +376,27 @@
               slot="examStatus"
               slot-scope="{ row }"
             >
-              <span v-if="row.examStatus === 1">已通过</span>
-              <span v-if="row.examStatus === 2">未通过</span>
-              <span v-if="row.examStatus === 3">未开始</span>
+              <span v-if="row.examStatus == 1">已通过</span>
+              <span v-if="row.examStatus == 2">未通过</span>
+              <span v-if="row.examStatus == 3">未开始</span>
             </template>
             <!-- 评估情况 // （1：已评估；2：未评估；3：未开始）-->
             <template
               slot="evaluate"
               slot-scope="{ row }"
             >
-              <span v-if="row.evaluate === 1">已评估</span>
-              <span v-if="row.evaluate === 2">未评估</span>
-              <span v-if="row.evaluate === 3">未开始</span>
+              <span v-if="row.evaluate == 1">已评估</span>
+              <span v-if="row.evaluate == 2">未评估</span>
+              <span v-if="row.evaluate == 3">未开始</span>
             </template>
             <!-- 证书状态 // （1：已获得；2：未获得；3：未开始）-->
             <template
               slot="certificate"
               slot-scope="{ row }"
             >
-              <span v-if="row.certificate === 1">已获得</span>
-              <span v-if="row.certificate === 2">未获得</span>
-              <span v-if="row.certificate === 3">未开始</span>
+              <span v-if="row.certificate == 1">已获得</span>
+              <span v-if="row.certificate == 2">未获得</span>
+              <span v-if="row.certificate == 3">未开始</span>
             </template>
 
             <!-- 操作 -->
@@ -405,7 +405,7 @@
               slot-scope="scope"
             >
               <el-button
-                v-if="scope.row.onlineProgress == 100 && row.examStatus == 1"
+                v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
                 type="text"
                 size="medium"
                 @click.stop="isgrantCertificate(scope.row)"
