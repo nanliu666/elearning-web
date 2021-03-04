@@ -156,21 +156,73 @@
         </el-button>
       </div>
     </div>
-    <div class="compileLecturerr_introduce">
+    <!-- <div class="compileLecturerr_introduce">
       <div class="introduce_title">
         讲师介绍
       </div>
       <div class="ntroduce_content">
         <div v-html="teacherData.introduction"></div>
       </div>
-      <!-- <div class="ntroduce_img">
-        <img
-          src=""
-          alt=""
-        />
-      </div> -->
-    </div>
-
+    </div> -->
+    <basic-container style="margin-top: 20px">
+      <el-menu
+        :default-active="activeIndex"
+        style="margin-top: -20px"
+        class="el-menu-demo"
+        :active-text-color="activeColor"
+        mode="horizontal"
+        @select="handleSelect"
+      >
+        <el-menu-item index="0">
+          讲师介绍
+        </el-menu-item>
+        <el-menu-item index="1">
+          授课情况
+        </el-menu-item>
+      </el-menu>
+      <div style="padding: 20px; min-height:32vh">
+        <div
+          v-if="activeIndex === '0'"
+          class="ntroduce_content"
+        >
+          <div v-html="teacherData.introduction"></div>
+        </div>
+        <common-table
+          v-if="activeIndex === '1'"
+          id="demo"
+          ref="table"
+          :columns="tableColumns"
+          :config="tableConfig"
+          :data="tableData"
+          :loading="tableLoading"
+          :page-config="tablePageConfig"
+          :page="page"
+          @current-page-change="handleCurrentPageChange"
+          @page-size-change="handlePageSizeChange"
+        >
+          <template #topMenu>
+            <search-popover
+              ref="searchPopover"
+              :require-options="searchConfig.requireOptions"
+              :popover-options="searchConfig.popoverOptions"
+              @submit="handleSearch"
+            />
+          </template>
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
+            <el-button
+              type="text"
+              icon="el-icon-delete"
+              @click="exportSelected(selection)"
+            >
+              批量导出
+            </el-button>
+          </template>
+        </common-table>
+      </div>
+    </basic-container>
     <!-- 停用弹框 -->
     <el-dialog
       title="提醒"
@@ -236,14 +288,118 @@
 <script>
 import { getCourseListData } from '@/api/course/course'
 import { getTeacher, Teacherdelete, editSysRulus } from '@/api/lecturer/lecturer'
+import { getBatchList } from '@/api/examManage/schedule'
+import SearchPopover from '@/components/searchPopOver/index'
+import styles from '@/styles/variables.scss'
+import { getCategoryTree } from '@/api/live'
+const TABLE_COLUMNS = [
+  {
+    label: '课程名称',
+    prop: 'userName',
+    slot: true,
+    minWidth: 150
+  },
+  {
+    label: '所在分类',
+    prop: 'phoneNum',
+    slot: true,
+    minWidth: 120
+  },
+  {
+    label: '课程类型',
+    prop: 'orgName',
+    minWidth: 120
+  },
+  {
+    label: '授课时间',
+    slot: true,
+    prop: 'batchNumber',
+    minWidth: 120
+  }
+]
+const TABLE_CONFIG = {
+  rowKey: 'id',
+  showHandler: false,
+  showIndexColumn: false,
+  enablePagination: true,
+  enableMultiSelect: true,
+  handlerColumn: {
+    minWidth: 150
+  }
+}
+const SEARCH_CONFIG = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'name',
+      label: '',
+      data: '',
+      options: [],
+      config: { placeholder: '请输入课程名称搜索', 'suffix-icon': 'el-icon-search' }
+    }
+  ],
+  popoverOptions: [
+    {
+      type: 'treeSelect',
+      field: 'categoryId',
+      label: '所在分类',
+      data: '',
+      config: {
+        selectParams: {
+          placeholder: '请选择',
+          multiple: false
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'name',
+            disabled: 'disabled',
+            value: 'id'
+          }
+        }
+      }
+    },
+    {
+      type: 'select',
+      field: 'batchNumber',
+      label: '课程类型',
+      data: '',
+      options: [
+        { key: '在线', value: '在线' },
+        { key: '面授', value: '面授' },
+        { key: '直播', value: '直播' }
+      ]
+    },
+    { type: 'dataPicker', field: 'entryDate', label: '授课时间' }
+  ]
+}
 export default {
+  components: { SearchPopover },
   data() {
     return {
       CourseList: '',
       blockDialogVisible: false,
       showBtnData: false,
       showBtnDel: false,
-
+      activeIndex: '1',
+      activeColor: styles.primaryColor,
+      tableLoading: false,
+      tableData: [],
+      tablePageConfig: {},
+      tableConfig: TABLE_CONFIG,
+      tableColumns: TABLE_COLUMNS,
+      searchConfig: SEARCH_CONFIG,
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
       teacherData: {
         photo: '',
         status: '',
@@ -264,6 +420,19 @@ export default {
   },
   activated() {
     this.isgetTeacher()
+    this.loadTableData()
+    let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
+    getCategoryTree({ source: 'classroom' }).then((res) => {
+      categoryIdType.config.treeParams.data = _.concat(
+        [
+          {
+            name: '全部',
+            id: ''
+          }
+        ],
+        res
+      )
+    })
   },
 
   methods: {
@@ -298,7 +467,45 @@ export default {
     //     this.toLecturer()
     //   })
     // },
-
+    /**
+     * 处理页码改变
+     */
+    handleCurrentPageChange(param) {
+      this.queryInfo.pageNo = param
+      this.loadTableData()
+    },
+    /**
+     * 处理页码大小更改
+     */
+    handlePageSizeChange(param) {
+      this.queryInfo.pageSize = param
+      this.loadTableData()
+    },
+    // 搜索
+    handleSearch(params) {
+      this.queryInfo = _.assign(this.queryInfo, params)
+      this.loadTableData()
+    },
+    /**
+     * 处理nav切换
+     */
+    handleSelect(key) {
+      this.activeIndex = key
+    },
+    async loadTableData() {
+      if (this.tableLoading) return
+      try {
+        this.tableData = []
+        this.tableLoading = true
+        let { totalNum, data } = await getBatchList(_.assign(this.queryInfo, { id: this.id }))
+        this.tableData = data
+        this.page.total = totalNum
+      } catch (error) {
+        this.$message.error(error.message)
+      } finally {
+        this.tableLoading = false
+      }
+    },
     // 删除讲师fn
     TeacherdeleteFn() {
       let params = {
@@ -473,6 +680,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/ .el-menu--horizontal {
+  border-bottom: 1px solid #cccccc !important;
+}
 .dialog-footer {
   display: flex;
   padding-left: 25%;

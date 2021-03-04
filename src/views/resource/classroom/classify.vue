@@ -48,14 +48,14 @@
               {{ row.status == 0 ? '停用' : '启用' }}
             </el-button>
             <el-button
-              v-p="AUTH_REP_CATALOG"
+              v-p="EDIT_REP_CATALOG"
               type="text"
-              @click="handleAuth(row)"
+              @click="handleOrgEdit(row)"
             >
-              权限配置
+              编辑
             </el-button>
             <el-dropdown
-              v-if="$p([EDIT_REP_CATALOG, DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
+              v-if="$p([DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -66,22 +66,16 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="EDIT_REP_CATALOG"
-                  command="edit"
+                  v-p="ADD_CHILD_REP_CATALOG"
+                  command="addChild"
                 >
-                  编辑
+                  新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_REP_CATALOG"
                   command="delete"
                 >
                   删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="ADD_CHILD_REP_CATALOG"
-                  command="addChild"
-                >
-                  新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -263,15 +257,10 @@ export default {
       const isDisabled = !_.isEmpty(target) && target.status == '1' ? true : false
       return isDisabled
     },
-    // 权限配置窗口
-    handleAuth() {
-      this.$message.warning('正在开发中...')
-    },
     // 多种操作
     async handleCommand($event, row) {
       const TYPE_COMMAND = {
         delete: this.handleDelete,
-        edit: this.handleOrgEdit,
         addChild: this.handleAddChild
       }
       TYPE_COMMAND[$event](row)

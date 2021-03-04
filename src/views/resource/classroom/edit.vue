@@ -1,8 +1,5 @@
 <template>
-  <div
-    ref="wrapper"
-    class="NewsEdit wrapper"
-  >
+  <div class="NewsEdit wrapper">
     <page-header
       :title="pageTitle"
       :back="() => handleBack()"
@@ -27,7 +24,7 @@
 
         <template #roomArea>
           <el-input
-            v-model="formData.roomArea"
+            v-model.number="formData.roomArea"
             placeholder="请输入"
           >
             <template slot="append">
@@ -48,24 +45,36 @@
             </el-tooltip>
           </div>
         </template>
-        <template #photoPath>
+        <template #picReqList>
           <common-upload
-            v-model="formData.photoPath"
+            v-if="!_.get(formData.picReqList, '[0].fileUrl', null)"
+            v-model="formData.picReqList"
+            :multiple="false"
+            drag
             :before-upload="beforeUpload"
-            :drag="true"
           >
-            <template #default>
-              <div class="upload__wrapper">
-                <i class="el-icon-picture-outline wrapper__icon" />
-                <div class="wrapper__title">
-                  点击或者拖拽附件到此区域
-                </div>
-                <div class="wrapper__tips">
-                  上传的图片格式要求jpg，jpeg，bmp，png，大小不超过10M
-                </div>
+            <div
+              slot="default"
+              class="upload__wrapper"
+            >
+              <i class="el-icon-picture-outline wrapper__icon" />
+              <div class="wrapper__title">
+                点击或者拖拽附件到此区域
               </div>
-            </template>
+              <div class="wrapper__tips">
+                上传的图片格式要求jpg，jpeg，bmp，png，大小不超过10M
+              </div>
+            </div>
           </common-upload>
+          <common-image-view
+            v-if="_.get(formData.picReqList, '[0].fileUrl', null)"
+            :image-width="360"
+            :url="_.get(formData.picReqList, '[0].fileUrl', null)"
+            :file-name="_.get(formData.picReqList, '[0].localName', null)"
+            :preview-src-list="[_.get(formData.picReqList, '[0].fileUrl', null)]"
+            :is-delete="true"
+            @deleteFile="deleteFile"
+          />
         </template>
       </common-form>
 
@@ -90,10 +99,16 @@
 </template>
 
 <script>
-import { addClassroom, editClassroom, queryClassroomInfo } from '@/api/resource/classroom'
+import {
+  addClassroom,
+  editClassroom,
+  queryClassroomInfo,
+  checkClassroomName
+} from '@/api/resource/classroom'
 import { getCategoryTree } from '@/api/live'
 import { mapGetters } from 'vuex'
 import CommonUpload from '@/components/common-upload/commonUpload'
+import CommonImageView from '@/components/common-image-viewer/viewer'
 const FORM_COLUMNS = [
   {
     prop: 'basicTitle',
@@ -112,7 +127,7 @@ const FORM_COLUMNS = [
   {
     label: '所在分类',
     itemType: 'treeSelect',
-    prop: 'catalogId',
+    prop: 'categoryId',
     required: true,
     span: 11,
     offset: 1,
@@ -131,7 +146,7 @@ const FORM_COLUMNS = [
         props: {
           children: 'children',
           label: 'name',
-          value: 'id'
+          value: 'idStr'
         },
         required: true
       }
@@ -140,6 +155,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'input',
     label: '地址',
+    required: true,
     prop: 'roomAddr',
     span: 11
   },
@@ -157,10 +173,14 @@ const FORM_COLUMNS = [
     label: ''
   },
   {
-    itemType: 'input',
+    itemType: 'select',
     label: '投影仪',
     prop: 'hasProjector',
-    placeholder: '请输入',
+    placeholder: '请选择',
+    options: [
+      { label: '有', value: 1 },
+      { label: '没有', value: 0 }
+    ],
     span: 11,
     offset: 0
   },
@@ -168,6 +188,22 @@ const FORM_COLUMNS = [
     itemType: 'slot',
     label: '面积',
     prop: 'roomArea',
+    rules: [
+      {
+        validator: (rule, value, callback) => {
+          if (_.isNumber(value)) {
+            if (value >= 0) {
+              callback()
+            } else {
+              return callback(new Error('面积必须为正整数'))
+            }
+          } else {
+            return callback(new Error('面积必须填数字'))
+          }
+        },
+        trigger: ['blur', 'change']
+      }
+    ],
     span: 11,
     offset: 1
   },
@@ -180,11 +216,7 @@ const FORM_COLUMNS = [
   {
     itemType: 'slot',
     label: '',
-    prop: 'photoPath',
-    props: {
-      label: 'jobName',
-      value: 'id'
-    },
+    prop: 'picReqList',
     required: false,
     span: 11
   }
@@ -192,6 +224,7 @@ const FORM_COLUMNS = [
 export default {
   name: 'ClassroomEdit',
   components: {
+    CommonImageView,
     CommonUpload
   },
   data() {
@@ -200,12 +233,12 @@ export default {
       formColumns: FORM_COLUMNS,
       formData: {
         roomName: '',
-        catalogId: '',
+        categoryId: '',
         roomAddr: '',
-        hasProjector: '', // 是否有投影仪：0：没有；1：有
+        hasProjector: 0, // 是否有投影仪：0：没有；1：有
         maxCapacity: null,
         roomArea: null,
-        photoPath: []
+        picReqList: []
       },
       submitting: false
     }
@@ -219,91 +252,87 @@ export default {
     next()
   },
   computed: {
-    // 查询参数
-    _formData() {
-      const formData = _.cloneDeep(this.formData)
-      return formData
-    },
-    catalogId() {
-      return this.$route.query.catalogId || null
+    categoryId() {
+      return this.$route.query.categoryId || null
     },
     id() {
-      return this.$route.query.id || null
+      return _.get(this.$route, 'query.id')
     },
     ...mapGetters(['tag'])
   },
   mounted() {
-    this.pageTitle = this.id ? '编辑教室' : '创建教室'
-    if (this.catalogId) {
-      this.formData.catalogId = this.catalogId
-    }
+    this.initSetting()
     this.initData()
   },
   methods: {
-    // 预览附件
-    previewFile(data) {
-      window.open(data.fileUrl)
+    initSetting() {
+      this.pageTitle = this.id ? '编辑教室' : '创建教室'
+      const rules = [{ required: false, validator: this.checkClassroomName, trigger: ['blur'] }]
+      _.set(this.formColumns, '[1].rules', rules)
+      if (this.categoryId) {
+        this.formData.categoryId = this.categoryId
+      }
+    },
+    // 最大字数限制
+    checkClassroomName(rule, value, callback) {
+      checkClassroomName({ id: this.id, roomName: value })
+        .then(() => {
+          callback()
+        })
+        .catch(() => {
+          callback(new Error('该教室名称已被使用'))
+        })
     },
     // 删除上传文件
-    deleteUpload() {},
+    deleteFile() {
+      this.formData.picReqList = []
+    },
     // 上传格式校验
     beforeUpload(file) {
       const fileTypeIndex = file.name.lastIndexOf('.')
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
-      const imageSizeLimit = file.size / 1024 / 1024 < 10 //图片限制10M
-      const TYPE_LIST = ['exe', 'bat']
       const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP']
       const isImage = _.some(IMAGE_TYPE, (item) => {
         return item === fileType
       })
-      let isLtFileSize = imageSizeLimit
-      const notBatNorExe = _.some(TYPE_LIST, (item) => {
-        return item === fileType
-      })
-      const isEmpty = file.size === 0
+      let isLtFileSize = file.size / 1024 / 1024 < 10
       if (!isImage) {
         this.$message.error('不能上传图片类型以外的文件!')
-        return false
-      }
-      if (isEmpty) {
-        this.$message.error('上传文件不能为空!')
         return false
       }
       if (!isLtFileSize) {
         this.$message.error('上传图片大小不能超过10M!')
         return false
       }
-      if (notBatNorExe) {
-        this.$message.error('不允许上传.exe .bat类型文件')
-        return false
-      }
-      return !isImage && isLtFileSize && !notBatNorExe && !isEmpty
+      return isImage && isLtFileSize
     },
     /**
      * 初始选择数据
      */
-    initData() {
-      let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
+    async initData() {
+      let categoryId = _.find(this.formColumns, { prop: 'categoryId' })
       getCategoryTree({ source: 'classroom' }).then(
-        (res) => (catalogId.props.treeParams.data = res)
+        (res) => (categoryId.props.treeParams.data = res)
       )
       if (this.id) {
-        this.loadDetail()
+        const data = await queryClassroomInfo({ id: this.id })
+        this.formData = data
       }
     },
     // 点击完成
     handlePublishBtnClick() {
-      this.validate().then(async () => {
+      this.$refs.form.validate().then(async () => {
         try {
           this.submitting = true
           // 区分是编辑还是新增
-          _.isNull(this.id)
-            ? await this.createKnowledgeFun(this._formData)
-            : await this.updateKnowledgeFun(this._formData)
+          !this.id
+            ? await await addClassroom(this.formData)
+            : await await editClassroom(this.formData)
           this.$message.success('发布成功')
           this.handleBack()
         } catch (error) {
-          this.$message.error(error.message)
+          window.console.log(error)
+          window.console.log(JSON.stringify(this.formData))
         } finally {
           this.submitting = false
         }
@@ -312,39 +341,6 @@ export default {
     handleBack() {
       this.$router.back()
       this.$store.commit('DEL_TAG', this.tag)
-    },
-    // 加载详细
-    async loadDetail(id = this.id) {
-      const data = await queryClassroomInfo({ id })
-      for (let key in data) {
-        this.$set(this.formData, key, data[key])
-      }
-    },
-    validate(...args) {
-      // const BRIEF_MIN_LEN = 10 // 限制最小输入长度
-      return new Promise((resolve, reject) => {
-        this.$refs.form
-          .validate(...args)
-          .then((data) => {
-            resolve(data)
-          })
-          .catch((error) => reject(error))
-      })
-    },
-    clearValidate(...args) {
-      return this.$refs.form.clearValidate(...args)
-    },
-    // 创建教室
-    async createKnowledgeFun(params) {
-      const data = await addClassroom(params)
-      return data
-    },
-    // 更新数据
-    async updateKnowledgeFun(params) {
-      const API_PARAMS = ['catalogId', 'knowledgeId', 'roomAddr', 'roomName']
-      const param = _.assign({ knowledgeId: this.id }, _.pick(params, API_PARAMS))
-      await editClassroom(param)
-      return { knowledgeId: this.id }
     }
   }
 }

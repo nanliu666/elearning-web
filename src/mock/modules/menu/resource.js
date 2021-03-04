@@ -26,7 +26,6 @@ export default {
       isEnabled: 1,
       isOwn: 1,
       isShow: 1,
-      path: '/resource/classroom/index1',
       code: 'org_user',
       alias: 'user',
       icon: 'iconfont iconicon_boss',
@@ -183,81 +182,96 @@ export default {
       children: []
     },
     {
-      menuId: '12123141231226142158',
+      sort: 4,
+      menuId: '12124375467421228',
       menuName: '证书模板管理',
-      menuType: 'Menu',
+      menuType: 'Dir',
       isEnabled: 1,
       isOwn: 1,
       isShow: 1,
       code: 'org_user',
       alias: 'user',
-      path: '/resource/certificate/certificateManage',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: [
         {
-          menuType: 'Button',
-          isOwn: 1,
-          menuName: '新建模板',
+          menuId: '12123141231226142158',
+          menuName: '证书模板管理',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/certificate/certificateManage/add'
+          isOwn: 1,
+          isShow: 1,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/certificate/certificateManage',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '新建模板',
+              isEnabled: 1,
+              path: '/certificate/certificateManage/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '停用',
+              isEnabled: 1,
+              path: '/certificate/certificateManage/stop'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '预览',
+              isEnabled: 1,
+              path: '/certificate/certificateManage/preview'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '删除',
+              isEnabled: 1,
+              path: '/certificate/certificateManage/delete'
+            }
+          ]
         },
         {
-          menuType: 'Button',
-          isOwn: 1,
-          menuName: '停用',
+          menuId: '1212437546742158',
+          menuName: '新建证书模版',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/certificate/certificateManage/stop'
+          isOwn: 1,
+          isShow: 0,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/certificate/addCertificate',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: []
         },
         {
-          menuType: 'Button',
-          isOwn: 1,
-          menuName: '预览',
+          menuId: '12679683472345158',
+          menuName: '证书发放明细',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/certificate/certificateManage/preview'
-        },
-        {
-          menuType: 'Button',
           isOwn: 1,
-          menuName: '删除',
-          isEnabled: 1,
-          path: '/certificate/certificateManage/delete'
-        }
-      ]
-    },
-    {
-      menuId: '1212437546742158',
-      menuName: '新建证书模版',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 0,
-      code: 'org_user',
-      alias: 'user',
-      path: '/resource/certificate/addCertificate',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
-    },
-    {
-      menuId: '12679683472345158',
-      menuName: '证书发放明细',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 1,
-      code: 'org_user',
-      alias: 'user',
-      path: '/resource/certificate/certificateDetail',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: [
-        {
-          menuType: 'Button',
-          isOwn: 1,
-          menuName: '导出Excel',
-          isEnabled: 1,
-          path: '/certificate/certificateDetail/export'
+          isShow: 1,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/certificate/certificateDetail',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '导出Excel',
+              isEnabled: 1,
+              path: '/certificate/certificateDetail/export'
+            }
+          ]
         }
       ]
     }
