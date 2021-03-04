@@ -76,6 +76,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="DELETE_CLASSROOM"
             type="text"
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
