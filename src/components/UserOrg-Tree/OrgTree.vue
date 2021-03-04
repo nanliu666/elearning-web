@@ -51,6 +51,7 @@
 <script>
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
+  props: ['idList'],
   data() {
     return {
       filterText: '',
@@ -70,16 +71,29 @@ export default {
     },
     selected() {
       this.handleSubmit()
-      console.log(this.selected)
     }
   },
-  activated() {
-    this.loadOrgData()
-  },
+  activated() {},
   mounted() {
-    this.loadOrgData()
+    this.loadOrgData().then(() => {
+      const list = this.idList
+      this.$refs.tree.setCheckedKeys(list)
+      this.updateSelected(this.orgData)
+      console.log(this.selected)
+    })
   },
   methods: {
+    updateSelected(list) {
+      list.forEach((item) => {
+        const { id, children = [] } = item
+        if (this.idList.includes(id)) {
+          this.selected.push(item)
+        }
+        if (children.length) {
+          this.updateSelected(children)
+        }
+      })
+    },
     handleSubmit() {
       this.$emit('selectedValue', this.selected)
     },
@@ -88,7 +102,8 @@ export default {
       return data.orgName.indexOf(value) !== -1
     },
     loadOrgData() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      this.selected = []
+      return getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
         this.orgData = res
       })
     },
