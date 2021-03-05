@@ -289,7 +289,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '停用',
+              menuName: '启用/停用',
               isEnabled: 1,
               path: '/certificate/certificateManage/stop'
             },
