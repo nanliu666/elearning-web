@@ -166,7 +166,8 @@ export default {
       },
       form: {
         parentId: '',
-        orgIds: []
+        orgIds: [],
+        isPublic: 0
       },
       parentOrgIdLabel: '',
       rules: {

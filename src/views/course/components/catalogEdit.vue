@@ -73,16 +73,16 @@
           </div>
         </template>
         <el-select
-          v-model="form.region"
+          v-model="form.isPublic"
           placeholder="请选择"
         >
           <el-option
             label="否"
-            value="0"
+            :value="0"
           ></el-option>
           <el-option
             label="是"
-            value="1"
+            :value="1"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -158,7 +158,8 @@ export default {
       },
       form: {
         parentId: '',
-        orgIds: []
+        orgIds: [],
+        isPublic: 0
       },
       parentOrgIdLabel: '',
       rules: {
@@ -168,7 +169,6 @@ export default {
       loading: false
     }
   },
-
   methods: {
     // 可见范围返回数据
     getOrgList(val) {
