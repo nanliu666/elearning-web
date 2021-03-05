@@ -64,7 +64,10 @@
         label="可见范围"
       >
         <div>
-          <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+          <OrgTree
+            :id-list="idList"
+            @selectedValue="getUserList"
+          ></OrgTree>
         </div>
         {{ userList }}
       </el-form-item>
@@ -105,10 +108,10 @@
 <script>
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 import { mapGetters } from 'vuex'
-import UserOrgTree from '@/views/course/components/UserOrgTree'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 export default {
   name: 'CatalogEdit',
-  components: { UserOrgTree },
+  components: { OrgTree },
   props: {
     visible: {
       type: Boolean,
@@ -117,6 +120,7 @@ export default {
   },
   data() {
     return {
+      idList: [],
       type: 'create',
       userList: [],
       form: {
