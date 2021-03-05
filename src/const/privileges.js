@@ -12,6 +12,8 @@ export const AUTH_COURSE_CATALOG = '/course/catalog/author' // 权限配置
 export const EDIT_COURSE_CATALOG = '/course/catalog/edit' // 编辑
 export const DELETE_COURSE_CATALOG = '/course/catalog/delete' // 删除
 export const ADD_GROUNP_COURSE_CATALOG = '/course/catalog/addNewGroup' // 新增子分类
+// 课程中心的审核
+export const COURSE_APPROVALCENTER_VIEW = '/course/approvalCenter/view' // 查看详情
 // 培训中心的鉴权
 export const ADD_TRAIN = '/training/trainingArrange/add' // 新增培训
 export const ADD_GROUNP_TRAIN = '/training/trainingArrange/addGroup' // 新增分组

@@ -1,6 +1,7 @@
 <template>
   <el-dialog
     v-loading="loading"
+    destroy-on-close
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
@@ -91,7 +92,10 @@
         label="可见范围"
       >
         <div>
-          <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+          <OrgTree
+            :id-list="idList"
+            @selectedValue="getUserList"
+          ></OrgTree>
         </div>
         {{ userList }}
       </el-form-item>
@@ -130,12 +134,12 @@
 </template>
 
 <script>
-import UserOrgTree from './UserOrgTree'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCatalog, addCatalog, editCatalog } from '@/api/course/course'
 export default {
   name: 'CatalogEdit',
   components: {
-    UserOrgTree
+    OrgTree
   },
   props: {
     visible: {
@@ -145,6 +149,7 @@ export default {
   },
   data() {
     return {
+      idList: [],
       userList: [],
       type: 'create',
       radioDisable: {
