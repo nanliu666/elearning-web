@@ -225,6 +225,7 @@ export default {
     create() {
       this.userList = []
       this.type = 'create'
+      this.idList = []
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
@@ -240,6 +241,7 @@ export default {
       this.$emit('changevisible', true)
     },
     edit(row) {
+      this.idList = row.orgIdList
       this.userList = []
       this.type = 'edit'
       const { idStr, parentId, name } = row

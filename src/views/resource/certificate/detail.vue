@@ -40,7 +40,7 @@
             v-p="REVOKE_CERTIFICATE_DETAIL"
             type="text"
             icon="el-icon-sold-out"
-            @click="exportBatch(selection)"
+            @click="revokeCertificateFun(selection)"
           >
             批量撤回
           </el-button>
@@ -49,8 +49,9 @@
           <div class="menuClass">
             <el-button
               v-p="REVOKE_CERTIFICATE_DETAIL"
+              :disabled="row.status === '2'"
               type="text"
-              @click="viewCertificate(row)"
+              @click="revokeCertificateFun(row)"
             >
               撤回证书
             </el-button>
@@ -192,7 +193,7 @@ import {
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCertificateGrantList } from '@/api/certificate/certificate'
+import { getCertificateGrantList, revokeCertificate } from '@/api/certificate/certificate'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
@@ -242,6 +243,36 @@ export default {
     })
   },
   methods: {
+    // 查看来源
+    viewCertificate() {},
+    // 撤回证书
+    revokeCertificateFun(row) {
+      const isBatch = _.isArray(row)
+      const canRevokeList = _.filter(row, (item) => {
+        return item.status === '1'
+      })
+      const revokeTips = isBatch
+        ? `您确定要为${_.get(canRevokeList, '[0].stuName')}等${_.size(
+            canRevokeList
+          )}个学员撤回证书吗？`
+        : `您确定要撤回${row.stuName}的证书吗？`
+      const stuIds = isBatch ? _.map(canRevokeList, 'stuId') : [row.stuId]
+      const trainId = isBatch ? _.map(canRevokeList, 'trainId') : [row.trainId]
+      const params = {
+        stuIds,
+        trainId
+      }
+      this.$confirm(revokeTips, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        revokeCertificate(params).then(() => {
+          this.loadTableData()
+          this.$message.success('撤回证书成功')
+        })
+      })
+    },
     // 批量导出
     exportBatch() {},
     /**

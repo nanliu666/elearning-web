@@ -8,6 +8,11 @@ import qs from 'qs'
  */
 export const checkClassroomName = (params) => post('/manage/v1/classroom/roomNameIsExit', params)
 /**
+ * 创建或编辑资源下的分类列表
+ */
+export const queryCategoryOrgList = (params) =>
+  post('/manage/v1/classroom/queryCategoryOrgList', params)
+/**
  * 创建教室
  */
 export const addClassroom = (params) => post('/manage/v1/classroom/addClassroom', params)
@@ -24,11 +29,6 @@ export const editClassroom = (params) => post('/manage/v1/classroom/updateClassr
  */
 export const addCategoryOrgRelation = (params) =>
   get('/manage/v1/classroom/addCategoryOrgRelation', params)
-/**
- * 权限配置-组织架构列表
- */
-export const queryCategoryOrgList = (params) =>
-  get('/manage/v1/classroom/queryCategoryOrgList', params)
 /**
  * 修改教室状态
  */

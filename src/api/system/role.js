@@ -1,5 +1,8 @@
-import request, { del } from '@/router/axios'
-
+import request, { del, get } from '@/router/axios'
+/**
+ * 树状查询岗位
+ */
+export const getPositionAll = (params) => get('/manage/v1/source/base/position/all', params)
 export const getList = (current, size, params) => {
   return request({
     url: '/api/blade-system/role/list',
