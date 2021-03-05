@@ -256,7 +256,7 @@ export default {
     {
       sort: 4,
       menuId: '12124375467421228',
-      menuName: '证书模板管理',
+      menuName: '证书管理',
       menuType: 'Dir',
       isEnabled: 1,
       isOwn: 1,
@@ -268,7 +268,7 @@ export default {
       children: [
         {
           menuId: '12123141231226142158',
-          menuName: '证书模板管理',
+          menuName: '模板管理',
           menuType: 'Menu',
           isEnabled: 1,
           isOwn: 1,
@@ -325,23 +325,66 @@ export default {
         },
         {
           menuId: '12679683472345158',
-          menuName: '证书发放明细',
+          menuName: '发放明细',
           menuType: 'Menu',
           isEnabled: 1,
           isOwn: 1,
           isShow: 1,
           code: 'org_user',
           alias: 'user',
-          path: '/resource/certificate/certificateDetail',
+          path: '/resource/certificate/detailList',
           icon: 'iconfont iconicon_boss',
           dataPrivileges: [],
           children: [
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '导出Excel',
+              menuName: '批量导出',
               isEnabled: 1,
-              path: '/certificate/certificateDetail/export'
+              path: '/certificate/detailList/export'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '查看',
+              isEnabled: 1,
+              path: '/certificate/detailList/view'
+            }
+          ]
+        },
+        {
+          menuId: '12679683472345158',
+          menuName: '查看详情',
+          menuType: 'Menu',
+          isEnabled: 1,
+          isOwn: 1,
+          isShow: 0,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/certificate/detail',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '批量导出',
+              isEnabled: 1,
+              path: '/certificate/detail/export'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '查看来源',
+              isEnabled: 1,
+              path: '/certificate/detail/source'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '撤回证书',
+              isEnabled: 1,
+              path: '/certificate/detail/revoke'
             }
           ]
         }

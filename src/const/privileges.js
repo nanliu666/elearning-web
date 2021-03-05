@@ -95,7 +95,12 @@ export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 停用
 export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 预览
 export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 删除
 // 证书发放明细的鉴权
-export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
+export const EXPORT_CERTIFICATE = '/certificate/detailList/export' // 导出Excel
+export const VIEW_CERTIFICATE = '/certificate/detailList/view' // 查看
+// 证书发放明细的详情的鉴权
+export const EXPORT_CERTIFICATE_DETAIL = '/certificate/detail/export' // 导出
+export const SOURCE_CERTIFICATE_DETAIL = '/certificate/detail/source' // 查看来源
+export const REVOKE_CERTIFICATE_DETAIL = '/certificate/detail/revoke' // 撤回证书
 // 组织管理的鉴权
 export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
