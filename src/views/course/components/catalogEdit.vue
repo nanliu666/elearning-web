@@ -1,11 +1,12 @@
 <template>
   <el-dialog
+    v-if="visible"
     v-loading="loading"
-    destroy-on-close
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
+    top="5vh"
     @close="handleClose"
   >
     <el-form
@@ -93,11 +94,11 @@
       >
         <div>
           <OrgTree
-            :id-list="idList"
-            @selectedValue="getUserList"
+            :id-list="form.orgIdList"
+            @selectedValue="getOrgList"
           ></OrgTree>
         </div>
-        {{ userList }}
+        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
@@ -149,8 +150,6 @@ export default {
   },
   data() {
     return {
-      idList: [],
-      userList: [],
       type: 'create',
       radioDisable: {
         Company: false,
@@ -158,7 +157,8 @@ export default {
         Group: false
       },
       form: {
-        parentId: ''
+        parentId: '',
+        orgIds: []
       },
       parentOrgIdLabel: '',
       rules: {
@@ -171,8 +171,8 @@ export default {
 
   methods: {
     // 可见范围返回数据
-    getUserList(val) {
-      this.userList = val
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
     },
     async loadOrgTree() {
       let res = await getCatalog()
@@ -212,6 +212,8 @@ export default {
     submit(type) {
       if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        this.form.orgIds = this.form.orgIds.toString()
+        this.form.source = 'course'
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
@@ -316,6 +318,7 @@ export default {
   font-size: 12px;
   color: #a1a8ae;
   margin-top: -8px;
+  margin-bottom: -24px;
 }
 .newOrgDailog {
   .el-select {
@@ -330,5 +333,11 @@ export default {
 }
 /deep/ .el-form-item__label {
   padding: 0 0 0 0;
+}
+/deep/ .el-dialog__body {
+  padding: 15px 20px 0;
+}
+/deep/ .el-form-item {
+  margin-bottom: 10px;
 }
 </style>
