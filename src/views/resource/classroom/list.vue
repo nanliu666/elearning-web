@@ -3,7 +3,7 @@
     <page-header title="教室列表">
       <el-button
         slot="rightMenu"
-        v-p="ADD_REP_CATALOG"
+        v-p="ADD_CLASSROOM"
         type="primary"
         size="medium"
         @click="createClassroom"
@@ -76,6 +76,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-p="DELETE_CLASSROOM"
             type="text"
             icon="el-icon-delete"
             @click="deleteSelected(selection)"
@@ -85,9 +86,13 @@
         </template>
         <template #roomName="{row}">
           <div
+            v-if="$p(VIEW_CLASSROOM)"
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
+            {{ row.roomName }}
+          </div>
+          <div v-else>
             {{ row.roomName }}
           </div>
         </template>
@@ -97,21 +102,21 @@
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="STOP_REP_CATALOG"
+              v-p="STOP_CLASSROOM"
               type="text"
               @click="handleStatus(row)"
             >
               {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
             <el-button
-              v-p="AUTH_REP_CATALOG"
+              v-p="EDIT_CLASSROOM"
               type="text"
               @click="editClassroom(row)"
             >
               编辑
             </el-button>
             <el-button
-              v-p="AUTH_REP_CATALOG"
+              v-p="DELETE_CLASSROOM"
               type="text"
               @click="deleteClassroomFun(row)"
             >
@@ -246,12 +251,11 @@ const SEARCH_CONFIG = {
   ]
 }
 import {
-  ADD_REP_CATALOG,
-  STOP_REP_CATALOG,
-  AUTH_REP_CATALOG,
-  EDIT_REP_CATALOG,
-  DELETE_REP_CATALOG,
-  ADD_CHILD_REP_CATALOG
+  VIEW_CLASSROOM,
+  ADD_CLASSROOM,
+  STOP_CLASSROOM,
+  EDIT_CLASSROOM,
+  DELETE_CLASSROOM
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -284,25 +288,18 @@ export default {
     }
   },
   computed: {
-    ADD_REP_CATALOG: () => ADD_REP_CATALOG,
-    STOP_REP_CATALOG: () => STOP_REP_CATALOG,
-    AUTH_REP_CATALOG: () => AUTH_REP_CATALOG,
-    EDIT_REP_CATALOG: () => EDIT_REP_CATALOG,
-    DELETE_REP_CATALOG: () => DELETE_REP_CATALOG,
-    ADD_CHILD_REP_CATALOG: () => ADD_CHILD_REP_CATALOG,
+    VIEW_CLASSROOM: () => VIEW_CLASSROOM,
+    ADD_CLASSROOM: () => ADD_CLASSROOM,
+    STOP_CLASSROOM: () => STOP_CLASSROOM,
+    EDIT_CLASSROOM: () => EDIT_CLASSROOM,
+    DELETE_CLASSROOM: () => DELETE_CLASSROOM,
     ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p([
-          STOP_REP_CATALOG,
-          AUTH_REP_CATALOG,
-          EDIT_REP_CATALOG,
-          DELETE_REP_CATALOG,
-          ADD_CHILD_REP_CATALOG
-        ])
+        this.tableConfig.showHandler = this.$p([STOP_CLASSROOM, EDIT_CLASSROOM, DELETE_CLASSROOM])
       },
       deep: true
     }
@@ -388,10 +385,10 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
-      const hasTrain = true
+      const hasTrain = _.empty(_.filter(selected, 'isReserve'))
       const deleteBatchTips = `您确定要批量删除${_.size(selected).length}个教室吗？`
       const reserveTips =
-        '您选择的教室包含已关联正在进行中的培训安排，不能对其进行删除操作 </br>是否忽略继续删除其他教室？'
+        '您选择的教室包含已关联正在进行中的培训安排，不能对其进行删除操作，是否忽略继续删除其他教室？'
       const confirmButtonText = hasTrain ? '继续删除' : '确定'
       const tips = hasTrain ? reserveTips : deleteBatchTips
       this.$confirm(tips, '提示', {

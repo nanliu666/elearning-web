@@ -89,7 +89,7 @@
 <script>
 import { checkUserInfo, createUser, createNewWorkNo, editUser } from '@/api/personnel/roster'
 import { getStaffBasicInfo } from '@/api/personalInfo'
-import { getRoleList } from '@/api/system/role'
+import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getUserWorkList, getOrgTree } from '@/api/org/org'
 import { findTreeNodes } from '@/util/util'
 import { mapGetters } from 'vuex'
@@ -263,10 +263,28 @@ export default {
           label: '直接领导'
         },
         {
-          itemType: 'input',
           prop: 'position',
+          itemType: 'treeSelect',
           label: '岗位',
-          maxlength: 32
+          props: {
+            selectParams: {
+              placeholder: '请选择岗位',
+              multiple: false
+            },
+            treeParams: {
+              data: [],
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'name',
+                value: 'id'
+              }
+            }
+          }
         },
         {
           itemType: 'input',
@@ -355,6 +373,10 @@ export default {
   activated() {
     this.loadUserData()
     this.resetForm()
+    getPositionAll().then((res) => {
+      const positionConfig = _.find(this.columns, { prop: 'position' })
+      _.set(positionConfig, 'props.treeParams.data', res)
+    })
   },
   created() {
     this.loadOrgData()

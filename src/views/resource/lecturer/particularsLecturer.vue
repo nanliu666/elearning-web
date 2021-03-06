@@ -113,8 +113,8 @@
             {{ teacherData.teacherTitle }}
           </el-col>
         </el-row>
-        <!-- <el-row>
-          <el-col
+        <el-row>
+          <!-- <el-col
             :span="4"
             style="color:#898989;"
           >
@@ -122,8 +122,17 @@
           </el-col>
           <el-col :span="8">
             <span class="box_content_icon">计算机技术</span><span class="box_content_icon">计算机技术</span>
+          </el-col> -->
+          <el-col
+            :span="5"
+            style="color:#898989;"
+          >
+            评分：
           </el-col>
-        </el-row> -->
+          <el-col :span="7">
+            <el-rate v-model="teacherData.teacherScore"></el-rate>
+          </el-col>
+        </el-row>
       </div>
       <div class="head_box_btns">
         <el-button
@@ -287,33 +296,37 @@
 
 <script>
 import { getCourseListData } from '@/api/course/course'
-import { getTeacher, Teacherdelete, editSysRulus } from '@/api/lecturer/lecturer'
-import { getBatchList } from '@/api/examManage/schedule'
+import { getTeacher, Teacherdelete, editSysRulus, getCourseList } from '@/api/lecturer/lecturer'
 import SearchPopover from '@/components/searchPopOver/index'
 import styles from '@/styles/variables.scss'
 import { getCategoryTree } from '@/api/live'
 const TABLE_COLUMNS = [
   {
+    label: '序号',
+    prop: 'rowNum',
+    minWidth: 50
+  },
+  {
     label: '课程名称',
-    prop: 'userName',
+    prop: 'courseName',
     slot: true,
     minWidth: 150
   },
   {
     label: '所在分类',
-    prop: 'phoneNum',
+    prop: 'catalogName',
     slot: true,
     minWidth: 120
   },
   {
     label: '课程类型',
-    prop: 'orgName',
+    prop: 'typeName',
     minWidth: 120
   },
   {
     label: '授课时间',
     slot: true,
-    prop: 'batchNumber',
+    prop: 'courseTime',
     minWidth: 120
   }
 ]
@@ -322,7 +335,6 @@ const TABLE_CONFIG = {
   showHandler: false,
   showIndexColumn: false,
   enablePagination: true,
-  enableMultiSelect: true,
   handlerColumn: {
     minWidth: 150
   }
@@ -331,7 +343,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'name',
+      field: 'courseName',
       label: '',
       data: '',
       options: [],
@@ -341,7 +353,7 @@ const SEARCH_CONFIG = {
   popoverOptions: [
     {
       type: 'treeSelect',
-      field: 'categoryId',
+      field: 'catalogId',
       label: '所在分类',
       data: '',
       config: {
@@ -367,16 +379,27 @@ const SEARCH_CONFIG = {
     },
     {
       type: 'select',
-      field: 'batchNumber',
+      field: 'courseType',
       label: '课程类型',
       data: '',
       options: [
-        { key: '在线', value: '在线' },
-        { key: '面授', value: '面授' },
-        { key: '直播', value: '直播' }
+        { label: '全部', value: '' },
+        { label: '在线', value: 1 },
+        { label: '面授', value: 2 },
+        { label: '直播', value: 3 }
       ]
     },
-    { type: 'dataPicker', field: 'entryDate', label: '授课时间' }
+    {
+      type: 'dataPicker',
+      label: '日期范围',
+      data: '',
+      field: 'startTime,endTime',
+      config: {
+        type: 'datetimerange',
+        'range-separator': '至',
+        'value-format': 'yyyy-MM-dd HH:mm:ss'
+      }
+    }
   ]
 }
 export default {
@@ -387,7 +410,7 @@ export default {
       blockDialogVisible: false,
       showBtnData: false,
       showBtnDel: false,
-      activeIndex: '1',
+      activeIndex: '0',
       activeColor: styles.primaryColor,
       tableLoading: false,
       tableData: [],
@@ -399,6 +422,16 @@ export default {
         currentPage: 1,
         size: 10,
         total: 0
+      },
+      queryInfo: {
+        teacherId: this.$route.query.id,
+        pageNo: 1,
+        pageSize: 10,
+        courseName: '',
+        courseType: '',
+        catalogId: '',
+        startTime: '',
+        endTime: ''
       },
       teacherData: {
         photo: '',
@@ -421,8 +454,8 @@ export default {
   activated() {
     this.isgetTeacher()
     this.loadTableData()
-    let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryTree({ source: 'classroom' }).then((res) => {
+    let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'catalogId' })
+    getCategoryTree({ source: 'course' }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -497,7 +530,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getBatchList(_.assign(this.queryInfo, { id: this.id }))
+        let { totalNum, data } = await getCourseList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {

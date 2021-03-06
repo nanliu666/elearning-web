@@ -55,3 +55,13 @@ export const delGrantDetails = (params) =>
  * */
 export const exportGrantExcel = (params) =>
   get('/api/manage/v1/source/certificate/exportGrantExcel', params)
+/**
+ * 查询证书发放明细
+ * */
+export const getCertificateGrantDetail = (params) =>
+  get('/api/manage/v1/source/certificate/getCertificateGrantDetail', params)
+/**
+ * 撤回证书
+ * @param {Object} params - 参数
+ * */
+export const revokeCertificate = (params) => post('/api/manage/v1/train/revokeCertificate', params)

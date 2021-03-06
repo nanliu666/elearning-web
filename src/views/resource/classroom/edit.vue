@@ -103,9 +103,9 @@ import {
   addClassroom,
   editClassroom,
   queryClassroomInfo,
+  queryCategoryOrgList,
   checkClassroomName
 } from '@/api/resource/classroom'
-import { getCategoryTree } from '@/api/live'
 import { mapGetters } from 'vuex'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import CommonImageView from '@/components/common-image-viewer/viewer'
@@ -311,7 +311,7 @@ export default {
      */
     async initData() {
       let categoryId = _.find(this.formColumns, { prop: 'categoryId' })
-      getCategoryTree({ source: 'classroom' }).then(
+      queryCategoryOrgList({ source: 'classroom' }).then(
         (res) => (categoryId.props.treeParams.data = res)
       )
       if (this.id) {

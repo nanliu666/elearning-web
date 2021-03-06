@@ -87,9 +87,9 @@
 import {
   addKnowledgeList,
   updateKnowledge,
-  getKnowledgeCatalogList,
   getKnowledgeManageDetails
 } from '@/api/knowledge/knowledge'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
 const FORM_COLUMNS = [
@@ -369,7 +369,9 @@ export default {
       //   })
       // }
       if (catalogId) {
-        getKnowledgeCatalogList().then((res) => (catalogId.props.treeParams.data = res))
+        queryCategoryOrgList({ source: 'knowledge' }).then(
+          (res) => (catalogId.props.treeParams.data = res)
+        )
       }
       if (this.id) {
         this.loadDetail()
