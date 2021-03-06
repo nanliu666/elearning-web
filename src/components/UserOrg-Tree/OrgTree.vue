@@ -51,7 +51,7 @@
 <script>
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
-  props: ['idList'],
+  props: ['idList', 'isload'],
   data() {
     return {
       filterText: '',
@@ -73,17 +73,15 @@ export default {
       this.handleSubmit()
     }
   },
-  activated() {},
-  mounted() {
+  created() {
     this.loadOrgData().then(() => {
       const list = this.idList
       this.$refs.tree.setCheckedKeys(list)
       this.updateSelected(this.orgData)
-      console.log(this.selected)
     })
   },
   methods: {
-    updateSelected(list) {
+    updateSelected(list = []) {
       list.forEach((item) => {
         const { id, children = [] } = item
         if (this.idList.includes(id)) {
@@ -156,14 +154,14 @@ export default {
     width: 60%;
   }
   .left_box {
-    padding: 20px;
+    padding: 20px 20px 0;
   }
   .right {
     border-left: 1px solid #f2f2f2;
     width: 40%;
     // padding-left: 20px;
     // padding-right: 20px;
-    height: 470px;
+    height: 370px;
     overflow-y: auto;
 
     .el-tag {
@@ -174,7 +172,7 @@ export default {
 }
 .outer-user {
   overflow-y: auto;
-  height: 380px;
+  height: 300px;
 
   .total-check {
     padding: 6px;
@@ -195,7 +193,7 @@ export default {
   }
 }
 .tree {
-  height: 340px;
+  height: 250px;
   overflow-y: auto;
   padding-top: 10px;
 }
