@@ -1,4 +1,0 @@
-diff a/src/mock/modules/menu/system.js b/src/mock/modules/menu/system.js	(rejected hunks)
-@@ -376 +376 @@ export default {
--          children:[
-+          children: [
