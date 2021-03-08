@@ -274,7 +274,10 @@ export default {
       })
     },
     // 批量导出
-    exportBatch() {},
+    exportBatch(select) {
+      const ids = _.join(_.map(select, 'id'), ',')
+      window.open(`/api/manage/v1/source/certificate/exportGrantExcel?ids=${ids}`)
+    },
     /**
      * 处理页码改变
      */
