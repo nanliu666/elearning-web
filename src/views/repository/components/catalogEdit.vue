@@ -1,10 +1,12 @@
 <template>
   <el-dialog
+    v-if="visible"
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
+    top="5vh"
     @close="handleClose"
   >
     <el-form
@@ -74,16 +76,16 @@
           </div>
         </template>
         <el-select
-          v-model="form.region"
+          v-model="form.isPublic"
           placeholder="请选择"
         >
           <el-option
             label="否"
-            value="0"
+            :value="0"
           ></el-option>
           <el-option
             label="是"
-            value="1"
+            :value="1"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -94,9 +96,11 @@
         label="可见范围"
       >
         <div>
-          <OrgTree @selectedValue="getUserList"></OrgTree>
+          <OrgTree
+            :id-list="form.orgIdList"
+            @selectedValue="getOrgList"
+          ></OrgTree>
         </div>
-        {{ userList }}
       </el-form-item>
     </el-form>
     <span
@@ -154,7 +158,6 @@ export default {
   },
   data() {
     return {
-      userList: '',
       type: 'create',
       radioDisable: {
         Company: false,
@@ -162,7 +165,9 @@ export default {
         Group: false
       },
       form: {
-        parentId: ''
+        parentId: '',
+        orgIds: [],
+        isPublic: 0
       },
       parentOrgIdLabel: '',
       rules: {
@@ -177,8 +182,8 @@ export default {
   },
   methods: {
     // 可见范围返回数据
-    getUserList(val) {
-      this.userList = val
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
     },
     async loadOrgTree() {
       let res = await getKnowledgeCatalogList()
@@ -206,7 +211,7 @@ export default {
       let target = this.findOrg(this.form.parentId)
       let temp = _.isEmpty(target) ? this.orgTree : target.children
       let hasSameName = _.some(temp, (child) => {
-        return child.name === this.form.name
+        return child.name == this.form.name
       })
       if (hasSameName) {
         this.$message.error('该分类已存在')
@@ -217,6 +222,8 @@ export default {
     submit(type) {
       if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        this.form.orgIds = this.form.orgIds.toString()
+        this.form.source = 'knowledge'
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
@@ -319,6 +326,7 @@ export default {
   font-size: 12px;
   color: #a1a8ae;
   margin-top: -8px;
+  margin-bottom: -24px;
 }
 .newOrgDailog {
   .el-select {
@@ -333,5 +341,14 @@ export default {
 }
 /deep/ .el-form-item__label {
   padding: 0 0 0 0;
+}
+/deep/ .el-dialog__body {
+  padding: 15px 20px 0;
+}
+/deep/ .el-form-item {
+  margin-bottom: 10px;
+}
+/deep/.el-dialog__footer {
+  padding: 0px 20px 20px;
 }
 </style>
