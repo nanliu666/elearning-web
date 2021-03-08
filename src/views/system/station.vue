@@ -84,9 +84,9 @@
           </div>
         </template>
         <template #handler="{ row }">
+          v-p="DETAIL_STATION"
           <div class="table__handler">
             <el-button
-              v-p="DETAIL_STATION"
               size="medium"
               type="text"
               @click.stop="() => handleViewUser(row)"

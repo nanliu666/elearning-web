@@ -1,0 +1,51 @@
+diff a/src/views/system/station.vue b/src/views/system/station.vue	(rejected hunks)
+@@ -26 +26,4 @@
+-        <template slot="multiSelectMenu" slot-scope="{ selection }">
++        <template
++          slot="multiSelectMenu"
++          slot-scope="{ selection }"
++        >
+@@ -30,2 +34,0 @@
+-            @click="batchExport(selection)"
+-            v-loading.fullscreen.lock="fullscreenLoading"
+@@ -48 +51,4 @@
+-              <div class="refresh-container" @click="refresh">
++              <div
++                class="refresh-container"
++                @click="refresh"
++              >
+@@ -52 +58,5 @@
+-              <el-popover placement="bottom" width="40" trigger="click">
++              <el-popover
++                placement="bottom"
++                width="40"
++                trigger="click"
++              >
+@@ -93 +103,4 @@
+-            <el-dropdown trigger="hover" @command="(command) => handleCommand(command, row)">
++            <el-dropdown
++              trigger="hover"
++              @command="(command) => handleCommand(command, row)"
++            >
+@@ -98,2 +111,12 @@
+-                <el-dropdown-item command="edit" v-p="EDIT_STATION"> 编辑 </el-dropdown-item>
+-                <el-dropdown-item command="delete" v-p="DELETE_STATION"> 删除 </el-dropdown-item>
++                <el-dropdown-item
++                  v-p="EDIT_STATION"
++                  command="edit"
++                >
++                  编辑
++                </el-dropdown-item>
++                <el-dropdown-item
++                  v-p="DELETE_STATION"
++                  command="delete"
++                >
++                  删除
++                </el-dropdown-item>
+@@ -106 +129,5 @@
+-      <station-form ref="stationForm" :rowData="rowData" @initData="loadData"></station-form>
++      <station-form
++        ref="stationForm"
++        :row-data="rowData"
++        @initData="loadData"
++      ></station-form>
