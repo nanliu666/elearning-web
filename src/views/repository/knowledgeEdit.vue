@@ -73,10 +73,18 @@
           完成
         </el-button>
         <el-button
+          v-if="!id"
           size="medium"
           @click="() => handleContinueAdd()"
         >
           完成并继续添加
+        </el-button>
+        <el-button
+          v-if="id"
+          size="medium"
+          @click="handleBack"
+        >
+          取消
         </el-button>
       </div>
     </basic-container>
