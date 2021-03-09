@@ -52,14 +52,26 @@ export const delGrantDetails = (params) =>
 
 /**
  * 导出证书发放列表Excel
- * @param {Object} params - 参数
  * */
-// export const exportGrantExcel = (params, config = {responseType: 'blob'}) =>
-//   get('/api/manage/v1/source/certificate/exportGrantExcel', params, config)
 export const exportGrantExcel = (params) =>
   axios.get('/api/manage/v1/source/certificate/exportGrantExcel', {
     responseType: 'blob',
-    // headers: { 'Content-Type': 'application/vnd.ms-excel;charset=UTF-8' },
+    headers: {
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+    },
+    params
+  })
+/**
+ * 导出证书模板
+ * */
+export const exportTemplateExcel = (params) =>
+  axios.get('/api/manage/v1/source/certificate/exportTemplateExcel', {
+    responseType: 'blob',
+    headers: {
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+    },
     params
   })
 /**
