@@ -35,7 +35,7 @@
           </div>
         </template>
         <template #status="{row}">
-          {{ row.status == 0 ? '已启用' : '已停用' }}
+          {{ row.status == 0 ? '已停用' : '已启用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -45,7 +45,7 @@
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status == 0 ? '停用' : '启用' }}
+              {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
             <el-button
               v-p="EDIT_CLASSROOM_CLASSIFY"
@@ -251,7 +251,7 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status == '1' ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status == 1 ? true : false
       return isDisabled
     },
     // 多种操作
@@ -335,14 +335,14 @@ export default {
     handleStatus(row) {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status == 0 ? '停用' : '启用'
+      const statusText = row.status == 0 ? '启用' : '停用'
       const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
       // 获取到当前分类以及子分类的id集合
       const params = { id: row.idStr, status: row.status == 0 ? 1 : 0 }
-      this.$confirm(`${row.status == 0 ? stopContent : startContent}`, '提醒', {
+      this.$confirm(`${row.status == 1 ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

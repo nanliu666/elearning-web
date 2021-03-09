@@ -186,11 +186,12 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { roleId, roleName, remark } = { ...newVal }
+        let { roleId, roleName, remark, orgIds } = { ...newVal }
         this.form = {
           roleId,
           roleName,
-          remark
+          remark,
+          orgIdList: orgIds.split(',')
         }
       },
       immediate: true,
@@ -218,7 +219,6 @@ export default {
         })
       }
     },
-
     // 保存并继续添加
     onContinue() {
       this.onClickSave(this.clearForm)
