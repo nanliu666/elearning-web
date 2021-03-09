@@ -276,7 +276,9 @@ export default {
       _.assign(examArrangeBasis, { type: type === 'publish' ? 0 : 1 })
       _.assign(examArrangeBasis, examPattern)
       _.assign(examArrangeBasis, { creatorId: this.userId })
-      examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
+      examArrangeBasis.fixedTime = !examArrangeBasis.fixedTime
+        ? examArrangeBasis.fixedTime
+        : moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
       let params = {
         examArrangeBasis,
         examineeBatchList
