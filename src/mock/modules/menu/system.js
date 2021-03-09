@@ -350,6 +350,92 @@ export default {
       ]
     },
     {
+      menuId: '1259073456778285058234',
+      menuName: '岗位管理',
+      menuType: 'Dir',
+      isOwn: 1,
+      isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+      isShow: 1,
+      code: 'station',
+      alias: '岗位管理',
+      icon: 'iconfont iconicon_boss',
+      dataPrivileges: [],
+      children: [
+        {
+          menuId: '125634453478285058',
+          menuName: '岗位管理',
+          menuType: 'Menu',
+          isOwn: 1,
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          isShow: 1,
+          code: 'station',
+          alias: '岗位管理',
+          path: '/system/station',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '岗位新增',
+              isEnabled: 1,
+              path: '/system/station/add'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '批量导出',
+              isEnabled: 1,
+              path: '/system/station/exports'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '查看用户',
+              isEnabled: 1,
+              path: '/system/station/detail'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '岗位编辑',
+              isEnabled: 1,
+              path: '/system/station/edit'
+            },
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '岗位删除',
+              isEnabled: 1,
+              path: '/system/station/delete'
+            }
+          ]
+        },
+        {
+          menuId: '12590123458285058',
+          menuName: '查看用户',
+          menuType: 'Menu',
+          isOwn: 1,
+          isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
+          isShow: 0,
+          code: 'station_detail',
+          alias: 'stationsDetail',
+          path: '/system/stationDetail',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              isOwn: 1,
+              menuName: '批量删除',
+              isEnabled: 1,
+              path: '/system/stationDetail/exports'
+            }
+          ]
+        }
+      ]
+    },
+    {
       menuId: '1259070994843471874',
       menuName: '菜单管理',
       menuType: 'Menu',
