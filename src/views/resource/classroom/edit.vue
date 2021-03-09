@@ -146,7 +146,7 @@ const FORM_COLUMNS = [
         props: {
           children: 'children',
           label: 'name',
-          value: 'idStr'
+          value: 'id'
         },
         required: true
       }
@@ -237,7 +237,7 @@ export default {
         roomAddr: '',
         hasProjector: 0, // 是否有投影仪：0：没有；1：有
         maxCapacity: null,
-        roomArea: null,
+        roomArea: 0,
         picReqList: []
       },
       submitting: false

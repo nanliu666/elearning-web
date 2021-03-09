@@ -2,10 +2,11 @@
   <el-dialog
     :title="form.roleId ? '编辑角色' : '新建角色'"
     :visible.sync="roleVisible"
-    width="500px"
     :close-on-click-modal="false"
     :modal-append-to-body="false"
     :before-close="onClose"
+    width="800px"
+    top="5vh"
     @opened="onOpened"
   >
     <div v-loading="loading">
@@ -32,6 +33,12 @@
             placeholder="请输入描述"
           >
           </el-input>
+        </template>
+        <template slot="range">
+          <OrgTree
+            :id-list="form.orgIdList"
+            @selectedValue="getOrgList"
+          ></OrgTree>
         </template>
       </commonForm>
       <div
@@ -67,10 +74,12 @@
 <script>
 import treeSelect from '@/components/treeSelect/treeSelect'
 import { createRole, updateRole } from '../../../api/system/role'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 
 export default {
   name: 'RoleEdit',
   components: {
+    OrgTree,
     treeSelect
   },
   props: {
@@ -151,6 +160,12 @@ export default {
         label: '描述',
         maxlength: 100,
         span: 24
+      },
+      {
+        prop: 'range',
+        label: '管理范围',
+        itemType: 'slot',
+        span: 24
       }
     ]
     return {
@@ -159,6 +174,8 @@ export default {
       loading: false,
       roleVisible: true,
       form: {
+        orgIdList: [],
+        orgIds: [],
         roleId: '',
         roleName: '',
         remark: ''
@@ -187,6 +204,9 @@ export default {
   },
   mounted() {},
   methods: {
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
+    },
     onOpened() {
       if (this.row.roleId) {
         this.$nextTick(() => {
@@ -215,7 +235,8 @@ export default {
     createFunc(callback) {
       const params = {
         ...this.form,
-        categoryId: this.categoryId
+        categoryId: this.categoryId,
+        orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       createRole(params)
@@ -237,7 +258,8 @@ export default {
         ...this.form,
         positions,
         jobs: this.form.jobs,
-        categoryId: this.categoryId
+        categoryId: this.categoryId,
+        orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       updateRole(params)

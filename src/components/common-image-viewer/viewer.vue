@@ -81,8 +81,8 @@ export default {
     deleteFile(url) {
       this.$emit('deleteFile', url)
     },
-    downloadFile(url) {
-      this.$emit('downloadFile', url)
+    downloadFile(data) {
+      this.$emit('downloadFile', data)
     },
     handlePreviewImage(list, index = 0) {
       this.viewing = true

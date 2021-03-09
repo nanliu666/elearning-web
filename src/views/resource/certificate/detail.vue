@@ -29,6 +29,7 @@
           slot-scope="{ selection }"
         >
           <el-button
+            v-if="false"
             v-p="EXPORT_CERTIFICATE_DETAIL"
             type="text"
             icon="el-icon-sold-out"
@@ -56,6 +57,7 @@
               撤回证书
             </el-button>
             <el-button
+              v-if="false"
               v-p="SOURCE_CERTIFICATE_DETAIL"
               type="text"
               @click="viewCertificate(row)"
@@ -193,7 +195,11 @@ import {
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCertificateGrantList, revokeCertificate } from '@/api/certificate/certificate'
+import {
+  getCertificateGrantList,
+  revokeCertificate,
+  exportGrantExcel
+} from '@/api/certificate/certificate'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
@@ -256,25 +262,26 @@ export default {
             canRevokeList
           )}个学员撤回证书吗？`
         : `您确定要撤回${row.stuName}的证书吗？`
-      const stuIds = isBatch ? _.map(canRevokeList, 'stuId') : [row.stuId]
-      const trainId = isBatch ? _.map(canRevokeList, 'trainId') : [row.trainId]
-      const params = {
-        stuIds,
-        trainId
-      }
+      const ids = isBatch ? _.map(canRevokeList, 'stuId') : [row.stuId]
       this.$confirm(revokeTips, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        revokeCertificate(params).then(() => {
+        revokeCertificate({ ids }).then(() => {
           this.loadTableData()
           this.$message.success('撤回证书成功')
         })
       })
     },
     // 批量导出
-    exportBatch() {},
+    exportBatch(select) {
+      const ids = _.join(_.map(select, 'id'), ',')
+      // window.open(`/api/manage/v1/source/certificate/exportGrantExcel?ids=${ids}`)
+      exportGrantExcel({ ids }).then((result) => {
+        console.log('result==', result)
+      })
+    },
     /**
      * 处理页码改变
      */
