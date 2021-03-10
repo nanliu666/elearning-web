@@ -398,7 +398,7 @@
                     type="text"
                     @click="reflectionVisible = true"
                   >
-                    修改课前思考
+                    {{ ruleForm.thinkContent ? '修改课前思考' : '编辑课前思考' }}
                   </el-button>
                 </el-table-column>
                 <el-table-column
@@ -408,7 +408,7 @@
                 >
                   <el-button
                     type="text"
-                    @click="reflectionData = []"
+                    @click="delReflectionData()"
                   >
                     删除
                   </el-button>
@@ -791,7 +791,7 @@
 import { categoryMap } from '@/const/approve'
 import {
   getCourseTags,
-  getCatalog,
+  // getCatalog,
   // getCourseContents,
   getCourse,
   addCourse,
@@ -800,6 +800,7 @@ import {
 } from '@/api/course/course'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 // import { logout } from '@/api/user'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
 export default {
   name: 'EstablishCourse',
   components: {
@@ -841,6 +842,10 @@ export default {
         {
           name: '资料下载',
           value: 3
+        },
+        {
+          name: '作业',
+          value: 4
         }
       ],
       // 填写课程信息
@@ -977,15 +982,20 @@ export default {
     this.islistTeacher()
     this.$refs.ruleForm.clearValidate()
     this.disabledBtn = false
+    this.reflectionData = []
   },
   methods: {
+    delReflectionData() {
+      this.reflectionData = []
+      this.ruleForm.thinkContent = ''
+    },
     beforeTaskUpload() {},
     handleClose() {},
     // 添加作业btn
     addTask() {
       let item = {
         sort: '', //序号
-        type: '', //章节类型
+        type: 4, //章节类型
         name: '', // 章节名称
         localName: '', //文章标题
         url: '',
@@ -1046,7 +1056,6 @@ export default {
     },
     onUploadProgress(fileData, content, contentIdx) {
       const contents = this.ruleForm.contents
-      console.log(contents)
       let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
       if (index < 0) {
         fileData.status = 'progress'
@@ -1056,6 +1065,7 @@ export default {
           saveOrcompile: 1,
           type: content ? content.type : 2,
           name: (content && content.name) || fileData.name,
+          fileSize: fileData.size,
           upLoad: [
             {
               localName: fileData.name
@@ -1162,7 +1172,7 @@ export default {
           localName,
           url,
           introduction,
-          thinkContent,
+          // thinkContent,
           passCondition = '',
           content,
           catalogId
@@ -1186,16 +1196,39 @@ export default {
         if (introduction) {
           res.introduction = _.unescape(introduction)
         }
-        if (thinkContent) {
-          res.thinkContent = _.unescape(thinkContent)
-        }
+        // if (thinkContent) {
+        //   res.thinkContent = _.unescape(thinkContent)
+        // }
+
+        // 课前思考数据回显处理
+        let delIndex
+        let thinkContentData
+        res.contents.map((item, index) => {
+          if (item.type == 5) {
+            let data = {
+              url: '',
+              localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+              sort: '', //序号
+              type: '', //章节类型
+              name: item.name, // 章节名称
+              content: '', //文章内容
+              upLoad: [], //[url,localName],  //所有上传的文件
+              saveOrcompile: 0 // 1保存&0编辑
+            }
+            this.reflectionData.push(data)
+            delIndex = index
+            thinkContentData = item.upLoad[0].content
+          }
+        })
+        res.contents.splice(delIndex, 1)
         this.ruleForm = res
+        this.ruleForm.thinkContent = _.unescape(thinkContentData)
       })
     },
 
     // 拿到列表数据
     isgetCatalog() {
-      getCatalog().then((res) => {
+      queryCategoryOrgList({ source: 'course' }).then((res) => {
         let resList = this.ListData(res)
         this.catalogIdoptions = resList
       })
@@ -1310,9 +1343,6 @@ export default {
       params.contents.forEach((item) => {
         delete item.upLoad
       })
-
-      // params.catalogId = params.catalogId ? params.catalogId.join(',') : ''
-      // params.catalogId = params.catalogId ? params.catalogId[params.catalogId.length - 1] : ''
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
       params.isRecommend = params.isRecommend === false ? 0 : 1
       params.catalogId =
@@ -1325,7 +1355,8 @@ export default {
       // 查一下章节有没有内容 做一下校验
       let upIndexArr = []
       params.contents.map((item, index) => {
-        if (item.localName == '' || item.name == '' || item.type == '') {
+        // item.localName == '' ||
+        if (item.name == '' || item.type == '') {
           upIndexArr.push(index + 1)
         }
       })
@@ -1333,7 +1364,15 @@ export default {
         this.$message.error(`第${upIndexArr}条章节内容或有遗漏，请重新编辑或者删除该章节内容`)
       }
       if (upIndexArr.length) return
-
+      // 把课前思考加入contents
+      params.contents.push({
+        type: 5,
+        name: this.reflectionData[0].name,
+        content: params.thinkContent
+      })
+      delete params.thinkContent
+      // console.log(params)
+      // return
       // 草稿
 
       if (status === 2) {

@@ -124,3 +124,14 @@ export const getStudyList = (params) => get('/api/manage/v1/course/getStudyList'
  * */
 export const getCourseInfoUserList = (params) =>
   get('/api/manage/v1/course/getCourseInfoUserList', params)
+/**
+ *  查询课程作业列表
+ * @param {Object} params - 参数
+ * */
+export const listCourseJob = (params) => get('api/manage/v1/course/listCourseJob', params)
+/**
+ *  查询用户心得体会列表
+ * @param {Object} params - 参数
+ * */
+export const courseFeelListByUserId = (params) =>
+  get('api/manage/v1/course/courseFeelListByUserId', params)

@@ -1,15 +1,15 @@
 <template>
   <div class="courseTask">
     <div
-      v-for="(item, index) in 3"
+      v-for="(items, index) in tableData"
       :key="index"
     >
       <el-table
-        :data="tableData"
+        :data="items.fileInfoList"
         style="width: 100%"
       >
         <el-table-column
-          label="作业来源：消防知识学习 > 第一章"
+          :label="items.jobName"
           prop="name"
           width="480px"
         >
@@ -18,18 +18,18 @@
               <span v-show="scope.$index == 0"> 作业内容： </span>
               <span v-show="scope.$index == 1"> 学员作业： </span>
               <span v-show="scope.$index == 2"> 教师评改： </span>
-              <span> {{ scope.row.name }} </span>
+              <span> {{ scope.row.fileName }} </span>
             </div>
           </template>
         </el-table-column>
         <el-table-column
           label=""
-          prop="content"
+          prop="fileSize"
         >
         </el-table-column>
         <el-table-column
           label=""
-          prop="date"
+          prop="updateTime"
         >
         </el-table-column>
         <el-table-column align="right">
@@ -43,14 +43,17 @@
               type="text"
               @click="handleUpload(scope.$index, scope.row)"
             >
-              上传评改
+              <span v-show="scope.$index == 1"> 修改作业 </span>
+              <span v-show="scope.$index == 2"> 上传评改 </span>
             </el-button>
-            <el-button
-              type="text"
-              @click="handleDownload(scope.$index, scope.row)"
-            >
-              下载
-            </el-button>
+            <!-- <el-button type="text">
+              下载  {{scope.row.filePath}}
+            </el-button> -->
+            <a
+              :href="scope.row.filePath"
+              download
+              style="color:#01aafc;"
+            > 下载 </a>
           </template>
         </el-table-column>
       </el-table>
@@ -59,34 +62,26 @@
 </template>
 
 <script>
+import { listCourseJob } from '@/api/course/course'
 export default {
   data() {
     return {
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: 'Java培训练习1.doc',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: 'Java培训练习2.doc',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: 'Java培训练习3.doc',
-          content: '12.5K'
-        }
-      ],
+      tableData: [],
       search: ''
     }
   },
+  activated() {
+    this.getInfo()
+  },
   methods: {
-    handleUpload(index, row) {
-      console.log(index, row)
+    async getInfo() {
+      let params = { courseId: this.$route.query.courseId, stuId: this.$route.query.row.stuId }
+      // let params = { courseId: '1369562437399535618', stuId: '123' }
+      let res = await listCourseJob(params)
+      this.tableData = res
+      console.log(res)
     },
-    handleDownload(index, row) {
+    handleUpload(index, row) {
       console.log(index, row)
     }
   }
