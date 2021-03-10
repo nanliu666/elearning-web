@@ -164,7 +164,7 @@
           after-text="分钟内禁止交卷"
         />
       </template>
-      <template #preCreate>
+      <!-- <template #preCreate>
         <switch-input
           :disabled="modelDisabled"
           :switch-value.sync="model.preCreate"
@@ -172,7 +172,7 @@
           pre-text="试卷最多预生成"
           after-text="份"
         />
-      </template>
+      </template> -->
       <template #openResults>
         <switch-input
           :disabled="modelDisabled"
@@ -448,16 +448,17 @@ const EventColumns = [
     prop: 'answerBanExam',
     label: '答卷时间过少禁止交卷'
   },
-  {
-    itemType: 'slot',
-    span: 11,
-    offset: 2,
-    prop: 'preCreate',
-    label: '启用试卷预生成服务'
-  },
+  // {
+  //   itemType: 'slot',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'preCreate',
+  //   label: '启用试卷预生成服务'
+  // },
   {
     itemType: 'switch',
     span: 11,
+    offset: 2,
     prop: 'isHold',
     label: '自动保存答案到服务器'
   },
