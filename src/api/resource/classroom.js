@@ -45,4 +45,4 @@ export const queryClassroom = (params) => get('/manage/v1/classroom/queryClassro
 /**
  * 查询预约列表
  */
-export const getBookList = (params) => get('/manage/v1/classroom/book/list', params)
+export const getBookList = (params) => get('/manage/v1/classroom/book/queryClassRoomList', params)
