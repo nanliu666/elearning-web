@@ -147,7 +147,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '创建人',
-    prop: 'creatorId'
+    prop: 'creatorName'
   },
   {
     label: '更新时间',
@@ -283,21 +283,21 @@ export default {
       }
       await queryStation(params).then((res) => {
         this.tableData = res.data
-        this.page.total = res.data.length
+        this.page.total = res.totalNum
       })
     },
     // 加载数据
-    async loadData(parentId) {
+    async loadData() {
       let params = {
         pageNo: this.page.currentPage,
         pageSize: this.page.size
       }
-      if (parentId) this.refreshLoadTree(parentId)
       this.tableLoading = true
+      this.tableData = []
       await getStationParent(params).then((res) => {
         this.tableData = res.data
         this.tableLoading = false
-        this.page.total = res.data.length
+        this.page.total = res.totalNum
       })
     },
     // 批量导出

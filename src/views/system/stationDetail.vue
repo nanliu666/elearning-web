@@ -90,27 +90,27 @@ const TABLE_COLUMNS = [
   },
   {
     label: '用户编号',
-    prop: 'number'
+    prop: 'workNo'
   },
   {
     label: '手机号',
-    prop: 'phone'
+    prop: 'phonenum'
   },
   {
     label: '状态',
-    prop: 'status',
+    prop: 'userStatus',
     formatter(record) {
       return (
         {
           1: '正常',
           2: '禁用'
-        }[record.status] || ''
+        }[record.userStatus] || ''
       )
     }
   },
   {
     label: '部门',
-    prop: 'department'
+    prop: 'orgName'
   }
 ]
 // 搜索配置
@@ -129,6 +129,7 @@ const SEARCH_POPOVER_CONFIG = {
 }
 import { EXPORTS_STATIONDETAIL } from '@/const/privileges'
 import { dateFormat } from '@/util/date'
+import { getOrgUserList } from '@/api/system/user'
 export default {
   name: 'JobsDetail',
   components: {
@@ -171,8 +172,8 @@ export default {
   },
   computed: {
     EXPORTS_STATIONDETAIL: () => EXPORTS_STATIONDETAIL,
-    orgId() {
-      return this.$route.query.orgId
+    id() {
+      return this.$route.query.id
     }
   },
   mounted() {
@@ -189,45 +190,34 @@ export default {
       this.loadData()
     },
     // 输入框搜索
-    handleSearch() {},
+    handleSearch(params) {
+      this.loadData(params.name)
+    },
     // 加载数据
-    loadData() {
-      this.tableData = [
-        {
-          id: '1',
-          name: '白浅',
-          number: 'E00058',
-          phone: '13800138000',
-          status: '1',
-          department: '行政部'
-        },
-        {
-          id: '2',
-          name: '白浅',
-          number: 'E00058',
-          phone: '13800138000',
-          status: '2',
-          department: '行政部'
-        },
-        {
-          id: '3',
-          name: '白浅',
-          number: 'E00058',
-          phone: '13800138000',
-          status: '1',
-          department: '行政部'
-        }
-      ]
+    async loadData(name) {
+      this.tableLoading = true
+      let params = {
+        pageNo: this.page.currentPage,
+        pageSize: this.page.size,
+        positionId: this.id,
+        orgId: 0,
+        search: name || ''
+      }
+      await getOrgUserList(params).then((res) => {
+        this.tableData = res.data
+        this.page.total = res.totalNum
+        this.tableLoading = false
+      })
     },
     // 批量导出
     batchExport(selection) {
       this.fullscreenLoading = true
       selection.forEach((v) => {
-        v.status =
+        v.userStatus =
           {
             1: '正常',
             2: '禁用'
-          }[v.status] || ''
+          }[v.userStatus] || ''
       })
       import('@/vendor/Export2Excel').then((excel) => {
         const tHeader = this.tableColumns.map((v) => v.label)
@@ -248,6 +238,7 @@ export default {
     },
     // 刷新
     refresh() {
+      this.searchPopoverConfig.requireOptions[0].data = ''
       this.loadData()
     }
   }
