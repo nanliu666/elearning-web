@@ -1,4 +1,5 @@
 import { del, get, post, put } from '@/router/axios'
+import axios from 'axios'
 /**
  * del, get, post, put
  * 查询模板列表
@@ -51,10 +52,28 @@ export const delGrantDetails = (params) =>
 
 /**
  * 导出证书发放列表Excel
- * @param {Object} params - 参数
  * */
 export const exportGrantExcel = (params) =>
-  get('/api/manage/v1/source/certificate/exportGrantExcel', params)
+  axios.get('/api/manage/v1/source/certificate/exportGrantExcel', {
+    responseType: 'blob',
+    headers: {
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+    },
+    params
+  })
+/**
+ * 导出证书模板
+ * */
+export const exportTemplateExcel = (params) =>
+  axios.get('/api/manage/v1/source/certificate/exportTemplateExcel', {
+    responseType: 'blob',
+    headers: {
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+    },
+    params
+  })
 /**
  * 查询证书发放明细
  * */
@@ -64,4 +83,5 @@ export const getCertificateGrantDetail = (params) =>
  * 撤回证书
  * @param {Object} params - 参数
  * */
-export const revokeCertificate = (params) => post('/api/manage/v1/train/revokeCertificate', params)
+export const revokeCertificate = (params) =>
+  post('/api/manage/v1/source/certificate/revoke', params)

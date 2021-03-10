@@ -153,8 +153,10 @@ const TABLE_COLUMNS = [
   },
   {
     label: '最大容纳人数',
-    slot: true,
     prop: 'maxCapacity',
+    formatter: (row) => {
+      return row.maxCapacity !== 0 ? `${row.maxCapacity}人` : '不限制'
+    },
     minWidth: 120
   },
   {
@@ -166,7 +168,7 @@ const TABLE_COLUMNS = [
   {
     label: '地址',
     slot: true,
-    prop: 'roomArea',
+    prop: 'roomAddr',
     minWidth: 120
   },
   {

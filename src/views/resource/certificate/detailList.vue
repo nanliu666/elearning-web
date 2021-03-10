@@ -75,7 +75,7 @@ const TABLE_COLUMNS = [
   }
 ]
 const TABLE_CONFIG = {
-  rowKey: 'id',
+  rowKey: 'templateId',
   showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
@@ -100,7 +100,7 @@ const SEARCH_CONFIG = {
 import { EXPORT_CERTIFICATE, VIEW_CERTIFICATE } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCertificateGrantDetail } from '@/api/certificate/certificate'
+import { getCertificateGrantDetail, exportTemplateExcel } from '@/api/certificate/certificate'
 export default {
   components: { SearchPopover },
   data() {
@@ -150,7 +150,23 @@ export default {
       })
     },
     // 批量导出
-    exportBatch() {},
+    exportBatch(select) {
+      const templateIds = _.join(_.map(select, 'templateId'), ',')
+      exportTemplateExcel({ templateIds }).then((res) => {
+        const { data, headers } = res
+        const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
+        const blob = new Blob([data], { type: headers['content-type'] })
+        let dom = document.createElement('a')
+        let url = window.URL.createObjectURL(blob)
+        dom.href = url
+        dom.download = decodeURI(fileName)
+        dom.style.display = 'none'
+        document.body.appendChild(dom)
+        dom.click()
+        dom.parentNode.removeChild(dom)
+        window.URL.revokeObjectURL(url)
+      })
+    },
     /**
      * 处理页码改变
      */

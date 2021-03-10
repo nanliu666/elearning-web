@@ -138,7 +138,7 @@ export default {
         orgId: '',
         birthDate: '',
         leaderId: '',
-        position: '',
+        positionId: '',
         postLevel: '',
         post: '',
         positionTitle: '',
@@ -263,7 +263,7 @@ export default {
           label: '直接领导'
         },
         {
-          prop: 'position',
+          prop: 'positionId',
           itemType: 'treeSelect',
           label: '岗位',
           props: {
@@ -374,7 +374,7 @@ export default {
     this.loadUserData()
     this.resetForm()
     getPositionAll().then((res) => {
-      const positionConfig = _.find(this.columns, { prop: 'position' })
+      const positionConfig = _.find(this.columns, { prop: 'positionId' })
       _.set(positionConfig, 'props.treeParams.data', res)
     })
   },
