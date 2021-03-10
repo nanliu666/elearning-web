@@ -166,7 +166,7 @@ const TABLE_COLUMNS = [
   {
     label: '地址',
     slot: true,
-    prop: 'roomArea',
+    prop: 'roomAddr',
     minWidth: 120
   },
   {

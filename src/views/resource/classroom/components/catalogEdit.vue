@@ -59,7 +59,7 @@
       </el-form-item>
       <!-- 可见范围 -->
       <el-form-item
-        v-show="!parentOrgIdLabel"
+        v-show="parentOrgIdLabel === '' || parentOrgIdLabel === '顶级'"
         label="可见范围"
       >
         <div>
@@ -178,7 +178,7 @@ export default {
     },
     // 提交
     submit(type) {
-      if (this.checkSameName()) return
+      if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         this.form.orgIds = this.form.orgIds.toString()
         this.form.source = 'classroom'
@@ -224,9 +224,11 @@ export default {
     // 新建分类
     create() {
       this.type = 'create'
+      this.form.name = ''
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.loadOrgTree()
     },
     // 新建子分类
     createChild(row) {
@@ -236,11 +238,12 @@ export default {
       this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
+      this.loadOrgTree()
     },
     edit(row) {
       this.type = 'edit'
       this.form = _.cloneDeep(row)
-      this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
+      this.parentOrgIdLabel = row.parentId === '0' ? '顶级' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
       this.loadOrgTree()
     },

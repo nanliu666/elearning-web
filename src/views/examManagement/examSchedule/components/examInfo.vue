@@ -672,7 +672,7 @@ export default {
         createAnswers: false,
         lateBanExam: false,
         answerBanExam: false,
-        preCreate: false,
+        preCreate: true,
         isHold: false,
         lateBanExamValue: 15, // 迟到15
         answerBanExamValue: 30, // 最低30分钟才可交卷

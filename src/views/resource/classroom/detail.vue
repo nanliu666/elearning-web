@@ -56,7 +56,7 @@
               <li class="details-li">
                 <span class="li-label">投影仪：</span>
                 <span class="li-value">{{
-                  classroomDetail.hasProjector === 0 ? '有' : '没有'
+                  classroomDetail.hasProjector === 1 ? '有' : '没有'
                 }}</span>
               </li>
             </ul>

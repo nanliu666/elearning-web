@@ -94,7 +94,6 @@
 
 <script>
 import { getCategoryTree, deleteCategory, updateCategoryStatus, getCreatorList } from '@/api/live'
-
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
@@ -170,17 +169,17 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 0, label: '停用' },
+              { value: 1, label: '启用' }
             ]
           },
           {
             type: 'select',
-            field: 'userId',
+            field: 'creatorId',
             data: '',
             label: '创建人',
             options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
+            config: { optionLabel: 'name', optionValue: 'id' },
             loading: false,
             noMore: false,
             pageNo: 2,
@@ -251,7 +250,7 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status == 1 ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status == 0
       return isDisabled
     },
     // 多种操作
@@ -306,7 +305,6 @@ export default {
           this.tableData = res
           this.tableLoading = false
         })
-        this.$refs.orgEdit.loadOrgTree()
       } catch (error) {
         this.$message.error(error.message)
       } finally {
