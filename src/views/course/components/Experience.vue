@@ -1,73 +1,79 @@
 <template>
   <div class="courseTask">
-    <el-table
-      :data="tableData"
-      style="width: 100%"
+    <div
+      v-for="(items, index) in tableData"
+      :key="index"
     >
-      <el-table-column
-        label="作业来源：消防知识学习 > 第一章"
-        prop="name"
-        width="480px"
+      <el-table
+        :data="items.fileInfoList"
+        style="width: 100%"
       >
-        <template slot-scope="scope">
-          <span> {{ scope.row.name }} </span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label=""
-        prop="content"
-      >
-      </el-table-column>
-      <el-table-column
-        label=""
-        prop="date"
-      >
-      </el-table-column>
-      <el-table-column align="right">
-        <template slot="header">
-          <el-button type="text">
-            打包下载
-          </el-button>
-        </template>
-        <template slot-scope="scope">
-          <el-button
-            type="text"
-            @click="handleDownload(scope.$index, scope.row)"
-          >
-            下载
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        <el-table-column
+          :label="items.jobName"
+          prop="name"
+          width="480px"
+        >
+          <template slot-scope="scope">
+            <div>
+              <span> {{ scope.row.fileName }} </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label=""
+          prop="fileSize"
+        >
+        </el-table-column>
+        <el-table-column
+          label=""
+          prop="updateTime"
+        >
+        </el-table-column>
+        <el-table-column align="right">
+          <template slot="header">
+            <el-button type="text">
+              打包下载
+            </el-button>
+          </template>
+          <template slot-scope="scope">
+            <!-- <el-button type="text">
+              下载  {{scope.row.filePath}}
+            </el-button> -->
+            <a
+              :href="scope.row.filePath"
+              :download="scope.row.fileName"
+              style="color:#01aafc;"
+            >
+              下载
+            </a>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 
 <script>
+import { courseFeelListByUserId } from '@/api/course/course'
 export default {
   data() {
     return {
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '课程学习心得1',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: '课程学习心得2',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: '课程学习心得3',
-          content: '12.5K'
-        }
-      ],
+      tableData: [],
       search: ''
     }
   },
+  activated() {
+    this.getInfo()
+  },
   methods: {
-    handleDownload(index, row) {
+    async getInfo() {
+      let params = { courseId: this.$route.query.courseId, stuId: this.$route.query.row.stuId }
+      // let params = { courseId: '1369562437399535618', stuId: '123' }
+      let res = await courseFeelListByUserId(params)
+      this.tableData = res
+      // console.log(res)
+    },
+    handleUpload(index, row) {
       console.log(index, row)
     }
   }

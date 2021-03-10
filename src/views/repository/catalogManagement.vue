@@ -93,13 +93,14 @@
             >
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
+
             <el-button
-              v-p="AUTH_REP_CATALOG"
               type="text"
-              @click="handleAuth(row)"
+              @click="handleCommand('edit', row)"
             >
-              权限配置
+              编辑
             </el-button>
+
             <el-dropdown
               v-if="$p([EDIT_REP_CATALOG, DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
               @command="handleCommand($event, row)"
@@ -111,23 +112,20 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  v-p="EDIT_REP_CATALOG"
-                  command="edit"
-                >
+                <!-- <el-dropdown-item v-p="EDIT_REP_CATALOG" command="edit">
                   编辑
+                </el-dropdown-item> -->
+                <el-dropdown-item
+                  v-p="ADD_CHILD_REP_CATALOG"
+                  command="addChild"
+                >
+                  新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_REP_CATALOG"
                   command="delete"
                 >
                   删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="ADD_CHILD_REP_CATALOG"
-                  command="addChild"
-                >
-                  新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>

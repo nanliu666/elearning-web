@@ -56,8 +56,12 @@
             </div>
           </div>
         </template>
-        <template #status="{row}">
-          {{ row.status === '0' ? '已上架' : '已下架' }}
+        <template #progress="{row}">
+          <el-progress :percentage="row.progress || 0"></el-progress>
+        </template>
+
+        <template #jobPercent="{row}">
+          {{ row.jobTimes }}次/{{ row.jobPercent }}
         </template>
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
@@ -67,34 +71,29 @@
           slot-scope="{ selection }"
         >
           <el-button
-            v-p="DELETE_REP"
             type="text"
             size="medium"
             icon="el-icon-delete"
             @click="multipleDeleteClick(selection)"
           >
-            批量删除
+            批量导出
           </el-button>
         </template>
         <template
-          slot="resName"
+          slot="name"
           slot-scope="{ row }"
         >
           <div
-            v-if="VIEW_REP"
             class="ellipsis title"
             @click="jumpDetail(row)"
           >
-            {{ row.resName }}
-          </div>
-          <div v-else>
-            {{ row.resName }}
+            {{ row.name }}
           </div>
         </template>
         <template #handler="{row}">
           <el-button
             type="text"
-            @click="toMaterialScience(row)"
+            @click="jumpDetail(row)"
           >
             查看上报材料
           </el-button>
@@ -105,7 +104,7 @@
 </template>
 
 <script>
-import { getKnowledgeManageList, deleteKnowledgeList } from '@/api/knowledge/knowledge'
+import { getStudyList } from '@/api/course/course'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
 // 表格属性
@@ -114,34 +113,34 @@ const TABLE_COLUMNS = [
     label: '姓名',
     minWidth: 150,
     slot: true,
-    prop: 'resName',
+    prop: 'name',
     fixed: 'left'
   },
   {
     label: '手机号',
-    slot: true,
-    prop: 'status',
+    prop: 'phonenum',
     maxWidth: 100
   },
   {
     label: '所属部门',
-    prop: 'catalogName',
+    prop: 'deptName',
     minWidth: 100
   },
   {
     label: '学习进度',
     slot: true,
-    prop: 'uploadType',
+    prop: 'progress',
     minWidth: 100
   },
-  {
-    label: '课程通过状态',
-    prop: 'creatorName',
-    minWidth: 100
-  },
+  // {
+  //   label: '课程通过状态',
+  //   prop: 'creatorName',
+  //   minWidth: 100
+  // },
   {
     label: '作业提交率',
-    prop: 'updateTime',
+    prop: 'jobPercent',
+    slot: true,
     minWidth: 100
   }
 ]
@@ -160,7 +159,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
     config: { placeholder: '输入学员姓名搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'resName',
+    field: 'name',
     label: '',
     type: 'input'
   }
@@ -168,7 +167,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'treeSelect',
-    field: 'departmentId',
+    field: 'orgId',
     label: '组织名称',
     data: '',
     config: {
@@ -194,34 +193,34 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   },
   {
     type: 'select',
-    field: 'status',
+    field: 'progress',
     label: '学习进度',
     data: '',
     options: [
       { value: 0, label: '未完成' },
-      { value: 1, label: '已完成' }
+      { value: 100, label: '已完成' }
     ]
   },
   {
     type: 'select',
-    field: 'status1',
+    field: 'jobSubmitRate',
     label: '作业提交率',
     data: '',
     options: [
       { value: 0, label: '未完成' },
-      { value: 1, label: '全部提交' }
-    ]
-  },
-  {
-    type: 'select',
-    field: 'status2',
-    label: '课程通过状态',
-    data: '',
-    options: [
-      { value: 0, label: '已通过' },
-      { value: 1, label: '未通过' }
+      { value: 100, label: '全部提交' }
     ]
   }
+  // {
+  //   type: 'select',
+  //   field: 'status2',
+  //   label: '课程通过状态',
+  //   data: '',
+  //   options: [
+  //     { value: 0, label: '已通过' },
+  //     { value: 1, label: '未通过' }
+  //   ]
+  // }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -256,16 +255,6 @@ const FORM_COLUMNS = [
     }
   }
 ]
-import {
-  ADD_REP,
-  TOP_REP,
-  PUTAWAY_REP,
-  EDIT_REP,
-  DELETE_REP,
-  MOVE_REP,
-  VIEW_REP
-} from '@/const/privileges'
-import { mapGetters } from 'vuex'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -309,44 +298,13 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
-  computed: {
-    ADD_REP: () => ADD_REP,
-    TOP_REP: () => TOP_REP,
-    PUTAWAY_REP: () => PUTAWAY_REP,
-    EDIT_REP: () => EDIT_REP,
-    DELETE_REP: () => DELETE_REP,
-    VIEW_REP: () => VIEW_REP,
-    MOVE_REP: () => MOVE_REP,
-    ...mapGetters(['privileges'])
-  },
-  watch: {
-    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
-    privileges: {
-      handler() {
-        this.tableConfig.showHandler = this.$p([
-          TOP_REP,
-          PUTAWAY_REP,
-          EDIT_REP,
-          MOVE_REP,
-          DELETE_REP
-        ])
-      },
-      deep: true
-    }
-  },
+
   activated() {
     this.refreshTableData()
 
     this.loadOrgData()
   },
   methods: {
-    // 查看上报材料BTN
-    toMaterialScience() {
-      this.$router.push({
-        path: '/course/materials'
-        // query: { id }
-      })
-    },
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: 0 }).then(
         (res) =>
@@ -368,7 +326,7 @@ export default {
       _.each(selected, (item) => {
         selectedIds.push(item.id)
       })
-      await deleteKnowledgeList({ id: selectedIds.join(',') })
+      // await deleteKnowledgeList({ id: selectedIds.join(',') })
       this.$message.success('删除成功')
       this.$refs.table.clearSelection()
       this.loadTableData()
@@ -398,10 +356,10 @@ export default {
       this.loadTableData()
     },
     // 跳去详情
-    jumpDetail({ id }) {
+    jumpDetail(row) {
       this.$router.push({
         path: '/course/materials',
-        query: { id }
+        query: { row: row, courseId: this.$route.query.id }
       })
     },
     // 刷新列表数据
@@ -415,7 +373,8 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
+        this.queryInfo.courseId = this.$route.query.id
+        let { totalNum, data } = await getStudyList(this.queryInfo)
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {

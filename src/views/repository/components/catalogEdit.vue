@@ -269,6 +269,7 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.form.isPublic = 0
     },
     // 新建子分类
     createChild(row) {
@@ -278,6 +279,7 @@ export default {
       this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
+      this.form.isPublic = 0
     },
     edit(row) {
       this.type = 'edit'

@@ -6,29 +6,29 @@
     />
     <div class="materials_top">
       <div class="materials_top_title">
-        这是一个寂寞的天，没有下雨
+        {{ courseData.name }}的上报材料
       </div>
       <div class="materials_top_box">
         <div class="materials_top_box_item">
           <span>手机：</span>
-          <span>12312312312</span>
+          <span>{{ courseData.phonenum }}</span>
         </div>
         <div class="materials_top_box_item">
           <span>所属部门：</span>
-          <span>12312312312</span>
+          <span>{{ courseData.deptName }}</span>
         </div>
         <div class="materials_top_box_item">
           <span>名称：</span>
-          <span>12312312312</span>
+          <span>{{ courseData.courseName }}</span>
         </div>
         <div class="materials_top_box_item">
           <span>作业提交率：</span>
-          <span>12312312312</span>
+          <span>{{ courseData.jobTimes }} / {{ courseData.jobPercent }}% </span>
         </div>
-        <div class="materials_top_box_item">
+        <!-- <div class="materials_top_box_item">
           <span>学习心得提交率：</span>
-          <span>12312312312</span>
-        </div>
+          <span>{{ courseData.jobTimes }} / {{ courseData.jobPercent }}% </span>
+        </div> -->
       </div>
     </div>
     <div class="materials_content">
@@ -58,8 +58,12 @@ export default {
   },
   data() {
     return {
-      Select: 1
+      Select: 1,
+      courseData: {}
     }
+  },
+  activated() {
+    this.courseData = this.$route.query.row
   },
   methods: {
     setSelect(i) {
