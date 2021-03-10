@@ -291,7 +291,7 @@ export default {
     beforeUpload(file) {
       const fileTypeIndex = file.name.lastIndexOf('.')
       const fileType = file.name.substring(fileTypeIndex + 1, file.length)
-      const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP']
+      const IMAGE_TYPE = ['jpg', 'jpeg', 'png', 'GIF', 'BMP']
       const isImage = _.some(IMAGE_TYPE, (item) => {
         return item === fileType
       })
@@ -354,6 +354,7 @@ $color_font_uploader: #a0a8ae;
 /deep/ .el-upload-dragger {
   padding: 20px;
   height: 200px;
+  width: 380px;
 }
 .upload__wrapper {
   .wrapper__icon {
