@@ -127,6 +127,7 @@ export default {
         Group: false
       },
       form: {
+        name: '',
         parentId: '',
         orgIds: []
       },
@@ -224,8 +225,7 @@ export default {
     // 新建分类
     create() {
       this.type = 'create'
-      this.form.name = ''
-      this.parentOrgIdLabel = ''
+      _.assign(this.$data, this.$options.data())
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
       this.loadOrgTree()
