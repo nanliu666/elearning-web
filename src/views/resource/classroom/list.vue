@@ -375,8 +375,8 @@ export default {
       }
     },
     // 具体的删除函数
-    deleteFun(id) {
-      deleteClassroom({ id }).then(() => {
+    deleteFun(ids) {
+      deleteClassroom({ ids }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
