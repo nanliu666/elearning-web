@@ -89,7 +89,7 @@
         </el-button>
         <el-button
           size="medium"
-          @click="handleBack"
+          @click="cancel"
         >
           取消
         </el-button>
@@ -121,6 +121,7 @@ const FORM_COLUMNS = [
     label: '教室名称',
     prop: 'roomName',
     required: true,
+    maxLength: 200,
     span: 11,
     offset: 0
   },
@@ -156,6 +157,7 @@ const FORM_COLUMNS = [
     itemType: 'input',
     label: '地址',
     required: true,
+    maxLength: 300,
     prop: 'roomAddr',
     span: 11
   },
@@ -163,6 +165,8 @@ const FORM_COLUMNS = [
     itemType: 'inputNumber',
     label: '最大容纳人数',
     prop: 'maxCapacity',
+    max: 100000,
+    min: 0,
     offset: 1,
     span: 11
   },
@@ -192,7 +196,9 @@ const FORM_COLUMNS = [
       {
         validator: (rule, value, callback) => {
           if (_.isNumber(value)) {
-            if (value >= 0) {
+            if (value > 100000) {
+              return callback(new Error('面积最大限制输入值 100000'))
+            } else if (value < 100000 && value >= 0) {
               callback()
             } else {
               return callback(new Error('面积必须为正整数'))
@@ -337,6 +343,10 @@ export default {
           this.submitting = false
         }
       })
+    },
+    cancel() {
+      this.$message.info('创建教室已取消')
+      this.handleBack()
     },
     handleBack() {
       this.$router.back()
