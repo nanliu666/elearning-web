@@ -1365,11 +1365,12 @@ export default {
       }
       if (upIndexArr.length) return
       // 把课前思考加入contents
-      params.contents.push({
-        type: 5,
-        name: this.reflectionData[0].name,
-        content: params.thinkContent
-      })
+      if (this.reflectionData[0] || params.thinkContent)
+        params.contents.push({
+          type: 5,
+          name: this.reflectionData[0].name || '',
+          content: params.thinkContent || ''
+        })
       delete params.thinkContent
       // console.log(params)
       // return
