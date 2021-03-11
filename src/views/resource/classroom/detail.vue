@@ -296,6 +296,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+/deep/ .el-form-item__content {
+  width: 270px;
+}
 /deep/ .el-menu--horizontal {
   border-bottom: 1px solid #cccccc !important;
 }
