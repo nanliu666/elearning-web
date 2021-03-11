@@ -387,7 +387,7 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
-      const hasTrain = _.empty(_.filter(selected, 'isReserve'))
+      const hasTrain = _.isEmpty(_.filter(selected, 'isReserve'))
       const deleteBatchTips = `您确定要批量删除${_.size(selected).length}个教室吗？`
       const reserveTips =
         '您选择的教室包含已关联正在进行中的培训安排，不能对其进行删除操作，是否忽略继续删除其他教室？'
