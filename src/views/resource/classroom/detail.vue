@@ -282,7 +282,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getBookList(_.assign(this.queryInfo))
+        let { totalNum, data } = await getBookList(_.assign(this.queryInfo, { id: this.id }))
         this.tableData = data
         this.page.total = totalNum
       } catch (error) {
