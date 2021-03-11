@@ -198,7 +198,7 @@ const FORM_COLUMNS = [
           if (_.isNumber(value)) {
             if (value > 100000) {
               return callback(new Error('面积最大限制输入值 100000'))
-            } else if (value < 100000 && value >= 0) {
+            } else if (value <= 100000 && value >= 0) {
               callback()
             } else {
               return callback(new Error('面积必须为正整数'))
