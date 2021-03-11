@@ -89,7 +89,7 @@
         </el-button>
         <el-button
           size="medium"
-          @click="handleBack"
+          @click="cancel"
         >
           取消
         </el-button>
@@ -337,6 +337,10 @@ export default {
           this.submitting = false
         }
       })
+    },
+    cancel() {
+      this.$message.info('创建教室已取消')
+      this.handleBack()
     },
     handleBack() {
       this.$router.back()
