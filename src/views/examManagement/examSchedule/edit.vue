@@ -185,6 +185,7 @@ export default {
               this.setDisabled(examInfo)
             })
             this.setLazySelectFisrt(examInfo, res)
+            examInfo.loadTestPaper()
           }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
         })

@@ -726,7 +726,10 @@ export default {
     // 编辑和复制
     edit(type) {
       const basicQuery = { id: this.$route.query.id }
-      const query = type === 'copy' ? _.assign(basicQuery, { type: 'copy' }) : basicQuery
+      const query =
+        type === 'copy'
+          ? _.assign(basicQuery, { type: 'copy' })
+          : _.assign(basicQuery, { source: 'mark' })
       this.$router.push({ path: '/examManagement/examSchedule/edit', query })
     },
     deleteFun() {
