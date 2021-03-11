@@ -1368,7 +1368,7 @@ export default {
       if (this.reflectionData[0] || params.thinkContent)
         params.contents.push({
           type: 5,
-          name: this.reflectionData[0].name || '',
+          name: this.reflectionData[0] ? this.reflectionData[0].name : '',
           content: params.thinkContent || ''
         })
       delete params.thinkContent
