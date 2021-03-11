@@ -179,6 +179,16 @@ const ScheduleColumns = [
     }
   },
   {
+    prop: 'classroomName',
+    formatter(record) {
+      return `${record.type === 1 ? '授课教室：' : '活动教室：'}${_.get(
+        record,
+        'classroomName',
+        ''
+      )}`
+    }
+  },
+  {
     prop: 'address',
     formatter(record) {
       return `地点：${record.address}`
