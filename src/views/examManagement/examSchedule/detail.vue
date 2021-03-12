@@ -793,6 +793,8 @@ export default {
         // 未开启发放证书并且是自动评分，关闭操作列
         if (this.examDetail.autoEvaluate && !this.examDetail.certificate) {
           this.tableConfig.showHandler = false
+        } else {
+          this.tableConfig.showHandler = true
         }
       })
       let fieldOrgId = _.find(this.searchConfig.popoverOptions, { field: 'orgId' })
