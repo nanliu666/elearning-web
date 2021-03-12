@@ -156,6 +156,16 @@ export default {
     // 初始化数据
     async loadOrgData() {
       await getStationTree().then((res) => {
+        // 递归循环删除层级数5层以下的节点
+        const loop = (tree) => {
+          _.each(tree, (item) => {
+            if (item.fullName.split('|').length > 3 && item.children) {
+              delete item.children
+            }
+            loop(item.children)
+          })
+        }
+        loop(res)
         this.treeData = res
       })
       this.columns.find((item) => item.prop === 'parentId').props.treeParams.data = this.treeData
@@ -261,7 +271,6 @@ export default {
       let params = {
         ids: row.id
       }
-      console.log(row)
       //   判断删除行是否包含子级
       if (row.hasChildren) {
         this.$confirm('您选中的岗位下含有用户，无法删除该岗位', '提示', {
