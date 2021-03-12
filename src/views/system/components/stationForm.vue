@@ -271,24 +271,18 @@ export default {
       let params = {
         ids: row.id
       }
-      //   判断删除行是否包含子级
-      if (row.hasChildren) {
-        this.$confirm('您选中的岗位下含有用户，无法删除该岗位', '提示', {
-          confirmButtonText: '我知道了',
-          showCancelButton: false,
-          type: 'warning'
-        }).then(() => {
+      this.$confirm('您确定要删除选中的岗位吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        //   判断删除行是否包含子级
+        if (row.hasChildren) {
           this.$message({
             type: 'error',
-            message: '很抱歉，您选中的岗位下存下级岗位，请先将下级岗位调整后再删除!'
+            message: '删除失败，本岗位含有下级岗位，请先将下级岗位调整后再删除!'
           })
-        })
-      } else {
-        this.$confirm('您确定要删除选中的岗位吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(async () => {
+        } else {
           await deleteStation(params).then(() => {
             this.$emit('initData')
             this.loadOrgData()
@@ -297,8 +291,8 @@ export default {
               message: '已成功删除该岗位!'
             })
           })
-        })
-      }
+        }
+      })
     },
     // 监听公共方法,根据不同情况进行不同的操作，1、创建下级岗位，2、编辑
     commonWatch(data, type) {
