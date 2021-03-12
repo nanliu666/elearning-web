@@ -387,8 +387,11 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
-      const hasTrain = _.isEmpty(_.filter(selected, 'isReserve'))
-      const deleteBatchTips = `您确定要批量删除${_.size(selected).length}个教室吗？`
+      const groupByTrain = _.groupBy(selected, 'isReserve')
+      const hasTrainTrue = _.get(groupByTrain, 'true', [])
+      const hasTrainFalse = _.get(groupByTrain, 'false', [])
+      const hasTrain = !_.isEmpty(hasTrainTrue)
+      const deleteBatchTips = `您确定要批量删除${_.size(hasTrainFalse)}个教室吗？`
       const reserveTips =
         '您选择的教室包含已关联正在进行中的培训安排，不能对其进行删除操作，是否忽略继续删除其他教室？'
       const confirmButtonText = hasTrain ? '继续删除' : '确定'
