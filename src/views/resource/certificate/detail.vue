@@ -105,7 +105,7 @@ const TABLE_COLUMNS = [
     label: '撤回时间',
     prop: 'revokeTime',
     formatter(data) {
-      return _.isEmpty(data.revokeTime) ? '--' : data
+      return _.isEmpty(data.revokeTime) ? '--' : data.revokeTime
     },
     minWidth: 120
   }

@@ -24,7 +24,7 @@
 
         <template #roomArea>
           <el-input
-            v-model.number="formData.roomArea"
+            v-model="formData.roomArea"
             placeholder="请输入"
           >
             <template slot="append">
@@ -195,10 +195,10 @@ const FORM_COLUMNS = [
     rules: [
       {
         validator: (rule, value, callback) => {
-          if (_.isNumber(value)) {
+          if (_.isNumber(Number(value))) {
             if (value > 100000) {
               return callback(new Error('面积最大限制输入值 100000'))
-            } else if (value < 100000 && value >= 0) {
+            } else if (value <= 100000 && value >= 0) {
               callback()
             } else {
               return callback(new Error('面积必须为正整数'))
@@ -345,7 +345,7 @@ export default {
       })
     },
     cancel() {
-      this.$message.info('创建教室已取消')
+      this.$message.info(`${!this.id ? '创建' : '编辑'}教室已取消`)
       this.handleBack()
     },
     handleBack() {

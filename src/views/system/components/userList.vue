@@ -161,7 +161,7 @@ import {
   delUser,
   getOuterUserList
 } from '@/api/system/user'
-import { getRoleList } from '@/api/system/role'
+import { getRoleList, getPositionAll } from '@/api/system/role'
 import { mapGetters } from 'vuex'
 import { SETTING_USER, RESET_USER, EDIT_USER, END_USER, DELETE_USER } from '@/const/privileges'
 const COLUMNS = [
@@ -182,7 +182,7 @@ const COLUMNS = [
       return (
         {
           '1': '正常',
-          '2': '禁用'
+          '2': '冻结'
         }[record.userStatus] || ''
       )
     }
@@ -283,7 +283,31 @@ export default {
             config: { optionLabel: 'roleName', optionValue: 'roleId' }
           },
 
-          { type: 'input', field: 'position', label: '岗位', config: {} },
+          {
+            type: 'treeSelect',
+            field: 'positionId',
+            label: '岗位',
+            data: '',
+            config: {
+              selectParams: {
+                placeholder: '请选择岗位',
+                multiple: false
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  value: 'id'
+                }
+              }
+            }
+          },
           { type: 'input', field: 'postLevel', label: '职级', config: {} },
           { type: 'input', field: 'post', label: '职务', config: {} },
           { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
@@ -340,6 +364,10 @@ export default {
   created() {
     this.loadData()
     this.loadRoleData()
+    getPositionAll().then((res) => {
+      const positionConfig = _.find(this.searchConfig.popoverOptions, { field: 'positionId' })
+      _.set(positionConfig, 'config.treeParams.data', res)
+    })
   },
   activated() {
     this.loadData()

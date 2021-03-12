@@ -130,6 +130,7 @@ export default {
       treeName: '组织', //切换组织部门
       submitting: false,
       form: {
+        remark: '',
         name: '',
         sex: '',
         phonenum: '',

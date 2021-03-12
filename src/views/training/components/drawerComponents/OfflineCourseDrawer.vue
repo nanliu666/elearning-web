@@ -20,6 +20,25 @@
             @select="selectContact"
           />
         </template>
+        <template #classroomId>
+          <div class="classroom__container">
+            <lazy-select
+              v-model="model.classroomId"
+              :disabled="!model.todoDate"
+              :searchable="true"
+              :load="loadClassroom"
+              :option-props="{ label: 'roomName', value: 'id', key: 'id' }"
+              @select="selectClassroom"
+            />
+            <div
+              class="classroom__title"
+              :class="{ active__title: model.todoDate }"
+              @click="viewReserve"
+            >
+              预订情况
+            </div>
+          </div>
+        </template>
         <template #lecturerName>
           <lazy-select
             v-if="model.type === 1"
@@ -49,14 +68,18 @@
         </el-button>
       </div>
     </div>
+    <classroom-reserve
+      :visible.sync="reserveVisible"
+      :params="reserveParams"
+    />
   </el-drawer>
 </template>
 
 <script>
 import { getOrgUserList } from '@/api/system/user'
-import { getTrainCource } from '@/api/train/train'
+import { getTrainCource, getBookList } from '@/api/train/train'
 import moment from 'moment'
-
+import ClassroomReserve from './ClassroomReserve'
 const EventColumns = [
   {
     itemType: 'radio',
@@ -77,6 +100,13 @@ const EventColumns = [
     prop: 'todoTime',
     isRange: true,
     label: '活动时间'
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    required: true,
+    prop: 'classroomId',
+    label: '活动教室'
   },
   { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
   { itemType: 'slot', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
@@ -116,6 +146,13 @@ const CourseColumns = [
     itemType: 'slot',
     span: 24,
     required: true,
+    prop: 'classroomId',
+    label: '授课教室'
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    required: true,
     prop: 'courseId',
     label: '关联课程'
   },
@@ -127,6 +164,7 @@ const modelCopy = {
   todoDate: null,
   todoTime: [moment().startOf('day'), moment().endOf('day')],
   lecturerName: null,
+  classroomId: null,
   address: '',
   courseId: null,
   courseName: null
@@ -134,7 +172,8 @@ const modelCopy = {
 export default {
   name: 'OfflineCourseDrawer',
   components: {
-    LazySelect: () => import('@/components/lazy-select/lazySelect')
+    LazySelect: () => import('@/components/lazy-select/lazySelect'),
+    ClassroomReserve
   },
   props: {
     schedule: { type: Object, default: () => ({}) },
@@ -142,6 +181,7 @@ export default {
   },
   data() {
     return {
+      reserveVisible: false,
       userList: [],
       title: '创建线下日程',
       columns: CourseColumns,
@@ -150,6 +190,13 @@ export default {
     }
   },
   computed: {
+    reserveParams() {
+      return {
+        todoDate: this.model.todoDate,
+        startTime: moment(_.get(this.model, 'todoTime[0]')).format('HH:mm'),
+        endTime: moment(_.get(this.model, 'todoTime[1]')).format('HH:mm')
+      }
+    },
     innnerVisible: {
       get: function() {
         return this.visible
@@ -175,6 +222,12 @@ export default {
         }
       }
     },
+    reserveParams: {
+      handler() {
+        this.loadClassroom()
+      },
+      deep: true
+    },
     'model.type': {
       handler(value) {
         if (value === 1) {
@@ -183,6 +236,15 @@ export default {
           this.columns = EventColumns
         }
       }
+    },
+    'model.todoDate': {
+      handler(value) {
+        if (!value) {
+          this.model.classroomId = ''
+          this.model.classroomName = ''
+        }
+      },
+      deep: true
     },
     schedule(value) {
       this.model = {
@@ -200,6 +262,15 @@ export default {
     }
   },
   methods: {
+    // 选择了教室的数据处理。教室名称赋值
+    selectClassroom(data) {
+      _.set(this.model, 'classroomName', data.roomName)
+    },
+    // 查看预订情况
+    viewReserve() {
+      if (!this.model.todoDate) return
+      this.reserveVisible = true
+    },
     selectContact(data) {
       this.model = _.assign(this.model, data)
     },
@@ -208,6 +279,9 @@ export default {
         this.userList = [...this.userList, ...res.data]
       })
       return getOrgUserList(_.assign(params, { orgId: 0 }))
+    },
+    loadClassroom(params) {
+      return getBookList(_.assign(params, this.reserveParams))
     },
     loadCourse(params) {
       //courseType 2-线下日程
@@ -230,6 +304,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.classroom__container {
+  position: relative;
+  .classroom__title {
+    position: absolute;
+    right: 0;
+    top: -30px;
+    font-size: 12px;
+    color: #dadada;
+  }
+  .active__title {
+    cursor: pointer;
+    color: #606266;
+  }
+}
 .wrapper {
   height: 100%;
   display: flex;
