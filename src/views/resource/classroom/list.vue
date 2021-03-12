@@ -130,8 +130,12 @@
 </template>
 
 <script>
-import { queryClassroom, deleteClassroom, updateClassroomStatus } from '@/api/resource/classroom'
-import { getCategoryTree } from '@/api/live'
+import {
+  queryClassroom,
+  deleteClassroom,
+  updateClassroomStatus,
+  queryCategoryOrgList
+} from '@/api/resource/classroom'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
@@ -308,7 +312,7 @@ export default {
   },
   activated() {
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryTree({ source: 'classroom' }).then((res) => {
+    queryCategoryOrgList({ source: 'classroom' }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
