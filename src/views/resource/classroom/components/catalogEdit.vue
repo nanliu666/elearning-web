@@ -146,7 +146,13 @@ export default {
     },
     async loadOrgTree() {
       let res = await getCategoryTree({ source: 'classroom', addFlag: '1' })
-      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      if (this.type === 'edit') {
+        this.orgTree = this.clearCurrentChildren(res)
+        this.parentOrgIdLabel =
+          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+      } else {
+        this.orgTree = res
+      }
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -242,10 +248,9 @@ export default {
     },
     edit(row) {
       this.type = 'edit'
-      this.form = _.cloneDeep(row)
-      this.parentOrgIdLabel = row.parentId === '0' ? '顶级' : this.findOrg(row.parentId).name
-      this.$emit('changevisible', true)
       this.loadOrgTree()
+      this.form = _.cloneDeep(row)
+      this.$emit('changevisible', true)
     },
     findOrg(id) {
       let org = {}
