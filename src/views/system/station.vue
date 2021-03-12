@@ -295,11 +295,14 @@ export default {
       }
       this.tableLoading = true
       this.tableData = []
-      await getStationParent(params).then((res) => {
-        this.tableData = res.data
-        this.tableLoading = false
-        this.page.total = res.totalNum
-      })
+      await getStationParent(params)
+        .then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+        })
+        .finally(() => {
+          this.tableLoading = false
+        })
     },
     // 批量导出
     batchExport(selection) {

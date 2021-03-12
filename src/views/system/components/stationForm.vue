@@ -291,6 +291,7 @@ export default {
         }).then(async () => {
           await deleteStation(params).then(() => {
             this.$emit('initData')
+            this.loadOrgData()
             this.$message({
               type: 'success',
               message: '已成功删除该岗位!'
