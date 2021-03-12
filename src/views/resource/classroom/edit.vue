@@ -24,7 +24,7 @@
 
         <template #roomArea>
           <el-input
-            v-model.number="formData.roomArea"
+            v-model="formData.roomArea"
             placeholder="请输入"
           >
             <template slot="append">
@@ -195,7 +195,7 @@ const FORM_COLUMNS = [
     rules: [
       {
         validator: (rule, value, callback) => {
-          if (_.isNumber(value)) {
+          if (_.isNumber(Number(value))) {
             if (value > 100000) {
               return callback(new Error('面积最大限制输入值 100000'))
             } else if (value <= 100000 && value >= 0) {
