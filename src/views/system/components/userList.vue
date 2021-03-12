@@ -182,7 +182,7 @@ const COLUMNS = [
       return (
         {
           '1': '正常',
-          '2': '禁用'
+          '2': '冻结'
         }[record.userStatus] || ''
       )
     }
