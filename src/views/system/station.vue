@@ -15,6 +15,7 @@
     <basic-container block>
       <common-table
         ref="multipleTable"
+        :key="Math.random()"
         :config="tableConfig"
         :columns="columnsVisible | columnsFilter"
         :data="tableData"
