@@ -59,7 +59,7 @@
       </el-form-item>
       <!-- 可见范围 -->
       <el-form-item
-        v-show="parentOrgIdLabel === '' || parentOrgIdLabel === '顶级'"
+        v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
         label="可见范围"
       >
         <div>
@@ -121,11 +121,6 @@ export default {
   data() {
     return {
       type: 'create',
-      radioDisable: {
-        Company: false,
-        Department: false,
-        Group: false
-      },
       form: {
         name: '',
         parentId: '',
@@ -270,11 +265,6 @@ export default {
     },
     handleClose() {
       this.form = { parentId: '' }
-      this.radioDisable = {
-        Company: false,
-        Department: false,
-        Group: false
-      }
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {
