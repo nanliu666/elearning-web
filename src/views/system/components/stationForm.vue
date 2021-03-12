@@ -75,6 +75,7 @@ export default {
           itemType: 'input',
           required: true,
           span: 24,
+          maxlength: 10,
           placeholder: ' 请输入名称，建议不超过10个字'
         },
         {
@@ -106,10 +107,13 @@ export default {
         {
           prop: 'remark',
           label: '岗位描述',
-          placeholder: '请输入岗位描述',
+          placeholder: '请输入岗位描述,最多100字',
           itemType: 'input',
           type: 'textarea',
-          span: 24
+          maxlength: 100,
+          showWordLimit: true,
+          span: 24,
+          rows: 4
         }
       ],
       type: '',
@@ -179,18 +183,21 @@ export default {
         if (!params.remark) params.remark = ''
         params.fullName = fullPath
         params.sort = 1
-        await addStation(params).then(() => {
-          this.saveContinue = false
-          this.loadOrgData()
-          this.$nextTick(() => {
-            this.form = {}
+        await addStation(params)
+          .then(() => {
+            this.loadOrgData()
+            this.$nextTick(() => {
+              this.form = {}
+            })
+            this.$emit('initData')
+            this.$message({
+              type: 'success',
+              message: '保存成功，请继续添加!'
+            })
           })
-          this.$emit('initData')
-          this.$message({
-            type: 'success',
-            message: '保存成功，请继续添加!'
+          .finally(() => {
+            this.saveContinue = false
           })
-        })
       })
     },
     // 点击保存
@@ -219,8 +226,23 @@ export default {
         if (this.type == 'edit') {
           params.id = this.rowData.id
           editStation
-          await editStation(params).then(() => {
-            this.saveLoading = false
+          await editStation(params)
+            .then(() => {
+              this.handleClose()
+              this.loadOrgData()
+              this.$emit('initData', this.rowData.parentId)
+              this.$message({
+                type: 'success',
+                message: '保存成功!'
+              })
+            })
+            .finally(() => {
+              this.saveLoading = false
+            })
+          return
+        }
+        await addStation(params)
+          .then(() => {
             this.handleClose()
             this.loadOrgData()
             this.$emit('initData', this.rowData.parentId)
@@ -229,18 +251,9 @@ export default {
               message: '保存成功!'
             })
           })
-          return
-        }
-        await addStation(params).then(() => {
-          this.saveLoading = false
-          this.handleClose()
-          this.loadOrgData()
-          this.$emit('initData', this.rowData.parentId)
-          this.$message({
-            type: 'success',
-            message: '保存成功!'
+          .finally(() => {
+            this.saveLoading = false
           })
-        })
       })
     },
     // 删除操作
@@ -248,8 +261,9 @@ export default {
       let params = {
         ids: row.id
       }
+      console.log(row)
       //   判断删除行是否包含子级
-      if (row.children) {
+      if (row.hasChildren) {
         this.$confirm('您选中的岗位下含有用户，无法删除该岗位', '提示', {
           confirmButtonText: '我知道了',
           showCancelButton: false,
