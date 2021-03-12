@@ -57,7 +57,7 @@
             @node-click="nodeClick"
           >
             <span
-              slot-scope="{ node, data }"
+              slot-scope="{ data }"
               class="custom-tree-node"
             >
               <span>{{ data.name }}</span><span>{{ data.relatedNum ? ` (${data.relatedNum})` : ' (0)' }}</span>
@@ -97,7 +97,6 @@
                   :require-options="searchConfig.requireOptions"
                   :popover-options="searchConfig.popoverOptions"
                   @submit="handleSubmitSearch"
-                  @reset="handleResetSearch"
                 />
                 <div class="operations-right">
                   <div
@@ -171,6 +170,7 @@ export default {
   },
   data() {
     return {
+      query: {},
       loading: false,
       treeData: [], // 组织架构数据
       treeProps: {
@@ -212,12 +212,14 @@ export default {
         ],
         popoverOptions: [
           {
+            data: '',
             type: 'select',
             field: 'type',
             label: '类型',
             options: _.map(QUESTION_TYPE_MAP, (val, key) => ({ label: val, value: key }))
           },
           {
+            data: '',
             type: 'select',
             field: 'status',
             label: '状态',
@@ -329,10 +331,6 @@ export default {
     handleSubmitSearch(params) {
       this.query = { ...this.query, ...params }
       this.page.currentPage = 1
-      this.loadData()
-    },
-    handleResetSearch() {
-      this.query = {}
       this.loadData()
     },
     handleRefresh() {
