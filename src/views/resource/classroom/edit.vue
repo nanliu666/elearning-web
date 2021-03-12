@@ -345,7 +345,7 @@ export default {
       })
     },
     cancel() {
-      this.$message.info('创建教室已取消')
+      this.$message.info(`${!this.id ? '创建' : '编辑'}教室已取消`)
       this.handleBack()
     },
     handleBack() {
