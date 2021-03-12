@@ -95,6 +95,7 @@
             <el-button
               size="medium"
               type="text"
+              :disabled="row.fullName.split('|').length >= 5"
               @click.stop="() => handleCreateSubordinate(row, 'create')"
             >
               创建下级岗位

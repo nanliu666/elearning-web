@@ -96,7 +96,7 @@ export const deleteStation = (params) => {
  */
 export const viewUser = (params) => {
   return request({
-    url: '/api/user/v1/user/all/postition',
+    url: '/api/manage/v1/source/base/position/users',
     method: 'get',
     params: {
       ...params
