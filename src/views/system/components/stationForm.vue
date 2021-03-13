@@ -75,6 +75,7 @@ export default {
           itemType: 'input',
           required: true,
           span: 24,
+          maxlength: 10,
           placeholder: ' 请输入名称，建议不超过10个字'
         },
         {
@@ -106,10 +107,13 @@ export default {
         {
           prop: 'remark',
           label: '岗位描述',
-          placeholder: '请输入岗位描述',
+          placeholder: '请输入岗位描述,最多100字',
           itemType: 'input',
           type: 'textarea',
-          span: 24
+          maxlength: 100,
+          showWordLimit: true,
+          span: 24,
+          rows: 4
         }
       ],
       type: '',
@@ -152,6 +156,16 @@ export default {
     // 初始化数据
     async loadOrgData() {
       await getStationTree().then((res) => {
+        // 递归循环删除层级数5层以下的节点
+        const loop = (tree) => {
+          _.each(tree, (item) => {
+            if (item.fullName.split('|').length > 3 && item.children) {
+              delete item.children
+            }
+            loop(item.children)
+          })
+        }
+        loop(res)
         this.treeData = res
       })
       this.columns.find((item) => item.prop === 'parentId').props.treeParams.data = this.treeData
@@ -179,18 +193,21 @@ export default {
         if (!params.remark) params.remark = ''
         params.fullName = fullPath
         params.sort = 1
-        await addStation(params).then(() => {
-          this.saveContinue = false
-          this.loadOrgData()
-          this.$nextTick(() => {
-            this.form = {}
+        await addStation(params)
+          .then(() => {
+            this.loadOrgData()
+            this.$nextTick(() => {
+              this.form = {}
+            })
+            this.$emit('initData')
+            this.$message({
+              type: 'success',
+              message: '保存成功，请继续添加!'
+            })
           })
-          this.$emit('initData')
-          this.$message({
-            type: 'success',
-            message: '保存成功，请继续添加!'
+          .finally(() => {
+            this.saveContinue = false
           })
-        })
       })
     },
     // 点击保存
@@ -219,8 +236,23 @@ export default {
         if (this.type == 'edit') {
           params.id = this.rowData.id
           editStation
-          await editStation(params).then(() => {
-            this.saveLoading = false
+          await editStation(params)
+            .then(() => {
+              this.handleClose()
+              this.loadOrgData()
+              this.$emit('initData', this.rowData.parentId)
+              this.$message({
+                type: 'success',
+                message: '保存成功!'
+              })
+            })
+            .finally(() => {
+              this.saveLoading = false
+            })
+          return
+        }
+        await addStation(params)
+          .then(() => {
             this.handleClose()
             this.loadOrgData()
             this.$emit('initData', this.rowData.parentId)
@@ -229,18 +261,9 @@ export default {
               message: '保存成功!'
             })
           })
-          return
-        }
-        await addStation(params).then(() => {
-          this.saveLoading = false
-          this.handleClose()
-          this.loadOrgData()
-          this.$emit('initData', this.rowData.parentId)
-          this.$message({
-            type: 'success',
-            message: '保存成功!'
+          .finally(() => {
+            this.saveLoading = false
           })
-        })
       })
     },
     // 删除操作
@@ -248,33 +271,28 @@ export default {
       let params = {
         ids: row.id
       }
-      //   判断删除行是否包含子级
-      if (row.children) {
-        this.$confirm('您选中的岗位下含有用户，无法删除该岗位', '提示', {
-          confirmButtonText: '我知道了',
-          showCancelButton: false,
-          type: 'warning'
-        }).then(() => {
+      this.$confirm('您确定要删除选中的岗位吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        //   判断删除行是否包含子级
+        if (row.hasChildren) {
           this.$message({
             type: 'error',
-            message: '很抱歉，您选中的岗位下存下级岗位，请先将下级岗位调整后再删除!'
+            message: '删除失败，本岗位含有下级岗位，请先将下级岗位调整后再删除!'
           })
-        })
-      } else {
-        this.$confirm('您确定要删除选中的岗位吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(async () => {
+        } else {
           await deleteStation(params).then(() => {
             this.$emit('initData')
+            this.loadOrgData()
             this.$message({
               type: 'success',
               message: '已成功删除该岗位!'
             })
           })
-        })
-      }
+        }
+      })
     },
     // 监听公共方法,根据不同情况进行不同的操作，1、创建下级岗位，2、编辑
     commonWatch(data, type) {

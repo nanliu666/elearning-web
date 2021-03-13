@@ -367,7 +367,10 @@ export default {
     },
     // 跳转详情
     jumpDetail(row) {
-      this.$router.push({ path: '/examManagement/examSchedule/detail', query: { id: row.id } })
+      this.$router.push({
+        path: '/examManagement/examSchedule/detail',
+        query: { id: row.id, source: 'mark' }
+      })
     },
     // 加载函数
     async loadTableData() {

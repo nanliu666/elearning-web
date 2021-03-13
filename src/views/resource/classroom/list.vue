@@ -130,8 +130,12 @@
 </template>
 
 <script>
-import { queryClassroom, deleteClassroom, updateClassroomStatus } from '@/api/resource/classroom'
-import { getCategoryTree } from '@/api/live'
+import {
+  queryClassroom,
+  deleteClassroom,
+  updateClassroomStatus,
+  queryCategoryOrgList
+} from '@/api/resource/classroom'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
   {
@@ -240,8 +244,8 @@ const SEARCH_CONFIG = {
       data: '',
       options: [
         { value: '', label: '全部' },
-        { value: 0, label: '启用' },
-        { value: 1, label: '停用' }
+        { value: 0, label: '停用' },
+        { value: 1, label: '启用' }
       ]
     },
     {
@@ -308,7 +312,7 @@ export default {
   },
   activated() {
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
-    getCategoryTree({ source: 'classroom' }).then((res) => {
+    queryCategoryOrgList({ source: 'classroom' }).then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -375,8 +379,8 @@ export default {
       }
     },
     // 具体的删除函数
-    deleteFun(id) {
-      deleteClassroom({ id }).then(() => {
+    deleteFun(ids) {
+      deleteClassroom({ ids }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
@@ -387,8 +391,11 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
-      const hasTrain = _.empty(_.filter(selected, 'isReserve'))
-      const deleteBatchTips = `您确定要批量删除${_.size(selected).length}个教室吗？`
+      const groupByTrain = _.groupBy(selected, 'isReserve')
+      const hasTrainTrue = _.get(groupByTrain, 'true', [])
+      const hasTrainFalse = _.get(groupByTrain, 'false', [])
+      const hasTrain = !_.isEmpty(hasTrainTrue)
+      const deleteBatchTips = `您确定要批量删除${_.size(hasTrainFalse)}个教室吗？`
       const reserveTips =
         '您选择的教室包含已关联正在进行中的培训安排，不能对其进行删除操作，是否忽略继续删除其他教室？'
       const confirmButtonText = hasTrain ? '继续删除' : '确定'

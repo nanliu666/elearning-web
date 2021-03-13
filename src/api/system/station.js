@@ -90,3 +90,16 @@ export const deleteStation = (params) => {
     }
   })
 }
+
+/**
+ * 岗位管理查看用户
+ */
+export const viewUser = (params) => {
+  return request({
+    url: '/api/manage/v1/source/base/position/users',
+    method: 'get',
+    params: {
+      ...params
+    }
+  })
+}

@@ -15,6 +15,7 @@
     <basic-container block>
       <common-table
         ref="multipleTable"
+        :key="Math.random()"
         :config="tableConfig"
         :columns="columnsVisible | columnsFilter"
         :data="tableData"
@@ -95,6 +96,7 @@
             <el-button
               size="medium"
               type="text"
+              :disabled="row.fullName.split('|').length >= 5"
               @click.stop="() => handleCreateSubordinate(row, 'create')"
             >
               创建下级岗位
@@ -294,11 +296,14 @@ export default {
       }
       this.tableLoading = true
       this.tableData = []
-      await getStationParent(params).then((res) => {
-        this.tableData = res.data
-        this.tableLoading = false
-        this.page.total = res.totalNum
-      })
+      await getStationParent(params)
+        .then((res) => {
+          this.tableData = res.data
+          this.page.total = res.totalNum
+        })
+        .finally(() => {
+          this.tableLoading = false
+        })
     },
     // 批量导出
     batchExport(selection) {

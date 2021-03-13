@@ -129,7 +129,7 @@ const SEARCH_POPOVER_CONFIG = {
 }
 import { EXPORTS_STATIONDETAIL } from '@/const/privileges'
 import { dateFormat } from '@/util/date'
-import { getOrgUserList } from '@/api/system/user'
+import { viewUser } from '@/api/system/station'
 export default {
   name: 'JobsDetail',
   components: {
@@ -203,7 +203,7 @@ export default {
         orgId: 0,
         search: name || ''
       }
-      await getOrgUserList(params).then((res) => {
+      await viewUser(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
         this.tableLoading = false
