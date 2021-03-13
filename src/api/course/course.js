@@ -135,3 +135,8 @@ export const listCourseJob = (params) => get('api/manage/v1/course/listCourseJob
  * */
 export const courseFeelListByUserId = (params) =>
   get('api/manage/v1/course/courseFeelListByUserId', params)
+/**
+ *  导出学习人员列表
+ * @param {Object} params.courseId - 课程Id
+ * */
+export const exportStudyList = (params) => get('api/manage/v1/course/exportStudyList', params)

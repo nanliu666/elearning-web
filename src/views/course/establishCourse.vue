@@ -1065,7 +1065,7 @@ export default {
           saveOrcompile: 1,
           type: content ? content.type : 2,
           name: (content && content.name) || fileData.name,
-          fileSize: fileData.size,
+          fileSize: '',
           upLoad: [
             {
               localName: fileData.name

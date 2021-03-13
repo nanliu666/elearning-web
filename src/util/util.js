@@ -1,5 +1,35 @@
 import { validatenull } from './validate'
 import moment from 'moment'
+import axios from 'axios'
+
+/**
+ * 七牛云下载转成blob弹窗形式
+ * @param {string} html
+ */
+export const downLoadFile = (data) => {
+  const url = data.url || data.fileUrl || data.filePath
+  axios
+    .get(
+      url,
+      // 将responseType的默认json改为blob
+      {
+        responseType: 'blob',
+        emulateJSON: true
+      }
+    )
+    .then((res) => {
+      let objectUrl = URL.createObjectURL(new Blob([res.data]))
+      const a = document.createElement('a')
+      a.download = data.fileName
+      a.style.display = 'none'
+      a.href = objectUrl
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(objectUrl)
+    })
+}
+
 /**
  * 给试题富文本加行内样式
  * @param {string} html
