@@ -92,7 +92,12 @@ const EventColumns = [
       { label: '活动', value: 2 }
     ]
   },
-  { itemType: 'datePicker', span: 24, required: true, prop: 'todoDate', label: '活动日期' },
+  {
+    itemType: 'datePicker',
+    span: 24,
+    prop: 'todoDate',
+    label: '活动日期'
+  },
   {
     itemType: 'timePicker',
     span: 24,
@@ -127,7 +132,6 @@ const CourseColumns = [
   {
     itemType: 'datePicker',
     span: 24,
-    required: true,
     prop: 'todoDate',
     label: '授课日期'
   },
@@ -169,6 +173,7 @@ const modelCopy = {
   courseId: null,
   courseName: null
 }
+import { mapGetters } from 'vuex'
 export default {
   name: 'OfflineCourseDrawer',
   components: {
@@ -190,6 +195,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['trainTimeInVuex']),
     reserveParams() {
       return {
         todoDate: this.model.todoDate,
@@ -261,7 +267,37 @@ export default {
       }
     }
   },
+  mounted() {
+    const todoDateProps = _.find(this.columns, { prop: 'todoDate' })
+    const todoDateRules = [
+      { required: true, validator: this.validateTodoDate, trigger: ['blur', 'change'] }
+    ]
+    _.set(todoDateProps, 'rules', todoDateRules)
+  },
   methods: {
+    // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
+    validateTodoDate(rule, value, callback) {
+      // 授课开始时间要在考试时间之间
+      const isLegalTime = moment(this.model.todoDate).isBetween(
+        moment(this.trainTimeInVuex[0]),
+        moment(this.trainTimeInVuex[1])
+      )
+      // 与培训开始日期或结束日期相同
+      const isSame =
+        moment(this.model.todoDate).isSame(this.trainTimeInVuex[0]) ||
+        moment(this.model.todoDate).isSame(this.trainTimeInVuex[1])
+      if (!isLegalTime && !isSame) {
+        callback(
+          new Error(
+            `${this.model.type === 0 ? '活动' : '授课'}日期要在培训日期（${
+              this.trainTimeInVuex[0]
+            }至${this.trainTimeInVuex[1]}）之间`
+          )
+        )
+      } else {
+        callback()
+      }
+    },
     // 选择了教室的数据处理。教室名称赋值
     selectClassroom(data) {
       _.set(this.model, 'classroomName', data.roomName)
