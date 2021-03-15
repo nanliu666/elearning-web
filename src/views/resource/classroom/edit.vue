@@ -167,6 +167,7 @@ const FORM_COLUMNS = [
     prop: 'maxCapacity',
     max: 100000,
     min: 0,
+    precision: 0,
     offset: 1,
     span: 11
   },
@@ -195,7 +196,15 @@ const FORM_COLUMNS = [
     rules: [
       {
         validator: (rule, value, callback) => {
-          if (_.isNumber(Number(value))) {
+          const numberValue = Number(value)
+          if (_.isNaN(numberValue)) {
+            return callback(new Error('面积必须填数字'))
+          } else {
+            if (!_.isInteger(numberValue)) {
+              if (value.split('.')[1].length > 1) {
+                return callback(new Error('面积最多存在一位小数点'))
+              }
+            }
             if (value > 100000) {
               return callback(new Error('面积最大限制输入值 100000'))
             } else if (value <= 100000 && value >= 0) {
@@ -203,8 +212,6 @@ const FORM_COLUMNS = [
             } else {
               return callback(new Error('面积必须为正整数'))
             }
-          } else {
-            return callback(new Error('面积必须填数字'))
           }
         },
         trigger: ['blur', 'change']

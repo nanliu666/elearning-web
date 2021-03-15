@@ -104,8 +104,8 @@
               @submit="handleSearch"
             />
           </template>
-          <template #useTime>
-            {{ classroomDetail.startTime }} - {{ classroomDetail.endTime }}
+          <template #useTime="{row}">
+            {{ row.startTime }} - {{ row.endTime }}
           </template>
         </common-table>
       </div>

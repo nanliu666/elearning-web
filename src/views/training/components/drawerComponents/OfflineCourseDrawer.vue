@@ -17,7 +17,7 @@
             :searchable="true"
             :load="loadCourse"
             :option-props="{ label: 'courseName', value: 'courseId', key: 'courseId' }"
-            @select="selectContact"
+            @select="selectCourse"
           />
         </template>
         <template #classroomId>
@@ -26,6 +26,7 @@
               v-model="model.classroomId"
               :disabled="!model.todoDate"
               :searchable="true"
+              :first-option="classroomDefault"
               :load="loadClassroom"
               :option-props="{ label: 'roomName', value: 'id', key: 'id' }"
               @select="selectClassroom"
@@ -39,20 +40,15 @@
             </div>
           </div>
         </template>
-        <template #lecturerName>
+        <template #lecturerId>
           <lazy-select
-            v-if="model.type === 1"
-            v-model="model.lecturerName"
-            :disabled="true"
+            v-model="model.lecturerId"
+            :disabled="model.type === 1"
             :searchable="true"
+            :first-option="lecturerDefault"
             :load="loadCoordinator"
             :option-props="{ label: 'name', value: 'userId', key: 'userId' }"
-          />
-          <el-input
-            v-if="model.type === 2"
-            v-model="model.lecturerName"
-            maxlength="32"
-            placeholder="请输入主持人"
+            @select="selectLecturer"
           />
         </template>
       </common-form>
@@ -92,7 +88,12 @@ const EventColumns = [
       { label: '活动', value: 2 }
     ]
   },
-  { itemType: 'datePicker', span: 24, required: true, prop: 'todoDate', label: '活动日期' },
+  {
+    itemType: 'datePicker',
+    span: 24,
+    prop: 'todoDate',
+    label: '活动日期'
+  },
   {
     itemType: 'timePicker',
     span: 24,
@@ -108,9 +109,8 @@ const EventColumns = [
     prop: 'classroomId',
     label: '活动教室'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'courseName', label: '活动主题' },
-  { itemType: 'slot', span: 24, required: true, prop: 'lecturerName', label: '主持人' },
-  { itemType: 'input', span: 24, prop: 'address', label: '活动地点' }
+  { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
+  { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' }
 ]
 const CourseColumns = [
   {
@@ -127,7 +127,6 @@ const CourseColumns = [
   {
     itemType: 'datePicker',
     span: 24,
-    required: true,
     prop: 'todoDate',
     label: '授课日期'
   },
@@ -156,19 +155,24 @@ const CourseColumns = [
     prop: 'courseId',
     label: '关联课程'
   },
-  { itemType: 'slot', span: 24, prop: 'lecturerName', label: '讲师' },
-  { itemType: 'input', span: 24, prop: 'address', label: '授课地点' }
+  { itemType: 'slot', span: 24, prop: 'lecturerId', label: '讲师' }
 ]
 const modelCopy = {
   type: 1,
   todoDate: null,
-  todoTime: [moment().startOf('day'), moment().endOf('day')],
+  theme: null,
+  // 教室时间的使用范围为06:00-23:00
+  todoTime: [
+    moment().set({ hour: 6, minute: 0, second: 0 }),
+    moment().set({ hour: 23, minute: 0, second: 0 })
+  ],
+  lecturerId: null,
   lecturerName: null,
   classroomId: null,
-  address: '',
   courseId: null,
   courseName: null
 }
+import { mapGetters } from 'vuex'
 export default {
   name: 'OfflineCourseDrawer',
   components: {
@@ -181,8 +185,9 @@ export default {
   },
   data() {
     return {
+      classroomDefault: [],
+      lecturerDefault: [],
       reserveVisible: false,
-      userList: [],
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
@@ -190,6 +195,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['trainTimeInVuex']),
     reserveParams() {
       return {
         todoDate: this.model.todoDate,
@@ -224,7 +230,13 @@ export default {
     },
     reserveParams: {
       handler() {
-        this.loadClassroom()
+        // 拉取课室的前提条件
+        this.$refs.form &&
+          this.$refs.form.validateField('todoDate', (value) => {
+            if (_.isEmpty(value)) {
+              this.loadClassroom()
+            }
+          })
       },
       deep: true
     },
@@ -251,6 +263,19 @@ export default {
         ...modelCopy,
         ...value
       }
+      // 初始化教室、讲师默认值
+      this.lecturerDefault = [
+        {
+          userId: value.lecturerId,
+          name: value.lecturerName
+        }
+      ]
+      this.classroomDefault = [
+        {
+          roomName: value.classroomName,
+          id: value.classroomId
+        }
+      ]
       if (value.todoDate) {
         this.model.todoDate = moment(value.todoDate).toDate()
         if (value.todoTime) {
@@ -261,27 +286,59 @@ export default {
       }
     }
   },
+  mounted() {
+    const todoDateProps = _.find(this.columns, { prop: 'todoDate' })
+    const todoDateRules = [
+      { required: true, validator: this.validateTodoDate, trigger: ['blur', 'change'] }
+    ]
+    _.set(todoDateProps, 'rules', todoDateRules)
+  },
   methods: {
+    // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
+    validateTodoDate(rule, value, callback) {
+      // 授课开始时间要在考试时间之间
+      const isLegalTime = moment(this.model.todoDate).isBetween(
+        moment(this.trainTimeInVuex[0]),
+        moment(this.trainTimeInVuex[1])
+      )
+      // 与培训开始日期或结束日期相同
+      const isSame =
+        moment(this.model.todoDate).isSame(this.trainTimeInVuex[0]) ||
+        moment(this.model.todoDate).isSame(this.trainTimeInVuex[1])
+      if (!isLegalTime && !isSame) {
+        callback(
+          new Error(
+            `${this.model.type === 0 ? '活动' : '授课'}日期要在培训日期（${
+              this.trainTimeInVuex[0]
+            }至${this.trainTimeInVuex[1]}）之间`
+          )
+        )
+      } else {
+        callback()
+      }
+    },
     // 选择了教室的数据处理。教室名称赋值
     selectClassroom(data) {
       _.set(this.model, 'classroomName', data.roomName)
+    },
+    // 选择了讲师的数据处理。讲师名称赋值
+    selectLecturer(data) {
+      _.set(this.model, 'lecturerName', data.name)
     },
     // 查看预订情况
     viewReserve() {
       if (!this.model.todoDate) return
       this.reserveVisible = true
     },
-    selectContact(data) {
+    selectCourse(data) {
       this.model = _.assign(this.model, data)
     },
     loadCoordinator(params) {
-      getOrgUserList(_.assign(params, { orgId: 0 })).then((res) => {
-        this.userList = [...this.userList, ...res.data]
-      })
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadClassroom(params) {
-      return getBookList(_.assign(params, this.reserveParams))
+      const param = _.assign(params, this.reserveParams)
+      return getBookList(param)
     },
     loadCourse(params) {
       //courseType 2-线下日程
@@ -292,7 +349,7 @@ export default {
     },
     submit() {
       this.$refs.form.validate().then(() => {
-        const data = this.model
+        const data = _.cloneDeep(this.model)
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
         data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
         this.$emit('submit', data, this.editType)

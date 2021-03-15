@@ -492,14 +492,20 @@ export default {
       }
     },
     async multipleDeleteClick(selected) {
-      let selectedIds = []
-      _.each(selected, (item) => {
-        selectedIds.push(item.id)
+      this.$confirm('是否批量删除所选资源', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        let selectedIds = []
+        _.each(selected, (item) => {
+          selectedIds.push(item.id)
+        })
+        await deleteKnowledgeList({ id: selectedIds.join(',') })
+        this.$message.success('删除成功')
+        this.$refs.table.clearSelection()
+        this.loadTableData()
       })
-      await deleteKnowledgeList({ id: selectedIds.join(',') })
-      this.$message.success('删除成功')
-      this.$refs.table.clearSelection()
-      this.loadTableData()
     },
     // 置顶与取消置顶
     handleTop(rowData) {

@@ -169,11 +169,13 @@ const ScheduleColumns = [
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${_.get(record, 'courseName', '')}`
+      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${
+        record.type === 1 ? _.get(record, 'courseName', '') : _.get(record, 'theme', '')
+      }`
     }
   },
   {
-    prop: 'lecturerName',
+    prop: 'lecturerId',
     formatter(record) {
       return `${record.type === 1 ? '讲师：' : '主持人：'}${_.get(record, 'lecturerName', '')}`
     }
@@ -186,12 +188,6 @@ const ScheduleColumns = [
         'classroomName',
         ''
       )}`
-    }
-  },
-  {
-    prop: 'address',
-    formatter(record) {
-      return `地点：${record.address}`
     }
   }
 ]
