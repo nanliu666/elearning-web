@@ -424,7 +424,7 @@ export default {
         total: 0
       },
       queryInfo: {
-        teacherId: this.$route.query.id,
+        teacherId: this.$route.query.user_id_str,
         pageNo: 1,
         pageSize: 10,
         courseName: '',
