@@ -1,4 +1,6 @@
 import { get, post, put, del } from '@/router/axios'
+import request from '@/router/axios'
+
 /**
  *  del, get, post, put
  * 查询培训详情
@@ -105,3 +107,35 @@ export const delTrain = (params) => del('/api/manage/v1/train/delTrain', params)
  * @param {Object} courseId - 参数
  * */
 export const stopSchedule = (params) => put(`/api/manage/v1/stopSchedule/${params}`)
+
+export const queryJoin = (params) => {
+  return request({
+    url: '/api/manage/v1/train/apply/join',
+    method: 'get',
+    params
+  })
+}
+
+export const setJoin = (data) => {
+  return request({
+    url: '/api/manage/v1/train/apply/join',
+    method: 'put',
+    data
+  })
+}
+
+export const queryStatistics = (params) => {
+  return request({
+    url: '/api/manage/v1/train/people/statistics',
+    method: 'get',
+    params
+  })
+}
+
+export const querySignList = (params) => {
+  return request({
+    url: '/api/manage/v1/train/sign/list',
+    method: 'get',
+    params
+  })
+}
