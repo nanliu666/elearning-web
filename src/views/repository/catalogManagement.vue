@@ -237,7 +237,7 @@ export default {
           },
           {
             type: 'select',
-            field: 'userId',
+            field: 'createId',
             data: '',
             label: '创建人',
             options: [],

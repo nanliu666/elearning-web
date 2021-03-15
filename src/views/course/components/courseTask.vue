@@ -9,7 +9,7 @@
         style="width: 100%"
       >
         <el-table-column
-          :label="items.jobName"
+          :label="'作业来源： ' + items.jobName"
           prop="name"
           width="480px"
         >
@@ -26,6 +26,11 @@
           label=""
           prop="fileSize"
         >
+          <template slot-scope="scope">
+            <div>
+              <span> {{ scope.row.fileSize + 'k' }} </span>
+            </div>
+          </template>
         </el-table-column>
         <el-table-column
           label=""
@@ -46,13 +51,15 @@
               <span v-show="scope.$index == 1"> 修改作业 </span>
               <span v-show="scope.$index == 2"> 上传评改 </span>
             </el-button>
-            <!-- <el-button type="text">
-              下载  {{scope.row.filePath}}
-            </el-button> -->
-            <a
+            <!-- <a
               :href="scope.row.filePath"
               download
               style="color:#01aafc;"
+            > 下载 </a> -->
+
+            <a
+              style="color:#01aafc; cursor:pointer;"
+              @click="downLoadInfo(scope.row)"
             > 下载 </a>
           </template>
         </el-table-column>
@@ -62,6 +69,7 @@
 </template>
 
 <script>
+import { downLoadFile } from '@/util/util'
 import { listCourseJob } from '@/api/course/course'
 export default {
   data() {
@@ -74,6 +82,10 @@ export default {
     this.getInfo()
   },
   methods: {
+    downLoadInfo(data) {
+      // 下载
+      downLoadFile(data)
+    },
     async getInfo() {
       let params = { courseId: this.$route.query.courseId, stuId: this.$route.query.row.stuId }
       // let params = { courseId: '1369562437399535618', stuId: '123' }

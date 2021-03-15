@@ -104,7 +104,7 @@
 </template>
 
 <script>
-import { getStudyList } from '@/api/course/course'
+import { getStudyList, exportStudyList } from '@/api/course/course'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
 // 表格属性
@@ -324,10 +324,13 @@ export default {
     async multipleDeleteClick(selected) {
       let selectedIds = []
       _.each(selected, (item) => {
-        selectedIds.push(item.id)
+        selectedIds.push(item.courseId)
       })
+      console.log(selected)
       // await deleteKnowledgeList({ id: selectedIds.join(',') })
-      this.$message.success('删除成功')
+      let res = await exportStudyList({ courseId: this.$route.query.id })
+      console.log(res)
+      this.$message.success('操作成功')
       this.$refs.table.clearSelection()
       this.loadTableData()
     },
