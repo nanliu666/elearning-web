@@ -332,6 +332,14 @@ export default {
     },
     selectCourse(data) {
       this.model = _.assign(this.model, data)
+      this.model.lecturerName = data.name
+      this.model.lecturerId = data.userId
+      this.lecturerDefault = [
+        {
+          name: data.name,
+          userId: data.userId
+        }
+      ]
     },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
