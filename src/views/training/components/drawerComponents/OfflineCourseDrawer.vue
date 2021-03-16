@@ -223,7 +223,7 @@ export default {
           } else {
             // 新增的时候重置数据
             this.editType = 'add'
-            this.model.id = _.uniqueId('12454611451154')
+            this.model.id = _.uniqueId()
           }
         }
       }
@@ -247,7 +247,11 @@ export default {
         } else {
           this.columns = EventColumns
         }
-      }
+        this.$refs.form.clearValidate()
+        this.setRules()
+      },
+      deep: true,
+      immediate: true
     },
     'model.todoDate': {
       handler(value) {
@@ -264,18 +268,22 @@ export default {
         ...value
       }
       // 初始化教室、讲师默认值
-      this.lecturerDefault = [
-        {
-          userId: value.lecturerId,
-          name: value.lecturerName
-        }
-      ]
-      this.classroomDefault = [
-        {
-          roomName: value.classroomName,
-          id: value.classroomId
-        }
-      ]
+      if (value.lecturerId) {
+        this.lecturerDefault = [
+          {
+            userId: value.lecturerId,
+            name: value.lecturerName
+          }
+        ]
+      }
+      if (value.classroomId) {
+        this.classroomDefault = [
+          {
+            roomName: value.classroomName,
+            id: value.classroomId
+          }
+        ]
+      }
       if (value.todoDate) {
         this.model.todoDate = moment(value.todoDate).toDate()
         if (value.todoTime) {
@@ -286,14 +294,14 @@ export default {
       }
     }
   },
-  mounted() {
-    const todoDateProps = _.find(this.columns, { prop: 'todoDate' })
-    const todoDateRules = [
-      { required: true, validator: this.validateTodoDate, trigger: ['blur', 'change'] }
-    ]
-    _.set(todoDateProps, 'rules', todoDateRules)
-  },
   methods: {
+    setRules() {
+      const todoDateProps = _.find(this.columns, { prop: 'todoDate' })
+      const todoDateRules = [
+        { required: true, validator: this.validateTodoDate, trigger: ['blur', 'change'] }
+      ]
+      _.set(todoDateProps, 'rules', todoDateRules)
+    },
     // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
     validateTodoDate(rule, value, callback) {
       // 授课开始时间要在考试时间之间
@@ -308,7 +316,7 @@ export default {
       if (!isLegalTime && !isSame) {
         callback(
           new Error(
-            `${this.model.type === 0 ? '活动' : '授课'}日期要在培训日期（${
+            `${this.model.type === 1 ? '授课' : '活动'}日期要在培训日期（${
               this.trainTimeInVuex[0]
             }至${this.trainTimeInVuex[1]}）之间`
           )

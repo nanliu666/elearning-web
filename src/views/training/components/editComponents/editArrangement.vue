@@ -335,9 +335,9 @@ export default {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
     },
     // 线下日程提交后的数据处理
-    handleSubmitSchedule(data) {
+    handleSubmitSchedule(data, type) {
       const index = _.findIndex(this.schedule.data, { id: data.id })
-      if (index >= 0) {
+      if (index >= 0 && type === 'edit') {
         this.$set(this.schedule.data, index, data)
       } else {
         this.schedule.data.push(data)
