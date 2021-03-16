@@ -56,6 +56,7 @@
         </el-button>
         <el-button
           v-if="activeStep === 2"
+          v-load="submitLoading"
           size="medium"
           type="primary"
           @click="publish(0)"
@@ -114,6 +115,7 @@ export default {
   },
   data() {
     return {
+      submitLoading: false,
       trainWay: 0,
       loading: false,
       activeStep: 0,
@@ -234,6 +236,7 @@ export default {
         if (this.isNext === 'next') {
           editFun = createTrain
         }
+        this.submitLoading = true
         editFun(params)
           .then(() => {
             this.$message.success('发布成功')
@@ -241,6 +244,9 @@ export default {
           })
           .catch(() => {
             window.console.error(JSON.stringify(params))
+          })
+          .finally(() => {
+            this.submitLoading = true
           })
       })
     },
