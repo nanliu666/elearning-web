@@ -247,7 +247,7 @@ export default {
         } else {
           this.columns = EventColumns
         }
-        this.$refs.form.clearValidate()
+        this.$refs.form && this.$refs.form.clearValidate()
         this.setRules()
       },
       deep: true,
