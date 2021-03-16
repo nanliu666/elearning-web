@@ -324,11 +324,14 @@ export default {
       const data = { ...row }
       data.type = 'plan'
       data.studyName = this.data.studyName
+      const query = {}
+      Object.keys(data).forEach((key) => {
+        query[key] = data[key]
+      })
+
       this.$router.push({
         path: '/learnArrange/stuff/index',
-        query: {
-          data: decodeURIComponent(JSON.stringify(data))
-        }
+        query
       })
     }
   }

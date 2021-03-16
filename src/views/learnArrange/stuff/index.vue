@@ -110,8 +110,10 @@ export default {
     }
   },
   activated() {
-    const $data = JSON.parse(this.$route.query.data)
-    Object.assign(this.data, $data)
+    const query = this.$route.query
+    Object.keys(this.$route.query).forEach((key) => {
+      this.data[key] = query[key]
+    })
     this.$forceUpdate()
     this.getData()
   },
