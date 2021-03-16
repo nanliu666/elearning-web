@@ -11,8 +11,8 @@
           <lazySelect
             v-model="formData.contactName"
             :load="loadCoordinator"
-            :allow-create="isCreate"
-            :searchable="remote"
+            :allow-create="false"
+            :searchable="true"
             :option-props="personOptionProps"
             @select="selectContact"
           >
@@ -63,8 +63,6 @@ export default {
       }
     }
     return {
-      remote: true,
-      isCreate: true,
       personOptionProps,
       infoFormColumns: [
         {
@@ -163,8 +161,6 @@ export default {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
-          options: [],
-          maxlength: 32,
           required: true,
           span: 11,
           offset: 2
@@ -369,7 +365,11 @@ export default {
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      if (_.size(_.get(params, 'search')) > 32) {
+        this.$message.error('您输入的联系人姓名过长，无法搜索！')
+      } else {
+        return getOrgUserList(_.assign(params, { orgId: 0 }))
+      }
     }
   }
 }
