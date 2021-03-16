@@ -290,7 +290,8 @@ export default {
           ADD_CHILD_REP_CATALOG
         ])
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   activated() {
