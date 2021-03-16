@@ -1243,12 +1243,13 @@ export default {
       const { trainName, trainId } = this.showTrainDetail
       data.trainName = trainName
       data.trainId = trainId
-      data.trainId = '1365147281375969282'
+      const query = {}
+      Object.keys(data).forEach((key) => {
+        query[key] = data[key]
+      })
       this.$router.push({
         path: '/learnArrange/stuff/index',
-        query: {
-          data: decodeURIComponent(JSON.stringify(data))
-        }
+        query
       })
     },
 
