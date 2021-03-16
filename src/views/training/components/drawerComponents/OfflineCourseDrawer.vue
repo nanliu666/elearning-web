@@ -24,7 +24,6 @@
           <div class="classroom__container">
             <lazy-select
               v-model="model.classroomId"
-              :disabled="!model.todoDate"
               :searchable="true"
               :first-option="classroomDefault"
               :load="loadClassroom"
@@ -36,7 +35,7 @@
               :class="{ active__title: model.todoDate }"
               @click="viewReserve"
             >
-              预订情况
+              预定情况
             </div>
           </div>
         </template>
@@ -333,7 +332,7 @@ export default {
     selectLecturer(data) {
       _.set(this.model, 'lecturerName', data.name)
     },
-    // 查看预订情况
+    // 查看预定情况
     viewReserve() {
       if (!this.model.todoDate) return
       this.reserveVisible = true

@@ -75,7 +75,7 @@ const BASE_COLUMNS = [
     placeholder: '请输入分类名称',
     label: '',
     span: 24,
-    maxlength: 32,
+    maxlength: 20,
     required: true
   }
 ]
