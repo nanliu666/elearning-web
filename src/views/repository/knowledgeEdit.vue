@@ -213,6 +213,7 @@ const UPLOAD_ONLINE = [
     label: '资源路径',
     prop: 'resUrl',
     required: true,
+    maxlength: 2083,
     span: 24
   }
 ]
