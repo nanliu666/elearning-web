@@ -24,7 +24,6 @@
           <div class="classroom__container">
             <lazy-select
               v-model="model.classroomId"
-              :disabled="!model.todoDate"
               :searchable="true"
               :first-option="classroomDefault"
               :load="loadClassroom"
