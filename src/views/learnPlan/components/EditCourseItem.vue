@@ -33,17 +33,37 @@
         ></el-input-number>
       </template>
       <template slot="timeList">
-        <el-time-picker
+        <el-button
+          icon="el-icon-plus"
+          circle
+          style="display: block; margin-bottom: 12px;"
+          size="medium"
+          @click="addTimeList"
+        ></el-button>
+
+        <div
           v-for="(time, index) in course.timeList"
           :key="index"
-          v-model="time.list"
-          is-range
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
-          placeholder="选择时间范围"
-          value-format="HH:mm:ss"
-        />
+          class="timeList"
+        >
+          <el-time-picker
+            v-model="time.list"
+            is-range
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择时间范围"
+            value-format="HH:mm:ss"
+          />
+          <el-button
+            v-show="course.timeList.length > 1"
+            circle
+            icon="el-icon-minus"
+            style="margin-left: 5px;"
+            size="mini"
+            @click="delTimeList(index)"
+          ></el-button>
+        </div>
       </template>
     </common-form>
     <el-tabs value="first">
@@ -189,7 +209,19 @@ export default {
       ]
     }
   },
+  created() {
+    this.course.timeList = [{ list: ['', ''] }]
+  },
   methods: {
+    delTimeList(index) {
+      if (this.course.timeList.length <= 1) return
+      this.course.timeList.splice(index, 1)
+    },
+    addTimeList() {
+      this.course.timeList.push({
+        list: ['', '']
+      })
+    },
     validateDateRange(rule, value, callback) {
       if (moment(value[0]).isBefore(this.planTimeRange[0])) {
         callback(new Error('课程开始时间需要大于等于计划开始时间'))
@@ -289,6 +321,12 @@ export default {
   }
   /deep/.el-card {
     border: none;
+  }
+
+  .timeList {
+    &:not(:last-child) {
+      margin-bottom: 6px;
+    }
   }
 }
 </style>
