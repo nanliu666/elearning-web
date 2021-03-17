@@ -116,24 +116,6 @@ const personOptionProps = {
   key: 'userId'
 }
 
-const personFormColumns = [
-  {
-    itemType: 'slot',
-    label: '班主任',
-    prop: 'headTeacher',
-    required: true,
-    span: 11,
-    offset: 0
-  },
-  {
-    itemType: 'slot',
-    label: '助教',
-    prop: 'teachAssistant',
-    required: true,
-    span: 11,
-    offset: 2
-  }
-]
 export default {
   name: 'EditDetail',
   components: {
@@ -145,7 +127,29 @@ export default {
       teacherDefault: [],
       assessFormColumns,
       certificateFormColumns,
-      personFormColumns,
+      personFormColumns: [
+        {
+          itemType: 'slot',
+          label: '班主任',
+          prop: 'headTeacher',
+          rules: [
+            { required: true, validator: this.checkHeadTeacher, trigger: ['blur', 'change'] }
+          ],
+          span: 11,
+          offset: 0
+        },
+        {
+          itemType: 'slot',
+          label: '助教',
+          prop: 'teachAssistant',
+          rules: [
+            { required: true, validator: this.checkTeachAssistant, trigger: ['blur', 'change'] }
+          ],
+          required: true,
+          span: 11,
+          offset: 2
+        }
+      ],
       personOptionProps,
       formData: {
         certificateId: '',
@@ -159,6 +163,36 @@ export default {
     }
   },
   methods: {
+    // 检验班主任与助教不能同时为一人
+    checkHeadTeacher(rule, value, callback) {
+      const { headTeacher, teachAssistant } = this.formData
+      if (_.isEmpty(value)) {
+        callback(new Error('请选择班主任！'))
+      } else if (
+        _.some(teachAssistant, (item) => {
+          return item === headTeacher
+        })
+      ) {
+        callback(new Error('班主任与助教不能同时为一人！'))
+      } else {
+        callback()
+      }
+    },
+    // 检验班主任与助教不能同时为一人
+    checkTeachAssistant(rule, value, callback) {
+      const { headTeacher, teachAssistant } = this.formData
+      if (_.isEmpty(value)) {
+        callback(new Error('请选择助教！'))
+      } else if (
+        _.some(teachAssistant, (item) => {
+          return item === headTeacher
+        })
+      ) {
+        callback(new Error('班主任与助教不能同时为一人！'))
+      } else {
+        callback()
+      }
+    },
     loadCertificateList(params) {
       return getCertificateList(_.assign(params, { status: 1 }))
     },
