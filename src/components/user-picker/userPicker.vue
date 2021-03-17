@@ -66,31 +66,32 @@
               v-model.trim="outerParams.search"
               placeholder="搜索姓名或手机号码"
             />
-            <el-checkbox
-              v-if="!_.isEmpty(usersNameList)"
-              v-model="checkAll"
-              class="total-check"
-              :indeterminate="isIndeterminate"
-              @change="handleCheckAllChange"
-            >
-              全选
-            </el-checkbox>
-            <el-checkbox-group
-              v-model="checkedUsers"
-              class="check-ul"
-              @change="handleCheckedUserChange"
-            >
+            <div v-if="!_.isEmpty(usersNameList)">
               <el-checkbox
-                v-for="(item, index) in usersNameList"
-                :key="item.bizId"
-                class="check-li"
-                :label="item"
-                @change="handleSelectUser(outerData[index])"
+                v-model="checkAll"
+                class="total-check"
+                :indeterminate="isIndeterminate"
+                @change="handleCheckAllChange"
               >
-                {{ outerData[index].bizName
-                }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                全选
               </el-checkbox>
-            </el-checkbox-group>
+              <el-checkbox-group
+                v-model="checkedUsers"
+                class="check-ul"
+                @change="handleCheckedUserChange"
+              >
+                <el-checkbox
+                  v-for="(item, index) in usersNameList"
+                  :key="item.bizId"
+                  class="check-li"
+                  :label="item"
+                  @change="handleSelectUser(outerData[index])"
+                >
+                  {{ outerData[index].bizName
+                  }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
             <com-empty
               v-if="_.isEmpty(usersNameList)"
               height="31vh"
