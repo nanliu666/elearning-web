@@ -23,6 +23,7 @@
         <template #classroomId>
           <div class="classroom__container">
             <lazy-select
+              ref="classroomRef"
               v-model="model.classroomId"
               :searchable="true"
               :first-option="classroomDefault"
@@ -233,7 +234,8 @@ export default {
         this.$refs.form &&
           this.$refs.form.validateField('todoDate', (value) => {
             if (_.isEmpty(value)) {
-              this.loadClassroom()
+              // 手动更新教室列表
+              this.$refs.classroomRef.loadOptionData(true)
             }
           })
       },
