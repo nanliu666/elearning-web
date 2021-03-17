@@ -345,17 +345,24 @@ export default {
         this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
-    getData() {
-      return new Promise((resolve, reject) => {
-        this.$refs['form']
-          .validate()
-          .then(() => {
-            resolve(this.formData) // TODO 提交表单
-          })
-          .catch(() => {
-            reject()
-          })
-      })
+    getData(type) {
+      // 如果是草稿，直接返回数据
+      if (type === 1) {
+        return new Promise((resolve) => {
+          resolve(this.formData)
+        })
+      } else {
+        return new Promise((resolve, reject) => {
+          this.$refs['form']
+            .validate()
+            .then(() => {
+              resolve(this.formData) // TODO 提交表单
+            })
+            .catch(() => {
+              reject()
+            })
+        })
+      }
     },
     selectContact(data) {
       if (data.phonenum) {

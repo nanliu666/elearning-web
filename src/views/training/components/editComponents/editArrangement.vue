@@ -276,6 +276,7 @@ export default {
   },
   methods: {
     getData() {
+      // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
         resolve({
           trainOfflineTodo: this.schedule.data,

@@ -174,7 +174,7 @@ export default {
           })
       })
     },
-    getData() {
+    getData(type) {
       let promiseList = []
       const personForm = this.getLiData('personForm')
       promiseList.push(personForm)
@@ -188,9 +188,16 @@ export default {
         const certificateForm = this.getLiData('certificateForm')
         promiseList.push(certificateForm)
       }
-      return Promise.all(promiseList).then(() => {
-        return this.formData
-      })
+      // 如果是草稿，直接返回数据
+      if (type === 1) {
+        return new Promise((resolve) => {
+          resolve(this.formData)
+        })
+      } else {
+        return Promise.all(promiseList).then(() => {
+          return this.formData
+        })
+      }
     },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
