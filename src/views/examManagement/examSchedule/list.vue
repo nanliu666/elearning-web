@@ -108,9 +108,6 @@
         <template #status="{row}">
           {{ row.status | statusFilterer }}
         </template>
-        <template #examPattern="{row}">
-          {{ row.examPattern | patternFilterer }}
-        </template>
         <template #examType="{row}">
           {{ row.examType | typeFilterer }}
         </template>
@@ -194,13 +191,14 @@ let TABLE_COLUMNS = [
   {
     label: '考试分类',
     prop: 'category',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) => (row.category ? row.category : '未分类')
   },
   {
     label: '考试方式',
-    slot: true,
     prop: 'examPattern',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) => PATTERN_TYPE[row.examPattern]
   },
   {
     label: '考试类型',
@@ -238,17 +236,17 @@ const STATUS_STATUS = [
   { value: '', label: '全部' },
   { value: '1', label: '未开始' },
   { value: '2', label: '进行中' },
-  { value: '3', label: '已结束' }
+  { value: '3', label: '已过期' }
 ]
-const PATTERN_TYPE = [
-  { value: '', label: '全部' },
-  { value: 'general', label: '普通考试' },
-  { value: 'offline', label: '线下考试' }
-]
+const PATTERN_TYPE = {
+  general: '普通考试',
+  offline: '线下考试'
+}
 const TYPE_STATUS = [
   { value: '', label: '全部' },
   { value: 'CurrencyExam', label: '通用考试' },
   { value: 'CourseExam', label: '课程考试' },
+  { value: 'StudyPlan', label: '学习计划' },
   { value: 'TrainExam', label: '培训班考试' }
 ]
 const WAY_STATUS = [
@@ -360,11 +358,6 @@ export default {
           return item.value === data
         })[0].label
       }
-    },
-    patternFilterer(data) {
-      return _.filter(PATTERN_TYPE, (item) => {
-        return item.value === data
-      })[0].label
     },
     typeFilterer(data) {
       const type = _.filter(TYPE_STATUS, (item) => {

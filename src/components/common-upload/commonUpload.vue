@@ -29,13 +29,17 @@ export default {
   props: {
     checkUpload: {
       type: Function,
-      default: () => true
+      default: () => false
     },
     onUploadComplete: {
       type: Function,
       default: () => true
     },
     onUploadProgress: {
+      type: Function,
+      default: () => true
+    },
+    onUploadError: {
       type: Function,
       default: () => true
     },
@@ -91,6 +95,7 @@ export default {
       uploadQiniu(file.file, {
         next({ total }) {
           fileData.percent = parseInt(total.percent)
+          fileData.status = 'progress'
           if (that.needHandler) {
             that.onUploadProgress(fileData)
           }
@@ -103,6 +108,9 @@ export default {
             that.$message.error('上传失败，请联系管理员')
             // eslint-disable-next-line
             console.error('upload err:', err)
+          }
+          if (that.needHandler) {
+            that.onUploadError(fileData)
           }
         },
         complete({ url, fileName }) {
@@ -120,6 +128,7 @@ export default {
           // 专门给表格设计器的上传附件组件使用的，组件name为FileUpload
           that.$emit('getValue', newValue)
           // that.$emit('on-complete', fileData)
+          fileData.status = 'complete'
           if (that.needHandler) {
             that.onUploadComplete(file, url)
           }

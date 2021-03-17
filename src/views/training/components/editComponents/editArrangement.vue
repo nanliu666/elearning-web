@@ -169,11 +169,13 @@ const ScheduleColumns = [
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${_.get(record, 'courseName', '')}`
+      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${
+        record.type === 1 ? _.get(record, 'courseName', '') : _.get(record, 'theme', '')
+      }`
     }
   },
   {
-    prop: 'lecturerName',
+    prop: 'lecturerId',
     formatter(record) {
       return `${record.type === 1 ? '讲师：' : '主持人：'}${_.get(record, 'lecturerName', '')}`
     }
@@ -186,12 +188,6 @@ const ScheduleColumns = [
         'classroomName',
         ''
       )}`
-    }
-  },
-  {
-    prop: 'address',
-    formatter(record) {
-      return `地点：${record.address}`
     }
   }
 ]
@@ -231,6 +227,7 @@ const TestConfig = {
   showHandler: true,
   handlerColumn: { label: '操作', width: 150 }
 }
+import moment from 'moment'
 export default {
   name: 'EditArrangement',
   components: { OfflineCourseDrawer, OnlineCourseDrawer, EditExamineDrawer },
@@ -339,9 +336,38 @@ export default {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
     },
     // 线下日程提交后的数据处理
-    handleSubmitSchedule(data) {
+    handleSubmitSchedule(data, type) {
+      // 默认不存在同一个教室的重叠时段
+      let isOverlapping = false
       const index = _.findIndex(this.schedule.data, { id: data.id })
-      if (index >= 0) {
+      // 同一天使用的相同教室
+      const sameClassrommAndDate = _.find(this.schedule.data, {
+        classroomId: data.classroomId,
+        todoDate: data.todoDate
+      })
+      if (sameClassrommAndDate) {
+        const time1 = sameClassrommAndDate.todoTime
+        const time2 = data.todoTime
+        const time1List = [
+          moment(`${data.todoDate} ${time1[0]}`),
+          moment(`${data.todoDate} ${time1[1]}`)
+        ]
+        const time2List = [
+          moment(`${data.todoDate} ${time2[0]}`),
+          moment(`${data.todoDate} ${time2[1]}`)
+        ]
+        // 被选日期开始日期isSameOrBefore已选结束日期 and 被选日期结束日期isSameOrAfter已选开始日期
+        if (
+          moment(time1List[0]).isSameOrBefore(moment(time2List[1], 'minute')) &&
+          moment(time1List[1]).isSameOrAfter(moment(time2List[0], 'minute'))
+        ) {
+          this.$message.error('您所选的教室存在重叠时段，请重新选择！')
+          isOverlapping = true
+        }
+      }
+      // 有重叠时段就不进行补充
+      if (isOverlapping) return
+      if (index >= 0 && type === 'edit') {
         this.$set(this.schedule.data, index, data)
       } else {
         this.schedule.data.push(data)

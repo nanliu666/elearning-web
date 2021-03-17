@@ -110,7 +110,6 @@ export default {
               validator: (rule, value, callback) => {
                 // value成绩发布时间 isBefore 考试结束时间
                 const examEndTime = _.get(this, '$parent.$children[0].model.examTime[1]', null)
-                console.log('this==', moment(value).isBefore(moment(examEndTime)))
                 if (moment(value).isBefore(moment(examEndTime))) {
                   return callback(new Error('成绩发布时间不能早于考试结束时间'))
                 }

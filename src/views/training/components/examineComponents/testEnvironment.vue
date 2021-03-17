@@ -38,14 +38,14 @@ const switchConfig = [
       before: '分钟内禁止交卷'
     }
   },
-  {
-    label: '启用试卷预生成服务',
-    prop: 'preCreate',
-    expand: {
-      pre: '试卷最多预生成',
-      before: '份'
-    }
-  },
+  // {
+  //   label: '启用试卷预生成服务',
+  //   prop: 'preCreate',
+  //   expand: {
+  //     pre: '试卷最多预生成',
+  //     before: '份'
+  //   }
+  // },
   {
     label: '自动保存答案到服务器',
     prop: 'isHold'
@@ -58,7 +58,7 @@ const defaultValue = {
   createAnswers: false,
   lateBanExam: false,
   answerBanExam: false,
-  preCreate: false,
+  preCreate: true,
   isHold: false,
   lateBanExamValue: 15, // 迟到15
   answerBanExamValue: 30, // 最低30分钟才可交卷
