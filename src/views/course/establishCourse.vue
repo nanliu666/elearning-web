@@ -598,8 +598,8 @@
                     <el-progress
                       v-else-if="scope.row.fileData.status == 'progress'"
                       :percentage="scope.row.fileData.percent"
-                      :status="scope.row.fileData.status != 'error' ? 'success' : 'exception'"
-                      :text-inside="scope.row.fileData.status != 'error'"
+                      status="success"
+                      text-inside
                       :stroke-width="18"
                     ></el-progress>
                   </div>
@@ -1047,7 +1047,8 @@ export default {
         name: (content && content.name) || fileData.name || '社区的商业模式',
         upLoad: [
           {
-            localName: fileData.name
+            localName: fileData.name,
+            fileSize: fileData.file.size // (fileData.file.size / 1024).toFixed(1) //大小单位KB
           }
         ],
         fileData
@@ -1065,7 +1066,7 @@ export default {
           saveOrcompile: 1,
           type: content ? content.type : 2,
           name: (content && content.name) || fileData.name,
-          fileSize: '',
+
           upLoad: [
             {
               localName: fileData.name
@@ -1088,11 +1089,11 @@ export default {
       const contents = this.ruleForm.contents
       const content = contents.find((c) => c.fileData.uid === file.file.uid)
       content.upLoad[0].url = url
+      content.upLoad[0].fileSize = (file.file.size / 1024).toFixed(1) //大小单位KB
       content.fileData.status = 'complete'
       if (contents.every((c) => c.fileData.status === 'complete') && contents.pending) {
         this.isAddCourse(contents.addStatus)
       }
-
       this.continueUploading(file)
     },
     controlUpload(index) {
@@ -1186,6 +1187,8 @@ export default {
           item.type = +c.type
           item.fileData = {}
           item.name = c.name
+          item.fileSize = c.fileSize
+          item.id = c.id
           return item
         })
         res.imageUrl = [{ localName, url }]
@@ -1323,11 +1326,12 @@ export default {
       //   params.imageUrl = params.imageUrl.splice(1, 1)
       // }
       // this.remember = false
-
       params.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
           item.localName = item.upLoad[item.upLoad.length - 1].localName
+          item.fileSize = item.upLoad[item.upLoad.length - 1].fileSize
+          item.id = item.id || ''
           item.content =
             item.upLoad[item.upLoad.length - 1].url || item.upLoad[item.upLoad.length - 1].content
         }
