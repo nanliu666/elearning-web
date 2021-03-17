@@ -539,7 +539,7 @@ export default {
     isqueryTeacherlist() {
       let params = {
         pageNo: 1,
-        pageSize: 999,
+        pageSize: 9999,
         search: ''
       }
 

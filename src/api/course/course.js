@@ -140,3 +140,16 @@ export const courseFeelListByUserId = (params) =>
  * @param {Object} params.courseId - 课程Id
  * */
 export const exportStudyList = (params) => get('api/manage/v1/course/exportStudyList', params)
+/**
+ *  学员提交作业或讲师提交评改
+ * @param {Object} params.courseId        课程id
+ * @param {Object} params.fileCategory    文件归类：用户提交的附件user、还是讲师评改的附件teacher
+ * @param {Object} params.fileName        文件名称，包括扩展名
+ * @param {Object} params.filePath        文件所在路径
+ * @param {Object} params.fileSize        文件大小
+ * @param {Object} params.id              对应FileInfoList里的Id，有则回传，没有则传空
+ * @param {Object} params.jobId           对应课程作业Id
+ * @param {Object} params.userId          学员id
+ **/
+export const saveCourseLinkedStudentOrTeacher = (params) =>
+  post('api/manage/v1/web/coursecenter/coursework/saveCourseLinkedStudentOrTeacher', params)

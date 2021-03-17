@@ -1,5 +1,8 @@
 <template>
-  <div class="courseTask">
+  <div
+    v-if="this.$route.query.row.courseName"
+    class="courseTask"
+  >
     <el-table
       :data="tableData"
       style="width: 100%"
@@ -73,7 +76,7 @@ export default {
       // let params = { courseId: '1369562437399535618', stuId: '123' }
       let res = await courseFeelListByUserId(params)
       this.tableData = res
-      console.log(res)
+      // console.log(res)
     },
     handleUpload(index, row) {
       console.log(index, row)
