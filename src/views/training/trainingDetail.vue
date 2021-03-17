@@ -1148,18 +1148,20 @@ export default {
   async activated() {
     // this.loadData()
     // this.getInfo()
+
+    await this.isGetTrainDetail()
+    // 获取报名情况数据
+    this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId
+    this.getRegisterData()
+    this.getSigninData()
+    this.isExamList()
+    this.isgetTrainEvaluate()
+
     this.refreshTableData()
     this.isStudentList({ trainId: 1 })
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
-    await this.isGetTrainDetail()
-    this.isgetTrainEvaluate()
-    this.isExamList()
-    // 获取报名情况数据
-    this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId
-    this.getRegisterData()
-    this.getSigninData()
   },
   methods: {
     getSigninColumn(value, d) {
@@ -1296,11 +1298,11 @@ export default {
     // 去开办下一期
     handleConfig() {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
-      this.$router.push({ path: '/training/edit', query: { id: this.$route.query.id } })
+      this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.trainId } })
     },
     // 结办
     isstopSchedule() {
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       stopSchedule(id).then(() => {
         this.issueStatus = false
         this.$message({
@@ -1321,9 +1323,7 @@ export default {
 
     // 查询培训考试安排
     isExamList() {
-      let id = this.$route.query.id
-      // let id = '1332236640693030914'
-      examList({ trainId: id }).then((res) => {
+      examList({ trainId: this.showTrainDetail.trainId }).then((res) => {
         this.showExamList = res
       })
     },
@@ -1369,7 +1369,7 @@ export default {
     isGetOfflineTodo() {
       // console.log('id', this.$route.query.id)
       // let id = '1332138220456259585'
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       getOfflineTodo({ trainId: id }).then((res) => {
         this.isOfflineTodo = res
         let index = 1
@@ -1385,7 +1385,7 @@ export default {
     isGetOnlineCourse() {
       // console.log('id', this.$route.query.id)
       // let id = '1331882612830322689'
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       getOnlineCourse({ trainId: id }).then((res) => {
         // console.log('------------+',res)
         this.showOnlineCourse = res
@@ -1394,7 +1394,7 @@ export default {
     // 查询培训详情
     isGetTrainDetail() {
       // console.log('id', this.$route.query.id)
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       // let id = '1332136482139570178'
       return getTrainDetail({ trainId: id }).then((res) => {
         this.showTrainDetail = res
@@ -1415,7 +1415,7 @@ export default {
       let params = { ...page, ...courseName }
       params.status = this.status
       // params.trainId = 1
-      params.trainId = this.$route.query.id
+      params.trainId = this.showTrainDetail.trainId
       studentList(params).then((res) => {
         this.tableData = res.data
         SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
@@ -1431,7 +1431,7 @@ export default {
 
     isgetTrainEvaluate() {
       // console.log('id', this.$route.query.id)
-      let params = { trainId: this.$route.query.id++ }
+      let params = { trainId: this.showTrainDetail.trainId }
       getTrainEvaluate(params).then((res) => {
         this.showTrainEvaluate = res
       })

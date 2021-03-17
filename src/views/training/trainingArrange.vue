@@ -698,7 +698,7 @@ export default {
     },
     // 去培训详情
     toTrainingDetail(row) {
-      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })
+      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status=' + row.status })
     },
     // 草稿删除
     isDraftDel(scope) {

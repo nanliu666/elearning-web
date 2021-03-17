@@ -110,6 +110,18 @@
             </div>
           </template>
           <template
+            slot="coursePlanName"
+            slot-scope="{ row }"
+          >
+            <el-button
+              type="text"
+              @click="jumpDetail(row)"
+            >
+              {{ row.coursePlanName }}
+            </el-button>
+          </template>
+
+          <template
             slot="multiSelectMenu"
             slot-scope="{ selection }"
           >
@@ -274,9 +286,10 @@ import {
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 180,
-    prop: 'coursePlanNo'
+    label: '名称',
+    prop: 'coursePlanName',
+    slot: true,
+    width: 300
   },
   {
     label: '名称',
@@ -625,13 +638,21 @@ export default {
       this.loadDraftData()
     },
     // 跳去详情
-    jumpDetail({ id }) {
+    // jumpDetail({ id }) {
+    //   this.$router.push({
+    //     path: '/repository/knowledgeDetail',
+    //     query: { id }
+    //   })
+    // },
+    jumpDetail(row) {
+      var data = { ...row }
       this.$router.push({
-        path: '/repository/knowledgeDetail',
-        query: { id }
+        path: '/learnArrange/plan/detail',
+        query: {
+          data: decodeURIComponent(JSON.stringify(data))
+        }
       })
     },
-
     async loadDraftData() {
       const draft = this.draft
       if (draft.tableLoading) return

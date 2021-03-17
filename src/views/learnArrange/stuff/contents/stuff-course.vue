@@ -47,15 +47,12 @@
         </el-table-column>
 
         <el-table-column align="right">
-          <template
-            slot="header"
-            slot-scope="scope"
-          >
+          <template slot="header">
             <el-button
               type="text"
               size="small"
               :disabled="!table.trainAttachmentVOS.length"
-              @click="packToDownload(scope.row)"
+              @click="downloadZip"
             >
               打包下载
             </el-button>
@@ -65,15 +62,14 @@
             <common-upload
               v-if="scope.row.fileCategory"
               need-handler
-              :disabled="scope.row.loading"
-              :on-upload-progress="(data) => (scope.row.loading = true)"
-              :on-upload-complete="(data) => (scope.row.loading = false)"
+              :disabled="loading[i + scope.$index + '']"
+              :on-upload-start="() => onUploadStart(i + scope.$index + '')"
+              :on-upload-complete="() => onUploadComplete(i + scope.$index + '')"
             >
               <el-button
+                :loading="loading[i + scope.$index + '']"
                 type="text"
                 size="small"
-                :loading="scope.row.loading"
-                :disabled="scope.row.loading"
               >
                 {{ scope.row.fileCategory === 'user' ? '修改作业' : '修改评改' }}
               </el-button>
@@ -94,6 +90,7 @@
 </template>
 
 <script>
+import { downloadZip } from '@/api/learnArrange'
 export default {
   name: 'StuffCourse',
   components: {
@@ -120,11 +117,11 @@ export default {
     }
   },
   methods: {
-    onUploadProgress(row, data) {
-      const { uid } = data
-      row.uid = uid
-      this.loading[uid] = true
-      this.$forceUpdate
+    onUploadStart(id) {
+      this.loading[id] = true
+    },
+    onUploadComplete(id) {
+      this.loading[id] = false
     },
     getFileName(row) {
       const fileName = row.fileName || '未提交'
@@ -140,7 +137,24 @@ export default {
     courseChange(courseId) {
       this.parentVm.queryWork(courseId)
     },
-    packToDownload() {},
+    downloadZip() {
+      const data = {
+        filePath: [],
+        fileName: [],
+        zipComment: '打包下载'
+      }
+      this.data.course.forEach((c) => {
+        c.trainAttachmentVOS.forEach((item) => {
+          const { fileName, filePath } = item
+          if (!filePath || !fileName) return
+          data.filePath.push(filePath)
+          data.fileName.push(fileName)
+        })
+      })
+      downloadZip(data).then(() => {
+        // todo
+      })
+    },
     download(row) {
       const { fileName } = row
       const link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
