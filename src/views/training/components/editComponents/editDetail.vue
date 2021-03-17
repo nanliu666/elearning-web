@@ -153,8 +153,8 @@ export default {
       personOptionProps,
       formData: {
         certificateId: '',
-        evaluation: true,
-        certificate: true,
+        evaluation: false,
+        certificate: false,
         evaluationType: [0],
         templateId: '',
         headTeacher: null,
