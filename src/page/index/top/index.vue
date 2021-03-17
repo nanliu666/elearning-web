@@ -114,7 +114,7 @@ export default {
       let tid = getStore({
         name: 'token'
       })
-      window.location.href = `${frontBaseUrl}/#/wel?tid=${tid}`
+      window.location.href = `${frontBaseUrl}/#/home?tid=${tid}`
     },
     showUserCenter() {
       this.$router.push('/info/securitySetting')
