@@ -221,7 +221,7 @@ export default {
         contactName: '',
         trainName: '',
         categoryId: '',
-        trainTime: '',
+        trainTime: [],
         people: 0,
         trainObjectsList: [],
         trainWay: 3,
