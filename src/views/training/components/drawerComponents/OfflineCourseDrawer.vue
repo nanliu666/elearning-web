@@ -109,7 +109,7 @@ const EventColumns = [
     prop: 'classroomId',
     label: '活动教室'
   },
-  { itemType: 'input', span: 24, required: true, prop: 'theme', label: '活动主题' },
+  { itemType: 'input', span: 24, required: true, prop: 'theme', maxLength: 32, label: '活动主题' },
   { itemType: 'slot', span: 24, required: true, prop: 'lecturerId', label: '主持人' }
 ]
 const CourseColumns = [
