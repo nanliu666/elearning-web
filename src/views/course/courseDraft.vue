@@ -1024,6 +1024,19 @@ export default {
       this.getScreenInfo()
       this.$refs.seachPopover.resetForm()
 
+      let unshiftData = {
+        config: { placeholder: '请选择' },
+        data: '',
+        field: 'isPutaway',
+        label: '状态',
+        type: 'select',
+        options: [
+          { value: '0', label: '下架' },
+          { value: '1', label: '上架' },
+          { value: '2', label: '全部' }
+        ]
+      }
+
       // 草稿没有状态
       if (this.status == 1) {
         // 已发布
@@ -1032,22 +1045,16 @@ export default {
           prop: 'isPutaway',
           slot: true
         }
-        SEARCH_POPOVER_POPOVER_OPTIONS.unshift({
-          config: { placeholder: '请选择' },
-          data: '',
-          field: 'isPutaway',
-          label: '状态',
-          type: 'select',
-          options: [
-            { value: '0', label: '下架' },
-            { value: '1', label: '上架' },
-            { value: '2', label: '全部' }
-          ]
-        })
+
+        if (unshiftData.label != SEARCH_POPOVER_POPOVER_OPTIONS[0].label) {
+          SEARCH_POPOVER_POPOVER_OPTIONS.unshift(unshiftData)
+        }
       } else {
         // 草稿
-        SEARCH_POPOVER_POPOVER_OPTIONS.splice(0, 1)
-        TABLE_COLUMNS[3] = {}
+        if (unshiftData.label == SEARCH_POPOVER_POPOVER_OPTIONS[0].label) {
+          SEARCH_POPOVER_POPOVER_OPTIONS.splice(0, 1)
+          TABLE_COLUMNS[3] = {}
+        }
       }
     }
   }

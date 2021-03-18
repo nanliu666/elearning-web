@@ -85,10 +85,13 @@ export default {
   data() {
     return {
       tableData: [],
-      uploadData: []
+      uploadData: [],
+      stuId: ''
     }
   },
   activated() {
+    let rowData = JSON.parse(this.$route.query.row)
+    this.stuId = rowData.stuId
     this.getInfo()
   },
   methods: {
@@ -111,7 +114,7 @@ export default {
         fileSize: (this.uploadData[this.uploadData.length - 1].size / 1024).toFixed(1), //文件大小   //大小单位KB
         id: scope.row.id, //对应FileInfoList里的Id，有则回传，没有则传空
         jobId: id, //对应课程作业Id
-        userId: this.$route.query.row.stuId //学员id
+        userId: this.stuId //学员id
       }
       saveCourseLinkedStudentOrTeacher(params).then(() => {
         this.getInfo()
@@ -123,24 +126,27 @@ export default {
       downLoadFile(data)
     },
     async getInfo() {
-      let params = { courseId: this.$route.query.courseId, stuId: this.$route.query.row.stuId }
-      // let params = { courseId: '1369562437399535618', stuId: '123' }
+      let params = { courseId: this.$route.query.courseId, stuId: this.stuId }
       let res = await listCourseJob(params)
-      res.map((item) => {
-        if (item.fileInfoList.length === 2) {
-          item.fileInfoList.push({
-            fileName: '未提交',
-            filePath: '',
-            fileSize: '',
-            id: '',
-            source: '',
-            updateTime: '--',
-            userFileId: ''
-          })
+      let pushData = {
+        fileName: '未提交',
+        filePath: '',
+        fileSize: '',
+        id: '',
+        source: '',
+        updateTime: '--',
+        userFileId: ''
+      }
+      this.tableData = res
+      this.tableData.forEach((item, index) => {
+        if (item.fileInfoList.length == 1) {
+          this.tableData[index].fileInfoList.push(pushData)
+          this.tableData[index].fileInfoList.push(pushData)
+          return
+        } else if (item.fileInfoList.length == 2) {
+          this.tableData[index].fileInfoList.push(pushData)
         }
       })
-      this.tableData = res
-      console.log(this.tableData)
     },
     handleUpload(index, row) {
       console.log(index, row)

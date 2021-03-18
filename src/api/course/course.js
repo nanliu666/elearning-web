@@ -153,3 +153,10 @@ export const exportStudyList = (params) => get('api/manage/v1/course/exportStudy
  **/
 export const saveCourseLinkedStudentOrTeacher = (params) =>
   post('api/manage/v1/web/coursecenter/coursework/saveCourseLinkedStudentOrTeacher', params)
+/**
+ *  批量压缩成zip下载
+ * @param {Object} params.filePath        多个文件路径url的数组
+ * @param {Object} params.fileName        每个文件对应的名称数组
+ * @param {Object} params.zipComment      zip包名称
+ **/
+export const zip = (params) => post('/api/common/oss/download/zip', params)

@@ -526,6 +526,7 @@ export default {
   },
   data() {
     return {
+      searchParamsData: '',
       CourseList: '',
       blockDialogVisible: false,
       showBtnData: false,
@@ -787,8 +788,8 @@ export default {
     },
 
     // 查询讲师列表
-    islistTeacher(id, searchParams) {
-      let params = { categoryId: id || this.clickId, ...searchParams, ...this.page }
+    islistTeacher(id) {
+      let params = { categoryId: id || this.clickId, ...this.searchParamsData, ...this.page }
       if (!params.categoryId) {
         delete params.categoryId
       }
@@ -818,7 +819,10 @@ export default {
 
     // 搜索
     handleSearch(searchParams) {
-      this.islistTeacher(this.clickId, searchParams)
+      this.page.pageNo = 1
+      this.page.currentPage = 1
+      this.searchParamsData = searchParams
+      this.islistTeacher(this.clickId)
     },
     // 批量删除
     handleRemoveItems(selection) {

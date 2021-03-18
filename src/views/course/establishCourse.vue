@@ -72,6 +72,7 @@
             >
               <el-input
                 v-model="ruleForm.name"
+                placeholder="请输入"
                 maxlength="32"
               ></el-input>
             </el-form-item>
@@ -172,6 +173,7 @@
             <el-form-item prop="period">
               <el-input-number
                 v-model="ruleForm.period"
+                placeholder="请输入"
                 controls-position="right"
                 :min="0"
                 :max="100"
@@ -186,6 +188,7 @@
             <el-form-item prop="credit">
               <el-input-number
                 v-model="ruleForm.credit"
+                placeholder="请输入"
                 controls-position="right"
                 :min="0"
                 :step="0.5"
@@ -275,6 +278,8 @@
                 v-model="ruleForm.isRecommend"
                 active-color="#198cff"
                 inactive-color="#a0a8ae"
+                :active-value="1"
+                :inactive-value="0"
               >
               </el-switch>
             </div>
@@ -324,8 +329,8 @@
           >
             <tinymce
               v-model="ruleForm.introduction"
-              :init="{ height: 100 }"
-            />
+              :init="{ selector: '#textarea1', placeholder: '在这里输入文字' }"
+            ></tinymce>
           </el-form-item>
         </div>
       </el-form>
@@ -398,7 +403,7 @@
                     type="text"
                     @click="reflectionVisible = true"
                   >
-                    {{ ruleForm.thinkContent ? '修改课前思考' : '编辑课前思考' }}
+                    添加课前思考
                   </el-button>
                 </el-table-column>
                 <el-table-column
@@ -859,7 +864,7 @@ export default {
         thinkContent: '', //课前思考内容
         introduction: '', //课程介绍
         // tagIds: [], //标签
-        isRecommend: false, //是否推荐
+        isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
         period: '', //时长
         credit: '', //学分
@@ -983,6 +988,10 @@ export default {
     this.$refs.ruleForm.clearValidate()
     this.disabledBtn = false
     this.reflectionData = []
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
   },
   methods: {
     delReflectionData() {
@@ -1348,7 +1357,7 @@ export default {
         delete item.upLoad
       })
       params.passCondition = params.passCondition ? params.passCondition.join(',') : ''
-      params.isRecommend = params.isRecommend === false ? 0 : 1
+      // params.isRecommend = params.isRecommend === false ? 0 : 1
       params.catalogId =
         this.$route.query.catalogName == params.catalogId ? this.catalogName : params.catalogId
       // params.tagIds = params.tagIds.join(',')
@@ -1512,43 +1521,42 @@ export default {
     },
     // 清空数据
     isdeleteData() {
-      this.ruleForm = {
-        imageUrl: [], //图片
-        url: '',
-        localName: '',
-        catalogId: '',
-        electiveType: '',
-        thinkContent: ' ', //课前思考内容
-        introduction: ' ', //课程介绍
-        // tagIds: [], //标签
-        isRecommend: false, //是否推荐
-        passCondition: [], //通过条件
-        period: undefined, //时长
-        credit: undefined, //学分
-        // 所在分类现在没有
-        type: '', //课程类型
-        name: '', //课程名称
-        teacherId: '', //讲师id
-        // 表格
-        contents: [
-          // {
-          //   url: '',
-          //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-          //   sort: '', //序号
-          //   type: '', //章节类型
-          //   name: '', // 章节名称
-          //   content: '', //文章内容
-          //   upLoad: [], //[url,localName],  //所有上传的文件
-          //   saveOrcompile: 0 // 1保存&0编辑
-          // }
-        ]
-      }
-      this.$refs.ruleForm.clearValidate()
-
-      this.$refs.apprSubmit.handleClose()
-      this.headIndex = 1
-      this.parentOrgIdLabel = ''
-      this.$refs.ruleForm.resetFields()
+      // this.ruleForm = {
+      //   imageUrl: [], //图片
+      //   url: '',
+      //   localName: '',
+      //   catalogId: '',
+      //   electiveType: '',
+      //   thinkContent: ' ', //课前思考内容
+      //   introduction: ' ', //课程介绍
+      //   // tagIds: [], //标签
+      //   isRecommend: false, //是否推荐
+      //   passCondition: [], //通过条件
+      //   period: undefined, //时长
+      //   credit: undefined, //学分
+      //   // 所在分类现在没有
+      //   type: '', //课程类型
+      //   name: '', //课程名称
+      //   teacherId: '', //讲师id
+      //   // 表格
+      //   contents: [
+      //     // {
+      //     //   url: '',
+      //     //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
+      //     //   sort: '', //序号
+      //     //   type: '', //章节类型
+      //     //   name: '', // 章节名称
+      //     //   content: '', //文章内容
+      //     //   upLoad: [], //[url,localName],  //所有上传的文件
+      //     //   saveOrcompile: 0 // 1保存&0编辑
+      //     // }
+      //   ]
+      // }
+      // this.$refs.ruleForm.clearValidate()
+      // this.$refs.apprSubmit.handleClose()
+      // this.headIndex = 1
+      // this.parentOrgIdLabel = ''
+      // this.$refs.ruleForm.resetFields()
     },
     // 作业上传校验
     taskUpload(file) {
