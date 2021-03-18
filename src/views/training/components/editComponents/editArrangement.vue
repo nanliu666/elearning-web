@@ -296,20 +296,12 @@ export default {
         .value()
     }
   },
-  watch: {
-    'schedule.data': {
-      handler() {
-        this.signIn = !_.isEmpty(this.schedule.data)
-      },
-      deep: true,
-      immediate: true
-    }
-  },
   methods: {
     getData() {
       // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
         resolve({
+          signIn: this.signIn,
           trainOfflineTodo: this.schedule.data,
           trainOnlineCourse: this.course.data,
           trainExam: this.examine.data
@@ -366,9 +358,11 @@ export default {
     // 删除线下日程
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
+      this.signIn = !_.isEmpty(this.schedule.data)
     },
     // 线下日程提交后的数据处理
     handleSubmitSchedule(data, type) {
+      this.signIn = true
       // 默认不存在同一个教室的重叠时段
       let isOverlapping = false
       const index = _.findIndex(this.schedule.data, { id: data.id })

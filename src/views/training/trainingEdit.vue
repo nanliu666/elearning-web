@@ -200,6 +200,9 @@ export default {
             detailData.headTeacher = detailData.headTeacher.userId
             detailData.teachAssistant = _.map(detailData.teachAssistant, 'userId')
             this.$refs.editDetail.formData = detailData
+            // 赋值培训安排的数据
+            const { signIn } = trainInfo
+            this.$refs.editArrangement.signIn = signIn
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
             trainOnlineCourse.forEach((item) => {
               item.courseId = item.course

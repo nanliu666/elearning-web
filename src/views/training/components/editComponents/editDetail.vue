@@ -154,7 +154,7 @@ export default {
           label: '公开报名',
           prop: 'applyJoinValue',
           required: false,
-          disabled: false,
+          disabled: true,
           hasLabelSwitch: true,
           labelSwitchConfig: {
             prop: 'applyJoin'
@@ -170,6 +170,7 @@ export default {
           itemType: 'datePicker',
           label: '报名截止日期',
           prop: 'applyJoinEndDate',
+          isVisible: false,
           required: false,
           span: 11,
           offset: 2
@@ -179,7 +180,7 @@ export default {
       formData: {
         applyJoinEndDate: '',
         applyJoinValue: 'approval',
-        applyJoin: '',
+        applyJoin: false,
         certificateId: '',
         evaluation: false,
         certificate: false,
@@ -188,6 +189,18 @@ export default {
         headTeacher: null,
         teachAssistant: null
       }
+    }
+  },
+  watch: {
+    'formData.applyJoin': {
+      handler(data) {
+        const temp = _.find(this.personFormColumns, { prop: 'applyJoinEndDate' })
+        _.set(temp, 'isVisible', data)
+        const applyJoinValueTemp = _.find(this.personFormColumns, { prop: 'applyJoinValue' })
+        _.set(applyJoinValueTemp, 'disabled', !data)
+      },
+      deep: true,
+      immediate: true
     }
   },
   methods: {
