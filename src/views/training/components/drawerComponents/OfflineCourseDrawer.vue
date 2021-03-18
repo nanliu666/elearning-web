@@ -197,10 +197,17 @@ export default {
   computed: {
     ...mapGetters(['trainTimeInVuex']),
     reserveParams() {
+      // 由于保存的时候会将moment时间格式成字符串，所以加上这个判断
+      const startTimeTmp = _.get(this.model, 'todoTime[0]')
+      const endTimeTmp = _.get(this.model, 'todoTime[1]')
+      const startTime = _.isString(startTimeTmp)
+        ? startTimeTmp
+        : moment(startTimeTmp).format('HH:mm')
+      const endTime = _.isString(endTimeTmp) ? endTimeTmp : moment(endTimeTmp).format('HH:mm')
       return {
         todoDate: this.model.todoDate,
-        startTime: moment(_.get(this.model, 'todoTime[0]')).format('HH:mm'),
-        endTime: moment(_.get(this.model, 'todoTime[1]')).format('HH:mm')
+        startTime,
+        endTime
       }
     },
     innnerVisible: {
@@ -217,7 +224,7 @@ export default {
       handler: function(val) {
         if (val) {
           if (!_.isEmpty(this.schedule)) {
-            this.model = _.cloneDeep(this.schedule)
+            this.initEditData()
             this.title = '编辑线下日程'
             this.editType = 'edit'
           } else {
@@ -268,34 +275,39 @@ export default {
         ...modelCopy,
         ...value
       }
-      // 初始化教室、讲师默认值
-      if (value.lecturerId) {
-        this.lecturerDefault = [
-          {
-            userId: value.lecturerId,
-            name: value.lecturerName
-          }
-        ]
-      }
-      if (value.classroomId) {
-        this.classroomDefault = [
-          {
-            roomName: value.classroomName,
-            id: value.classroomId
-          }
-        ]
-      }
-      if (value.todoDate) {
-        this.model.todoDate = moment(value.todoDate).toDate()
-        if (value.todoTime) {
-          this.model.todoTime = value.todoTime.map((time) =>
-            moment(value.todoDate + ' ' + time).toDate()
-          )
-        }
-      }
     }
   },
   methods: {
+    // 初始编辑的数据
+    initEditData() {
+      this.model = _.cloneDeep(this.schedule)
+      if (this.model.todoDate) {
+        // 编辑的时候，格式化授课时间06::00==> moment格式
+        if (this.model.todoTime) {
+          this.model.todoTime = this.model.todoTime.map((time) => {
+            return moment(`${this.model.todoDate} ${time}`, moment.defaultFormat).toDate()
+          })
+        }
+        this.model.todoDate = moment(this.model.todoDate).toDate()
+      }
+      // 初始化教室、讲师默认值
+      if (this.model.lecturerId) {
+        this.lecturerDefault = [
+          {
+            userId: this.model.lecturerId,
+            name: this.model.lecturerName
+          }
+        ]
+      }
+      if (this.model.classroomId) {
+        this.classroomDefault = [
+          {
+            roomName: this.model.classroomName,
+            id: this.model.classroomId
+          }
+        ]
+      }
+    },
     setRules() {
       const todoDateProps = _.find(this.columns, { prop: 'todoDate' })
       const todoDateRules = [
