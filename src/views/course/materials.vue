@@ -63,7 +63,7 @@ export default {
     }
   },
   activated() {
-    this.courseData = this.$route.query.row
+    this.courseData = JSON.parse(this.$route.query.row)
   },
   methods: {
     setSelect(i) {

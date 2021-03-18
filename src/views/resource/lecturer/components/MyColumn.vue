@@ -425,8 +425,10 @@ export default {
     isShowinputFn() {
       this.isShowinput = false
       this.dataAddCatalog.input = ''
+      this.compileNewly = 0
     },
     isEditFn(data) {
+      this.compileNewly = 0
       this.isEdit = false
       this.dataAddCatalog.input = ''
       // this.expandedKeysData = []

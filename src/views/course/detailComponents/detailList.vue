@@ -362,7 +362,7 @@ export default {
     jumpDetail(row) {
       this.$router.push({
         path: '/course/materials',
-        query: { row: row, courseId: this.$route.query.id }
+        query: { row: JSON.stringify(row), courseId: this.$route.query.id }
       })
     },
     // 刷新列表数据

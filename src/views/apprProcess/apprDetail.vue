@@ -562,7 +562,7 @@ export default {
         .then(function() {
           let { id, catalogName } = JSON.parse(self.applyDetail.formData)
           self.$router.push({
-            path: '/course/compileCourse',
+            path: '/course/establishCourse',
             query: { id: id, catalogName: catalogName }
           })
         })
