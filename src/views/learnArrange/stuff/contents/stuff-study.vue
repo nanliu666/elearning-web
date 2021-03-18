@@ -30,15 +30,12 @@
         </el-table-column>
 
         <el-table-column align="right">
-          <template
-            slot="header"
-            slot-scope="scope"
-          >
+          <template slot="header">
             <el-button
               type="text"
               size="small"
               :disabled="!table.trainAttachmentVOS.length"
-              @click="packToDownload(scope.row)"
+              @click="downloadZip"
             >
               打包下载
             </el-button>
@@ -60,6 +57,8 @@
 </template>
 
 <script>
+import { downloadZip } from '@/api/learnArrange'
+
 export default {
   name: 'StuffStudy',
   props: {
@@ -76,7 +75,24 @@ export default {
     }
   },
   methods: {
-    packToDownload() {},
+    downloadZip() {
+      const data = {
+        filePath: [],
+        fileName: [],
+        zipComment: '打包下载'
+      }
+      this.data.course.forEach((c) => {
+        c.trainAttachmentVOS.forEach((item) => {
+          const { fileName, filePath } = item
+          if (!filePath || !fileName) return
+          data.filePath.push(filePath)
+          data.fileName.push(fileName)
+        })
+      })
+      downloadZip(data).then(() => {
+        // todo
+      })
+    },
     download(row) {
       const { fileName } = row
       const link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')

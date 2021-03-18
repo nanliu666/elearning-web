@@ -273,6 +273,7 @@ export default {
 
   .container {
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 24px;
     background: #ffffff;
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);

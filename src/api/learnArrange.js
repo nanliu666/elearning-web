@@ -74,3 +74,11 @@ export const getQrcode = (params) => {
     params
   })
 }
+
+export const downloadZip = (data) => {
+  return request({
+    url: '/api/common/oss/download/zip',
+    method: 'post',
+    data
+  })
+}
