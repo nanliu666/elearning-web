@@ -66,31 +66,32 @@
               v-model.trim="outerParams.search"
               placeholder="搜索姓名或手机号码"
             />
-            <el-checkbox
-              v-if="!_.isEmpty(usersNameList)"
-              v-model="checkAll"
-              class="total-check"
-              :indeterminate="isIndeterminate"
-              @change="handleCheckAllChange"
-            >
-              全选
-            </el-checkbox>
-            <el-checkbox-group
-              v-model="checkedUsers"
-              class="check-ul"
-              @change="handleCheckedUserChange"
-            >
+            <div v-if="!_.isEmpty(usersNameList)">
               <el-checkbox
-                v-for="(item, index) in usersNameList"
-                :key="item.bizId"
-                class="check-li"
-                :label="item"
-                @change="handleSelectUser(outerData[index])"
+                v-model="checkAll"
+                class="total-check"
+                :indeterminate="isIndeterminate"
+                @change="handleCheckAllChange"
               >
-                {{ outerData[index].bizName
-                }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                全选
               </el-checkbox>
-            </el-checkbox-group>
+              <el-checkbox-group
+                v-model="checkedUsers"
+                class="check-ul"
+                @change="handleCheckedUserChange"
+              >
+                <el-checkbox
+                  v-for="(item, index) in usersNameList"
+                  :key="item.bizId"
+                  class="check-li"
+                  :label="item"
+                  @change="handleSelectUser(outerData[index])"
+                >
+                  {{ outerData[index].bizName
+                  }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
             <com-empty
               v-if="_.isEmpty(usersNameList)"
               height="31vh"
@@ -232,6 +233,7 @@ export default {
   data() {
     const activeTab = this.selectType.split(',')[0] || 'Org'
     return {
+      isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
       checkedUsers: [],
       usersNameList: [],
@@ -242,7 +244,7 @@ export default {
       orgSearchData: [],
       outerParams: {
         pageNo: 1,
-        pageSize: 10000,
+        pageSize: 500,
         search: '',
         loaded: false
       },
@@ -321,9 +323,23 @@ export default {
     if (_.includes(this.selectType, 'OuterUser')) {
       this.loadOuterUser()
     }
+    this.listenerScroll()
   },
-
+  beforeDestroy() {
+    //移除监听滚动条事件
+    window.removeEventListener('scroll', this.listenerScroll)
+  },
   methods: {
+    listenerScroll() {
+      window.addEventListener('scroll', this.debounceOuterScrollHandler, true)
+    },
+    handleOuterScroll(e) {
+      if (this.isClear) return
+      const refTarget = e.target
+      if (refTarget.scrollTop + refTarget.offsetHeight >= refTarget.scrollHeight) {
+        this.loadOuterUser()
+      }
+    },
     // 切换全选与全删
     handleCheckAllChange(val) {
       this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : []
@@ -426,12 +442,7 @@ export default {
         this.selected.push(user)
       }
     },
-    handleOuterScroll() {
-      const ref = this.$refs.outerUser
-      if (ref.scrollTop + ref.offsetHeight >= ref.scrollHeight) {
-        this.loadOuterUser()
-      }
-    },
+
     handleSearchOuterUser() {
       this.outerParams.loaded = false
       this.outerParams.pageNo = 1
@@ -445,6 +456,7 @@ export default {
       this.loading = true
       getOuterUser({ pageNo, search, pageSize })
         .then((res) => {
+          const { totalPage } = res
           if (_.size(res.data) > 0) {
             const data = _.map(res.data, (item) =>
               _.assign(item, {
@@ -465,6 +477,7 @@ export default {
             this.outerParams.loaded = true
           }
           this.outerParams.pageNo = pageNo + 1
+          this.isClear = totalPage < pageNo + 1
         })
         .finally(() => {
           this.loading = false
@@ -535,14 +548,13 @@ export default {
   }
 }
 .outer-user {
-  overflow-y: auto;
-  height: 380px;
-
   .total-check {
     padding: 6px;
     padding-top: 8px;
   }
   .check-ul {
+    overflow-y: auto;
+    height: 350px;
     .check-li {
       display: block;
       &:hover {

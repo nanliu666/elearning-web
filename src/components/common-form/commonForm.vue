@@ -11,146 +11,155 @@
         :span="column.span ? column.span : 10"
         :offset="column.offset ? column.offset : 0"
       >
-        <el-form-item
-          v-if="column.itemType !== 'slotout'"
-          :label="`${column.label}${column.props && column.props.showColon ? ':' : ''}`"
-          v-bind="elFormItemAttrs(column)"
-          :rules="getRules(column)"
-        >
-          <slot
-            slot="label"
-            :name="column.prop + '-label'"
+        <div :style="{ visibility: _.get(column, 'isVisible', true) ? 'visible' : 'hidden' }">
+          <el-form-item
+            v-if="column.itemType !== 'slotout'"
+            :label="`${column.label}${column.props && column.props.showColon ? ':' : ''}`"
+            v-bind="elFormItemAttrs(column)"
+            :rules="getRules(column)"
           >
-            {{ column.label }}
-          </slot>
-          <el-input-number
-            v-if="column.itemType == 'inputNumber'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请输入${column.label}`"
-            @input="column.props && column.props.onlyNumber && inputNumber($event, column)"
-          />
-          <el-input
-            v-if="column.itemType == 'input'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请输入${column.label}`"
-            @input="column.props && column.props.onlyNumber && inputNumber($event, column)"
-          />
-          <el-select
-            v-if="column.itemType == 'select'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          >
-            <el-option
-              v-for="item in column.options"
-              :key="item[(column.props && column.props.value) || 'value']"
-              :label="
-                column.props
-                  ? (column.props.formatter && item.formatter(item)) ||
-                    item[column.props.label || 'label']
-                  : item.label
-              "
-              :value="item[(column.props && column.props.value) || 'value']"
+            <slot
+              slot="label"
+              :name="column.prop + '-label'"
+            >
+              {{ column.label }}
+              <el-switch
+                v-if="column.hasLabelSwitch"
+                v-model="model[column.labelSwitchConfig.prop]"
+                v-bind="itemAttrs(column.labelSwitchConfig)"
+                class="label__switch"
+                @change="changeLabel(column, model[column.labelSwitchConfig.prop])"
+              />
+            </slot>
+            <el-input-number
+              v-if="column.itemType == 'inputNumber'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请输入${column.label}`"
+              @input="column.props && column.props.onlyNumber && inputNumber($event, column)"
             />
-          </el-select>
-          <el-radio-group
-            v-if="column.itemType == 'radio'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          >
-            <el-radio
-              v-for="item in column.options"
-              :key="item[(column.props && column.props.value) || 'value']"
-              :label="item[(column.props && column.props.value) || 'value']"
+            <el-input
+              v-if="column.itemType == 'input'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请输入${column.label}`"
+              @input="column.props && column.props.onlyNumber && inputNumber($event, column)"
+            />
+            <el-select
+              v-if="column.itemType == 'select'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
             >
-              {{
-                column.props
-                  ? (column.props.formatter && item.formatter(item)) ||
-                    item[column.props.label || 'label']
-                  : item.label
-              }}
-            </el-radio>
-          </el-radio-group>
-          <el-checkbox-group
-            v-if="column.itemType == 'checkbox'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          >
-            <el-checkbox
-              v-for="item in column.options"
-              :key="item[(column.props && column.props.value) || 'value']"
-              :label="item[(column.props && column.props.value) || 'value']"
+              <el-option
+                v-for="item in column.options"
+                :key="item[(column.props && column.props.value) || 'value']"
+                :label="
+                  column.props
+                    ? (column.props.formatter && item.formatter(item)) ||
+                      item[column.props.label || 'label']
+                    : item.label
+                "
+                :value="item[(column.props && column.props.value) || 'value']"
+              />
+            </el-select>
+            <el-radio-group
+              v-if="column.itemType == 'radio'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
             >
-              {{
-                column.props
-                  ? (column.props.formatter && item.formatter(item)) ||
-                    item[column.props.label || 'label']
-                  : item.label
-              }}
-            </el-checkbox>
-          </el-checkbox-group>
-          <el-cascader
-            v-if="column.itemType == 'cascader'"
-            v-model="model[column.prop]"
-            :options="column.options"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          />
+              <el-radio
+                v-for="item in column.options"
+                :key="item[(column.props && column.props.value) || 'value']"
+                :label="item[(column.props && column.props.value) || 'value']"
+              >
+                {{
+                  column.props
+                    ? (column.props.formatter && item.formatter(item)) ||
+                      item[column.props.label || 'label']
+                    : item.label
+                }}
+              </el-radio>
+            </el-radio-group>
+            <el-checkbox-group
+              v-if="column.itemType == 'checkbox'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            >
+              <el-checkbox
+                v-for="item in column.options"
+                :key="item[(column.props && column.props.value) || 'value']"
+                :label="item[(column.props && column.props.value) || 'value']"
+              >
+                {{
+                  column.props
+                    ? (column.props.formatter && item.formatter(item)) ||
+                      item[column.props.label || 'label']
+                    : item.label
+                }}
+              </el-checkbox>
+            </el-checkbox-group>
+            <el-cascader
+              v-if="column.itemType == 'cascader'"
+              v-model="model[column.prop]"
+              :options="column.options"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            />
 
-          <el-date-picker
-            v-if="column.itemType == 'datePicker'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          />
-          <el-time-picker
-            v-if="column.itemType == 'timePicker'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          />
+            <el-date-picker
+              v-if="column.itemType == 'datePicker'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            />
+            <el-time-picker
+              v-if="column.itemType == 'timePicker'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            />
 
-          <el-tree-select
-            v-if="column.itemType == 'treeSelect'"
-            v-model="model[column.prop]"
-            :select-params="column.props && column.props.selectParams"
-            :tree-params="column.props && column.props.treeParams"
-            v-bind="itemAttrs(column)"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          />
-          <lazy-select
-            v-if="column.itemType === 'lazySelect'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-            :option-list.sync="column.optionList"
-            :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
-          />
-          <el-switch
-            v-if="column.itemType == 'switch'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-          />
-          <tinymce
-            v-if="column.itemType == 'richtext'"
-            v-model="model[column.prop]"
-            v-bind="itemAttrs(column)"
-          />
-          <slot
-            v-if="column.itemType == 'slot'"
-            v-bind="itemAttrs(column)"
-            :name="column.prop"
-          />
-          <div
-            v-if="column.desc"
-            class="desc"
-          >
-            {{ column.desc }}
-          </div>
-        </el-form-item>
+            <el-tree-select
+              v-if="column.itemType == 'treeSelect'"
+              v-model="model[column.prop]"
+              :select-params="column.props && column.props.selectParams"
+              :tree-params="column.props && column.props.treeParams"
+              v-bind="itemAttrs(column)"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            />
+            <lazy-select
+              v-if="column.itemType === 'lazySelect'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+              :option-list.sync="column.optionList"
+              :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+            />
+            <el-switch
+              v-if="column.itemType == 'switch'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+            />
+            <tinymce
+              v-if="column.itemType == 'richtext'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+            />
+            <slot
+              v-if="column.itemType == 'slot'"
+              v-bind="itemAttrs(column)"
+              :name="column.prop"
+            />
+            <div
+              v-if="column.desc"
+              class="desc"
+            >
+              {{ column.desc }}
+            </div>
+          </el-form-item>
+        </div>
         <slot
           v-if="column.itemType == 'slotout'"
           v-bind="itemAttrs(column)"
@@ -212,6 +221,9 @@ export default {
   },
   mounted() {},
   methods: {
+    changeLabel(column, value) {
+      _.set(column, 'disabled', !value)
+    },
     elFormItemAttrs(column) {
       const copy = {}
       for (const key in column) {
@@ -289,7 +301,12 @@ export default {
 .el-cascader {
   width: 100%;
 }
-
+/deep/ .el-form-item__label {
+  width: 100%;
+  .label__switch {
+    float: right;
+  }
+}
 /deep/ .el-select {
   width: 100%;
 }

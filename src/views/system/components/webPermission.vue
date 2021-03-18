@@ -35,14 +35,14 @@
           <!--          >-->
           <!--            页面控件权限-->
           <!--          </el-button>-->
-          <el-button
+          <!-- <el-button
             v-p="RANGE_PERMISSION"
             size="medium"
             type="text"
             @click.stop="() => handleMenuItemAddBtnClick(row.menuId)"
           >
             管理范围
-          </el-button>
+          </el-button> -->
           <el-button
             v-p="DELETE_PERMISSION"
             size="medium"

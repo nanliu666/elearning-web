@@ -200,6 +200,9 @@ export default {
             detailData.headTeacher = detailData.headTeacher.userId
             detailData.teachAssistant = _.map(detailData.teachAssistant, 'userId')
             this.$refs.editDetail.formData = detailData
+            // 赋值培训安排的数据
+            const { signIn } = trainInfo
+            this.$refs.editArrangement.signIn = signIn
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
             trainOnlineCourse.forEach((item) => {
               item.courseId = item.course
@@ -226,9 +229,9 @@ export default {
     },
     // 发布区分编辑发布还是新增发布
     publish(type) {
-      const basicData = this.$refs.editBasicInfo.getData()
+      const basicData = this.$refs.editBasicInfo.getData(type)
       const editArrangement = this.$refs.editArrangement.getData()
-      const detailData = this.$refs.editDetail.getData()
+      const detailData = this.$refs.editDetail.getData(type)
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
         let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
@@ -268,7 +271,8 @@ export default {
         .value()
       trainInfo['introduction'] = _.escape(trainInfo['introduction'])
       trainInfo['type'] = type
-      const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
+      const { trainExam, trainOfflineTodo, trainOnlineCourse, signIn } = res[1]
+      _.set(trainInfo, 'signIn', signIn)
       let params = {
         id: this.id,
         trainInfo,

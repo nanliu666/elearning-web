@@ -116,24 +116,6 @@ const personOptionProps = {
   key: 'userId'
 }
 
-const personFormColumns = [
-  {
-    itemType: 'slot',
-    label: '班主任',
-    prop: 'headTeacher',
-    required: true,
-    span: 11,
-    offset: 0
-  },
-  {
-    itemType: 'slot',
-    label: '助教',
-    prop: 'teachAssistant',
-    required: true,
-    span: 11,
-    offset: 2
-  }
-]
 export default {
   name: 'EditDetail',
   components: {
@@ -145,12 +127,63 @@ export default {
       teacherDefault: [],
       assessFormColumns,
       certificateFormColumns,
-      personFormColumns,
+      personFormColumns: [
+        {
+          itemType: 'slot',
+          label: '班主任',
+          prop: 'headTeacher',
+          rules: [
+            { required: true, validator: this.checkHeadTeacher, trigger: ['blur', 'change'] }
+          ],
+          span: 11,
+          offset: 0
+        },
+        {
+          itemType: 'slot',
+          label: '助教',
+          prop: 'teachAssistant',
+          rules: [
+            { required: true, validator: this.checkTeachAssistant, trigger: ['blur', 'change'] }
+          ],
+          required: true,
+          span: 11,
+          offset: 2
+        },
+        {
+          itemType: 'select',
+          label: '公开报名',
+          prop: 'applyJoinValue',
+          required: false,
+          disabled: true,
+          hasLabelSwitch: true,
+          labelSwitchConfig: {
+            prop: 'applyJoin'
+          },
+          options: [
+            { label: '审批通过', value: 'approval' },
+            { label: '自动通过', value: 'automatic' }
+          ],
+          span: 11,
+          offset: 0
+        },
+        {
+          itemType: 'datePicker',
+          label: '报名截止日期',
+          prop: 'applyJoinEndDate',
+          isVisible: false,
+          required: false,
+          span: 11,
+          offset: 2
+        }
+      ],
       personOptionProps,
       formData: {
+        applyJoinEndDate: '',
+        applyJoinValue: 'approval',
+        applyJoin: false,
         certificateId: '',
-        evaluation: true,
-        certificate: true,
+        evaluation: false,
+        certificate: false,
         evaluationType: [0],
         templateId: '',
         headTeacher: null,
@@ -158,7 +191,49 @@ export default {
       }
     }
   },
+  watch: {
+    'formData.applyJoin': {
+      handler(data) {
+        const temp = _.find(this.personFormColumns, { prop: 'applyJoinEndDate' })
+        _.set(temp, 'isVisible', data)
+        const applyJoinValueTemp = _.find(this.personFormColumns, { prop: 'applyJoinValue' })
+        _.set(applyJoinValueTemp, 'disabled', !data)
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
+    // 检验班主任与助教不能同时为一人
+    checkHeadTeacher(rule, value, callback) {
+      const { headTeacher, teachAssistant } = this.formData
+      if (_.isEmpty(value)) {
+        callback(new Error('请选择班主任！'))
+      } else if (
+        _.some(teachAssistant, (item) => {
+          return item === headTeacher
+        })
+      ) {
+        callback(new Error('班主任与助教不能同时为一人！'))
+      } else {
+        callback()
+      }
+    },
+    // 检验班主任与助教不能同时为一人
+    checkTeachAssistant(rule, value, callback) {
+      const { headTeacher, teachAssistant } = this.formData
+      if (_.isEmpty(value)) {
+        callback(new Error('请选择助教！'))
+      } else if (
+        _.some(teachAssistant, (item) => {
+          return item === headTeacher
+        })
+      ) {
+        callback(new Error('班主任与助教不能同时为一人！'))
+      } else {
+        callback()
+      }
+    },
     loadCertificateList(params) {
       return getCertificateList(_.assign(params, { status: 1 }))
     },
@@ -174,7 +249,7 @@ export default {
           })
       })
     },
-    getData() {
+    getData(type) {
       let promiseList = []
       const personForm = this.getLiData('personForm')
       promiseList.push(personForm)
@@ -188,9 +263,16 @@ export default {
         const certificateForm = this.getLiData('certificateForm')
         promiseList.push(certificateForm)
       }
-      return Promise.all(promiseList).then(() => {
-        return this.formData
-      })
+      // 如果是草稿，直接返回数据
+      if (type === 1) {
+        return new Promise((resolve) => {
+          resolve(this.formData)
+        })
+      } else {
+        return Promise.all(promiseList).then(() => {
+          return this.formData
+        })
+      }
     },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: 0 }))

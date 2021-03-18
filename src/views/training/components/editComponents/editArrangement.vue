@@ -6,13 +6,31 @@
     >
       <div class="header">
         <span class="header--title">线下日程</span>
-        <el-button
-          type="primary"
-          size="medium"
-          @click="handleEditSchedule({})"
-        >
-          添加线下日程
-        </el-button>
+        <div>
+          <span>
+            <span style="padding-right: 4px">开启签到功能</span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="启用签到功能后，学员每一节线下课程/活动都需要扫描二维码进行签到"
+              placement="top-start"
+            >
+              <i class="el-icon-warning" />
+            </el-tooltip>
+            <el-switch
+              v-model="signIn"
+              style="margin: 0 40px 0 10px;"
+              :disabled="signInDisabled"
+            />
+          </span>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="handleEditSchedule({})"
+          >
+            添加线下日程
+          </el-button>
+        </div>
       </div>
       <el-collapse
         v-model="activeName"
@@ -239,6 +257,7 @@ export default {
   },
   data() {
     return {
+      signIn: false,
       activeName: '0',
       schedule: {
         config: ScheduleConfig,
@@ -264,6 +283,9 @@ export default {
     }
   },
   computed: {
+    signInDisabled() {
+      return _.isEmpty(this.schedule.data)
+    },
     scheduleList() {
       return _.chain(this.schedule.data)
         .groupBy('todoDate')
@@ -276,8 +298,10 @@ export default {
   },
   methods: {
     getData() {
+      // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
         resolve({
+          signIn: this.signIn,
           trainOfflineTodo: this.schedule.data,
           trainOnlineCourse: this.course.data,
           trainExam: this.examine.data
@@ -334,9 +358,11 @@ export default {
     // 删除线下日程
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
+      this.signIn = !_.isEmpty(this.schedule.data)
     },
     // 线下日程提交后的数据处理
     handleSubmitSchedule(data, type) {
+      this.signIn = true
       // 默认不存在同一个教室的重叠时段
       let isOverlapping = false
       const index = _.findIndex(this.schedule.data, { id: data.id })
