@@ -148,10 +148,38 @@ export default {
           required: true,
           span: 11,
           offset: 2
+        },
+        {
+          itemType: 'select',
+          label: '公开报名',
+          prop: 'applyJoinValue',
+          required: false,
+          disabled: false,
+          hasLabelSwitch: true,
+          labelSwitchConfig: {
+            prop: 'applyJoin'
+          },
+          options: [
+            { label: '审批通过', value: 'approval' },
+            { label: '自动通过', value: 'automatic' }
+          ],
+          span: 11,
+          offset: 0
+        },
+        {
+          itemType: 'datePicker',
+          label: '报名截止日期',
+          prop: 'applyJoinEndDate',
+          required: false,
+          span: 11,
+          offset: 2
         }
       ],
       personOptionProps,
       formData: {
+        applyJoinEndDate: '',
+        applyJoinValue: 'approval',
+        applyJoin: '',
         certificateId: '',
         evaluation: false,
         certificate: false,

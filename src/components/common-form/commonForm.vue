@@ -22,6 +22,13 @@
             :name="column.prop + '-label'"
           >
             {{ column.label }}
+            <el-switch
+              v-if="column.hasLabelSwitch"
+              v-model="model[column.labelSwitchConfig.prop]"
+              v-bind="itemAttrs(column.labelSwitchConfig)"
+              class="label__switch"
+              @change="changeLabel(column, model[column.labelSwitchConfig.prop])"
+            />
           </slot>
           <el-input-number
             v-if="column.itemType == 'inputNumber'"
@@ -212,6 +219,9 @@ export default {
   },
   mounted() {},
   methods: {
+    changeLabel(column, value) {
+      _.set(column, 'disabled', !value)
+    },
     elFormItemAttrs(column) {
       const copy = {}
       for (const key in column) {
@@ -289,7 +299,12 @@ export default {
 .el-cascader {
   width: 100%;
 }
-
+/deep/ .el-form-item__label {
+  width: 100%;
+  .label__switch {
+    float: right;
+  }
+}
 /deep/ .el-select {
   width: 100%;
 }

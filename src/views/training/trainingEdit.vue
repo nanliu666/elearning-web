@@ -268,7 +268,8 @@ export default {
         .value()
       trainInfo['introduction'] = _.escape(trainInfo['introduction'])
       trainInfo['type'] = type
-      const { trainExam, trainOfflineTodo, trainOnlineCourse } = res[1]
+      const { trainExam, trainOfflineTodo, trainOnlineCourse, signIn } = res[1]
+      _.set(trainInfo, 'signIn', signIn)
       let params = {
         id: this.id,
         trainInfo,

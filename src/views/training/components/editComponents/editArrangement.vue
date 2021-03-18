@@ -6,13 +6,31 @@
     >
       <div class="header">
         <span class="header--title">线下日程</span>
-        <el-button
-          type="primary"
-          size="medium"
-          @click="handleEditSchedule({})"
-        >
-          添加线下日程
-        </el-button>
+        <div>
+          <span>
+            <span style="padding-right: 4px">开启签到功能</span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="启用签到功能后，学员每一节线下课程/活动都需要扫描二维码进行签到"
+              placement="top-start"
+            >
+              <i class="el-icon-warning" />
+            </el-tooltip>
+            <el-switch
+              v-model="signIn"
+              style="margin: 0 40px 0 10px;"
+              :disabled="signInDisabled"
+            />
+          </span>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="handleEditSchedule({})"
+          >
+            添加线下日程
+          </el-button>
+        </div>
       </div>
       <el-collapse
         v-model="activeName"
@@ -239,6 +257,7 @@ export default {
   },
   data() {
     return {
+      signIn: false,
       activeName: '0',
       schedule: {
         config: ScheduleConfig,
@@ -264,6 +283,9 @@ export default {
     }
   },
   computed: {
+    signInDisabled() {
+      return _.isEmpty(this.schedule.data)
+    },
     scheduleList() {
       return _.chain(this.schedule.data)
         .groupBy('todoDate')
@@ -272,6 +294,15 @@ export default {
           list: _.sortBy(list, (i) => i.todoTime && i.todoTime[0])
         }))
         .value()
+    }
+  },
+  watch: {
+    'schedule.data': {
+      handler() {
+        this.signIn = !_.isEmpty(this.schedule.data)
+      },
+      deep: true,
+      immediate: true
     }
   },
   methods: {
