@@ -57,8 +57,10 @@
 </template>
 
 <script>
-import { courseFeelListByUserId, zip } from '@/api/course/course'
+import { courseFeelListByUserId } from '@/api/course/course'
 import { downLoadFile } from '@/util/util'
+import { getStore } from '@/util/store.js'
+// import axios from 'axios'
 export default {
   data() {
     return {
@@ -85,17 +87,59 @@ export default {
     // 打包下载
     handleUpload() {
       let params = {
-        filePath: [],
-        fileName: [],
-        zipComment: this.rowData.courseName + '->学习心得->打包下载'
+        filePath: '',
+        fileName: '',
+        zipComment: '89898.zip',
+        responseType: 'blob',
+        emulateJSON: true
       }
       this.tableData.forEach((item) => {
-        params.filePath.push(item.filePath)
-        params.fileName.push(item.fileName)
+        params.filePath += item.filePath + ',' //.push(item.filePath)
+        params.fileName += item.fileName + ',' //.push(item.fileName)
       })
-      zip(params).then((res) => {
-        console.log(res)
-      })
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      // axios.get('/api/common/oss/download/zip', {
+      //   responseType: 'blob',
+      //   headers: {
+      //     accessToken: `bearer  ${token}`
+      //   },
+      //   params
+      // }).then((res)=>{
+      //   debugger
+      // })
+      // axios.get('/api/common/oss/download/zip',params).then((res)=>{
+      //   debugger
+      // })
+      // zip(params).then((res) => {
+      //   console.log(res)
+      //   this.repDownload(res)
+      // })
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      //url = 'http://localhost:1888/api/common/oss/download/zip?filePath=https:%2F%2Foa-file-dev.bestgrand.com.cn%2F000c3bd2fa7b4d379d6a3e5e64c7bcba.png,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fbed127b60e13423e9bccd36eb6384f0b.txt,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fd466a8f6e9dd4b118ec759be3be6c347.png,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fbd506f5ce4ce46c2bbf788efdf596ca9.png,&fileName=bg.png,git.txt,bg.png,123.png,&zipComment=%E6%B5%8B%E8%AF%95%E8%81%94%E8%B0%83%E5%A4%9A%E4%B8%AA%E4%BD%9C%E4%B8%9A.zip&responseType=blob&emulateJSON=true'
+
+      // if (!url) {
+      //   this.$message.error('视频路径不存在')
+      //   return
+      // }
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
     }
   }
 }
