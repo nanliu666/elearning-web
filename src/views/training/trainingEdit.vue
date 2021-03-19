@@ -104,7 +104,7 @@ import EditArrangement from './components/editComponents/editArrangement'
 import EditBasicInfo from './components/editComponents/editBasicInfo'
 import EditDetail from './components/editComponents/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
-const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
+// const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑
 export default {
   name: 'TrainingEdit',
@@ -176,29 +176,25 @@ export default {
       }
     },
     jumpStep(index) {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = index
-      })
+      this.activeStep = index
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     /***
-     * @author guanfenda
-     * @desc 返回上一步
-     *
+     *返回上一步
      * */
     handlePreviousStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
-      })
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     /***
-     * @author guanfenda
      * @desc 处理下一步 验证当前form是否符合规范
-     *
      * */
     handleNextStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
-      })
+      this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     initData() {
       if (this.id) {
