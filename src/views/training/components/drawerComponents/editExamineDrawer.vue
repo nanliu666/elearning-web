@@ -96,7 +96,9 @@ export default {
       currentIndex: 0,
       title: '添加考试',
       navList,
-      model: {}
+      model: {
+        operationType: 'Add'
+      }
     }
   },
   computed: {
@@ -124,6 +126,7 @@ export default {
     assignmentInEdit() {
       this.title = '编辑考试'
       this.editType = 'edit'
+      this.model.operationType = this.examine.operationType
       this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
       this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
       this.$refs.examineePermissionsRef.model = this.getNavModel(
@@ -160,6 +163,7 @@ export default {
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
       const achievementPublishData = this.$refs.achievementPublishRef.model
       const examineData = {
+        ...this.model,
         ...basicSettingData,
         ...testEnvironmentData,
         ...examinePermissionsData,
@@ -167,8 +171,6 @@ export default {
         ...achievementPublishData
       }
       examineData.id = this.editType === 'add' ? createUniqueID() : this.examine.id
-      const operationType = _.isNumber(examineData.id) ? 'Add' : 'Update'
-      _.assign(examineData, { operationType })
       this.$refs.basicSettingRef.$refs.form
         .validate()
         .then(() => {
