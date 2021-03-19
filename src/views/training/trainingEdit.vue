@@ -147,10 +147,28 @@ export default {
       return this.$route.query.id
     }
   },
+  beforeRouteLeave(from, to, next) {
+    this.resetF5Refresh()
+    next()
+  },
   mounted() {
     this.initData()
   },
   methods: {
+    // 提示是否需要继续刷新
+    stopF5Refresh() {
+      window.addEventListener('keydown', this.preventDefaultFun)
+    },
+    // 离开去除监听刷新
+    resetF5Refresh() {
+      window.removeEventListener('keydown', this.preventDefaultFun)
+    },
+    // 具体监听函数
+    preventDefaultFun() {
+      window.onbeforeunload = function() {
+        return 1
+      }
+    },
     jumpDetail() {
       if (this.activeStep !== 2) {
         this.jumpStep(2)
