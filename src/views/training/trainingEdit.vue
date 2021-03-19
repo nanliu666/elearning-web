@@ -56,7 +56,7 @@
         </el-button>
         <el-button
           v-if="activeStep === 2"
-          v-load="submitLoading"
+          v-loading="submitLoading"
           size="medium"
           type="primary"
           @click="publish(0)"
@@ -239,6 +239,7 @@ export default {
         if (this.isNext === 'next') {
           editFun = createTrain
         }
+        if (this.submitLoading) return
         this.submitLoading = true
         editFun(params)
           .then(() => {
@@ -249,7 +250,7 @@ export default {
             window.console.error(JSON.stringify(params))
           })
           .finally(() => {
-            this.submitLoading = true
+            this.submitLoading = false
           })
       })
     },

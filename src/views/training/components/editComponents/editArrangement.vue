@@ -157,7 +157,7 @@
     <offline-course-drawer
       :visible.sync="schedule.drawerVisible"
       :schedule="schedule.editingRecord"
-      @submit="handleSubmitSchedule($event)"
+      @submit="handleSubmitSchedule"
     />
     <online-course-drawer
       :visible.sync="course.drawerVisible"
@@ -178,9 +178,9 @@ import EditExamineDrawer from '../drawerComponents/editExamineDrawer'
 import OnlineCourseDrawer from '../drawerComponents/OnlineCourseDrawer'
 const ScheduleColumns = [
   {
-    prop: 'todoTime',
+    prop: 'todoTimeParams',
     formatter: function(record) {
-      return record.todoTime.join(' ~ ')
+      return record.todoTimeParams.join(' ~ ')
     }
   },
   {
@@ -360,20 +360,16 @@ export default {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
       this.signIn = !_.isEmpty(this.schedule.data)
     },
-    // 线下日程提交后的数据处理
-    handleSubmitSchedule(data, type) {
-      this.signIn = true
-      // 默认不存在同一个教室的重叠时段
+    checkOverlapTime(data) {
       let isOverlapping = false
-      const index = _.findIndex(this.schedule.data, { id: data.id })
       // 同一天使用的相同教室
       const sameClassrommAndDate = _.find(this.schedule.data, {
         classroomId: data.classroomId,
         todoDate: data.todoDate
       })
       if (sameClassrommAndDate) {
-        const time1 = sameClassrommAndDate.todoTime
-        const time2 = data.todoTime
+        const time1 = sameClassrommAndDate.todoTimeParams
+        const time2 = data.todoTimeParams
         const time1List = [
           moment(`${data.todoDate} ${time1[0]}`),
           moment(`${data.todoDate} ${time1[1]}`)
@@ -392,7 +388,17 @@ export default {
         }
       }
       // 有重叠时段就不进行补充
-      if (isOverlapping) return
+      return isOverlapping
+    },
+    // 线下日程提交后的数据处理
+    handleSubmitSchedule(msg) {
+      // 默认不存在同一个教室的重叠时段
+      const { data, type } = msg
+      if (type === 'add') {
+        if (this.checkOverlapTime(data)) return
+      }
+      this.signIn = true
+      const index = _.findIndex(this.schedule.data, { id: data.id })
       if (index >= 0 && type === 'edit') {
         this.$set(this.schedule.data, index, data)
       } else {

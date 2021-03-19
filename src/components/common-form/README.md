@@ -39,6 +39,8 @@
 | rules       | 校验规则                                                 |    否    |  Array  |   -    |
 | required    | 是否必填，当为true时会自动添加一个必填的校验规则         |    否    | Boolean | false  |
 | placeholder | 自定义占位内容                                           |    否    | String  |        |
+| isVisible   | 是否隐藏且占位，默认不隐藏                               |    否    | Boolean |  true  |
+| isHidden    | 是否隐藏且不占位，默认不隐藏                             |    否    | Boolean | false  |
 
 
 ### itemType 可选值

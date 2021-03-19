@@ -17,6 +17,7 @@
           :type="item.config && item.config.type ? item.config.type : 'text'"
           :placeholder="item.config.placeholder || '请输入' + item.label"
           class="elInput"
+          :maxlength="item.maxlength"
           :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
           @input="search(item)"
