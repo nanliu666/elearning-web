@@ -9,6 +9,7 @@
         v-for="column in columns"
         :key="column.prop"
         :span="column.span ? column.span : 10"
+        :class="{ is__hidden: _.get(column, 'isHidden', false) }"
         :offset="column.offset ? column.offset : 0"
       >
         <div :style="{ visibility: _.get(column, 'isVisible', true) ? 'visible' : 'hidden' }">
@@ -300,6 +301,9 @@ export default {
 .el-input-number,
 .el-cascader {
   width: 100%;
+}
+.is__hidden {
+  display: none;
 }
 /deep/ .el-form-item__label {
   width: 100%;
