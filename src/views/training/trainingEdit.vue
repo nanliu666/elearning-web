@@ -149,7 +149,9 @@ export default {
   },
   mounted() {
     this.initData()
-    this.setF5Refresh()
+    if (process.env.NODE_ENV === 'production') {
+      this.setF5Refresh()
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.clearF5Refresh()

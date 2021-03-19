@@ -11,7 +11,7 @@
           <lazySelect
             v-model="formData.contactName"
             :load="loadCoordinator"
-            :allow-create="false"
+            :allow-create="true"
             :searchable="true"
             :option-props="personOptionProps"
             @select="selectContact"

@@ -114,7 +114,7 @@ export default {
   watch: {
     visible(value) {
       if (value) {
-        if (!_.isEmpty(this.examine) && !_.isEmpty(this.$refs)) {
+        if (!_.isEmpty(this.examine)) {
           this.assignmentInEdit()
         } else {
           this.clearInAdd()
@@ -127,14 +127,16 @@ export default {
       this.title = '编辑考试'
       this.editType = 'edit'
       this.model.operationType = this.examine.operationType
-      this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
-      this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
-      this.$refs.examineePermissionsRef.model = this.getNavModel(
-        this.$refs.examineePermissionsRef.model
-      )
-      this.$refs.evaluationStrategyRef.model = this.getNavModel(
-        this.$refs.evaluationStrategyRef.model
-      )
+      this.$nextTick(() => {
+        this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
+        this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
+        this.$refs.examineePermissionsRef.model = this.getNavModel(
+          this.$refs.examineePermissionsRef.model
+        )
+        this.$refs.evaluationStrategyRef.model = this.getNavModel(
+          this.$refs.evaluationStrategyRef.model
+        )
+      })
     },
     clearInAdd() {
       // 新增的时候重置数据
