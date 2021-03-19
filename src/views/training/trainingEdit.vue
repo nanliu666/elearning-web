@@ -147,27 +147,28 @@ export default {
       return this.$route.query.id
     }
   },
-  beforeRouteLeave(from, to, next) {
-    this.resetF5Refresh()
-    next()
-  },
   mounted() {
     this.initData()
+    this.setF5Refresh()
+  },
+  beforeRouteLeave(to, from, next) {
+    this.clearF5Refresh()
+    next()
   },
   methods: {
-    // 提示是否需要继续刷新
-    stopF5Refresh() {
-      window.addEventListener('keydown', this.preventDefaultFun)
+    clearF5Refresh() {
+      window.removeEventListener('beforeunload', this.watchF5Refresh)
     },
-    // 离开去除监听刷新
-    resetF5Refresh() {
-      window.removeEventListener('keydown', this.preventDefaultFun)
+    setF5Refresh() {
+      window.addEventListener('beforeunload', this.watchF5Refresh)
     },
-    // 具体监听函数
-    preventDefaultFun() {
-      window.onbeforeunload = function() {
-        return 1
+    watchF5Refresh(e) {
+      // 兼容IE8和Firefox 4之前的版本
+      if (e) {
+        e.returnValue = '关闭提示'
       }
+      // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+      return '关闭提示'
     },
     jumpDetail() {
       if (this.activeStep !== 2) {
