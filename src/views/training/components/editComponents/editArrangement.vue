@@ -328,6 +328,7 @@ export default {
     handleDeleteExamine(row) {
       let index = _.findIndex(this.examine.data, (item) => item.id === row.id)
       this.examine.data.splice(index, 1)
+      this.$message.success('删除成功！')
     },
     // 新增与编辑在线课程
     handleEditCourse(row) {
@@ -349,6 +350,7 @@ export default {
     handleDeleteCourse(row) {
       let index = _.findIndex(this.course.data, (item) => item.id === row.id)
       this.course.data.splice(index, 1)
+      this.$message.success('删除成功！')
     },
     // 编辑与新增线下日程
     handleEditSchedule(row) {
@@ -359,6 +361,7 @@ export default {
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
       this.signIn = !_.isEmpty(this.schedule.data)
+      this.$message.success('删除成功！')
     },
     checkOverlapTime(data) {
       let isOverlapping = false
