@@ -108,7 +108,7 @@ export default {
           prop: 'trainTime',
           options: [''],
           required: true,
-          type: 'daterange',
+          type: 'datetimerange',
           span: 11,
           offset: 0
         },
