@@ -164,7 +164,7 @@
       :course="course.editingRecord"
       @submit="courseSubmit"
     />
-    <EditExamineDrawer
+    <edit-examine-drawer
       :visible.sync="examine.drawerVisible"
       :examine="examine.editingRecord"
       @submit="examineSubmit"

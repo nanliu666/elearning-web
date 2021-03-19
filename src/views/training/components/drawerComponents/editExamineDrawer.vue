@@ -167,6 +167,8 @@ export default {
         ...achievementPublishData
       }
       examineData.id = this.editType === 'add' ? createUniqueID() : this.examine.id
+      const operationType = _.isNumber(examineData.id) ? 'Add' : 'Update'
+      _.assign(examineData, { operationType })
       this.$refs.basicSettingRef.$refs.form
         .validate()
         .then(() => {
