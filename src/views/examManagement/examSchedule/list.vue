@@ -259,6 +259,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
+      maxlength: 32,
       field: 'examName',
       label: '',
       data: '',
