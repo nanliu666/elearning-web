@@ -8,6 +8,10 @@ export const postExamArrange = (params) => post('/manage/v1/exam/arrange', param
  */
 export const getExamList = (params) => get('/manage/v1/exam/paper/list', params)
 /**
+ * 分页查询副本试卷列表
+ */
+export const getCopyPaperList = (params) => get('/manage/v1/exam/paper/copy/list', params)
+/**
  * 获取创始人接口
  */
 export const getCreatUsers = (params) => get('/manage/v1/exam/creator', params)

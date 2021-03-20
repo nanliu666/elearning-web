@@ -106,22 +106,29 @@
                   <li>
                     <span class="text">学分：</span> <span> {{ courseData.credit }} </span>
                   </li>
-                  <li>
+                  <li v-if="courseData.passCondition">
                     <span class="text">通过条件：</span>
                     <span
-                      v-for="(item, index) in courseData.passCondition"
+                      v-for="(item, index) in courseData.passCondition.split(',')"
                       :key="index"
                     >
-                      <span v-show="item == 'a'">教师评定 </span>
                       <span
-                        v-show="item == 'b'"
-                      >考试通过
-                        {{ courseData.passCondition.split(',').length >= 3 ? ',' : '' }}</span>
-                      <span
-                        v-show="item == 'c'"
-                      >达到课程学时
-                        {{ courseData.passCondition.split(',').length >= 2 ? ',' : '' }}
+                        v-if="item == 'a'"
+                      >教师评定
+                        {{ index != courseData.passCondition.split(',').length - 1 ? ',' : '' }}
                       </span>
+                      <span
+                        v-if="item == 'b'"
+                      >考试通过{{
+                        index != courseData.passCondition.split(',').length - 1 ? ',' : ''
+                      }}
+                      </span>
+                      <span
+                        v-if="item == 'c'"
+                      >达到课程学时
+                        {{
+                          index != courseData.passCondition.split(',').length - 1 ? ',' : ''
+                        }}</span>
                     </span>
                   </li>
                   <li>
@@ -494,6 +501,13 @@ export default {
   activated() {
     this.loadData()
   },
+  created() {
+    this.loadData()
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   methods: {
     // 查看课程内容
     jumpToLearn(item) {
@@ -559,11 +573,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(function() {
+        .then(() => {
           let { id, catalogName } = JSON.parse(self.applyDetail.formData)
-          self.$router.push({
-            path: '/course/compileCourse',
-            query: { id: id, catalogName: catalogName }
+          this.$nextTick(() => {
+            self.$router.push({
+              path: '/course/establishCourse',
+              query: { id: id, catalogName: catalogName }
+            })
           })
         })
         .catch(() => {})

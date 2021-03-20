@@ -1,10 +1,12 @@
 <template>
   <el-dialog
+    v-if="visible"
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
-    width="550px"
+    width="800px"
     :modal-append-to-body="false"
+    top="5vh"
     @close="handleClose"
   >
     <el-form
@@ -21,8 +23,8 @@
       >
         <el-input
           v-model.trim="form.name"
-          maxlength="32"
           placeholder="请输入"
+          maxlength="32"
         />
       </el-form-item>
       <el-form-item label="上级分类">
@@ -39,7 +41,7 @@
               :label="parentOrgIdLabel"
             >
               <el-tree
-                ref="orgTreeRef"
+                ref="orgTree"
                 :data="orgTree"
                 node-key="orgId"
                 :props="{
@@ -50,13 +52,23 @@
               />
             </el-option>
           </el-select>
-          <div
-            v-if="type !== 'createChild'"
-            class="select-tips"
-          >
-            可通过选择上级分类为其构建子分类
+          <div class="select-tips">
+            可通过选择上级类目为其创建子分类，子分类可见范围跟随父分类
           </div>
         </el-col>
+      </el-form-item>
+      <!-- 可见范围 -->
+      <el-form-item
+        v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
+        label="可见范围"
+      >
+        <div>
+          <OrgTree
+            :id-list="form.orgIdList"
+            @selectedValue="getOrgList"
+          ></OrgTree>
+        </div>
+        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
@@ -71,8 +83,8 @@
       >完成</el-button>
       <el-button
         size="medium"
-        @click="submit('toCreate')"
-      >完成并创建教室</el-button>
+        @click="handleClose"
+      >取消</el-button>
     </span>
     <span
       v-else
@@ -93,10 +105,13 @@
 </template>
 
 <script>
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
-import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
+  components: {
+    OrgTree
+  },
   props: {
     visible: {
       type: Boolean,
@@ -106,13 +121,10 @@ export default {
   data() {
     return {
       type: 'create',
-      radioDisable: {
-        Company: false,
-        Department: false,
-        Group: false
-      },
       form: {
-        parentId: ''
+        name: '',
+        parentId: '',
+        orgIds: []
       },
       parentOrgIdLabel: '',
       rules: {
@@ -122,13 +134,20 @@ export default {
       loading: false
     }
   },
-  computed: {
-    ...mapGetters(['userId'])
-  },
   methods: {
+    // 可见范围返回数据
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
+    },
     async loadOrgTree() {
       let res = await getCategoryTree({ source: 'classroom', addFlag: '1' })
-      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      if (this.type === 'edit') {
+        this.orgTree = this.clearCurrentChildren(res)
+        this.parentOrgIdLabel =
+          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+      } else {
+        this.orgTree = res
+      }
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -161,12 +180,14 @@ export default {
     },
     // 提交
     submit(type) {
-      if (this.checkSameName()) return
+      if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        this.form.orgIds = this.form.orgIds.toString()
+        this.form.source = 'classroom'
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addCategory(_.assign(this.form, { creatorId: this.userId, source: 'classroom' }))
+            addCategory(this.form)
               .then((res) => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -205,30 +226,26 @@ export default {
     // 新建分类
     create() {
       this.type = 'create'
-      this.parentOrgIdLabel = ''
+      _.assign(this.$data, this.$options.data())
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.loadOrgTree()
     },
     // 新建子分类
     createChild(row) {
       this.type = 'createChild'
-      this.form = _.pick(_.cloneDeep(row), ['name', 'parentId', 'source'])
+      this.form = _.cloneDeep(row)
       this.form.parentId = row.idStr
       this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
+      this.loadOrgTree()
     },
     edit(row) {
       this.type = 'edit'
-      const { idStr, parentId, name } = row
-      this.form = {
-        id: idStr,
-        parentId,
-        name
-      }
-      this.parentOrgIdLabel = row.parentId == '0' ? '顶级' : this.findOrg(row.parentIdStr).name
-      this.$emit('changevisible', true)
       this.loadOrgTree()
+      this.form = _.cloneDeep(row)
+      this.$emit('changevisible', true)
     },
     findOrg(id) {
       let org = {}
@@ -248,12 +265,6 @@ export default {
     },
     handleClose() {
       this.form = { parentId: '' }
-      this.radioDisable = {
-        Company: false,
-        Department: false,
-        Group: false
-      }
-      this.$refs.ruleForm.clearValidate()
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {
@@ -270,6 +281,7 @@ export default {
   font-size: 12px;
   color: #a1a8ae;
   margin-top: -8px;
+  margin-bottom: -24px;
 }
 .newOrgDailog {
   .el-select {
@@ -284,5 +296,11 @@ export default {
 }
 /deep/ .el-form-item__label {
   padding: 0 0 0 0;
+}
+/deep/ .el-dialog__body {
+  padding: 15px 20px 0;
+}
+/deep/ .el-form-item {
+  margin-bottom: 10px;
 }
 </style>

@@ -16,6 +16,7 @@
           <div class="search-box">
             <search-popover
               ref="searchPopover"
+              maxlength="10"
               :require-options="searchConfig.requireOptions"
               :popover-options="searchConfig.popoverOptions"
               @submit="handleSearch"
@@ -35,11 +36,11 @@
                 placement="bottom"
                 width="40"
                 trigger="click"
-                style="margin-left:10px"
+                style="margin-left: 10px"
               >
                 <el-checkbox-group
                   v-model="columnsVisible"
-                  style="display: flex;flex-direction: column;"
+                  style="display: flex; flex-direction: column"
                 >
                   <el-checkbox
                     v-for="item in tableColumns"
@@ -53,7 +54,7 @@
                 <i
                   slot="reference"
                   class="el-icon-setting"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                 />
               </el-popover>
             </div>
@@ -66,7 +67,7 @@
           <span v-if="row.isUsed === 0">禁用</span>
           <span v-if="row.isUsed === 1">正常</span>
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               type="text"
@@ -83,8 +84,8 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { getLiveList, getcategoryTree } from '@/api/live/liveList'
+// import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { getLiveList, getcategoryTree, getCreateUserId } from '@/api/live/liveList'
 let TABLE_COLUMNS = [
   { type: 'index', label: '序号', width: 100 },
   {
@@ -140,7 +141,11 @@ const SEARCH_CONFIG = {
       label: '',
       data: '',
       options: [],
-      config: { placeholder: '输入直播标题或编号搜索', 'suffix-icon': 'el-icon-search' }
+      config: {
+        placeholder: '输入直播标题或编号搜索',
+        'suffix-icon': 'el-icon-search',
+        maxlength: 20
+      }
     }
   ],
   popoverOptions: [
@@ -176,24 +181,24 @@ const SEARCH_CONFIG = {
       data: '',
       label: '创建人',
       options: [],
-      config: { optionLabel: 'name', optionValue: 'userId' },
+      config: { optionLabel: 'name', optionValue: 'id' },
       loading: false,
       noMore: false,
-      pageNo: 2,
-      loadMoreFun(item) {
-        if (item.loading || item.noMore) return
-        item.loading = true
-        getCreatUsers().then((res) => {
-          if (res.length > 0) {
-            item.options.push(...res)
-            item.pageNo += 1
-            item.loading = false
-          } else {
-            item.noMore = true
-            item.loading = false
-          }
-        })
-      }
+      pageNo: 2
+      //   loadMoreFun(item) {
+      //     if (item.loading || item.noMore) return
+      //     item.loading = true
+      //     getCreatUsers().then((res) => {
+      //       if (res.length > 0) {
+      //         item.options.push(...res)
+      //         item.pageNo += 1
+      //         item.loading = false
+      //       } else {
+      //         item.noMore = true
+      //         item.loading = false
+      //       }
+      //     })
+      //   }
     },
     {
       type: 'select',
@@ -243,7 +248,7 @@ export default {
   },
   activated() {
     this.initSearchData()
-    getCreatUsers().then((res) => {
+    getCreateUserId().then((res) => {
       this.searchConfig.popoverOptions[1].options.push(...res)
     })
     this.loadTableData()

@@ -16,6 +16,7 @@
       slot-scope="{ row }"
     >
       <el-button
+        v-p="COURSE_APPROVALCENTER_VIEW"
         type="text"
         @click="toDetails(row)"
       >
@@ -66,6 +67,7 @@
       <!--撤回-->
       <!--</el-button>-->
       <el-button
+        v-p="COURSE_APPROVALCENTER_VIEW"
         type="text"
         @click="toDetails(scope.row)"
       >
@@ -76,6 +78,7 @@
 </template>
 
 <script>
+import { COURSE_APPROVALCENTER_VIEW } from '@/const/privileges'
 import { fulllist, cancel } from '@/api/approvalCenter/approvalCenter'
 import { STATUS_TO_TEXT } from '@/const/approve'
 // 表格属性
@@ -156,12 +159,16 @@ export default {
     }
   },
 
+  computed: {
+    COURSE_APPROVALCENTER_VIEW: () => COURSE_APPROVALCENTER_VIEW
+  },
+
   activated() {
     this.setPitch()
   },
-  // created() {
-  //   this.setPitch()
-  // },
+  created() {
+    this.setPitch()
+  },
   methods: {
     statusToText(status) {
       return STATUS_TO_TEXT[status]

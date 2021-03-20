@@ -96,7 +96,9 @@ export default {
       currentIndex: 0,
       title: '添加考试',
       navList,
-      model: {}
+      model: {
+        operationType: 'Add'
+      }
     }
   },
   computed: {
@@ -112,7 +114,7 @@ export default {
   watch: {
     visible(value) {
       if (value) {
-        if (!_.isEmpty(this.examine) && !_.isEmpty(this.$refs)) {
+        if (!_.isEmpty(this.examine)) {
           this.assignmentInEdit()
         } else {
           this.clearInAdd()
@@ -124,14 +126,17 @@ export default {
     assignmentInEdit() {
       this.title = '编辑考试'
       this.editType = 'edit'
-      this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
-      this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
-      this.$refs.examineePermissionsRef.model = this.getNavModel(
-        this.$refs.examineePermissionsRef.model
-      )
-      this.$refs.evaluationStrategyRef.model = this.getNavModel(
-        this.$refs.evaluationStrategyRef.model
-      )
+      this.model.operationType = this.examine.operationType
+      this.$nextTick(() => {
+        this.$refs.basicSettingRef.model = this.getNavModel(this.$refs.basicSettingRef.model)
+        this.$refs.testEnvironmentRef.model = this.getNavModel(this.$refs.testEnvironmentRef.model)
+        this.$refs.examineePermissionsRef.model = this.getNavModel(
+          this.$refs.examineePermissionsRef.model
+        )
+        this.$refs.evaluationStrategyRef.model = this.getNavModel(
+          this.$refs.evaluationStrategyRef.model
+        )
+      })
     },
     clearInAdd() {
       // 新增的时候重置数据
@@ -160,6 +165,7 @@ export default {
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
       const achievementPublishData = this.$refs.achievementPublishRef.model
       const examineData = {
+        ...this.model,
         ...basicSettingData,
         ...testEnvironmentData,
         ...examinePermissionsData,

@@ -102,15 +102,14 @@ RouterPlugin.install = function(router, store) {
       for (let i = 0; i < aMenu.length; i++) {
         // 取到当前要处理的一项
         const oMenu = aMenu[i]
-        // window.console.log('oMenu', oMenu)
         // 判断this.routerList中是否已经存在该path，存在就跳出
-        // console.log(oMenu[propsDefault.path]!=="")
         // if (this.routerList.includes(oMenu[propsDefault.path])&&oMenu[propsDefault.path]!=="") return
         // 这一块的赋值 也就是取到返回的值
         let path = oMenu[propsDefault.path] || '',
           //特殊处理组件 执行完这个 component 也就是精确到具体的文件了  views文件夹下面就是具体的页面代码
           component = genComponent(oMenu.path),
           icon = oMenu[propsDefault.icon],
+          name = oMenu[propsDefault.label],
           children = oMenu[propsDefault.children],
           meta = oMenu[propsDefault.meta] || {}
         // meta中 keepalive 的处理
@@ -143,6 +142,7 @@ RouterPlugin.install = function(router, store) {
             }
           },
           icon: icon,
+          name: name,
           meta: meta,
           // redirect: (() => {
           //   // 第一次进来但是没有子路由的 需要添加redirect

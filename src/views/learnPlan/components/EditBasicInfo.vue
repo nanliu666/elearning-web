@@ -46,7 +46,7 @@ export default {
         {
           prop: 'coursePlanName',
           itemType: 'input',
-          label: '课程安排名称',
+          label: '线上必修计划名称',
           maxlength: 32,
           required: true
         },
@@ -82,7 +82,9 @@ export default {
           itemType: 'datePicker',
           valueFormat: 'yyyy-MM-dd HH:mm:ss',
           type: 'daterange',
-          label: '时间范围',
+          label: '学习时间',
+          'start-placeholder': '开始日期',
+          'end-placeholder': '结束日期',
           required: true
         },
         {

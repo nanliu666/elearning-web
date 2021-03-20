@@ -80,6 +80,7 @@
           slot-scope="{ row }"
         >
           <el-button
+            v-p="COURSE_APPROVALCENTER_VIEW"
             type="text"
             @click="toDetails(row)"
           >
@@ -118,8 +119,9 @@
           slot-scope="scope"
         >
           <!--<el-button type="text" @click="againFn()"> 重新申请 </el-button>-->
-        <!--<el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>-->
+          <!--<el-button type="text" @click="withdrawFn(scope.row)"> 撤回 </el-button>-->
           <el-button
+            v-p="COURSE_APPROVALCENTER_VIEW"
             type="text"
             @click="toDetails(scope.row)"
           >
@@ -132,6 +134,7 @@
 </template>
 
 <script>
+import { COURSE_APPROVALCENTER_VIEW } from '@/const/privileges'
 import { fulllist } from '@/api/approvalCenter/approvalCenter'
 import { STATUS_TO_TEXT } from '@/const/approve'
 import Reviewed from './components/Reviewed'
@@ -218,12 +221,19 @@ export default {
       }
     }
   },
+  computed: {
+    COURSE_APPROVALCENTER_VIEW: () => COURSE_APPROVALCENTER_VIEW
+  },
 
   watch: {
     searchInput: function() {
+      this.page.pageNo = 1
+      this.page.currentPage = 1
       this.setPitch(this.pitch)
     },
     statusValue: function() {
+      this.page.pageNo = 1
+      this.page.currentPage = 1
       this.setPitch(this.pitch)
     }
   },

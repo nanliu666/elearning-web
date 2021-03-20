@@ -124,3 +124,39 @@ export const getStudyList = (params) => get('/api/manage/v1/course/getStudyList'
  * */
 export const getCourseInfoUserList = (params) =>
   get('/api/manage/v1/course/getCourseInfoUserList', params)
+/**
+ *  查询课程作业列表
+ * @param {Object} params - 参数
+ * */
+export const listCourseJob = (params) => get('api/manage/v1/course/listCourseJob', params)
+/**
+ *  查询用户心得体会列表
+ * @param {Object} params - 参数
+ * */
+export const courseFeelListByUserId = (params) =>
+  get('api/manage/v1/course/courseFeelListByUserId', params)
+/**
+ *  导出学习人员列表
+ * @param {Object} params.courseId - 课程Id
+ * */
+export const exportStudyList = (params) => get('api/manage/v1/course/exportStudyList', params)
+/**
+ *  学员提交作业或讲师提交评改
+ * @param {Object} params.courseId        课程id
+ * @param {Object} params.fileCategory    文件归类：用户提交的附件user、还是讲师评改的附件teacher
+ * @param {Object} params.fileName        文件名称，包括扩展名
+ * @param {Object} params.filePath        文件所在路径
+ * @param {Object} params.fileSize        文件大小
+ * @param {Object} params.id              对应FileInfoList里的Id，有则回传，没有则传空
+ * @param {Object} params.jobId           对应课程作业Id
+ * @param {Object} params.userId          学员id
+ **/
+export const saveCourseLinkedStudentOrTeacher = (params) =>
+  post('api/manage/v1/web/coursecenter/coursework/saveCourseLinkedStudentOrTeacher', params)
+/**
+ *  批量压缩成zip下载
+ * @param {Object} params.filePath        多个文件路径url的数组
+ * @param {Object} params.fileName        每个文件对应的名称数组
+ * @param {Object} params.zipComment      zip包名称
+ **/
+export const zip = (params) => get('/api/common/oss/download/zip', params)

@@ -164,7 +164,7 @@
           after-text="分钟内禁止交卷"
         />
       </template>
-      <template #preCreate>
+      <!-- <template #preCreate>
         <switch-input
           :disabled="modelDisabled"
           :switch-value.sync="model.preCreate"
@@ -172,7 +172,7 @@
           pre-text="试卷最多预生成"
           after-text="份"
         />
-      </template>
+      </template> -->
       <template #openResults>
         <switch-input
           :disabled="modelDisabled"
@@ -284,15 +284,15 @@ import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
 import { getAllUserList } from '@/api/system/user'
 import { getCategoryList } from '@/api/examManage/category'
-import { getExamList, getCertificateList } from '@/api/examManage/schedule'
-
-const insertConfig = {
-  itemType: 'switch',
-  span: 11,
-  offset: 2,
-  prop: 'modifyLimit',
-  label: '不允许修改考生客观题及其评分结果'
-}
+import { getExamList, getCertificateList, getCopyPaperList } from '@/api/examManage/schedule'
+// TODO:隐藏不允许修改考生客观题及其评分结果
+// const insertConfig = {
+//   itemType: 'switch',
+//   span: 11,
+//   offset: 2,
+//   prop: 'modifyLimit',
+//   label: '不允许修改考生客观题及其评分结果'
+// }
 const testPaper1Config = {
   itemType: 'slot',
   span: 11,
@@ -448,16 +448,17 @@ const EventColumns = [
     prop: 'answerBanExam',
     label: '答卷时间过少禁止交卷'
   },
-  {
-    itemType: 'slot',
-    span: 11,
-    offset: 2,
-    prop: 'preCreate',
-    label: '启用试卷预生成服务'
-  },
+  // {
+  //   itemType: 'slot',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'preCreate',
+  //   label: '启用试卷预生成服务'
+  // },
   {
     itemType: 'switch',
     span: 11,
+    offset: 2,
     prop: 'isHold',
     label: '自动保存答案到服务器'
   },
@@ -672,7 +673,7 @@ export default {
         createAnswers: false,
         lateBanExam: false,
         answerBanExam: false,
-        preCreate: false,
+        preCreate: true,
         isHold: false,
         lateBanExamValue: 15, // 迟到15
         answerBanExamValue: 30, // 最低30分钟才可交卷
@@ -763,28 +764,29 @@ export default {
       deep: true,
       immediate: true
     },
-    'model.modifyAnswer': {
-      handler(value) {
-        const index = _.findIndex(this.columns, (column) => {
-          return column.prop === 'modifyAnswer'
-        })
-        const limitIndex = _.findIndex(this.columns, (column) => {
-          return column.prop === 'modifyLimit'
-        })
-        if (value) {
-          if (limitIndex === -1) {
-            this.columns.splice(index + 1, 0, insertConfig)
-            this.columns[index].span = 11
-          }
-        } else {
-          if (limitIndex !== -1) {
-            this.columns[index].span = 24
-            this.columns.splice(limitIndex, 1)
-          }
-        }
-      },
-      deep: true
-    },
+    // TODO:隐藏允许评卷人修改考生答案
+    // 'model.modifyAnswer': {
+    //   handler(value) {
+    //     const index = _.findIndex(this.columns, (column) => {
+    //       return column.prop === 'modifyAnswer'
+    //     })
+    //     const limitIndex = _.findIndex(this.columns, (column) => {
+    //       return column.prop === 'modifyLimit'
+    //     })
+    //     if (value) {
+    //       if (limitIndex === -1) {
+    //         this.columns.splice(index + 1, 0, insertConfig)
+    //         this.columns[index].span = 11
+    //       }
+    //     } else {
+    //       if (limitIndex !== -1) {
+    //         this.columns[index].span = 24
+    //         this.columns.splice(limitIndex, 1)
+    //       }
+    //     }
+    //   },
+    //   deep: true
+    // },
     // 是否发放证书
     'model.certificate': {
       handler(value) {
@@ -833,7 +835,12 @@ export default {
       return getAllUserList(params)
     },
     loadTestPaper(params) {
-      return getExamList(_.assign(params, { status: 'normal' }))
+      //从手工评卷的编辑进来的时候，需要换成副本接口，入参也需要加入试卷id
+      const loadFun = _.get(this.$route, 'query.source') ? getCopyPaperList : getExamList
+      const loadParam = _.get(this.$route, 'query.source')
+        ? _.assign(params, { id: this.model.testPaper })
+        : _.assign(params, { status: 'normal' })
+      return loadFun(loadParam)
     },
     loadCertificateList(params) {
       return getCertificateList(_.assign(params, { status: '1' }))

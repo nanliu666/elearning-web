@@ -35,7 +35,7 @@ export const getQuestion = (params) => get('/manage/v1/question', params)
  * @param {*} params
  * @param {*} params.id
  */
-export const delQuestion = (params) => del('/manage/v1/question', params)
+export const delQuestion = (params) => post('/manage/v1/question/del', params)
 /**
  * 获取试题分类
  * @param {*} params

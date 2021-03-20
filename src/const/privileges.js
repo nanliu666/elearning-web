@@ -12,6 +12,8 @@ export const AUTH_COURSE_CATALOG = '/course/catalog/author' // 权限配置
 export const EDIT_COURSE_CATALOG = '/course/catalog/edit' // 编辑
 export const DELETE_COURSE_CATALOG = '/course/catalog/delete' // 删除
 export const ADD_GROUNP_COURSE_CATALOG = '/course/catalog/addNewGroup' // 新增子分类
+// 课程中心的审核
+export const COURSE_APPROVALCENTER_VIEW = '/course/approvalCenter/view' // 查看详情
 // 培训中心的鉴权
 export const ADD_TRAIN = '/training/trainingArrange/add' // 新增培训
 export const ADD_GROUNP_TRAIN = '/training/trainingArrange/addGroup' // 新增分组
@@ -95,7 +97,12 @@ export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 停用
 export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 预览
 export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 删除
 // 证书发放明细的鉴权
-export const EXPORT_CERTIFICATE = '/certificate/certificateDetail/export' // 导出Excel
+export const EXPORT_CERTIFICATE = '/certificate/detailList/export' // 导出Excel
+export const VIEW_CERTIFICATE = '/certificate/detailList/view' // 查看
+// 证书发放明细的详情的鉴权
+export const EXPORT_CERTIFICATE_DETAIL = '/certificate/detail/export' // 导出
+export const SOURCE_CERTIFICATE_DETAIL = '/certificate/detail/source' // 查看来源
+export const REVOKE_CERTIFICATE_DETAIL = '/certificate/detail/revoke' // 撤回证书
 // 组织管理的鉴权
 export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
@@ -157,3 +164,23 @@ export const DELETE_LIVE_BACK = '/live/playBackListSingle/delete' // 删除
 export const DOWNLOAD_LIVE_BACK = '/live/playBackListSingle/download' // 下载
 // 直播中心的数据统计的鉴权
 export const CONCAT_LIVE_START = '/live/live-stat-detail/concat' // 合并同一用户
+// 教室管理的分类管理的鉴权
+export const ADD_CLASSROOM_CLASSIFY = '/resource/classroom/classify/add' // 新建分类
+export const STOP_CLASSROOM_CLASSIFY = '/resource/classroom/classify/stop' // 启用/停用
+export const EDIT_CLASSROOM_CLASSIFY = '/resource/classroom/classify/eidt' // 编辑
+export const DELETE_CLASSROOM_CLASSIFY = '/resource/classroom/classify/delete' // 删除
+export const ADD_NEW_GROUNP_CLASSROOM_CLASSIFY = '/resource/classroom/classify/addNewGroup' // 新建子分类
+// 教室管理的教室列表的鉴权
+export const ADD_CLASSROOM = '/resource/classroom/list/add' // 创建教室
+export const VIEW_CLASSROOM = '/resource/classroom/list/view' // 查看教室
+export const STOP_CLASSROOM = '/resource/classroom/list/stop' // 启用/停用
+export const EDIT_CLASSROOM = '/resource/classroom/list/eidt' // 编辑
+export const DELETE_CLASSROOM = '/resource/classroom/list/delete' // 删除
+
+// 岗位管理的鉴权
+export const ADD_STATION = '/system/station/add' // 岗位新增
+export const EXPORTS_STATION = '/system/station/exports' // 批量导出
+export const DETAIL_STATION = '/system/station/detail' // 查看用户
+export const EDIT_STATION = '/system/station/edit' // 岗位编辑
+export const DELETE_STATION = '/system/station/delete' // 岗位删除
+export const EXPORTS_STATIONDETAIL = '/system/stationDetail/exports' // 批量导出(查看用户)

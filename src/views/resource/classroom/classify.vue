@@ -3,7 +3,7 @@
     <page-header title="分类管理">
       <el-button
         slot="rightMenu"
-        v-p="ADD_REP_CATALOG"
+        v-p="ADD_CLASSROOM_CLASSIFY"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
@@ -35,27 +35,27 @@
           </div>
         </template>
         <template #status="{row}">
-          {{ row.status == 0 ? '已启用' : '已停用' }}
+          {{ row.status == 0 ? '已停用' : '已启用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="STOP_REP_CATALOG"
+              v-p="STOP_CLASSROOM_CLASSIFY"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status == 0 ? '停用' : '启用' }}
+              {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
             <el-button
-              v-p="AUTH_REP_CATALOG"
+              v-p="EDIT_CLASSROOM_CLASSIFY"
               type="text"
-              @click="handleAuth(row)"
+              @click="handleOrgEdit(row)"
             >
-              权限配置
+              编辑
             </el-button>
             <el-dropdown
-              v-if="$p([EDIT_REP_CATALOG, DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
+              v-if="$p([DELETE_CLASSROOM_CLASSIFY, ADD_NEW_GROUNP_CLASSROOM_CLASSIFY])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -66,22 +66,16 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="EDIT_REP_CATALOG"
-                  command="edit"
-                >
-                  编辑
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="DELETE_REP_CATALOG"
-                  command="delete"
-                >
-                  删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="ADD_CHILD_REP_CATALOG"
+                  v-p="ADD_NEW_GROUNP_CLASSROOM_CLASSIFY"
                   command="addChild"
                 >
                   新建子分类
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-p="DELETE_CLASSROOM_CLASSIFY"
+                  command="delete"
+                >
+                  删除
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -100,7 +94,6 @@
 
 <script>
 import { getCategoryTree, deleteCategory, updateCategoryStatus, getCreatorList } from '@/api/live'
-
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
@@ -140,12 +133,11 @@ const TABLE_CONFIG = {
   }
 }
 import {
-  ADD_REP_CATALOG,
-  STOP_REP_CATALOG,
-  AUTH_REP_CATALOG,
-  EDIT_REP_CATALOG,
-  DELETE_REP_CATALOG,
-  ADD_CHILD_REP_CATALOG
+  ADD_CLASSROOM_CLASSIFY,
+  STOP_CLASSROOM_CLASSIFY,
+  EDIT_CLASSROOM_CLASSIFY,
+  DELETE_CLASSROOM_CLASSIFY,
+  ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -177,17 +169,17 @@ export default {
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: 0, label: '启用' },
-              { value: 1, label: '停用' }
+              { value: 0, label: '停用' },
+              { value: 1, label: '启用' }
             ]
           },
           {
             type: 'select',
-            field: 'userId',
+            field: 'creatorId',
             data: '',
             label: '创建人',
             options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
+            config: { optionLabel: 'name', optionValue: 'id' },
             loading: false,
             noMore: false,
             pageNo: 2,
@@ -216,12 +208,11 @@ export default {
     }
   },
   computed: {
-    ADD_REP_CATALOG: () => ADD_REP_CATALOG,
-    STOP_REP_CATALOG: () => STOP_REP_CATALOG,
-    AUTH_REP_CATALOG: () => AUTH_REP_CATALOG,
-    EDIT_REP_CATALOG: () => EDIT_REP_CATALOG,
-    DELETE_REP_CATALOG: () => DELETE_REP_CATALOG,
-    ADD_CHILD_REP_CATALOG: () => ADD_CHILD_REP_CATALOG,
+    ADD_CLASSROOM_CLASSIFY: () => ADD_CLASSROOM_CLASSIFY,
+    STOP_CLASSROOM_CLASSIFY: () => STOP_CLASSROOM_CLASSIFY,
+    EDIT_CLASSROOM_CLASSIFY: () => EDIT_CLASSROOM_CLASSIFY,
+    DELETE_CLASSROOM_CLASSIFY: () => DELETE_CLASSROOM_CLASSIFY,
+    ADD_NEW_GROUNP_CLASSROOM_CLASSIFY: () => ADD_NEW_GROUNP_CLASSROOM_CLASSIFY,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -229,11 +220,10 @@ export default {
     privileges: {
       handler() {
         this.tableConfig.showHandler = this.$p([
-          STOP_REP_CATALOG,
-          AUTH_REP_CATALOG,
-          EDIT_REP_CATALOG,
-          DELETE_REP_CATALOG,
-          ADD_CHILD_REP_CATALOG
+          STOP_CLASSROOM_CLASSIFY,
+          EDIT_CLASSROOM_CLASSIFY,
+          DELETE_CLASSROOM_CLASSIFY,
+          ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
         ])
       },
       deep: true
@@ -260,18 +250,13 @@ export default {
         })
       }
       loop(this.tableData)
-      const isDisabled = !_.isEmpty(target) && target.status == '1' ? true : false
+      const isDisabled = !_.isEmpty(target) && target.status == 0
       return isDisabled
-    },
-    // 权限配置窗口
-    handleAuth() {
-      this.$message.warning('正在开发中...')
     },
     // 多种操作
     async handleCommand($event, row) {
       const TYPE_COMMAND = {
         delete: this.handleDelete,
-        edit: this.handleOrgEdit,
         addChild: this.handleAddChild
       }
       TYPE_COMMAND[$event](row)
@@ -320,7 +305,6 @@ export default {
           this.tableData = res
           this.tableLoading = false
         })
-        this.$refs.orgEdit.loadOrgTree()
       } catch (error) {
         this.$message.error(error.message)
       } finally {
@@ -349,14 +333,14 @@ export default {
     handleStatus(row) {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
-      const statusText = row.status == 0 ? '停用' : '启用'
+      const statusText = row.status == 0 ? '启用' : '停用'
       const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
       // 获取到当前分类以及子分类的id集合
       const params = { id: row.idStr, status: row.status == 0 ? 1 : 0 }
-      this.$confirm(`${row.status == 0 ? stopContent : startContent}`, '提醒', {
+      this.$confirm(`${row.status == 1 ? stopContent : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

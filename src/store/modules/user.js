@@ -2,7 +2,14 @@ import { setToken, setRefreshToken, removeToken, removeRefreshToken } from '@/ut
 import { Message } from 'element-ui'
 import { setStore, getStore } from '@/util/store'
 import { filterTree, sortTree } from '@/util/util'
-import { loginByUsername, getUserInfo, logout, refreshToken, getUserPrivilege } from '@/api/user'
+import {
+  loginByUsername,
+  getUserInfo,
+  logout,
+  refreshToken,
+  getUserPrivilege,
+  userDetailByToken
+} from '@/api/user'
 import md5 from 'js-md5'
 
 const user = {
@@ -23,6 +30,24 @@ const user = {
   actions: {
     set_info: ({ commit }, info) => {
       commit('SET_INFO', info)
+    },
+    // token登录
+    tokeLogin({ commit }, token) {
+      return new Promise((resolve, reject) => {
+        userDetailByToken({ accessToken: token })
+          .then((res) => {
+            commit('SET_TOKEN', token)
+            // commit('SET_REFRESH_TOKEN', res.refresh_token)
+            commit('SET_TENANT_ID', res.tenant_id)
+            commit('SET_USER_INFO', res)
+            commit('DEL_ALL_TAG')
+            commit('CLEAR_LOCK')
+            resolve(res)
+          })
+          .catch((error) => {
+            reject(error)
+          })
+      })
     },
     //根据用户名登录
     LoginByUsername({ commit }, userInfo) {

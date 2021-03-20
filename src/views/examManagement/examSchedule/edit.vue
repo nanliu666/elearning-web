@@ -185,6 +185,7 @@ export default {
               this.setDisabled(examInfo)
             })
             this.setLazySelectFisrt(examInfo, res)
+            examInfo.loadTestPaper()
           }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
         })
@@ -232,7 +233,6 @@ export default {
       const examInfoData = this.$refs.examInfo.getData(type)
       const examBatchData = this.$refs.examBatch.getData(type)
       Promise.all([examInfoData, examBatchData]).then((res) => {
-        this.submitLoading = true
         this.handleSubmit(res, type)
       })
     },
@@ -277,7 +277,9 @@ export default {
       _.assign(examArrangeBasis, { type: type === 'publish' ? 0 : 1 })
       _.assign(examArrangeBasis, examPattern)
       _.assign(examArrangeBasis, { creatorId: this.userId })
-      examArrangeBasis.fixedTime = moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
+      examArrangeBasis.fixedTime = !examArrangeBasis.fixedTime
+        ? examArrangeBasis.fixedTime
+        : moment(examArrangeBasis.fixedTime).format('YYYY-MM-DD HH:mm:ss')
       let params = {
         examArrangeBasis,
         examineeBatchList

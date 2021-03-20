@@ -73,10 +73,18 @@
           完成
         </el-button>
         <el-button
+          v-if="!id"
           size="medium"
           @click="() => handleContinueAdd()"
         >
           完成并继续添加
+        </el-button>
+        <el-button
+          v-if="id"
+          size="medium"
+          @click="handleBack"
+        >
+          取消
         </el-button>
       </div>
     </basic-container>
@@ -87,9 +95,9 @@
 import {
   addKnowledgeList,
   updateKnowledge,
-  getKnowledgeCatalogList,
   getKnowledgeManageDetails
 } from '@/api/knowledge/knowledge'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
 const FORM_COLUMNS = [
@@ -205,6 +213,7 @@ const UPLOAD_ONLINE = [
     label: '资源路径',
     prop: 'resUrl',
     required: true,
+    maxlength: 2083,
     span: 24
   }
 ]
@@ -369,7 +378,9 @@ export default {
       //   })
       // }
       if (catalogId) {
-        getKnowledgeCatalogList().then((res) => (catalogId.props.treeParams.data = res))
+        queryCategoryOrgList({ source: 'knowledge' }).then(
+          (res) => (catalogId.props.treeParams.data = res)
+        )
       }
       if (this.id) {
         this.loadDetail()

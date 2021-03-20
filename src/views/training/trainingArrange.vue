@@ -385,12 +385,14 @@
                     </span>
                     <el-dropdown-menu slot="dropdown">
                       <el-dropdown-item
+                        v-if="scope.row.status == 1"
                         v-p="EDIT_TRAIN"
                         command="edit"
                       >
                         编辑
                       </el-dropdown-item>
                       <el-dropdown-item
+                        v-if="scope.row.status != 2"
                         v-p="DELETE_TRAIN"
                         command="del"
                       >
@@ -537,7 +539,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     type: 'numInterval',
     field: 'peopleMin,peopleMax',
     data: { min: '', max: '' },
-    label: '计划人数'
+    label: '计划人数',
+    required: true
   },
   {
     config: { placeholder: '请选择' },
@@ -546,9 +549,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '培训方式',
     type: 'select',
     options: [
-      { value: 1, label: '面授' },
-      { value: 2, label: '混合' },
-      { value: 3, label: '在线' },
+      { value: 2, label: '面授' },
+      { value: 3, label: '混合' },
+      { value: 1, label: '在线' },
       { value: '', label: '全部' }
     ]
   },
@@ -698,7 +701,7 @@ export default {
     },
     // 去培训详情
     toTrainingDetail(row) {
-      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })
+      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status=' + row.status })
     },
     // 草稿删除
     isDraftDel(scope) {
@@ -727,7 +730,15 @@ export default {
       params = { ...params, ...this.page, ...param }
       getScheduleList(params).then((res) => {
         // console.log(res);
-        this.tableData = res.data
+        this.tableData = res.data.map((item) => {
+          if (!item.organizer) {
+            item.organizer = '--'
+          }
+          if (!item.composite) {
+            item.composite = '--'
+          }
+          return item
+        })
         this.page.total = res.totalNum
       })
     },
@@ -978,6 +989,10 @@ export default {
     },
 
     handleSearch(searchParams) {
+      let { peopleMin, peopleMax } = searchParams
+      if (peopleMin && peopleMax) {
+        if (peopleMin >= peopleMax) return
+      }
       this.page.pageNo = 1
       this.isgetScheduleList(searchParams)
     },

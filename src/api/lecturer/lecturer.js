@@ -66,3 +66,7 @@ export const move = (params) => post('/api/manage/v1/teacher/catalog/move', para
  * */
 export const editTeacherCatalog = (params) =>
   post('/api/manage/v1/teacher/editTeacherCatalog', params)
+/**
+ *  查询讲师授课情况
+ * */
+export const getCourseList = (params) => post('/api/manage/v1/teacher/courseList', params)

@@ -22,7 +22,7 @@
               value: 'courseId',
               key: 'courseId'
             }"
-            @select="selectContact"
+            @select="selectCourse"
           />
         </template>
         <template #lecturerName>
@@ -84,6 +84,8 @@ const modelCopy = {
   lecturerName: null,
   classTime: []
 }
+import moment from 'moment'
+import { mapGetters } from 'vuex'
 export default {
   name: 'OnlineCourseDrawer',
   components: {
@@ -104,6 +106,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['trainTimeInVuex']),
     innnerVisible: {
       get: function() {
         return this.visible
@@ -135,9 +138,42 @@ export default {
       }
     }
   },
+  mounted() {
+    const classTimeProps = _.find(this.columns, { prop: 'classTime' })
+    const classTimeRules = [
+      { required: true, validator: this.validateClassTime, trigger: ['blur', 'change'] }
+    ]
+    _.set(classTimeProps, 'rules', classTimeRules)
+  },
   methods: {
-    selectContact(data) {
+    // 上课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
+    validateClassTime(rule, value, callback) {
+      // 上课开始时间要在考试时间之前
+      const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
+        moment(this.model.classTime[0])
+      )
+      // 上课结束时间要在考试结束时间之后
+      const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
+        moment(this.model.classTime[1])
+      )
+      if (!isLegalBeginTime) {
+        callback(new Error(`上课开始日期要在培训开始日期（${this.trainTimeInVuex[0]}）之后`))
+      } else if (!isLegalEndTime) {
+        callback(new Error(`上课结束日期要在培训结束日期（${this.trainTimeInVuex[1]}）之前`))
+      } else {
+        callback()
+      }
+    },
+    selectCourse(data) {
       this.model = _.assign(this.model, data)
+      this.model.lecturerName = data.name
+      this.model.lecturerId = data.userId
+      this.courseDefault = [
+        {
+          name: data.name,
+          userId: data.userId
+        }
+      ]
     },
     loadCoordinator(params) {
       return getOrgUserList(_.assign(params, { orgId: 0 }))

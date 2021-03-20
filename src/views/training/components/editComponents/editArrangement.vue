@@ -6,13 +6,31 @@
     >
       <div class="header">
         <span class="header--title">线下日程</span>
-        <el-button
-          type="primary"
-          size="medium"
-          @click="handleEditSchedule({})"
-        >
-          添加线下日程
-        </el-button>
+        <div>
+          <span>
+            <span style="padding-right: 4px">开启签到功能</span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="启用签到功能后，学员每一节线下课程/活动都需要扫描二维码进行签到"
+              placement="top-start"
+            >
+              <i class="el-icon-warning" />
+            </el-tooltip>
+            <el-switch
+              v-model="signIn"
+              style="margin: 0 40px 0 10px;"
+              :disabled="signInDisabled"
+            />
+          </span>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="handleEditSchedule({})"
+          >
+            添加线下日程
+          </el-button>
+        </div>
       </div>
       <el-collapse
         v-model="activeName"
@@ -139,14 +157,14 @@
     <offline-course-drawer
       :visible.sync="schedule.drawerVisible"
       :schedule="schedule.editingRecord"
-      @submit="handleSubmitSchedule($event)"
+      @submit="handleSubmitSchedule"
     />
     <online-course-drawer
       :visible.sync="course.drawerVisible"
       :course="course.editingRecord"
       @submit="courseSubmit"
     />
-    <EditExamineDrawer
+    <edit-examine-drawer
       :visible.sync="examine.drawerVisible"
       :examine="examine.editingRecord"
       @submit="examineSubmit"
@@ -160,28 +178,34 @@ import EditExamineDrawer from '../drawerComponents/editExamineDrawer'
 import OnlineCourseDrawer from '../drawerComponents/OnlineCourseDrawer'
 const ScheduleColumns = [
   {
-    prop: 'todoTime',
+    prop: 'todoTimeParams',
     formatter: function(record) {
-      return record.todoTime.join(' ~ ')
+      return record.todoTimeParams.join(' ~ ')
     }
   },
   {
     prop: 'title',
     minWidth: 150,
     formatter(record) {
-      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${_.get(record, 'courseName', '')}`
+      return `${record.type === 1 ? '【面授课程】' : '【活动】'}${
+        record.type === 1 ? _.get(record, 'courseName', '') : _.get(record, 'theme', '')
+      }`
     }
   },
   {
-    prop: 'lecturerName',
+    prop: 'lecturerId',
     formatter(record) {
       return `${record.type === 1 ? '讲师：' : '主持人：'}${_.get(record, 'lecturerName', '')}`
     }
   },
   {
-    prop: 'address',
+    prop: 'classroomName',
     formatter(record) {
-      return `地点：${record.address}`
+      return `${record.type === 1 ? '授课教室：' : '活动教室：'}${_.get(
+        record,
+        'classroomName',
+        ''
+      )}`
     }
   }
 ]
@@ -221,6 +245,7 @@ const TestConfig = {
   showHandler: true,
   handlerColumn: { label: '操作', width: 150 }
 }
+import moment from 'moment'
 export default {
   name: 'EditArrangement',
   components: { OfflineCourseDrawer, OnlineCourseDrawer, EditExamineDrawer },
@@ -232,6 +257,7 @@ export default {
   },
   data() {
     return {
+      signIn: false,
       activeName: '0',
       schedule: {
         config: ScheduleConfig,
@@ -257,6 +283,9 @@ export default {
     }
   },
   computed: {
+    signInDisabled() {
+      return _.isEmpty(this.schedule.data)
+    },
     scheduleList() {
       return _.chain(this.schedule.data)
         .groupBy('todoDate')
@@ -269,8 +298,10 @@ export default {
   },
   methods: {
     getData() {
+      // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
         resolve({
+          signIn: this.signIn,
           trainOfflineTodo: this.schedule.data,
           trainOnlineCourse: this.course.data,
           trainExam: this.examine.data
@@ -297,6 +328,7 @@ export default {
     handleDeleteExamine(row) {
       let index = _.findIndex(this.examine.data, (item) => item.id === row.id)
       this.examine.data.splice(index, 1)
+      this.$message.success('删除成功！')
     },
     // 新增与编辑在线课程
     handleEditCourse(row) {
@@ -318,6 +350,7 @@ export default {
     handleDeleteCourse(row) {
       let index = _.findIndex(this.course.data, (item) => item.id === row.id)
       this.course.data.splice(index, 1)
+      this.$message.success('删除成功！')
     },
     // 编辑与新增线下日程
     handleEditSchedule(row) {
@@ -327,11 +360,49 @@ export default {
     // 删除线下日程
     handleDeleteSchedule(row) {
       this.schedule.data = this.schedule.data.filter((item) => item !== row)
+      this.signIn = !_.isEmpty(this.schedule.data)
+      this.$message.success('删除成功！')
+    },
+    checkOverlapTime(data) {
+      let isOverlapping = false
+      // 同一天使用的相同教室
+      const sameClassrommAndDate = _.find(this.schedule.data, {
+        classroomId: data.classroomId,
+        todoDate: data.todoDate
+      })
+      if (sameClassrommAndDate) {
+        const time1 = sameClassrommAndDate.todoTimeParams
+        const time2 = data.todoTimeParams
+        const time1List = [
+          moment(`${data.todoDate} ${time1[0]}`),
+          moment(`${data.todoDate} ${time1[1]}`)
+        ]
+        const time2List = [
+          moment(`${data.todoDate} ${time2[0]}`),
+          moment(`${data.todoDate} ${time2[1]}`)
+        ]
+        // 被选日期开始日期isSameOrBefore已选结束日期 and 被选日期结束日期isSameOrAfter已选开始日期
+        if (
+          moment(time1List[0]).isSameOrBefore(moment(time2List[1], 'minute')) &&
+          moment(time1List[1]).isSameOrAfter(moment(time2List[0], 'minute'))
+        ) {
+          this.$message.error('您所选的教室存在重叠时段，请重新选择！')
+          isOverlapping = true
+        }
+      }
+      // 有重叠时段就不进行补充
+      return isOverlapping
     },
     // 线下日程提交后的数据处理
-    handleSubmitSchedule(data) {
+    handleSubmitSchedule(msg) {
+      // 默认不存在同一个教室的重叠时段
+      const { data, type } = msg
+      if (type === 'add') {
+        if (this.checkOverlapTime(data)) return
+      }
+      this.signIn = true
       const index = _.findIndex(this.schedule.data, { id: data.id })
-      if (index >= 0) {
+      if (index >= 0 && type === 'edit') {
         this.$set(this.schedule.data, index, data)
       } else {
         this.schedule.data.push(data)

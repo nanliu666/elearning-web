@@ -1,14 +1,12 @@
 <template>
-  <div class="image-li">
+  <div
+    class="image-li"
+    :style="{ width: `${imageWidth}px` }"
+  >
     <el-image
       class="el-image"
       :src="url"
     />
-    <image-viewer
-      :url-list="previewSrcList"
-      :visible.sync="viewing"
-      :initial-index="viewIndex"
-    ></image-viewer>
     <div
       v-if="fileName"
       class="image-name"
@@ -23,7 +21,16 @@
         @click.stop="downloadFile($props)"
       ><i class="el-icon-download"></i></span>
       <span @click.stop="handlePreviewImage([url])"><i class="el-icon-view" /></span>
+      <span
+        v-if="isDelete"
+        @click.stop="deleteFile([url])"
+      ><i class="el-icon-delete"></i></span>
     </div>
+    <image-viewer
+      :url-list="previewSrcList"
+      :visible.sync="viewing"
+      :initial-index="viewIndex"
+    />
   </div>
 </template>
 
@@ -35,9 +42,17 @@ export default {
     ImageViewer
   },
   props: {
+    isDelete: {
+      type: Boolean,
+      default: false
+    },
     isDownload: {
       type: Boolean,
       default: false
+    },
+    imageWidth: {
+      type: Number,
+      default: 240
     },
     // 文件名称
     fileName: {
@@ -63,8 +78,11 @@ export default {
     }
   },
   methods: {
-    downloadFile(url) {
-      this.$emit('downloadFile', url)
+    deleteFile(url) {
+      this.$emit('deleteFile', url)
+    },
+    downloadFile(data) {
+      this.$emit('downloadFile', data)
     },
     handlePreviewImage(list, index = 0) {
       this.viewing = true
@@ -78,14 +96,15 @@ export default {
 <style scoped lang="scss">
 .image-li {
   position: relative;
+  display: flex;
+  flex-direction: column;
   margin-right: 40px;
-  width: 240px;
   border: 1px solid #ebeced;
   box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
   border-radius: 4px;
   .el-image {
     width: 100%;
-    height: 180px;
+    height: 200px;
   }
   .image-name {
     height: 36px;

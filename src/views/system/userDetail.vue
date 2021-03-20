@@ -39,7 +39,7 @@
           <div class="user-info__row">
             <span
               class="user-info__column"
-            ><i class="el-icon-mobile" />{{ userData.phonenum || '暂无' }}</span>
+            ><i class="el-icon-mobile" />{{ userData.phonenum | phonenumFilter }}</span>
             <span
               class="user-info__column"
             ><i class="el-icon-message" />{{ userData.email || '暂无' }}</span>
@@ -151,6 +151,15 @@ export default {
     // 员工角色编辑
     userRoleEdit: () => import('./components/userRoleEdit'),
     CommonImageView
+  },
+  filters: {
+    phonenumFilter: (value) => {
+      if (value) {
+        return value.replace(/\s/g, '').replace(/(\d{3})(\d{0,4})(\d{0,4})/, '$1 $2 $3')
+      } else {
+        return '暂无'
+      }
+    }
   },
   data() {
     return {

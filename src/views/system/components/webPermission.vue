@@ -14,7 +14,7 @@
       <template #multiSelectMenu="{ selection }">
         <el-button
           v-p="DELETE_PERMISSION"
-          style="margin-bottom:0;"
+          style="margin-bottom: 0"
           type="text"
           @click="() => handleRemoveItems(selection)"
         >
@@ -22,11 +22,11 @@
         </el-button>
       </template>
 
-      <template #icon="{row}">
+      <template #icon="{ row }">
         <i :class="_.get(row, 'icon', '')" />
       </template>
 
-      <template #handler="{row}">
+      <template #handler="{ row }">
         <div class="table__handler">
           <!--          <el-button-->
           <!--            size="medium"-->
@@ -35,14 +35,14 @@
           <!--          >-->
           <!--            页面控件权限-->
           <!--          </el-button>-->
-          <el-button
+          <!-- <el-button
             v-p="RANGE_PERMISSION"
             size="medium"
             type="text"
             @click.stop="() => handleMenuItemAddBtnClick(row.menuId)"
           >
             管理范围
-          </el-button>
+          </el-button> -->
           <el-button
             v-p="DELETE_PERMISSION"
             size="medium"
@@ -373,8 +373,11 @@ export default {
         let arr = []
         this.filterData(tableData, arr)
         this.tableData = arr
+        console.log(this.tableData)
         // 更新分页器数据
-        this.page.total = _.size(tableData)
+        // this.page.total = _.size(tableData)
+        this.page.total = _.size(this.tableData)
+        console.log(_.size(tableData))
       } catch (error) {
         window.console.log(error)
       } finally {

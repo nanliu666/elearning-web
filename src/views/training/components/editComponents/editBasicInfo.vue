@@ -11,8 +11,8 @@
           <lazySelect
             v-model="formData.contactName"
             :load="loadCoordinator"
-            :allow-create="isCreate"
-            :searchable="remote"
+            :allow-create="true"
+            :searchable="true"
             :option-props="personOptionProps"
             @select="selectContact"
           >
@@ -33,7 +33,7 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList, getAllCatalog } from '@/api/system/user'
+import { getWorkList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
 import { getUserList } from '@/api/examManage/schedule'
@@ -41,15 +41,6 @@ const personOptionProps = {
   label: 'name',
   value: 'name',
   key: 'userId'
-}
-const addressConfig = {
-  itemType: 'input',
-  label: '培训地点',
-  prop: 'address',
-  maxlength: 32,
-  required: false,
-  span: 11,
-  offset: 0
 }
 export default {
   name: 'EditBasicInfo',
@@ -63,8 +54,6 @@ export default {
       }
     }
     return {
-      remote: true,
-      isCreate: true,
       personOptionProps,
       infoFormColumns: [
         {
@@ -110,7 +99,7 @@ export default {
           prop: 'trainTime',
           options: [''],
           required: true,
-          type: 'daterange',
+          type: 'datetimerange',
           span: 11,
           offset: 0
         },
@@ -160,11 +149,19 @@ export default {
           offset: 2
         },
         {
+          isHidden: false,
+          itemType: 'input',
+          label: '培训地点',
+          prop: 'address',
+          maxlength: 32,
+          required: false,
+          span: 11,
+          offset: 0
+        },
+        {
           itemType: 'slot',
           label: '联系人',
           prop: 'contactName',
-          options: [],
-          maxlength: 32,
           required: true,
           span: 11,
           offset: 2
@@ -225,7 +222,7 @@ export default {
         contactName: '',
         trainName: '',
         categoryId: '',
-        trainTime: '',
+        trainTime: [],
         people: 0,
         trainObjectsList: [],
         trainWay: 3,
@@ -263,28 +260,21 @@ export default {
     'formData.trainWay': {
       handler(val) {
         this.$emit('changeWay', val)
-        let adressIndex = _.findIndex(this.infoFormColumns, (item) => {
-          return item.prop === 'address'
-        })
-        let trainWayIndex = _.findIndex(this.infoFormColumns, (item) => {
-          return item.prop === 'trainWay'
-        })
-
-        if (val === 1) {
-          if (adressIndex !== -1) {
-            this.infoFormColumns.splice(adressIndex, 1)
-          }
-        } else {
-          if (adressIndex === -1) {
-            this.infoFormColumns.splice(trainWayIndex + 1, 0, addressConfig)
-          }
-        }
+        // 找到地址的配置
+        const temp = _.find(this.infoFormColumns, { prop: 'address' })
+        _.set(temp, 'isHidden', val === 1)
         let contactNameIndex = _.findIndex(this.infoFormColumns, (item) => {
           return item.prop === 'contactName'
         })
-        _.each(this.infoFormColumns, (item, index) => {
+        _.map(this.infoFormColumns, (item, index) => {
           if (index >= contactNameIndex && index < this.infoFormColumns.length - 1) {
-            item.offset = index % 2 == 0 ? 0 : 2
+            let offset
+            if (val === 1) {
+              offset = index % 2 == 0 ? 2 : 0
+            } else {
+              offset = index % 2 == 0 ? 0 : 2
+            }
+            _.set(item, 'offset', offset)
           }
         })
       },
@@ -349,17 +339,24 @@ export default {
         this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
-    getData() {
-      return new Promise((resolve, reject) => {
-        this.$refs['form']
-          .validate()
-          .then(() => {
-            resolve(this.formData) // TODO 提交表单
-          })
-          .catch(() => {
-            reject()
-          })
-      })
+    getData(type) {
+      // 如果是草稿，直接返回数据
+      if (type === 1) {
+        return new Promise((resolve) => {
+          resolve(this.formData)
+        })
+      } else {
+        return new Promise((resolve, reject) => {
+          this.$refs['form']
+            .validate()
+            .then(() => {
+              resolve(this.formData) // TODO 提交表单
+            })
+            .catch(() => {
+              reject()
+            })
+        })
+      }
     },
     selectContact(data) {
       if (data.phonenum) {
@@ -369,7 +366,11 @@ export default {
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      if (_.size(_.get(params, 'search')) > 32) {
+        this.$message.error('您输入的联系人姓名过长，无法搜索！')
+      } else {
+        return getWorkList(_.assign(params, { orgId: 0 }))
+      }
     }
   }
 }

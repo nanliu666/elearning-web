@@ -161,6 +161,20 @@ export default {
       children: []
     },
     {
+      menuId: '94745634742334623158',
+      menuName: '查看上报材料',
+      menuType: 'Menu',
+      isEnabled: 1,
+      isOwn: 1,
+      isShow: 0,
+      code: 'org_user',
+      alias: 'user',
+      path: '/course/materials',
+      icon: 'iconfont iconicon_boss',
+      dataPrivileges: [],
+      children: []
+    },
+    {
       menuId: '12590567456745635058',
       menuName: '创建课程',
       menuType: 'Menu',

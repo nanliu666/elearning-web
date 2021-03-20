@@ -52,7 +52,7 @@
             </div>
           </el-dropdown-item>
           <el-dropdown-item>
-            <div @click="toFront">
+            <div @click="toFront()">
               用户前台
             </div>
           </el-dropdown-item>
@@ -71,7 +71,9 @@
 import { resetRouter } from '@/router/router'
 import { mapGetters, mapState } from 'vuex'
 import { fullscreenToggel, listenfullscreen } from '@/util/util'
+import { getStore } from '@/util/store.js'
 import topLock from './top-lock'
+import { frontBaseUrl } from '@/config/env'
 export default {
   name: 'Top',
   components: {
@@ -109,8 +111,10 @@ export default {
   },
   methods: {
     toFront() {
-      // 跳转到前台
-      window.location.href = 'http://139.159.141.248:7071'
+      let tid = getStore({
+        name: 'token'
+      })
+      window.location.href = `${frontBaseUrl}/#/home?tid=${tid}`
     },
     showUserCenter() {
       this.$router.push('/info/securitySetting')

@@ -84,3 +84,11 @@ export const getTenantInfo = (domain) =>
     method: 'get',
     params: domain
   })
+// 通过token获取用户信息
+export const userDetailByToken = (params) => {
+  return request({
+    url: '/blade-auth/oauth/userdetail/taken',
+    method: 'get',
+    params: params
+  })
+}

@@ -1,6 +1,6 @@
 <template>
   <div class="Menu fill">
-    <page-header title="证书管理">
+    <page-header title="模板管理">
       <template slot="rightMenu">
         <el-button
           v-p="ADD_CERTIFICATE"

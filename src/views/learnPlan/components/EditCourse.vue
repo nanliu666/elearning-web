@@ -5,7 +5,10 @@
   >
     <!-- 添加课程页面 -->
     <div class="layout_header">
-      <ul class="header_left">
+      <ul
+        v-if="courseList.length"
+        class="header_left"
+      >
         <li>
           <el-checkbox
             v-model="checkAll"
