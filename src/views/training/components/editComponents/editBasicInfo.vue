@@ -107,7 +107,6 @@ export default {
           itemType: 'input',
           label: '计划人数',
           prop: 'people',
-          type: 'Number',
           rules: [{ required: false, validator: this.validatePeople, trigger: ['blur', 'change'] }],
           min: 0,
           span: 11,
@@ -223,7 +222,7 @@ export default {
         trainName: '',
         categoryId: '',
         trainTime: [],
-        people: 0,
+        people: '',
         trainObjectsList: [],
         trainWay: 3,
         address: '',
@@ -249,13 +248,6 @@ export default {
         this.handlerData(_.cloneDeep(data))
       },
       deep: true
-    },
-    'formData.people': {
-      handler(val) {
-        this.formData.people = Math.abs(val)
-      },
-      deep: true,
-      immediate: true
     },
     'formData.trainWay': {
       handler(val) {
@@ -318,10 +310,22 @@ export default {
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
-      if (value !== 0) {
-        this.$refs.form.validateField('trainObjectsList')
+      const numberValue = Number(value)
+      if (_.isNaN(numberValue)) {
+        return callback(new Error('计划人数必须填数字'))
+      } else {
+        if (!_.isInteger(numberValue)) {
+          return callback(new Error('计划人数不能为小数'))
+        }
+        if (value > 100000) {
+          return callback(new Error('计划人数最大限制输入值 100000'))
+        } else if (value <= 100000 && value >= 0) {
+          this.$refs.form.validateField('trainObjectsList')
+          callback()
+        } else {
+          return callback(new Error('计划人数必须为正整数'))
+        }
       }
-      callback()
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
