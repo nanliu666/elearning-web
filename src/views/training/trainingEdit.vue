@@ -56,7 +56,7 @@
         </el-button>
         <el-button
           v-if="activeStep === 2"
-          v-load="submitLoading"
+          v-loading="submitLoading"
           size="medium"
           type="primary"
           @click="publish(0)"
@@ -104,7 +104,7 @@ import EditArrangement from './components/editComponents/editArrangement'
 import EditBasicInfo from './components/editComponents/editBasicInfo'
 import EditDetail from './components/editComponents/editDetail'
 import { createTrain, putTrain, getTrainDetail } from '@/api/train/train'
-const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
+// const REFS_LIST = ['editBasicInfo', 'editArrangement', 'editDetail']
 // 培训编辑
 export default {
   name: 'TrainingEdit',
@@ -149,37 +149,54 @@ export default {
   },
   mounted() {
     this.initData()
+    if (process.env.NODE_ENV === 'production') {
+      this.setF5Refresh()
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.clearF5Refresh()
+    next()
   },
   methods: {
+    clearF5Refresh() {
+      window.removeEventListener('beforeunload', this.watchF5Refresh)
+    },
+    setF5Refresh() {
+      window.addEventListener('beforeunload', this.watchF5Refresh)
+    },
+    watchF5Refresh(e) {
+      // 兼容IE8和Firefox 4之前的版本
+      if (e) {
+        e.returnValue = '关闭提示'
+      }
+      // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+      return '关闭提示'
+    },
     jumpDetail() {
       if (this.activeStep !== 2) {
         this.jumpStep(2)
       }
     },
     jumpStep(index) {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = index
-      })
+      this.activeStep = index
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     /***
-     * @author guanfenda
-     * @desc 返回上一步
-     *
+     *返回上一步
      * */
     handlePreviousStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
-      })
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     /***
-     * @author guanfenda
      * @desc 处理下一步 验证当前form是否符合规范
-     *
      * */
     handleNextStep() {
-      this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-        this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
-      })
+      this.activeStep = this.activeStep === 2 ? 0 : this.activeStep + 1
+      // this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      // })
     },
     initData() {
       if (this.id) {
@@ -239,6 +256,7 @@ export default {
         if (this.isNext === 'next') {
           editFun = createTrain
         }
+        if (this.submitLoading) return
         this.submitLoading = true
         editFun(params)
           .then(() => {
@@ -249,7 +267,7 @@ export default {
             window.console.error(JSON.stringify(params))
           })
           .finally(() => {
-            this.submitLoading = true
+            this.submitLoading = false
           })
       })
     },

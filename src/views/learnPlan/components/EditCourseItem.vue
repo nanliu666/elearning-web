@@ -241,18 +241,14 @@ export default {
       this.$emit('course-replace', course)
     },
     handleViewTextPaper(course, exam) {
-      if (exam.testPaperType === 'manual') {
-        this.paperId = exam.testPaper
-        this.paperType = exam.testPaperType
-        // this.$router.push({
-        //   path: '/examManagement/examSchedule/preview',
-        //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }
-        // })
+      this.paperId = exam.testPaper
+      this.paperType = exam.testPaperType
+      // this.$router.push({
+      //   path: '/examManagement/examSchedule/preview',
+      //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }
+      // })
 
-        this.dialogVisible = true
-      } else {
-        this.$message.error('随机试卷不支持预览')
-      }
+      this.dialogVisible = true
     },
     handleExamCommand(course, index, command) {
       if (command === 'del') {

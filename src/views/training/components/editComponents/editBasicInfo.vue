@@ -11,7 +11,7 @@
           <lazySelect
             v-model="formData.contactName"
             :load="loadCoordinator"
-            :allow-create="false"
+            :allow-create="true"
             :searchable="true"
             :option-props="personOptionProps"
             @select="selectContact"
@@ -33,7 +33,7 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList, getAllCatalog } from '@/api/system/user'
+import { getWorkList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
 import { getUserList } from '@/api/examManage/schedule'
@@ -41,15 +41,6 @@ const personOptionProps = {
   label: 'name',
   value: 'name',
   key: 'userId'
-}
-const addressConfig = {
-  itemType: 'input',
-  label: '培训地点',
-  prop: 'address',
-  maxlength: 32,
-  required: false,
-  span: 11,
-  offset: 0
 }
 export default {
   name: 'EditBasicInfo',
@@ -108,7 +99,7 @@ export default {
           prop: 'trainTime',
           options: [''],
           required: true,
-          type: 'daterange',
+          type: 'datetimerange',
           span: 11,
           offset: 0
         },
@@ -156,6 +147,16 @@ export default {
           required: true,
           span: 11,
           offset: 2
+        },
+        {
+          isHidden: false,
+          itemType: 'input',
+          label: '培训地点',
+          prop: 'address',
+          maxlength: 32,
+          required: false,
+          span: 11,
+          offset: 0
         },
         {
           itemType: 'slot',
@@ -259,28 +260,21 @@ export default {
     'formData.trainWay': {
       handler(val) {
         this.$emit('changeWay', val)
-        let adressIndex = _.findIndex(this.infoFormColumns, (item) => {
-          return item.prop === 'address'
-        })
-        let trainWayIndex = _.findIndex(this.infoFormColumns, (item) => {
-          return item.prop === 'trainWay'
-        })
-
-        if (val === 1) {
-          if (adressIndex !== -1) {
-            this.infoFormColumns.splice(adressIndex, 1)
-          }
-        } else {
-          if (adressIndex === -1) {
-            this.infoFormColumns.splice(trainWayIndex + 1, 0, addressConfig)
-          }
-        }
+        // 找到地址的配置
+        const temp = _.find(this.infoFormColumns, { prop: 'address' })
+        _.set(temp, 'isHidden', val === 1)
         let contactNameIndex = _.findIndex(this.infoFormColumns, (item) => {
           return item.prop === 'contactName'
         })
-        _.each(this.infoFormColumns, (item, index) => {
+        _.map(this.infoFormColumns, (item, index) => {
           if (index >= contactNameIndex && index < this.infoFormColumns.length - 1) {
-            item.offset = index % 2 == 0 ? 0 : 2
+            let offset
+            if (val === 1) {
+              offset = index % 2 == 0 ? 2 : 0
+            } else {
+              offset = index % 2 == 0 ? 0 : 2
+            }
+            _.set(item, 'offset', offset)
           }
         })
       },
@@ -375,7 +369,7 @@ export default {
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
       } else {
-        return getOrgUserList(_.assign(params, { orgId: 0 }))
+        return getWorkList(_.assign(params, { orgId: 0 }))
       }
     }
   }

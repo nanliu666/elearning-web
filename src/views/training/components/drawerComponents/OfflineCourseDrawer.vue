@@ -157,21 +157,9 @@ const CourseColumns = [
   },
   { itemType: 'slot', span: 24, prop: 'lecturerId', label: '讲师' }
 ]
-const modelCopy = {
-  type: 1,
-  todoDate: null,
-  theme: null,
-  // 教室时间的使用范围为06:00-23:00
-  todoTime: [
-    moment().set({ hour: 6, minute: 0, second: 0 }),
-    moment().set({ hour: 23, minute: 0, second: 0 })
-  ],
-  lecturerId: null,
-  lecturerName: null,
-  classroomId: null,
-  courseId: null,
-  courseName: null
-}
+// 教室时间的使用范围为06:00-23:00
+const START_TIME = moment().set({ hour: 6, minute: 0, second: 0 })
+const END_TIME = moment().set({ hour: 23, minute: 0, second: 0 })
 import { mapGetters } from 'vuex'
 export default {
   name: 'OfflineCourseDrawer',
@@ -191,23 +179,29 @@ export default {
       title: '创建线下日程',
       columns: CourseColumns,
       editType: 'add',
-      model: modelCopy
+      model: {
+        type: 1,
+        todoDate: null,
+        theme: null,
+        // 给datepick显示用的数据
+        todoTime: [START_TIME, END_TIME],
+        // 入参数据，以及列表的展示数据
+        todoTimeParams: [START_TIME.format('HH:mm'), END_TIME.format('HH:mm')],
+        lecturerId: null,
+        lecturerName: null,
+        classroomId: null,
+        courseId: null,
+        courseName: null
+      }
     }
   },
   computed: {
     ...mapGetters(['trainTimeInVuex']),
     reserveParams() {
-      // 由于保存的时候会将moment时间格式成字符串，所以加上这个判断
-      const startTimeTmp = _.get(this.model, 'todoTime[0]')
-      const endTimeTmp = _.get(this.model, 'todoTime[1]')
-      const startTime = _.isString(startTimeTmp)
-        ? startTimeTmp
-        : moment(startTimeTmp).format('HH:mm')
-      const endTime = _.isString(endTimeTmp) ? endTimeTmp : moment(endTimeTmp).format('HH:mm')
       return {
         todoDate: this.model.todoDate,
-        startTime,
-        endTime
+        startTime: _.get(this.model, 'todoTimeParams[0]'),
+        endTime: _.get(this.model, 'todoTimeParams[1]')
       }
     },
     innnerVisible: {
@@ -230,7 +224,8 @@ export default {
           } else {
             // 新增的时候重置数据
             this.editType = 'add'
-            this.model.id = _.uniqueId()
+            _.assign(this.$data, this.$options.data())
+            _.set(this.model, 'id', _.uniqueId())
           }
         }
       }
@@ -269,25 +264,13 @@ export default {
         }
       },
       deep: true
-    },
-    schedule(value) {
-      this.model = {
-        ...modelCopy,
-        ...value
-      }
     }
   },
   methods: {
     // 初始编辑的数据
     initEditData() {
-      this.model = _.cloneDeep(this.schedule)
+      this.model = _.assign(this.model, _.cloneDeep(this.schedule))
       if (this.model.todoDate) {
-        // 编辑的时候，格式化授课时间06::00==> moment格式
-        if (this.model.todoTime) {
-          this.model.todoTime = this.model.todoTime.map((time) => {
-            return moment(`${this.model.todoDate} ${time}`, moment.defaultFormat).toDate()
-          })
-        }
         this.model.todoDate = moment(this.model.todoDate).toDate()
       }
       // 初始化教室、讲师默认值
@@ -380,8 +363,7 @@ export default {
       this.$refs.form.validate().then(() => {
         const data = _.cloneDeep(this.model)
         data.todoDate = moment(data.todoDate).format('YYYY-MM-DD')
-        data.todoTime = data.todoTime.map((time) => moment(time).format('HH:mm'))
-        this.$emit('submit', data, this.editType)
+        this.$emit('submit', { data: data, type: this.editType })
         this.close()
       })
     }

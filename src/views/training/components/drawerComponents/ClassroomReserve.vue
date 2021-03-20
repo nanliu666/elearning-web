@@ -39,12 +39,12 @@
           </div>
         </template>
         <template
-          v-for="(item, index) in timeQuantum"
+          v-for="item in timeQuantum"
           :slot="item.prop"
           slot-scope="{ row, column }"
         >
           <div
-            :key="index"
+            :key="item.prop"
             :class="getTimeClass(row, column)"
           >
             {{ column.label }}
@@ -111,6 +111,7 @@ const SEARCH_CONFIG = {
 }
 import SearchPopover from '@/components/searchPopOver/index'
 import moment from 'moment'
+const TIME_CYCLE = 30 // 以30分钟为一个周期
 export default {
   name: 'ClassroomReserve',
   components: { SearchPopover },
@@ -166,7 +167,7 @@ export default {
   methods: {
     getTimeClass(row, column) {
       return `time__container ${[
-        _.some(row.reservedTodoTime, (item) => {
+        _.some(row.showLabel, (item) => {
           return _.includes(item, column['label'])
         })
           ? 'spot__red'
@@ -177,14 +178,13 @@ export default {
       // 以半小时为刻度，范围为06:00-23:00。一共17个小时
       const endTime = moment('23: 00', 'HH:mm')
       const starTime = moment('06: 00', 'HH:mm')
-      const interval = 30
       let diff = endTime.diff(starTime, 'minutes')
-      let num = Math.ceil(diff / interval)
+      let num = Math.ceil(diff / TIME_CYCLE)
       for (let i = 1; i <= num; i++) {
         this.timeQuantum.push({
           label: starTime
             .clone()
-            .add((i - 1) * interval, 'minutes')
+            .add((i - 1) * TIME_CYCLE, 'minutes')
             .format('HH:mm'),
           prop: `time${i}`,
           slot: true,
@@ -216,14 +216,43 @@ export default {
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
+    // 处理教室的使用时间，将类似['06:00-07:00', '09-10:00']的数据转化成['06:00', '06:30', '09:00', '09:30']
+    handleUseTime() {
+      _.each(this.tableData, (row) => {
+        _.set(row, 'showLabel', [])
+        if (!_.isEmpty(row.reservedTodoTime)) {
+          // [6-7 9-12]
+          _.each(row.reservedTodoTime, (item) => {
+            const timeRange = _.split(item, '-')
+            const startTime = moment(`${this.params.todoDate} ${timeRange[0]}`)
+            const endTime = moment(`${this.params.todoDate} ${timeRange[1]}`)
+            const diffInterval = endTime.diff(startTime, 'minutes') / TIME_CYCLE
+            let startIndex = null
+            _.each(this.timeQuantum, (timeItem, index) => {
+              // 第一个元素为起点
+              if (timeRange[0] === timeItem.label) {
+                startIndex = index
+              }
+              if (_.isNumber(startIndex)) {
+                // 当前的index以及index+diffInterval之内的被占领,计算到一个开区间时间轴如['06:00', '07:00')
+                if (startIndex <= index && index < startIndex + diffInterval) {
+                  row.showLabel.push(timeItem.label)
+                }
+              }
+            })
+          })
+        }
+      })
+    },
     async loadTableData() {
       if (this.tableLoading) return
       try {
         this.tableData = []
         this.tableLoading = true
-        const params = _.assign(this.queryInfo, this.params)
+        const params = _.assign(this.queryInfo, { todoDate: this.params.todoDate })
         let { totalNum, data } = await getBookList(params)
         this.tableData = data
+        this.handleUseTime()
         this.page.total = totalNum
       } catch (error) {
         this.$message.error(error.message)

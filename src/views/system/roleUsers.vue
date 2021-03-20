@@ -30,19 +30,19 @@
             @current-page-change="pageChange"
           >
             <template slot="topMenu">
-              <div class="flex-flow flex justify-content align-items ">
+              <div class="flex-flow flex justify-content align-items">
                 <div>
                   <el-input
                     v-model="form.name"
                     placeholder="输入工号或者姓名搜索"
                     clearable
-                    style="width:200px;margin-right:12px;"
+                    style="width: 200px; margin-right: 12px"
                     @input="search"
                   />
                 </div>
                 <div>
                   <i
-                    class="icon  el-icon-refresh-right"
+                    class="icon el-icon-refresh-right"
                     @click="getData"
                   />
                 </div>
@@ -64,7 +64,7 @@
             <template
               slot="handler"
               slot-scope="scope"
-              style="width:80px"
+              style="width: 80px"
             >
               <!-- <el-button
                 type="text"
@@ -133,28 +133,28 @@ export default {
       },
       columns: [
         {
-          label: '工号',
+          label: '姓名',
+          prop: 'name'
+        },
+        {
+          label: '用户编号',
           prop: 'workNo'
         },
         {
-          label: '姓名',
-          prop: 'name'
+          label: '手机号',
+          prop: 'phonenum'
         },
         {
           label: '状态',
           prop: 'userStatus',
           formatter(row) {
-            let arr = { '1': '正常', '2': '禁用' }
+            let arr = { 1: '正常', 2: '禁用' }
             return arr[row.userStatus]
           }
         },
         {
           label: '部门',
           prop: 'orgName'
-        },
-        {
-          label: '职位',
-          prop: 'jobName'
         }
       ],
       page: {
@@ -208,6 +208,7 @@ export default {
       this.params.search = this.form.name
       getUserList(this.params).then((res) => {
         this.data = res.data
+        console.log(this.data)
         this.page.total = res.totalNum
         this.loading = false
       })

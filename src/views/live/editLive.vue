@@ -132,7 +132,7 @@
                 <el-tooltip placement="top">
                   <div
                     slot="content"
-                    style="width:300px;"
+                    style="width: 300px"
                   >
                     <p>注意：需配合使用3.6以上版本客户端使用</p>
                     <p>连麦计费规则：</p>
@@ -149,7 +149,7 @@
                   </div>
                   <el-button
                     type="text"
-                    style="color:#606266;"
+                    style="color: #606266"
                   >
                     <i class="el-icon-question"></i>
                   </el-button>
@@ -274,17 +274,17 @@
           <!--</el-form> -->
 
           <h3>
-            <span style="margin-right: 10px;">直播预告</span>
+            <span style="margin-right: 10px">直播预告</span>
             <el-tooltip placement="top">
               <div
                 slot="content"
-                style="width:300px;"
+                style="width: 300px"
               >
                 <p>实际开播时间由讲师控制，该预告作用为前台展示</p>
               </div>
               <el-button
                 type="text"
-                style="color:#606266;"
+                style="color: #606266"
               >
                 <i class="el-icon-question"></i>
               </el-button>
@@ -330,7 +330,7 @@
                   end-placeholder="结束日期"
                   value-format="yyyy-MM-dd hh:mm:ss"
                   :clearable="false"
-                  style="width: 22vw;"
+                  style="width: 22vw"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -423,7 +423,7 @@
               >
                 <el-button
                   type="text"
-                  style="float:right;"
+                  style="float: right"
                   @click="add_table_liveTime(basicForm.table_liveTime)"
                 >
                   添加直播
@@ -507,7 +507,7 @@
         class="tabs2"
       >
         <div class="table_header">
-          <h3 style="float:left;">
+          <h3 style="float: left">
             讲师设置
           </h3>
           <el-button
@@ -528,7 +528,7 @@
         <el-table
           :data="table_teacherSet"
           stripe
-          style="width: 100%;margin-bottom:50px;"
+          style="width: 100%; margin-bottom: 50px"
         >
           <el-table-column label="名称">
             <template slot-scope="scope">
@@ -590,7 +590,7 @@
           </el-table-column>
         </el-table>
         <div class="table_header">
-          <h3 style="float:left;">
+          <h3 style="float: left">
             关联课程
           </h3>
           <el-button
@@ -658,7 +658,7 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="关联方式">
-                <div style="clear: both;">
+                <div style="clear: both">
                   <el-radio
                     v-model="radio_connectionMode"
                     label="all"
@@ -681,19 +681,19 @@
               </el-form-item>
               <p
                 v-show="radio_connectionMode != 'direct'"
-                style="color:rgba(0,11,21,0.85)"
+                style="color: rgba(0, 11, 21, 0.85)"
               >
                 学员总数：
               </p>
               <p
                 v-show="radio_connectionMode == 'all'"
-                style="color:rgba(0,11,21,0.25);"
+                style="color: rgba(0, 11, 21, 0.25)"
               >
                 学员登录平台即可观看，链接分享给任意人员可以进行观看。
               </p>
               <p
                 v-show="radio_connectionMode == 'code'"
-                style="color:rgba(0,11,21,0.25);"
+                style="color: rgba(0, 11, 21, 0.25)"
               >
                 学员登录平即可观看，链接分享给其他人员需要使用验证码。
               </p>
@@ -703,7 +703,7 @@
             v-show="radio_connectionMode == 'code'"
             class="block_label"
           >
-            <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item
                 label="欢迎标题"
                 prop="title"
@@ -713,7 +713,7 @@
                   maxlength="32"
                 ></el-input>
               </el-form-item>
-            </el-col>
+            </el-col> -->
             <el-col :span="12">
               <el-form-item
                 label="验证码"
@@ -725,7 +725,7 @@
                 ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item
                 label="提示文案"
                 prop="tips"
@@ -735,7 +735,7 @@
                   maxlength="32"
                 ></el-input>
               </el-form-item>
-            </el-col>
+            </el-col> -->
 
             <el-col :span="24">
               <el-form-item
@@ -782,7 +782,7 @@
 
                 <el-button
                   type="text"
-                  style="float:right;"
+                  style="float: right"
                   @click="showDialog_add_student()"
                 >
                   添加学员
