@@ -46,7 +46,7 @@
         class="dialog-footer"
       >
         <el-button
-          style="margin-right: 15px;"
+          style="margin-right: 15px"
           size="medium"
           @click="onClickVisible"
         >
