@@ -83,8 +83,11 @@ export default {
       }
       this.data.course.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
-          const { fileName, filePath } = item
+          let { fileName, filePath } = item
           if (!filePath || !fileName) return
+          if (filePath.indexOf('http') !== 0) {
+            filePath = 'https://' + filePath
+          }
           data.filePath.push(filePath)
           data.fileName.push(fileName)
         })

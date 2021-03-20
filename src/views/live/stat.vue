@@ -76,7 +76,7 @@
                       value="1"
                     ></el-option>
                     <el-option
-                      label="停用"
+                      label="禁用"
                       value="0"
                     ></el-option>
                   </el-select>
@@ -244,7 +244,7 @@
             label="状态"
           >
             <template slot-scope="scope">
-              {{ scope.row.isUsed == '1' ? '正常' : '停用' }}
+              {{ scope.row.isUsed == '1' ? '正常' : '禁用' }}
             </template>
           </el-table-column>
           <el-table-column
