@@ -70,7 +70,7 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.trainTime }}
+              {{ showTrainDetail.trainBeginTime + '~' + showTrainDetail.trainEndTime }}
             </div>
           </el-col>
         </el-row>
@@ -220,7 +220,7 @@
         class="introduce_content"
       >
         <div class="introduce_content_t">
-          <div v-text="showTrainDetail.introduction"></div>
+          <div v-html="showTrainDetail.introduction"></div>
         </div>
       </div>
     </div>
@@ -1394,9 +1394,8 @@ export default {
     // 查询培训详情
     isGetTrainDetail() {
       // console.log('id', this.$route.query.id)
-      let id = this.showTrainDetail.trainId
       // let id = '1332136482139570178'
-      return getTrainDetail({ trainId: id }).then((res) => {
+      return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction)
       })
