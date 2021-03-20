@@ -319,7 +319,7 @@ export default {
         }
         if (value > 100000) {
           return callback(new Error('计划人数最大限制输入值 100000'))
-        } else if (value <= 100000 && value >= 0) {
+        } else if (value <= 100000 && value > 0) {
           this.$refs.form.validateField('trainObjectsList')
           callback()
         } else {
