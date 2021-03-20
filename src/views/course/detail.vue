@@ -43,7 +43,7 @@
           </el-col>
           <el-col :span="12">
             <div class="colbox">
-              <span class="text_title">所在目录：</span>
+              <span class="text_title">所在分类：</span>
               <span class="text">{{ userData.catalogName }}</span>
             </div>
           </el-col>
@@ -83,18 +83,24 @@
           <el-col :span="12">
             <div class="colbox">
               <span class="text_title">通过条件：</span>
+              <!-- {{ userData.passCondition.spllit(',') }} -->
               <span
-                v-show="userData.passCondition == 'a'"
-                class="text"
-              >教师评定</span>
-              <span
-                v-show="userData.passCondition == 'b'"
-                class="text"
-              >考试通过</span>
-              <span
-                v-show="userData.passCondition == 'c'"
-                class="text"
-              >达到课程学时</span>
+                v-for="(item, index) in userData.passCondition.split(',')"
+                :key="index"
+              >
+                <span
+                  v-if="item == 'a'"
+                >教师评定 {{ index != userData.passCondition.split(',').length - 1 ? ',' : '' }}
+                </span>
+                <span
+                  v-if="item == 'b'"
+                >考试通过{{ index != userData.passCondition.split(',').length - 1 ? ',' : '' }}
+                </span>
+                <span
+                  v-if="item == 'c'"
+                >达到课程学时
+                  {{ index != userData.passCondition.split(',').length - 1 ? ',' : '' }}</span>
+              </span>
             </div>
           </el-col>
         </el-row>
@@ -126,7 +132,7 @@
             学习人数
           </div>
           <div class="item_bottom">
-            {{ userData.studyPeople }}
+            {{ userData.studyPeople || '--' }}
           </div>
         </div>
         <div class="bar_item">
@@ -134,7 +140,7 @@
             完成人数
           </div>
           <div class="item_bottom">
-            {{ userData.finishPeople }}
+            {{ userData.finishPeople || '--' }}
           </div>
         </div>
         <div class="bar_item">
@@ -142,7 +148,7 @@
             收藏人数
           </div>
           <div class="item_bottom">
-            {{ userData.collectedPeople }}
+            {{ userData.collectedPeople || '--' }}
           </div>
         </div>
         <div class="bar_item">
@@ -150,7 +156,7 @@
             评论人数
           </div>
           <div class="item_bottom">
-            {{ userData.commentPeople }}
+            {{ userData.commentPeople || '--' }}
           </div>
         </div>
         <div class="bar_item">
@@ -158,7 +164,7 @@
             评分
           </div>
           <div class="item_bottom">
-            {{ userData.scope }}
+            {{ userData.scope || '--' }}
           </div>
         </div>
       </div>
@@ -255,6 +261,8 @@ export default {
   methods: {
     async getInfo() {
       this.userData = await getCourseStudyDetail({ courseId: this.$route.query.id })
+      // this.userData.passCondition  = this.userData.passCondition.split(',')
+      // console.log(this.userData);
     },
 
     //  处理页码改变

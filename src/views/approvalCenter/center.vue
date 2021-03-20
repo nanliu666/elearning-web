@@ -227,9 +227,13 @@ export default {
 
   watch: {
     searchInput: function() {
+      this.page.pageNo = 1
+      this.page.currentPage = 1
       this.setPitch(this.pitch)
     },
     statusValue: function() {
+      this.page.pageNo = 1
+      this.page.currentPage = 1
       this.setPitch(this.pitch)
     }
   },

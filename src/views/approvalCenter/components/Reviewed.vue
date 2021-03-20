@@ -166,9 +166,9 @@ export default {
   activated() {
     this.setPitch()
   },
-  // created() {
-  //   this.setPitch()
-  // },
+  created() {
+    this.setPitch()
+  },
   methods: {
     statusToText(status) {
       return STATUS_TO_TEXT[status]

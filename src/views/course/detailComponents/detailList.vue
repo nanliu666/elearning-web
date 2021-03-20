@@ -61,7 +61,7 @@
         </template>
 
         <template #jobPercent="{row}">
-          {{ row.jobTimes }}次/{{ row.jobPercent }}
+          {{ row.jobTimes || 0 }}次/{{ row.jobPercent || 0 }}%
         </template>
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
