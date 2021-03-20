@@ -27,7 +27,7 @@ export default [
     name: '编辑培训',
     component: TrainingEdit,
     meta: {
-      keepAlive: true,
+      keepAlive: false,
       isTab: false
     }
   },

@@ -225,26 +225,33 @@ export default {
   watch: {
     'model.testPaper': {
       handler(val) {
-        this.$set(this.model, 'testPaperType', _.find(this.testPaperList, { id: val }).type)
+        this.$set(
+          this.model,
+          'testPaperType',
+          _.get(_.find(this.testPaperList, { id: val }), 'type')
+        )
       }
     }
   },
   methods: {
     // 考试结束日期在试卷有效期之前
     validateTestPaper(rule, value, callback) {
-      const paperExpiredTime = _.find(this.$refs.testPaperRef.optionList, (item) => {
-        return item.id === value
-      }).expiredTime
-      // 培训结束日期在卷子有效期之前
-      const isLegalExpiredTime = moment(this.model.examTime[1]).isSameOrBefore(paperExpiredTime)
-      if (paperExpiredTime && !isLegalExpiredTime) {
-        callback(
-          new Error(
-            `此卷结束日${paperExpiredTime}在考试结束日时（${this.model.examTime[1]}）已过期`
+      if (_.get(this.$refs, 'testPaperRef')) {
+        const temp = _.find(this.$refs.testPaperRef.optionList, (item) => {
+          return item.id === value
+        })
+        const paperExpiredTime = _.get(temp, 'expiredTime')
+        // 培训结束日期在卷子有效期之前
+        const isLegalExpiredTime = moment(this.model.examTime[1]).isSameOrBefore(paperExpiredTime)
+        if (paperExpiredTime && !isLegalExpiredTime) {
+          callback(
+            new Error(
+              `此卷结束日${paperExpiredTime}在考试结束日时（${this.model.examTime[1]}）已过期`
+            )
           )
-        )
-      } else {
-        callback()
+        } else {
+          callback()
+        }
       }
     },
     // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间

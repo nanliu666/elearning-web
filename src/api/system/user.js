@@ -88,6 +88,9 @@ export const modifyUserStatus = (userId, userStatus) => {
 export const getOrgUserList = (params) => {
   return get('/org/v1/org/user', params)
 }
+export const getWorkList = (params) => {
+  return get('/user/v1/user/work/list', params)
+}
 // 搜索所有人员，包括外部员工
 export const getAllUserList = (params) => {
   return get('/user/v1/user/all', params)

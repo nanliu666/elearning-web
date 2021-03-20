@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { getOrgUserList } from '@/api/system/user'
+import { getWorkList } from '@/api/system/user'
 import { getCertificateList } from '@/api/examManage/schedule'
 const assessFormColumns = [
   {
@@ -275,7 +275,7 @@ export default {
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      return getWorkList(_.assign(params, { orgId: 0 }))
     },
     loadCertificate() {
       return Promise.resolve({ data: [] })
