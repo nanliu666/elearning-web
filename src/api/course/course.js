@@ -159,4 +159,4 @@ export const saveCourseLinkedStudentOrTeacher = (params) =>
  * @param {Object} params.fileName        每个文件对应的名称数组
  * @param {Object} params.zipComment      zip包名称
  **/
-export const zip = (params) => post('/api/common/oss/download/zip', params)
+export const zip = (params) => get('/api/common/oss/download/zip', params)

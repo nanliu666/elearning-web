@@ -23,7 +23,7 @@
         </div>
         <div class="materials_top_box_item">
           <span>作业提交率：</span>
-          <span>{{ courseData.jobTimes }} / {{ courseData.jobPercent }}% </span>
+          <span>{{ courseData.jobTimes || 0 }}次 / {{ courseData.jobPercent || 0 }}% </span>
         </div>
         <!-- <div class="materials_top_box_item">
           <span>学习心得提交率：</span>

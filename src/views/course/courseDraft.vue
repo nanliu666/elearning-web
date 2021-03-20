@@ -1020,6 +1020,11 @@ export default {
     // 导航
     showSelect(index) {
       this.status = index
+      // 把筛选数据清空
+      this.searchParams = ''
+      this.page.pageNo = 1
+      this.page.currentPage = 1
+
       this.getInfo()
       this.getScreenInfo()
       this.$refs.seachPopover.resetForm()

@@ -262,17 +262,18 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
-      this.form.isPublic = 0
+      this.$set(this.form, 'isPublic', 0)
+      this.$set(this.form, 'name', '')
     },
     // 新建子分类
     createChild(row) {
       this.type = 'createChild'
       this.form = _.cloneDeep(row)
       this.form.parentId = row.id
-      this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
-      this.form.isPublic = 0
+      this.$set(this.form, 'isPublic', 0)
+      this.$set(this.form, 'name', '')
     },
     edit(row) {
       this.type = 'edit'

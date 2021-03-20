@@ -178,6 +178,7 @@
                 :min="0"
                 :max="100"
                 :step="0.5"
+                :precision="1"
                 @change="handleChange"
               ></el-input-number>
             </el-form-item>
@@ -193,6 +194,7 @@
                 :min="0"
                 :step="0.5"
                 :max="100"
+                :precision="1"
                 @change="handleChange"
               ></el-input-number>
             </el-form-item>
@@ -308,7 +310,7 @@
                     slot="tip"
                     class="el-upload__tip"
                   >
-                    只能上传jpg/jpeg/png文件，且不超过10MB
+                    只能上传jpg、jpeg、bmp、png文件，且不超过10MB
                   </div>
                 </div>
                 <img
@@ -444,6 +446,7 @@
                 添加作业
               </el-button>
               <common-upload
+                :limit="20"
                 class="upload-more"
                 multiple
                 need-handler
@@ -508,10 +511,12 @@
                     <el-select
                       v-model="scope.row.type"
                       placeholder="请选择"
-                      @change="scope.row.upLoad = []"
+                      :disabled="scope.row.type == 4"
+                      @change="() => selectChange(scope)"
                     >
                       <el-option
                         v-for="item in typeOption"
+                        v-show="item.value != 4"
                         :key="item.value"
                         :label="item.name"
                         :value="item.value"
@@ -765,7 +770,6 @@
             :visible.sync="reflectionVisible"
             width="50%"
             :modal-append-to-body="false"
-            :before-close="handleClose"
           >
             <div class="reflection_content">
               <tinymce v-model="ruleForm.thinkContent" />
@@ -925,17 +929,17 @@ export default {
     }
   },
   watch: {
-    $route: {
-      handler() {
-        this.$nextTick(() => {
-          this.$refs.ruleForm.clearValidate()
-          // this.$refs.ruleForm.resetFields()
-        })
-      },
-      immediate: true,
-      deep: true,
-      return: true
-    },
+    // $route: {
+    //   handler() {
+    //     this.$nextTick(() => {
+    //       this.$refs.ruleForm.clearValidate()
+    //       // this.$refs.ruleForm.resetFields()
+    //     })
+    //   },
+    //   immediate: true,
+    //   deep: true,
+    //   return: true
+    // },
     'ruleForm.imageUrl': {
       handler() {
         this.$nextTick(() => {
@@ -962,7 +966,14 @@ export default {
   created() {
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
-    })
+    }),
+      this.isdeleteData()
+    this.isgetCourseTags()
+    this.isgetCatalog()
+    this.getInfo()
+    this.islistTeacher()
+    this.disabledBtn = false
+    this.reflectionData = []
   },
   mounted() {
     this.$nextTick(() => {
@@ -994,12 +1005,35 @@ export default {
     next()
   },
   methods: {
+    selectChange(scope) {
+      if (scope.row.upLoad.length) {
+        this.$confirm('切换类型是否需要清除内容?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            this.ruleForm.contents[scope.$index].upLoad = []
+            this.$message({
+              type: 'success',
+              message: '清除成功!'
+            })
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消清除'
+            })
+          })
+      }
+
+      console.log(scope)
+    },
     delReflectionData() {
       this.reflectionData = []
       this.ruleForm.thinkContent = ''
     },
     beforeTaskUpload() {},
-    handleClose() {},
     // 添加作业btn
     addTask() {
       let item = {
@@ -1056,8 +1090,8 @@ export default {
         name: (content && content.name) || fileData.name || '社区的商业模式',
         upLoad: [
           {
-            localName: fileData.name,
-            fileSize: fileData.file.size // (fileData.file.size / 1024).toFixed(1) //大小单位KB
+            localName: fileData.name
+            // fileSize: fileData.file.size // (fileData.file.size / 1024).toFixed(1) //大小单位KB
           }
         ],
         fileData
@@ -1227,8 +1261,10 @@ export default {
               upLoad: [], //[url,localName],  //所有上传的文件
               saveOrcompile: 0 // 1保存&0编辑
             }
-            this.reflectionData.push(data)
-            delIndex = index
+            if (!this.reflectionData.length) {
+              this.reflectionData.push(data)
+              delIndex = index
+            }
             thinkContentData = item.upLoad[0].content
           }
         })
@@ -1330,11 +1366,6 @@ export default {
         })
         return n
       })
-
-      // if (this.remember) {
-      //   params.imageUrl = params.imageUrl.splice(1, 1)
-      // }
-      // this.remember = false
       params.contents.map((item, index) => {
         item.sort = index
         if (item.upLoad.length !== 0) {
@@ -1378,13 +1409,14 @@ export default {
       }
       if (upIndexArr.length) return
       // 把课前思考加入contents
-      if (this.reflectionData[0] || params.thinkContent)
+      if ((this.reflectionData[0] ? this.reflectionData[0].name : false) || params.thinkContent) {
         params.contents.push({
           type: 5,
           name: this.reflectionData[0] ? this.reflectionData[0].name : '',
           content: params.thinkContent || ''
         })
-      delete params.thinkContent
+      }
+
       // console.log(params)
       // return
       // 草稿
@@ -1397,6 +1429,15 @@ export default {
         })
           .then(() => {
             params.status = status
+
+            // 分类不管是不是草稿都要填
+            if (!params.catalogId) {
+              this.$message({
+                message: '所在分类一定要填哦',
+                type: 'warning'
+              })
+              return
+            }
 
             // 判断是新增还是编辑
             if (this.$route.query.id) {
@@ -1599,10 +1640,10 @@ export default {
 
     // 课件校验
     CoursewareUpload(file) {
-      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|jpeg|png)$/
-      const regxImg = /^.*\.(jpg|jpeg|png)$/
+      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png)$/
+      const regxImg = /^.*\.(jpg|jpeg|png|bmp)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
-      const isLtImg = file.size / 1024 / 1024 < 5
+      const isLtImg = file.size / 1024 / 1024 < 10
       if (!isLt10M) {
         this.$message.error('上传课件大小不能超过 2GB!')
         return false
@@ -1613,7 +1654,7 @@ export default {
       }
       if (regxImg.test(file.name)) {
         if (!isLtImg) {
-          this.$message.error('上传图片大小不能超过 5MB!')
+          this.$message.error('上传图片大小不能超过 10MB!')
           return false
         }
 
@@ -1627,7 +1668,7 @@ export default {
     addArticleBtn() {
       let item = {
         sort: '', //序号
-        type: '', //章节类型
+        type: 2, //章节类型
         name: '', // 章节名称
         localName: '', //文章标题
         url: '',
@@ -1645,6 +1686,10 @@ export default {
     // 删除
     delContent(c, i) {
       this.ruleForm.contents.splice(i, 1)
+      this.$message({
+        message: '该章节已成功删除',
+        type: 'success'
+      })
       // 文章类型
       if (c.type === 1) return
       const uploadIndex = this.uploadingQueue.findIndex((file) => file.file.uid === c.fileData.uid)
@@ -1680,14 +1725,14 @@ export default {
     //   // res, file
     // },
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpeg|png)$/
-      const isLt10M = file.size / 1024 / 1024 < 5
+      const regx = /^.*\.(jpg|jpeg|png|bmp)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
       if (!isLt10M) {
-        this.$message.error('上传图片大小不能超过 5MB!')
+        this.$message.error('上传图片大小不能超过 10MB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg,jpeg,png文件')
+        this.$message.error('上传图片只支持jpg,jpeg,bmp,png文件')
         return false
       }
       return true
