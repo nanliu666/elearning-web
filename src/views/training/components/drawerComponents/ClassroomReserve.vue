@@ -249,7 +249,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        const params = _.assign(this.queryInfo, this.params)
+        const params = _.assign(this.queryInfo, { todoDate: this.params.todoDate })
         let { totalNum, data } = await getBookList(params)
         this.tableData = data
         this.handleUseTime()

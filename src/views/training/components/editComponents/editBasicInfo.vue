@@ -11,7 +11,7 @@
           <lazySelect
             v-model="formData.contactName"
             :load="loadCoordinator"
-            :allow-create="false"
+            :allow-create="true"
             :searchable="true"
             :option-props="personOptionProps"
             @select="selectContact"
@@ -33,7 +33,7 @@
 
 <script>
 import lazySelect from '@/components/lazy-select/lazySelect'
-import { getOrgUserList, getAllCatalog } from '@/api/system/user'
+import { getWorkList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
 import { getUserList } from '@/api/examManage/schedule'
@@ -369,7 +369,7 @@ export default {
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
       } else {
-        return getOrgUserList(_.assign(params, { orgId: 0 }))
+        return getWorkList(_.assign(params, { orgId: 0 }))
       }
     }
   }
