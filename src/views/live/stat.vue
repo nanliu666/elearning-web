@@ -20,7 +20,7 @@
           <div class="operate-left">
             <div class="input-wrapper">
               <el-input
-                v-model="filterForm[currentTable].titleOrNo"
+                v-model="filterForm[currentTable].name"
                 :disabled="loading[currentTable]"
                 clearable
                 size="medium"
@@ -95,7 +95,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        titleOrNo: filterForm[currentTable].titleOrNo
+                        name: filterForm[currentTable].name
                       }
                     "
                   >
@@ -136,7 +136,7 @@
                     @click="
                       filterForm[currentTable] = {
                         ...initForm[currentTable],
-                        titleOrNo: filterForm[currentTable].titleOrNo
+                        name: filterForm[currentTable].name
                       }
                     "
                   >
@@ -364,7 +364,7 @@ export default {
       },
       initForm: {
         live: {
-          titleOrNo: '',
+          name: '',
           categoryId: '',
           creatorId: '',
           isUsed: '',
@@ -372,7 +372,7 @@ export default {
           pageSize: 10
         },
         person: {
-          titleOrNo: '',
+          name: '',
           orgId: '',
           pageNo: 1,
           pageSize: 10
@@ -380,7 +380,7 @@ export default {
       },
       filterForm: {
         live: {
-          titleOrNo: '',
+          name: '',
           categoryId: '',
           creatorId: '',
           isUsed: '',
@@ -388,7 +388,7 @@ export default {
           pageSize: 10
         },
         person: {
-          titleOrNo: '',
+          name: '',
           orgId: '',
           pageNo: 1,
           pageSize: 10
@@ -408,7 +408,7 @@ export default {
   },
   computed: {
     searchValWatcher() {
-      return this.filterForm[this.currentTable].titleOrNo
+      return this.filterForm[this.currentTable].name
     }
   },
   watch: {
