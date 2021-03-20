@@ -97,13 +97,13 @@
             >
               {{ row.status == '1' ? '停用' : '启用' }}
             </el-button>
-            <el-button
+            <!-- <el-button
               v-p="AUTH_LIVE_CLASSIFY"
               type="text"
               @click="handleAuth(row)"
             >
               权限配置
-            </el-button>
+            </el-button> -->
             <el-dropdown @command="handleCommand($event, row)">
               <el-button
                 type="text"
@@ -247,7 +247,11 @@ export default {
       },
       data: [],
       createOrgDailog: false,
-      searchParams: {}
+      searchParams: {
+        parentId: 0,
+        type: '0',
+        name: ''
+      }
     }
   },
   computed: {
@@ -339,14 +343,25 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteCategory({ id: id + '' }).then(() => {
-        this.loadTableData()
-        this.$refs.table.clearSelection()
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
-      })
+      deleteCategory({ id: id + '' }).then(
+        () => {
+          this.loadTableData()
+          this.$refs.table.clearSelection()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        },
+        (err) => {
+          console.log(err)
+          this.$confirm('您选择分类下含有直播，无法删除该分类', '提示', {
+            confirmButtonText: '我知道了',
+            type: 'warning',
+            showCancelButton: false,
+            center: false
+          })
+        }
+      )
     },
     // 单个删除
     handleDelete(row) {
@@ -395,8 +410,6 @@ export default {
           this.tableData.forEach((item) => {
             item.hasChildren = false
           })
-
-          console.log(this.tableData)
           // this.tableData = res;
           this.tableLoading = false
         })

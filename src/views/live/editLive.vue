@@ -842,10 +842,7 @@
               </el-form-item>
             </el-col>
 
-            <el-col
-              :span="6"
-              :offset="14"
-            >
+            <el-col class="paginationDiv">
               <!-- :current-page.sync="StudentsPage.totalNo" -->
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
@@ -2017,6 +2014,7 @@ export default {
     submit_live_data() {
       let otherData = []
       let slef = this
+
       this.table_teacherSet.forEach(function(item) {
         if (item.type === 2 || item.type === 3) {
           let teacher = {}
@@ -2025,13 +2023,14 @@ export default {
               teacher.nickName = currentValue.name
             }
           })
-          ;(teacher.userActor = item.identity),
-            (teacher.roleName =
-              item.role === '嘉宾' ? 'Guest' : item.role === '助教' ? 'Assistant' : ''),
+          // (teacher.userActor = item.identity),
+          ;(teacher.roleName =
+            item.identity === '嘉宾' ? 'Guest' : item.identity === '助教' ? 'Assistant' : ''),
             (teacher.userId = item.nameList_value)
           otherData.push(teacher)
         }
       })
+
       var data = {
         batchDeclare: this.basicForm.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
         categoryId: this.basicForm.liveClassification_value, // 所属分类
@@ -2416,5 +2415,8 @@ export default {
     height: auto;
     background: transparent;
   }
+}
+.paginationDiv {
+  text-align: right;
 }
 </style>
