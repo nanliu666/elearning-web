@@ -289,12 +289,14 @@ const TABLE_COLUMNS = [
     label: '名称',
     prop: 'coursePlanName',
     slot: true,
-    width: 300
+    fixed: true,
+    minWidth: 180
   },
   {
-    label: '名称',
-    prop: 'coursePlanName',
-    width: 300
+    label: '编号',
+    prop: 'coursePlanNo',
+    slot: false,
+    minWidth: 180
   },
   {
     label: '分类',
@@ -317,7 +319,7 @@ const TABLE_COLUMNS = [
     label: '课程时间',
     prop: 'time',
     formatter: (row) => row.startTime + '~' + row.endTime,
-    minWidth: 100
+    minWidth: 300
   }
 ]
 const TABLE_CONFIG = {

@@ -138,21 +138,33 @@ export default {
       this.parentVm.queryWork(courseId)
     },
     downloadZip() {
-      const data = {
+      const params = {
         filePath: [],
         fileName: [],
-        zipComment: '打包下载'
+        zipComment: '打包下载.zip'
       }
       this.data.course.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
-          const { fileName, filePath } = item
-          if (!filePath || !fileName) return
-          data.filePath.push(filePath)
-          data.fileName.push(fileName)
+          let { fileName: name, filePath: path } = item
+          if (!path || !name) return
+          if (path.indexOf('http') !== 0) {
+            path = 'https://' + path
+          }
+          params.filePath.push(path)
+          params.fileName.push(name)
         })
       })
-      downloadZip(data).then(() => {
-        // todo
+      params.filePath = params.filePath.join(',')
+      params.fileName = params.fileName.join(',')
+      let p = ''
+      Object.keys(params).forEach((key) => {
+        const value = params[key]
+        p += `&${decodeURIComponent(key)}=${decodeURIComponent(value)}`
+      })
+
+      p = '?' + p.slice(1)
+      downloadZip(p).then(() => {
+        // console.log(res)
       })
     },
     download(row) {
