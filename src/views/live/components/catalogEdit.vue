@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    v-if="visible"
     v-loading="loading"
     :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"

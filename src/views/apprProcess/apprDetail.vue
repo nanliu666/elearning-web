@@ -163,10 +163,10 @@
               <div class="content">
                 <div v-html="courseData.introduction"></div>
               </div>
-              <div class="title">
+              <!-- <div class="title">
                 <i></i>
                 <span>课前思考</span>
-              </div>
+              </div> -->
               <div class="content">
                 <div v-html="courseData.thinkContent"></div>
               </div>
@@ -184,9 +184,9 @@
                   <div>
                     <i>{{ index + 1 }}</i> <span>{{ item.name }}</span>
                   </div>
-                  <div class="btn">
+                  <!-- <div class="btn">
                     查看内容
-                  </div>
+                  </div> -->
                 </li>
               </ul>
             </div>
@@ -510,11 +510,11 @@ export default {
   },
   methods: {
     // 查看课程内容
-    jumpToLearn(item) {
-      this.$router.push({
-        path: '/approvalCenter/chapter',
-        query: { courseId: item.courseId, chapterId: item.id }
-      })
+    jumpToLearn() {
+      // this.$router.push({
+      //   path: '/approvalCenter/chapter',
+      //   query: { courseId: item.courseId, chapterId: item.id }
+      // })
     },
     // 获取课程信息
     async getCourseData() {

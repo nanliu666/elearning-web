@@ -151,11 +151,6 @@ export default {
   data() {
     return {
       type: 'create',
-      radioDisable: {
-        Company: false,
-        Department: false,
-        Group: false
-      },
       form: {
         parentId: '',
         orgIds: [],
@@ -175,8 +170,14 @@ export default {
       this.form.orgIds = val.map((item) => item.id)
     },
     async loadOrgTree() {
-      let res = await getCatalog()
-      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      let res = await getCatalog({ source: 'course', addFlag: '1' })
+      if (this.type === 'edit') {
+        this.orgTree = this.clearCurrentChildren(res)
+        this.parentOrgIdLabel =
+          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+      } else {
+        this.orgTree = res
+      }
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -210,14 +211,13 @@ export default {
     },
     // 提交
     submit(type) {
-      if (this.checkSameName()) return
+      if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         this.form.orgIds = this.form.orgIds.toString()
         this.form.source = 'course'
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            // console.log('this.form', this.form)
             addCatalog(this.form)
               .then((res) => {
                 this.$message.success('创建成功')
@@ -237,9 +237,8 @@ export default {
               })
           } else {
             this.loading = true
-            // console.log('this.form', this.form)
-
-            editCatalog(this.form)
+            // editCatalog(this.form)
+            editCatalog(_.assign(this.form, { source: 'course' }))
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
@@ -264,6 +263,7 @@ export default {
       this.orgTree[0] && this.handleOrgNodeClick()
       this.$set(this.form, 'isPublic', 0)
       this.$set(this.form, 'name', '')
+      this.loadOrgTree()
     },
     // 新建子分类
     createChild(row) {
@@ -274,9 +274,11 @@ export default {
       this.$emit('changevisible', true)
       this.$set(this.form, 'isPublic', 0)
       this.$set(this.form, 'name', '')
+      this.loadOrgTree()
     },
     edit(row) {
       this.type = 'edit'
+      this.loadOrgTree()
       this.form = _.cloneDeep(row)
       this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
@@ -300,11 +302,6 @@ export default {
     },
     handleClose() {
       this.form = { parentId: '' }
-      this.radioDisable = {
-        Company: false,
-        Department: false,
-        Group: false
-      }
       this.$emit('changevisible', false)
     },
     handleOrgNodeClick(data) {

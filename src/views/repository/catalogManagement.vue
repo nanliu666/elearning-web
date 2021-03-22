@@ -403,7 +403,9 @@ export default {
     },
     // 编辑分类
     handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
+      let data = row
+      if (data.parentId == 0) data.parentId = ''
+      this.$refs.orgEdit.edit(data)
     },
     /**
      * 处理停用启用
