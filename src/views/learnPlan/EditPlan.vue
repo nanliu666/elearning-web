@@ -249,6 +249,11 @@ export default {
           s.publishTime = +s.publishTime
         })
       })
+      data.participantsList.map(item => {
+        item.department = item.orgName
+        delete item.orgName
+        return item
+      })
       let func
       if (this.id) {
         func = updatePlan

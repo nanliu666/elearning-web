@@ -222,6 +222,7 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.$refs.ruleForm.clearValidate()
     },
     // 新建子分类
     createChild(row) {
@@ -265,6 +266,7 @@ export default {
         Group: false
       }
       this.$emit('changevisible', false)
+      this.$refs.ruleForm.clearValidate()
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {

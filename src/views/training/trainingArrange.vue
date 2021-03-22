@@ -370,6 +370,7 @@
                       type="text"
                       size="medium"
                       @click="isstopSchedule(scope.row.id)"
+                      :disabled="scope.row.status == 3"
                     >
                       结办
                     </el-button>

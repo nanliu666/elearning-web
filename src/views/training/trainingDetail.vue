@@ -88,30 +88,20 @@
           </el-col>
           <el-col :span="2">
             <div class="col_title">
-              {{ '培训对象:' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.object }}
-            </div>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="2">
-            <div class="col_title">
               {{ '培训方式：' }}
             </div>
           </el-col>
           <el-col :span="5">
             <!-- trainWay:'',	//培训方式（1：面授；2：混合；3：在线）	integer(int32) -->
             <div class="col_content">
-              <span v-if="showTrainDetail.trainWay === 1">面授</span>
-              <span v-if="showTrainDetail.trainWay === 2">混合</span>
-              <span v-if="showTrainDetail.trainWay === 3">在线</span>
+              <span v-if="showTrainDetail.trainWay == 2">面授</span>
+              <span v-if="showTrainDetail.trainWay == 3">混合</span>
+              <span v-if="showTrainDetail.trainWay == 1">在线</span>
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '培训地点：' }}
@@ -119,12 +109,10 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.address }}
+              {{ showTrainDetail.address || '--'}}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '联系人：' }}
@@ -132,9 +120,14 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.contactName }}
+              {{ showTrainDetail.contactName || '--' }}
             </div>
           </el-col>
+
+        </el-row>
+
+        <el-row>
+
           <el-col :span="2">
             <div class="col_title">
               {{ '联系电话：' }}
@@ -145,10 +138,8 @@
               {{ showTrainDetail.contactPhone }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
-          <el-col :span="2">
+                  <el-col :span="2">
             <div class="col_title">
               {{ '主办单位：' }}
             </div>
@@ -158,6 +149,10 @@
               {{ showTrainDetail.sponsor }}
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
+  
           <el-col :span="2">
             <div class="col_title">
               {{ '承办单位：  ' }}
@@ -165,13 +160,11 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.organizer }}
+              {{ showTrainDetail.organizer || '--' }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
-          <el-col :span="2">
+                    <el-col :span="2">
             <div class="col_title">
               {{ '班主任： ' }}
             </div>
@@ -181,6 +174,12 @@
               {{ showTrainDetail.headTeacher }}
             </div>
           </el-col>
+
+
+        </el-row>
+
+        <el-row>
+
           <el-col :span="2">
             <div class="col_title">
               {{ '助教：    ' }}
@@ -877,7 +876,7 @@
 <script>
 // 培训详情
 import { delCourseInfo } from '@/api/course/course'
-import { getOfflineTodo, queryJoin, setJoin, queryStatistics } from '@/api/training/training'
+import { getOfflineTodo, queryJoin, setJoin, queryStatistics, delTrain } from '@/api/training/training'
 import Pagination from '@/components/common-pagination'
 import DownCodeDialog from './components/downCodeDialog'
 import {
@@ -1453,11 +1452,14 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            delCourseInfo({ courseId: row.catalogId }).then(() => {
+            delTrain({ ids: this.showTrainDetail.id }).then(() => {
               this.$message({
                 type: 'success',
                 message: '删除成功!'
               })
+              this.$router.back()
+            }).catch(() => {
+              this.$message.warning('删除失败，请重试')
             })
           })
           .catch(() => {

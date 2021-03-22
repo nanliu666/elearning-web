@@ -38,6 +38,7 @@
           circle
           style="display: block; margin-bottom: 12px;"
           size="medium"
+          :disabled="course.timeList.length >= 5"
           @click="addTimeList"
         ></el-button>
 
@@ -97,7 +98,7 @@
           添加
         </div>
       </el-tab-pane>
-      <el-tab-pane
+      <!-- <el-tab-pane
         label="关联练习"
         name="second"
       >
@@ -106,7 +107,7 @@
         label="关联作业"
         name="third"
       >
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
 
     <!-- 预览框 -->
@@ -197,7 +198,6 @@ export default {
           label: '允许学习次数',
           offset: 4,
           desc: '0：表示无限制',
-          required: true
         },
         {
           prop: 'timeList',
@@ -210,7 +210,8 @@ export default {
     }
   },
   created() {
-    this.course.timeList = [{ list: ['', ''] }]
+    console.log(this.course)
+    // this.course.timeList = [{ list: ['', ''] }]
   },
   methods: {
     delTimeList(index) {

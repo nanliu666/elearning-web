@@ -6,23 +6,27 @@
     <!-- 添加课程页面 -->
     <div class="layout_header">
       <ul
-        v-if="courseList.length"
         class="header_left"
       >
         <li>
           <el-checkbox
             v-model="checkAll"
             :indeterminate="isIndeterminate"
+            :disabled="!courseList.length"
             @change="handleCheckAllChange"
           >
             全选
           </el-checkbox>
         </li>
-        <li @click="handleDeleteCourse">
+        <li>
+        <el-button type="text" size="medium" :disabled="!courseList.length"  @click="handleDeleteCourse">
           <i class="el-icon-delete"></i>删除
+        </el-button>
         </li>
-        <li @click="handleBatchEdit">
-          <i class="el-icon-edit-outline"></i>批量修改
+        <li>
+          <el-button type="text" size="medium" :disabled="!courseList.length"  @click="handleBatchEdit">
+            <i class="el-icon-edit-outline"></i>批量修改
+          </el-button>
         </li>
       </ul>
       <el-button
@@ -99,6 +103,7 @@
     <CourseSelectDialog
       ref="listSelect"
       :multiple="!replacingCourse"
+      :course-list="courseList"
       :visible.sync="courseDialogVisible"
       @submit="handleCourseSelectSubmit"
     />
