@@ -535,7 +535,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   },
   {
     data: '',
-    field: 'creatorName',
+    field: 'creatorId',
     label: '创建人',
     type: 'select',
     options: [],

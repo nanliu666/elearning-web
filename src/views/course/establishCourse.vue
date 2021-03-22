@@ -1266,9 +1266,10 @@ export default {
               delIndex = index
             }
             thinkContentData = item.upLoad[0].content
+            res.contents.splice(delIndex, 1)
           }
         })
-        res.contents.splice(delIndex, 1)
+
         this.ruleForm = res
         this.ruleForm.thinkContent = _.unescape(thinkContentData)
       })
