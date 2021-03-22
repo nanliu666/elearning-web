@@ -1,17 +1,8 @@
 <template>
   <!-- 人员信息 页面 -->
-  <basic-container
-    block
-    class="basicContainer"
-  >
-    <div style="text-align: right;">
-      <el-button
-        type="primary"
-        size="medium"
-        @click="handleAddUser"
-      >
-        添加人员
-      </el-button>
+  <basic-container block class="basicContainer">
+    <div style="text-align: right">
+      <el-button type="primary" size="medium" @click="handleAddUser"> 添加人员 </el-button>
     </div>
 
     <common-table
@@ -22,25 +13,15 @@
       :data="userList"
     >
       <template #multiSelectMenu="{ selection }">
-        <el-button
-          style="margin-bottom:0;"
-          type="text"
-          @click="handleMultiDelete(selection)"
-        >
+        <el-button style="margin-bottom: 0" type="text" @click="handleMultiDelete(selection)">
           批量删除
         </el-button>
       </template>
 
-      <template #oparetion="{row}">
-        <el-button
-          size="medium"
-          type="text"
-          @click="handleDelete(row)"
-        >
-          删除
-        </el-button>
-      </template>
-    </common-table><user-picker
+      <template #oparetion="{ row }">
+        <el-button size="medium" type="text" @click="handleDelete(row)"> 删除 </el-button>
+      </template> </common-table
+    ><user-picker
       select-type="Org,OuterUser"
       :value="userList"
       :visible.sync="userPicking"
@@ -207,6 +188,7 @@ export default {
           this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
           this.$emit('update:user-list', this.userList)
           this.$message.success('删除成功')
+          this.$refs.table.clearSelection()
         })
         .catch(() => {})
     }
