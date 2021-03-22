@@ -149,7 +149,7 @@
               v-p="STOP_REQUIRED"
               type="text"
               size="medium"
-              :disabled="[3].includes(row.status)"
+              :disabled="3 != row.status"
               @click="closePlan(row)"
             >
               结办

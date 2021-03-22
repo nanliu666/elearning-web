@@ -307,7 +307,7 @@ const TABLE_COLUMNS = [
     label: '包含课程',
     formatter: (row) => _.map(row.courseList, 'courseName').join(','),
     prop: 'courseList',
-    minWidth: 100
+    minWidth: 100,
   },
   {
     label: '状态',
@@ -665,7 +665,13 @@ export default {
           pageNo: draft.page.currentPage,
           pageSize: draft.page.size
         })
-        draft.tableData = data
+        draft.tableData = data.map(item => {
+          if (!item.courseList || !item.courseList.length) {
+            item.courseList = [{courseName: '-'}]
+          }
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          return item
+        })
         draft.page.total = totalNum
       } catch (error) {
         // window.console.log(error)
@@ -685,6 +691,13 @@ export default {
           pageSize: published.page.size
         })
         published.tableData = data
+        published.tableData = data.map(item => {
+          if (!item.courseList || !item.courseList.length) {
+            item.courseList = [{courseName: '-'}]
+          }
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          return item
+        })
         published.page.total = totalNum
       } catch (error) {
         // window.console.log(error)

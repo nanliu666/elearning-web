@@ -270,11 +270,11 @@ export default {
       tableLoading: false,
       initForm: {
         deptName: '',
-        progress: 'Yes',
-        jobPercent: 'Yes',
-        isFinish: 'Yes',
-        isExaimPass: 'Yes',
-        coursePassStatus: 'Yes',
+        progress: '',
+        jobPercent: '',
+        isFinish: '',
+        isExaimPass: '',
+        coursePassStatus: '',
         pageNo: 1,
         pageSize: 10
       },
@@ -282,11 +282,11 @@ export default {
       filterFormVisible: false,
       filterForm: {
         deptName: '',
-        progress: 'Yes',
-        jobPercent: 'Yes',
-        isFinish: 'Yes',
-        isExaimPass: 'Yes',
-        coursePassStatus: 'Yes',
+        progress: '',
+        jobPercent: '',
+        isFinish: '',
+        isExaimPass: '',
+        coursePassStatus: '',
         pageNo: 1,
         pageSize: 10
       }
