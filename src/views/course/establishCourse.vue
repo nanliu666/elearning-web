@@ -446,7 +446,6 @@
                 添加作业
               </el-button>
               <common-upload
-                :limit="20"
                 class="upload-more"
                 multiple
                 need-handler
@@ -902,7 +901,10 @@ export default {
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['change'] }
         ],
-        introduction: [{ required: true, message: '请书写课程介绍', trigger: ['blur', 'change'] }],
+        introduction: [
+          { required: true, message: '请书写课程介绍', trigger: ['blur', 'change'] },
+          { max: 5000, message: '课程介绍最多不超过5000字', trigger: ['blur', 'change'] }
+        ],
         thinkContent: [
           { required: true, message: '请书写课前思考内容', trigger: ['blur', 'change'] }
         ]

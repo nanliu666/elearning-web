@@ -301,7 +301,10 @@ export default {
 
   activated() {
     this.refreshTableData()
-
+    this.loadOrgData()
+  },
+  created() {
+    this.refreshTableData()
     this.loadOrgData()
   },
   methods: {

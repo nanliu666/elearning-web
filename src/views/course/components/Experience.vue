@@ -74,6 +74,11 @@ export default {
     this.stuId = this.rowData.stuId
     this.getInfo()
   },
+  created() {
+    this.rowData = JSON.parse(this.$route.query.row)
+    this.stuId = this.rowData.stuId
+    this.getInfo()
+  },
   methods: {
     downLoadInfo(data) {
       // 下载
@@ -89,7 +94,7 @@ export default {
       let params = {
         filePath: '',
         fileName: '',
-        zipComment: '',
+        zipComment: encodeURIComponent('打包下载文件.zip'),
         responseType: 'blob',
         emulateJSON: true
       }
@@ -99,31 +104,9 @@ export default {
       })
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
       &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
-      // axios.get('/api/common/oss/download/zip', {
-      //   responseType: 'blob',
-      //   headers: {
-      //     accessToken: `bearer  ${token}`
-      //   },
-      //   params
-      // }).then((res)=>{
-      //   debugger
-      // })
-      // axios.get('/api/common/oss/download/zip',params).then((res)=>{
-      //   debugger
-      // })
-      // zip(params).then((res) => {
-      //   console.log(res)
-      //   this.repDownload(res)
-      // })
       this.repDownload(url)
     },
     repDownload(url) {
-      //url = 'http://localhost:1888/api/common/oss/download/zip?filePath=https:%2F%2Foa-file-dev.bestgrand.com.cn%2F000c3bd2fa7b4d379d6a3e5e64c7bcba.png,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fbed127b60e13423e9bccd36eb6384f0b.txt,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fd466a8f6e9dd4b118ec759be3be6c347.png,https:%2F%2Foa-file-dev.bestgrand.com.cn%2Fbd506f5ce4ce46c2bbf788efdf596ca9.png,&fileName=bg.png,git.txt,bg.png,123.png,&zipComment=%E6%B5%8B%E8%AF%95%E8%81%94%E8%B0%83%E5%A4%9A%E4%B8%AA%E4%BD%9C%E4%B8%9A.zip&responseType=blob&emulateJSON=true'
-
-      // if (!url) {
-      //   this.$message.error('路径不存在')
-      //   return
-      // }
       // 下载
       let token = getStore({ name: 'token' })
       let x = new XMLHttpRequest()
