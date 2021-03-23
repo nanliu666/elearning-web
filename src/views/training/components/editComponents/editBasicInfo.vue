@@ -311,32 +311,40 @@ export default {
     // 计划人数的变动
     validatePeople(rule, value, callback) {
       const numberValue = Number(value)
-      if (_.isNaN(numberValue)) {
-        return callback(new Error('计划人数必须填数字'))
+      if (value === '') {
+        callback()
       } else {
-        if (!_.isInteger(numberValue)) {
-          return callback(new Error('计划人数不能为小数'))
-        }
-        if (value > 100000) {
-          return callback(new Error('计划人数最大限制输入值 100000'))
-        } else if (value <= 100000 && value > 0) {
-          this.$refs.form.validateField('trainObjectsList')
-          callback()
+        if (_.isNaN(numberValue)) {
+          return callback(new Error('计划人数必须填数字'))
         } else {
-          return callback(new Error('计划人数必须为正整数'))
+          if (!_.isInteger(numberValue)) {
+            return callback(new Error('计划人数不能为小数'))
+          }
+          if (value > 100000) {
+            return callback(new Error('计划人数最大限制输入值 100000'))
+          } else if (value <= 100000 && value > 0) {
+            this.$refs.form.validateField('trainObjectsList')
+            callback()
+          } else {
+            return callback(new Error('计划人数必须为正整数'))
+          }
         }
       }
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
-      const moreThan = _.size(this.userList) - this.formData.people
-      this.$nextTick(() => {
-        if (_.size(this.userList) > 0 && moreThan > 0 && this.formData.people !== 0) {
-          callback(new Error(`超过计划${moreThan}人，请酌量删除`))
-        } else {
-          callback()
-        }
-      })
+      if (this.formData.people !== '') {
+        const moreThan = _.size(this.userList) - this.formData.people
+        this.$nextTick(() => {
+          if (_.size(this.userList) > 0 && moreThan > 0 && this.formData.people !== 0) {
+            callback(new Error(`超过计划${moreThan}人，请酌量删除`))
+          } else {
+            callback()
+          }
+        })
+      } else {
+        callback()
+      }
     },
     getCatalogs() {
       getAllCatalog().then((res) => {
