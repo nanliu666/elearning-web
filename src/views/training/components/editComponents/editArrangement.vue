@@ -155,16 +155,19 @@
       </common-table>
     </section>
     <offline-course-drawer
+      ref="offlineRef"
       :visible.sync="schedule.drawerVisible"
       :schedule="schedule.editingRecord"
       @submit="handleSubmitSchedule"
     />
     <online-course-drawer
+      ref="onlineRef"
       :visible.sync="course.drawerVisible"
       :course="course.editingRecord"
       @submit="courseSubmit"
     />
     <edit-examine-drawer
+      ref="examineRef"
       :visible.sync="examine.drawerVisible"
       :examine="examine.editingRecord"
       @submit="examineSubmit"
@@ -246,6 +249,7 @@ const TestConfig = {
   handlerColumn: { label: '操作', width: 150 }
 }
 import moment from 'moment'
+import { mapGetters } from 'vuex'
 export default {
   name: 'EditArrangement',
   components: { OfflineCourseDrawer, OnlineCourseDrawer, EditExamineDrawer },
@@ -283,6 +287,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['trainTimeInVuex']),
     signInDisabled() {
       return _.isEmpty(this.schedule.data)
     },
@@ -298,6 +303,10 @@ export default {
   },
   methods: {
     getData() {
+      // TODO需要在此处同时校验三个弹窗的时间与培训时间之前的关系，不满足需要存在提示
+      // this.$refs.offlineRef.$refs.form.validateField('todoDate')
+      // this.$refs.onlineRef.$refs.form.validateField('classTime')
+      // this.$refs.examineRef.$refs.basicSettingRef.$refs.form.validateField('classTime')
       // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
         const trainOfflineTodo = _.cloneDeep(this.schedule.data)

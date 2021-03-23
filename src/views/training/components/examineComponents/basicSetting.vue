@@ -256,25 +256,33 @@ export default {
     },
     // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间
     validateExamTime(rule, value, callback) {
-      this.$refs.form.validateField('testPaper')
-      // 培训开始时间要在考试时间之前
-      const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
-        moment(this.model.examTime[0])
-      )
-      // 培训结束时间要在考试结束时间之后
-      const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
-        moment(this.model.examTime[1])
-      )
-      if (!isLegalBeginTime) {
-        callback(
-          new Error(`考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`)
-        )
-      } else if (!isLegalEndTime) {
-        callback(
-          new Error(`考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`)
-        )
+      if (_.isEmpty(this.trainTimeInVuex)) {
+        callback(new Error('请先选择培训时间'))
       } else {
-        callback()
+        this.$refs.form.validateField('testPaper')
+        // 培训开始时间要在考试时间之前
+        const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
+          moment(this.model.examTime[0])
+        )
+        // 培训结束时间要在考试结束时间之后
+        const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
+          moment(this.model.examTime[1])
+        )
+        if (!isLegalBeginTime) {
+          callback(
+            new Error(
+              `考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
+            )
+          )
+        } else if (!isLegalEndTime) {
+          callback(
+            new Error(
+              `考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
+            )
+          )
+        } else {
+          callback()
+        }
       }
     },
     loadCoordinator(params) {
