@@ -45,12 +45,18 @@
         align="center"
         label="课程类型"
       >
+        <template slot-scope="scope">
+          {{ scope.row.todoType == 'course' ? '面授课程' : '线下活动' }}
+        </template>
       </el-table-column>
       <el-table-column
         prop="status"
         align="center"
         label="状态"
       >
+        <template slot-scope="scope">
+          {{ scope.row.status == 1 ? '未开始' : scope.row.status == 2 ? '进行中' : '已结束' }}
+        </template>
       </el-table-column>
       <el-table-column
         prop="todoTime"
