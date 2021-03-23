@@ -149,6 +149,7 @@ export default {
         list.forEach((item) => {
           item.orgName = item.orgName || '-'
           item.phoneNum = item.phoneNum || item.phonenum || '-'
+          item.department = item.department || item.orgName || '-'
         })
       },
       deep: true
