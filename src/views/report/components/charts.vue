@@ -54,7 +54,15 @@ export default {
       charts.clear()
       const option = {
         tooltip: {
-          trigger: 'axis'
+          trigger: 'axis',
+          // formatter(params) {
+          //   if (params.length === 3) {
+          //     if (params[params.length - 1] === 'line') {
+          //       const data = params[params.length - 1].data
+          //       params[params.length - 1].data = data + '%'
+          //     }
+          //   }
+          // }
         },
         legend: {
           data: []
@@ -103,12 +111,13 @@ export default {
         type: 'bar',
         stack: 'total',
         label: {
-          show: true
+          show: false
         },
         data: this.data.joinNum,
         itemStyle: {
           color: 'rgba(1,170,252,1)'
-        }
+        },
+        barWidth: 60
       })
       if (this.type === 'exam') {
         legend.data.push('参考人数', '通过人数', '通过率')
@@ -118,12 +127,13 @@ export default {
             type: 'bar',
             stack: 'total',
             label: {
-              show: true
+              show: false
             },
             data: this.data.passNum,
             itemStyle: {
               color: 'rgba(123, 212, 255, 1)'
-            }
+            },
+            barWidth: 60
           },
           {
             name: '通过率',
@@ -141,7 +151,7 @@ export default {
           name: '通过率',
           axisLabel: {
             formatter: '{value}%'
-          }
+          },
         })
       }
       this.charts.setOption(option)

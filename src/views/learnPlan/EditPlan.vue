@@ -249,7 +249,7 @@ export default {
           s.publishTime = +s.publishTime
         })
       })
-      data.participantsList.map(item => {
+      data.participantsList.map((item) => {
         item.department = item.orgName
         delete item.orgName
         return item
@@ -260,6 +260,7 @@ export default {
       } else {
         data.creatorId = this.userInfo.user_id
         data.creatorName = this.userInfo.nick_name
+        data.phonenum = data.phoneNum
         data.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
         func = addPlan
       }

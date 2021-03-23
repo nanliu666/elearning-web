@@ -25,6 +25,7 @@
           >设置前置条件</span>
         </el-tooltip>
       </div>
+
       <template slot="studyFrequency">
         <el-input-number
           v-model="course.studyFrequency"
@@ -197,7 +198,7 @@ export default {
           itemType: 'slot',
           label: '允许学习次数',
           offset: 4,
-          desc: '0：表示无限制',
+          desc: '0：表示无限制'
         },
         {
           prop: 'timeList',

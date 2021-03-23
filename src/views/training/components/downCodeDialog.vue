@@ -81,6 +81,7 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
+
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
     value: function(callback, type, quality) {
@@ -139,7 +140,20 @@ export default {
         width: CODE_WIDTH,
         height: CODE_HEIGHT
       })
-      qrcode.makeCode(JSON.stringify(params))
+      let baseURL =
+        process.env.NODE_ENV == 'development'
+          ? 'http://localhost:8080'
+          : 'http://139.159.141.248:8081/mobile'
+
+      baseURL = baseURL += '/pages/signin/index'
+
+      let p = ''
+      Object.keys(params).forEach((key) => {
+        p += '&' + key + '=' + params[key]
+      })
+
+      baseURL += '?' + p.slice(1)
+      qrcode.makeCode(baseURL)
       var canvas = qrcode._el.children[0]
       var data = canvas.toDataURL().replace('image/png', 'image/octet-stream;') //获取二维码值，并修改响应头部。
       var saveLink = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')

@@ -365,8 +365,8 @@
                       v-if="scope.row.status !== 0"
                       type="text"
                       size="medium"
-                      @click="isstopSchedule(scope.row.id)"
                       :disabled="scope.row.status == 3"
+                      @click="isstopSchedule(scope.row.id)"
                     >
                       结办
                     </el-button>
