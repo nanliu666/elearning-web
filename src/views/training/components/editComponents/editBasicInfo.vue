@@ -245,9 +245,12 @@ export default {
     },
     'formData.trainObjectsList': {
       handler(data) {
-        this.handlerData(_.cloneDeep(data))
+        if (!_.isEmpty(data)) {
+          this.handlerData(_.cloneDeep(data))
+        }
       },
-      deep: true
+      deep: true,
+      immediate: true
     },
     'formData.trainWay': {
       handler(val) {
@@ -295,7 +298,9 @@ export default {
         result = await Promise.all(
           examList.true.map(async (item) => {
             return (async () => {
-              return await getUserList({ orgId: item.id })
+              return await getUserList({
+                orgId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.id
+              })
             })()
           })
         )
@@ -306,14 +311,15 @@ export default {
         }
       }
       this.userList = data
-      this.$refs.form.validateField('trainObjectsList')
+      this.$refs.form && this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
-      const numberValue = Number(value)
       if (value === '') {
+        this.$refs.form.clearValidate()
         callback()
       } else {
+        const numberValue = Number(value)
         if (_.isNaN(numberValue)) {
           return callback(new Error('计划人数必须填数字'))
         } else {
