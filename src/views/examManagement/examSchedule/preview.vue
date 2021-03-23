@@ -151,6 +151,7 @@ export default {
       })
     },
     initData() {
+      this.paperData = []
       this.loading = true
       // 手工卷子接口 getManualPreview
       // 随机卷子接口统一接口 createRandomPaper
