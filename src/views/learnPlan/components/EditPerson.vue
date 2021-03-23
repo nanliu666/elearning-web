@@ -19,7 +19,7 @@
       class="commonTable"
       :columns="tableColumns"
       :config="tableConfig"
-      :data="userList"
+      :data="currentList"
     >
       <template #multiSelectMenu="{ selection }">
         <el-button
@@ -40,7 +40,17 @@
           删除
         </el-button>
       </template>
-    </common-table><user-picker
+    </common-table>
+
+    <div class="page-container">
+      <pagination
+        :total="userList.length"
+        :page.sync="page.pageNo"
+        :limit.sync="page.pageSize"
+      ></pagination>
+    </div>
+
+    <user-picker
       select-type="Org,OuterUser"
       :value="userList"
       :visible.sync="userPicking"
@@ -51,6 +61,7 @@
 
 <script>
 import UserPicker from '@/components/user-picker/userPicker'
+import Pagination from '@/components/common-pagination'
 
 import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
@@ -97,7 +108,8 @@ const TABLE_PAGE_CONFIG = {}
 export default {
   name: 'EditPerson',
   components: {
-    UserPicker
+    UserPicker,
+    Pagination
   },
   props: {
     planId: {
@@ -115,15 +127,20 @@ export default {
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
+        pageSize: 10,
+        pageNo: 1
       },
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
+    }
+  },
+  computed: {
+    currentList() {
+      const { pageSize: size, pageNo: no } = this.page
+      return this.userList.slice(size * (no - 1), size * no)
     }
   },
   watch: {
