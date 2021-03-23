@@ -5,9 +5,7 @@
   >
     <!-- 添加课程页面 -->
     <div class="layout_header">
-      <ul
-        class="header_left"
-      >
+      <ul class="header_left">
         <li>
           <el-checkbox
             v-model="checkAll"
@@ -19,12 +17,22 @@
           </el-checkbox>
         </li>
         <li>
-        <el-button type="text" size="medium" :disabled="!courseList.length"  @click="handleDeleteCourse">
-          <i class="el-icon-delete"></i>删除
-        </el-button>
+          <el-button
+            type="text"
+            size="medium"
+            :disabled="!courseList.length"
+            @click="handleDeleteCourse"
+          >
+            <i class="el-icon-delete"></i>删除
+          </el-button>
         </li>
         <li>
-          <el-button type="text" size="medium" :disabled="!courseList.length"  @click="handleBatchEdit">
+          <el-button
+            type="text"
+            size="medium"
+            :disabled="!courseList.length"
+            @click="handleBatchEdit"
+          >
             <i class="el-icon-edit-outline"></i>批量修改
           </el-button>
         </li>

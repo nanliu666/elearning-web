@@ -369,8 +369,8 @@
                       v-if="scope.row.status !== 0"
                       type="text"
                       size="medium"
-                      @click="isstopSchedule(scope.row.id)"
                       :disabled="scope.row.status == 3"
+                      @click="isstopSchedule(scope.row.id)"
                     >
                       结办
                     </el-button>
@@ -386,16 +386,17 @@
                     </span>
                     <el-dropdown-menu slot="dropdown">
                       <el-dropdown-item
-                        v-if="scope.row.status == 1"
                         v-p="EDIT_TRAIN"
                         command="edit"
+                        :disabled="scope.row.status != 1"
                       >
                         编辑
                       </el-dropdown-item>
+
                       <el-dropdown-item
-                        v-if="scope.row.status != 2"
                         v-p="DELETE_TRAIN"
                         command="del"
+                        :disabled="scope.row.status == 2"
                       >
                         删除
                       </el-dropdown-item>
