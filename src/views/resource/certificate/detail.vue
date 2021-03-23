@@ -212,7 +212,8 @@ export default {
       // 请求参数
       queryInfo: {
         pageNo: 1,
-        pageSize: 10
+        pageSize: 10,
+        templateId: ''
       },
       tableLoading: false,
       tableData: [],
@@ -239,6 +240,9 @@ export default {
       },
       deep: true
     }
+  },
+  created() {
+    this.queryInfo.templateId = this.$route.query.id
   },
   activated() {
     this.loadTableData()
@@ -307,7 +311,28 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.queryInfo = _.assign(this.queryInfo, params)
+      console.log('params:', params)
+      let currentStatus = ''
+      if (params.status && params.status === 'No') {
+        currentStatus = '2'
+      } else if (params.status && params.status === 'Yes') {
+        currentStatus = '1'
+      } else {
+        currentStatus = ''
+      }
+      let currentParams = {
+        pageNo: this.queryInfo.pageNo,
+        pageSize: this.queryInfo.pageSize,
+        stuName: params.stuName,
+        templateId: this.queryInfo.templateId,
+        deptCode: params.parentOrgId ? params.parentOrgId : '',
+        phonenum: params.batchNumber,
+        status: currentStatus,
+        dateRange: `${params.startTime ? params.startTime : ''}~${
+          params.endTime ? params.endTime : ''
+        }`
+      }
+      this.queryInfo = currentParams
       this.loadTableData()
     },
     async loadTableData() {
