@@ -1123,7 +1123,7 @@ export default {
         ],
         introduction: [
           { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
-          { min: 1, max: 5000, message: '长度在 1 到 5000 个字符', trigger: 'blur' }
+          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: 'blur' }
         ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
@@ -1437,7 +1437,6 @@ export default {
           break
       }
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'formLiveTypeForm'
-
       if (!formName) {
         if (
           this.table_teacherSet.filter((x) => x.nameList_value).length ===
@@ -1461,6 +1460,13 @@ export default {
             this.headIndex += 1
           }
         } else {
+          if (errmsg == this.basicFormRules.introduction[1].message) {
+            this.$message({
+              message: '直播介绍最多不能超过5000字',
+              type: 'error'
+            })
+          }
+          console.log(errmsg)
           return false
         }
       })
