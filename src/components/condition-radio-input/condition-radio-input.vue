@@ -1,14 +1,14 @@
 <template>
   <div class="radio-input-box">
-    <el-radio :label="innerValue">
+    <el-radio :label="label">
       <span
         class="label-text"
         style="margin-right: 15px;"
       >{{ labelText }}</span>
-      <span v-if="innerValue === value">
+      <span v-if="isShow">
         {{ textBefore }}
         <el-input-number
-          v-model.number="modelNumber"
+          v-model.number="value"
           :controls="false"
           :min="min"
           :style="`width:${inputWidth}px`"
@@ -28,16 +28,16 @@ export default {
       type: Number,
       default: 0
     },
+    label: {
+      type: Number,
+      default: 1
+    },
+    isShow: {
+      type: Boolean,
+      default: false
+    },
     value: {
-      type: Number,
-      default: null
-    },
-    passScope: {
-      type: Number,
-      default: null
-    },
-    number: {
-      type: Number,
+      type: [String, Number],
       default: null
     },
     labelText: {
@@ -52,13 +52,9 @@ export default {
       type: String,
       default: ''
     },
-    defaultValue: {
-      type: [String, Number],
-      default: 10
-    },
     inputWidth: {
       type: Number,
-      default: 50
+      default: 60
     },
     inputProps: {
       type: Object,
@@ -66,18 +62,8 @@ export default {
     }
   },
   data() {
-    return {
-      innerValue: this.defaultValue,
-      modelNumber: this.number
-    }
-  },
-
-  watch: {
-    innerValue(val) {
-      this.$emit('input', val)
-    }
-  },
-  methods: {}
+    return {}
+  }
 }
 </script>
 <style lang="scss" scoped>
