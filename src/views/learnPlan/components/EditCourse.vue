@@ -63,6 +63,12 @@
             :key="course.courseId"
             :name="course.courseId"
           >
+            <template slot="content">
+              <i
+                class="el-icon-edit edit-button"
+                @click.prevent="course.isEdit = !course.isEdit"
+              ></i>
+            </template>
             <template slot="title">
               <div class="layout_content_label">
                 <div class="layout_content_label__head">
@@ -75,7 +81,12 @@
                     class="el-icon-arrow-right"
                   ></i>
                   <el-checkbox :label="course.courseId"></el-checkbox>
-                  {{ course.courseName }}
+                  <input
+                    v-if="course.isEdit"
+                    v-model="course.courseName"
+                    type="text"
+                  />
+                  <span v-else>{{ course.courseName }}</span>
                 </div>
                 <i class="icon-drag"></i>
               </div>
@@ -478,4 +489,12 @@ export default {
 //     width: 45%;
 //   }
 // }
+
+.edit-button {
+  position: absolute;
+  width: 45px;
+  margin-left: 20px;
+  margin-top: 15px;
+  font-size: 18px;
+}
 </style>
