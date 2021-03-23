@@ -100,6 +100,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import EditArrangement from './components/editComponents/editArrangement'
 import EditBasicInfo from './components/editComponents/editBasicInfo'
 import EditDetail from './components/editComponents/editDetail'
@@ -220,6 +221,15 @@ export default {
             // 赋值培训安排的数据
             const { signIn } = trainInfo
             this.$refs.editArrangement.signIn = signIn
+            _.each(trainOfflineTodo, (todo) => {
+              if (!_.isEmpty(todo.todoTime)) {
+                const tempTodoTime = _.cloneDeep(todo.todoTime)
+                _.set(todo, 'todoTimeParams', tempTodoTime)
+                _.each(tempTodoTime, (item, index) => {
+                  todo.todoTime[index] = moment(`${todo.todoDate} ${item}`)
+                })
+              }
+            })
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
             trainOnlineCourse.forEach((item) => {
               item.courseId = item.course
@@ -279,7 +289,12 @@ export default {
       _.each(pickTrain, (item) => {
         trainObjectsList.push({
           type: item.type,
-          bizId: item.type === 'User' ? item.userId : item.bizId
+          bizId:
+            item.type === 'User'
+              ? _.get(item, 'userId')
+                ? _.get(item, 'userId')
+                : item.bizId
+              : item.bizId
         })
       })
       // 基本信息(除培训对象外)详细信息

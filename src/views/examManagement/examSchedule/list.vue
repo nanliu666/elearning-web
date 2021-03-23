@@ -506,7 +506,7 @@ export default {
     handleCommand(row) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'copy' }
+        query: { id: row.id, type: 'copy', examPattern: row.examPattern }
       })
     },
     // 创建考试

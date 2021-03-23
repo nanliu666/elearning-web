@@ -300,9 +300,13 @@ export default {
     getData() {
       // 不管是不是草稿，直接返回数据
       return new Promise((resolve) => {
+        const trainOfflineTodo = _.cloneDeep(this.schedule.data)
+        _.map(trainOfflineTodo, (item) => {
+          return (item.todoTime = item.todoTimeParams)
+        })
         resolve({
           signIn: this.signIn,
-          trainOfflineTodo: this.schedule.data,
+          trainOfflineTodo,
           trainOnlineCourse: this.course.data,
           trainExam: this.examine.data
         })
