@@ -289,7 +289,12 @@ export default {
       _.each(pickTrain, (item) => {
         trainObjectsList.push({
           type: item.type,
-          bizId: item.type === 'User' ? item.userId : item.bizId
+          bizId:
+            item.type === 'User'
+              ? _.get(item, 'userId')
+                ? _.get(item, 'userId')
+                : item.bizId
+              : item.bizId
         })
       })
       // 基本信息(除培训对象外)详细信息
