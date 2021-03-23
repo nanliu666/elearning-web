@@ -109,7 +109,7 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.address || '--'}}
+              {{ showTrainDetail.address || '--' }}
             </div>
           </el-col>
 
@@ -123,11 +123,9 @@
               {{ showTrainDetail.contactName || '--' }}
             </div>
           </el-col>
-
         </el-row>
 
         <el-row>
-
           <el-col :span="2">
             <div class="col_title">
               {{ '联系电话：' }}
@@ -139,7 +137,7 @@
             </div>
           </el-col>
 
-                  <el-col :span="2">
+          <el-col :span="2">
             <div class="col_title">
               {{ '主办单位：' }}
             </div>
@@ -152,7 +150,6 @@
         </el-row>
 
         <el-row>
-  
           <el-col :span="2">
             <div class="col_title">
               {{ '承办单位：  ' }}
@@ -164,7 +161,7 @@
             </div>
           </el-col>
 
-                    <el-col :span="2">
+          <el-col :span="2">
             <div class="col_title">
               {{ '班主任： ' }}
             </div>
@@ -174,12 +171,9 @@
               {{ showTrainDetail.headTeacher }}
             </div>
           </el-col>
-
-
         </el-row>
 
         <el-row>
-
           <el-col :span="2">
             <div class="col_title">
               {{ '助教：    ' }}
@@ -876,7 +870,13 @@
 <script>
 // 培训详情
 import { delCourseInfo } from '@/api/course/course'
-import { getOfflineTodo, queryJoin, setJoin, queryStatistics, delTrain } from '@/api/training/training'
+import {
+  getOfflineTodo,
+  queryJoin,
+  setJoin,
+  queryStatistics,
+  delTrain
+} from '@/api/training/training'
 import Pagination from '@/components/common-pagination'
 import DownCodeDialog from './components/downCodeDialog'
 import {
@@ -1452,15 +1452,17 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            delTrain({ ids: this.showTrainDetail.id }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
+            delTrain({ ids: this.showTrainDetail.id })
+              .then(() => {
+                this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
+                this.$router.back()
               })
-              this.$router.back()
-            }).catch(() => {
-              this.$message.warning('删除失败，请重试')
-            })
+              .catch(() => {
+                this.$message.warning('删除失败，请重试')
+              })
           })
           .catch(() => {
             this.$message({

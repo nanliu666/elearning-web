@@ -509,6 +509,14 @@
         <div class="table_header">
           <h3 style="float: left">
             讲师设置
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="最多只能添加两个嘉宾、两个助教"
+              placement="top"
+            >
+              <i class="el-icon-question"></i>
+            </el-tooltip>
           </h3>
           <el-button
             :disabled="teacherSetButton.guestButton"
@@ -774,6 +782,7 @@
             <el-col :span="24">
               <el-form-item :label="'关联学员：' + totalNum + '人（仅关联学员可以观看）'">
                 <el-button
+                  v-if="multipleSelection.length"
                   type="text"
                   @click="delete_batchTableStudent()"
                 >
@@ -792,7 +801,9 @@
                   :data="table_relatedStudents"
                   stripe
                   style="width: 100%"
+                  @selection-change="handleSelectionChange"
                 >
+                  >
                   <el-table-column
                     type="selection"
                     width="55"
@@ -1061,6 +1072,7 @@ export default {
   },
   data() {
     return {
+      multipleSelection: [],
       oldOrgUserData: [],
       totalNum: 0,
       otherUserVal: '',
@@ -1109,7 +1121,10 @@ export default {
         select_mode_value: [
           { required: true, message: '请选择直播方式', trigger: ['blur', 'change'] }
         ],
-        introduction: [{ required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] }],
+        introduction: [
+          { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
+          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: 'blur' }
+        ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
         ],
@@ -1422,7 +1437,6 @@ export default {
           break
       }
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'formLiveTypeForm'
-
       if (!formName) {
         if (
           this.table_teacherSet.filter((x) => x.nameList_value).length ===
@@ -1446,6 +1460,13 @@ export default {
             this.headIndex += 1
           }
         } else {
+          if (errmsg == this.basicFormRules.introduction[1].message) {
+            this.$message({
+              message: '直播介绍最多不能超过5000字',
+              type: 'error'
+            })
+          }
+          console.log(errmsg)
           return false
         }
       })
@@ -1502,7 +1523,7 @@ export default {
     },
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
-      const isLt10M = file.size / 1024 / 1024 < 5
+      const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 10MB!')
@@ -2259,6 +2280,9 @@ export default {
             break
         }
       })
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     }
   }
 }

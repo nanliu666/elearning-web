@@ -159,6 +159,16 @@ export default {
       }
     }
   },
+  watch: {
+    courseList: {
+      handler(val) {
+        this.tableData = this.originTableData.filter(
+          (item) => !val.find((c) => c.courseId === item.id)
+        )
+      },
+      deep: true
+    }
+  },
   created() {
     this.getCourseData()
     this.loadCategoryData()
@@ -194,7 +204,9 @@ export default {
       getCourseList({ ...this.queryInfo, pageNo: this.page.currentPage, pageSize: this.page.size })
         .then((res) => {
           this.page.total = res.totalNum
-          this.tableData = this.originTableData = res.data.filter(item => !this.courseList.find(c => c.courseId === item.id))
+          this.tableData = this.originTableData = res.data.filter(
+            (item) => !this.courseList.find((c) => c.courseId === item.id)
+          )
         })
         .catch((err) => {
           window.console.log(err)
@@ -212,14 +224,6 @@ export default {
     handleClose() {
       this.$refs.table.clearSelection()
       this.$emit('update:visible', false)
-    }
-  },
-  watch: {
-    courseList: {
-      handler(val) {
-        this.tableData = this.originTableData.filter(item => !val.find(c => c.courseId === item.id))
-      },
-      deep: true
     }
   }
 }

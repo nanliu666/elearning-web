@@ -261,7 +261,11 @@ export default {
     treeProps() {
       return {
         disabled: 'disabled',
-        label: 'bizName',
+        label: function(data) {
+          const { bizName, phoneNum } = data
+          if (!phoneNum) return bizName
+          return bizName + '(' + phoneNum + ')'
+        },
         isLeaf: 'isLeaf',
         children: 'children'
       }
