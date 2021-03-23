@@ -782,6 +782,7 @@
             <el-col :span="24">
               <el-form-item :label="'关联学员：' + totalNum + '人（仅关联学员可以观看）'">
                 <el-button
+                  v-if="multipleSelection.length"
                   type="text"
                   @click="delete_batchTableStudent()"
                 >
@@ -800,7 +801,9 @@
                   :data="table_relatedStudents"
                   stripe
                   style="width: 100%"
+                  @selection-change="handleSelectionChange"
                 >
+                  >
                   <el-table-column
                     type="selection"
                     width="55"
@@ -1069,6 +1072,7 @@ export default {
   },
   data() {
     return {
+      multipleSelection: [],
       oldOrgUserData: [],
       totalNum: 0,
       otherUserVal: '',
@@ -1117,7 +1121,10 @@ export default {
         select_mode_value: [
           { required: true, message: '请选择直播方式', trigger: ['blur', 'change'] }
         ],
-        introduction: [{ required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] }],
+        introduction: [
+          { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
+          { min: 1, max: 5000, message: '长度在 1 到 5000 个字符', trigger: 'blur' }
+        ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
         ],
@@ -1510,7 +1517,7 @@ export default {
     },
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
-      const isLt10M = file.size / 1024 / 1024 < 5
+      const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 10MB!')
@@ -2267,6 +2274,9 @@ export default {
             break
         }
       })
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     }
   }
 }
