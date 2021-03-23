@@ -42,11 +42,11 @@
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin-left:10px"
+                  style="margin-left: 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
+                    style="display: flex; flex-direction: column"
                   >
                     <el-checkbox
                       v-for="item in tableColumns"
@@ -61,7 +61,7 @@
                   <i
                     slot="reference"
                     class="el-icon-setting"
-                    style="cursor: pointer;"
+                    style="cursor: pointer"
                   />
                 </el-popover>
               </div>
@@ -80,10 +80,10 @@
             批量删除
           </el-button>
         </template>
-        <template #status="{row}">
+        <template #status="{ row }">
           {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="STOP_REP_CATALOG"
@@ -95,6 +95,7 @@
             </el-button>
 
             <el-button
+              v-p="EDIT_REP_CATALOG"
               type="text"
               @click="handleCommand('edit', row)"
             >
