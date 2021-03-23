@@ -100,6 +100,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import EditArrangement from './components/editComponents/editArrangement'
 import EditBasicInfo from './components/editComponents/editBasicInfo'
 import EditDetail from './components/editComponents/editDetail'
@@ -220,6 +221,15 @@ export default {
             // 赋值培训安排的数据
             const { signIn } = trainInfo
             this.$refs.editArrangement.signIn = signIn
+            _.each(trainOfflineTodo, (todo) => {
+              if (!_.isEmpty(todo.todoTime)) {
+                const tempTodoTime = _.cloneDeep(todo.todoTime)
+                _.set(todo, 'todoTimeParams', tempTodoTime)
+                _.each(tempTodoTime, (item, index) => {
+                  todo.todoTime[index] = moment(`${todo.todoDate} ${item}`)
+                })
+              }
+            })
             this.$refs.editArrangement.schedule.data = trainOfflineTodo
             trainOnlineCourse.forEach((item) => {
               item.courseId = item.course
