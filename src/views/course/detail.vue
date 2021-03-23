@@ -81,7 +81,10 @@
             </div>
           </el-col>
           <el-col :span="12">
-            <div class="colbox">
+            <div
+              v-if="userData.passCondition"
+              class="colbox"
+            >
               <span class="text_title">通过条件：</span>
               <!-- {{ userData.passCondition.spllit(',') }} -->
               <span
@@ -260,7 +263,10 @@ export default {
   },
   methods: {
     async getInfo() {
-      this.userData = await getCourseStudyDetail({ courseId: this.$route.query.id })
+      let res = await getCourseStudyDetail({ courseId: this.$route.query.id })
+      res.scope = parseFloat(res.scope).toFixed(1)
+      this.userData = res
+
       // this.userData.passCondition  = this.userData.passCondition.split(',')
       // console.log(this.userData);
     },

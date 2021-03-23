@@ -11,7 +11,7 @@
         <el-table-column
           :label="'作业来源： ' + items.jobName"
           prop="name"
-          width="480px"
+          width="780px"
         >
           <template slot-scope="scope">
             <div>
@@ -51,7 +51,10 @@
                 :multiple="false"
                 @input="onSuccess(scope, items.id)"
               >
-                <el-button type="text">
+                <el-button
+                  type="text"
+                  :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
+                >
                   <span v-if="scope.$index == 1">修改作业</span>
                   <span
                     v-if="scope.$index == 2"
@@ -60,7 +63,6 @@
                 </el-button>
               </common-upload>
             </span>
-
             <el-button
               type="text"
               :disabled="scope.row.updateTime == '--'"
@@ -90,6 +92,11 @@ export default {
     }
   },
   activated() {
+    let rowData = JSON.parse(this.$route.query.row)
+    this.stuId = rowData.stuId
+    this.getInfo()
+  },
+  created() {
     let rowData = JSON.parse(this.$route.query.row)
     this.stuId = rowData.stuId
     this.getInfo()
