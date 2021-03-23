@@ -99,35 +99,39 @@ instance.interceptors.response.use(
     const status = res.data.resCode || res.status
     const statusWhiteList = website.statusWhiteList || []
     const message = res.data.resMsg || res.data.error_description || '服务请求出错，请联系管理员'
+    const { config } = res
+    if (_.get(config, 'responseType') === 'blob') {
+      return res
+    } else {
+      //如果在白名单里则自行catch逻辑处理
+      if (statusWhiteList.includes(status)) return Promise.reject(res)
+      //如果是401则跳转到登录页面
+      if (status === 401) store.dispatch('FedLogOut').then(() => router.push({ path: '/login' }))
+      // 如果请求为非200否者默认统一处理
 
-    //如果在白名单里则自行catch逻辑处理
-    if (statusWhiteList.includes(status)) return Promise.reject(res)
-    //如果是401则跳转到登录页面
-    if (status === 401) store.dispatch('FedLogOut').then(() => router.push({ path: '/login' }))
-    // 如果请求为非200否者默认统一处理
-
-    if (status !== 200) {
-      if (status === 8000) {
-        addLoading(res)
-      } else if (String(status).startsWith('5')) {
-        Message({
-          message: '服务请求出错，请联系管理员',
-          type: 'error',
-          showClose: true
-        })
-      } else {
-        Message({
-          message,
-          type: 'error',
-          showClose: true
-        })
+      if (status !== 200) {
+        if (status === 8000) {
+          addLoading(res)
+        } else if (String(status).startsWith('5')) {
+          Message({
+            message: '服务请求出错，请联系管理员',
+            type: 'error',
+            showClose: true
+          })
+        } else {
+          Message({
+            message,
+            type: 'error',
+            showClose: true
+          })
+        }
+        return Promise.reject(new Error(message))
       }
-      return Promise.reject(new Error(message))
+      if (String.prototype.endsWith.call(res.config.url, '/oauth/token')) {
+        return res.data
+      }
+      return res.data.response
     }
-    if (String.prototype.endsWith.call(res.config.url, '/oauth/token')) {
-      return res.data
-    }
-    return res.data.response
   },
   (error) => {
     NProgress.done()
