@@ -509,6 +509,14 @@
         <div class="table_header">
           <h3 style="float: left">
             讲师设置
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="最多只能添加两个嘉宾、两个助教"
+              placement="top"
+            >
+              <i class="el-icon-question"></i>
+            </el-tooltip>
           </h3>
           <el-button
             :disabled="teacherSetButton.guestButton"
