@@ -1043,13 +1043,11 @@
                 >
                   <el-tree
                     ref="otherUserTree"
-                    v-infinite-scroll="treeLoad"
                     :data="otherUser"
                     show-checkbox
                     node-key="id"
                     default-expand-all
                     :expand-on-click-node="false"
-                    class="infinite-list"
                     @check="select_organizationUser"
                   >
                     <span
@@ -1346,7 +1344,7 @@ export default {
       },
       treeOtherUser: {
         pageNo: 1,
-        pageSize: 50
+        pageSize: 99999
       },
       treeLoading: false,
       isEdit: false
@@ -2352,29 +2350,29 @@ export default {
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
-    },
-    // 外部人员滚动加载
-    async treeLoad() {
-      this.treeLoading = true
-      this.treeOtherUser.pageNo++
-      await getOtherUser({
-        categoryId: '',
-        pageNo: this.treeOtherUser.pageNo,
-        pageSize: this.treeOtherUser.pageSize
-      })
-        .then((res) => {
-          this.otherUser = [...this.otherUser, ...res.data]
-          this.otherUser.forEach((item) => {
-            item.phoneNum = item.phonenum
-            item.userCode = item.workNo
-            item.id = item.userId
-            item.type = 'user'
-          })
-        })
-        .finally(() => {
-          this.treeLoading = false
-        })
     }
+    // 外部人员滚动加载
+    // async treeLoad() {
+    //   this.treeLoading = true
+    //   this.treeOtherUser.pageNo++
+    //   await getOtherUser({
+    //     categoryId: '',
+    //     pageNo: this.treeOtherUser.pageNo,
+    //     pageSize: this.treeOtherUser.pageSize
+    //   })
+    //     .then((res) => {
+    //       this.otherUser = [...this.otherUser, ...res.data]
+    //       this.otherUser.forEach((item) => {
+    //         item.phoneNum = item.phonenum
+    //         item.userCode = item.workNo
+    //         item.id = item.userId
+    //         item.type = 'user'
+    //       })
+    //     })
+    //     .finally(() => {
+    //       this.treeLoading = false
+    //     })
+    // }
   }
 }
 </script>
