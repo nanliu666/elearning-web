@@ -82,12 +82,7 @@
 
 <script>
 import QustionPreview from '../question/questionPreview'
-import {
-  getManualPreview,
-  getRandomPreview,
-  delExamPreview,
-  createRandomPaper
-} from '@/api/examManage/schedule'
+import { getManualPreview, delExamPreview, createRandomPaper } from '@/api/examManage/schedule'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -157,10 +152,13 @@ export default {
     },
     initData() {
       this.loading = true
-      let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
-      if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
-        loadFun = createRandomPaper
-      }
+      // 手工卷子接口 getManualPreview
+      // 随机卷子接口统一接口 createRandomPaper
+      let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : createRandomPaper
+      // 随机卷子且进来预览不显示删除接口 getRandomPreview
+      // if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
+      //   loadFun = getRandomPreview
+      // }
       const basicParams = { paperId: this.$route.query.paperId }
       const parmas =
         this.$route.query.paperType === 'manual' || this.$route.query.isManaged
