@@ -110,7 +110,8 @@ instance.interceptors.response.use(
       // 如果请求为非200否者默认统一处理
 
       if (status !== 200) {
-        if (status === 8000) {
+        if (status === 8000 || status === 8001) {
+          // 8000 为被挤出来；8001为token过期
           addLoading(res)
         } else if (String(status).startsWith('5')) {
           Message({
