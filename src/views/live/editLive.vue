@@ -174,9 +174,59 @@
                 required
                 class="live_scene"
               >
-                <el-row :gutter="20">
+                <el-tooltip
+                  v-if="isEdit"
+                  class="item"
+                  effect="dark"
+                  content="直播场景不允许修改"
+                  placement="left"
+                >
+                  <el-row :gutter="20">
+                    <el-col :span="5">
+                      <div
+                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                        @click="toggle_scene = 'ppt'"
+                      >
+                        <img
+                          v-show="toggle_scene == 'ppt'"
+                          src="../../assets/images/live/live_act_screen.png"
+                        />
+                        <img
+                          v-show="toggle_scene == 'topclass'"
+                          src="../../assets/images/live/live_screen.png"
+                        />
+                        <p>云课堂</p>
+                        <p>(三分屏)</p>
+                      </div>
+                    </el-col>
+                    <el-col :span="5">
+                      <div
+                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                        @click="toggle_scene = 'topclass'"
+                      >
+                        <img
+                          v-show="toggle_scene == 'topclass'"
+                          src="../../assets/images/live/live_act_vedio.png"
+                        />
+                        <img
+                          v-show="toggle_scene == 'ppt'"
+                          src="../../assets/images/live/live_vedio.png"
+                        />
+                        <p>直播助手</p>
+                        <p>(纯视频)</p>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-tooltip>
+                <el-row
+                  v-else
+                  :gutter="20"
+                >
                   <el-col :span="5">
-                    <div @click="toggle_scene = 'ppt'">
+                    <div
+                      :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                      @click="toggle_scene = 'ppt'"
+                    >
                       <img
                         v-show="toggle_scene == 'ppt'"
                         src="../../assets/images/live/live_act_screen.png"
@@ -190,7 +240,10 @@
                     </div>
                   </el-col>
                   <el-col :span="5">
-                    <div @click="toggle_scene = 'topclass'">
+                    <div
+                      :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                      @click="toggle_scene = 'topclass'"
+                    >
                       <img
                         v-show="toggle_scene == 'topclass'"
                         src="../../assets/images/live/live_act_vedio.png"
@@ -984,21 +1037,29 @@
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
                 ></el-input>
-                <el-tree
-                  :data="otherUser"
-                  show-checkbox
-                  node-key="id"
-                  default-expand-all
-                  :expand-on-click-node="false"
-                  @check="select_organizationUser"
+                <div
+                  v-loading="treeLoading"
+                  class="other-user"
                 >
-                  <span
-                    slot-scope="{ node, data }"
-                    class="custom-tree-node"
+                  <el-tree
+                    ref="otherUserTree"
+                    v-infinite-scroll="treeLoad"
+                    :data="otherUser"
+                    show-checkbox
+                    node-key="id"
+                    default-expand-all
+                    :expand-on-click-node="false"
+                    class="infinite-list"
+                    @check="select_organizationUser"
                   >
-                    <span>{{ data.name }}({{ data.phoneNum }})</span>
-                  </span>
-                </el-tree>
+                    <span
+                      slot-scope="{ node, data }"
+                      class="custom-tree-node"
+                    >
+                      <span>{{ data.name }}({{ data.phoneNum }})</span>
+                    </span>
+                  </el-tree>
+                </div>
               </el-tab-pane>
             </el-tabs>
           </el-col>
@@ -1282,7 +1343,13 @@ export default {
       StudentsPage: {
         pageSize: 10,
         currentPage: 1
-      }
+      },
+      treeOtherUser: {
+        pageNo: 1,
+        pageSize: 50
+      },
+      treeLoading: false,
+      isEdit: false
     }
   },
   watch: {
@@ -1341,6 +1408,7 @@ export default {
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
       this.getStudentInfoList()
+      this.isEdit = true
     }
     //   获取直播分类
     getcategoryTree({
@@ -1355,8 +1423,8 @@ export default {
     // 获取其他用户
     getOtherUser({
       categoryId: '',
-      pageNo: 1,
-      pageSize: 99999
+      pageNo: this.treeOtherUser.pageNo,
+      pageSize: this.treeOtherUser.pageSize
     }).then((res) => {
       this.otherUser = res.data
 
@@ -1922,7 +1990,8 @@ export default {
     },
     handleClick() {},
 
-    delete_dialog_selectStudent(arr, index) {
+    delete_dialog_selectStudent(arr, index, id) {
+      this.$refs.otherUserTree.setChecked(id, false)
       arr.splice(index, 1)
     },
     delete_table_relatedStudents(arr, index) {
@@ -2283,6 +2352,28 @@ export default {
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
+    },
+    // 外部人员滚动加载
+    async treeLoad() {
+      this.treeLoading = true
+      this.treeOtherUser.pageNo++
+      await getOtherUser({
+        categoryId: '',
+        pageNo: this.treeOtherUser.pageNo,
+        pageSize: this.treeOtherUser.pageSize
+      })
+        .then((res) => {
+          this.otherUser = [...this.otherUser, ...res.data]
+          this.otherUser.forEach((item) => {
+            item.phoneNum = item.phonenum
+            item.userCode = item.workNo
+            item.id = item.userId
+            item.type = 'user'
+          })
+        })
+        .finally(() => {
+          this.treeLoading = false
+        })
     }
   }
 }
