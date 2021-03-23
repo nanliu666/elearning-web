@@ -87,7 +87,7 @@
 <script>
 import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
-import { getOrgUserList } from '@/api/system/user'
+import { getWorkList } from '@/api/system/user'
 import { getExamList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
@@ -278,7 +278,7 @@ export default {
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      return getWorkList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
       return getExamList(_.assign(params, { status: 'normal' }))
