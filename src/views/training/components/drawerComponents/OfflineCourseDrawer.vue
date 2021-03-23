@@ -243,6 +243,15 @@ export default {
       },
       deep: true
     },
+    'model.todoTime': {
+      handler() {
+        this.model.todoTimeParams = [
+          moment(this.model.todoTime[0]).format('HH:mm'),
+          moment(this.model.todoTime[1]).format('HH:mm')
+        ]
+      },
+      deep: true
+    },
     'model.type': {
       handler(value) {
         if (value === 1) {
