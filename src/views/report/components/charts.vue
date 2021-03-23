@@ -54,7 +54,7 @@ export default {
       charts.clear()
       const option = {
         tooltip: {
-          trigger: 'axis',
+          trigger: 'axis'
           // formatter(params) {
           //   if (params.length === 3) {
           //     if (params[params.length - 1] === 'line') {
@@ -151,7 +151,7 @@ export default {
           name: '通过率',
           axisLabel: {
             formatter: '{value}%'
-          },
+          }
         })
       }
       this.charts.setOption(option)

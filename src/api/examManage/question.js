@@ -53,8 +53,4 @@ export const uploadQuestionFile = (params) => post('/manage/v1/question/read', p
  * @param {*} params
  */
 export const exportErrorReport = (params) =>
-  axios.get('/api/manage/v1/errorQuestionExcelImport', {
-    responseType: 'blob',
-    // headers: { 'Content-Type': 'application/vnd.ms-excel;charset=UTF-8' },
-    params
-  })
+  get('/api/manage/v1/errorQuestionExcelImport', params, { responseType: 'blob' })
