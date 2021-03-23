@@ -231,6 +231,7 @@
           @click="status = 2"
         >学习情况</span>
         <span
+          v-if="showTrainDetail.signIn"
           :class="{ select: status === 3 }"
           style="cursor:pointer;"
           @click="status = 3"
@@ -1059,7 +1060,7 @@ export default {
       },
       getRegisterForm: {
         pageNo: 1,
-        pageSize: 10
+        pageSize: 10,
       },
       signinTotal: 0,
       registerTotal: 0,
@@ -1274,6 +1275,7 @@ export default {
         setJoin(params)
           .then(() => {
             this.$message.success('操作成功')
+            this.getRegisterData()
           })
           .catch(() => {
             this.$message.error('操作失败')
@@ -1406,7 +1408,7 @@ export default {
       let page = {
         pageNo: '',
         pageSize: '',
-        status: ''
+        totalNum: ''
       }
       page.pageNo = this.page.currentPage
       page.pageSize = this.page.size
@@ -1416,6 +1418,7 @@ export default {
       params.trainId = this.showTrainDetail.trainId
       studentList(params).then((res) => {
         this.tableData = res.data
+        this.page.total = res.totalNum
         SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
         this.tableData.forEach((item) => {
           // console.log(item.id,item.deptName);
