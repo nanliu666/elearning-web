@@ -504,27 +504,23 @@
               >
                 查看上报材料
               </el-button>
+
               <el-button
-                v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
-                type="text"
-                size="medium"
-                @click.stop="isgrantCertificate(scope.row)"
-              >
-                发放证书
-              </el-button>
-              <el-button
-                v-else-if="scope.row.certificate == 1"
+                v-if="scope.row.certificate == 1"
                 type="text"
                 size="medium"
                 @click.stop="isrevokeCertificate(scope.row)"
               >
                 撤回证书
               </el-button>
-
-              <span
+              <el-button
                 v-else
-                style="color:#ccc;"
-              >发送证书</span>
+                type="text"
+                size="medium"
+                @click.stop="isgrantCertificate(scope.row)"
+              >
+                发放证书
+              </el-button>
             </template>
           </common-table>
         </basic-container>
@@ -1341,17 +1337,19 @@ export default {
 
     //发放学员证书
     isgrantCertificate(row) {
-      grantCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
+      grantCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
         })
+        this.page.currentPage = 1
+        this.page.size = 10
         this.isStudentList()
       })
     },
     // 撤回学员证书
     isrevokeCertificate(row) {
-      revokeCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
+      revokeCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -1515,7 +1513,6 @@ export default {
 
     handleRemoveItems(selection, i) {
       let idData = _.map(selection, ({ stuId }) => stuId).join(',')
-
       this.$confirm(
         `您确定要为${selection[0].stuName}等${selection.length}个学员${
           i ? '发放证书' : '撤回证书'
@@ -1540,6 +1537,8 @@ export default {
 
     // 批量发放证书&撤回证书
     batchFn(idData, i) {
+      this.page.currentPage = 1
+      this.page.size = 10
       if (i) {
         grantCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(() => {
           this.$message({

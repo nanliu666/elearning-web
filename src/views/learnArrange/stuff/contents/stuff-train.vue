@@ -1,6 +1,9 @@
 <template>
   <div class="stuff-train">
-    <div class="table-list">
+    <div
+      v-if="data.train.length"
+      class="table-list"
+    >
       <el-table
         v-for="(table, i) in data.train"
         :key="i"
@@ -10,7 +13,7 @@
         <el-table-column
           align="center"
           header-align="left"
-          :label="table.name"
+          :label="'来源: ' + table.name"
           prop="fileName"
         >
         </el-table-column>
@@ -52,6 +55,13 @@
           </template>
         </el-table-column>
       </el-table>
+    </div>
+
+    <div
+      v-else
+      class="empty"
+    >
+      暂未提交
     </div>
   </div>
 </template>
@@ -129,6 +139,10 @@ export default {
 .stuff-train {
   .table-list {
     margin-top: 12px;
+  }
+  .empty {
+    text-align: center;
+    margin: 30px auto;
   }
 }
 </style>

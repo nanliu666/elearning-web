@@ -72,7 +72,15 @@
                 type="text"
                 size="small"
               >
-                {{ scope.row.fileCategory === 'user' ? '修改作业' : '修改评改' }}
+                {{
+                  scope.row.fileName
+                    ? scope.row.fileCategory === 'user'
+                      ? '修改作业'
+                      : '修改评改'
+                    : scope.row.fileCategory === 'user'
+                      ? '上传作业'
+                      : '上传评改'
+                }}
               </el-button>
             </common-upload>
             <el-button
@@ -201,6 +209,9 @@ export default {
 .stuff-course {
   .table-list {
     margin-top: 12px;
+  }
+  .course-selector {
+    width: auto !important;
   }
   .edit-upload {
     display: block;

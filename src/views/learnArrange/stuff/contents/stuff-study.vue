@@ -10,7 +10,7 @@
         <el-table-column
           align="center"
           header-align="left"
-          :label="table.name"
+          :label="'课程: ' + table.name"
           prop="fileName"
         >
         </el-table-column>
