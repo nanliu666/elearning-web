@@ -77,9 +77,6 @@
         <template #categoryName="{row}">
           {{ row.categoryName ? row.categoryName : '未分类' }}
         </template>
-        <template #createUser1="{row}">
-          {{ moment(row.examEndTime).diff(moment(row.examBeginTime), 'minutes') }}
-        </template>
         <template #examEndTime="{row}">
           <span>{{ moment(row.examBeginTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
           <span>至</span>
@@ -146,9 +143,11 @@ let TABLE_COLUMNS = [
   },
   {
     label: '答题时限（分钟）',
-    prop: 'createUser1',
-    slot: true,
-    minWidth: 150
+    prop: 'reckonTimeValue',
+    minWidth: 150,
+    formatter: (row) => {
+      return row.reckonTime ? row.reckonTimeValue : '不限制'
+    }
   },
   {
     label: '创建人',

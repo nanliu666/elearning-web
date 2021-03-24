@@ -93,7 +93,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'roomName',
+      field: 'search',
       label: '',
       data: '',
       options: [],

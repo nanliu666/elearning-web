@@ -8,7 +8,7 @@
       <span v-if="isShow">
         {{ textBefore }}
         <el-input-number
-          v-model.number="value"
+          v-model.number="innerValue"
           :controls="false"
           :min="min"
           :style="`width:${inputWidth}px`"
@@ -63,6 +63,16 @@ export default {
   },
   data() {
     return {}
+  },
+  computed: {
+    innerValue: {
+      get() {
+        return this.value
+      },
+      set(val) {
+        this.$emit('input', val)
+      }
+    }
   }
 }
 </script>
