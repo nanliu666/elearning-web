@@ -98,6 +98,7 @@ const EventColumns = [
     itemType: 'input',
     span: 24,
     offset: 0,
+    maxlength: 32,
     required: false,
     prop: 'reviewRemark',
     label: '考试评语：',
