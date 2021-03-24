@@ -362,6 +362,7 @@ export default {
     },
 
     handleSearch(searchParams) {
+      this.page.pageNo = 1
       this.isgetScheduleList(searchParams)
     },
     handleRemoveItems(selection) {

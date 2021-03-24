@@ -231,7 +231,7 @@ const BASE_COLUMNS = [
         required: true
       }
     },
-    required: false,
+    required: true,
     span: 11,
     offset: 2
   },

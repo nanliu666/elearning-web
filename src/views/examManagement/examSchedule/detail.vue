@@ -431,6 +431,7 @@ const TABLE_COLUMNS = [
   {
     label: '部门',
     prop: 'orgName',
+    formatter: (row) => (row.orgName ? row.orgName : '无部门'),
     minWidth: 120
   },
   {

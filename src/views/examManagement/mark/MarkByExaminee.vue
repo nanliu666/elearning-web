@@ -275,7 +275,7 @@ export default {
       const list = _.chain(this.formDataList)
         .cloneDeep()
         .filter((item) => {
-          return item.result
+          return item.result !== '-1'
         })
         .value()
       if (_.isEmpty(list)) {

@@ -76,7 +76,7 @@ export default {
     getCorrect() {
       const target = _.chain(this.data.examinationPaperUserOptionREQS)
         .filter((item) => {
-          return item.isCorrect === 1
+          return _.includes(this.data.answerQuestion, item.optionId)
         })
         .map('contentOption')
         .join(' ')
@@ -88,7 +88,7 @@ export default {
     getAnswerValue() {
       const target = _.chain(this.data.examinationPaperUserOptionREQS)
         .find((item) => {
-          return item.optionId === this.data.answerQuestion
+          return item.optionId === this.data.answerUser
         })
         .get('contentOption', '考生未作答')
         .value()
