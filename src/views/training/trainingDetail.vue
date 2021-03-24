@@ -11,9 +11,15 @@
       <div class="title_box_headline">
         <div class="title_box_headline_l">
           {{ showTrainDetail.trainName }}
-          <span v-if="showTrainDetail.status === 3">已结束</span>
-          <span v-if="showTrainDetail.status === 1">未开始</span>
-          <span v-if="showTrainDetail.status === 2">进行中</span>
+          <span
+            v-if="!$route.query.status"
+            style="background-color: #FFFCE6; color: #FCBA00;"
+          >草稿</span>
+          <span v-else>
+            <span v-if="showTrainDetail.status === 3">已结束</span>
+            <span v-if="showTrainDetail.status === 1">未开始</span>
+            <span v-if="showTrainDetail.status === 2">进行中</span>
+          </span>
         </div>
         <div class="title_box_headline_r">
           <el-button
@@ -221,6 +227,7 @@
     <div class="trainingDetail_nav">
       <div class="select_bar">
         <span
+          v-if="$route.query.status"
           :class="{ select: status === 1 }"
           style="cursor:pointer;"
           @click="status = 1"
@@ -231,7 +238,7 @@
           @click="status = 2"
         >学习情况</span>
         <span
-          v-if="showTrainDetail.signIn"
+          v-if="showTrainDetail.signIn && $route.query.status"
           :class="{ select: status === 3 }"
           style="cursor:pointer;"
           @click="status = 3"
@@ -242,6 +249,7 @@
           @click="status = 4"
         >培训安排</span>
         <span
+          v-if="$route.query.status"
           :class="{ select: status === 5 }"
           style="cursor:pointer;"
           @click="status = 5"
@@ -249,7 +257,7 @@
       </div>
 
       <div
-        v-show="status === 1"
+        v-show="status === 1 && $route.query.status"
         class="register-container"
       >
         <div class="register-data">
@@ -535,6 +543,7 @@
           线下日程
         </p>
         <el-collapse
+          v-if="isOfflineTodo.length"
           v-model="activeNames"
           @change="handleChange"
         >
@@ -569,6 +578,10 @@
             </div>
           </el-collapse-item>
         </el-collapse>
+
+        <div v-else>
+          暂无培训安排信息
+        </div>
 
         <p class="course_title offline_title">
           在线课程
@@ -665,7 +678,7 @@
 
       <!-- 签到情况 -->
       <div
-        v-show="status === 3"
+        v-show="status === 3 && $route.query.status"
         class="signin-container"
       >
         <div class="signin-header">
@@ -718,7 +731,7 @@
 
       <!-- 评估结果 -->
       <div
-        v-show="status === 5"
+        v-show="status === 5 && $route.query.status"
         class="result"
       >
         <div>
@@ -1168,6 +1181,8 @@ export default {
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
+
+    if (!this.$route.query.status) this.status = 2
   },
   methods: {
     getSigninColumn(value, d) {
