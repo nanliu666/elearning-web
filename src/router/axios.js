@@ -114,12 +114,12 @@ instance.interceptors.response.use(
           // 8000 为被挤出来；8001为token过期
           addLoading(res)
         } else if (String(status).startsWith('5')) {
-          Message({
-            message: '服务请求出错，请联系管理员',
-            type: 'error',
-            showClose: true
-          })
-        } else {
+          // Message({
+          //   message: '服务请求出错，请联系管理员',
+          //   type: 'error',
+          //   showClose: true
+          // })
+        } else if (getToken()) {
           Message({
             message,
             type: 'error',
