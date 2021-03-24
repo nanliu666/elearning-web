@@ -44,7 +44,9 @@
         <ul class="details-ul">
           <li class="details-li">
             <span class="li-label">考试分类：</span>
-            <span class="li-value">{{ examDetail.categoryName }}</span>
+            <span class="li-value">{{
+              examDetail.categoryName ? examDetail.categoryName : '未分类'
+            }}</span>
           </li>
           <li class="details-li">
             <span class="li-label">考试用卷：</span>
