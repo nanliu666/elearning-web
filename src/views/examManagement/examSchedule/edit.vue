@@ -138,6 +138,7 @@ export default {
     }
   },
   mounted() {
+    this.$route.meta.keepAlive = false
     this.initData()
   },
   methods: {
@@ -174,10 +175,10 @@ export default {
       })
     },
     initData() {
+      const examInfo = this.$refs.examInfo
       if (this.id) {
         // 编辑的时候的数据回显
         getExamArrange({ id: this.id }).then((res) => {
-          const examInfo = this.$refs.examInfo
           //TODO: 不知为何测试环境不能置灰，先测试下
           if (examInfo) {
             examInfo.model = res
@@ -189,6 +190,9 @@ export default {
           }
           this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
         })
+      } else {
+        examInfo.modelDisabled = false
+        examInfo.setColumnsDisable(false)
       }
     },
     // 懒加载的默认值
