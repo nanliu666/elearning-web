@@ -176,7 +176,7 @@ const TABLE_COLUMNS = [
     prop: 'timeLimit',
     align: 'center',
     formatter(row) {
-      return row.timeLimit + 's'
+      return row.timeLimit ? row.timeLimit + 's' : '不限时'
     },
     minWidth: 120
   }
