@@ -314,6 +314,7 @@ export default {
             this.$refs.table.clearSelection()
             this.loadTree()
             this.loadData()
+            this.$message.success('已成功删除已选试题！')
           })
         })
         .catch()
