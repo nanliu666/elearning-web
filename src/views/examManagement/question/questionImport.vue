@@ -186,17 +186,20 @@ export default {
       this.$message.warning('只能选择一个文件')
     },
     beforeUpload(file) {
-      console.log('beforeUploadfile', file)
-      const isXLS = file.type === 'application/vnd.ms-excel'
-      const isLt2M = file.size / 1024 / 1024 < 2
-
-      if (!isXLS) {
-        this.$message.error('上传文件只能是 xls 格式!')
+      const regx = /^.*\.(xls|xlsx|csv)$/
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持xls，xlsx，csv文件')
+        return false
       }
+      // const isXLS = file.type === 'application/vnd.ms-excel'
+      const isLt2M = file.size / 1024 / 1024 < 2
+      // if (!isXLS) {
+      //   this.$message.error('上传文件只能是 xls 格式!')
+      // }
       if (!isLt2M) {
         this.$message.error('上传文件大小不能超过 2MB!')
       }
-      return isLt2M && isXLS
+      return isLt2M && regx.test(file.name)
     },
     onChange() {
       this.importDisabled = false
