@@ -351,16 +351,16 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
-        },
-        (err) => {
-          console.log(err)
-          this.$confirm('您选择分类下含有直播，无法删除该分类', '提示', {
-            confirmButtonText: '我知道了',
-            type: 'warning',
-            showCancelButton: false,
-            center: false
-          })
         }
+        // ,
+        // (err) => {
+        //   this.$confirm('您选择分类下含有直播，无法删除该分类', '提示', {
+        //     confirmButtonText: '我知道了',
+        //     type: 'warning',
+        //     showCancelButton: false,
+        //     center: false
+        //   })
+        // }
       )
     },
     // 单个删除
