@@ -19,14 +19,14 @@
           <el-button
             type="primary"
             size="mini"
-            :disabled="issueStatus"
+            :disabled="!issueStatus"
             @click="handleConfig"
           >
             开办下一期
           </el-button>
           <el-button
             size="mini"
-            :disabled="issueStatus"
+            :disabled="!issueStatus"
             @click="isstopSchedule"
           >
             结办
@@ -390,7 +390,10 @@
               </div>
             </template>
 
-            <template #multiSelectMenu="{ selection }">
+            <template
+              v-if="showTrainDetail.isArranged"
+              #multiSelectMenu="{ selection }"
+            >
               <el-button
                 style="margin-bottom:0;"
                 type="text"
@@ -421,6 +424,7 @@
             </template>
             <!-- 选修学习进度 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="electiveProgress"
               slot-scope="{ row }"
             >
@@ -428,6 +432,7 @@
             </template>
             <!-- 在线学习进度(必修) -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="onlineProgress"
               slot-scope="{ row }"
             >
@@ -436,6 +441,7 @@
 
             <!-- 作业提交率 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="jobPercent"
               slot-scope="{ row }"
             >
@@ -445,6 +451,7 @@
             </template>
             <!-- 上报材料 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="isSubmit"
               slot-scope="{ row }"
             >
@@ -455,6 +462,7 @@
 
             <!-- 考试情况 // 1：已通过；2：未通过；3：未开始）-->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="examStatus"
               slot-scope="{ row }"
             >
@@ -473,6 +481,7 @@
             </template>
             <!-- 证书状态 // （1：已获得；2：未获得；3：未开始）-->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="certificate"
               slot-scope="{ row }"
             >
@@ -483,6 +492,7 @@
 
             <!-- 操作 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="handler"
               slot-scope="scope"
             >
@@ -533,16 +543,16 @@
           @change="handleChange"
         >
           <el-collapse-item
-            v-for="(itemb, value, index) in isOfflineTodo"
+            v-for="(todo, index) in isOfflineTodo"
             :key="index"
             :name="index + 1"
           >
             <template slot="title">
-              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天 {{ value }}
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天 {{ todo.date }}
             </template>
 
             <div
-              v-for="(item, i) in itemb"
+              v-for="(item, i) in todo.data"
               :key="i"
               class="arrange_schedule_i"
             >
@@ -870,8 +880,7 @@
 
 <script>
 // 培训详情
-// eslint-disable-next-line no-unused-vars
-import { delCourseInfo } from '@/api/course/course'
+// import { delCourseInfo } from '@/api/course/course'
 import {
   getOfflineTodo,
   queryJoin,
@@ -1373,7 +1382,17 @@ export default {
       // let id = '1332138220456259585'
       let id = this.showTrainDetail.trainId
       getOfflineTodo({ trainId: id }).then((res) => {
-        this.isOfflineTodo = res
+        let list = (this.isOfflineTodo = [])
+        Object.keys(res).forEach((key) => {
+          list.push({
+            date: key,
+            data: res[key]
+          })
+        })
+        list = list.sort((a, b) => {
+          return new Date(a.date) > new Date(b.date) ? 1 : -1
+        })
+
         let index = 1
         for (const key in res) {
           ++index
@@ -1443,8 +1462,7 @@ export default {
     handleChange() {},
 
     // 编辑&删除&移动
-    // eslint-disable-next-line no-unused-vars
-    handleCommand(e, row) {
+    handleCommand(e) {
       if (e === 'edit') {
         // 编辑
         this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })

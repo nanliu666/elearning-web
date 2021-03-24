@@ -59,7 +59,7 @@ export const createRandomPaper = (params) =>
 /**
  * 随机试卷预览
  */
-export const getRandomPreview = (params) => get('/manage/v1/exam/preview/random', params)
+export const getRandomPreview = (params) => get('/v1/exam/preview/createRandomPaper', params)
 /**
  * 预生成试卷列表
  */

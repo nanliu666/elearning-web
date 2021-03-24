@@ -122,7 +122,7 @@
               v-else-if="item.type === 'User'"
               class="iconfont  icon-approval-checkin-bicolor imgs"
             />
-            {{ item.phoneNum ? item.bizName + '(' + item.phoneNum + ')' : item.bizName }}
+            {{ item.phoneNum ? item.name + '(' + item.phoneNum + ')' : item.name }}
           </div>
           <div class="icon">
             <i
@@ -262,9 +262,8 @@ export default {
       return {
         disabled: 'disabled',
         label: function(data) {
-          // eslint-disable-next-line no-unused-vars
-          let { bizName, phoneNum, name, phonenum } = data
-          name = name || bizName
+          let { bizName, phoneNum, phonenum } = data
+          // name = name || bizName
           phoneNum = phoneNum || phonenum
           if (!phoneNum) return bizName
           return bizName + '(' + phoneNum + ')'
@@ -303,6 +302,7 @@ export default {
       }
     },
     selected(val) {
+      console.log(val)
       const { orgTree, orgTreeSearch } = this.$refs
       ;[orgTree, orgTreeSearch].forEach((ref) => {
         if (_.isNil(ref)) return
