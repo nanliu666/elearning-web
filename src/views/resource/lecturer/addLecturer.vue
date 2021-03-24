@@ -31,6 +31,8 @@
                   v-model="ruleForm.userId"
                   placeholder="请选择"
                   filterable
+                  remote
+                  :remote-method="remoteMethod"
                 >
                   <el-option
                     v-for="item in Teacherlist"
@@ -428,6 +430,17 @@ export default {
         this.ruleForm.categoryId = data.id
         this.parentOrgIdLabel = data.label
       }
+    },
+    remoteMethod(v) {
+      // 搜索请求
+      let params = {
+        pageNo: 1,
+        pageSize: -1,
+        search: v
+      }
+      queryTeacherlist(params).then((res) => {
+        this.Teacherlist = res.data
+      })
     },
 
     async loadNode(node, resolve) {
