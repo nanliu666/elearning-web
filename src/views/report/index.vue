@@ -93,7 +93,7 @@
         </el-col>
       </el-row>
       <data-block
-        :title="study.course.title"
+        :title="study.train.title"
         :data="Object.values(study.train.data)"
         class="margin-top-8"
       />
@@ -284,7 +284,7 @@ export default {
           }
         },
         train: {
-          title: '培训',
+          title: '培训统计',
           data: {
             trainNum: {
               name: '培训项目总数',
@@ -321,7 +321,7 @@ export default {
             name: '参考次数',
             content: 0
           },
-          examPass: {
+          passRate: {
             name: '考试通过率',
             content: 0
           }

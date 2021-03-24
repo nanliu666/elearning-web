@@ -21,10 +21,11 @@
         :key="i"
         :data="table.trainAttachmentVOS"
       >
-        <el-table-column
-          align="center"
-          :label="table.name"
-        >
+        <el-table-column align="left">
+          <template slot="header">
+            {{ '课程: ' + table.name }}
+          </template>
+
           <template slot-scope="scope">
             <div>
               {{ getFileName(scope.row) }}

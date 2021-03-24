@@ -298,6 +298,12 @@ const TABLE_COLUMNS = [
     slot: false,
     minWidth: 180
   },
+  {
+    label: '主办单位',
+    prop: 'sponsor',
+    slot: false,
+    minWidth: 180
+  },
   // {
   //   label: '分类',
   //   prop: 'categoryName',
@@ -670,6 +676,7 @@ export default {
             item.courseList = [{ courseName: '-' }]
           }
           if (!item.coursePlanNo) item.coursePlanNo = '-'
+          if (!item.sponsor) item.sponsor = '-'
           return item
         })
         draft.page.total = totalNum
@@ -696,6 +703,7 @@ export default {
             item.courseList = [{ courseName: '-' }]
           }
           if (!item.coursePlanNo) item.coursePlanNo = '-'
+          if (!item.sponsor) item.sponsor = '-'
           return item
         })
         published.page.total = totalNum

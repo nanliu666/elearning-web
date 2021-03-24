@@ -679,7 +679,7 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     position: relative;
-    padding-right: 17px;
+    padding-right: 30px;
     .custom-tree-node-text-num {
       position: absolute;
       top: 0;
