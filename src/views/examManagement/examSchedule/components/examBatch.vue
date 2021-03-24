@@ -233,6 +233,7 @@ export default {
     },
     deleteBatch(index) {
       this.batchList.splice(index, 1)
+      this.$message.success('删除成功')
     },
     // 删除单独的项，当这个批次内的所有考生都删除后，必须将本批次删除
     deleteBatchItem(index, sonIndex) {
