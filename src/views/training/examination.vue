@@ -1,12 +1,15 @@
 <template>
   <div class="examination">
-    <div class="examination_head">
+    <div
+      class="examination_head"
+      @click="goBack()"
+    >
       <i class="el-icon-arrow-left"></i>
       考试详情
     </div>
     <div class="examination_title">
       <div class="examination_title_h">
-        JAVA编程考试
+        {{ showExamDetail.examName }}
 
         <span v-if="showExamDetail.status === 1">未开始</span>
         <span v-if="showExamDetail.status === 2">进行中</span>
@@ -105,7 +108,6 @@
                         class="operations__column--item"
                       >
                         {{ item.label }}
-                        123
                       </el-checkbox>
                     </el-checkbox-group>
                   </div>
@@ -120,10 +122,10 @@
             slot="examStatus"
             slot-scope="{ row }"
           >
-            <span v-if="row.electiveType === 2">已通过</span>
-            <span v-if="row.electiveType === 3">未通过</span>
-            <span v-if="row.electiveType === 4">未考试</span>
-            <span v-if="row.electiveType === 5">缺考</span>
+            <span v-if="row.electiveType == 2">已通过</span>
+            <span v-if="row.electiveType == 3">未通过</span>
+            <span v-if="row.electiveType == 4">未考试</span>
+            <span v-if="row.electiveType == 5">缺考</span>
           </template>
 
           <!-- 是否及格 -->
@@ -131,8 +133,8 @@
             slot="examPass"
             slot-scope="{ row }"
           >
-            <span v-if="row.examPass === 0">不及格</span>
-            <span v-if="row.examPass === 1">及格</span>
+            <span v-if="row.examPass == 0">不及格</span>
+            <span v-if="row.examPass == 1">及格</span>
           </template>
         </common-table>
       </basic-container>
@@ -141,7 +143,6 @@
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
 import { examDetail, examResult } from '@/api/training/training'
 
 // 表格属性
@@ -222,48 +223,24 @@ export default {
       // query: {},
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [
-        {
-          isRecommend: 1,
-          passCondition: 'c',
-          catalogId: 4,
-          teacherId: 4,
-          isTop: 1,
-          createId: 4,
-          name: 'dd',
-          electiveType: 2,
-          id: 4,
-          type: 2,
-          createName: '小红'
-        },
-        {
-          isRecommend: 1, //是否推荐课程（0:否；1：是）
-          passCondition: 'a', //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时
-          catalogId: 1, //	课程目录id
-          teacherId: 1, //课程讲师id
-          isTop: 0, //是否置顶（0：否；1：是）
-          createId: 1, //创建人账号
-          name: 'aa', //	课程名称
-          electiveType: 1, //选修类型(1:开放选修 2:通过审批 3:禁止选修)
-          id: 1, //	主键id
-          type: 1, //课程类型(1:在线 2:面授 3:直播)
-          createName: '初始用户' //创建人
-        }
-      ],
+      tableData: [],
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
   created() {
-    this.refreshTableData()
-    // this.loadData()
-    this.getInfo()
     this.isExamDetail()
     this.isExamResult()
   },
   activated() {
-    this.getInfo()
+    this.isExamDetail()
+    this.isExamResult()
   },
   methods: {
+    goBack() {
+      this.$router.go(-1)
+      // this.$router.push({ path: '/course/detail' })
+    },
+
     // 查询培训考试结果列表
     isExamResult(courseName) {
       let page = {
@@ -277,8 +254,9 @@ export default {
       params.status = this.status
       params.trainId = 1
       examResult(params).then((res) => {
-        // console.log('examResult---',res)
+        console.log('examResult---', res)
         this.tableData = res.data
+        this.page.total = res.totalNum
       })
     },
 
@@ -287,8 +265,8 @@ export default {
       // console.log('id', this.$route.query.id)
       let id = { examId: this.$route.query.id }
       examDetail(id).then((res) => {
-        // console.log(res)
-        this.showExamDetail = res
+        console.log(res)
+        this.showExamDetail = res[0]
       })
     },
 
@@ -311,26 +289,6 @@ export default {
     // 刷新列表数据
     refreshTableData() {
       this.isExamResult()
-    },
-
-    // 拿数据
-    getInfo(courseName) {
-      // currentPage	当前页	body	true
-      // size	页面显示数量	body	true
-      // status	课程状态（1：已发布；2：草稿；3：停用）	body	true
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
-      }
-      params = { ...this.page, ...courseName }
-      params.status = this.status
-      // console.log('params', params)
-      getCourseListData(params).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
-        window.console.log(res)
-      })
     },
     // 导航
     showSelect(index) {

@@ -21,11 +21,9 @@
         :key="i"
         :data="table.trainAttachmentVOS"
       >
-        <el-table-column
-          align="left"
-        >
+        <el-table-column align="left">
           <template slot="header">
-            {{'课程: ' + table.name}}
+            {{ '课程: ' + table.name }}
           </template>
 
           <template slot-scope="scope">

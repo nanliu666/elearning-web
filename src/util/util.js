@@ -722,7 +722,7 @@ export function getCanvasImgColorUrl(color) {
   cxt.moveTo(5, 0)
   cxt.lineTo(0, 5)
   cxt.strokeStyle = color
-  cxt.stroke();
+  cxt.stroke()
   cxt.fillStyle = 'rgba(255,255,255,0)'
   cxt.fillRect(0, 0, 100, 100)
 

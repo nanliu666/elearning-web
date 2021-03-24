@@ -122,7 +122,7 @@
               v-else-if="item.type === 'User'"
               class="iconfont  icon-approval-checkin-bicolor imgs"
             />
-            {{ item.phoneNum ? item.name + '(' + item.phoneNum + ')' : item.name}}
+            {{ item.phoneNum ? item.name + '(' + item.phoneNum + ')' : item.name }}
           </div>
           <div class="icon">
             <i
@@ -262,8 +262,8 @@ export default {
       return {
         disabled: 'disabled',
         label: function(data) {
-          let { bizName, phoneNum, name, phonenum } = data
-          name = name || bizName
+          let { bizName, phoneNum, phonenum } = data
+          // name = name || bizName
           phoneNum = phoneNum || phonenum
           if (!phoneNum) return bizName
           return bizName + '(' + phoneNum + ')'

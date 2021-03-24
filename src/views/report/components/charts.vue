@@ -7,7 +7,6 @@ import echarts from 'echarts'
 import { getCanvasImgColorUrl } from '@/util/util'
 require('echarts/theme/macarons') // echarts theme
 
-
 export default {
   name: 'Charts',
   props: {
@@ -59,7 +58,8 @@ export default {
       const option = {
         tooltip: {
           trigger: 'axis',
-          axisPointer: { // 坐标轴指示器，坐标轴触发有效
+          axisPointer: {
+            // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           }
         },
@@ -87,14 +87,14 @@ export default {
             id: 'dataZoomX',
             type: 'slider',
             xAxisIndex: [0],
-            filterMode: 'filter',
-        // dataBackground:{                        //数据阴影的样式。
-        //     lineStyle: '#333',              //阴影的线条样式
-        //     areaStyle: '#333',              //阴影的填充样式
-        // },
-        // fillerColor:"rgba(167,183,204,0.4)",  //选中范围的填充颜色。
-        // borderColor:"#ddd"
-        }
+            filterMode: 'filter'
+            // dataBackground:{                        //数据阴影的样式。
+            //     lineStyle: '#333',              //阴影的线条样式
+            //     areaStyle: '#333',              //阴影的填充样式
+            // },
+            // fillerColor:"rgba(167,183,204,0.4)",  //选中范围的填充颜色。
+            // borderColor:"#ddd"
+          }
         ],
         noDataLoadingOption: {
           effect: 'bubble',
@@ -115,20 +115,20 @@ export default {
       if (this.type === 'exam') {
         legend.data.push('参考人数', '通过人数', '通过率')
 
-          const dataURL = getCanvasImgColorUrl('#5ab1ef')
-          const PatternImgA = new Image()
-          PatternImgA.src = dataURL
+        const dataURL = getCanvasImgColorUrl('#5ab1ef')
+        const PatternImgA = new Image()
+        PatternImgA.src = dataURL
 
-          const itemStyle = {
-            color: {
-                image: PatternImgA,
-                repeat: 'repeat'
-            },
-            barBorderColor: '#5ab1ef',
-            barBorderWidth: 1,
-            barBorderRadius: 0,
-            borderType: 'solid'
-          }
+        const itemStyle = {
+          color: {
+            image: PatternImgA,
+            repeat: 'repeat'
+          },
+          barBorderColor: '#5ab1ef',
+          barBorderWidth: 1,
+          barBorderRadius: 0,
+          borderType: 'solid'
+        }
 
         series.push(
           {
@@ -178,13 +178,13 @@ export default {
         switch (this.type) {
           case 'course':
             name = '学习人数'
-            break;
+            break
           case 'train':
             name = '培训人数'
-            break;
+            break
           case 'live':
             name = '参加人数'
-            break;
+            break
         }
 
         series.push({

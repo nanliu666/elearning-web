@@ -36,7 +36,7 @@
               :class="node.label == '未分类' ? 'paddingRight' : ''"
               class="custom-tree-node-text"
             >{{ node.label }}&nbsp;
-              <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
+              <span class="custom-tree-node-text-num"> &nbsp; {{ `(${data.count || 0})` }}</span>
             </span>
 
             <span
@@ -669,8 +669,11 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     position: relative;
-    padding-right: 30px;
+    padding-right: 28px;
     .custom-tree-node-text-num {
+      display: inline-block;
+      width: 24px;
+      margin-right: 10px;
       position: absolute;
       top: 0;
       right: 0;

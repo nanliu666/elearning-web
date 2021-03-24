@@ -390,7 +390,10 @@
               </div>
             </template>
 
-            <template #multiSelectMenu="{ selection }" v-if="showTrainDetail.isArranged">
+            <template
+              v-if="showTrainDetail.isArranged"
+              #multiSelectMenu="{ selection }"
+            >
               <el-button
                 style="margin-bottom:0;"
                 type="text"
@@ -421,7 +424,7 @@
             </template>
             <!-- 选修学习进度 -->
             <template
-             v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged"
               slot="electiveProgress"
               slot-scope="{ row }"
             >
@@ -429,7 +432,7 @@
             </template>
             <!-- 在线学习进度(必修) -->
             <template
-               v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged"
               slot="onlineProgress"
               slot-scope="{ row }"
             >
@@ -448,7 +451,7 @@
             </template>
             <!-- 上报材料 -->
             <template
-             v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged"
               slot="isSubmit"
               slot-scope="{ row }"
             >
@@ -478,7 +481,7 @@
             </template>
             <!-- 证书状态 // （1：已获得；2：未获得；3：未开始）-->
             <template
-            v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged"
               slot="certificate"
               slot-scope="{ row }"
             >
@@ -489,7 +492,7 @@
 
             <!-- 操作 -->
             <template
-            v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged"
               slot="handler"
               slot-scope="scope"
             >
@@ -877,7 +880,7 @@
 
 <script>
 // 培训详情
-import { delCourseInfo } from '@/api/course/course'
+// import { delCourseInfo } from '@/api/course/course'
 import {
   getOfflineTodo,
   queryJoin,
@@ -1067,7 +1070,7 @@ export default {
       },
       getRegisterForm: {
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 10
       },
       signinTotal: 0,
       registerTotal: 0,
@@ -1379,15 +1382,15 @@ export default {
       // let id = '1332138220456259585'
       let id = this.showTrainDetail.trainId
       getOfflineTodo({ trainId: id }).then((res) => {
-        let list = this.isOfflineTodo = []
-        Object.keys(res).forEach(key => {
+        let list = (this.isOfflineTodo = [])
+        Object.keys(res).forEach((key) => {
           list.push({
             date: key,
             data: res[key]
           })
         })
-        list = list.sort((a, b)=>{
-          return new Date(a.date) > new Date(b.date) ? 1 : -1;
+        list = list.sort((a, b) => {
+          return new Date(a.date) > new Date(b.date) ? 1 : -1
         })
 
         let index = 1
@@ -1459,7 +1462,7 @@ export default {
     handleChange() {},
 
     // 编辑&删除&移动
-    handleCommand(e, row) {
+    handleCommand(e) {
       if (e === 'edit') {
         // 编辑
         this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })
