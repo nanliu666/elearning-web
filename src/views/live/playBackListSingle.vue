@@ -141,12 +141,27 @@ export default {
     },
     repRelease(item) {
       // 发布 下架
-      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
-      setReplayStatus(sendPar).then(() => {
-        this.initPlayBackData()
-        this.$message({
-          message: '操作成功',
-          type: 'success'
+
+      this.$confirm(
+        `${
+          item.shelfStatus === 0
+            ? '下架后，该直播回放将对学员不可见，您确定要上架吗？'
+            : '上架后，学员将会在直播中看到该回放，您确定要上架吗？'
+        }`,
+        '提醒',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(() => {
+        let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
+        setReplayStatus(sendPar).then(() => {
+          this.initPlayBackData()
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          })
         })
       })
     },

@@ -1,5 +1,4 @@
 import { del, get, post, put } from '@/router/axios'
-import axios from 'axios'
 /**
  * del, get, post, put
  * 查询模板列表
@@ -54,26 +53,12 @@ export const delGrantDetails = (params) =>
  * 导出证书发放列表Excel
  * */
 export const exportGrantExcel = (params) =>
-  axios.get('/api/manage/v1/source/certificate/exportGrantExcel', {
-    responseType: 'blob',
-    headers: {
-      'Content-Type':
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
-    },
-    params
-  })
+  get('/api/manage/v1/source/certificate/exportGrantExcel', params, { responseType: 'blob' })
 /**
  * 导出证书模板
  * */
 export const exportTemplateExcel = (params) =>
-  axios.get('/api/manage/v1/source/certificate/exportTemplateExcel', {
-    responseType: 'blob',
-    headers: {
-      'Content-Type':
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
-    },
-    params
-  })
+  get('/api/manage/v1/source/certificate/exportTemplateExcel', params, { responseType: 'blob' })
 /**
  * 查询证书发放明细
  * */

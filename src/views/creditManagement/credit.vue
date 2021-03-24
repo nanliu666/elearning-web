@@ -56,6 +56,12 @@
           >
             <template #multiSelectMenu>
             </template>
+            <template
+              slot="user_status"
+              slot-scope="{ row }"
+            >
+              {{ row.user_status === 1 ? '正常' : '停用' }}
+            </template>
             <template #topMenu>
               <div class="flex flex-justify-between align-center">
                 <search-popover
@@ -106,7 +112,7 @@ const COLUMNS = [
     minWidth: 180
   },
   {
-    prop: 'code',
+    prop: 'user_id_str',
     label: '用户编号',
     minWidth: 180
   },
@@ -118,14 +124,16 @@ const COLUMNS = [
   {
     prop: 'user_status',
     label: '状态',
-    formatter: (row) => {
-      return (
-        {
-          true: '停用',
-          false: '正常'
-        }[row.user_status] || ''
-      )
-    }
+    slot: true
+
+    // formatter: (row) => {
+    //   return (
+    //     {
+    //       true: '停用',
+    //       false: '正常'
+    //     }[row.user_status] || ''
+    //   )
+    // }
   },
   {
     prop: 'dept',
@@ -134,7 +142,7 @@ const COLUMNS = [
     minWidth: 180
   },
   {
-    prop: 'update_time',
+    prop: 'create_time',
     label: '更新时间',
     minWidth: 180
   }
@@ -185,7 +193,7 @@ export default {
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '姓名/编号', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '请输入人员姓名', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
@@ -262,7 +270,13 @@ export default {
       this.loadData()
     },
     handleSubmitSearch(params) {
-      this.query = { ...this.query, ...params }
+      this.page.currentPage = 1
+      let currentParam = {
+        likeQuery: params.search
+        // userId:params.search
+      }
+
+      this.query = { ...currentParam }
       this.loadData()
     },
     handleResetSearch() {

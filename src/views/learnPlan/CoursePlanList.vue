@@ -298,17 +298,17 @@ const TABLE_COLUMNS = [
     slot: false,
     minWidth: 180
   },
-  {
-    label: '分类',
-    prop: 'categoryName',
-    minWidth: 100
-  },
-  {
-    label: '包含课程',
-    formatter: (row) => _.map(row.courseList, 'courseName').join(','),
-    prop: 'courseList',
-    minWidth: 100
-  },
+  // {
+  //   label: '分类',
+  //   prop: 'categoryName',
+  //   minWidth: 100
+  // },
+  // {
+  //   label: '包含课程',
+  //   formatter: (row) => _.map(row.courseList, 'courseName').join(','),
+  //   prop: 'courseList',
+  //   minWidth: 100
+  // },
   {
     label: '状态',
     formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),

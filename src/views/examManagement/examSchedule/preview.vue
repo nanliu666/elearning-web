@@ -36,10 +36,13 @@
             :key="index"
             class="main-question-li"
           >
-            <div style="margin-bottom: 10px">
+            <div>
               <span>{{ (index + 1) | number2zhcn }}、</span>
               <span>{{ item[0].type | typeFilter }}</span>
               <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+            </div>
+            <div style="margin-bottom: 10px; margin-top: 4px;color: #ccc">
+              {{ _.get(item, '[0]title', '') }}
             </div>
             <div
               v-for="(sonitem, sonindex) in item"
@@ -82,12 +85,7 @@
 
 <script>
 import QustionPreview from '../question/questionPreview'
-import {
-  getManualPreview,
-  getRandomPreview,
-  delExamPreview,
-  createRandomPaper
-} from '@/api/examManage/schedule'
+import { getManualPreview, delExamPreview, createRandomPaper } from '@/api/examManage/schedule'
 import {
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
@@ -156,11 +154,15 @@ export default {
       })
     },
     initData() {
+      this.paperData = []
       this.loading = true
-      let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : getRandomPreview
-      if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
-        loadFun = createRandomPaper
-      }
+      // 手工卷子接口 getManualPreview
+      // 随机卷子接口统一接口 createRandomPaper
+      let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : createRandomPaper
+      // 随机卷子且进来预览不显示删除接口 getRandomPreview
+      // if (this.$route.query.isManaged && this.$route.query.paperType === 'random') {
+      //   loadFun = getRandomPreview
+      // }
       const basicParams = { paperId: this.$route.query.paperId }
       const parmas = _.assign(basicParams, { previewId: this.$route.query.previewId })
       loadFun(parmas)

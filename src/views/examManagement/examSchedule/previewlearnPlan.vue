@@ -153,10 +153,7 @@ export default {
         loadFun = createRandomPaper
       }
       const basicParams = { paperId: this.paperId }
-      const parmas =
-        this.paperType === 'manual' || this.isManaged
-          ? basicParams
-          : _.assign(basicParams, { previewId: this.previewId })
+      const parmas = _.assign(basicParams, { previewId: this.previewId })
       loadFun(parmas)
         .then((res) => {
           res.questions = this.handleData(res.questions)

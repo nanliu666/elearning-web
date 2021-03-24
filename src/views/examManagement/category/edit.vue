@@ -173,7 +173,7 @@ export default {
     },
     // 提交
     submit() {
-      if (this.checkSameName()) return
+      if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         if (valid) {
           if (this.type !== 'edit') {
@@ -208,6 +208,7 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.loadOrgTree()
     },
     // 新建子分类
     createChild(row) {
@@ -217,6 +218,7 @@ export default {
       this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
+      this.loadOrgTree()
     },
     edit(row) {
       this.type = 'edit'
@@ -229,7 +231,7 @@ export default {
       let org = {}
       function deep(arr) {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].id === id) {
+          if (arr[i].idStr === id) {
             org = arr[i]
             return
           }

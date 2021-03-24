@@ -28,7 +28,9 @@
             </li>
             <li class="details-li">
               <span class="li-label">提供人：</span>
-              <span class="li-value">{{ konwledgeDetail.providerName }}</span>
+              <span class="li-value">{{
+                konwledgeDetail.providerName ? konwledgeDetail.providerName : '--'
+              }}</span>
             </li>
             <li class="details-li">
               <span class="li-label">上传模式：</span>

@@ -107,7 +107,6 @@ export default {
           itemType: 'input',
           label: '计划人数',
           prop: 'people',
-          type: 'Number',
           rules: [{ required: false, validator: this.validatePeople, trigger: ['blur', 'change'] }],
           min: 0,
           span: 11,
@@ -223,7 +222,7 @@ export default {
         trainName: '',
         categoryId: '',
         trainTime: [],
-        people: 0,
+        people: '',
         trainObjectsList: [],
         trainWay: 3,
         address: '',
@@ -246,13 +245,9 @@ export default {
     },
     'formData.trainObjectsList': {
       handler(data) {
-        this.handlerData(_.cloneDeep(data))
-      },
-      deep: true
-    },
-    'formData.people': {
-      handler(val) {
-        this.formData.people = Math.abs(val)
+        if (!_.isEmpty(data)) {
+          this.handlerData(_.cloneDeep(data))
+        }
       },
       deep: true,
       immediate: true
@@ -303,7 +298,9 @@ export default {
         result = await Promise.all(
           examList.true.map(async (item) => {
             return (async () => {
-              return await getUserList({ orgId: item.id })
+              return await getUserList({
+                orgId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.id
+              })
             })()
           })
         )
@@ -314,25 +311,46 @@ export default {
         }
       }
       this.userList = data
-      this.$refs.form.validateField('trainObjectsList')
+      this.$refs.form && this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
-      if (value !== 0) {
-        this.$refs.form.validateField('trainObjectsList')
+      if (value === '') {
+        this.$refs.form.clearValidate()
+        callback()
+      } else {
+        const numberValue = Number(value)
+        if (_.isNaN(numberValue)) {
+          return callback(new Error('计划人数必须填数字'))
+        } else {
+          if (!_.isInteger(numberValue)) {
+            return callback(new Error('计划人数不能为小数'))
+          }
+          if (value > 100000) {
+            return callback(new Error('计划人数最大限制输入值 100000'))
+          } else if (value <= 100000 && value > 0) {
+            this.$refs.form.validateField('trainObjectsList')
+            callback()
+          } else {
+            return callback(new Error('计划人数必须为正整数'))
+          }
+        }
       }
-      callback()
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
-      const moreThan = _.size(this.userList) - this.formData.people
-      this.$nextTick(() => {
-        if (_.size(this.userList) > 0 && moreThan > 0 && this.formData.people !== 0) {
-          callback(new Error(`超过计划${moreThan}人，请酌量删除`))
-        } else {
-          callback()
-        }
-      })
+      if (this.formData.people !== '') {
+        const moreThan = _.size(this.userList) - this.formData.people
+        this.$nextTick(() => {
+          if (_.size(this.userList) > 0 && moreThan > 0 && this.formData.people !== 0) {
+            callback(new Error(`超过计划${moreThan}人，请酌量删除`))
+          } else {
+            callback()
+          }
+        })
+      } else {
+        callback()
+      }
     },
     getCatalogs() {
       getAllCatalog().then((res) => {
@@ -353,6 +371,7 @@ export default {
               resolve(this.formData) // TODO 提交表单
             })
             .catch(() => {
+              this.$message.error('请完整填写基本信息')
               reject()
             })
         })

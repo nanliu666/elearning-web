@@ -364,6 +364,7 @@
                   >
                     开办下一期
                   </el-button>
+                  <span class="decollator_span">|</span>
                   <span v-p="END_TRAIN">
                     <el-button
                       v-if="scope.row.status !== 0"
@@ -1122,6 +1123,10 @@ $color_icon: #A0A8AE
   background-color: #ccc;
   color: #333;
   margin-left: 10px;
+}
+.decollator_span {
+  margin: 0 5px;
+  color: #ebeced;
 }
 .trainingArrange {
   .box_title {

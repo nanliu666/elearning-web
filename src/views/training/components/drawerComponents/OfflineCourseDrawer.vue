@@ -243,6 +243,15 @@ export default {
       },
       deep: true
     },
+    'model.todoTime': {
+      handler() {
+        this.model.todoTimeParams = [
+          moment(this.model.todoTime[0]).format('HH:mm'),
+          moment(this.model.todoTime[1]).format('HH:mm')
+        ]
+      },
+      deep: true
+    },
     'model.type': {
       handler(value) {
         if (value === 1) {
@@ -300,25 +309,29 @@ export default {
     },
     // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
     validateTodoDate(rule, value, callback) {
-      // 授课开始时间要在考试时间之间
-      const isLegalTime = moment(this.model.todoDate).isBetween(
-        moment(this.trainTimeInVuex[0]),
-        moment(this.trainTimeInVuex[1])
-      )
-      // 与培训开始日期或结束日期相同
-      const isSame =
-        moment(this.model.todoDate).isSame(this.trainTimeInVuex[0]) ||
-        moment(this.model.todoDate).isSame(this.trainTimeInVuex[1])
-      if (!isLegalTime && !isSame) {
-        callback(
-          new Error(
-            `${this.model.type === 1 ? '授课' : '活动'}日期要在培训日期（${
-              this.trainTimeInVuex[0]
-            }至${this.trainTimeInVuex[1]}）之间`
-          )
-        )
+      if (_.isEmpty(this.trainTimeInVuex)) {
+        callback(new Error('请先选择培训时间'))
       } else {
-        callback()
+        // 授课开始时间要在考试时间之间
+        const isLegalTime = moment(this.model.todoDate).isBetween(
+          moment(this.trainTimeInVuex[0]),
+          moment(this.trainTimeInVuex[1])
+        )
+        // 与培训开始日期或结束日期相同
+        const isSame =
+          moment(this.model.todoDate).isSame(this.trainTimeInVuex[0]) ||
+          moment(this.model.todoDate).isSame(this.trainTimeInVuex[1])
+        if (!isLegalTime && !isSame) {
+          callback(
+            new Error(
+              `${this.model.type === 1 ? '授课' : '活动'}日期要在培训日期（${
+                this.trainTimeInVuex[0]
+              }至${this.trainTimeInVuex[1]}）之间`
+            )
+          )
+        } else {
+          callback()
+        }
       }
     },
     // 选择了教室的数据处理。教室名称赋值

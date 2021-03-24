@@ -56,11 +56,11 @@
         >
           <i
             v-if="!leftHidden"
-            class="iconimage_icon_Doubleleftarrow iconfont"
+            class="icon-arrow-left-outlined  iconfont"
           ></i>
           <i
             v-else
-            class="iconimage_icon_Doublerightarrow iconfont"
+            class="iconimage_icon_Rightarrow iconfont"
           ></i>
         </div>
         <!-- 文章类型 -->
@@ -108,7 +108,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { liveReplayList, setReplayStatus } from '@/api/live/liveReplay'
+import { liveReplayList } from '@/api/live/liveReplay'
 const axios = require('axios/index')
 
 export default {
@@ -175,11 +175,6 @@ export default {
       }
       return chapter.content
     },
-    setTimer() {
-      this.timer = setInterval(() => {
-        this.submitLearnRecords()
-      }, 5 * 60 * 1000)
-    },
     getList() {
       this.leftHidden = false
       liveReplayList({
@@ -237,50 +232,6 @@ export default {
         }
       }
     },
-    loadCourseDetail() {
-      if (!this.courseId) {
-        return
-      }
-      getReplayList({ courseId: this.courseId }).then((res) => {
-        this.course = res
-      })
-    },
-    submitLearnRecords() {
-      let params = { period: 5, courseId: this.courseId }
-      params.contentRecords = _.map(
-        this.chapters,
-        (chapter) => `${chapter.contentId}:${chapter.progress}`
-      ).join(',')
-      if (!params.contentRecords) {
-        return
-      }
-      updateLearnRecord(params)
-        .then()
-        .catch()
-    },
-    loadChapters() {
-      if (!this.courseId) {
-        return
-      }
-      getLearnRecord({ courseId: this.courseId }).then((res) => {
-        this.chapters = _.sortBy(res, 'sort')
-        _.forEach(this.chapters, (chapter) => {
-          if (this.isChapterVideo(chapter)) {
-            // chapter.content =
-            //   'https://oa-file-dev.bestgrand.com.cn/b8a6256a5a31464fa28a3ae46992e850.mp4'
-            this.setDuration(chapter).catch()
-          }
-          // if (chapter.type == '2') {
-          // chapter.content = 'http://ieee802.org:80/secmail/docIZSEwEqHFr.doc'
-          // chapter.content =
-          //   'https://oa-file-dev.bestgrand.com.cn/7f6c5943b4d14733b61f7efaa7b4ec30.txt'
-          // }
-          if (chapter.contentId == this.chapterId) {
-            this.currentChapter = chapter
-          }
-        })
-      })
-    },
     // 请求七牛云获取视频时长(单位秒)
     setDuration(chapter) {
       return new Promise((resolve, reject) => {
@@ -295,28 +246,6 @@ export default {
             reject(err)
           })
       })
-    },
-    loadNoteList() {
-      if (!this.courseId) {
-        return
-      }
-      getNotesList({ courseId: this.courseId }).then((res) => {
-        this.notes = res
-      })
-    },
-    submitNote() {
-      if (!this.note) {
-        return
-      }
-      this.submitting = true
-      addNote({ courseId: this.courseId, remark: this.note })
-        .then(() => {
-          this.note = ''
-          this.loadNoteList()
-        })
-        .finally(() => {
-          this.submitting = false
-        })
     },
     goBack() {
       this.$router.go(-1)
@@ -500,6 +429,7 @@ $mainLineGray: #ebeced;
         text-align: center;
         background-color: rgba($primaryFontColor, 0.3);
         border-radius: 0 4px 4px 0;
+
         i {
           font-size: 14px;
           line-height: 48px;

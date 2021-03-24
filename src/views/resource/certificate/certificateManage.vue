@@ -132,6 +132,9 @@
                   <div class="text">
                     {{ preview.text }}
                   </div>
+                  <div class="IssuingAgency">
+                    {{ preview.awardAgency }}
+                  </div>
                   <img
                     v-if="preview.logoUrl"
                     :src="preview.logoUrl"
@@ -143,8 +146,8 @@
                   </div>
                   <div class="serial">
                     <div>证书编号:</div>
-                    <div>YB-20201130-0001</div>
-                    <div>{{ preview.createTime }}</div>
+                    <div>{{ CertificateNumberInitials }}-20201130-0001</div>
+                    <div>{{ preview.createTime ? preview.createTime.substr(0, 10) : '' }}</div>
                   </div>
                 </div>
               </div>
@@ -174,6 +177,7 @@
 </template>
 
 <script>
+import { pinyin } from 'pinyin-pro'
 import SearchPopover from '@/components/searchPopOver/index'
 import {
   getCertificateList,
@@ -328,7 +332,8 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableData: [],
       tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG
+      tablePageConfig: TABLE_PAGE_CONFIG,
+      CertificateNumberInitials: '' //证书编号首字母
     }
   },
   computed: {
@@ -362,9 +367,13 @@ export default {
       this.$router.push({ path: '/resource/certificate/addCertificate' })
     },
     // 批量删除
-    multipleDeleteClick(selected) {
+    multipleDeleteClick(selectArr) {
+      let currentArr = selectArr.filter((item) => {
+        return item.status === 0
+      })
+      let deactivate = selectArr.length - currentArr.length
       let selectedIds = []
-      _.each(selected, (item) => {
+      _.each(currentArr, (item) => {
         selectedIds.push(item.id)
       })
       // 提示
@@ -374,9 +383,22 @@ export default {
         type: 'warning'
       })
         .then(async () => {
+          if (selectedIds.length === 0) {
+            this.$message.warning('所选证书模版处于启用状态，请停用后删除')
+            this.$refs.table.clearSelection()
+            this.refreshTableData()
+            return
+          }
           await delTemplate({ templateIds: selectedIds.join(',') })
-          this.$message.success('删除成功')
-          this.loadTableData()
+          if (deactivate === 0) {
+            this.$message.success('删除成功')
+          } else {
+            this.$message.success(
+              `已删除${selectedIds.length}条证书模版，另外${deactivate}条证书模板处于启用状态，请停用后删除`
+            )
+          }
+          this.$refs.table.clearSelection()
+          this.refreshTableData()
         })
         .catch(() => {
           this.$message({
@@ -442,6 +464,11 @@ export default {
     //   预览Btn
     previewMouseOver(id) {
       getSingleCertificate({ templateId: id }).then((res) => {
+        let currentstr = pinyin(res.awardAgency, { pattern: 'initial', type: 'array' })
+          .splice(0, 2)
+          .join('')
+          .toUpperCase()
+        this.CertificateNumberInitials = currentstr ? currentstr : 'YB'
         this.preview = res
       })
     },
@@ -467,6 +494,7 @@ export default {
       for (let i in searchParams) {
         this.queryInfo[i] = searchParams[i]
       }
+      this.queryInfo.pageNo = 1
       this.loadTableData()
     },
     // 跳去详情
@@ -534,6 +562,13 @@ export default {
     height: 28%;
     text-align: center;
     word-wrap: break-word;
+  }
+  .IssuingAgency {
+    position: absolute;
+    top: 85.6%;
+    left: 55%;
+    z-index: 99999;
+    transform: translateX(-50%);
   }
   .logo {
     position: absolute;
