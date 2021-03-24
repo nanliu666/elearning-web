@@ -60,7 +60,7 @@
             >
               <span>{{ studentItem.name }}</span>
               <span>手机：{{ studentItem.phoneNum || studentItem.phonenum }}</span>
-              <span>部门：{{ studentItem.orgName }}</span>
+              <span>部门：{{ studentItem.orgName ? studentItem.orgName : '无部门' }}</span>
               <el-button
                 v-if="hasDelete(item.examTime)"
                 size="medium"
@@ -233,6 +233,7 @@ export default {
     },
     deleteBatch(index) {
       this.batchList.splice(index, 1)
+      this.$message.success('删除成功')
     },
     // 删除单独的项，当这个批次内的所有考生都删除后，必须将本批次删除
     deleteBatchItem(index, sonIndex) {
