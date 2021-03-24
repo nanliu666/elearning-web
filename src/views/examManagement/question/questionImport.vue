@@ -186,6 +186,7 @@ export default {
       this.$message.warning('只能选择一个文件')
     },
     beforeUpload(file) {
+      console.log('beforeUploadfile', file)
       const isXLS = file.type === 'application/vnd.ms-excel'
       const isLt2M = file.size / 1024 / 1024 < 2
 
