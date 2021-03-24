@@ -371,6 +371,7 @@ export default {
               resolve(this.formData) // TODO 提交表单
             })
             .catch(() => {
+              this.$message.error('请完整填写基本信息')
               reject()
             })
         })

@@ -460,16 +460,11 @@ export default {
       immediate: true
     }
   },
-  mounted() {
-    if (this.id) {
-      this.loadData()
-    }
-    this.loadCategoryData()
-  },
   activated() {
     if (this.id) {
       this.loadData()
     }
+    this.loadCategoryData()
   },
   beforeDestroy() {
     this.scoreWatcher && this.scoreWatcher()

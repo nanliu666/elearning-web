@@ -43,11 +43,13 @@
             class="uploader"
             drag
             action=""
-            :file-list="uploadList"
+            :file-list.sync="uploadList"
             :limit="1"
             :on-exceed="handleExceed"
             :before-upload="beforeUpload"
             :http-request="httpRequest"
+            :on-change="onChange"
+            :before-remove="removeFile"
             :auto-upload="false"
           >
             <i class="iconimage_icon_Uploadcoursecontent1 iconfont icon-upload"></i>
@@ -60,6 +62,7 @@
           <el-button
             type="primary"
             size="medium"
+            :disabled="importDisabled"
             @click="handleSubmit"
           >
             确认导入
@@ -153,6 +156,7 @@ export default {
   name: 'QuestionImport',
   data() {
     return {
+      importDisabled: true,
       uploadList: [],
       successCount: 0,
       failedCount: 0,
@@ -192,6 +196,12 @@ export default {
         this.$message.error('上传文件大小不能超过 2MB!')
       }
       return isLt2M && isXLS
+    },
+    onChange() {
+      this.importDisabled = false
+    },
+    removeFile() {
+      this.importDisabled = true
     },
     httpRequest(file) {
       const parmas = new FormData()
