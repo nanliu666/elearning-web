@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     thousands(num) {
-      if (typeof num !== 'number') return
+      if (typeof num !== 'number') return num
       var str = num.toString()
       var reg = str.indexOf('.') > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g
       return str.replace(reg, '$1,')

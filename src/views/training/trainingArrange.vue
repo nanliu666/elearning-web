@@ -543,7 +543,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'peopleMin,peopleMax',
     data: { min: '', max: '' },
     label: '计划人数',
-    required: true
+    required: false
   },
   {
     config: { placeholder: '请选择' },

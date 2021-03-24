@@ -136,11 +136,6 @@ export default {
           itemType: 'slot',
           span: 24,
           rules: [
-            {
-              required: true,
-              message: '请选择关联用卷',
-              trigger: 'blur'
-            },
             { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
           ],
           prop: 'testPaper',
@@ -236,6 +231,7 @@ export default {
   methods: {
     // 考试结束日期在试卷有效期之前
     validateTestPaper(rule, value, callback) {
+      if (!value) callback('请选择关联同卷')
       if (_.get(this.$refs, 'testPaperRef')) {
         const temp = _.find(this.$refs.testPaperRef.optionList, (item) => {
           return item.id === value
