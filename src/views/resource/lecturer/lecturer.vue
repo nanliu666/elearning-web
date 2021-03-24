@@ -205,7 +205,7 @@
                   class="marginLine"
                   type="text"
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row, 0)"
+                  @click.stop="iseditSysRulus(scope.row, 0, '停用')"
                 >
                   停用
                 </el-button>
@@ -215,7 +215,7 @@
                   class="marginLineColor"
                   style=" cursor:pointer; "
                   size="medium"
-                  @click.stop="iseditSysRulus(scope.row, 1)"
+                  @click.stop="iseditSysRulus(scope.row, 1, '启用')"
                 >
                   启用
                 </span>
@@ -729,7 +729,7 @@ export default {
     },
 
     // 启动/停用按钮
-    iseditSysRulus(id, i) {
+    iseditSysRulus(id, i, text) {
       // 启用弹框
       if (i) {
         this.$confirm('您确定要启用该讲师吗？', '提示', {
@@ -743,7 +743,7 @@ export default {
           .catch(() => {
             this.$message({
               type: 'info',
-              message: '已取消删除'
+              message: `已取消${text}`
             })
           })
       } else {
@@ -773,7 +773,7 @@ export default {
               .catch(() => {
                 this.$message({
                   type: 'info',
-                  message: '已取消删除'
+                  message: `已取消${text}`
                 })
               })
           } else {
