@@ -110,6 +110,7 @@ const BASE_COLUMNS = [
     required: true
   },
   {
+    required: true,
     itemType: 'treeSelect',
     label: '试卷分类',
     prop: 'categoryId',
@@ -134,7 +135,6 @@ const BASE_COLUMNS = [
         required: true
       }
     },
-    required: false,
     span: 11,
     offset: 2
   },
