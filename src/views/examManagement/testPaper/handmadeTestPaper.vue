@@ -215,7 +215,7 @@ export default {
       typeList: [],
       themeBlockData: {
         key: 1,
-        type: '',
+        type: 'single_choice',
         title: '',
         tableData: []
       },
