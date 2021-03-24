@@ -1,5 +1,7 @@
 <template>
   <el-dialog
+    :close-on-click-modal="false"
+    append-to-body
     :title="
       type === 'create'
         ? `新建${currentType}分类`
