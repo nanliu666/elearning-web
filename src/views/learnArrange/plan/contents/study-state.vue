@@ -188,7 +188,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.jobPercent }}
+              {{ scope.row.job }}
             </div>
           </template>
         </el-table-column>

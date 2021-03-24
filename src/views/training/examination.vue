@@ -327,9 +327,9 @@ export default {
       params.status = this.status
       // console.log('params', params)
       getCourseListData(params).then((res) => {
-        this.tableData = res
-        this.page.total = res.length
-        // window.console.log(res)
+        this.tableData = res.data
+        this.page.total = res.totalNum
+        window.console.log(res)
       })
     },
     // 导航

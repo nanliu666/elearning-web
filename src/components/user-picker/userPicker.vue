@@ -122,7 +122,7 @@
               v-else-if="item.type === 'User'"
               class="iconfont  icon-approval-checkin-bicolor imgs"
             />
-            {{ item.phoneNum ? item.bizName + '(' + item.phoneNum + ')' : item.bizName}}
+            {{ item.phoneNum ? item.name + '(' + item.phoneNum + ')' : item.name}}
           </div>
           <div class="icon">
             <i
@@ -302,6 +302,7 @@ export default {
       }
     },
     selected(val) {
+      console.log(val)
       const { orgTree, orgTreeSearch } = this.$refs
       ;[orgTree, orgTreeSearch].forEach((ref) => {
         if (_.isNil(ref)) return
