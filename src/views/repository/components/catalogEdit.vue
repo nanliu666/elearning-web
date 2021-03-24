@@ -185,9 +185,16 @@ export default {
     getOrgList(val) {
       this.form.orgIds = val.map((item) => item.id)
     },
+
     async loadOrgTree() {
       let res = await getKnowledgeCatalogList()
-      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      if (this.type === 'edit') {
+        this.orgTree = this.clearCurrentChildren(res)
+        this.parentOrgIdLabel =
+          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+      } else {
+        this.orgTree = res
+      }
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -220,7 +227,7 @@ export default {
     },
     // 提交
     submit(type) {
-      if (this.checkSameName()) return
+      if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         this.form.orgIds = this.form.orgIds.toString()
         this.form.source = 'knowledge'
@@ -269,15 +276,18 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
+      this.$set(this.form, 'isPublic', 0)
+      this.$set(this.form, 'name', '')
     },
     // 新建子分类
     createChild(row) {
       this.type = 'createChild'
       this.form = _.cloneDeep(row)
       this.form.parentId = row.id
-      this.form.name = ''
       this.parentOrgIdLabel = row.name
       this.$emit('changevisible', true)
+      this.$set(this.form, 'isPublic', 0)
+      this.$set(this.form, 'name', '')
     },
     edit(row) {
       this.type = 'edit'

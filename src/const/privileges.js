@@ -176,3 +176,11 @@ export const VIEW_CLASSROOM = '/resource/classroom/list/view' // 查看教室
 export const STOP_CLASSROOM = '/resource/classroom/list/stop' // 启用/停用
 export const EDIT_CLASSROOM = '/resource/classroom/list/eidt' // 编辑
 export const DELETE_CLASSROOM = '/resource/classroom/list/delete' // 删除
+
+// 岗位管理的鉴权
+export const ADD_STATION = '/system/station/add' // 岗位新增
+export const EXPORTS_STATION = '/system/station/exports' // 批量导出
+export const DETAIL_STATION = '/system/station/detail' // 查看用户
+export const EDIT_STATION = '/system/station/edit' // 岗位编辑
+export const DELETE_STATION = '/system/station/delete' // 岗位删除
+export const EXPORTS_STATIONDETAIL = '/system/stationDetail/exports' // 批量导出(查看用户)

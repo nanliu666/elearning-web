@@ -17,7 +17,7 @@
           :type="item.config && item.config.type ? item.config.type : 'text'"
           :placeholder="item.config.placeholder || '请输入' + item.label"
           class="elInput"
-          :maxlength="item.maxlength"
+          :maxlength="item.config && item.config.maxlength"
           :suffix-icon="item.config && item.config['suffix-icon']"
           clearable
           @input="search(item)"
@@ -63,7 +63,7 @@
           </div>
           <div
             v-show="item.noMore"
-            style="text-align: center; font-size:14px;color: #606266;"
+            style="text-align: center; font-size: 14px; color: #606266"
           >
             没有更多了
           </div>
@@ -96,7 +96,7 @@
           placeholder="结束时间"
           start-placeholder="开始时间"
           end-placeholder="结束时间"
-          style="width:198px"
+          style="width: 198px"
           :unlink-panels="true"
           @change="change"
         />
@@ -200,7 +200,7 @@
                       </div>
                       <div
                         v-show="item.noMore"
-                        style="text-align: center; font-size:14px;color: #606266;"
+                        style="text-align: center; font-size: 14px; color: #606266"
                       >
                         没有更多了
                       </div>

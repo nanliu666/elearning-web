@@ -249,12 +249,18 @@ export default {
           s.publishTime = +s.publishTime
         })
       })
+      data.participantsList.map((item) => {
+        item.department = item.orgName
+        delete item.orgName
+        return item
+      })
       let func
       if (this.id) {
         func = updatePlan
       } else {
         data.creatorId = this.userInfo.user_id
         data.creatorName = this.userInfo.nick_name
+        data.phonenum = data.phoneNum
         data.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
         func = addPlan
       }

@@ -6,10 +6,11 @@
 
 ### Attributes 配置
 
-| 参数               | 说明                                                                       |  类型   | 默认值 |
+| 参数               | 说明                                                                        |  类型   | 默认值 |
 | selectedValue      | 返回选中的数组                                                              |  function |   -    |
+| idList             | 回显的id                                                                    |  list |   -    |
 
 ### 代码示例
 ```html
-   <UserOrgTree @selectedValue="getUserList"></UserOrgTree>
+   <OrgTree :idList="idList" @selectedValue="getUserList"></OrgTree>
 ```

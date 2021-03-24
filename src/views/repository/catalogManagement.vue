@@ -42,11 +42,11 @@
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin-left:10px"
+                  style="margin-left: 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
+                    style="display: flex; flex-direction: column"
                   >
                     <el-checkbox
                       v-for="item in tableColumns"
@@ -61,7 +61,7 @@
                   <i
                     slot="reference"
                     class="el-icon-setting"
-                    style="cursor: pointer;"
+                    style="cursor: pointer"
                   />
                 </el-popover>
               </div>
@@ -80,10 +80,10 @@
             批量删除
           </el-button>
         </template>
-        <template #status="{row}">
+        <template #status="{ row }">
           {{ row.status === '0' ? '已启用' : '已停用' }}
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="STOP_REP_CATALOG"
@@ -93,13 +93,15 @@
             >
               {{ row.status === '0' ? '停用' : '启用' }}
             </el-button>
+
             <el-button
-              v-p="AUTH_REP_CATALOG"
+              v-p="EDIT_REP_CATALOG"
               type="text"
-              @click="handleAuth(row)"
+              @click="handleCommand('edit', row)"
             >
-              权限配置
+              编辑
             </el-button>
+
             <el-dropdown
               v-if="$p([EDIT_REP_CATALOG, DELETE_REP_CATALOG, ADD_CHILD_REP_CATALOG])"
               @command="handleCommand($event, row)"
@@ -111,23 +113,20 @@
                 <i class="el-icon-arrow-down el-icon-more" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  v-p="EDIT_REP_CATALOG"
-                  command="edit"
-                >
+                <!-- <el-dropdown-item v-p="EDIT_REP_CATALOG" command="edit">
                   编辑
+                </el-dropdown-item> -->
+                <el-dropdown-item
+                  v-p="ADD_CHILD_REP_CATALOG"
+                  command="addChild"
+                >
+                  新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_REP_CATALOG"
                   command="delete"
                 >
                   删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="ADD_CHILD_REP_CATALOG"
-                  command="addChild"
-                >
-                  新建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -239,7 +238,7 @@ export default {
           },
           {
             type: 'select',
-            field: 'userId',
+            field: 'createId',
             data: '',
             label: '创建人',
             options: [],
@@ -405,7 +404,9 @@ export default {
     },
     // 编辑分类
     handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
+      let data = row
+      if (data.parentId == 0) data.parentId = ''
+      this.$refs.orgEdit.edit(data)
     },
     /**
      * 处理停用启用

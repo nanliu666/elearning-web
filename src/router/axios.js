@@ -105,26 +105,27 @@ instance.interceptors.response.use(
     } else {
       //如果在白名单里则自行catch逻辑处理
       if (statusWhiteList.includes(status)) return Promise.reject(res)
-      //如果是401则跳转到登录页面
-      if (status === 401) store.dispatch('FedLogOut').then(() => router.push({ path: '/login' }))
-      // 如果请求为非200否者默认统一处理
 
+      // 如果请求为非200否者默认统一处理
       if (status !== 200) {
-        if (status === 8000) {
+        if (status === 8000 || status === 8001) {
+          // 8000 为被挤出来；8001为token过期
           addLoading(res)
         } else if (String(status).startsWith('5')) {
-          Message({
-            message: '服务请求出错，请联系管理员',
-            type: 'error',
-            showClose: true
-          })
-        } else {
+          // Message({
+          //   message: '服务请求出错，请联系管理员',
+          //   type: 'error',
+          //   showClose: true
+          // })
+        } else if (getToken()) {
           Message({
             message,
             type: 'error',
             showClose: true
           })
         }
+        //如果是401则跳转到登录页面
+        if (status === 401) store.dispatch('FedLogOut').then(() => router.push({ path: '/login' }))
         return Promise.reject(new Error(message))
       }
       if (String.prototype.endsWith.call(res.config.url, '/oauth/token')) {

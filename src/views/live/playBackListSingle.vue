@@ -22,6 +22,15 @@
             width="220"
             height="124"
           />
+          <div class="header__play">
+            <span class="play-icon"></span>
+          </div>
+          <div class="playback">
+            直播回放
+          </div>
+          <div class="amount-play">
+            <i class="el-icon-video-camera-solid"></i>{{ formatNumber(item.people || 0) }}
+          </div>
         </div>
         <div class="text">
           <h3>直播回放：{{ item.channelName }}</h3>
@@ -132,12 +141,27 @@ export default {
     },
     repRelease(item) {
       // 发布 下架
-      let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
-      setReplayStatus(sendPar).then(() => {
-        this.initPlayBackData()
-        this.$message({
-          message: '操作成功',
-          type: 'success'
+
+      this.$confirm(
+        `${
+          item.shelfStatus === 0
+            ? '下架后，该直播回放将对学员不可见，您确定要上架吗？'
+            : '上架后，学员将会在直播中看到该回放，您确定要上架吗？'
+        }`,
+        '提醒',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(() => {
+        let sendPar = { videoId: item.id.toString(), shelfStatus: item.shelfStatus === 0 ? 1 : 0 }
+        setReplayStatus(sendPar).then(() => {
+          this.initPlayBackData()
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          })
         })
       })
     },
@@ -220,6 +244,16 @@ export default {
       // 改变每页显示条数回调
       this.PBLParmas.pageNo = val
       this.initPlayBackData()
+    },
+    formatNumber(num) {
+      num = Number(num)
+      if (num == 0) {
+        return 0
+      } else if (num >= 1 && num < 10000) {
+        return num
+      } else {
+        return (num / 10000).toFixed(2) + '万'
+      }
     }
   }
 }
@@ -264,9 +298,54 @@ export default {
   display: flex;
   height: 124px;
   margin: 0 0 40px 0;
+  .header__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 11, 21, 0.45);
+    border-radius: 100%;
+    margin-left: -24px;
+    margin-top: -24px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    cursor: pointer;
+    .play-icon {
+      width: 0;
+      height: 0;
+      margin-left: 8px;
+      border-top: 10px solid transparent;
+      border-left: 20px solid #ffffff;
+      border-bottom: 10px solid transparent;
+    }
+  }
+  .playback {
+    background: #ecebeb;
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .amount-play {
+    font-size: 12px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+  }
 }
 .PBLS .img {
+  position: relative;
   width: 220px;
+  cursor: pointer;
   border-radius: 4px;
 }
 .PBLS .text {

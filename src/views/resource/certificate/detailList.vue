@@ -92,7 +92,7 @@ const SEARCH_CONFIG = {
       label: '',
       data: '',
       options: [],
-      config: { placeholder: '输入证书名称/编号搜索', 'suffix-icon': 'el-icon-search' }
+      config: { placeholder: '输入证书名称搜索', 'suffix-icon': 'el-icon-search' }
     }
   ],
   popoverOptions: []
@@ -143,10 +143,9 @@ export default {
   methods: {
     // 查看
     viewCertificate(row) {
-      // tagName: row.templateName
       this.$router.push({
         path: '/resource/certificate/detail',
-        query: { id: row.id, title: row.templateName }
+        query: { id: row.templateId, title: row.templateName }
       })
     },
     // 批量导出
@@ -183,6 +182,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
+      this.queryInfo.pageNo = 1
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },

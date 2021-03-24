@@ -191,9 +191,10 @@ export default {
         },
         {
           prop: 'logo',
-          itemType: 'slotout',
-          required: false,
-          offset: 5
+          itemType: 'slot',
+          label: '颁发机构logo',
+          offset: 5,
+          required: true
         }
       ]
     }
@@ -203,6 +204,14 @@ export default {
       handler() {
         this.$nextTick(() => {
           this.$refs.form.validateField('back', () => {})
+        })
+      },
+      immediate: false
+    },
+    'form.logo': {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.form.validateField('logo', () => {})
         })
       },
       immediate: false

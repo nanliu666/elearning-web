@@ -10,16 +10,31 @@
           <el-checkbox
             v-model="checkAll"
             :indeterminate="isIndeterminate"
+            :disabled="!courseList.length"
             @change="handleCheckAllChange"
           >
             全选
           </el-checkbox>
         </li>
-        <li @click="handleDeleteCourse">
-          <i class="el-icon-delete"></i>删除
+        <li>
+          <el-button
+            type="text"
+            size="medium"
+            :disabled="!courseList.length"
+            @click="handleDeleteCourse"
+          >
+            <i class="el-icon-delete"></i>删除
+          </el-button>
         </li>
-        <li @click="handleBatchEdit">
-          <i class="el-icon-edit-outline"></i>批量修改
+        <li>
+          <el-button
+            type="text"
+            size="medium"
+            :disabled="!courseList.length"
+            @click="handleBatchEdit"
+          >
+            <i class="el-icon-edit-outline"></i>批量修改
+          </el-button>
         </li>
       </ul>
       <el-button
@@ -43,37 +58,51 @@
           v-model="courseList"
           :animation="200"
         >
-          <el-collapse-item
+          <div
             v-for="course in courseList"
             :key="course.courseId"
-            :name="course.courseId"
+            @click="course.isEdit = false"
           >
-            <template slot="title">
-              <div class="layout_content_label">
-                <div class="layout_content_label__head">
-                  <i
-                    v-if="activeCollapses.includes(course.courseId)"
-                    class="el-icon-arrow-down"
-                  ></i>
-                  <i
-                    v-else
-                    class="el-icon-arrow-right"
-                  ></i>
-                  <el-checkbox :label="course.courseId"></el-checkbox>
-                  {{ course.courseName }}
+            <el-collapse-item :name="course.courseId">
+              <template slot="title">
+                <div class="layout_content_label">
+                  <div class="layout_content_label__head">
+                    <i
+                      v-if="activeCollapses.includes(course.courseId)"
+                      class="el-icon-arrow-down"
+                    ></i>
+                    <i
+                      v-else
+                      class="el-icon-arrow-right"
+                    ></i>
+                    <el-checkbox :label="course.courseId"></el-checkbox>
+                    <input
+                      v-if="course.isEdit"
+                      v-model="course.courseName"
+                      type="text"
+                      @click.stop
+                    />
+                    <span v-else>{{ course.courseName }}</span>
+
+                    <i
+                      class="el-icon-edit edit-button"
+                      @click.stop="editCourseName(course)"
+                    ></i>
+                  </div>
+
+                  <i class="icon-drag"></i>
                 </div>
-                <i class="icon-drag"></i>
-              </div>
-            </template>
-            <CourseItem
-              ref="courseItem"
-              :course="course"
-              :plan-time-range="planTimeRange"
-              @exam-edit="handleExamEdit"
-              @course-pre="handleSetPrecondition"
-              @course-replace="handleReplaceCourse"
-            />
-          </el-collapse-item>
+              </template>
+              <CourseItem
+                ref="courseItem"
+                :course="course"
+                :plan-time-range="planTimeRange"
+                @exam-edit="handleExamEdit"
+                @course-pre="handleSetPrecondition"
+                @course-replace="handleReplaceCourse"
+              />
+            </el-collapse-item>
+          </div>
         </draggable>
       </el-collapse>
     </el-checkbox-group>
@@ -96,6 +125,7 @@
     <CourseSelectDialog
       ref="listSelect"
       :multiple="!replacingCourse"
+      :course-list="courseList"
       :visible.sync="courseDialogVisible"
       @submit="handleCourseSelectSubmit"
     />
@@ -168,6 +198,10 @@ export default {
   },
   computed: {},
   methods: {
+    editCourseName(course) {
+      course.isEdit = !course.isEdit
+      this.$forceUpdate()
+    },
     // 清空数据
     reset() {
       Object.assign(this.$data, this.$options.data())
@@ -406,6 +440,7 @@ export default {
       width: 100%;
       position: relative;
       display: flex;
+      align-items: center;
       justify-content: space-between;
       padding: 0 16px 0 24px;
       &__head {
@@ -462,4 +497,9 @@ export default {
 //     width: 45%;
 //   }
 // }
+
+.edit-button {
+  margin-left: 30px;
+  font-size: 18px !important;
+}
 </style>

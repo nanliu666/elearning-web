@@ -35,8 +35,8 @@
                   class="search-sort-box"
                   @click="toSort"
                 >
-                  <i class="el-icon-sort" />
-                  <span class="sort-text">调整排序</span>
+                  <!-- <i class="el-icon-sort" />
+                  <span class="sort-text">调整排序</span> -->
                 </div>
                 <el-popover
                   placement="bottom"
@@ -81,7 +81,7 @@
           </el-button>
         </template> -->
         <template #status="{row}">
-          {{ row.status === '0' ? '已启用' : '已停用' }}
+          {{ row.status == '0' ? '已启用' : '已停用' }}
         </template>
         <template #handler="{row}">
           <div class="menuClass">
@@ -91,7 +91,7 @@
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
             >
-              {{ row.status === '0' ? '停用' : '启用' }}
+              {{ row.status == '0' ? '停用' : '启用' }}
             </el-button>
             <el-button
               v-p="EDIT_COURSE_CATALOG"
@@ -398,7 +398,9 @@ export default {
     },
     // 编辑分类
     handleOrgEdit(row) {
-      this.$refs.orgEdit.edit(row)
+      let data = row
+      if (data.parentId == 0) data.parentId = ''
+      this.$refs.orgEdit.edit(data)
     },
     /**
      * 处理停用启用

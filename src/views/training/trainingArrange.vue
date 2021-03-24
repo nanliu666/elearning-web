@@ -364,11 +364,13 @@
                   >
                     开办下一期
                   </el-button>
+                  <span class="decollator_span">|</span>
                   <span v-p="END_TRAIN">
                     <el-button
                       v-if="scope.row.status !== 0"
                       type="text"
                       size="medium"
+                      :disabled="scope.row.status == 3"
                       @click="isstopSchedule(scope.row.id)"
                     >
                       结办
@@ -387,12 +389,15 @@
                       <el-dropdown-item
                         v-p="EDIT_TRAIN"
                         command="edit"
+                        :disabled="scope.row.status != 1"
                       >
                         编辑
                       </el-dropdown-item>
+
                       <el-dropdown-item
                         v-p="DELETE_TRAIN"
                         command="del"
+                        :disabled="scope.row.status == 2"
                       >
                         删除
                       </el-dropdown-item>
@@ -537,7 +542,8 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     type: 'numInterval',
     field: 'peopleMin,peopleMax',
     data: { min: '', max: '' },
-    label: '计划人数'
+    label: '计划人数',
+    required: true
   },
   {
     config: { placeholder: '请选择' },
@@ -546,9 +552,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '培训方式',
     type: 'select',
     options: [
-      { value: 1, label: '面授' },
-      { value: 2, label: '混合' },
-      { value: 3, label: '在线' },
+      { value: 2, label: '面授' },
+      { value: 3, label: '混合' },
+      { value: 1, label: '在线' },
       { value: '', label: '全部' }
     ]
   },
@@ -588,6 +594,7 @@ export default {
   },
   data() {
     return {
+      searchParams: '',
       // 接口
       columnInterface: {
         listTeacherCategory: getCatalogs, //查询讲师分类列表
@@ -698,7 +705,7 @@ export default {
     },
     // 去培训详情
     toTrainingDetail(row) {
-      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status' + row.status })
+      this.$router.push({ path: '/training/trainingDetail?id=' + row.id + '&status=' + row.status })
     },
     // 草稿删除
     isDraftDel(scope) {
@@ -724,10 +731,18 @@ export default {
       }
       params.type = this.status
       params.categoryId = this.idSchedule
-      params = { ...params, ...this.page, ...param }
+      params = { ...params, ...this.page, ...param, ...this.searchParams }
       getScheduleList(params).then((res) => {
         // console.log(res);
-        this.tableData = res.data
+        this.tableData = res.data.map((item) => {
+          if (!item.organizer) {
+            item.organizer = '--'
+          }
+          if (!item.composite) {
+            item.composite = '--'
+          }
+          return item
+        })
         this.page.total = res.totalNum
       })
     },
@@ -978,8 +993,13 @@ export default {
     },
 
     handleSearch(searchParams) {
+      let { peopleMin, peopleMax } = searchParams
+      if (peopleMin && peopleMax) {
+        if (peopleMin >= peopleMax) return
+      }
       this.page.pageNo = 1
-      this.isgetScheduleList(searchParams)
+      this.searchParams = searchParams
+      this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
       this.$confirm('此操作将删除, 是否继续?', '提示', {
@@ -1103,6 +1123,10 @@ $color_icon: #A0A8AE
   background-color: #ccc;
   color: #333;
   margin-left: 10px;
+}
+.decollator_span {
+  margin: 0 5px;
+  color: #ebeced;
 }
 .trainingArrange {
   .box_title {

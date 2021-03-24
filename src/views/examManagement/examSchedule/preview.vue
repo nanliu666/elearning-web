@@ -164,10 +164,7 @@ export default {
       //   loadFun = getRandomPreview
       // }
       const basicParams = { paperId: this.$route.query.paperId }
-      const parmas =
-        this.$route.query.paperType === 'manual' || this.$route.query.isManaged
-          ? basicParams
-          : _.assign(basicParams, { previewId: this.$route.query.previewId })
+      const parmas = _.assign(basicParams, { previewId: this.$route.query.previewId })
       loadFun(parmas)
         .then((res) => {
           res.questions = this.handleData(res.questions)

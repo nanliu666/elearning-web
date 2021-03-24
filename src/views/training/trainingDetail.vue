@@ -70,7 +70,7 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.trainTime }}
+              {{ showTrainDetail.trainBeginTime + '~' + showTrainDetail.trainEndTime }}
             </div>
           </el-col>
         </el-row>
@@ -88,30 +88,20 @@
           </el-col>
           <el-col :span="2">
             <div class="col_title">
-              {{ '培训对象:' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.object }}
-            </div>
-          </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="2">
-            <div class="col_title">
               {{ '培训方式：' }}
             </div>
           </el-col>
           <el-col :span="5">
             <!-- trainWay:'',	//培训方式（1：面授；2：混合；3：在线）	integer(int32) -->
             <div class="col_content">
-              <span v-if="showTrainDetail.trainWay === 1">面授</span>
-              <span v-if="showTrainDetail.trainWay === 2">混合</span>
-              <span v-if="showTrainDetail.trainWay === 3">在线</span>
+              <span v-if="showTrainDetail.trainWay == 2">面授</span>
+              <span v-if="showTrainDetail.trainWay == 3">混合</span>
+              <span v-if="showTrainDetail.trainWay == 1">在线</span>
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '培训地点：' }}
@@ -119,12 +109,10 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.address }}
+              {{ showTrainDetail.address || '--' }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '联系人：' }}
@@ -132,9 +120,12 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.contactName }}
+              {{ showTrainDetail.contactName || '--' }}
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '联系电话：' }}
@@ -145,9 +136,7 @@
               {{ showTrainDetail.contactPhone }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '主办单位：' }}
@@ -158,6 +147,9 @@
               {{ showTrainDetail.sponsor }}
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '承办单位：  ' }}
@@ -165,12 +157,10 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.organizer }}
+              {{ showTrainDetail.organizer || '--' }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '班主任： ' }}
@@ -181,6 +171,9 @@
               {{ showTrainDetail.headTeacher }}
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '助教：    ' }}
@@ -222,12 +215,6 @@
         <div class="introduce_content_t">
           <div v-html="showTrainDetail.introduction"></div>
         </div>
-        <!-- <div class="introduce_content_img">
-          <img
-            src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1606197580956&di=f8a17064ea1c3ef1ac53a82ecbc7ccdd&imgtype=0&src=http%3A%2F%2Fi3.3conline.com%2Fimages%2Fpiclib%2F201011%2F11%2Fbatch%2F1%2F74221%2F1289443294111o66qdard53.jpg"
-            alt=""
-          />
-        </div> -->
       </div>
     </div>
 
@@ -237,22 +224,98 @@
           :class="{ select: status === 1 }"
           style="cursor:pointer;"
           @click="status = 1"
-        >学员概况</span>
+        >报名情况</span>
         <span
           :class="{ select: status === 2 }"
           style="cursor:pointer;"
           @click="status = 2"
-        >培训安排</span>
+        >学习情况</span>
         <span
+          v-if="showTrainDetail.signIn"
           :class="{ select: status === 3 }"
           style="cursor:pointer;"
           @click="status = 3"
+        >签到情况</span>
+        <span
+          :class="{ select: status === 4 }"
+          style="cursor:pointer;"
+          @click="status = 4"
+        >培训安排</span>
+        <span
+          :class="{ select: status === 5 }"
+          style="cursor:pointer;"
+          @click="status = 5"
         >评估结果</span>
       </div>
 
-      <!-- 学员概况 -->
       <div
         v-show="status === 1"
+        class="register-container"
+      >
+        <div class="register-data">
+          <span>计划人数：</span>{{ plannedPopulation }}人 <span>已参加：</span>{{ participated }}人
+          <span>剩余名额：</span>{{ remainingPlaces }}人
+        </div>
+        <el-table
+          class="register-table"
+          :data="registerData"
+          style="width: 100%"
+        >
+          <el-table-column
+            align="center"
+            prop="name"
+            label="姓名"
+          >
+          </el-table-column>
+          <el-table-column
+            align="center"
+            prop="phonenum"
+            label="手机号"
+          >
+          </el-table-column>
+          <el-table-column
+            align="center"
+            prop="orgName"
+            label="所属部门"
+          >
+          </el-table-column>
+
+          <el-table-column
+            label="操作"
+            align="center"
+          >
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                @click="setRegister(scope.row, 'agree')"
+              >
+                同意
+              </el-button>
+              <el-button
+                type="text"
+                @click="setRegister(scope.row, 'reject')"
+              >
+                拒绝
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div
+          class="page-container"
+          style="margin-right: 45px;"
+        >
+          <pagination
+            :total="registerTotal"
+            :page="getRegisterForm.pageNo"
+            :limit="getRegisterForm.pageSize"
+            @pagination="registerPagination"
+          ></pagination>
+        </div>
+      </div>
+
+      <!-- 学习情况 -->
+      <div
+        v-show="status === 2"
         class="general"
       >
         <!-- 表格内容 -->
@@ -371,6 +434,25 @@
               <el-progress :percentage="row.onlineProgress || 0"></el-progress>
             </template>
 
+            <!-- 作业提交率 -->
+            <template
+              slot="jobPercent"
+              slot-scope="{ row }"
+            >
+              <span style="text-align: center; display: inline-block; width: 100%;">{{
+                row.jobPercent || '--'
+              }}</span>
+            </template>
+            <!-- 上报材料 -->
+            <template
+              slot="isSubmit"
+              slot-scope="{ row }"
+            >
+              <span style="text-align: center; display: inline-block; width: 100%;">{{
+                row.isSubmit === 'Yes' ? '已提交' : '未提交'
+              }}</span>
+            </template>
+
             <!-- 考试情况 // 1：已通过；2：未通过；3：未开始）-->
             <template
               slot="examStatus"
@@ -408,6 +490,14 @@
                 v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
                 type="text"
                 size="medium"
+                @click.stop="toStuffDetail(scope.row)"
+              >
+                查看上报材料
+              </el-button>
+              <el-button
+                v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
+                type="text"
+                size="medium"
                 @click.stop="isgrantCertificate(scope.row)"
               >
                 发放证书
@@ -432,7 +522,7 @@
 
       <!-- 培训安排 -->
       <div
-        v-show="status === 2"
+        v-show="status === 4"
         class="arrange"
       >
         <p class="offline_title">
@@ -452,8 +542,8 @@
             </template>
 
             <div
-              v-for="(item, index) in itemb"
-              :key="index"
+              v-for="(item, i) in itemb"
+              :key="i"
               class="arrange_schedule_i"
             >
               <span>{{ item.todoTime }}</span>
@@ -567,9 +657,62 @@
         </el-table>
       </div>
 
-      <!-- 评估结果 -->
+      <!-- 签到情况 -->
       <div
         v-show="status === 3"
+        class="signin-container"
+      >
+        <div class="signin-header">
+          <el-input
+            v-model="getSigninForm.name"
+            class="signin-input"
+            placeholder="输入学员姓名搜索"
+            suffix-icon="el-icon-search"
+            size="medium"
+            clearable
+          ></el-input>
+
+          <el-button
+            class="signin-btn"
+            size="medium"
+            type="primary"
+            @click="downcodeDlgVisible = true"
+          >
+            签到二维码
+          </el-button>
+        </div>
+
+        <el-table
+          class="signin-table"
+          :data="signinData"
+        >
+          <el-table-column
+            v-for="(item, index) in signinLevel"
+            :key="index"
+            header-align="center"
+            align="center"
+            :prop="item.prop"
+            :label="item.label"
+          >
+            <template slot-scope="scope">
+              {{ getSigninColumn(scope.row[item.prop], item.dynamic) }}
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div style="margin-right: 45px;">
+          <pagination
+            :total="signinTotal"
+            :page="getSigninForm.pageNo"
+            :limit="getSigninForm.pageSize"
+            @pagination="signinPagination"
+          ></pagination>
+        </div>
+      </div>
+
+      <!-- 评估结果 -->
+      <div
+        v-show="status === 5"
         class="result"
       >
         <div>
@@ -687,13 +830,57 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      title="审批意见"
+      :visible.sync="approveDlgVisible"
+      width="30%"
+      :modal-append-to-body="false"
+      @close="onApproveDlgClose"
+    >
+      <el-input
+        v-model="approveText"
+        type="textarea"
+        :rows="6"
+        placeholder="请填写拒绝原因（选填）"
+      >
+      </el-input>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          size="small"
+          @click="approveDlgVisible = false"
+        >取 消</el-button>
+        <el-button
+          type="primary"
+          size="small"
+          @click="setRegister('reject')"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <down-code-dialog
+      :dialog-visibe.sync="downcodeDlgVisible"
+      :train-id="showTrainDetail.trainId"
+    />
   </div>
 </template>
 
 <script>
 // 培训详情
+// eslint-disable-next-line no-unused-vars
 import { delCourseInfo } from '@/api/course/course'
-import { getOfflineTodo } from '@/api/training/training'
+import {
+  getOfflineTodo,
+  queryJoin,
+  setJoin,
+  queryStatistics,
+  delTrain
+} from '@/api/training/training'
+import Pagination from '@/components/common-pagination'
+import DownCodeDialog from './components/downCodeDialog'
 import {
   studentList,
   getOnlineCourse,
@@ -702,7 +889,8 @@ import {
   grantCertificate,
   revokeCertificate,
   examList,
-  stopSchedule
+  stopSchedule,
+  querySignList
 } from '@/api/training/training'
 // 表格属性
 const TABLE_COLUMNS = [
@@ -735,6 +923,17 @@ const TABLE_COLUMNS = [
   },
   // 1：已通过；2：未通过；3：未开始）
   {
+    label: '学习心得提交率',
+    prop: 'jobPercent',
+    minWidth: 120,
+    slot: true
+  },
+  {
+    label: '上报材料',
+    prop: 'isSubmit',
+    slot: true
+  },
+  {
     label: '考试情况',
     prop: 'examStatus',
     slot: true
@@ -755,7 +954,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'stuId',
   handlerColumn: {
-    width: 100
+    width: 200
   },
   enableMultiSelect: true,
   enablePagination: true,
@@ -835,11 +1034,17 @@ const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-
+const signinRef = {
+  userName: '用户',
+  phonenum: '手机号',
+  orgName: '部门'
+}
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    Pagination,
+    DownCodeDialog
   },
   filters: {
     // 过滤不可见的列
@@ -848,6 +1053,25 @@ export default {
   },
   data() {
     return {
+      downcodeDlgVisible: false,
+      getSigninForm: {
+        pageNo: 1,
+        pageSize: 10,
+        name: ''
+      },
+      getRegisterForm: {
+        pageNo: 1,
+        pageSize: 10
+      },
+      signinTotal: 0,
+      registerTotal: 0,
+      signinName: '',
+      signinData: [],
+      signinLevel: Object.keys(signinRef).map((key) => ({ label: signinRef[key], prop: key })),
+      codeDialogVisibe: false,
+      approveDlgVisible: false,
+      approveText: '',
+      registerData: [], // 报名情况数据
       // 是否是已发布页过来的
       issueStatus: this.$route.query.status,
       showExamList: [],
@@ -898,7 +1122,17 @@ export default {
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
-      tablePageConfig: TABLE_PAGE_CONFIG
+      tablePageConfig: TABLE_PAGE_CONFIG,
+      plannedPopulation: 0,
+      participated: 0,
+      remainingPlaces: 0
+    }
+  },
+  watch: {
+    'getSigninForm.name': {
+      handler() {
+        this.getSigninData()
+      }
     }
   },
 
@@ -912,19 +1146,153 @@ export default {
     // this.isgetTrainEvaluate()
     // this.isExamList()
   },
-  activated() {
+  async activated() {
     // this.loadData()
     // this.getInfo()
+
+    await this.isGetTrainDetail()
+    // 获取报名情况数据
+    this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId
+    this.getRegisterData()
+    this.getSigninData()
+    this.isExamList()
+    this.isgetTrainEvaluate()
+
     this.refreshTableData()
     this.isStudentList({ trainId: 1 })
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
-    this.isGetTrainDetail()
-    this.isgetTrainEvaluate()
-    this.isExamList()
   },
   methods: {
+    getSigninColumn(value, d) {
+      if (d) {
+        switch (value) {
+          case '1':
+            return '缺勤'
+          case '2':
+            return '已签到'
+          case '3':
+            return '未开始'
+          default:
+            return '--'
+        }
+      }
+      return value || '--'
+    },
+    getSigninData() {
+      querySignList(this.getSigninForm).then((res) => {
+        const { data = [], totalNum = 0 } = res
+        this.signinData = data
+        this.signinTotal = totalNum
+        const value = data[0]
+        if (!value) return
+        const level = []
+        Object.keys(value).forEach((key) => {
+          if (key === 'userId') return
+          if (key === 'signInSituation') {
+            value[key].forEach((obj) => {
+              const sKey = Object.keys(obj)[0]
+              level.push({
+                prop: sKey,
+                label: sKey,
+                dynamic: true
+              })
+            })
+          } else {
+            level.push({
+              prop: key,
+              label: signinRef[key]
+            })
+          }
+        })
+        this.signinLevel = level
+        this.signinData = data.map((item) => {
+          item.signInSituation.forEach((sign) => {
+            item = Object.assign(item, sign)
+          })
+          delete item.signInSituation
+          return item
+        })
+      })
+    },
+    queryJoin() {
+      queryJoin(this.getRegisterForm).then((res) => {
+        const { data, totalNum } = res
+        this.registerData = data
+        this.registerTotal = totalNum
+      })
+    },
+    getRegisterData() {
+      this.queryJoin()
+      queryStatistics({ trainId: this.getRegisterForm.trainId }).then((res) => {
+        Object.keys(res).forEach((key) => {
+          this[key] = res[key] || 0
+        })
+      })
+    },
+    registerPagination({ page, limit }) {
+      this.getRegisterForm.pageNo = page
+      this.getRegisterForm.pageSize = limit
+      this.queryJoin()
+    },
+    signinPagination({ page, limit }) {
+      this.getSigninForm.pageNo = page
+      this.getSigninForm.pageSize = limit
+      this.getSigninData()
+    },
+    toStuffDetail(row) {
+      var data = { ...row }
+      const { trainName, trainId } = this.showTrainDetail
+      data.trainName = trainName
+      data.trainId = trainId
+      const query = {}
+      Object.keys(data).forEach((key) => {
+        query[key] = data[key]
+      })
+      this.$router.push({
+        path: '/learnArrange/stuff/index',
+        query
+      })
+    },
+
+    setRegister(row, type) {
+      if (arguments.length === 2 && type === 'reject') {
+        this.cacherow = row
+        this.approveDlgVisible = true
+        return
+      } else {
+        const params = {}
+        if (arguments.length === 1) {
+          params.rejectDesc = this.approveText
+          params.type = row
+          params.signUpId = [this.cacherow.signUpId]
+        } else {
+          params.signUpId = [row.signUpId]
+          params.type = type
+        }
+        params.trainId = this.showTrainDetail.trainId
+
+        setJoin(params)
+          .then(() => {
+            this.$message.success('操作成功')
+            this.getRegisterData()
+          })
+          .catch(() => {
+            this.$message.error('操作失败')
+          })
+          .finally(() => {
+            this.approveText = ''
+            this.approveDlgVisible = false
+          })
+      }
+    },
+    onApproveDlgClose() {
+      this.approveText = ''
+    },
+    rejectRegister() {
+      this.approveDlgVisible = true
+    },
     // 去用户详情
     toUserDetail(row) {
       this.$router.push({ path: '/system/userDetail', query: { userId: row.stuId } })
@@ -932,11 +1300,11 @@ export default {
     // 去开办下一期
     handleConfig() {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
-      this.$router.push({ path: '/training/edit', query: { id: this.$route.query.id } })
+      this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.trainId } })
     },
     // 结办
     isstopSchedule() {
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       stopSchedule(id).then(() => {
         this.issueStatus = false
         this.$message({
@@ -947,7 +1315,8 @@ export default {
     },
     // 去列表页
     toTrainingArrange() {
-      this.$router.push({ path: '/training/trainingArrange' })
+      this.$router.back()
+      // this.$router.push({ path: '/training/trainingArrange' })
     },
     // 跳转考试详情
     toexamDetail(id) {
@@ -956,9 +1325,7 @@ export default {
 
     // 查询培训考试安排
     isExamList() {
-      let id = this.$route.query.id
-      // let id = '1332236640693030914'
-      examList({ trainId: id }).then((res) => {
+      examList({ trainId: this.showTrainDetail.trainId }).then((res) => {
         this.showExamList = res
       })
     },
@@ -1004,7 +1371,7 @@ export default {
     isGetOfflineTodo() {
       // console.log('id', this.$route.query.id)
       // let id = '1332138220456259585'
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       getOfflineTodo({ trainId: id }).then((res) => {
         this.isOfflineTodo = res
         let index = 1
@@ -1020,7 +1387,7 @@ export default {
     isGetOnlineCourse() {
       // console.log('id', this.$route.query.id)
       // let id = '1331882612830322689'
-      let id = this.$route.query.id
+      let id = this.showTrainDetail.trainId
       getOnlineCourse({ trainId: id }).then((res) => {
         // console.log('------------+',res)
         this.showOnlineCourse = res
@@ -1029,9 +1396,8 @@ export default {
     // 查询培训详情
     isGetTrainDetail() {
       // console.log('id', this.$route.query.id)
-      let id = this.$route.query.id
       // let id = '1332136482139570178'
-      getTrainDetail({ trainId: id }).then((res) => {
+      return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction)
       })
@@ -1043,16 +1409,17 @@ export default {
       let page = {
         pageNo: '',
         pageSize: '',
-        status: ''
+        totalNum: ''
       }
       page.pageNo = this.page.currentPage
       page.pageSize = this.page.size
       let params = { ...page, ...courseName }
       params.status = this.status
       // params.trainId = 1
-      params.trainId = this.$route.query.id
+      params.trainId = this.showTrainDetail.trainId
       studentList(params).then((res) => {
         this.tableData = res.data
+        this.page.total = res.totalNum
         SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
         this.tableData.forEach((item) => {
           // console.log(item.id,item.deptName);
@@ -1066,7 +1433,7 @@ export default {
 
     isgetTrainEvaluate() {
       // console.log('id', this.$route.query.id)
-      let params = { trainId: this.$route.query.id++ }
+      let params = { trainId: this.showTrainDetail.trainId }
       getTrainEvaluate(params).then((res) => {
         this.showTrainEvaluate = res
       })
@@ -1076,6 +1443,7 @@ export default {
     handleChange() {},
 
     // 编辑&删除&移动
+    // eslint-disable-next-line no-unused-vars
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
@@ -1089,12 +1457,17 @@ export default {
           type: 'warning'
         })
           .then(() => {
-            delCourseInfo({ courseId: row.catalogId }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
+            delTrain({ ids: this.showTrainDetail.id })
+              .then(() => {
+                this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
+                this.$router.back()
               })
-            })
+              .catch(() => {
+                this.$message.warning('删除失败，请重试')
+              })
           })
           .catch(() => {
             this.$message({
@@ -1612,6 +1985,38 @@ export default {
     left: 10px;
     top: 14px;
     font-size: 20px;
+  }
+}
+
+.register-container {
+  padding: 0 30px;
+  padding-bottom: 15px;
+  margin-top: 15px;
+  .regiter-data {
+    color: #000;
+    span {
+      color: #333;
+    }
+  }
+  .register-table {
+    margin-top: 16px;
+  }
+}
+
+.signin-container {
+  padding: 0 30px;
+  padding-bottom: 30px;
+  margin: 15px 0;
+  .signin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .signin-input {
+      width: 270px;
+    }
+  }
+  .signin-table {
+    margin-top: 15px;
   }
 }
 </style>

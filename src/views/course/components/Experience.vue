@@ -1,41 +1,55 @@
 <template>
-  <div class="courseTask">
+  <div
+    v-if="tableData"
+    class="courseTask"
+  >
     <el-table
       :data="tableData"
       style="width: 100%"
     >
       <el-table-column
-        label="作业来源：消防知识学习 > 第一章"
+        :label="'课程: ' + rowData.courseName"
         prop="name"
         width="480px"
       >
         <template slot-scope="scope">
-          <span> {{ scope.row.name }} </span>
+          <div>
+            <span> {{ scope.row.fileName }} </span>
+          </div>
         </template>
       </el-table-column>
       <el-table-column
         label=""
-        prop="content"
+        prop="fileSize"
       >
+        <template slot-scope="scope">
+          <div>
+            <span> {{ scope.row.fileSize + 'k' }} </span>
+          </div>
+        </template>
       </el-table-column>
       <el-table-column
         label=""
-        prop="date"
+        prop="updateTime"
       >
       </el-table-column>
       <el-table-column align="right">
-        <template slot="header">
-          <el-button type="text">
+        <template #header>
+          <el-button
+            type="text"
+            @click="handleUpload()"
+          >
             打包下载
           </el-button>
         </template>
         <template slot-scope="scope">
-          <el-button
-            type="text"
-            @click="handleDownload(scope.$index, scope.row)"
-          >
-            下载
-          </el-button>
+          <!-- <el-button type="text">
+              下载  {{scope.row.filePath}}
+            </el-button> -->
+          <a
+            style="color:#01aafc; cursor:pointer;"
+            @click="downLoadInfo(scope.row)"
+          > 下载 </a>
         </template>
       </el-table-column>
     </el-table>
@@ -43,32 +57,72 @@
 </template>
 
 <script>
+import { courseFeelListByUserId } from '@/api/course/course'
+import { downLoadFile } from '@/util/util'
+import { getStore } from '@/util/store.js'
+// import axios from 'axios'
 export default {
   data() {
     return {
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '课程学习心得1',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: '课程学习心得2',
-          content: '12.5K'
-        },
-        {
-          date: '2016-05-02',
-          name: '课程学习心得3',
-          content: '12.5K'
-        }
-      ],
-      search: ''
+      tableData: [],
+      stuId: '',
+      rowData: ''
     }
   },
+  activated() {
+    this.rowData = JSON.parse(this.$route.query.row)
+    this.stuId = this.rowData.stuId
+    this.getInfo()
+  },
+  created() {
+    this.rowData = JSON.parse(this.$route.query.row)
+    this.stuId = this.rowData.stuId
+    this.getInfo()
+  },
   methods: {
-    handleDownload(index, row) {
-      console.log(index, row)
+    downLoadInfo(data) {
+      // 下载
+      downLoadFile(data)
+    },
+    async getInfo() {
+      let params = { courseId: this.$route.query.courseId, stuId: this.stuId }
+      let res = await courseFeelListByUserId(params)
+      this.tableData = res
+    },
+    // 打包下载
+    handleUpload() {
+      let params = {
+        filePath: '',
+        fileName: '',
+        zipComment: encodeURIComponent('打包下载文件.zip'),
+        responseType: 'blob',
+        emulateJSON: true
+      }
+      this.tableData.forEach((item) => {
+        params.filePath += item.filePath + ',' //.push(item.filePath)
+        params.fileName += item.fileName + ',' //.push(item.fileName)
+      })
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
     }
   }
 }

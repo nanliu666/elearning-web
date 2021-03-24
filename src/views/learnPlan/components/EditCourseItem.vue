@@ -25,6 +25,7 @@
           >设置前置条件</span>
         </el-tooltip>
       </div>
+
       <template slot="studyFrequency">
         <el-input-number
           v-model="course.studyFrequency"
@@ -33,17 +34,38 @@
         ></el-input-number>
       </template>
       <template slot="timeList">
-        <el-time-picker
+        <el-button
+          icon="el-icon-plus"
+          circle
+          style="display: block; margin-bottom: 12px;"
+          size="medium"
+          :disabled="course.timeList.length >= 5"
+          @click="addTimeList"
+        ></el-button>
+
+        <div
           v-for="(time, index) in course.timeList"
           :key="index"
-          v-model="time.list"
-          is-range
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
-          placeholder="选择时间范围"
-          value-format="HH:mm:ss"
-        />
+          class="timeList"
+        >
+          <el-time-picker
+            v-model="time.list"
+            is-range
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择时间范围"
+            value-format="HH:mm:ss"
+          />
+          <el-button
+            v-show="course.timeList.length > 1"
+            circle
+            icon="el-icon-minus"
+            style="margin-left: 5px;"
+            size="mini"
+            @click="delTimeList(index)"
+          ></el-button>
+        </div>
       </template>
     </common-form>
     <el-tabs value="first">
@@ -77,7 +99,7 @@
           添加
         </div>
       </el-tab-pane>
-      <el-tab-pane
+      <!-- <el-tab-pane
         label="关联练习"
         name="second"
       >
@@ -86,7 +108,7 @@
         label="关联作业"
         name="third"
       >
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
 
     <!-- 预览框 -->
@@ -176,8 +198,7 @@ export default {
           itemType: 'slot',
           label: '允许学习次数',
           offset: 4,
-          desc: '0：表示无限制',
-          required: true
+          desc: '0：表示无限制'
         },
         {
           prop: 'timeList',
@@ -189,7 +210,20 @@ export default {
       ]
     }
   },
+  created() {
+    console.log(this.course)
+    // this.course.timeList = [{ list: ['', ''] }]
+  },
   methods: {
+    delTimeList(index) {
+      if (this.course.timeList.length <= 1) return
+      this.course.timeList.splice(index, 1)
+    },
+    addTimeList() {
+      this.course.timeList.push({
+        list: ['', '']
+      })
+    },
     validateDateRange(rule, value, callback) {
       if (moment(value[0]).isBefore(this.planTimeRange[0])) {
         callback(new Error('课程开始时间需要大于等于计划开始时间'))
@@ -209,18 +243,14 @@ export default {
       this.$emit('course-replace', course)
     },
     handleViewTextPaper(course, exam) {
-      if (exam.testPaperType === 'manual') {
-        this.paperId = exam.testPaper
-        this.paperType = exam.testPaperType
-        // this.$router.push({
-        //   path: '/examManagement/examSchedule/preview',
-        //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }
-        // })
+      this.paperId = exam.testPaper
+      this.paperType = exam.testPaperType
+      // this.$router.push({
+      //   path: '/examManagement/examSchedule/preview',
+      //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }
+      // })
 
-        this.dialogVisible = true
-      } else {
-        this.$message.error('随机试卷不支持预览')
-      }
+      this.dialogVisible = true
     },
     handleExamCommand(course, index, command) {
       if (command === 'del') {
@@ -289,6 +319,12 @@ export default {
   }
   /deep/.el-card {
     border: none;
+  }
+
+  .timeList {
+    &:not(:last-child) {
+      margin-bottom: 6px;
+    }
   }
 }
 </style>

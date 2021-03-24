@@ -19,7 +19,7 @@
           <a
             target="_blank"
             download="题库导入模板.xsl"
-            :href="'https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls'"
+            :href="'https://oa-file-dev.bestgrand.com.cn/5e40b6f6de9541a682924c7ba980941e.xls'"
           >
             <el-button
               size="medium"

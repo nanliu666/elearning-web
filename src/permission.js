@@ -42,6 +42,11 @@ router.beforeEach((to, from, next) => {
   const meta = to.meta || {}
   const isMenu = meta.menu === undefined ? to.query.menu : meta.menu
   store.commit('SET_IS_MENU', isMenu === undefined)
+  if (to.query.tid) {
+    // 如果url带token，做token登录处理
+    isToken(to.query.tid, next)
+  }
+
   if (getToken()) {
     if (store.getters.isLock && to.path !== lockPage) {
       //如果系统激活锁屏，全部跳转到锁屏页
@@ -101,3 +106,11 @@ router.afterEach(() => {
   //根据当前的标签也获取label的值动态设置浏览器标题
   router.$avueRouter.setTitle(title)
 })
+function isToken(tid, next) {
+  // 如果url带token，做token登录处理
+  store.dispatch('tokeLogin', tid).then((res) => {
+    if (res.account) {
+      next({ path: '/' })
+    }
+  })
+}

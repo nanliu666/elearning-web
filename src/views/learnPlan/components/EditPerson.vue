@@ -4,7 +4,7 @@
     block
     class="basicContainer"
   >
-    <div style="text-align: right;">
+    <div style="text-align: right">
       <el-button
         type="primary"
         size="medium"
@@ -19,11 +19,11 @@
       class="commonTable"
       :columns="tableColumns"
       :config="tableConfig"
-      :data="userList"
+      :data="currentList"
     >
       <template #multiSelectMenu="{ selection }">
         <el-button
-          style="margin-bottom:0;"
+          style="margin-bottom: 0"
           type="text"
           @click="handleMultiDelete(selection)"
         >
@@ -31,7 +31,7 @@
         </el-button>
       </template>
 
-      <template #oparetion="{row}">
+      <template #oparetion="{ row }">
         <el-button
           size="medium"
           type="text"
@@ -40,7 +40,17 @@
           删除
         </el-button>
       </template>
-    </common-table><user-picker
+    </common-table>
+
+    <div class="page-container">
+      <pagination
+        :total="userList.length"
+        :page.sync="page.pageNo"
+        :limit.sync="page.pageSize"
+      ></pagination>
+    </div>
+
+    <user-picker
       select-type="Org,OuterUser"
       :value="userList"
       :visible.sync="userPicking"
@@ -51,6 +61,7 @@
 
 <script>
 import UserPicker from '@/components/user-picker/userPicker'
+import Pagination from '@/components/common-pagination'
 
 import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
@@ -67,7 +78,7 @@ const TABLE_COLUMNS = [
   },
   {
     label: '所在部门',
-    prop: 'orgName',
+    prop: 'department',
     minWidth: 100
   },
   {
@@ -97,7 +108,8 @@ const TABLE_PAGE_CONFIG = {}
 export default {
   name: 'EditPerson',
   components: {
-    UserPicker
+    UserPicker,
+    Pagination
   },
   props: {
     planId: {
@@ -115,9 +127,8 @@ export default {
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
+        pageSize: 10,
+        pageNo: 1
       },
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
@@ -126,12 +137,19 @@ export default {
       tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
+  computed: {
+    currentList() {
+      const { pageSize: size, pageNo: no } = this.page
+      return this.userList.slice(size * (no - 1), size * no)
+    }
+  },
   watch: {
     userList: {
       handler(list) {
         list.forEach((item) => {
           item.orgName = item.orgName || '-'
           item.phoneNum = item.phoneNum || item.phonenum || '-'
+          item.department = item.department || item.orgName || '-'
         })
       },
       deep: true
@@ -207,6 +225,7 @@ export default {
           this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
           this.$emit('update:user-list', this.userList)
           this.$message.success('删除成功')
+          this.$refs.table.clearSelection()
         })
         .catch(() => {})
     }

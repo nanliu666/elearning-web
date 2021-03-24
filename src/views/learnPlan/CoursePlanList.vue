@@ -110,6 +110,18 @@
             </div>
           </template>
           <template
+            slot="coursePlanName"
+            slot-scope="{ row }"
+          >
+            <el-button
+              type="text"
+              @click="jumpDetail(row)"
+            >
+              {{ row.coursePlanName }}
+            </el-button>
+          </template>
+
+          <template
             slot="multiSelectMenu"
             slot-scope="{ selection }"
           >
@@ -274,26 +286,29 @@ import {
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 180,
-    prop: 'coursePlanNo'
-  },
-  {
     label: '名称',
     prop: 'coursePlanName',
-    width: 300
+    slot: true,
+    fixed: true,
+    minWidth: 180
   },
   {
-    label: '分类',
-    prop: 'categoryName',
-    minWidth: 100
+    label: '编号',
+    prop: 'coursePlanNo',
+    slot: false,
+    minWidth: 180
   },
-  {
-    label: '包含课程',
-    formatter: (row) => _.map(row.courseList, 'courseName').join(','),
-    prop: 'courseList',
-    minWidth: 100
-  },
+  // {
+  //   label: '分类',
+  //   prop: 'categoryName',
+  //   minWidth: 100
+  // },
+  // {
+  //   label: '包含课程',
+  //   formatter: (row) => _.map(row.courseList, 'courseName').join(','),
+  //   prop: 'courseList',
+  //   minWidth: 100
+  // },
   {
     label: '状态',
     formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),
@@ -304,7 +319,7 @@ const TABLE_COLUMNS = [
     label: '课程时间',
     prop: 'time',
     formatter: (row) => row.startTime + '~' + row.endTime,
-    minWidth: 100
+    minWidth: 300
   }
 ]
 const TABLE_CONFIG = {
@@ -625,13 +640,21 @@ export default {
       this.loadDraftData()
     },
     // 跳去详情
-    jumpDetail({ id }) {
+    // jumpDetail({ id }) {
+    //   this.$router.push({
+    //     path: '/repository/knowledgeDetail',
+    //     query: { id }
+    //   })
+    // },
+    jumpDetail(row) {
+      var data = { ...row }
       this.$router.push({
-        path: '/repository/knowledgeDetail',
-        query: { id }
+        path: '/learnArrange/plan/detail',
+        query: {
+          data: decodeURIComponent(JSON.stringify(data))
+        }
       })
     },
-
     async loadDraftData() {
       const draft = this.draft
       if (draft.tableLoading) return
@@ -642,7 +665,13 @@ export default {
           pageNo: draft.page.currentPage,
           pageSize: draft.page.size
         })
-        draft.tableData = data
+        draft.tableData = data.map((item) => {
+          if (!item.courseList || !item.courseList.length) {
+            item.courseList = [{ courseName: '-' }]
+          }
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          return item
+        })
         draft.page.total = totalNum
       } catch (error) {
         // window.console.log(error)
@@ -662,6 +691,13 @@ export default {
           pageSize: published.page.size
         })
         published.tableData = data
+        published.tableData = data.map((item) => {
+          if (!item.courseList || !item.courseList.length) {
+            item.courseList = [{ courseName: '-' }]
+          }
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          return item
+        })
         published.page.total = totalNum
       } catch (error) {
         // window.console.log(error)
@@ -828,6 +864,7 @@ export default {
   width: 40px;
 }
 .operations-right {
+  padding-right: 30px;
   i {
     margin-left: 12px;
     font-size: 18px;

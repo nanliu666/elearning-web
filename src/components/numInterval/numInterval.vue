@@ -104,7 +104,7 @@ export default {
     validateMin(rule, value, callback) {
       const one = Number(value)
       const max = Number(this.value.max)
-      if (!max || one < max) {
+      if (!max || one <= max) {
         return callback()
       }
       return callback(new Error('不得大于最大值'))
@@ -112,7 +112,7 @@ export default {
     validateMax(rule, value, callback) {
       const one = Number(value)
       const min = Number(this.value.min)
-      if (!min || one > min) {
+      if (!min || one >= min) {
         return callback()
       }
       return callback(new Error('不得小于最小值'))

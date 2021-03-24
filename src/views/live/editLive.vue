@@ -132,7 +132,7 @@
                 <el-tooltip placement="top">
                   <div
                     slot="content"
-                    style="width:300px;"
+                    style="width: 300px"
                   >
                     <p>注意：需配合使用3.6以上版本客户端使用</p>
                     <p>连麦计费规则：</p>
@@ -149,7 +149,7 @@
                   </div>
                   <el-button
                     type="text"
-                    style="color:#606266;"
+                    style="color: #606266"
                   >
                     <i class="el-icon-question"></i>
                   </el-button>
@@ -174,9 +174,59 @@
                 required
                 class="live_scene"
               >
-                <el-row :gutter="20">
+                <el-tooltip
+                  v-if="isEdit"
+                  class="item"
+                  effect="dark"
+                  content="直播场景不允许修改"
+                  placement="left"
+                >
+                  <el-row :gutter="20">
+                    <el-col :span="5">
+                      <div
+                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                        @click="toggle_scene = 'ppt'"
+                      >
+                        <img
+                          v-show="toggle_scene == 'ppt'"
+                          src="../../assets/images/live/live_act_screen.png"
+                        />
+                        <img
+                          v-show="toggle_scene == 'topclass'"
+                          src="../../assets/images/live/live_screen.png"
+                        />
+                        <p>云课堂</p>
+                        <p>(三分屏)</p>
+                      </div>
+                    </el-col>
+                    <el-col :span="5">
+                      <div
+                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                        @click="toggle_scene = 'topclass'"
+                      >
+                        <img
+                          v-show="toggle_scene == 'topclass'"
+                          src="../../assets/images/live/live_act_vedio.png"
+                        />
+                        <img
+                          v-show="toggle_scene == 'ppt'"
+                          src="../../assets/images/live/live_vedio.png"
+                        />
+                        <p>直播助手</p>
+                        <p>(纯视频)</p>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-tooltip>
+                <el-row
+                  v-else
+                  :gutter="20"
+                >
                   <el-col :span="5">
-                    <div @click="toggle_scene = 'ppt'">
+                    <div
+                      :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                      @click="toggle_scene = 'ppt'"
+                    >
                       <img
                         v-show="toggle_scene == 'ppt'"
                         src="../../assets/images/live/live_act_screen.png"
@@ -190,7 +240,10 @@
                     </div>
                   </el-col>
                   <el-col :span="5">
-                    <div @click="toggle_scene = 'topclass'">
+                    <div
+                      :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                      @click="toggle_scene = 'topclass'"
+                    >
                       <img
                         v-show="toggle_scene == 'topclass'"
                         src="../../assets/images/live/live_act_vedio.png"
@@ -274,17 +327,17 @@
           <!--</el-form> -->
 
           <h3>
-            <span style="margin-right: 10px;">直播预告</span>
+            <span style="margin-right: 10px">直播预告</span>
             <el-tooltip placement="top">
               <div
                 slot="content"
-                style="width:300px;"
+                style="width: 300px"
               >
                 <p>实际开播时间由讲师控制，该预告作用为前台展示</p>
               </div>
               <el-button
                 type="text"
-                style="color:#606266;"
+                style="color: #606266"
               >
                 <i class="el-icon-question"></i>
               </el-button>
@@ -330,7 +383,7 @@
                   end-placeholder="结束日期"
                   value-format="yyyy-MM-dd hh:mm:ss"
                   :clearable="false"
-                  style="width: 22vw;"
+                  style="width: 22vw"
                 ></el-date-picker>
               </el-form-item>
             </el-col>
@@ -423,7 +476,7 @@
               >
                 <el-button
                   type="text"
-                  style="float:right;"
+                  style="float: right"
                   @click="add_table_liveTime(basicForm.table_liveTime)"
                 >
                   添加直播
@@ -507,8 +560,16 @@
         class="tabs2"
       >
         <div class="table_header">
-          <h3 style="float:left;">
+          <h3 style="float: left">
             讲师设置
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="最多只能添加两个嘉宾、两个助教"
+              placement="top"
+            >
+              <i class="el-icon-question"></i>
+            </el-tooltip>
           </h3>
           <el-button
             :disabled="teacherSetButton.guestButton"
@@ -528,7 +589,7 @@
         <el-table
           :data="table_teacherSet"
           stripe
-          style="width: 100%;margin-bottom:50px;"
+          style="width: 100%; margin-bottom: 50px"
         >
           <el-table-column label="名称">
             <template slot-scope="scope">
@@ -590,7 +651,7 @@
           </el-table-column>
         </el-table>
         <div class="table_header">
-          <h3 style="float:left;">
+          <h3 style="float: left">
             关联课程
           </h3>
           <el-button
@@ -658,7 +719,7 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="关联方式">
-                <div style="clear: both;">
+                <div style="clear: both">
                   <el-radio
                     v-model="radio_connectionMode"
                     label="all"
@@ -681,19 +742,19 @@
               </el-form-item>
               <p
                 v-show="radio_connectionMode != 'direct'"
-                style="color:rgba(0,11,21,0.85)"
+                style="color: rgba(0, 11, 21, 0.85)"
               >
                 学员总数：
               </p>
               <p
                 v-show="radio_connectionMode == 'all'"
-                style="color:rgba(0,11,21,0.25);"
+                style="color: rgba(0, 11, 21, 0.25)"
               >
                 学员登录平台即可观看，链接分享给任意人员可以进行观看。
               </p>
               <p
                 v-show="radio_connectionMode == 'code'"
-                style="color:rgba(0,11,21,0.25);"
+                style="color: rgba(0, 11, 21, 0.25)"
               >
                 学员登录平即可观看，链接分享给其他人员需要使用验证码。
               </p>
@@ -703,7 +764,7 @@
             v-show="radio_connectionMode == 'code'"
             class="block_label"
           >
-            <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item
                 label="欢迎标题"
                 prop="title"
@@ -713,7 +774,7 @@
                   maxlength="32"
                 ></el-input>
               </el-form-item>
-            </el-col>
+            </el-col> -->
             <el-col :span="12">
               <el-form-item
                 label="验证码"
@@ -725,7 +786,7 @@
                 ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item
                 label="提示文案"
                 prop="tips"
@@ -735,7 +796,7 @@
                   maxlength="32"
                 ></el-input>
               </el-form-item>
-            </el-col>
+            </el-col> -->
 
             <el-col :span="24">
               <el-form-item
@@ -774,6 +835,7 @@
             <el-col :span="24">
               <el-form-item :label="'关联学员：' + totalNum + '人（仅关联学员可以观看）'">
                 <el-button
+                  v-if="multipleSelection.length"
                   type="text"
                   @click="delete_batchTableStudent()"
                 >
@@ -782,7 +844,7 @@
 
                 <el-button
                   type="text"
-                  style="float:right;"
+                  style="float: right"
                   @click="showDialog_add_student()"
                 >
                   添加学员
@@ -792,7 +854,9 @@
                   :data="table_relatedStudents"
                   stripe
                   style="width: 100%"
+                  @selection-change="handleSelectionChange"
                 >
+                  >
                   <el-table-column
                     type="selection"
                     width="55"
@@ -842,10 +906,7 @@
               </el-form-item>
             </el-col>
 
-            <el-col
-              :span="6"
-              :offset="14"
-            >
+            <el-col class="paginationDiv">
               <!-- :current-page.sync="StudentsPage.totalNo" -->
               <el-pagination
                 layout="total,prev,pager,next,sizes,jumper"
@@ -976,21 +1037,27 @@
                   v-model="otherUserVal"
                   placeholder="请输入用户名称或手机搜索"
                 ></el-input>
-                <el-tree
-                  :data="otherUser"
-                  show-checkbox
-                  node-key="id"
-                  default-expand-all
-                  :expand-on-click-node="false"
-                  @check="select_organizationUser"
+                <div
+                  v-loading="treeLoading"
+                  class="other-user"
                 >
-                  <span
-                    slot-scope="{ node, data }"
-                    class="custom-tree-node"
+                  <el-tree
+                    ref="otherUserTree"
+                    :data="otherUser"
+                    show-checkbox
+                    node-key="id"
+                    default-expand-all
+                    :expand-on-click-node="false"
+                    @check="select_organizationUser"
                   >
-                    <span>{{ data.name }}({{ data.phoneNum }})</span>
-                  </span>
-                </el-tree>
+                    <span
+                      slot-scope="{ node, data }"
+                      class="custom-tree-node"
+                    >
+                      <span>{{ data.name }}({{ data.phoneNum }})</span>
+                    </span>
+                  </el-tree>
+                </div>
               </el-tab-pane>
             </el-tabs>
           </el-col>
@@ -1064,6 +1131,7 @@ export default {
   },
   data() {
     return {
+      multipleSelection: [],
       oldOrgUserData: [],
       totalNum: 0,
       otherUserVal: '',
@@ -1112,7 +1180,10 @@ export default {
         select_mode_value: [
           { required: true, message: '请选择直播方式', trigger: ['blur', 'change'] }
         ],
-        introduction: [{ required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] }],
+        introduction: [
+          { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
+          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: 'blur' }
+        ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
         ],
@@ -1270,7 +1341,13 @@ export default {
       StudentsPage: {
         pageSize: 10,
         currentPage: 1
-      }
+      },
+      treeOtherUser: {
+        pageNo: 1,
+        pageSize: 99999
+      },
+      treeLoading: false,
+      isEdit: false
     }
   },
   watch: {
@@ -1329,6 +1406,7 @@ export default {
     if (this.$route.query.id) {
       this.setLiveDetails(this.$route.query.id)
       this.getStudentInfoList()
+      this.isEdit = true
     }
     //   获取直播分类
     getcategoryTree({
@@ -1343,8 +1421,8 @@ export default {
     // 获取其他用户
     getOtherUser({
       categoryId: '',
-      pageNo: 1,
-      pageSize: 99999
+      pageNo: this.treeOtherUser.pageNo,
+      pageSize: this.treeOtherUser.pageSize
     }).then((res) => {
       this.otherUser = res.data
 
@@ -1425,7 +1503,6 @@ export default {
           break
       }
       let formName = type == 1 ? 'basicForm' : type == 2 ? '' : 'formLiveTypeForm'
-
       if (!formName) {
         if (
           this.table_teacherSet.filter((x) => x.nameList_value).length ===
@@ -1449,6 +1526,13 @@ export default {
             this.headIndex += 1
           }
         } else {
+          if (errmsg == this.basicFormRules.introduction[1].message) {
+            this.$message({
+              message: '直播介绍最多不能超过5000字',
+              type: 'error'
+            })
+          }
+          console.log(errmsg)
           return false
         }
       })
@@ -1505,7 +1589,7 @@ export default {
     },
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|png)$/
-      const isLt10M = file.size / 1024 / 1024 < 5
+      const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 10MB!')
@@ -1904,7 +1988,8 @@ export default {
     },
     handleClick() {},
 
-    delete_dialog_selectStudent(arr, index) {
+    delete_dialog_selectStudent(arr, index, id) {
+      this.$refs.otherUserTree.setChecked(id, false)
       arr.splice(index, 1)
     },
     delete_table_relatedStudents(arr, index) {
@@ -2017,6 +2102,7 @@ export default {
     submit_live_data() {
       let otherData = []
       let slef = this
+
       this.table_teacherSet.forEach(function(item) {
         if (item.type === 2 || item.type === 3) {
           let teacher = {}
@@ -2025,13 +2111,14 @@ export default {
               teacher.nickName = currentValue.name
             }
           })
-          ;(teacher.userActor = item.identity),
-            (teacher.roleName =
-              item.role === '嘉宾' ? 'Guest' : item.role === '助教' ? 'Assistant' : ''),
+          // (teacher.userActor = item.identity),
+          ;(teacher.roleName =
+            item.identity === '嘉宾' ? 'Guest' : item.identity === '助教' ? 'Assistant' : ''),
             (teacher.userId = item.nameList_value)
           otherData.push(teacher)
         }
       })
+
       var data = {
         batchDeclare: this.basicForm.select_mode_value, // 直播方式 single：单次；plural：多次；cycle：循环
         categoryId: this.basicForm.liveClassification_value, // 所属分类
@@ -2260,7 +2347,32 @@ export default {
             break
         }
       })
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     }
+    // 外部人员滚动加载
+    // async treeLoad() {
+    //   this.treeLoading = true
+    //   this.treeOtherUser.pageNo++
+    //   await getOtherUser({
+    //     categoryId: '',
+    //     pageNo: this.treeOtherUser.pageNo,
+    //     pageSize: this.treeOtherUser.pageSize
+    //   })
+    //     .then((res) => {
+    //       this.otherUser = [...this.otherUser, ...res.data]
+    //       this.otherUser.forEach((item) => {
+    //         item.phoneNum = item.phonenum
+    //         item.userCode = item.workNo
+    //         item.id = item.userId
+    //         item.type = 'user'
+    //       })
+    //     })
+    //     .finally(() => {
+    //       this.treeLoading = false
+    //     })
+    // }
   }
 }
 </script>
@@ -2416,5 +2528,8 @@ export default {
     height: auto;
     background: transparent;
   }
+}
+.paginationDiv {
+  text-align: right;
 }
 </style>
