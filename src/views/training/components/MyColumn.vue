@@ -343,7 +343,7 @@ export default {
               }
             })
           }
-
+          this.compileNewly = ''
           this.isEdit = false
           this.dataAddCatalog.input = ''
           this.$message({
@@ -445,6 +445,7 @@ export default {
         this.expandedKeysData = []
         this.expandedKeysData.push(data.id)
         this.inputAddMark = true
+        this.compileNewly = 0
         this.addSonInput(data)
       }
       //移动

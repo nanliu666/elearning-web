@@ -449,6 +449,7 @@ export default {
       //   新增
       if ($event === 'add') {
         this.addSonInputData = data
+        this.compileNewly = 0
         // 展开
         this.expandedKeysData = []
         this.expandedKeysData.push(data.id)
