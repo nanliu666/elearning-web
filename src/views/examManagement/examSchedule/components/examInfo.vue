@@ -78,7 +78,7 @@
           :disabled="false"
           :first-option="reviewerDefault"
           :searchable="true"
-          :load="loadCoordinator"
+          :load="loadReviewer"
           :option-props="{
             label: 'name',
             value: 'userId',
@@ -578,6 +578,17 @@ const EventColumns = [
       { label: '系统即时发布', value: 1 },
       { label: '定时自动发布', value: 2 }
     ]
+  },
+  {
+    itemType: 'datePicker',
+    isVisible: false,
+    span: 11,
+    offset: 2,
+    type: 'datetime',
+    required: true,
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
+    prop: 'fixedTime',
+    label: '定时发布日期时间'
   }
 ]
 const passTypeConfig = {
@@ -623,16 +634,6 @@ export default {
       testPaperDefault: [], // 考卷默认信息
       testPaperExpiredTime: '',
       radioList,
-      fixedTimeConfig: {
-        itemType: 'datePicker',
-        span: 11,
-        offset: 2,
-        type: 'datetime',
-        required: true,
-        valueFormat: 'yyyy-MM-dd HH:mm:ss',
-        prop: 'fixedTime',
-        label: '定时发布日期时间'
-      },
       columns: EventColumns,
       modelDisabled: false,
       model: {
@@ -704,24 +705,11 @@ export default {
     },
     'model.publishType': {
       handler(value) {
-        const fixedTimeIndex = _.findIndex(this.columns, (column) => {
-          return column.prop === 'fixedTime'
-        })
-        const publishRulesIndex = _.findIndex(this.columns, (column) => {
-          return column.prop === 'publishType'
-        })
         // 1隐藏， 2显示
-        if (value === 1) {
-          if (fixedTimeIndex !== -1) {
-            this.columns.splice(fixedTimeIndex, 1)
-          }
-        } else {
-          if (fixedTimeIndex === -1) {
-            this.columns.splice(publishRulesIndex + 1, 0, this.fixedTimeConfig)
-          }
-        }
+        _.set(_.find(this.columns, { prop: 'fixedTime' }), 'isVisible', value === 2)
       },
-      deep: true
+      deep: true,
+      immediate: true
     },
     'model.autoEvaluate': {
       handler(value) {
@@ -812,9 +800,9 @@ export default {
       _.each(this.columns, (item) => {
         _.set(item, 'disabled', boolean)
       })
-      this.fixedTimeConfig = boolean
+      this.fixedTimeConfig.disable = boolean
     },
-    loadCoordinator(params) {
+    loadReviewer(params) {
       return getAllUserList(params)
     },
     loadTestPaper(params) {
