@@ -276,7 +276,8 @@
 </template>
 
 <script>
-import { isMobile, validatePW, isEmailReg } from '@/util/validate'
+import { isMobile, validatePW } from '@/util/validate'
+// import { isMobile, validatePW, isEmailReg } from '@/util/validate'
 import { getCode, checkPhoneCode, checkPassword } from '@/api/personalInfo.js'
 import md5 from 'js-md5'
 import pageHeader from '@/components/page-header/pageHeader'
@@ -300,9 +301,11 @@ export default {
     const validateEmail = (rule, value, callback) => {
       if (!_this.identity.form.email) {
         callback(new Error('请输入邮箱'))
-      } else if (_this.identity.form.email && !isEmailReg(value)) {
-        callback(new Error('邮箱格式不正确'))
-      } else {
+      }
+      //  else if (_this.identity.form.email && !isEmailReg(value)) {
+      //   callback(new Error('邮箱格式不正确'))
+      // }
+      else {
         callback()
       }
     }
@@ -370,7 +373,10 @@ export default {
             }
           ],
           captchaCode: [{ required: true, message: '请输入图片验证码', trigger: 'blur' }],
-          email: [{ required: true, validator: validateEmail, trigger: 'blur' }]
+          email: [
+            { required: true, validator: validateEmail, trigger: 'blur' },
+            { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
+          ]
         }
       },
 

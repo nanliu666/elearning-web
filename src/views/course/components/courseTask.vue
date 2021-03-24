@@ -39,7 +39,10 @@
         </el-table-column>
         <el-table-column align="right">
           <template slot="header">
-            <el-button type="text">
+            <el-button
+              type="text"
+              @click="handleUpload(items)"
+            >
               打包下载
             </el-button>
           </template>
@@ -80,6 +83,7 @@
 <script>
 import { downLoadFile } from '@/util/util'
 import { listCourseJob, saveCourseLinkedStudentOrTeacher } from '@/api/course/course'
+import { getStore } from '@/util/store.js'
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
@@ -102,6 +106,46 @@ export default {
     this.getInfo()
   },
   methods: {
+    // 打包下载
+    handleUpload(items) {
+      let params = {
+        filePath: '',
+        fileName: '',
+        zipComment: encodeURIComponent('打包下载文件.zip'),
+        responseType: 'blob',
+        emulateJSON: true
+      }
+
+      items.fileInfoList.forEach((item) => {
+        if (item.fileName != '未提交') {
+          params.filePath += item.filePath + ',' //.push(item.filePath)
+          params.fileName += item.fileName + ',' //.push(item.fileName)
+        }
+      })
+      console.log(params)
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
+    },
+
     // 上传校验
     beforeUpload(file) {
       const isLt20M = file.size / 1024 / 1024 < 20
@@ -154,9 +198,6 @@ export default {
           this.tableData[index].fileInfoList.push(pushData)
         }
       })
-    },
-    handleUpload(index, row) {
-      console.log(index, row)
     }
   }
 }

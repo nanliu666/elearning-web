@@ -250,7 +250,8 @@ export default {
         })
       })
       data.participantsList.map((item) => {
-        item.department = item.orgName
+        item.department = item.orgName != '-' ? item.orgName : ''
+        item.phonenum = item.phoneNum
         delete item.orgName
         return item
       })
