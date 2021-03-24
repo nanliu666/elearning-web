@@ -594,6 +594,7 @@ export default {
   },
   data() {
     return {
+      searchParams: '',
       // 接口
       columnInterface: {
         listTeacherCategory: getCatalogs, //查询讲师分类列表
@@ -730,7 +731,7 @@ export default {
       }
       params.type = this.status
       params.categoryId = this.idSchedule
-      params = { ...params, ...this.page, ...param }
+      params = { ...params, ...this.page, ...param, ...this.searchParams }
       getScheduleList(params).then((res) => {
         // console.log(res);
         this.tableData = res.data.map((item) => {
@@ -997,7 +998,8 @@ export default {
         if (peopleMin >= peopleMax) return
       }
       this.page.pageNo = 1
-      this.isgetScheduleList(searchParams)
+      this.searchParams = searchParams
+      this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
       this.$confirm('此操作将删除, 是否继续?', '提示', {

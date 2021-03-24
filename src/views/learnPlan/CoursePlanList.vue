@@ -864,6 +864,7 @@ export default {
   width: 40px;
 }
 .operations-right {
+  padding-right: 30px;
   i {
     margin-left: 12px;
     font-size: 18px;
