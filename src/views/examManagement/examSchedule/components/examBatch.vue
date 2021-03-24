@@ -60,7 +60,7 @@
             >
               <span>{{ studentItem.name }}</span>
               <span>手机：{{ studentItem.phoneNum || studentItem.phonenum }}</span>
-              <span>部门：{{ studentItem.orgName }}</span>
+              <span>部门：{{ studentItem.orgName ? studentItem.orgName : '无部门' }}</span>
               <el-button
                 v-if="hasDelete(item.examTime)"
                 size="medium"
