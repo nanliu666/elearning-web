@@ -199,6 +199,11 @@
           prop="coursePassStatus"
           label="课程通过状态"
         >
+          <template slot-scope="scope">
+            <div>
+              {{ scope.row.coursePassStatus === 'yes' ? '已通过' : '未通过' }}
+            </div>
+          </template>
         </el-table-column>
         <el-table-column
           align="center"

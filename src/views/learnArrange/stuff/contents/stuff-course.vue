@@ -16,84 +16,97 @@
       </el-option>
     </el-select>
     <div class="table-list">
-      <el-table
-        v-for="(table, i) in data.course"
-        :key="i"
-        :data="table.trainAttachmentVOS"
+      <div
+        v-if="data.course.length"
+        class="table-list"
       >
-        <el-table-column align="left">
-          <template slot="header">
-            {{ '课程: ' + table.name }}
-          </template>
-
-          <template slot-scope="scope">
-            <div>
-              {{ getFileName(scope.row) }}
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column align="center">
-          <template slot-scope="scope">
-            <div>
-              {{ !scope.row.fileSize ? '--' : scope.row.fileSize + 'K' }}
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column
-          align="center"
-          prop="updateTime"
+        <el-table
+          v-for="(table, i) in data.course"
+          :key="i"
+          :data="table.trainAttachmentVOS"
         >
-        </el-table-column>
+          <el-table-column
+            align="left"
+            :label="'课程: ' + table.name"
+            label-class-name="course-name"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+              <div>
+                {{ getFileName(scope.row) }}
+              </div>
+            </template>
+          </el-table-column>
 
-        <el-table-column align="right">
-          <template slot="header">
-            <el-button
-              type="text"
-              size="small"
-              :disabled="!table.trainAttachmentVOS.length"
-              @click="downloadZip"
-            >
-              打包下载
-            </el-button>
-          </template>
+          <el-table-column align="center">
+            <template slot-scope="scope">
+              <div>
+                {{ !scope.row.fileSize ? '--' : scope.row.fileSize + 'K' }}
+              </div>
+            </template>
+          </el-table-column>
 
-          <template slot-scope="scope">
-            <common-upload
-              v-if="scope.row.fileCategory"
-              need-handler
-              :disabled="loading[i + scope.$index + '']"
-              :on-upload-start="() => onUploadStart(i + scope.$index + '')"
-              :on-upload-complete="() => onUploadComplete(i + scope.$index + '')"
-            >
+          <el-table-column
+            align="center"
+            prop="updateTime"
+          >
+          </el-table-column>
+
+          <el-table-column align="right">
+            <template slot="header">
               <el-button
-                :loading="loading[i + scope.$index + '']"
                 type="text"
                 size="small"
+                :disabled="!table.trainAttachmentVOS.length"
+                @click="downloadZip"
               >
-                {{
-                  scope.row.fileName
-                    ? scope.row.fileCategory === 'user'
-                      ? '修改作业'
-                      : '修改评改'
-                    : scope.row.fileCategory === 'user'
-                      ? '上传作业'
-                      : '上传评改'
-                }}
+                打包下载
               </el-button>
-            </common-upload>
-            <el-button
-              type="text"
-              size="small"
-              :disabled="!scope.row.fileName"
-              @click="download(scope.row)"
-            >
-              下载
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+
+            <template slot-scope="scope">
+              <common-upload
+                v-if="scope.row.fileCategory"
+                need-handler
+                :disabled="loading[i + scope.$index + '']"
+                :on-upload-start="() => onUploadStart(i + scope.$index + '')"
+                :on-upload-complete="() => onUploadComplete(i + scope.$index + '')"
+                @on-error="onUploadError"
+              >
+                <el-button
+                  :loading="loading[i + scope.$index + '']"
+                  type="text"
+                  size="small"
+                >
+                  {{
+                    scope.row.fileName
+                      ? scope.row.fileCategory === 'user'
+                        ? '修改作业'
+                        : '修改评改'
+                      : scope.row.fileCategory === 'user'
+                        ? '上传作业'
+                        : '上传评改'
+                  }}
+                </el-button>
+              </common-upload>
+              <el-button
+                type="text"
+                size="small"
+                :disabled="!scope.row.fileName"
+                @click="download(scope.row)"
+              >
+                下载
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div
+        v-else
+        class="empty"
+      >
+        暂未提交
+      </div>
     </div>
   </div>
 </template>
@@ -129,9 +142,15 @@ export default {
   },
   methods: {
     onUploadStart(id) {
+      this.$message.warning('正在上传')
       this.loading[id] = true
     },
+    onUploadError() {
+      this.$message.error('上传失败，请重试')
+    },
     onUploadComplete(id) {
+      this.$message.success('上传成功')
+      this.parentVm.queryWork()
       this.loading[id] = false
     },
     getFileName(row) {
@@ -192,6 +211,15 @@ export default {
 }
 </script>
 
+<style lang="scss">
+.stuff-course {
+  .course-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
 <style lang="scss" scoped>
 .stuff-course {
   .table-list {
@@ -202,6 +230,10 @@ export default {
   }
   .edit-upload {
     display: block;
+  }
+  .empty {
+    text-align: center;
+    margin: 30px auto;
   }
 }
 </style>

@@ -439,6 +439,14 @@
                 {{ row.signPercent || '--' }}
               </div>
             </template>
+            <template
+              slot="deptName"
+              slot-scope="{ row }"
+            >
+              <div>
+                {{ row.deptName || '--' }}
+              </div>
+            </template>
             <!-- 选修学习进度 -->
             <template
               v-if="showTrainDetail.isArranged"
@@ -469,11 +477,11 @@
             <!-- 作业提交率 -->
             <template
               v-if="showTrainDetail.isArranged"
-              slot="jobPercent"
+              slot="job"
               slot-scope="{ row }"
             >
               <span style="text-align: center; display: inline-block; width: 100%;">{{
-                row.jobPercent || '--'
+                row.job || '--'
               }}</span>
             </template>
             <!-- 上报材料 -->
@@ -493,9 +501,9 @@
               slot="examStatus"
               slot-scope="{ row }"
             >
-              <span v-if="row.examStatus == 1">已通过</span>
-              <span v-if="row.examStatus == 2">未通过</span>
-              <span v-if="row.examStatus == 3">未开始</span>
+              <span v-if="row.examStatus == 2">已通过</span>
+              <span v-if="row.examStatus == 3">未通过</span>
+              <span v-if="row.examStatus == 1">未开始</span>
             </template>
             <!-- 评估情况 // （1：已评估；2：未评估；3：未开始）-->
             <template
@@ -943,7 +951,8 @@ const TABLE_COLUMNS = [
   {
     label: '所属部门',
     prop: 'deptName',
-    minWidth: 240
+    minWidth: 240,
+    slot: true
   },
   {
     label: '在线学习进度(必修)',
@@ -989,14 +998,13 @@ const TABLE_COLUMNS2 = [
   },
   {
     label: '手机号码',
-    prop: 'phone',
-    minWidth: 180
+    prop: 'phone'
   },
 
   {
     label: '所属部门',
     prop: 'deptName',
-    minWidth: 240
+    slot: true
   },
   {
     label: '评估情况',
@@ -1218,10 +1226,10 @@ export default {
     this.isGetOfflineTodo()
 
     if (!this.$route.query.status) this.status = 2
-
     if (!this.showTrainDetail.isArranged) {
       this.columnsVisible = _.map(TABLE_COLUMNS2, ({ prop }) => prop)
       this.tableColumns = TABLE_COLUMNS2
+      // this.tableConfig.showHandler = false
       this.$forceUpdate()
     }
   },
