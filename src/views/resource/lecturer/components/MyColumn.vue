@@ -318,7 +318,7 @@ export default {
         // 做一个判断一级否有重名的
         if (node.btnshow) {
           this.data.map((item) => {
-            if (item.label == params.name) {
+            if (item.label == params.name && item.id != params.id) {
               this.$message({
                 message: '该名称已存在，请重新编辑',
                 type: 'warning'
