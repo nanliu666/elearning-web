@@ -13,7 +13,7 @@
       </el-button>
     </page-header>
     <basic-container block>
-      <el-container style="height:100%">
+      <el-container style="height: 100%">
         <roleAside
           v-bind="options"
           :current-id.sync="options.currentId"
@@ -48,11 +48,11 @@
                     size="medium"
                     placeholder="角色名称"
                     clearable
-                    style="width:200px;margin-right:12px;"
+                    style="width: 200px; margin-right: 12px"
                   />
                   <div class="refresh-container">
                     <span
-                      class="icon  el-icon-refresh-right"
+                      class="icon el-icon-refresh-right"
                       @click="loadRoleData"
                     />
                     <span class="refresh-text">刷新</span>
@@ -80,14 +80,14 @@
                 >
                   {{ user(scope.row) }}
                 </el-button>
-                <el-button
+                <!-- <el-button
                   v-if="scope.row.isBasic == 1"
                   type="text"
                   size="medium"
                   disabled
                 >
                   全部员工
-                </el-button>
+                </el-button> -->
                 <el-dropdown
                   v-if="$p([EDIT_ROLE, DELETE_ROLE])"
                   trigger="hover"
@@ -544,5 +544,8 @@ export default {
 }
 .icon.el-icon-refresh-right {
   padding-left: 0;
+}
+/deep/ .el-table__fixed-right::before {
+  height: 0 !important;
 }
 </style>

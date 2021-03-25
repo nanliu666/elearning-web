@@ -39,7 +39,7 @@ import { mapGetters } from 'vuex'
 import { getUserList } from '@/api/examManage/schedule'
 const personOptionProps = {
   label: 'name',
-  value: 'name',
+  value: 'workNo',
   key: 'userId'
 }
 export default {
@@ -380,7 +380,6 @@ export default {
       }
     },
     selectContact(data) {
-      console.log(data)
       if (data.phonenum) {
         this.formData.contactPhone = data.phonenum
       } else {
@@ -391,10 +390,8 @@ export default {
       console.log(params)
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
-        return false
-      } else {
-        return getWorkList(_.assign(params, { orgId: 0 }))
       }
+      return getWorkList(_.assign(params, { orgId: 0 }))
     }
   }
 }
