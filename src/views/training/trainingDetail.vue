@@ -262,7 +262,7 @@
       >
         <div class="register-data">
           <span>计划人数：</span>{{ plannedPopulation }}人 <span>已参加：</span>{{ participated }}人
-          <span>剩余名额：</span>{{ remainingPlaces }}人
+          <span v-if="remainingPlaces">剩余名额：</span>{{ remainingPlaces }}人
         </div>
         <el-table
           class="register-table"
