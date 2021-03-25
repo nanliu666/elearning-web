@@ -152,7 +152,10 @@ export default {
         .then((res) => {
           this.pageNo += 1
           if (!_.isEmpty(firstOption)) {
-            this.optionList = _.uniqBy([...res.data, ...firstOption], this.optionProps.value)
+            this.optionList = _.uniqBy(
+              [...this.optionList, ...res.data, ...firstOption],
+              this.optionProps.value
+            )
           } else {
             this.optionList.push(...res.data)
           }
