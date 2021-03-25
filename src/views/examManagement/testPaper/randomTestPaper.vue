@@ -566,6 +566,7 @@ export default {
                 if (_.isEmpty(item.categoryIds)) {
                   item.categoryIds = ['0']
                 }
+                //TODO: 待优化，将题型相同的试题类型只需要拉一次接口
                 const data = await this.getTopicCategory(item.type)
                 item.column.props.treeParams.data = data
               })()
