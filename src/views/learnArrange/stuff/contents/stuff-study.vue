@@ -1,6 +1,9 @@
 <template>
   <div class="stuff-study">
-    <div class="table-list">
+    <div
+      v-if="data.study.length"
+      class="table-list"
+    >
       <el-table
         v-for="(table, i) in data.study"
         :key="i"
@@ -52,6 +55,13 @@
           </template>
         </el-table-column>
       </el-table>
+    </div>
+
+    <div
+      v-else
+      class="empty"
+    >
+      暂未提交
     </div>
   </div>
 </template>
@@ -108,6 +118,10 @@ export default {
 .stuff-study {
   .table-list {
     margin-top: 12px;
+  }
+  .empty {
+    text-align: center;
+    margin: 30px auto;
   }
 }
 </style>

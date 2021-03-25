@@ -250,6 +250,7 @@ const TestConfig = {
 }
 import moment from 'moment'
 import { mapGetters } from 'vuex'
+import { Validate } from '../validate'
 export default {
   name: 'EditArrangement',
   components: { OfflineCourseDrawer, OnlineCourseDrawer, EditExamineDrawer },
@@ -303,11 +304,40 @@ export default {
   },
   methods: {
     getData() {
-      // TODO需要在此处同时校验三个弹窗的时间与培训时间之前的关系，不满足需要存在提示
-      // this.$refs.offlineRef.$refs.form.validateField('todoDate')
-      // this.$refs.onlineRef.$refs.form.validateField('classTime')
-      // this.$refs.examineRef.$refs.basicSettingRef.$refs.form.validateField('classTime')
-      // 不管是不是草稿，直接返回数据
+      // TODO:需要在此处同时校验三个弹窗的时间与培训时间之前的关系，不满足需要存在提示
+      const scheduleList = _.get(this.schedule, 'data')
+      const courseList = _.get(this.course, 'data')
+      const examineList = _.get(this.examine, 'data')
+      if (_.some([scheduleList, courseList, examineList], (item) => _.size(item) > 0)) {
+        const validateSchedule = Validate.validateSchedule(
+          scheduleList,
+          '线下日程',
+          'todoDate',
+          this.trainTimeInVuex
+        )
+        const validateCourse = Validate.validateSchedule(
+          courseList,
+          '在线课程',
+          'classTime',
+          this.trainTimeInVuex
+        )
+        const validateExamine = Validate.validateSchedule(
+          examineList,
+          '考试安排',
+          'examTime',
+          this.trainTimeInVuex
+        )
+        return Promise.all([validateSchedule, validateCourse, validateExamine]).then((res) => {
+          const isEverySuccess = _.every(res, Boolean)
+          if (isEverySuccess) {
+            return this.returnData()
+          }
+        })
+      } else {
+        return this.returnData()
+      }
+    },
+    returnData() {
       return new Promise((resolve) => {
         const trainOfflineTodo = _.cloneDeep(this.schedule.data)
         _.map(trainOfflineTodo, (item) => {

@@ -102,7 +102,7 @@
             <div class="li-content">
               <div class="content">
                 <span>答题模式：</span>
-                <span>{{ examDetail.answerMode === 1 ? '整卷模式' : '逐卷模式' }}</span>
+                <span>{{ examDetail.answerMode === 1 ? '整卷模式' : '逐题考试' }}</span>
               </div>
               <div class="content">
                 <span>考试时长：</span>

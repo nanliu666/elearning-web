@@ -172,6 +172,7 @@ const nzhcn = require('nzh/cn')
 import {
   getExamineePaperDetail,
   getExamineePaperDetailist,
+  getExamineePaperDetailNext,
   postSubmitByOne
 } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
@@ -235,7 +236,7 @@ export default {
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {
-    this.initData()
+    this.loadData(true)
   },
   beforeRouteLeave(to, from, next) {
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -262,14 +263,27 @@ export default {
     },
     // 提交且评下一个
     submitAndNext() {
-      this.isNext = true
+      const checkList = this.getTargetRefs()
+      Promise.all(
+        _.map(checkList, (item) => {
+          return item.validate()
+        })
+      )
+        .then(() => {
+          const list = this.checkEmpty()
+          // 空的直接返回
+          if (_.isEmpty(list)) return
+          this.loadData(false)
+        })
+        .catch(() => {
+          this.$message.error('请为所有已评出结果的试题输入得分！')
+        })
     },
     // 提交
     submit() {
       this.checkRequired()
     },
-    // 具体提交函数
-    submitFun() {
+    checkEmpty() {
       const targetRefs = this.getTargetRefs()
       this.formDataList = _.map(targetRefs, 'model')
       const list = _.chain(this.formDataList)
@@ -280,19 +294,27 @@ export default {
         .value()
       if (_.isEmpty(list)) {
         this.$message.error('您未对该考卷进行评分，请评分后再提交！')
+        return []
       } else {
-        const params = {
-          id: this.examineeAchievementDO.id,
-          list
-        }
-        postSubmitByOne(params)
-          .then(() => {
-            this.$router.go(-1)
-          })
-          .catch(() => {
-            window.console.error(JSON.stringify(params))
-          })
+        return list
       }
+    },
+    // 具体提交函数
+    submitFun() {
+      const list = this.checkEmpty()
+      // 空的直接返回
+      if (_.isEmpty(list)) return
+      const params = {
+        id: this.examineeAchievementDO.id,
+        list
+      }
+      postSubmitByOne(params)
+        .then(() => {
+          this.$router.go(-1)
+        })
+        .catch(() => {
+          window.console.error(JSON.stringify(params))
+        })
     },
     // 检测提交前的逻辑
     checkRequired() {
@@ -342,8 +364,13 @@ export default {
 
       return totalScore
     },
-    async initData() {
-      const examData = await getExamineePaperDetail({ id: this.$route.query.id })
+    async loadData(isFrist) {
+      this.impersonalityList = []
+      this.subjectivityList = []
+      const loadFun = isFrist ? getExamineePaperDetail : getExamineePaperDetailNext
+      const bacisParams = { id: this.$route.query.id }
+      const params = isFrist ? bacisParams : _.assign(bacisParams, { examId: this.examData.examId })
+      const examData = await loadFun(params)
       this.handleExamData(examData)
       this.getPaperData()
     },

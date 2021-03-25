@@ -368,7 +368,7 @@ const EventColumns = [
     span: 11,
     options: [
       { label: '整卷模式', value: 1 },
-      { label: '逐卷模式', value: 2 }
+      { label: '逐题考试', value: 2 }
     ]
   },
   {
@@ -800,7 +800,6 @@ export default {
       _.each(this.columns, (item) => {
         _.set(item, 'disabled', boolean)
       })
-      this.fixedTimeConfig.disable = boolean
     },
     loadReviewer(params) {
       return getAllUserList(params)

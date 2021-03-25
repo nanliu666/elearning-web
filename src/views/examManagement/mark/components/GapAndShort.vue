@@ -132,7 +132,6 @@ export default {
       handler(value) {
         if (value !== '-1') {
           this.columns[1].rules[0].required = true
-          this.columns[2].rules[0].required = true
           switch (value) {
             case '0':
               this.formData.scoreUser = Number(this.data.scoreQuestion)

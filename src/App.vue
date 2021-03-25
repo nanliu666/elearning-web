@@ -19,6 +19,7 @@ export default {
 <style lang="scss">
 #app {
   width: 100%;
+  min-width: 1024px;
   height: 100%;
   overflow: hidden;
 }

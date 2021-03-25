@@ -22,11 +22,11 @@
         </template>
         <template #classroomId>
           <div class="classroom__container">
+            <!-- :allow-create="true" -->
             <lazy-select
               ref="classroomRef"
               v-model="model.classroomId"
               :searchable="true"
-              :allow-create="true"
               :first-option="classroomDefault"
               :load="loadClassroom"
               :option-props="{ label: 'roomName', value: 'id', key: 'id' }"
@@ -161,6 +161,7 @@ const CourseColumns = [
 // 教室时间的使用范围为06:00-23:00
 const START_TIME = moment().set({ hour: 6, minute: 0, second: 0 })
 const END_TIME = moment().set({ hour: 23, minute: 0, second: 0 })
+import { Validate } from '../validate'
 import { mapGetters } from 'vuex'
 export default {
   name: 'OfflineCourseDrawer',
@@ -310,30 +311,12 @@ export default {
     },
     // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
     validateTodoDate(rule, value, callback) {
-      if (_.isEmpty(this.trainTimeInVuex)) {
-        callback(new Error('请先选择培训时间'))
-      } else {
-        // 授课开始时间要在考试时间之间
-        const isLegalTime = moment(this.model.todoDate).isBetween(
-          moment(this.trainTimeInVuex[0]),
-          moment(this.trainTimeInVuex[1])
-        )
-        // 与培训开始日期或结束日期相同
-        const isSame =
-          moment(this.model.todoDate).isSame(this.trainTimeInVuex[0]) ||
-          moment(this.model.todoDate).isSame(this.trainTimeInVuex[1])
-        if (!isLegalTime && !isSame) {
-          callback(
-            new Error(
-              `${this.model.type === 1 ? '授课' : '活动'}日期要在培训日期（${
-                this.trainTimeInVuex[0]
-              }至${this.trainTimeInVuex[1]}）之间`
-            )
-          )
-        } else {
-          callback()
-        }
-      }
+      Validate.validateLegalTime(
+        callback,
+        this.trainTimeInVuex,
+        this.model.todoDate,
+        this.model.type === 1 ? '授课日期' : '活动日期'
+      )
     },
     // 选择了教室的数据处理。教室名称赋值
     selectClassroom(data) {
@@ -363,8 +346,11 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadClassroom(params) {
-      const param = _.assign(params, this.reserveParams)
-      return getBookList(param)
+      if (_.size(_.get(params, 'search')) > 32) {
+        this.$message.error('您输入的教室名称过长，无法搜索！')
+      } else {
+        return getBookList(_.assign(params, this.reserveParams))
+      }
     },
     loadCourse(params) {
       //courseType 2-线下日程

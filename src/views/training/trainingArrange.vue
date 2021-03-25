@@ -691,7 +691,10 @@ export default {
   activated() {},
   methods: {
     treeClick(val) {
-      this.idSchedule = val
+      (this.page.pageNo = 1),
+        (this.page.pageSize = 10),
+        (this.page.total = 0),
+        (this.idSchedule = val)
       this.isgetScheduleList()
     },
     // 去开办下一期

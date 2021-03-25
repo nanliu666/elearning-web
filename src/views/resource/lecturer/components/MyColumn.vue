@@ -31,13 +31,21 @@
             slot-scope="{ node, data }"
             class="custom-tree-node"
           >
-            <span
-              v-show="!isEdit || data.id !== isEditId"
-              :class="node.label == '未分类' ? 'paddingRight' : ''"
-              class="custom-tree-node-text"
-            >{{ node.label }}&nbsp;
-              <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
-            </span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="node.label"
+              placement="top"
+              :disabled="node.label.length <= 13"
+            >
+              <span
+                v-show="!isEdit || data.id !== isEditId"
+                :class="node.label == '未分类' ? 'paddingRight' : ''"
+                class="custom-tree-node-text"
+              >{{ node.label }}&nbsp;
+                <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
+              </span>
+            </el-tooltip>
 
             <span
               v-show="isEdit && data.id === isEditId"
@@ -318,7 +326,7 @@ export default {
         // 做一个判断一级否有重名的
         if (node.btnshow) {
           this.data.map((item) => {
-            if (item.label == params.name) {
+            if (item.label == params.name && item.id != params.id) {
               this.$message({
                 message: '该名称已存在，请重新编辑',
                 type: 'warning'
@@ -350,7 +358,7 @@ export default {
               }
             })
           }
-
+          this.compileNewly = ''
           this.isEdit = false
           this.dataAddCatalog.input = ''
           this.$message({
@@ -385,7 +393,7 @@ export default {
             .listTeacherCategory({ test: '123', parentId: params.id })
             .then((res) => {
               // 去找到相应的数据push进去
-
+              this.compileNewly = ''
               if (params.id) {
                 this.data.map((item) => {
                   if (item.id == params.id) {
@@ -458,12 +466,14 @@ export default {
       }
       //移动
       if ($event === 'move') {
+        this.compileNewly = ''
         this.dialogFormVisible = true
         this.form.name = data.label
         this.form.optionData = data
       }
       // 删除
       if ($event === 'del') {
+        this.compileNewly = ''
         if (data.count) {
           this.$message({
             message: `您选择的${data.btnshow ? '分组' : '分类'}下存在数据，请调整后再删除！`,
