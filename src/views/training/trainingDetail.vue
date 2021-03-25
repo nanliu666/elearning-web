@@ -430,13 +430,27 @@
                 {{ row.stuName }}
               </el-button>
             </template>
+
+            <template
+              slot="signPercent"
+              slot-scope="{ row }"
+            >
+              <div>
+                {{ row.signPercent || '--' }}
+              </div>
+            </template>
             <!-- 选修学习进度 -->
             <template
               v-if="showTrainDetail.isArranged"
               slot="electiveProgress"
               slot-scope="{ row }"
             >
-              <el-progress :percentage="row.electiveProgress || 0"></el-progress>
+              <el-progress
+                v-if="typeof row.electiveProgress === 'number'"
+                :percentage="row.electiveProgress || 0"
+              ></el-progress>
+
+              <span v-else>--</span>
             </template>
             <!-- 在线学习进度(必修) -->
             <template
@@ -444,7 +458,12 @@
               slot="onlineProgress"
               slot-scope="{ row }"
             >
-              <el-progress :percentage="row.onlineProgress || 0"></el-progress>
+              <el-progress
+                v-if="typeof row.electiveProgress === 'number'"
+                :percentage="row.onlineProgress || 0"
+              ></el-progress>
+
+              <span v-else>--</span>
             </template>
 
             <!-- 作业提交率 -->
@@ -487,16 +506,6 @@
               <span v-if="row.evaluate == 2">未评估</span>
               <span v-if="row.evaluate == 3">未开始</span>
             </template>
-            <!-- 证书状态 // （1：已获得；2：未获得；3：未开始）-->
-            <template
-              v-if="showTrainDetail.isArranged"
-              slot="certificate"
-              slot-scope="{ row }"
-            >
-              <span v-if="row.certificate == 1">已获得</span>
-              <span v-if="row.certificate == 2">未获得</span>
-              <span v-if="row.certificate == 3">未开始</span>
-            </template>
 
             <!-- 操作 -->
             <template
@@ -505,7 +514,6 @@
               slot-scope="scope"
             >
               <el-button
-                v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
                 type="text"
                 size="medium"
                 @click.stop="toStuffDetail(scope.row)"
@@ -564,7 +572,7 @@
               <span>{{ item.todoTime }}</span>
               <span>
                 <span v-if="item.type === 1">【面授课程】</span><span v-else>【活动】</span>
-                {{ item.course }}</span>
+                {{ item.courseName }}</span>
               <span>
                 <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
                 {{ item.lecturerName }}</span>
@@ -572,7 +580,7 @@
               <span> 地点： {{ item.address }}</span>
 
               <!-- 状态（1：已结束；2：进行中；3：未开始） -->
-              <span>
+              <span v-if="$route.query.status">
                 状态：<span v-if="item.status === 1">未开始</span>
                 <span v-if="item.status === 2">进行中</span><span v-if="item.status === 3">已结束</span></span>
             </div>
@@ -597,7 +605,7 @@
           >
           </el-table-column>
           <el-table-column
-            prop="course"
+            prop="courseName"
             label="关联课程"
             width="180"
           >
@@ -617,6 +625,7 @@
             </template>
           </el-table-column>
           <el-table-column
+            v-if="$route.query.status"
             prop="status"
             label="状态"
           >
@@ -663,7 +672,10 @@
               <span v-if="row.status === 3">已结束</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column
+            v-if="$route.query.status"
+            label="操作"
+          >
             <template slot-scope="{ row }">
               <el-button
                 type="text"
@@ -923,6 +935,12 @@ const TABLE_COLUMNS = [
     minWidth: 180
   },
   {
+    label: '线下签到率',
+    prop: 'signPercent',
+    minWidth: 180,
+    slot: true
+  },
+  {
     label: '所属部门',
     prop: 'deptName',
     minWidth: 240
@@ -941,7 +959,7 @@ const TABLE_COLUMNS = [
   },
   // 1：已通过；2：未通过；3：未开始）
   {
-    label: '学习心得提交率',
+    label: '作业提交率',
     prop: 'jobPercent',
     minWidth: 120,
     slot: true
@@ -961,11 +979,28 @@ const TABLE_COLUMNS = [
     label: '评估情况',
     prop: 'evaluate',
     slot: true
-  },
-  // （1：已获得；2：未获得；3：未开始）
+  }
+]
+const TABLE_COLUMNS2 = [
   {
-    label: '证书状态',
-    prop: 'certificate',
+    label: '姓名',
+    prop: 'stuName',
+    slot: true
+  },
+  {
+    label: '手机号码',
+    prop: 'phone',
+    minWidth: 180
+  },
+
+  {
+    label: '所属部门',
+    prop: 'deptName',
+    minWidth: 240
+  },
+  {
+    label: '评估情况',
+    prop: 'evaluate',
     slot: true
   }
 ]
@@ -1038,13 +1073,13 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'certificate',
-    label: '证书状态',
+    field: 'sign',
+    label: '线下签到率',
     type: 'select',
     options: [
-      { value: 1, label: '已获得' },
-      { value: 2, label: '未获得' },
-      { value: 3, label: '未开始' }
+      { value: 1, label: '全部' },
+      { value: 2, label: '未完成' },
+      { value: 3, label: '已完成' }
     ]
   }
 ]
@@ -1183,6 +1218,12 @@ export default {
     this.isGetOfflineTodo()
 
     if (!this.$route.query.status) this.status = 2
+
+    if (!this.showTrainDetail.isArranged) {
+      this.columnsVisible = _.map(TABLE_COLUMNS2, ({ prop }) => prop)
+      this.tableColumns = TABLE_COLUMNS2
+      this.$forceUpdate()
+    }
   },
   methods: {
     getSigninColumn(value, d) {

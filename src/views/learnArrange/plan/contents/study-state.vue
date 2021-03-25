@@ -192,13 +192,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column
-          align="center"
-          header-align="center"
-          prop="materials"
-          label="上报材料"
-        >
-        </el-table-column>
+
         <el-table-column
           align="center"
           header-align="center"

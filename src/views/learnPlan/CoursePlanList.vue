@@ -286,7 +286,7 @@ import {
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '名称',
+    label: '线上必修名称',
     prop: 'coursePlanName',
     slot: true,
     fixed: true,
