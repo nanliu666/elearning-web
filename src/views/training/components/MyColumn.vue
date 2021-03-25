@@ -450,12 +450,14 @@ export default {
       }
       //移动
       if ($event === 'move') {
+        this.compileNewly = ''
         this.dialogFormVisible = true
         this.form.name = data.label
         this.form.optionData = data
       }
       // 删除
       if ($event === 'del') {
+        this.compileNewly = ''
         if (data.count) {
           this.$message({
             message: `您选择的${data.btnshow ? '分组' : '分类'}下存在数据，请调整后再删除！`,
