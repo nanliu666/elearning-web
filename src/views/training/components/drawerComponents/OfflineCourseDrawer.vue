@@ -22,11 +22,11 @@
         </template>
         <template #classroomId>
           <div class="classroom__container">
+            <!-- :allow-create="true" -->
             <lazy-select
               ref="classroomRef"
               v-model="model.classroomId"
               :searchable="true"
-              :allow-create="true"
               :first-option="classroomDefault"
               :load="loadClassroom"
               :option-props="{ label: 'roomName', value: 'id', key: 'id' }"
