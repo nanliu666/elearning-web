@@ -263,6 +263,7 @@ export default {
       this.orgTree[0] && this.handleOrgNodeClick()
       this.$set(this.form, 'isPublic', 0)
       this.$set(this.form, 'name', '')
+      this.$set(this.form, 'parentId', '')
       this.loadOrgTree()
     },
     // 新建子分类
