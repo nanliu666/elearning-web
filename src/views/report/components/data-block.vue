@@ -17,7 +17,11 @@
             {{ item.name }}
           </div>
           <div class="data-content">
-            {{ thousands(item.content) }}
+            <count-to
+              :start-val="0"
+              :end-val="item.content"
+            />
+            <span v-show="item.isPercent">%</span>
           </div>
         </li>
       </ul>
@@ -26,8 +30,13 @@
 </template>
 
 <script>
+import countTo from 'vue-count-to'
+
 export default {
   name: 'DataBlock',
+  components: {
+    countTo
+  },
   props: {
     title: {
       type: String,
