@@ -91,6 +91,7 @@ import { getWorkList } from '@/api/system/user'
 import { getExamList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
+import { Validate } from '../validate'
 export default {
   name: 'BasicSetting',
   components: {
@@ -252,34 +253,14 @@ export default {
     },
     // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间
     validateExamTime(rule, value, callback) {
-      if (_.isEmpty(this.trainTimeInVuex)) {
-        callback(new Error('请先选择培训时间'))
-      } else {
-        this.$refs.form.validateField('testPaper')
-        // 培训开始时间要在考试时间之前
-        const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
-          moment(this.model.examTime[0])
-        )
-        // 培训结束时间要在考试结束时间之后
-        const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
-          moment(this.model.examTime[1])
-        )
-        if (!isLegalBeginTime) {
-          callback(
-            new Error(
-              `考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
-            )
-          )
-        } else if (!isLegalEndTime) {
-          callback(
-            new Error(
-              `考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
-            )
-          )
-        } else {
-          callback()
-        }
-      }
+      Validate.validateLegalTime(
+        callback,
+        this.trainTimeInVuex,
+        this.model.examTime,
+        '考试日期',
+        this.entryCName
+      )
+      this.$refs.form.validateField('testPaper')
     },
     loadCoordinator(params) {
       return getWorkList(_.assign(params, { orgId: 0 }))
