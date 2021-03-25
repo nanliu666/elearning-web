@@ -19,10 +19,10 @@
             <el-radio label="">
               全部试题
             </el-radio>
-            <el-radio label="0">
+            <el-radio label="1">
               仅显示答对试题
             </el-radio>
-            <el-radio label="1">
+            <el-radio label="0">
               仅显示答错试题
             </el-radio>
           </el-radio-group>
@@ -142,7 +142,7 @@ export default {
         userId: '',
         type: '',
         id: '',
-        flag: '' //0 全队，1全错
+        flag: '' //0全错，1全对
       }
     }
   },

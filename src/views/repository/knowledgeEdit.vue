@@ -18,6 +18,9 @@
         <template #attachments>
           <common-upload
             :before-upload="beforeUpload"
+            need-handler
+            :on-upload-complete="onUploadComplete"
+            :on-upload-progress="onUploadProgress"
             @getValue="getValue"
           >
             <template #default>
@@ -32,6 +35,16 @@
               </div>
             </template>
           </common-upload>
+          <div class="UploadProgress">
+            上传进度：
+            <el-progress
+              v-if="videoFlag == true"
+              :percentage="videoUploadPercent"
+              status="success"
+              text-inside
+              :stroke-width="18"
+            ></el-progress>
+          </div>
           <ul class="uploader-ul">
             <li
               v-for="(item, index) in formData.attachments"
@@ -106,6 +119,7 @@ const FORM_COLUMNS = [
     label: '资源名称',
     prop: 'resName',
     required: true,
+    maxlength: 100,
     span: 11,
     offset: 0
   },
@@ -141,6 +155,7 @@ const FORM_COLUMNS = [
     itemType: 'input',
     label: '提供人',
     prop: 'providerName',
+    maxlength: 20,
     span: 11
   },
   {
@@ -248,7 +263,9 @@ export default {
         introduction: '',
         attachments: []
       },
-      submitting: false
+      submitting: false,
+      videoFlag: false,
+      videoUploadPercent: ''
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -355,6 +372,17 @@ export default {
       }
       return isLtFileSize && isLimitLength && !notBatNorExe && !isEmpty
     },
+
+    //
+    onUploadProgress(fileData) {
+      this.videoFlag = true
+      this.videoUploadPercent = Math.floor(fileData.percent)
+    },
+    onUploadComplete() {
+      setTimeout(() => {
+        this.videoFlag = false
+      }, 3000)
+    },
     // 预览附件
     previewFile(data) {
       window.open(data.fileUrl)
@@ -365,6 +393,7 @@ export default {
         return item.uid === data.uid
       })
       this.formData.attachments.splice(index, 1)
+      this.videoFlag = false
     },
     /**
      * 初始选择数据
@@ -490,6 +519,9 @@ $color_font_uploader: #a0a8ae;
 }
 .container__buttons {
   margin-top: 1rem;
+}
+.UploadProgress {
+  width: 50%;
 }
 .uploader-ul {
   margin-top: 4px;

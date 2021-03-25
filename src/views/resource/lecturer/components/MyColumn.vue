@@ -449,6 +449,7 @@ export default {
       //   新增
       if ($event === 'add') {
         this.addSonInputData = data
+        this.compileNewly = 0
         // 展开
         this.expandedKeysData = []
         this.expandedKeysData.push(data.id)
@@ -679,7 +680,7 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     position: relative;
-    padding-right: 17px;
+    padding-right: 30px;
     .custom-tree-node-text-num {
       position: absolute;
       top: 0;

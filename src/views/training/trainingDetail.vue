@@ -11,22 +11,28 @@
       <div class="title_box_headline">
         <div class="title_box_headline_l">
           {{ showTrainDetail.trainName }}
-          <span v-if="showTrainDetail.status === 3">已结束</span>
-          <span v-if="showTrainDetail.status === 1">未开始</span>
-          <span v-if="showTrainDetail.status === 2">进行中</span>
+          <span
+            v-if="!$route.query.status"
+            style="background-color: #FFFCE6; color: #FCBA00;"
+          >草稿</span>
+          <span v-else>
+            <span v-if="showTrainDetail.status === 3">已结束</span>
+            <span v-if="showTrainDetail.status === 1">未开始</span>
+            <span v-if="showTrainDetail.status === 2">进行中</span>
+          </span>
         </div>
         <div class="title_box_headline_r">
           <el-button
             type="primary"
             size="mini"
-            :disabled="issueStatus"
+            :disabled="!issueStatus"
             @click="handleConfig"
           >
             开办下一期
           </el-button>
           <el-button
             size="mini"
-            :disabled="issueStatus"
+            :disabled="!issueStatus"
             @click="isstopSchedule"
           >
             结办
@@ -221,6 +227,7 @@
     <div class="trainingDetail_nav">
       <div class="select_bar">
         <span
+          v-if="$route.query.status"
           :class="{ select: status === 1 }"
           style="cursor:pointer;"
           @click="status = 1"
@@ -231,7 +238,7 @@
           @click="status = 2"
         >学习情况</span>
         <span
-          v-if="showTrainDetail.signIn"
+          v-if="showTrainDetail.signIn && $route.query.status"
           :class="{ select: status === 3 }"
           style="cursor:pointer;"
           @click="status = 3"
@@ -242,6 +249,7 @@
           @click="status = 4"
         >培训安排</span>
         <span
+          v-if="$route.query.status"
           :class="{ select: status === 5 }"
           style="cursor:pointer;"
           @click="status = 5"
@@ -249,7 +257,7 @@
       </div>
 
       <div
-        v-show="status === 1"
+        v-show="status === 1 && $route.query.status"
         class="register-container"
       >
         <div class="register-data">
@@ -390,7 +398,10 @@
               </div>
             </template>
 
-            <template #multiSelectMenu="{ selection }">
+            <template
+              v-if="showTrainDetail.isArranged"
+              #multiSelectMenu="{ selection }"
+            >
               <el-button
                 style="margin-bottom:0;"
                 type="text"
@@ -421,6 +432,7 @@
             </template>
             <!-- 选修学习进度 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="electiveProgress"
               slot-scope="{ row }"
             >
@@ -428,6 +440,7 @@
             </template>
             <!-- 在线学习进度(必修) -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="onlineProgress"
               slot-scope="{ row }"
             >
@@ -436,6 +449,7 @@
 
             <!-- 作业提交率 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="jobPercent"
               slot-scope="{ row }"
             >
@@ -445,6 +459,7 @@
             </template>
             <!-- 上报材料 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="isSubmit"
               slot-scope="{ row }"
             >
@@ -455,6 +470,7 @@
 
             <!-- 考试情况 // 1：已通过；2：未通过；3：未开始）-->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="examStatus"
               slot-scope="{ row }"
             >
@@ -473,6 +489,7 @@
             </template>
             <!-- 证书状态 // （1：已获得；2：未获得；3：未开始）-->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="certificate"
               slot-scope="{ row }"
             >
@@ -483,6 +500,7 @@
 
             <!-- 操作 -->
             <template
+              v-if="showTrainDetail.isArranged"
               slot="handler"
               slot-scope="scope"
             >
@@ -494,27 +512,23 @@
               >
                 查看上报材料
               </el-button>
+
               <el-button
-                v-if="scope.row.onlineProgress == 100 && scope.row.examStatus == 1"
-                type="text"
-                size="medium"
-                @click.stop="isgrantCertificate(scope.row)"
-              >
-                发放证书
-              </el-button>
-              <el-button
-                v-else-if="scope.row.certificate == 1"
+                v-if="scope.row.certificate == 1"
                 type="text"
                 size="medium"
                 @click.stop="isrevokeCertificate(scope.row)"
               >
                 撤回证书
               </el-button>
-
-              <span
+              <el-button
                 v-else
-                style="color:#ccc;"
-              >发送证书</span>
+                type="text"
+                size="medium"
+                @click.stop="isgrantCertificate(scope.row)"
+              >
+                发放证书
+              </el-button>
             </template>
           </common-table>
         </basic-container>
@@ -529,20 +543,21 @@
           线下日程
         </p>
         <el-collapse
+          v-if="isOfflineTodo.length"
           v-model="activeNames"
           @change="handleChange"
         >
           <el-collapse-item
-            v-for="(itemb, value, index) in isOfflineTodo"
+            v-for="(todo, index) in isOfflineTodo"
             :key="index"
             :name="index + 1"
           >
             <template slot="title">
-              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天 {{ value }}
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天 {{ todo.date }}
             </template>
 
             <div
-              v-for="(item, i) in itemb"
+              v-for="(item, i) in todo.data"
               :key="i"
               class="arrange_schedule_i"
             >
@@ -563,6 +578,10 @@
             </div>
           </el-collapse-item>
         </el-collapse>
+
+        <div v-else>
+          暂无培训安排信息
+        </div>
 
         <p class="course_title offline_title">
           在线课程
@@ -659,7 +678,7 @@
 
       <!-- 签到情况 -->
       <div
-        v-show="status === 3"
+        v-show="status === 3 && $route.query.status"
         class="signin-container"
       >
         <div class="signin-header">
@@ -712,7 +731,7 @@
 
       <!-- 评估结果 -->
       <div
-        v-show="status === 5"
+        v-show="status === 5 && $route.query.status"
         class="result"
       >
         <div>
@@ -870,7 +889,7 @@
 
 <script>
 // 培训详情
-import { delCourseInfo } from '@/api/course/course'
+// import { delCourseInfo } from '@/api/course/course'
 import {
   getOfflineTodo,
   queryJoin,
@@ -1060,7 +1079,7 @@ export default {
       },
       getRegisterForm: {
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 10
       },
       signinTotal: 0,
       registerTotal: 0,
@@ -1162,6 +1181,8 @@ export default {
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
+
+    if (!this.$route.query.status) this.status = 2
   },
   methods: {
     getSigninColumn(value, d) {
@@ -1331,17 +1352,19 @@ export default {
 
     //发放学员证书
     isgrantCertificate(row) {
-      grantCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
+      grantCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
         })
+        this.page.currentPage = 1
+        this.page.size = 10
         this.isStudentList()
       })
     },
     // 撤回学员证书
     isrevokeCertificate(row) {
-      revokeCertificate({ stuIds: [row.id], trainId: this.showTrainDetail.id }).then(() => {
+      revokeCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(() => {
         this.$message({
           message: '操作成功',
           type: 'success'
@@ -1372,7 +1395,17 @@ export default {
       // let id = '1332138220456259585'
       let id = this.showTrainDetail.trainId
       getOfflineTodo({ trainId: id }).then((res) => {
-        this.isOfflineTodo = res
+        let list = (this.isOfflineTodo = [])
+        Object.keys(res).forEach((key) => {
+          list.push({
+            date: key,
+            data: res[key]
+          })
+        })
+        list = list.sort((a, b) => {
+          return new Date(a.date) > new Date(b.date) ? 1 : -1
+        })
+
         let index = 1
         for (const key in res) {
           ++index
@@ -1442,7 +1475,7 @@ export default {
     handleChange() {},
 
     // 编辑&删除&移动
-    handleCommand(e, row) {
+    handleCommand(e) {
       if (e === 'edit') {
         // 编辑
         this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })
@@ -1495,7 +1528,6 @@ export default {
 
     handleRemoveItems(selection, i) {
       let idData = _.map(selection, ({ stuId }) => stuId).join(',')
-
       this.$confirm(
         `您确定要为${selection[0].stuName}等${selection.length}个学员${
           i ? '发放证书' : '撤回证书'
@@ -1520,6 +1552,8 @@ export default {
 
     // 批量发放证书&撤回证书
     batchFn(idData, i) {
+      this.page.currentPage = 1
+      this.page.size = 10
       if (i) {
         grantCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(() => {
           this.$message({

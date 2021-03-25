@@ -21,10 +21,11 @@
         :key="i"
         :data="table.trainAttachmentVOS"
       >
-        <el-table-column
-          align="center"
-          :label="table.name"
-        >
+        <el-table-column align="left">
+          <template slot="header">
+            {{ '课程: ' + table.name }}
+          </template>
+
           <template slot-scope="scope">
             <div>
               {{ getFileName(scope.row) }}
@@ -71,7 +72,15 @@
                 type="text"
                 size="small"
               >
-                {{ scope.row.fileCategory === 'user' ? '修改作业' : '修改评改' }}
+                {{
+                  scope.row.fileName
+                    ? scope.row.fileCategory === 'user'
+                      ? '修改作业'
+                      : '修改评改'
+                    : scope.row.fileCategory === 'user'
+                      ? '上传作业'
+                      : '上传评改'
+                }}
               </el-button>
             </common-upload>
             <el-button
@@ -91,6 +100,8 @@
 
 <script>
 import { downloadZip } from '@/api/learnArrange'
+import { getStore } from '@/util/store.js'
+
 export default {
   name: 'StuffCourse',
   components: {
@@ -141,7 +152,8 @@ export default {
       const params = {
         filePath: [],
         fileName: [],
-        zipComment: '打包下载.zip'
+        zipComment: decodeURIComponent('打包下载.zip'),
+        emulateJSON: true
       }
       this.data.course.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
@@ -156,15 +168,21 @@ export default {
       })
       params.filePath = params.filePath.join(',')
       params.fileName = params.fileName.join(',')
-      let p = ''
-      Object.keys(params).forEach((key) => {
-        const value = params[key]
-        p += `&${decodeURIComponent(key)}=${decodeURIComponent(value)}`
-      })
 
-      p = '?' + p.slice(1)
-      downloadZip(p).then(() => {
-        // console.log(res)
+      let token = getStore({ name: 'token' })
+      const headers = { accessToken: `bearer  ${token}` }
+
+      const config = {
+        params,
+        headers,
+        responseType: 'blob'
+      }
+      downloadZip(config).then((res) => {
+        let url = window.URL.createObjectURL(res)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
       })
     },
     download(row) {
@@ -200,6 +218,9 @@ export default {
 .stuff-course {
   .table-list {
     margin-top: 12px;
+  }
+  .course-selector {
+    width: auto !important;
   }
   .edit-upload {
     display: block;

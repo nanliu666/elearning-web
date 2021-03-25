@@ -341,6 +341,7 @@ const createSubQustion = () => ({
   attachments: [],
   key: createUniqueID()
 })
+import { deleteHTMLTag } from '@/util/util'
 export default {
   name: 'QuestionEdit',
   components: {
@@ -399,8 +400,10 @@ export default {
          * 根据试题类型切换表单内容
          */
         if (val === QUESTION_TYPE_SINGLE) {
+          this.removeContentHTML()
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
         } else if (QUESTION_TYPE_MULTIPLE === val) {
+          this.removeContentHTML()
           const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
           _SELECT_COLUMNS[2].rules = [
             {
@@ -419,6 +422,7 @@ export default {
           ]
           this.columns = [...BASIC_COLUMNS, ..._SELECT_COLUMNS]
         } else if (val === QUESTION_TYPE_JUDGE) {
+          this.removeContentHTML()
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
           this.form.options = [
             { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
@@ -460,21 +464,22 @@ export default {
       immediate: true
     }
   },
-  mounted() {
+  activated() {
     if (this.id) {
       this.loadData()
     }
     this.loadCategoryData()
   },
-  activated() {
-    if (this.id) {
-      this.loadData()
-    }
-  },
   beforeDestroy() {
     this.scoreWatcher && this.scoreWatcher()
   },
   methods: {
+    // 当富文本切换当input删除多余的html标签
+    removeContentHTML() {
+      if (!_.isEmpty(this.form.content)) {
+        this.form.content = deleteHTMLTag(this.form.content)
+      }
+    },
     handleDeleteSubQuestion(index) {
       this.form.subQuestions.splice(index, 1)
     },

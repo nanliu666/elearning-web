@@ -36,10 +36,13 @@
             :key="index"
             class="main-question-li"
           >
-            <div style="margin-bottom: 10px">
+            <div>
               <span>{{ (index + 1) | number2zhcn }}、</span>
               <span>{{ item[0].type | typeFilter }}</span>
               <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
+            </div>
+            <div style="margin-bottom: 10px; margin-top: 4px;color: #ccc">
+              {{ _.get(item, '[0]title', '') }}
             </div>
             <div
               v-for="(sonitem, sonindex) in item"
@@ -151,6 +154,7 @@ export default {
       })
     },
     initData() {
+      this.paperData = []
       this.loading = true
       // 手工卷子接口 getManualPreview
       // 随机卷子接口统一接口 createRandomPaper

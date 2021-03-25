@@ -87,7 +87,7 @@
 <script>
 import RadioInput from '@/components/radio-input/radio-input'
 import CheckboxInput from '@/components/checkbox-input/checkbox-input'
-import { getOrgUserList } from '@/api/system/user'
+import { getWorkList } from '@/api/system/user'
 import { getExamList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
@@ -136,11 +136,6 @@ export default {
           itemType: 'slot',
           span: 24,
           rules: [
-            {
-              required: true,
-              message: '请选择关联用卷',
-              trigger: 'blur'
-            },
             { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
           ],
           prop: 'testPaper',
@@ -236,6 +231,7 @@ export default {
   methods: {
     // 考试结束日期在试卷有效期之前
     validateTestPaper(rule, value, callback) {
+      if (!value) callback('请选择关联同卷')
       if (_.get(this.$refs, 'testPaperRef')) {
         const temp = _.find(this.$refs.testPaperRef.optionList, (item) => {
           return item.id === value
@@ -256,29 +252,37 @@ export default {
     },
     // 考试开始时间大于等于培训开始时间，考试结束时间要小于等于培训结束时间
     validateExamTime(rule, value, callback) {
-      this.$refs.form.validateField('testPaper')
-      // 培训开始时间要在考试时间之前
-      const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
-        moment(this.model.examTime[0])
-      )
-      // 培训结束时间要在考试结束时间之后
-      const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
-        moment(this.model.examTime[1])
-      )
-      if (!isLegalBeginTime) {
-        callback(
-          new Error(`考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`)
-        )
-      } else if (!isLegalEndTime) {
-        callback(
-          new Error(`考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`)
-        )
+      if (_.isEmpty(this.trainTimeInVuex)) {
+        callback(new Error('请先选择培训时间'))
       } else {
-        callback()
+        this.$refs.form.validateField('testPaper')
+        // 培训开始时间要在考试时间之前
+        const isLegalBeginTime = moment(this.trainTimeInVuex[0]).isSameOrBefore(
+          moment(this.model.examTime[0])
+        )
+        // 培训结束时间要在考试结束时间之后
+        const isLegalEndTime = moment(this.trainTimeInVuex[1]).isSameOrAfter(
+          moment(this.model.examTime[1])
+        )
+        if (!isLegalBeginTime) {
+          callback(
+            new Error(
+              `考试开始日期要在${this.entryCName}开始日期（${this.trainTimeInVuex[0]}）之后`
+            )
+          )
+        } else if (!isLegalEndTime) {
+          callback(
+            new Error(
+              `考试结束日期要在${this.entryCName}结束日期（${this.trainTimeInVuex[1]}）之前`
+            )
+          )
+        } else {
+          callback()
+        }
       }
     },
     loadCoordinator(params) {
-      return getOrgUserList(_.assign(params, { orgId: 0 }))
+      return getWorkList(_.assign(params, { orgId: 0 }))
     },
     loadTestPaper(params) {
       return getExamList(_.assign(params, { status: 'normal' }))

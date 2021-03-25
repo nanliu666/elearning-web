@@ -93,7 +93,7 @@ const SEARCH_CONFIG = {
   requireOptions: [
     {
       type: 'input',
-      field: 'roomName',
+      field: 'search',
       label: '',
       data: '',
       options: [],
@@ -162,13 +162,13 @@ export default {
   },
   methods: {
     getTimeClass(row, column) {
-      return `time__container ${[
+      return `time__container ${
         _.some(row.showLabel, (item) => {
           return _.includes(item, column['label'])
         })
           ? 'spot__red'
           : 'spot__green'
-      ]} `
+      } `
     },
     initSetting() {
       // 以半小时为刻度，范围为06:00-23:00。一共17个小时

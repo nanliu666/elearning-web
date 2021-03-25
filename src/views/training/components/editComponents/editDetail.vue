@@ -269,9 +269,13 @@ export default {
           resolve(this.formData)
         })
       } else {
-        return Promise.all(promiseList).then(() => {
-          return this.formData
-        })
+        return Promise.all(promiseList)
+          .then(() => {
+            return this.formData
+          })
+          .catch(() => {
+            this.$message.error('请完整填写详细信息')
+          })
       }
     },
     loadCoordinator(params) {

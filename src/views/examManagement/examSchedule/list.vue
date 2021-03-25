@@ -136,6 +136,7 @@
             <el-button
               v-p="DELETE_EXAM"
               type="text"
+              :disabled="row.status === '2'"
               @click="handleDelete(row)"
             >
               删除

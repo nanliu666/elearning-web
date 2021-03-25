@@ -43,11 +43,13 @@
             class="uploader"
             drag
             action=""
-            :file-list="uploadList"
+            :file-list.sync="uploadList"
             :limit="1"
             :on-exceed="handleExceed"
             :before-upload="beforeUpload"
             :http-request="httpRequest"
+            :on-change="onChange"
+            :before-remove="removeFile"
             :auto-upload="false"
           >
             <i class="iconimage_icon_Uploadcoursecontent1 iconfont icon-upload"></i>
@@ -60,6 +62,7 @@
           <el-button
             type="primary"
             size="medium"
+            :disabled="importDisabled"
             @click="handleSubmit"
           >
             确认导入
@@ -153,6 +156,7 @@ export default {
   name: 'QuestionImport',
   data() {
     return {
+      importDisabled: true,
       uploadList: [],
       successCount: 0,
       failedCount: 0,
@@ -182,16 +186,26 @@ export default {
       this.$message.warning('只能选择一个文件')
     },
     beforeUpload(file) {
-      const isXLS = file.type === 'application/vnd.ms-excel'
-      const isLt2M = file.size / 1024 / 1024 < 2
-
-      if (!isXLS) {
-        this.$message.error('上传文件只能是 xls 格式!')
+      const regx = /^.*\.(xls|xlsx|csv)$/
+      if (!regx.test(file.name)) {
+        this.$message.error('上传资料只支持xls，xlsx，csv文件')
+        return false
       }
+      // const isXLS = file.type === 'application/vnd.ms-excel'
+      const isLt2M = file.size / 1024 / 1024 < 2
+      // if (!isXLS) {
+      //   this.$message.error('上传文件只能是 xls 格式!')
+      // }
       if (!isLt2M) {
         this.$message.error('上传文件大小不能超过 2MB!')
       }
-      return isLt2M && isXLS
+      return isLt2M && regx.test(file.name)
+    },
+    onChange() {
+      this.importDisabled = false
+    },
+    removeFile() {
+      this.importDisabled = true
     },
     httpRequest(file) {
       const parmas = new FormData()

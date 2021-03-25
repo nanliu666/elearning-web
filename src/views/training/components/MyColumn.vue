@@ -27,22 +27,31 @@
           :default-expanded-keys="expandedKeysData"
           @node-click="treeClickNode"
         >
-          <span slot-scope="{ node, data }" class="custom-tree-node">
+          <span
+            slot-scope="{ node, data }"
+            class="custom-tree-node"
+          >
             <span
-              :class="node.label == '未分类' ? 'paddingRight' : ''"
               v-show="!isEdit || data.id !== isEditId"
+              :class="node.label == '未分类' ? 'paddingRight' : ''"
               class="custom-tree-node-text"
-              >{{ node.label }}&nbsp;
+            >{{ node.label }}&nbsp;
               <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
             </span>
 
-            <span v-show="isEdit && data.id === isEditId" class="tree_input">
+            <span
+              v-show="isEdit && data.id === isEditId"
+              class="tree_input"
+            >
               <el-input
                 v-model="dataAddCatalog.input"
                 placeholder="请输入分类名称"
                 maxlength="20"
               ></el-input>
-              &nbsp;<el-button type="text" @click="isaddCatalog(data)">确认</el-button>
+              &nbsp;<el-button
+                type="text"
+                @click="isaddCatalog(data)"
+              >确认</el-button>
               <span @click="isEditFn(data)"> 取消</span>
               <!-- <span @click="isEdit = false"> 取消</span> -->
             </span>
@@ -59,10 +68,16 @@
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item v-show="data.btnshow" command="add">
+                  <el-dropdown-item
+                    v-show="data.btnshow"
+                    command="add"
+                  >
                     新增分类
                   </el-dropdown-item>
-                  <el-dropdown-item v-show="!data.btnshow" command="move"> 移动 </el-dropdown-item>
+                  <el-dropdown-item
+                    v-show="!data.btnshow"
+                    command="move"
+                  > 移动 </el-dropdown-item>
                   <el-dropdown-item command="edit"> 编辑 </el-dropdown-item>
                   <el-dropdown-item command="del"> 删除 </el-dropdown-item>
                 </el-dropdown-menu>
@@ -71,7 +86,10 @@
           </span>
         </el-tree>
 
-        <div v-show="isShowinput" class="isShowinput">
+        <div
+          v-show="isShowinput"
+          class="isShowinput"
+        >
           <el-input
             id="/lecturer/lecturer"
             v-model="dataAddCatalog.input"
@@ -79,15 +97,27 @@
             placeholder="请输入分组名称"
             maxlength="20"
           ></el-input>
-          <span class="isShowinput_yes" @click="isaddCatalog(data)">确认</span>
-          <span class="isShowinput_no" @click="isShowinputFn"> 取消</span>
+          <span
+            class="isShowinput_yes"
+            @click="isaddCatalog(data)"
+          >确认</span>
+          <span
+            class="isShowinput_no"
+            @click="isShowinputFn"
+          > 取消</span>
           <!-- <span @click="isShowinput = false"> 取消</span> -->
         </div>
         <div class="btn_bottom_box">
-          <div v-show="!isShowinput" class="btn_bottom">
-            <a class="btn1" href="#/training/trainingArrange" @click="adddata">
-              <i class="el-icon-plus btn_icon"></i> 新建分组</a
+          <div
+            v-show="!isShowinput"
+            class="btn_bottom"
+          >
+            <a
+              class="btn1"
+              href="#/training/trainingArrange"
+              @click="adddata"
             >
+              <i class="el-icon-plus btn_icon"></i> 新建分组</a>
             <!-- <span class="btn2">新建分类</span> -->
           </div>
         </div>
@@ -95,13 +125,31 @@
     </div>
 
     <!-- 移动选择框 -->
-    <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :modal-append-to-body="false">
+    <el-dialog
+      title="收货地址"
+      :visible.sync="dialogFormVisible"
+      :modal-append-to-body="false"
+    >
       <el-form :model="form">
-        <el-form-item label="分类名称" label-width="120px">
-          <el-input v-model="form.name" autocomplete="off" maxlength="32" disabled></el-input>
+        <el-form-item
+          label="分类名称"
+          label-width="120px"
+        >
+          <el-input
+            v-model="form.name"
+            autocomplete="off"
+            maxlength="32"
+            disabled
+          ></el-input>
         </el-form-item>
-        <el-form-item label="上级分类组" label-width="120px">
-          <el-select v-model="form.region" placeholder="请选择">
+        <el-form-item
+          label="上级分类组"
+          label-width="120px"
+        >
+          <el-select
+            v-model="form.region"
+            placeholder="请选择"
+          >
             <el-option
               v-for="(item, index) in data"
               v-show="item.label !== '未分类'"
@@ -112,11 +160,17 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
         <el-button @click="dialogFormVisible = false">
           取 消
         </el-button>
-        <el-button type="primary" @click="ismove">
+        <el-button
+          type="primary"
+          @click="ismove"
+        >
           确 定
         </el-button>
       </div>
@@ -289,7 +343,7 @@ export default {
               }
             })
           }
-
+          this.compileNewly = ''
           this.isEdit = false
           this.dataAddCatalog.input = ''
           this.$message({
@@ -391,6 +445,7 @@ export default {
         this.expandedKeysData = []
         this.expandedKeysData.push(data.id)
         this.inputAddMark = true
+        this.compileNewly = 0
         this.addSonInput(data)
       }
       //移动
@@ -512,7 +567,7 @@ export default {
       })
     },
     // 删除分组/分类
-    iddeleteTeacherCatalog(data, node) {
+    iddeleteTeacherCatalog(data) {
       let treeNode = this.$refs.tree.getNode(data.parent_id)
       this.columnInterface.deleteTeacherCatalog({ id: data.id }).then(() => {
         this.$message({
@@ -617,8 +672,11 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
     position: relative;
-    padding-right: 17px;
+    padding-right: 28px;
     .custom-tree-node-text-num {
+      display: inline-block;
+      width: 15px;
+      margin-right: 10px;
       position: absolute;
       top: 0;
       right: 0;

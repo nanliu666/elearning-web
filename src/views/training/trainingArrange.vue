@@ -364,6 +364,7 @@
                   >
                     开办下一期
                   </el-button>
+                  <span class="decollator_span">|</span>
                   <span v-p="END_TRAIN">
                     <el-button
                       v-if="scope.row.status !== 0"
@@ -542,7 +543,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'peopleMin,peopleMax',
     data: { min: '', max: '' },
     label: '计划人数',
-    required: true
+    required: false
   },
   {
     config: { placeholder: '请选择' },
@@ -593,6 +594,7 @@ export default {
   },
   data() {
     return {
+      searchParams: '',
       // 接口
       columnInterface: {
         listTeacherCategory: getCatalogs, //查询讲师分类列表
@@ -729,7 +731,7 @@ export default {
       }
       params.type = this.status
       params.categoryId = this.idSchedule
-      params = { ...params, ...this.page, ...param }
+      params = { ...params, ...this.page, ...param, ...this.searchParams }
       getScheduleList(params).then((res) => {
         // console.log(res);
         this.tableData = res.data.map((item) => {
@@ -996,7 +998,8 @@ export default {
         if (peopleMin >= peopleMax) return
       }
       this.page.pageNo = 1
-      this.isgetScheduleList(searchParams)
+      this.searchParams = searchParams
+      this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
       this.$confirm('此操作将删除, 是否继续?', '提示', {
@@ -1120,6 +1123,10 @@ $color_icon: #A0A8AE
   background-color: #ccc;
   color: #333;
   margin-left: 10px;
+}
+.decollator_span {
+  margin: 0 5px;
+  color: #ebeced;
 }
 .trainingArrange {
   .box_title {

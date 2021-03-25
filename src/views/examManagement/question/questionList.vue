@@ -293,21 +293,11 @@ export default {
       let id = null
       if (Array.isArray(data)) {
         if (_.some(data, (item) => item.examNum > 0)) {
-          await this.$confirm(
-            '你选择的数据中包含关联试卷数的试题，不能进行删除操作，是否忽略继续删除其它试题？',
-            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-          )
-          id = _.filter(data, (item) => item.examNum <= 0)
-            .map((item) => item.id)
-            .join(',')
+          id = _.map(data, (item) => item.id).join(',')
         } else {
           id = _.map(data, 'id').join(',')
         }
       } else {
-        if (data.examNum > 0) {
-          this.$message.warning('您选中试题有正在关联的试卷，请调整后再进行删除！')
-          return
-        }
         id = data.id
       }
       if (id === '') {
@@ -324,6 +314,7 @@ export default {
             this.$refs.table.clearSelection()
             this.loadTree()
             this.loadData()
+            this.$message.success('已成功删除已选试题！')
           })
         })
         .catch()
