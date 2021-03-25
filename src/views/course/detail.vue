@@ -264,7 +264,7 @@ export default {
   methods: {
     async getInfo() {
       let res = await getCourseStudyDetail({ courseId: this.$route.query.id })
-      res.scope = parseFloat(res.scope).toFixed(1)
+      res.scope = res.scope ? parseFloat(res.scope).toFixed(1) : 0
       this.userData = res
 
       // this.userData.passCondition  = this.userData.passCondition.split(',')
