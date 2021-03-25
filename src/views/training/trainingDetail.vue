@@ -89,7 +89,7 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.people }}
+              {{ typeof showTrainDetail.people !== 'number' ? '不限制' : showTrainDetail.people}}
             </div>
           </el-col>
           <el-col :span="2">
@@ -261,8 +261,12 @@
         class="register-container"
       >
         <div class="register-data">
-          <span>计划人数：</span>{{ plannedPopulation }}人 <span>已参加：</span>{{ participated }}人
-          <span v-if="remainingPlaces">剩余名额：</span>{{ remainingPlaces }}人
+
+          <span>计划人数：</span><span v-if="isNaN(plannedPopulation)">不限制</span><span v-else>{{ plannedPopulation }}人</span>
+          <span>已参加：</span>{{ participated }}人
+          <span v-if="typeof remainingPlaces === 'number' && remainingPlaces !== 0">
+            <span>剩余名额：</span>{{ remainingPlaces }}人
+          </span>
         </div>
         <el-table
           class="register-table"
@@ -1526,10 +1530,29 @@ export default {
     // 编辑&删除&移动
     handleCommand(e) {
       if (e === 'edit') {
+        if (this.showTrainDetail.status === 2) {
+          this.$alert('培训正在进行中，不能编辑这条培训记录', {
+            confirmButtonText: '确定'
+          });
+          return
+        }
+        if (this.showTrainDetail.status === 3) {
+          this.$alert('培训已结束，不能编辑这条培训记录', {
+            confirmButtonText: '确定'
+          });
+          return
+        }
+
         // 编辑
         this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })
       }
       if (e === 'del') {
+        if (this.showTrainDetail.status === 2) {
+          this.$alert('培训正在进行中，不能删除这条培训记录', {
+            confirmButtonText: '确定'
+          });
+          return
+        }
         // 删除
         this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
           confirmButtonText: '确定',

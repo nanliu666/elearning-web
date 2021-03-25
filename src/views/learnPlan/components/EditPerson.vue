@@ -21,14 +21,20 @@
       :config="tableConfig"
       :data="currentList"
     >
-      <template slot="department" slot-scope="{ row }">
+      <template
+        slot="department"
+        slot-scope="{ row }"
+      >
         <div>
-          {{row.department || '-'}}
+          {{ row.department || '-' }}
         </div>
       </template>
-      <template slot="phonenum" slot-scope="{ row }">
+      <template
+        slot="phonenum"
+        slot-scope="{ row }"
+      >
         <div>
-          {{row.phonenum || '-'}}
+          {{ row.phonenum || '-' }}
         </div>
       </template>
       <template #multiSelectMenu="{ selection }">
@@ -134,7 +140,7 @@ export default {
     selectedList: {
       type: Array,
       default: () => []
-    },
+    }
   },
   data() {
     return {
