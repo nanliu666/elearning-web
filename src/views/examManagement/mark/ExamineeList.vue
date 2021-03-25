@@ -129,7 +129,8 @@ let TABLE_COLUMNS = [
   {
     label: '所属组织',
     prop: 'dept',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) => (row.dept ? row.dept : '无组织')
   },
   {
     label: '状态',

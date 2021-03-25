@@ -118,7 +118,8 @@ const TABLE_COLUMNS = [
   {
     label: '所在部门',
     prop: 'orgName',
-    minWidth: 150
+    minWidth: 150,
+    formatter: (row) => (row.orgName ? row.orgName : '无部门')
   },
   {
     label: '考试时间',

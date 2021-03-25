@@ -28,7 +28,7 @@
         </li>
         <li class="card-li">
           <span class="li-label">归属组织：</span>
-          <span class="li-value">{{ data.dept }}</span>
+          <span class="li-value">{{ data.dept ? data.dept : '无组织' }}</span>
         </li>
         <li class="card-li">
           <span class="li-label">考试用卷：</span>
