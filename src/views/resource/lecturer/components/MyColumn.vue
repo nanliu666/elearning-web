@@ -31,13 +31,21 @@
             slot-scope="{ node, data }"
             class="custom-tree-node"
           >
-            <span
-              v-show="!isEdit || data.id !== isEditId"
-              :class="node.label == '未分类' ? 'paddingRight' : ''"
-              class="custom-tree-node-text"
-            >{{ node.label }}&nbsp;
-              <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
-            </span>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="node.label"
+              placement="top"
+              :disabled="node.label.length <= 13"
+            >
+              <span
+                v-show="!isEdit || data.id !== isEditId"
+                :class="node.label == '未分类' ? 'paddingRight' : ''"
+                class="custom-tree-node-text"
+              >{{ node.label }}&nbsp;
+                <span class="custom-tree-node-text-num">{{ `(${data.count || 0})` }}</span>
+              </span>
+            </el-tooltip>
 
             <span
               v-show="isEdit && data.id === isEditId"
@@ -51,7 +59,7 @@
               &nbsp;<el-button
                 type="text"
                 @click="isaddCatalog(data)"
-              >确认</el-button>
+              >确认1</el-button>
               <span @click="isEditFn(data)"> 取消</span>
               <!-- <span @click="isEdit = false"> 取消</span> -->
             </span>
