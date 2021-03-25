@@ -346,8 +346,11 @@ export default {
       return getOrgUserList(_.assign(params, { orgId: 0 }))
     },
     loadClassroom(params) {
-      const param = _.assign(params, this.reserveParams)
-      return getBookList(param)
+      if (_.size(_.get(params, 'search')) > 32) {
+        this.$message.error('您输入的教室名称过长，无法搜索！')
+      } else {
+        return getBookList(_.assign(params, this.reserveParams))
+      }
     },
     loadCourse(params) {
       //courseType 2-线下日程
