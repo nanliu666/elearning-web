@@ -332,7 +332,8 @@ export default {
      * 逐人评卷
      */
     handleExaminee(row) {
-      const query = { id: row.id, examineeBatchId: row.examineeBatchId, examId: row.examId }
+      // , examId: row.examId  隐藏examId
+      const query = { id: row.id, examineeBatchId: row.examineeBatchId }
       let path = ''
       if (row.status === '5' || (row.status === '4' && row.currentId !== this.userId)) {
         // 查看试卷详情

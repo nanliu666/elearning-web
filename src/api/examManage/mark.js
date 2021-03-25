@@ -20,6 +20,11 @@ export const listManualEvaluationOnceCount = (params) =>
 export const getExamineePaperDetail = (params) => get('/manage/v1/getExamineePaperDetail', params)
 
 /**
+ * 获取下一个考生答卷详情基本信息（头部信息概览，客/主观题题目数量以及分数展示）
+ */
+export const getExamineePaperDetailNext = (params) =>
+  get('/manage/v1/getExamineePaperDetailNext', params)
+/**
  * 获取逐人评卷考生答卷详情
  */
 export const getExamineePaperDetailist = (params) =>
