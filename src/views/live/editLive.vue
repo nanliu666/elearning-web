@@ -1020,7 +1020,7 @@
                   @check="select_organizationUser"
                 >
                   <span
-                    slot-scope="{ node, data }"
+                    slot-scope="{ data }"
                     class="custom-tree-node"
                   >
                     <span>{{ data.name }}</span>
@@ -1051,7 +1051,7 @@
                     @check="select_organizationUser"
                   >
                     <span
-                      slot-scope="{ node, data }"
+                      slot-scope="{ data }"
                       class="custom-tree-node"
                     >
                       <span>{{ data.name }}({{ data.phoneNum }})</span>
@@ -1356,13 +1356,13 @@ export default {
       this.loading = true
 
       this.valChange(1)
-    }),
+    }, 500),
 
     //其他人员
     otherUserVal: _.debounce(function() {
       this.loading = true
       this.valChange(2)
-    }),
+    }, 500),
     'basicForm.liveClassification_value': {
       handler() {
         //选择完成  隐藏选项
@@ -1989,6 +1989,7 @@ export default {
     handleClick() {},
 
     delete_dialog_selectStudent(arr, index, id) {
+      console.log(arr, index, id)
       this.$refs.otherUserTree.setChecked(id, false)
       arr.splice(index, 1)
     },
@@ -2053,6 +2054,16 @@ export default {
     select_organizationUser(data, node) {
       if (node.checkedKeys.indexOf(data.id) != -1) {
         if (data.type == 'user') {
+          for (let i = 0; i < this.dialogSelectStudent.length; i++) {
+            if (this.dialogSelectStudent[i].id == data.id) {
+              this.$message({
+                showClose: true,
+                message: '此人员已存在',
+                type: 'error'
+              })
+              return false
+            }
+          }
           this.dialogSelectStudent.push({
             department: data.orgName,
             name: data.name,
@@ -2061,6 +2072,7 @@ export default {
             id: data.userId
           })
         } else {
+          console.log(222)
           getUsersByOrgId({ orgId: data.id }).then((res) => {
             res.forEach((resitem) => {
               var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)

@@ -100,6 +100,7 @@ export default {
           options: [''],
           required: true,
           type: 'datetimerange',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           span: 11,
           offset: 0
         },
@@ -239,6 +240,7 @@ export default {
   watch: {
     'formData.trainTime': {
       handler(data) {
+        console.log(data)
         this.$store.commit('SET_TRAIN_TIME', data)
       },
       deep: true
@@ -378,6 +380,7 @@ export default {
       }
     },
     selectContact(data) {
+      console.log(data)
       if (data.phonenum) {
         this.formData.contactPhone = data.phonenum
       } else {
@@ -385,8 +388,10 @@ export default {
       }
     },
     loadCoordinator(params) {
+      console.log(params)
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
+        return false
       } else {
         return getWorkList(_.assign(params, { orgId: 0 }))
       }
