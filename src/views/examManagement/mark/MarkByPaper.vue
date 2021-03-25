@@ -331,7 +331,8 @@ export default {
       const { totalNum, list } = await getByPaper({
         id: this.questionMain.id,
         size: 100000,
-        currentPage: 1
+        currentPage: 1,
+        examId: this.$route.query.id
       })
       this.totalNum = totalNum
       this.currentTotalList = list
