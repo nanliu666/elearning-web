@@ -58,10 +58,12 @@
                   type="text"
                   :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
                 >
-                  <span v-if="scope.$index == 1">修改作业</span>
+                  <span v-if="scope.$index == 1">
+                    {{ scope.row.updateTime == '--' ? '上传作业' : '修改作业' }}
+                  </span>
                   <span
                     v-if="scope.$index == 2"
-                  >{{ scope.row.updateTime == '--' ? '上传评改' : '重新上传' }}
+                  >{{ scope.row.updateTime == '--' ? '上传评改' : '修改评改' }}
                   </span>
                 </el-button>
               </common-upload>
@@ -111,7 +113,7 @@ export default {
       let params = {
         filePath: '',
         fileName: '',
-        zipComment: encodeURIComponent('打包下载文件.zip'),
+        zipComment: encodeURIComponent('DownloadFiles.zip'),
         responseType: 'blob',
         emulateJSON: true
       }
