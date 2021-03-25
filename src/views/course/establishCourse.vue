@@ -1402,8 +1402,7 @@ export default {
       // 查一下章节有没有内容 做一下校验
       let upIndexArr = []
       params.contents.map((item, index) => {
-        // item.localName == '' ||
-        if (item.name == '' || item.type == '') {
+        if (item.content == '' || item.name == '' || item.type == '') {
           upIndexArr.push(index + 1)
         }
       })

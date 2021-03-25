@@ -94,7 +94,7 @@ export default {
       let params = {
         filePath: '',
         fileName: '',
-        zipComment: encodeURIComponent('打包下载文件.zip'),
+        zipComment: encodeURIComponent('DownloadFiles.zip'),
         responseType: 'blob',
         emulateJSON: true
       }
