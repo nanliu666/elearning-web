@@ -52,6 +52,7 @@
                 v-model="uploadData"
                 :before-upload="beforeUpload"
                 :multiple="false"
+                :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
                 @input="onSuccess(scope, items.id)"
               >
                 <el-button
