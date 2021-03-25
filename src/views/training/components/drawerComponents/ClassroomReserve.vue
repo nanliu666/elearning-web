@@ -14,7 +14,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
-        :page="page"
+        :page="queryInfo"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
@@ -121,15 +121,11 @@ export default {
   },
   data() {
     return {
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       // 请求参数
       queryInfo: {
-        pageNo: 1,
-        pageSize: 10
+        pageNo: 4,
+        pageSize: 10,
+        total: 0
       },
       tableLoading: false,
       tableData: [],
@@ -213,6 +209,7 @@ export default {
     },
     // 搜索
     handleSearch(params) {
+      this.queryInfo.pageNo = 1
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
@@ -253,7 +250,7 @@ export default {
         let { totalNum, data } = await getBookList(params)
         this.tableData = data
         this.handleUseTime()
-        this.page.total = totalNum
+        this.queryInfo.total = totalNum
       } catch (error) {
         this.$message.error(error.message)
       } finally {
