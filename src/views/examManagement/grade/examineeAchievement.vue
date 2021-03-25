@@ -100,7 +100,7 @@ import { getExamineeAchievement } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
 import examineeDialog from './compoments/examineeDialog'
-
+import moment from 'moment'
 const TABLE_COLUMNS = [
   {
     label: '姓名',
@@ -131,7 +131,9 @@ const TABLE_COLUMNS = [
     prop: 'answerTime',
     minWidth: 150,
     formatter: (row) => {
-      return row.answerTime && parseInt(row.answerTime) / 60
+      const timeList = _.split(row.examTime, '~')
+      const timeDiff = moment(timeList[1]).diff(moment(timeList[0]), 'minutes')
+      return timeDiff
     }
   },
   {

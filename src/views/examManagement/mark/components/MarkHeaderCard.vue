@@ -59,6 +59,7 @@
 <script>
 // 抽离查看评卷的与编辑评卷的公用头部
 import moment from 'moment'
+import { createCountdown } from '@/util/util'
 const STATUS_STATUS = [
   { value: '3', label: '待评卷', type: 'success' },
   { value: '4', label: '阅卷中', type: 'danger' },
@@ -85,22 +86,7 @@ export default {
     // 获取考试用时
     getExamUseTime() {
       const diffTime = moment(this.data.answerEndTime).diff(moment(this.data.answerBeginTime), 'ms')
-      return this.createCountdown(diffTime)
-    },
-    /**
-     * 入参：差异时间
-     * 返回：倒计时
-     * 作用：创建一个倒计时
-     */
-    createCountdown(diffTime) {
-      const hoursTime = moment.duration(diffTime).hours()
-      const minutesTime = moment.duration(diffTime).minutes()
-      const secondsTime = moment.duration(diffTime).seconds()
-      const formatHours = `${hoursTime < 10 ? `0${hoursTime}` : hoursTime}`
-      const formatMinutes = `${minutesTime < 10 ? `0${minutesTime}` : minutesTime}`
-      const formatSeconds = `${secondsTime < 10 ? `0${secondsTime}` : secondsTime}`
-      const targetTime = `${formatHours} : ${formatMinutes} : ${formatSeconds}`
-      return targetTime
+      return createCountdown(diffTime)
     }
   }
 }

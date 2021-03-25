@@ -44,6 +44,20 @@ export const addLine = (content) => {
   return HTML
 }
 /**
+ * 创建一个00:00:00的时间格式
+ * @param {string} html
+ */
+export const createCountdown = (diffTime) => {
+  const hoursTime = moment.duration(diffTime).hours()
+  const minutesTime = moment.duration(diffTime).minutes()
+  const secondsTime = moment.duration(diffTime).seconds()
+  const formatHours = `${hoursTime < 10 ? `0${hoursTime}` : hoursTime}`
+  const formatMinutes = `${minutesTime < 10 ? `0${minutesTime}` : minutesTime}`
+  const formatSeconds = `${secondsTime < 10 ? `0${secondsTime}` : secondsTime}`
+  const targetTime = `${formatHours} : ${formatMinutes} : ${formatSeconds}`
+  return targetTime
+}
+/**
  * 去除字符串中所有的html标签
  * @param {string} html
  */
