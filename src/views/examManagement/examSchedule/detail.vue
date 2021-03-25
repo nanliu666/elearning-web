@@ -44,7 +44,9 @@
         <ul class="details-ul">
           <li class="details-li">
             <span class="li-label">考试分类：</span>
-            <span class="li-value">{{ examDetail.categoryName }}</span>
+            <span class="li-value">{{
+              examDetail.categoryName ? examDetail.categoryName : '未分类'
+            }}</span>
           </li>
           <li class="details-li">
             <span class="li-label">考试用卷：</span>
@@ -173,14 +175,14 @@
                     : '否'
                 }}</span>
               </div>
-              <div class="content">
+              <!-- <div class="content">
                 <span>是否启用试卷预生成服务：</span>
                 <span>{{
                   examDetail.preCreate && examDetail.preCreateValue
                     ? `试卷最多预生成${examDetail.preCreateValue}份`
                     : '否'
                 }}</span>
-              </div>
+              </div> -->
               <div class="content">
                 <span>是否自动保存答案到服务器：</span>
                 <span>{{ examDetail.isHold ? '是' : '否' }}</span>
@@ -210,10 +212,10 @@
                 <span>是否允许考生查看答卷：</span>
                 <span>{{ examDetail.openAnswerSheet ? '允许' : '不允许' }}</span>
               </div>
-              <div class="content">
+              <!-- <div class="content">
                 <span>是否允许考生自己评卷：</span>
                 <span>{{ examDetail.selfMarking ? '允许' : '不允许' }}</span>
-              </div>
+              </div> -->
               <div class="content">
                 <span>是否允许考生查看标准答案：</span>
                 <span>{{ examDetail.publicAnswers ? '允许' : '不允许' }}</span>
@@ -229,7 +231,7 @@
               评卷策略：
             </div>
             <div class="li-content">
-              <div class="content">
+              <!-- <div class="content">
                 <span>是否允许评卷人修改考生答案：</span>
                 <span>{{ examDetail.modifyAnswer ? '允许' : '不允许' }}</span>
               </div>
@@ -239,7 +241,7 @@
               >
                 <span>是否允许修改考生客观题答案及其评分结果：</span>
                 <span>{{ examDetail.modifyLimit ? '允许' : '不允许' }}</span>
-              </div>
+              </div> -->
               <div class="content">
                 <span>评卷限定最高得分：</span>
                 <span>{{
