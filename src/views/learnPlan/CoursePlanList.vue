@@ -317,14 +317,17 @@ const TABLE_COLUMNS = [
   // },
   {
     label: '状态',
-    formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || ''),
+    formatter: (row) => ({ '1': '未开始', '2': '进行中', '3': '已结束' }[row.status] || '-'),
     prop: 'status',
     minWidth: 100
   },
   {
     label: '课程时间',
     prop: 'time',
-    formatter: (row) => row.startTime + '~' + row.endTime,
+    formatter: (row) => {
+      if (row.startTime && row.endTime) return row.startTime + '~' + row.endTime
+      else return '-'
+    },
     minWidth: 300
   }
 ]
