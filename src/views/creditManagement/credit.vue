@@ -18,7 +18,7 @@
             style="margin-bottom:10px;"
           />
           <el-tree
-            ref="orgTree"
+            ref="categoryTree"
             v-loading="treeLoading"
             :filter-node-method="filterNode"
             :data="treeData"
@@ -228,6 +228,7 @@ export default {
       deep: true
     },
     treeSearch(val) {
+      console.log('val:', val)
       this.$refs.categoryTree.filter(val)
     }
   },
@@ -258,7 +259,7 @@ export default {
     },
     filterNode(value, data) {
       if (!value) return true
-      return data.name.indexOf(value) !== -1
+      return data.orgName.indexOf(value) !== -1
     },
     nodeClick(data) {
       this.activeCategory = data
