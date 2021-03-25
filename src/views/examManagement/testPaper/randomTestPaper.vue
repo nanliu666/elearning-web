@@ -365,14 +365,8 @@ export default {
       },
       loading: false,
       column: {
-        page: {
-          currentPage: 1,
-          pageSize: 10,
-          pageNo: 1,
-          total: 0
-        },
         span: 20,
-        prop: 'orgId',
+        prop: 'categoryIds',
         itemType: 'treeSelect',
         label: '试题来源',
         required: true,
@@ -403,7 +397,6 @@ export default {
       surplusScore: 0,
       valid: false,
       options: [],
-      props: { multiple: true },
       tableData: [],
       tableItem: {
         id: '1',
@@ -448,11 +441,14 @@ export default {
       this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
     this.copy = this.$route.query.copy
-    this.getData()
+    //  获取试卷分类的数据
     this.getTestPaperCategory()
     if (!this.$route.query.id) {
       this.tableData = []
       this.pushItem()
+    } else {
+      // 编辑获取数据
+      this.getData()
     }
   },
   beforeRouteLeave(to, from, next) {
@@ -468,11 +464,11 @@ export default {
      * @desc  试题类型改变，试题来源重新请求
      * @params data 类型的值，row 当前行改变的数据
      * */
-    handeleTestQuestions(data, row) {
+    async handeleTestQuestions(data, row) {
       row.categoryIds = []
       row.totalQuestionNum = ''
       row.questionNum = ''
-      this.getTopicCategory(data, row.column)
+      row.column.props.treeParams.data = await this.getTopicCategory(data)
     },
     /**
      * @author fuanfenda
@@ -492,21 +488,15 @@ export default {
      * @desc 获取试题来源，并绑定试题来源数据
      * @param relateType 试题类型 column 试题来源potions
      * */
-    getTopicCategory(relateType = '', column) {
+    async getTopicCategory(relateType = '') {
       let params = {
         type: '0',
         relateType: relateType,
         expireStatus: '1'
       }
-      getcategoryTree(params).then(async (res) => {
-        this.column.props.treeParams.data = res
-
-        let categoryObject = await this.category(relateType)
-        column.props.treeParams.data = [
-          { id: '0', name: '未分类', relatedNum: categoryObject.totalNum },
-          ...res
-        ]
-      })
+      const treeData = await getcategoryTree(params)
+      let categoryObject = await this.category(relateType)
+      return [{ id: '0', name: '未分类', relatedNum: categoryObject.totalNum }, ...treeData]
     },
     /***
      * @author guanfendca
@@ -535,11 +525,11 @@ export default {
      * @author guanfenda
      * @desc 添加试题
      * */
-    pushItem() {
+    async pushItem() {
       let tableItem = _.cloneDeep(this.tableItem)
       tableItem.column = _.cloneDeep(this.column)
       this.tableData.push(tableItem)
-      this.getTopicCategory(tableItem.type, tableItem.column)
+      tableItem.column.props.treeParams.data = await this.getTopicCategory(tableItem.type)
     },
     /**
      * @author guanfenda
@@ -566,16 +556,21 @@ export default {
       }
       this.loading = true
       getTestPaper(params)
-        .then((res) => {
+        .then(async (res) => {
           this.form = res
-          res.randomSettings.map((data) => {
-            data.column = _.cloneDeep(this.column)
-            // 前端实现自己组装未分类的数据
-            if (_.isEmpty(data.categoryIds)) {
-              data.categoryIds = ['0']
-            }
-            this.getTopicCategory(data.type, data.column)
-          })
+          await Promise.all(
+            _.map(res.randomSettings, async (item) => {
+              return (async () => {
+                item.column = _.cloneDeep(this.column)
+                // 前端实现自己组装未分类的数据
+                if (_.isEmpty(item.categoryIds)) {
+                  item.categoryIds = ['0']
+                }
+                const data = await this.getTopicCategory(item.type)
+                item.column.props.treeParams.data = data
+              })()
+            })
+          )
           this.tableData = res.randomSettings
           !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
         })
