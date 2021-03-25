@@ -28,7 +28,7 @@
             :span="5"
             style="color:#333;font-size: 18px;"
           >
-            {{ name }}
+            {{ name ? name : '--' }}
           </el-col>
           <el-col :span="8">
             <span
@@ -59,7 +59,7 @@
             手机号码：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.phonenum }}
+            {{ teacherData.phonenum ? teacherData.phonenum : '--' }}
           </el-col>
           <el-col
             :span="5"
@@ -68,7 +68,7 @@
             电子邮箱：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.userEmail }}
+            {{ teacherData.userEmail ? teacherData.phonenum : '--' }}
           </el-col>
         </el-row>
         <el-row>
@@ -79,8 +79,9 @@
             性别：
           </el-col>
           <el-col :span="7">
-            <span v-if="teacherData.sex == 1">男</span>
-            <span v-if="teacherData.sex == 0">女</span>
+            <span v-if="teacherData.sex === '1'">男</span>
+            <span v-if="teacherData.sex === '0'">女</span>
+            <span v-if="teacherData.sex === ''">--</span>
           </el-col>
           <el-col
             :span="5"
@@ -101,7 +102,7 @@
             讲师级别：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherLevel }}
+            {{ teacherData.teacherLevel ? teacherData.teacherLevel : '--' }}
           </el-col>
           <el-col
             :span="5"
@@ -110,7 +111,7 @@
             讲师职称：
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherTitle }}
+            {{ teacherData.teacherTitle ? teacherData.teacherTitle : '--' }}
           </el-col>
         </el-row>
         <el-row>
