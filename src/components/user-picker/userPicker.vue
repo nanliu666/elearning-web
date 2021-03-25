@@ -105,24 +105,13 @@
         </div>
 
         <div
-          v-for="item of _(selected)
-            .sortBy(['type', 'bizName'])
-            .uniqBy('bizId')
-            .value()"
-          :key="item.bizId"
+          v-for="item in selected"
+          :key="item.userId"
           class="info flex flex-justify-between flex-items"
         >
           <div class="flex flex-justify-between flex-items">
-            <!-- 用户图标 -->
-            <i
-              v-if="item.type == 'Org'"
-              class="iconfont icon-usercircle2 imgss"
-            />
-            <i
-              v-else-if="item.type === 'User'"
-              class="iconfont  icon-approval-checkin-bicolor imgs"
-            />
-            {{ item.phoneNum ? item.name + '(' + item.phoneNum + ')' : item.name }}
+            <i class="iconfont  icon-approval-checkin-bicolor imgs" />
+            {{ getSelectedName(item) }}
           </div>
           <div class="icon">
             <i
@@ -155,6 +144,8 @@
 import { getOrgUserChild, getOuterUser } from '@/api/system/user'
 import ComEmpty from '@/components/common-empty/empty'
 import _ from 'lodash'
+import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
+
 const SEARCH_DELAY = 200
 const NODE_TYPE = {
   All: 'All',
@@ -262,11 +253,11 @@ export default {
       return {
         disabled: 'disabled',
         label: function(data) {
-          let { bizName, phoneNum, phonenum } = data
+          let { name, phoneNum, phonenum } = data
           // name = name || bizName
           phoneNum = phoneNum || phonenum
-          if (!phoneNum) return bizName
-          return bizName + '(' + phoneNum + ')'
+          if (!phoneNum) return name
+          return name + '(' + phoneNum + ')'
         },
         isLeaf: 'isLeaf',
         children: 'children'
@@ -302,7 +293,6 @@ export default {
       }
     },
     selected(val) {
-      console.log(val)
       const { orgTree, orgTreeSearch } = this.$refs
       ;[orgTree, orgTreeSearch].forEach((ref) => {
         if (_.isNil(ref)) return
@@ -337,6 +327,14 @@ export default {
     window.removeEventListener('scroll', this.listenerScroll)
   },
   methods: {
+    getSelectedName(item) {
+      const { name, phoneNum, phonenum } = item
+      const phone = phoneNum || phonenum
+      if (phone) {
+        return name + '(' + phone + ')'
+      }
+      return name
+    },
     listenerScroll() {
       window.addEventListener('scroll', this.debounceOuterScrollHandler, true)
     },
@@ -353,17 +351,17 @@ export default {
       this.isIndeterminate = false
       // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
-        _.pullAllBy(this.selected, this.outerData, 'bizId')
+        _.pullAllBy(this.selected, this.outerData, 'userId')
       } else {
         // 半选换全选需要把未选上的加入
         if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
-          this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'bizId')
+          this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'userId')
         } else {
           // 全选需要去重
           _.each(this.outerData, (item) => {
             this.handleSelectUser(item)
           })
-          this.selected = _.uniqBy(this.selected, 'bizId')
+          this.selected = _.uniqBy(this.selected, 'userId')
         }
       }
     },
@@ -378,9 +376,16 @@ export default {
      * @param {object} node 树形组件的node结节
      */
     handleCheckItem(node, { checkedNodes }) {
+      if (node.type === 'Org') {
+        getUserByOrgId({ orgId: node.id }).then((res = []) => {
+          res.forEach((item) => {
+            this.handleCheckItem(item, { checkedNodes })
+          })
+        })
+      }
       // 如果disabled则不能check项
       if (_.get(node, this.treeProps.disabled)) return
-      if (_.some(checkedNodes, (item) => item.bizId === node.bizId)) {
+      if (_.some(checkedNodes, (item) => item.userId === node.userId)) {
         // this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
         if (node.type !== NODE_TYPE.User) {
           if (!this.onlyUser) {
@@ -405,9 +410,9 @@ export default {
       if (outerIndex !== -1) {
         this.checkedUsers.splice(outerIndex, 1)
       }
-      const { bizId } = item
-      if (_.find(this.selected, { bizId })) {
-        this.selected = _.reject(this.selected, { bizId })
+      const { userId } = item
+      if (_.find(this.selected, { userId })) {
+        this.selected = _.reject(this.selected, { userId })
       } else {
         // 当前节点不在selected中则父节点被勾选时，取消勾选子节点
         this.selected = _(this.selected)
@@ -438,7 +443,22 @@ export default {
     },
 
     handleSubmit() {
-      this.$emit('input', _.uniqBy(this.selected, 'bizId'))
+      const res = []
+      this.selected.forEach((s) => {
+        let { name, orgName, department, phoneNum, phonenum, userId, workNo } = s
+
+        department = orgName || department
+        phonenum = phoneNum || phonenum
+        const item = {
+          name,
+          department,
+          phonenum,
+          userId,
+          workNo
+        }
+        res.push(item)
+      })
+      this.$emit('input', res)
       this.close()
     },
     handleSelectUser(user) {

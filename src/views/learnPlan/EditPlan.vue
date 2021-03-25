@@ -93,6 +93,7 @@
           ref="editPerson"
           :plan-id="id"
           :user-list.sync="formData.participantsList"
+          :selected-list="formData.participantsList"
         />
       </el-col>
     </el-row>
@@ -250,9 +251,10 @@ export default {
         })
       })
       data.participantsList.map((item) => {
-        item.department = item.orgName != '-' ? item.orgName : ''
-        item.phonenum = item.phoneNum
+        item.department = item.orgName || item.department
+        item.phonenum = item.phoneNum || item.phonenum
         delete item.orgName
+        delete item.phoneNum
         return item
       })
       let func

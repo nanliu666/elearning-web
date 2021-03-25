@@ -431,13 +431,13 @@ export default {
      * 处理停用启用
      */
     handleStatus(row) {
-      const statusText = row.status == 0 ? '停用' : '启用'
+      const statusText = row.status == 1 ? '停用' : '启用'
       const stopContent = '您确定要停用该教室吗？'
       const reserveTips = '该教室已被预订，停用后，后续不可再预订，确定继续此操作吗？'
       const stopTips = row.isReserve ? reserveTips : stopContent
       const startContent = '您确定要启用该教室吗？'
       const params = { status: row.status == 0 ? 1 : 0, id: row.id }
-      this.$confirm(`${row.status == 0 ? stopTips : startContent}`, '提醒', {
+      this.$confirm(`${row.status == 1 ? stopTips : startContent}`, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

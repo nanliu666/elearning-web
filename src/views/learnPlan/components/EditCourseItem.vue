@@ -37,7 +37,6 @@
           >设置前置条件</span>
         </el-tooltip>
       </div>
-
       <template slot="studyFrequency">
         <el-input-number
           v-model="course.studyFrequency"
@@ -152,6 +151,7 @@
 import Preview from '@/views/examManagement/examSchedule/previewlearnPlan'
 import moment from 'moment'
 import { validateTimeList } from './config'
+import { getCourseListData } from '@/api/course/course'
 export default {
   name: 'EditCourseItem',
   components: {
@@ -184,9 +184,9 @@ export default {
           itemType: 'checkbox',
           label: '通过条件',
           options: [
-            { label: '教师评定', value: '1' },
-            { label: '考试通过', value: '2' },
-            { label: '达到课程学时', value: '3' }
+            { label: '教师评定', value: 'a' },
+            { label: '考试通过', value: 'b' },
+            { label: '达到课程学时', value: 'c' }
           ],
           offset: 4,
           required: true
@@ -223,6 +223,14 @@ export default {
     }
   },
   created() {
+    let params = {
+      catalogId: this.course.courseId,
+      pageNo: 1,
+      pageSize: 1
+    }
+    getCourseListData(params).then((res) => {
+      this.course.passRule = res.data[0].passCondition.split(',')
+    })
     console.log(this.course)
     // this.course.timeList = [{ list: ['', ''] }]
   },

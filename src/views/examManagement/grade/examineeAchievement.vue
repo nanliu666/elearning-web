@@ -132,7 +132,7 @@ const TABLE_COLUMNS = [
     minWidth: 150,
     formatter: (row) => {
       const timeList = _.split(row.examTime, '~')
-      const timeDiff = moment(timeList[1]).diff(moment(timeList[0]), 'minutes')
+      const timeDiff = Math.ceil(moment(timeList[1]).diff(moment(timeList[0]), 'seconds') / 60)
       return timeDiff
     }
   },
