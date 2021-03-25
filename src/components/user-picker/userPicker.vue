@@ -111,7 +111,7 @@
         >
           <div class="flex flex-justify-between flex-items">
             <i class="iconfont  icon-approval-checkin-bicolor imgs" />
-              {{getSelectedName(item)}}
+            {{ getSelectedName(item) }}
           </div>
           <div class="icon">
             <i
@@ -377,8 +377,8 @@ export default {
      */
     handleCheckItem(node, { checkedNodes }) {
       if (node.type === 'Org') {
-        getUserByOrgId({orgId: node.id}).then(( res = [] ) => {
-          res.forEach(item => {
+        getUserByOrgId({ orgId: node.id }).then((res = []) => {
+          res.forEach((item) => {
             this.handleCheckItem(item, { checkedNodes })
           })
         })
@@ -444,7 +444,7 @@ export default {
 
     handleSubmit() {
       const res = []
-      this.selected.forEach(s => {
+      this.selected.forEach((s) => {
         let { name, orgName, department, phoneNum, phonenum, userId, workNo } = s
 
         department = orgName || department

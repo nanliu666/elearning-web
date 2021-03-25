@@ -318,6 +318,12 @@
                 <span v-if="row.status === 1">未开始</span>
                 <span v-if="row.status === 2">进行中</span>
               </template>
+              <template
+                slot="people"
+                slot-scope="{ row }"
+              >
+                <span>{{typeof row.people !== 'number' ? '未限制' : row.people}}</span>
+              </template>
               <!--培训时间-->
               <template
                 slot="trainBeginTime"
@@ -468,7 +474,8 @@ const TABLE_COLUMNS = [
   {
     label: '计划人数',
     prop: 'people',
-    minWidth: 80
+    minWidth: 80,
+    slot: true
   },
   {
     label: '培训方式',
