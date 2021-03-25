@@ -5,6 +5,18 @@
       :model="course"
       :columns="columns"
     >
+      <template slot="passRule-label">
+        通过条件
+        <el-tooltip
+          class="item"
+          effect="dark"
+          content="修改通过条件唯一替代本次培训"
+          placement="top-start"
+        >
+          <i class="el-icon-question" />
+        </el-tooltip>
+      </template>
+
       <div
         slot="courseName"
         class="course-name-input"
@@ -37,7 +49,7 @@
         <el-button
           icon="el-icon-plus"
           circle
-          style="display: block; margin-bottom: 12px;"
+          style="display: block; margin-bottom: 12px"
           size="medium"
           :disabled="course.timeList.length >= 5"
           @click="addTimeList"
@@ -61,7 +73,7 @@
             v-show="course.timeList.length > 1"
             circle
             icon="el-icon-minus"
-            style="margin-left: 5px;"
+            style="margin-left: 5px"
             size="mini"
             @click="delTimeList(index)"
           ></el-button>

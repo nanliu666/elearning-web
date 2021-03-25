@@ -68,6 +68,7 @@
 
 <script>
 import { downloadZip } from '@/api/learnArrange'
+import { downLoadFile } from '@/util/util'
 
 export default {
   name: 'StuffTrain',
@@ -107,29 +108,7 @@ export default {
       })
     },
     download(row) {
-      const { fileName } = row
-      const link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
-      link.href = `http://172.16.4.243:8080/g1/learn/${fileName}?download=1`
-      link.download = fileName
-      var event = document.createEvent('MouseEvents')
-      event.initMouseEvent(
-        'click',
-        true,
-        false,
-        window,
-        0,
-        0,
-        0,
-        0,
-        0,
-        false,
-        false,
-        false,
-        false,
-        0,
-        null
-      )
-      link.dispatchEvent(event)
+      downLoadFile(row)
     }
   }
 }
