@@ -157,7 +157,7 @@ export default {
           span: 24,
           options: [
             { label: '整卷模式', value: 1 },
-            { label: '逐卷模式', value: 2 }
+            { label: '逐题考试', value: 2 }
           ]
         },
         {
