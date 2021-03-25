@@ -308,40 +308,47 @@ export default {
       const scheduleList = _.get(this.schedule, 'data')
       const courseList = _.get(this.course, 'data')
       const examineList = _.get(this.examine, 'data')
-      const validateSchedule = Validate.validateSchedule(
-        scheduleList,
-        '线下日程',
-        'todoDate',
-        this.trainTimeInVuex
-      )
-      const validateCourse = Validate.validateSchedule(
-        courseList,
-        '在线课程',
-        'classTime',
-        this.trainTimeInVuex
-      )
-      const validateExamine = Validate.validateSchedule(
-        examineList,
-        '考试安排',
-        'examTime',
-        this.trainTimeInVuex
-      )
-      Promise.all([validateSchedule, validateCourse, validateExamine]).then((res) => {
-        const isEverySuccess = _.every(res, Boolean)
-        if (isEverySuccess) {
-          return new Promise((resolve) => {
-            const trainOfflineTodo = _.cloneDeep(this.schedule.data)
-            _.map(trainOfflineTodo, (item) => {
-              return (item.todoTime = item.todoTimeParams)
-            })
-            resolve({
-              signIn: this.signIn,
-              trainOfflineTodo,
-              trainOnlineCourse: this.course.data,
-              trainExam: this.examine.data
-            })
-          })
-        }
+      if (_.some([scheduleList, courseList, examineList], (item) => _.size(item) > 0)) {
+        const validateSchedule = Validate.validateSchedule(
+          scheduleList,
+          '线下日程',
+          'todoDate',
+          this.trainTimeInVuex
+        )
+        const validateCourse = Validate.validateSchedule(
+          courseList,
+          '在线课程',
+          'classTime',
+          this.trainTimeInVuex
+        )
+        const validateExamine = Validate.validateSchedule(
+          examineList,
+          '考试安排',
+          'examTime',
+          this.trainTimeInVuex
+        )
+        return Promise.all([validateSchedule, validateCourse, validateExamine]).then((res) => {
+          const isEverySuccess = _.every(res, Boolean)
+          if (isEverySuccess) {
+            return this.returnData()
+          }
+        })
+      } else {
+        return this.returnData()
+      }
+    },
+    returnData() {
+      return new Promise((resolve) => {
+        const trainOfflineTodo = _.cloneDeep(this.schedule.data)
+        _.map(trainOfflineTodo, (item) => {
+          return (item.todoTime = item.todoTimeParams)
+        })
+        resolve({
+          signIn: this.signIn,
+          trainOfflineTodo,
+          trainOnlineCourse: this.course.data,
+          trainExam: this.examine.data
+        })
       })
     },
     // 新增与编辑考试
