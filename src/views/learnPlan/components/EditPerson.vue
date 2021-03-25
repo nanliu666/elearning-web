@@ -21,6 +21,16 @@
       :config="tableConfig"
       :data="currentList"
     >
+      <template slot="department" slot-scope="{ row }">
+        <div>
+          {{row.department || '-'}}
+        </div>
+      </template>
+      <template slot="phonenum" slot-scope="{ row }">
+        <div>
+          {{row.phonenum || '-'}}
+        </div>
+      </template>
       <template #multiSelectMenu="{ selection }">
         <el-button
           style="margin-bottom: 0"
@@ -52,7 +62,7 @@
 
     <user-picker
       select-type="Org,OuterUser"
-      :value="userList"
+      :value="selectedList"
       :visible.sync="userPicking"
       @input="handleSelect"
     />
@@ -79,12 +89,13 @@ const TABLE_COLUMNS = [
   {
     label: '所在部门',
     prop: 'department',
-    minWidth: 100
+    minWidth: 100,
+    slot: true
   },
   {
     label: '手机号码',
     slot: true,
-    prop: 'phoneNum',
+    prop: 'phonenum',
     minWidth: 100
   },
   {
@@ -119,7 +130,11 @@ export default {
     userList: {
       type: Array,
       default: () => []
-    }
+    },
+    selectedList: {
+      type: Array,
+      default: () => []
+    },
   },
   data() {
     return {
@@ -143,55 +158,15 @@ export default {
       return this.userList.slice(size * (no - 1), size * no)
     }
   },
-  watch: {
-    userList: {
-      handler(list) {
-        list.forEach((item) => {
-          item.orgName = item.orgName || '-'
-          item.phoneNum = item.phoneNum || item.phonenum || '-'
-          item.department = item.department || item.orgName || '-'
-        })
-      },
-      deep: true
-    }
-  },
   methods: {
     handleAddUser() {
       this.userPicking = true
     },
-    async handleSelect(users) {
-      const orgs = _.remove(users, { type: 'Org' })
-      if (orgs.length > 0) {
-        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
-        this.$emit('update:user-list', _.concat(users, orgUsers))
-      } else {
-        this.$emit('update:user-list', users)
-      }
+    handleSelect(users) {
+      console.log(users)
+      this.$emit('update:user-list', users)
     },
-    // 拉取公司的直属员工
-    async getOrgUsers(orgId) {
-      return new Promise((resolve) => {
-        getUserByOrgId({ orgId }).then((res) => {
-          const users = _.map(res, (item) =>
-            _.assign(
-              {
-                bizId: item.userId,
-                bizName: item.name,
-                orgName: item.orgName,
-                department: item.orgName || '-',
-                departmentId: item.orgId,
-                phonenum: item.phoneNum || '-',
-                studyPlanId: this.planId,
-                type: 'User',
-                isLeaf: true
-              },
-              item
-            )
-          )
-          resolve(users)
-        })
-      })
-    },
+
     handleDelete(row) {
       this.$confirm('你确定要删除该人员?', '提示', {
         confirmButtonText: '确定',
