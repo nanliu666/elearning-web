@@ -322,7 +322,7 @@
                 slot="people"
                 slot-scope="{ row }"
               >
-                <span>{{typeof row.people !== 'number' ? '未限制' : row.people}}</span>
+                <span>{{ typeof row.people !== 'number' ? '未限制' : row.people }}</span>
               </template>
               <!--培训时间-->
               <template
