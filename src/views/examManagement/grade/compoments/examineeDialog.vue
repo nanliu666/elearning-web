@@ -121,6 +121,7 @@ export default {
         prop: 'examTime',
         itemType: 'datePicker',
         type: 'datetimerange',
+        valueFormat: 'yyyy-MM-dd HH:mm:ss',
         label: '考试时间',
         span: 24,
         required: true
