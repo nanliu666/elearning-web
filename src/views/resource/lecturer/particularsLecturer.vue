@@ -79,8 +79,9 @@
             性别：
           </el-col>
           <el-col :span="7">
-            <span v-if="teacherData.sex == 1">男</span>
-            <span v-if="teacherData.sex == 0">女</span>
+            <span v-if="teacherData.sex === '1'">男</span>
+            <span v-if="teacherData.sex === '0'">女</span>
+            <span v-if="teacherData.sex === ''">--</span>
           </el-col>
           <el-col
             :span="5"
