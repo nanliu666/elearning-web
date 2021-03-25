@@ -102,6 +102,7 @@ export default {
         },
         error(err) {
           fileData.isError = true
+          that.$emit('on-error', err)
           if (err.code === 614) {
             that.$message.error('上传失败，已存在相同文件')
           } else {
