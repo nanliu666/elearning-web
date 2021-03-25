@@ -113,8 +113,7 @@
 // 手工评卷列表页
 import SearchPopover from '@/components/searchPopOver/index'
 import { listManualEvaluation } from '@/api/examManage/mark'
-import { getExamList } from '@/api/examManage/schedule'
-import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { getExamList, getCreatUsers } from '@/api/examManage/schedule'
 import { getCategoryList } from '@/api/examManage/category'
 import moment from 'moment'
 let TABLE_COLUMNS = [
@@ -250,21 +249,7 @@ const SEARCH_CONFIG = {
       config: { optionLabel: 'name', optionValue: 'userId' },
       loading: false,
       noMore: false,
-      pageNo: 2,
-      loadMoreFun(item) {
-        if (item.loading || item.noMore) return
-        item.loading = true
-        getCreatUsers().then((res) => {
-          if (res.length > 0) {
-            item.options.push(...res)
-            item.pageNo += 1
-            item.loading = false
-          } else {
-            item.noMore = true
-            item.loading = false
-          }
-        })
-      }
+      pageNo: 1
     }
   ]
 }
@@ -327,13 +312,24 @@ export default {
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
-    if (_.size(creatorId.options) === 0) {
-      getCreatUsers().then((res) => {
-        if (creatorId) {
-          creatorId.options.push(...res)
+    getCreatUsers({ pageNo: 1, pageSize: 10, examType: 0 }).then((res) => {
+      creatorId.options.push(...res.data)
+    })
+    const loadMoreFun = (item) => {
+      if (item.loading || item.noMore) return
+      item.loading = true
+      getCreatUsers({ pageNo: item.pageNo, pageSize: 10, examType: 0 }).then((res) => {
+        if (res.data.length > 0) {
+          item.options.push(...res.data)
+          item.pageNo += 1
+          item.loading = false
+        } else {
+          item.noMore = true
+          item.loading = false
         }
       })
     }
+    creatorId.loadMoreFun = loadMoreFun
     this.loadTableData()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
     getCategoryList().then((res) => {
