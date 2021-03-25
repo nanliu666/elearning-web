@@ -59,7 +59,7 @@
               &nbsp;<el-button
                 type="text"
                 @click="isaddCatalog(data)"
-              >确认1</el-button>
+              >确认</el-button>
               <span @click="isEditFn(data)"> 取消</span>
               <!-- <span @click="isEdit = false"> 取消</span> -->
             </span>
@@ -358,7 +358,7 @@ export default {
               }
             })
           }
-
+          this.compileNewly = ''
           this.isEdit = false
           this.dataAddCatalog.input = ''
           this.$message({
@@ -393,7 +393,7 @@ export default {
             .listTeacherCategory({ test: '123', parentId: params.id })
             .then((res) => {
               // 去找到相应的数据push进去
-
+              this.compileNewly = ''
               if (params.id) {
                 this.data.map((item) => {
                   if (item.id == params.id) {
@@ -466,12 +466,14 @@ export default {
       }
       //移动
       if ($event === 'move') {
+        this.compileNewly = ''
         this.dialogFormVisible = true
         this.form.name = data.label
         this.form.optionData = data
       }
       // 删除
       if ($event === 'del') {
+        this.compileNewly = ''
         if (data.count) {
           this.$message({
             message: `您选择的${data.btnshow ? '分组' : '分类'}下存在数据，请调整后再删除！`,
