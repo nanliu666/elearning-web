@@ -19,7 +19,7 @@
           closable
           @close="handleRemove(user)"
         >
-          {{ user.bizName }}
+          {{ user.bizName || user.name }}
         </el-tag>
         <el-tag
           v-if="userList.length > 3"
