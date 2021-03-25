@@ -300,7 +300,8 @@ export default {
             },
             trainPass: {
               name: '通过率',
-              content: 0
+              content: 0,
+              isPercent: true
             }
           }
         }
@@ -323,7 +324,8 @@ export default {
           },
           passRate: {
             name: '考试通过率',
-            content: 0
+            content: 0,
+            isPercent: true
           }
         }
       },
@@ -357,7 +359,8 @@ export default {
       this.getData()
     },
     dateChange(date) {
-      const [startTime, endTime] = date
+      date = date || []
+      const [startTime = '', endTime = ''] = date
       Object.assign(this.query, { startTime, endTime })
       this.getData()
     },
@@ -399,16 +402,14 @@ export default {
       })
       studyTrain(this.query).then((res = {}) => {
         Object.keys(res).forEach((key) => {
-          let value = res[key]
-          this.study.train.data[key].content = key === 'trainPass' ? value + '%' : value
+          this.study.train.data[key].content = res[key]
         })
       })
       getExam(this.query).then((res = {}) => {
         Object.keys(res).forEach((key) => {
-          let value = res[key]
           const data = this.exam.data
           if (data.hasOwnProperty(key)) {
-            data[key].content = key === 'passRate' ? value + '%' : value
+            data[key].content = res[key]
           }
         })
       })
