@@ -291,6 +291,7 @@ export default {
     },
     async handleDelete(data) {
       let id = null
+
       if (Array.isArray(data)) {
         if (_.some(data, (item) => item.examNum > 0)) {
           id = _.map(data, (item) => item.id).join(',')
@@ -314,7 +315,7 @@ export default {
             this.$refs.table.clearSelection()
             this.loadTree()
             this.loadData()
-            this.$message.success('已成功删除已选试题！')
+            this.$message.success(`已成功删除${Array.isArray(data) ? _.size(data) : '1'}条试题`)
           })
         })
         .catch()
