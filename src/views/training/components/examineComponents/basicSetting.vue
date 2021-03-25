@@ -260,7 +260,7 @@ export default {
         '考试日期',
         this.entryCName
       )
-      this.$refs.form.validateField('testPaper')
+      // this.$refs.form.validateField('testPaper')
     },
     loadCoordinator(params) {
       return getWorkList(_.assign(params, { orgId: 0 }))

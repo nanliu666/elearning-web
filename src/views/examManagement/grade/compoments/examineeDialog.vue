@@ -78,7 +78,7 @@
 
 <script>
 import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
-
+import moment from 'moment'
 export default {
   name: 'ExamineeDialog',
   components: {},
@@ -208,10 +208,12 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { answerTime, examTime, ...others } = newVal
+        let { examTime, ...others } = newVal
+        const timeList = _.split(examTime, '~')
+        const timeDiff = Math.ceil(moment(timeList[1]).diff(moment(timeList[0]), 'seconds') / 60)
         this.form = {
           ...others,
-          answerTime: answerTime / 60,
+          answerTime: timeDiff,
           examTime: examTime.split('~')
         }
       },
