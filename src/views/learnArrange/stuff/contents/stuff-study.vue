@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import { downloadZip } from '@/api/learnArrange'
 import { downLoadFile } from '@/util/util'
+import { getStore } from '@/util/store.js'
 
 export default {
   name: 'StuffStudy',
@@ -86,7 +86,7 @@ export default {
     }
   },
   methods: {
-        // 打包下载
+    // 打包下载
     downloadZip() {
       let params = {
         filePath: [],
