@@ -13,7 +13,7 @@ export class Validate {
     if (_.isEmpty(trainTime)) {
       callback(new Error('请先选择培训时间'))
     } else {
-      const isLegalTime = this.isLegalTimeFun(date, trainTime)
+      const isLegalTime = this.isLegalTimeFun(date, trainTime, title)
       const timeLegalTips = `${title}日期要在${entryCName}日期（${trainTime[0]}至${trainTime[1]}）之间`
       if (isLegalTime) {
         callback()
@@ -27,14 +27,16 @@ export class Validate {
    * @param {*} time 当前比较日期
    * @returns 当前日期是否符合时间格式, true为符合格式，false为不符合格式
    */
-  static isLegalTimeFun(time, trainTime) {
+  static isLegalTimeFun(time, trainTime, title) {
     const beginTime = _.isArray(time) ? time[0] : time
     const endTime = _.isArray(time) ? time[1] : time
+    // 考试的弹窗需要比较到秒，其他需要比较到天
+    const typeParmas = title === '考试安排' || title === '考试日期' ? 'seconds' : 'days'
     // 2个日期介于两个日期之间
     // 培训开始时间需要在之前
-    const isLegalBeginTime = moment(trainTime[0]).isSameOrBefore(moment(beginTime))
+    const isLegalBeginTime = moment(trainTime[0]).isSameOrBefore(moment(beginTime), typeParmas)
     // 培训结束时间需要在之后
-    const isLegalEndTime = moment(trainTime[1]).isSameOrAfter(moment(endTime))
+    const isLegalEndTime = moment(trainTime[1]).isSameOrAfter(moment(endTime), typeParmas)
     return isLegalBeginTime && isLegalEndTime
   }
   // 错误提示
@@ -61,7 +63,7 @@ export class Validate {
       } else {
         let legalTime = []
         _.each(dateList, (item) => {
-          const isLegalTime = this.isLegalTimeFun(item[propKey], trainTime)
+          const isLegalTime = this.isLegalTimeFun(item[propKey], trainTime, title)
           if (!isLegalTime) {
             legalTime.push(item[propKey])
           }

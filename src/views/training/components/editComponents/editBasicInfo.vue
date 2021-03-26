@@ -386,7 +386,6 @@ export default {
       }
     },
     loadCoordinator(params) {
-      console.log(params)
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
       }
