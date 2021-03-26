@@ -1225,7 +1225,7 @@ export default {
     if (!this.showTrainDetail.isArranged) {
       this.columnsVisible = _.map(TABLE_COLUMNS2, ({ prop }) => prop)
       this.tableColumns = TABLE_COLUMNS2
-      // this.tableConfig.showHandler = false
+      this.tableConfig.showHandler = false
       this.$forceUpdate()
     }
   },
