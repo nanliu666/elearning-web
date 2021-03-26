@@ -175,7 +175,7 @@ const TABLE_COLUMNS = [
     prop: 'examScore'
   },
   {
-    label: '是否及格',
+    label: '是否通过',
     prop: 'examPass',
     slot: true
   }
