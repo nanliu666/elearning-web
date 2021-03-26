@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import UserPicker from '@/components/user-picker/userPicker'
+import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
 
 import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'

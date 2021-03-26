@@ -251,10 +251,9 @@ export default {
       page.pageNo = this.page.currentPage
       page.pageSize = this.page.size
       let params = { ...page, ...courseName }
-      params.status = this.status
-      params.trainId = 1
+      // params.status = this.status
+      params.examId = this.$route.query.id
       examResult(params).then((res) => {
-        console.log('examResult---', res)
         this.tableData = res.data
         this.page.total = res.totalNum
       })
@@ -265,7 +264,6 @@ export default {
       // console.log('id', this.$route.query.id)
       let id = { examId: this.$route.query.id }
       examDetail(id).then((res) => {
-        console.log(res)
         this.showExamDetail = res[0]
       })
     },
