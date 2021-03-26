@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="系统规则管理">
+    <page-header title="系统规则来源">
     </page-header>
 
     <basic-container block>

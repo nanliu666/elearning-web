@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header title="分类管理">
+    <page-header title="教室分类">
       <el-button
         slot="rightMenu"
         v-p="ADD_CLASSROOM_CLASSIFY"
