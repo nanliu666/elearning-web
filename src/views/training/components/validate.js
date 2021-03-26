@@ -25,7 +25,7 @@ export class Validate {
   /**
    * 是否在培训时间期间并且比较与培训开始日期或结束日期相同
    * @param {*} time 当前比较日期
-   * @returns 当前日期是否符合时间格式
+   * @returns 当前日期是否符合时间格式, true为符合格式，false为不符合格式
    */
   static isLegalTimeFun(time, trainTime) {
     const beginTime = _.isArray(time) ? time[0] : time
@@ -62,7 +62,7 @@ export class Validate {
         let legalTime = []
         _.each(dateList, (item) => {
           const isLegalTime = this.isLegalTimeFun(item[propKey], trainTime)
-          if (isLegalTime) {
+          if (!isLegalTime) {
             legalTime.push(item[propKey])
           }
         })

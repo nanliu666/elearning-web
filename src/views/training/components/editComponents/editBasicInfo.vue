@@ -240,7 +240,6 @@ export default {
   watch: {
     'formData.trainTime': {
       handler(data) {
-        console.log(data)
         this.$store.commit('SET_TRAIN_TIME', data)
       },
       deep: true
