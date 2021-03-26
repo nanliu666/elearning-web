@@ -31,11 +31,7 @@
       <div class="intro-list">
         <div class="intro-item">
           作业提交率：
-          <span class="text">{{
-            typeof data.jobTimes == 'number' && typeof data.jobPercent == 'number'
-              ? data.jobTimes + '次/' + data.jobPercent + '%'
-              : '--'
-          }}</span>
+          <span class="text">{{ data.job ? data.job : '--' }}</span>
         </div>
         <div class="intro-item">
           培训上报材料：
@@ -118,6 +114,7 @@ export default {
     Object.keys(this.$route.query).forEach((key) => {
       this.data[key] = query[key]
     })
+    console.log(this.data)
     this.$forceUpdate()
     this.getData()
   },
