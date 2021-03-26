@@ -132,8 +132,8 @@
             slot="examPass"
             slot-scope="{ row }"
           >
-            <span v-if="row.examPass == 0">不及格</span>
-            <span v-if="row.examPass == 1">及格</span>
+            <span v-if="row.examPass == 0">未通过</span>
+            <span v-if="row.examPass == 1">通过</span>
           </template>
         </common-table>
       </basic-container>
