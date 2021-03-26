@@ -437,6 +437,10 @@ export default {
             delLive({ liveId: row.liveId }).then(() => {
               var index = arr.findIndex((item) => item.liveId == row.liveId)
               arr.splice(index, 1)
+              this.$message({
+                message: '操作成功',
+                type: 'success'
+              })
             })
           })
         }
