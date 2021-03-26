@@ -27,9 +27,10 @@
         >
           <el-table-column
             align="left"
-            :label="'课程: ' + table.name"
+            :label="'作业来源: ' + table.name"
             label-class-name="course-name"
             show-overflow-tooltip
+            width="600"
           >
             <template slot-scope="scope">
               <div>

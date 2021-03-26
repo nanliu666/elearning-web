@@ -15,6 +15,7 @@
           header-align="left"
           :label="'来源: ' + table.name"
           prop="fileName"
+          width="600"
         >
         </el-table-column>
 
