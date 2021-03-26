@@ -211,7 +211,10 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
-          rules: [{ required: true, message: '请输入培训介绍', trigger: 'blur' }],
+          rules: [
+            { required: true, message: '请输入培训介绍', trigger: 'blur' },
+            { max: 5000, message: '培训介绍最多不超过5000字', trigger: ['blur', 'change'] }
+          ],
           options: [],
           span: 24,
           offset: 0

@@ -79,7 +79,7 @@
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
 
-import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
+// import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
