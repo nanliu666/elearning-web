@@ -59,13 +59,19 @@ export class Validate {
    */
   static validateSchedule(dateList, title, propKey, trainTime) {
     return new Promise((resolve, reject) => {
-      // 如果无线下日程的数据直接返回
+      // 如果数据直接返回
       if (_.isEmpty(dateList)) {
         resolve(true)
       } else {
         let legalTime = []
         _.each(dateList, (item) => {
-          const isLegalTime = this.isLegalTimeFun(item[propKey], trainTime, title)
+          let targetTime = item[propKey]
+          // 点击发布的时候，组装下数据
+          if (title === '线下日程') {
+            const tempList = _.split(item.todoTimeParams, ',')
+            targetTime = [`${item.todoDate} ${tempList[0]}`, `${item.todoDate} ${tempList[1]}`]
+          }
+          const isLegalTime = this.isLegalTimeFun(targetTime, trainTime, title)
           if (!isLegalTime) {
             legalTime.push(item[propKey])
           }
