@@ -251,6 +251,8 @@ export default {
           moment(this.model.todoTime[0]).format('HH:mm'),
           moment(this.model.todoTime[1]).format('HH:mm')
         ]
+        // 授课时间改变，再去手动校验下是否符合规格
+        this.$refs.form && this.$refs.form.validateField('todoDate')
       },
       deep: true
     },
@@ -310,11 +312,17 @@ export default {
       _.set(todoDateProps, 'rules', todoDateRules)
     },
     // 授课开始时间大于等于培训开始时间，授课结束时间要小于等于培训结束时间
+    /**
+     * 手动拼接出来授课日期+授课时间的数组
+     */
     validateTodoDate(rule, value, callback) {
       Validate.validateLegalTime(
         callback,
         this.trainTimeInVuex,
-        this.model.todoDate,
+        [
+          `${this.model.todoDate} ${this.model.todoTimeParams[0]}`,
+          `${this.model.todoDate} ${this.model.todoTimeParams[1]}`
+        ],
         this.model.type === 1 ? '授课日期' : '活动日期'
       )
     },
