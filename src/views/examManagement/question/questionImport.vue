@@ -34,7 +34,7 @@
             2.上传填好的表格
           </p>
           <p>
-            <span class="tips">支持文件类型：xls，xlsx，csv。 </span>
+            <span class="tips">支持文件类型：xls。 </span>
             <br />
             <span class="tips"> 一次至多导入500条信息，超出信息将不予以导入。</span>
           </p>
