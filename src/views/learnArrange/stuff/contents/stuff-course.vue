@@ -112,7 +112,6 @@
 </template>
 
 <script>
-import { downloadZip } from '@/api/learnArrange'
 import { getStore } from '@/util/store.js'
 import { downLoadFile } from '@/util/util'
 export default {
@@ -167,7 +166,7 @@ export default {
     courseChange(courseId) {
       this.parentVm.queryWork(courseId)
     },
-        // 打包下载
+    // 打包下载
     downloadZip() {
       let params = {
         filePath: [],
