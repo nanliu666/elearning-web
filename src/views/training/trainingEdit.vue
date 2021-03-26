@@ -256,7 +256,7 @@ export default {
     },
     // 发布区分编辑发布还是新增发布
     publish(type) {
-      const editArrangement = this.$refs.editArrangement.returnData()
+      const editArrangement = this.$refs.editArrangement.getData()
       const basicData = this.$refs.editBasicInfo.getData(type)
       const detailData = this.$refs.editDetail.getData(type)
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
