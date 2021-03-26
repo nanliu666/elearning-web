@@ -36,22 +36,12 @@
             />
             <div class="tree">
               <el-tree
-                v-show="!orgSearch"
-                ref="orgTree"
+                ref="tree"
                 :load="lazyLoadOrgTree"
-                :props="treeProps"
-                lazy
-                node-key="path"
-                show-checkbox
-                @check="handleCheckItem"
-              />
-              <el-tree
-                v-show="orgSearch"
-                ref="orgTreeSearch"
                 :data="orgSearchData"
                 :props="treeProps"
+                node-key="userId"
                 lazy
-                node-key="path"
                 show-checkbox
                 @check="handleCheckItem"
               />
@@ -277,6 +267,15 @@ export default {
   },
 
   watch: {
+    innerVisible(val) {
+      if (val) {
+        this.$nextTick(() => {
+          const nodes = this.selected.map(node => node.userId)
+          this.$refs.tree.setCheckedNodes(nodes)
+          this.$refs.tree.setCheckedKeys(nodes)
+        })
+      }
+    },
     value(val) {
       this.selected = val.slice()
       const temp = _.map(this.checkedUsers, (item) => {
@@ -291,13 +290,6 @@ export default {
         this.checkAll = false
         this.isIndeterminate = true
       }
-    },
-    selected(val) {
-      const { orgTree, orgTreeSearch } = this.$refs
-      ;[orgTree, orgTreeSearch].forEach((ref) => {
-        if (_.isNil(ref)) return
-        ref.setCheckedKeys(_.map(val, (item) => item.path))
-      })
     },
 
     // 在组织架构下使用查询参数
@@ -375,55 +367,26 @@ export default {
      * 处理选中单个项
      * @param {object} node 树形组件的node结节
      */
-    handleCheckItem(node, { checkedNodes }) {
+    handleCheckItem(node) {
       if (node.type === 'Org') {
         getUserByOrgId({ orgId: node.id }).then((res = []) => {
           res.forEach((item) => {
-            this.handleCheckItem(item, { checkedNodes })
-            return
+            this.handleCheckItem(item)
           })
         })
         return
       }
-      // 如果disabled则不能check项
-      if (_.get(node, this.treeProps.disabled)) return
-      if (_.some(checkedNodes, (item) => item.userId === node.userId)) {
-        // this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
-        if (node.type !== NODE_TYPE.User) {
-          if (!this.onlyUser) {
-            this.selected = _.reject(this.selected, (item) => _.includes(item.path, node.path))
-          }
-        }
-        // 如果是单选模式
-        if (this.isSingle) {
-          this.selected = [node]
-        } else {
-          this.selected.push(node)
-        }
+      const index = this.selected.findIndex(item => item.userId === node.userId)
+      if (index >= 0) {
+        this.selected.splice(index, 1)
       } else {
-        // 连续选中同一个目标则uncheck该选项
-        this.handleUncheckItem(node, checkedNodes)
+        this.selected.push(node)
       }
     },
-    handleUncheckItem(item, checkedNodes) {
-      const outerIndex = _.findIndex(this.checkedUsers, (userItem) => {
-        return item.name === userItem
-      })
-      if (outerIndex !== -1) {
-        this.checkedUsers.splice(outerIndex, 1)
-      }
-      const { userId } = item
-      if (_.find(this.selected, { userId })) {
-        this.selected = _.reject(this.selected, { userId })
-      } else {
-        // 当前节点不在selected中则父节点被勾选时，取消勾选子节点
-        this.selected = _(this.selected)
-          // 去除父节点
-          .reject((i) => _.includes(item.path, i.path) || _.includes(i.path, item.path))
-          // 添加其他节点
-          .concat(this.getCheckedNodes(checkedNodes))
-          .value()
-      }
+    handleUncheckItem(node) {
+      const index = this.selected.findIndex(item => item.userId === node.userId)
+      this.selected.splice(index, 1)
+      this.$refs.tree.setChecked(node.userId, false)
     },
     // 过滤掉已勾选的父节点下的所有子节点
     getCheckedNodes(checkedNodes) {
@@ -464,7 +427,7 @@ export default {
       this.close()
     },
     handleSelectUser(user) {
-      const index = _.findIndex(this.selected, { bizId: user.bizId })
+      const index = _.findIndex(this.selected, { userId: user.userId })
       if (index > -1) {
         this.selected = _.filter(this.selected, (item, i) => i != index)
       } else {

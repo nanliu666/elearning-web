@@ -167,11 +167,13 @@ export default {
     courseChange(courseId) {
       this.parentVm.queryWork(courseId)
     },
+        // 打包下载
     downloadZip() {
-      const params = {
+      let params = {
         filePath: [],
         fileName: [],
-        zipComment: decodeURIComponent('打包下载.zip'),
+        zipComment: encodeURIComponent('DownloadFiles.zip'),
+        responseType: 'blob',
         emulateJSON: true
       }
       this.data.course.forEach((c) => {
@@ -188,21 +190,27 @@ export default {
       params.filePath = params.filePath.join(',')
       params.fileName = params.fileName.join(',')
 
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
       let token = getStore({ name: 'token' })
-      const headers = { accessToken: `bearer  ${token}` }
+      let x = new XMLHttpRequest()
 
-      const config = {
-        params,
-        headers,
-        responseType: 'blob'
-      }
-      downloadZip(config).then((res) => {
-        let url = window.URL.createObjectURL(res)
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
         let a = document.createElement('a')
         a.href = url
         a.download = '' //可以填写默认的下载名称
         a.click()
-      })
+      }
+      x.send()
     },
     download(row) {
       downLoadFile(row)
