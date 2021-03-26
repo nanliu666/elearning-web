@@ -1005,7 +1005,7 @@ export default {
     handleSearch(searchParams) {
       let { peopleMin, peopleMax } = searchParams
       if (peopleMin && peopleMax) {
-        if (peopleMin >= peopleMax) return
+        if (peopleMin > peopleMax) return
       }
       this.page.pageNo = 1
       this.searchParams = searchParams
