@@ -6,8 +6,10 @@ export class Validate {
   /**
    * 比较弹窗内的时间与培训时间的关系
    * @param {*} callback 当前form表单的回调函数
+   * @param {*} trainTime  培训日期
    * @param {*} date  弹窗传入的选择的日期
    * @param {*} title 弹窗所比较的标题
+   * @param {*} entryCName 因为考试的新建的弹窗学习与培训共用，这里也会输入学习
    */
   static validateLegalTime(callback, trainTime, date, title, entryCName = '培训') {
     if (_.isEmpty(trainTime)) {
@@ -25,18 +27,18 @@ export class Validate {
   /**
    * 是否在培训时间期间并且比较与培训开始日期或结束日期相同
    * @param {*} time 当前比较日期
+   * trainTime 培训时间
+   * title 用来区分是在线/线下/考试
    * @returns 当前日期是否符合时间格式, true为符合格式，false为不符合格式
    */
   static isLegalTimeFun(time, trainTime, title) {
-    const beginTime = _.isArray(time) ? time[0] : time
-    const endTime = _.isArray(time) ? time[1] : time
-    // 考试的弹窗需要比较到秒，其他需要比较到天
-    const typeParmas = title === '考试安排' || title === '考试日期' ? 'seconds' : 'days'
+    // 考试与线下的弹窗需要比较到秒，在线的需要比较到天
+    const typeParmas = title === '在线课程' || title === '上课日期' ? 'days' : 'seconds'
     // 2个日期介于两个日期之间
     // 培训开始时间需要在之前
-    const isLegalBeginTime = moment(trainTime[0]).isSameOrBefore(moment(beginTime), typeParmas)
+    const isLegalBeginTime = moment(trainTime[0]).isSameOrBefore(moment(time[0]), typeParmas)
     // 培训结束时间需要在之后
-    const isLegalEndTime = moment(trainTime[1]).isSameOrAfter(moment(endTime), typeParmas)
+    const isLegalEndTime = moment(trainTime[1]).isSameOrAfter(moment(time[1]), typeParmas)
     return isLegalBeginTime && isLegalEndTime
   }
   // 错误提示
