@@ -13,7 +13,7 @@
           {{ showTrainDetail.trainName }}
           <span
             v-if="!$route.query.status"
-            style="background-color: #FFFCE6; color: #FCBA00;"
+            style="background-color: #fffce6; color: #fcba00"
           >草稿</span>
           <span v-else>
             <span v-if="showTrainDetail.status === 3">已结束</span>
@@ -202,13 +202,13 @@
         <div class="introduce_title_r">
           <span
             v-show="isShowIntroduce"
-            style="cursor:pointer;"
+            style="cursor: pointer"
             @click="isShowIntroduce = false"
           >
             <i class="el-icon-arrow-up"></i>&nbsp;收起</span>
           <span
             v-show="!isShowIntroduce"
-            style="cursor:pointer;"
+            style="cursor: pointer"
             @click="isShowIntroduce = true"
           >
             <i class="el-icon-arrow-down"></i>&nbsp;展开</span>
@@ -229,29 +229,29 @@
         <span
           v-if="$route.query.status"
           :class="{ select: status === 1 }"
-          style="cursor:pointer;"
+          style="cursor: pointer"
           @click="status = 1"
         >报名情况</span>
         <span
           :class="{ select: status === 2 }"
-          style="cursor:pointer;"
+          style="cursor: pointer"
           @click="status = 2"
         >学习情况</span>
         <span
           v-if="showTrainDetail.signIn && $route.query.status"
           :class="{ select: status === 3 }"
-          style="cursor:pointer;"
+          style="cursor: pointer"
           @click="status = 3"
         >签到情况</span>
         <span
           :class="{ select: status === 4 }"
-          style="cursor:pointer;"
+          style="cursor: pointer"
           @click="status = 4"
         >培训安排</span>
         <span
           v-if="$route.query.status"
           :class="{ select: status === 5 }"
-          style="cursor:pointer;"
+          style="cursor: pointer"
           @click="status = 5"
         >评估结果</span>
       </div>
@@ -260,6 +260,13 @@
         v-show="status === 1 && $route.query.status"
         class="register-container"
       >
+        <div class="register-data">
+          <span>计划人数：</span>{{ typeof plannedPopulation === 'number' ? plannedPopulation + '人' : '无限制' }}
+          <span v-if="!!participated">已参加：{{ participated }}人</span>
+
+          <span> 剩余名额：</span>{{ remainingPlaces }}人
+        </div>
+
         <el-table
           class="register-table"
           :data="registerData"
@@ -306,7 +313,7 @@
         </el-table>
         <div
           class="page-container"
-          style="margin-right: 45px;"
+          style="margin-right: 45px"
         >
           <pagination
             :total="registerTotal"
@@ -399,14 +406,14 @@
               #multiSelectMenu="{ selection }"
             >
               <el-button
-                style="margin-bottom:0;"
+                style="margin-bottom: 0"
                 type="text"
                 @click="() => handleRemoveItems(selection, 1)"
               >
                 发放证书
               </el-button>
               <el-button
-                style="margin-bottom:0;"
+                style="margin-bottom: 0"
                 type="text"
                 @click="() => handleRemoveItems(selection, 0)"
               >
@@ -431,9 +438,11 @@
               slot="signPercent"
               slot-scope="{ row }"
             >
-              <div>
-                {{ row.signPercent || '--' }}
-              </div>
+              <span>{{
+                typeof row.signTimes == 'number' && typeof row.signPercent == 'number'
+                  ? row.signTimes + '次/' + row.signPercent + '%'
+                  : '--'
+              }}</span>
             </template>
             <template
               slot="deptName"
@@ -445,7 +454,7 @@
             </template>
             <!-- 选修学习进度 -->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged || !$route.query.status"
               slot="electiveProgress"
               slot-scope="{ row }"
             >
@@ -458,7 +467,7 @@
             </template>
             <!-- 在线学习进度(必修) -->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged || !$route.query.status"
               slot="onlineProgress"
               slot-scope="{ row }"
             >
@@ -472,28 +481,30 @@
 
             <!-- 作业提交率 -->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged || !$route.query.status"
               slot="job"
               slot-scope="{ row }"
             >
-              <span style="text-align: center; display: inline-block; width: 100%;">{{
-                row.job || '--'
+              <span>{{
+                typeof row.jobTimes == 'number' && typeof row.jobPercent == 'number'
+                  ? row.jobTimes + '次/' + row.jobPercent + '%'
+                  : '--'
               }}</span>
             </template>
             <!-- 上报材料 -->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged || !$route.query.status"
               slot="isSubmit"
               slot-scope="{ row }"
             >
-              <span style="text-align: center; display: inline-block; width: 100%;">{{
+              <span style="text-align: center; display: inline-block; width: 100%">{{
                 row.isSubmit === 'Yes' ? '已提交' : '未提交'
               }}</span>
             </template>
 
             <!-- 考试情况 // 1：已通过；2：未通过；3：未开始）-->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged || !$route.query.status"
               slot="examStatus"
               slot-scope="{ row }"
             >
@@ -513,7 +524,7 @@
 
             <!-- 操作 -->
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged && $route.query.status"
               slot="handler"
               slot-scope="scope"
             >
@@ -565,7 +576,8 @@
             :name="index + 1"
           >
             <template slot="title">
-              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天 {{ todo.date }}
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天
+              {{ todo.date }}
             </template>
 
             <div
@@ -683,7 +695,7 @@
             <template slot-scope="{ row }">
               <el-button
                 type="text"
-                @click="toexamDetail(row.id)"
+                @click="toexamDetail(row)"
               >
                 考试详情
               </el-button>
@@ -735,7 +747,7 @@
           </el-table-column>
         </el-table>
 
-        <div style="margin-right: 45px;">
+        <div style="margin-right: 45px">
           <pagination
             :total="signinTotal"
             :page="getSigninForm.pageNo"
@@ -965,7 +977,7 @@ const TABLE_COLUMNS = [
   // 1：已通过；2：未通过；3：未开始）
   {
     label: '作业提交率',
-    prop: 'jobPercent',
+    prop: 'job',
     minWidth: 120,
     slot: true
   },
@@ -1124,7 +1136,10 @@ export default {
       registerTotal: 0,
       signinName: '',
       signinData: [],
-      signinLevel: Object.keys(signinRef).map((key) => ({ label: signinRef[key], prop: key })),
+      signinLevel: Object.keys(signinRef).map((key) => ({
+        label: signinRef[key],
+        prop: key
+      })),
       codeDialogVisibe: false,
       approveDlgVisible: false,
       approveText: '',
@@ -1221,13 +1236,18 @@ export default {
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
 
-    if (!this.$route.query.status) this.status = 2
-    if (!this.showTrainDetail.isArranged) {
+    this.tableConfig.showHandler = true
+    this.tableColumns = TABLE_COLUMNS
+    if (!this.$route.query.status) {
+      this.status = 2
+      this.tableConfig.showHandler = false
+    }
+    if (!this.showTrainDetail.isArranged && this.$route.query.status) {
       this.columnsVisible = _.map(TABLE_COLUMNS2, ({ prop }) => prop)
       this.tableColumns = TABLE_COLUMNS2
       this.tableConfig.showHandler = false
-      this.$forceUpdate()
     }
+    this.$forceUpdate()
   },
   methods: {
     getSigninColumn(value, d) {
@@ -1365,7 +1385,10 @@ export default {
     // 去开办下一期
     handleConfig() {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
-      this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.trainId } })
+      this.$router.push({
+        path: '/training/edit',
+        query: { id: this.showTrainDetail.trainId }
+      })
     },
     // 结办
     isstopSchedule() {
@@ -1384,8 +1407,8 @@ export default {
       // this.$router.push({ path: '/training/trainingArrange' })
     },
     // 跳转考试详情
-    toexamDetail(id) {
-      this.$router.push({ path: '/training/examination?id=' + id })
+    toexamDetail(row) {
+      this.$router.push({ path: '/training/examination?id=' + row.id })
     },
 
     // 查询培训考试安排
@@ -1536,7 +1559,10 @@ export default {
         }
 
         // 编辑
-        this.$router.push({ path: '/training/edit', query: { id: this.showTrainDetail.id } })
+        this.$router.push({
+          path: '/training/edit',
+          query: { id: this.showTrainDetail.id }
+        })
       }
       if (e === 'del') {
         if (this.showTrainDetail.status === 2) {

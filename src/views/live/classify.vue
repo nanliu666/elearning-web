@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="分类管理">
+    <page-header title="直播分类">
       <el-button
         slot="rightMenu"
         v-p="ADD_LIVE_CLASSIFY"
@@ -407,9 +407,7 @@ export default {
         this.tableLoading = true
         getCategoryTree(params).then((res) => {
           this.tableData = this.setDisableStatus(res)
-          this.tableData.forEach((item) => {
-            item.hasChildren = false
-          })
+          this.getTableData(this.tableData)
           // this.tableData = res;
           this.tableLoading = false
         })
@@ -428,6 +426,15 @@ export default {
         this.setDisableStatus(item.children, item)
       })
       return list
+    },
+    // 递归改变hasChildren的值
+    getTableData(list = []) {
+      list.forEach((item) => {
+        if (item) {
+          item.hasChildren = false
+          this.getTableData(item.children)
+        }
+      })
     },
     changevisible(data) {
       this.createOrgDailog = data

@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="分类管理" />
+    <page-header title="考评分类" />
     <basic-container block>
       <el-menu
         :default-active="activeIndex"

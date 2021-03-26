@@ -150,7 +150,6 @@ export default {
   activated() {
     const $data = JSON.parse(this.$route.query.data)
     Object.assign(this.data, $data)
-    this.tabData.studyName = this.data.studyName
     this.getData()
   },
   deactivated() {
@@ -189,6 +188,7 @@ export default {
     queryStudyInfo() {
       queryStudyInfo({ id: this.data.id }).then((res) => {
         this.data = Object.assign(this.data, res)
+        this.tabData.studyName = this.data.studyName
         this.$forceUpdate()
       })
     },

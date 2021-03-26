@@ -11,9 +11,9 @@
       <div class="examination_title_h">
         {{ showExamDetail.examName }}
 
-        <span v-if="showExamDetail.status === 1">未开始</span>
-        <span v-if="showExamDetail.status === 2">进行中</span>
-        <span v-if="showExamDetail.status === 3">已结束</span>
+        <span v-if="showExamDetail.status == 1">未开始</span>
+        <span v-if="showExamDetail.status == 2">进行中</span>
+        <span v-if="showExamDetail.status == 3">已结束</span>
       </div>
       <el-row>
         <el-col :span="6">
@@ -26,7 +26,7 @@
         </el-col>
         <el-col :span="6">
           <span style="color:#333;">{{ '关联用卷：' }}</span>
-          <span>{{ showExamDetail.examTime }}</span>
+          <span>{{ showExamDetail.testPaper }}</span>
         </el-col>
         <el-col :span="6">
           <span style="color:#333;">{{ '评卷人：' }}</span>
@@ -122,10 +122,9 @@
             slot="examStatus"
             slot-scope="{ row }"
           >
-            <span v-if="row.electiveType == 2">已通过</span>
-            <span v-if="row.electiveType == 3">未通过</span>
-            <span v-if="row.electiveType == 4">未考试</span>
-            <span v-if="row.electiveType == 5">缺考</span>
+            <span v-if="row.examStatus == 0">未考试 </span>
+            <span v-if="row.examStatus == 1">已考试</span>
+            <span v-if="row.examStatus == 2">缺考</span>
           </template>
 
           <!-- 是否及格 -->
@@ -133,8 +132,8 @@
             slot="examPass"
             slot-scope="{ row }"
           >
-            <span v-if="row.examPass == 0">不及格</span>
-            <span v-if="row.examPass == 1">及格</span>
+            <span v-if="row.examPass == 0">未通过</span>
+            <span v-if="row.examPass == 1">通过</span>
           </template>
         </common-table>
       </basic-container>
@@ -176,7 +175,7 @@ const TABLE_COLUMNS = [
     prop: 'examScore'
   },
   {
-    label: '是否及格',
+    label: '是否通过',
     prop: 'examPass',
     slot: true
   }
@@ -251,10 +250,9 @@ export default {
       page.pageNo = this.page.currentPage
       page.pageSize = this.page.size
       let params = { ...page, ...courseName }
-      params.status = this.status
-      params.trainId = 1
+      // params.status = this.status
+      params.examId = this.$route.query.id
       examResult(params).then((res) => {
-        console.log('examResult---', res)
         this.tableData = res.data
         this.page.total = res.totalNum
       })
@@ -265,7 +263,6 @@ export default {
       // console.log('id', this.$route.query.id)
       let id = { examId: this.$route.query.id }
       examDetail(id).then((res) => {
-        console.log(res)
         this.showExamDetail = res[0]
       })
     },

@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { downloadZip } from '@/api/learnArrange'
+import { getStore } from '@/util/store.js'
 import { downLoadFile } from '@/util/util'
 
 export default {
@@ -86,26 +86,50 @@ export default {
     }
   },
   methods: {
+    // 打包下载
     downloadZip() {
-      const data = {
+      let params = {
         filePath: [],
         fileName: [],
-        zipComment: '打包下载'
+        zipComment: encodeURIComponent('DownloadFiles.zip'),
+        responseType: 'blob',
+        emulateJSON: true
       }
-      this.data.course.forEach((c) => {
+      this.data.train.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
-          let { fileName, filePath } = item
-          if (!filePath || !fileName) return
-          if (filePath.indexOf('http') !== 0) {
-            filePath = 'https://' + filePath
+          let { fileName: name, filePath: path } = item
+          if (!path || !name) return
+          if (path.indexOf('http') !== 0) {
+            path = 'https://' + path
           }
-          data.filePath.push(filePath)
-          data.fileName.push(fileName)
+          params.filePath.push(path)
+          params.fileName.push(name)
         })
       })
-      downloadZip(data).then(() => {
-        // todo
-      })
+      params.filePath = params.filePath.join(',')
+      params.fileName = params.fileName.join(',')
+
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = function() {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '' //可以填写默认的下载名称
+        a.click()
+      }
+      x.send()
     },
     download(row) {
       downLoadFile(row)
