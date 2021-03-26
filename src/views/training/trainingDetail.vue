@@ -89,7 +89,7 @@
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ typeof showTrainDetail.people !== 'number' ? '不限制' : showTrainDetail.people }}
+              {{ !showTrainDetail.people ? '不限制' : showTrainDetail.people }}
             </div>
           </el-col>
           <el-col :span="2">
@@ -261,10 +261,9 @@
         class="register-container"
       >
         <div class="register-data">
-          <span>计划人数：</span>{{ typeof plannedPopulation === 'number' ? plannedPopulation + '人' : '无限制' }}
-          <span v-if="!!participated">已参加：{{ participated }}人</span>
-
-          <span> 剩余名额：</span>{{ remainingPlaces }}人
+          <span>计划人数：</span>{{ !plannedPopulation ? '无限制' : plannedPopulation + '人' }}
+          <span>已参加：{{ participated }}人</span>
+          <span v-if="!!plannedPopulation"> 剩余名额：{{ remainingPlaces }}人</span>
         </div>
 
         <el-table
