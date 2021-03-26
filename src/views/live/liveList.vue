@@ -438,7 +438,7 @@ export default {
               var index = arr.findIndex((item) => item.liveId == row.liveId)
               arr.splice(index, 1)
               this.$message({
-                message: '操作成功',
+                message: '直播删除成功',
                 type: 'success'
               })
             })
