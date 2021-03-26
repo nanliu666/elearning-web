@@ -31,7 +31,11 @@
       <div class="intro-list">
         <div class="intro-item">
           作业提交率：
-          <span class="text">{{ data.job ? data.job : '' }}</span>
+          <span class="text">{{
+            typeof data.jobTimes == 'number' && typeof data.jobPercent == 'number'
+              ? data.jobTimes + '次/' + data.jobPercent + '%'
+              : '--'
+          }}</span>
         </div>
         <div class="intro-item">
           培训上报材料：
