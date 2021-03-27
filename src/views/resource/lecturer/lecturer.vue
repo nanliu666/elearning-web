@@ -1126,7 +1126,7 @@ $color_icon: #A0A8AE
 /deep/.el-pagination {
   padding-right: 50px;
   /deep/ .el-input {
-    width: 65px;
+    // width: 65px;
   }
 }
 
