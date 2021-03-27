@@ -165,7 +165,9 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeCategory: null,
+      activeCategory: {
+        orgId: 1
+      },
       parentOrgId: 0,
       treeSearch: '',
       treeLoading: false,
@@ -238,6 +240,7 @@ export default {
   mounted() {
     this.loadTree()
     this.loadData()
+    this.getOuterNum()
   },
   methods: {
     loadTree(parentOrgId = '0') {
@@ -254,6 +257,23 @@ export default {
           this.treeLoading = false
         })
     },
+    //  获取外部人员数据方法
+    getOuterNum() {
+      this.loading = true
+      getListScoreDetails({
+        currentPage: this.page.currentPage,
+        size: this.page.size,
+        orgId: '',
+        operType: '1',
+        ...this.query
+      })
+        .then((res) => {
+          this.outerUserCount = res.totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
     deleteHTMLTag(...args) {
       return deleteHTMLTag(...args)
     },
@@ -262,6 +282,7 @@ export default {
       return data.orgName.indexOf(value) !== -1
     },
     nodeClick(data) {
+      console.log('data:', data)
       this.activeCategory = data
       this.page.currentPage = 1
       this.loadData()

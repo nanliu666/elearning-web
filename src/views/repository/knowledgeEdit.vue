@@ -35,10 +35,12 @@
               </div>
             </template>
           </common-upload>
-          <div class="UploadProgress">
+          <div
+            v-if="videoFlag == true"
+            class="UploadProgress"
+          >
             上传进度：
             <el-progress
-              v-if="videoFlag == true"
               :percentage="videoUploadPercent"
               status="success"
               text-inside
@@ -383,6 +385,7 @@ export default {
         this.videoFlag = false
       }, 3000)
     },
+
     // 预览附件
     previewFile(data) {
       window.open(data.fileUrl)

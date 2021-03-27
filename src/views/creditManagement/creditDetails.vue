@@ -73,14 +73,14 @@
             批量删除
           </el-button>
         </template>
-        <template #name="{row}">
+        <!-- <template #name="{row}">
           <el-link
             type="primary"
             style="line-height: 22px"
           >
             {{ row.name }}
           </el-link>
-        </template>
+        </template> -->
         <template #handler="{row}">
           <div class="menuClass">
             <el-button
@@ -103,22 +103,22 @@ import { DELETE_CREDIT_DETAIL } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 
 const TABLE_COLUMNS = [
-  {
-    prop: 'code',
-    label: '学员编号',
-    minWidth: 180
-  },
+  // {
+  //   prop: 'code',
+  //   label: '学员编号',
+  //   minWidth: 180
+  // },
   {
     prop: 'name',
     label: '姓名',
     slot: true,
-    minWidth: 180
+    minWidth: 150
   },
   {
     prop: 'dept',
     label: '部门',
     slot: true,
-    minWidth: 180
+    minWidth: 210
   },
   {
     prop: 'sys_rule',
