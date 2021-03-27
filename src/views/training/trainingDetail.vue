@@ -471,7 +471,7 @@
               slot-scope="{ row }"
             >
               <el-progress
-                v-if="typeof row.electiveProgress === 'number'"
+                v-if="typeof row.onlineProgress === 'number'"
                 :percentage="row.onlineProgress || 0"
               ></el-progress>
 
