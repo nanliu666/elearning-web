@@ -16,10 +16,7 @@
       </el-option>
     </el-select>
     <div class="table-list">
-      <div
-        v-if="data.course.length"
-        class="table-list"
-      >
+      <div v-if="data.course.length" class="table-list">
         <el-table
           v-for="(table, i) in data.course"
           :key="i"
@@ -42,16 +39,12 @@
           <el-table-column align="center">
             <template slot-scope="scope">
               <div>
-                {{ !scope.row.fileSize ? '--' : scope.row.fileSize + 'K' }}
+                {{ !scope.row.fileSize ? "--" : scope.row.fileSize + "K" }}
               </div>
             </template>
           </el-table-column>
 
-          <el-table-column
-            align="center"
-            prop="updateTime"
-          >
-          </el-table-column>
+          <el-table-column align="center" prop="updateTime"> </el-table-column>
 
           <el-table-column align="right">
             <template slot="header">
@@ -81,12 +74,12 @@
                 >
                   {{
                     scope.row.fileName
-                      ? scope.row.fileCategory === 'user'
-                        ? '修改作业'
-                        : '修改评改'
-                      : scope.row.fileCategory === 'user'
-                        ? '上传作业'
-                        : '上传评改'
+                      ? scope.row.fileCategory === "user"
+                        ? "修改作业"
+                        : "修改评改"
+                      : scope.row.fileCategory === "user"
+                      ? "上传作业"
+                      : "上传评改"
                   }}
                 </el-button>
               </common-upload>
@@ -102,121 +95,116 @@
           </el-table-column>
         </el-table>
       </div>
-      <div
-        v-else
-        class="empty"
-      >
-        暂未提交
-      </div>
+      <div v-else class="empty">暂未提交</div>
     </div>
   </div>
 </template>
 
 <script>
-import { getStore } from '@/util/store.js'
-import { downLoadFile } from '@/util/util'
+import { getStore } from "@/util/store.js";
+import { downLoadFile } from "@/util/util";
 export default {
-  name: 'StuffCourse',
+  name: "StuffCourse",
   components: {
-    commonUpload: () => import('@/components/common-upload/commonUpload')
+    commonUpload: () => import("@/components/common-upload/commonUpload"),
   },
   props: {
     data: {
       type: Object,
       default() {
-        return {}
-      }
+        return {};
+      },
     },
     parentVm: {
       type: Object,
       default() {
-        return {}
-      }
-    }
+        return {};
+      },
+    },
   },
   data() {
     return {
-      courseId: '',
-      loading: {}
-    }
+      courseId: "",
+      loading: {},
+    };
   },
   methods: {
     onUploadStart(id) {
-      this.$message.warning('正在上传')
-      this.loading[id] = true
+      this.$message.warning("正在上传");
+      this.loading[id] = true;
     },
     onUploadError() {
-      this.$message.error('上传失败，请重试')
+      this.$message.error("上传失败，请重试");
     },
     onUploadComplete(id) {
-      this.$message.success('上传成功')
-      this.parentVm.queryWork()
-      this.loading[id] = false
+      this.$message.success("上传成功");
+      this.parentVm.queryWork();
+      this.loading[id] = false;
     },
     getFileName(row) {
-      const fileName = row.fileName || '未提交'
+      const fileName = row.fileName || "未提交";
       switch (row.fileCategory) {
-        case 'teacher':
-          return '教师评改：' + fileName
-        case 'user':
-          return '学员作业：' + fileName
+        case "teacher":
+          return "教师评改：" + fileName;
+        case "user":
+          return "学员作业：" + fileName;
         default:
-          return '作业内容：' + fileName
+          return "作业内容：" + fileName;
       }
     },
     courseChange(courseId) {
-      this.parentVm.queryWork(courseId)
+      this.parentVm.queryWork(courseId);
     },
     // 打包下载
     downloadZip() {
       let params = {
         filePath: [],
         fileName: [],
-        zipComment: encodeURIComponent('DownloadFiles.zip'),
-        responseType: 'blob',
-        emulateJSON: true
-      }
+        zipComment: encodeURIComponent("DownloadFiles.zip"),
+        responseType: "blob",
+        emulateJSON: true,
+      };
       this.data.course.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
-          let { fileName: name, filePath: path } = item
-          if (!path || !name) return
-          if (path.indexOf('http') !== 0) {
-            path = 'https://' + path
+          let { fileName: name, filePath: path } = item;
+          if (!path || !name) return;
+          if (path.indexOf("http") !== 0) {
+            path = "https://" + path;
           }
-          params.filePath.push(path)
-          params.fileName.push(name)
-        })
-      })
-      params.filePath = params.filePath.join(',')
-      params.fileName = params.fileName.join(',')
+          params.filePath.push(path);
+          params.fileName.push(name);
+        });
+      });
+      params.filePath = params.filePath.join(",");
+      params.fileName = params.fileName.join(",");
 
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
-      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
-      this.repDownload(url)
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`;
+      this.repDownload(url);
     },
     repDownload(url) {
       // 下载
-      let token = getStore({ name: 'token' })
-      let x = new XMLHttpRequest()
+      let token = getStore({ name: "token" });
+      let x = new XMLHttpRequest();
 
-      x.open('GET', url, true)
-      x.setRequestHeader('accessToken', `bearer  ${token}`)
-      x.responseType = 'blob'
-      x.onprogress = function() {}
-      x.onload = function() {
-        let url = window.URL.createObjectURL(x.response)
-        let a = document.createElement('a')
-        a.href = url
-        a.download = '' //可以填写默认的下载名称
-        a.click()
-      }
-      x.send()
+      x.open("GET", url, true);
+      x.setRequestHeader("accessToken", `bearer  ${token}`);
+      x.responseType = "blob";
+      x.onprogress = function () {};
+      x.onload = function () {
+        let url = window.URL.createObjectURL(x.response);
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = ""; //可以填写默认的下载名称
+        a.click();
+      };
+      x.send();
     },
     download(row) {
-      downLoadFile(row)
-    }
-  }
-}
+      downLoadFile(row);
+    },
+  },
+};
 </script>
 
 <style lang="scss">
