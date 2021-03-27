@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="分类管理">
+    <page-header title="课程分类">
       <el-button
         slot="rightMenu"
         v-p="ADD_COURSE_CATALOG"

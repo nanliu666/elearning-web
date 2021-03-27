@@ -15,6 +15,7 @@
           header-align="left"
           :label="'课程: ' + table.name"
           prop="fileName"
+          width="600"
         >
         </el-table-column>
 
@@ -67,8 +68,8 @@
 </template>
 
 <script>
-import { downloadZip } from '@/api/learnArrange'
 import { downLoadFile } from '@/util/util'
+import { getStore } from '@/util/store.js'
 
 export default {
   name: 'StuffStudy',
@@ -86,7 +87,7 @@ export default {
     }
   },
   methods: {
-        // 打包下载
+    // 打包下载
     downloadZip() {
       let params = {
         filePath: [],

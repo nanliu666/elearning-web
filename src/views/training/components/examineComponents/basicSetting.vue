@@ -260,7 +260,10 @@ export default {
         '考试日期',
         this.entryCName
       )
-      // this.$refs.form.validateField('testPaper')
+      // 如果有考卷再去校验一次考卷的过期时间与考试时间的关系
+      if (this.model.testPaper) {
+        this.$refs.form.validateField('testPaper')
+      }
     },
     loadCoordinator(params) {
       return getWorkList(_.assign(params, { orgId: 0 }))

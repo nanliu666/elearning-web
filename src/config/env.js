@@ -18,7 +18,7 @@ if (location.host.indexOf('localhost') !== -1) {
   backBaseUrl = 'http://172.16.4.55:8081' // 深圳本地开发环境地址(后台管理)
 } else if (env.VUE_APP_ENV == 'sit') {
   backBaseUrl = 'http://139.159.141.248:8081' // 深圳本地开发环境地址(后台管理)
-} else if (env.VUE_APP_ENV == 'production') {
+} else if (env.VUE_APP_ENV == 'pro') {
   backBaseUrl = 'http://admin.epro-edu.com' //生产环境地址(后台管理)
 }
 // else if (env.VUE_APP_ENV == 'test') {
@@ -30,8 +30,8 @@ if (location.host.indexOf('localhost') !== -1) {
   frontBaseUrl = 'http://172.16.4.55:7071' // 深圳本地开发环境地址（用户前台）
 } else if (env.VUE_APP_ENV == 'sit') {
   frontBaseUrl = 'http://139.159.141.248:7071' // 线上sit环境地址（用户前台）
-} else if (env.VUE_APP_ENV == 'production') {
-  frontBaseUrl = 'http://user.epro-edu.com:7071' //生产环境地址（用户前台）
+} else if (env.VUE_APP_ENV == 'pro') {
+  frontBaseUrl = 'https://user.epro-edu.com' //生产环境地址（用户前台）
 }
 // else if (env.VUE_APP_ENV == 'test') {
 //   frontBaseUrl = 'http://139.159.141.248:7071' //测试环境地址（用户前台）

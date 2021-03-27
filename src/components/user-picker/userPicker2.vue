@@ -270,7 +270,7 @@ export default {
     innerVisible(val) {
       if (val) {
         this.$nextTick(() => {
-          const nodes = this.selected.map(node => node.userId)
+          const nodes = this.selected.map((node) => node.userId)
           this.$refs.tree.setCheckedNodes(nodes)
           this.$refs.tree.setCheckedKeys(nodes)
         })
@@ -376,7 +376,7 @@ export default {
         })
         return
       }
-      const index = this.selected.findIndex(item => item.userId === node.userId)
+      const index = this.selected.findIndex((item) => item.userId === node.userId)
       if (index >= 0) {
         this.selected.splice(index, 1)
       } else {
@@ -384,7 +384,7 @@ export default {
       }
     },
     handleUncheckItem(node) {
-      const index = this.selected.findIndex(item => item.userId === node.userId)
+      const index = this.selected.findIndex((item) => item.userId === node.userId)
       this.selected.splice(index, 1)
       this.$refs.tree.setChecked(node.userId, false)
     },

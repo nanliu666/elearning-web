@@ -15,6 +15,7 @@
           header-align="left"
           :label="'来源: ' + table.name"
           prop="fileName"
+          width="600"
         >
         </el-table-column>
 
@@ -67,7 +68,7 @@
 </template>
 
 <script>
-import { downloadZip } from '@/api/learnArrange'
+import { getStore } from '@/util/store.js'
 import { downLoadFile } from '@/util/util'
 
 export default {
@@ -86,7 +87,7 @@ export default {
     }
   },
   methods: {
-        // 打包下载
+    // 打包下载
     downloadZip() {
       let params = {
         filePath: [],

@@ -32,9 +32,10 @@
         <div class="intro-item">
           作业提交率：
           <span class="text">{{
-            typeof data.jobTimes == 'number' && typeof data.jobPercent == 'number'
-              ? data.jobTimes + '次/' + data.jobPercent + '%'
-              : '--'
+            data.job ||
+              (data.jobTimes && data.jobPercent
+                ? data.jobTimes + '次/' + data.jobPercent + '%'
+                : '--')
           }}</span>
         </div>
         <div class="intro-item">
@@ -111,6 +112,16 @@ export default {
   computed: {
     parentVm() {
       return this
+    }
+  },
+  watch: {
+    '$route.query': {
+      handler(val) {
+        Object.keys(val).forEach((key) => {
+          this.data[key] = val[key]
+        })
+      },
+      deep: true
     }
   },
   activated() {

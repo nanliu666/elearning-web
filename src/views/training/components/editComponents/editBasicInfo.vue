@@ -211,7 +211,10 @@ export default {
           itemType: 'slot',
           label: '培训介绍',
           prop: 'introduction',
-          rules: [{ required: true, message: '请输入培训介绍', trigger: 'blur' }],
+          rules: [
+            { required: true, message: '请输入培训介绍', trigger: 'blur' },
+            { max: 5000, message: '培训介绍最多不超过5000字', trigger: ['blur', 'change'] }
+          ],
           options: [],
           span: 24,
           offset: 0
@@ -240,7 +243,6 @@ export default {
   watch: {
     'formData.trainTime': {
       handler(data) {
-        console.log(data)
         this.$store.commit('SET_TRAIN_TIME', data)
       },
       deep: true
@@ -387,7 +389,6 @@ export default {
       }
     },
     loadCoordinator(params) {
-      console.log(params)
       if (_.size(_.get(params, 'search')) > 32) {
         this.$message.error('您输入的联系人姓名过长，无法搜索！')
       }

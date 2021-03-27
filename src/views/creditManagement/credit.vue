@@ -1,6 +1,6 @@
 <template>
   <div class="question-list  fill">
-    <page-header title="学分明细">
+    <page-header title="积分台账">
     </page-header>
     <el-row
       style="height: calc(100% - 92px);"

@@ -1,6 +1,6 @@
 <template>
   <div class="fill">
-    <page-header title="学分规则管理">
+    <page-header title="积分规则管理">
       <div slot="rightMenu">
         <el-button
           v-p="ADD_CREDIT"

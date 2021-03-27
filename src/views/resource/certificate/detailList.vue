@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header title="发放明细" />
+    <page-header title="证书发放明细" />
     <basic-container>
       <common-table
         ref="table"
