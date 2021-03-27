@@ -5,13 +5,17 @@
       :key="index"
     >
       <el-table
+        v-loading="isLoading && indexLoading == index"
         :data="items.fileInfoList"
         style="width: 100%"
+        element-loading-text="拼命打包下载中，请稍等！！！"
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0, 0, 0, 0.8)"
       >
         <el-table-column
           :label="'作业来源： ' + items.jobName"
           prop="name"
-          width="780px"
+          width="550px"
         >
           <template slot-scope="scope">
             <div>
@@ -41,7 +45,7 @@
           <template slot="header">
             <el-button
               type="text"
-              @click="handleUpload(items)"
+              @click="handleUpload(items, index)"
             >
               打包下载
             </el-button>
@@ -95,7 +99,9 @@ export default {
     return {
       tableData: [],
       uploadData: [],
-      stuId: ''
+      stuId: '',
+      isLoading: false,
+      indexLoading: ''
     }
   },
   activated() {
@@ -110,7 +116,9 @@ export default {
   },
   methods: {
     // 打包下载
-    handleUpload(items) {
+    handleUpload(items, index) {
+      this.isLoading = true
+      this.indexLoading = index
       let params = {
         filePath: '',
         fileName: '',
@@ -134,17 +142,18 @@ export default {
       // 下载
       let token = getStore({ name: 'token' })
       let x = new XMLHttpRequest()
-
       x.open('GET', url, true)
       x.setRequestHeader('accessToken', `bearer  ${token}`)
       x.responseType = 'blob'
       x.onprogress = function() {}
-      x.onload = function() {
+      x.onload = () => {
         let url = window.URL.createObjectURL(x.response)
         let a = document.createElement('a')
         a.href = url
-        a.download = '' //可以填写默认的下载名称
+        a.download = '打包下载文件.zip' //可以填写默认的下载名称
         a.click()
+        this.isLoading = false
+        this.indexLoading = ''
       }
       x.send()
     },
