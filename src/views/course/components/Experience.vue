@@ -4,13 +4,17 @@
     class="courseTask"
   >
     <el-table
+      v-loading="isLoading"
       :data="tableData"
       style="width: 100%"
+      element-loading-text="拼命打包下载中，请稍等！！！"
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
     >
       <el-table-column
         :label="'课程: ' + rowData.courseName"
         prop="name"
-        width="480px"
+        width="550px"
       >
         <template slot-scope="scope">
           <div>
@@ -66,7 +70,8 @@ export default {
     return {
       tableData: [],
       stuId: '',
-      rowData: ''
+      rowData: '',
+      isLoading: ''
     }
   },
   activated() {
@@ -91,6 +96,7 @@ export default {
     },
     // 打包下载
     handleUpload() {
+      this.isLoading = true
       let params = {
         filePath: '',
         fileName: '',
@@ -115,13 +121,15 @@ export default {
       x.setRequestHeader('accessToken', `bearer  ${token}`)
       x.responseType = 'blob'
       x.onprogress = function() {}
-      x.onload = function() {
+      x.onload = () => {
         let url = window.URL.createObjectURL(x.response)
         let a = document.createElement('a')
         a.href = url
-        a.download = '' //可以填写默认的下载名称
+        a.download = '打包下载文件.zip' //可以填写默认的下载名称
         a.click()
+        this.isLoading = false
       }
+
       x.send()
     }
   }
