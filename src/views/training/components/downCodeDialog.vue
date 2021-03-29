@@ -148,7 +148,7 @@ export default {
         height: CODE_HEIGHT
       })
       let url = backBaseUrl
-      let baseURL = (url += '/mobile/pages/signin/index')
+      let baseURL = (url += '/mobile/#/pages/signin/index')
 
       let p = ''
       Object.keys(params).forEach((key) => {
