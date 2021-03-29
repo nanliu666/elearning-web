@@ -1346,7 +1346,7 @@ export default {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
       this.$router.push({
         path: "/training/edit",
-        query: { id: this.showTrainDetail.trainId },
+        query: { id: this.showTrainDetail.trainId, type: "next" },
       });
     },
     // 结办
