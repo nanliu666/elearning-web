@@ -1773,6 +1773,7 @@ export default {
     // 关联学员表格批量删除
     delete_batchTableStudent() {
       let self = this
+      console.log(self.$refs.table_relatedStudents.selection)
       this.$confirm('您确定要批量删除所选人员吗？', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -1786,6 +1787,7 @@ export default {
               return true
             }
           })
+          self.$refs.otherUserTree.setChecked(item.id, false)
         })
         this.toggle_StudentsPage(1)
       })
