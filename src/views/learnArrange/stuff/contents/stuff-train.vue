@@ -1,6 +1,9 @@
 <template>
   <div class="stuff-train">
-    <div v-if="data.train.length" class="table-list">
+    <div
+      v-if="data.train.length"
+      class="table-list"
+    >
       <el-table
         v-for="(table, i) in data.train"
         :key="i"
@@ -14,17 +17,19 @@
           align="left"
           width="500"
           class-name="course-title"
-          slot-scope="scope"
         >
           <template slot="header">
-            <el-tooltip :content="'课程: ' + table.name" placement="top">
+            <el-tooltip
+              :content="'课程: ' + table.name"
+              placement="top"
+            >
               <div class="course-title">
-                {{ "来源: " + table.name }}
+                {{ '来源: ' + table.name }}
               </div>
             </el-tooltip>
           </template>
 
-          <template>
+          <template slot-scope="scope">
             <div>
               {{ scope.row.fileName }}
             </div>
@@ -34,12 +39,16 @@
         <el-table-column align="center">
           <template slot-scope="scope">
             <div>
-              {{ scope.row.fileSize + "K" }}
+              {{ scope.row.fileSize + 'K' }}
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column align="center" prop="updateTime"> </el-table-column>
+        <el-table-column
+          align="center"
+          prop="updateTime"
+        >
+        </el-table-column>
 
         <el-table-column align="right">
           <template slot="header">
@@ -54,7 +63,11 @@
           </template>
 
           <template slot-scope="scope">
-            <el-button type="text" size="small" @click="download(scope.row, table)">
+            <el-button
+              type="text"
+              size="small"
+              @click="download(scope.row, table)"
+            >
               下载
             </el-button>
           </template>
@@ -62,89 +75,94 @@
       </el-table>
     </div>
 
-    <div v-else class="empty">暂未提交</div>
+    <div
+      v-else
+      class="empty"
+    >
+      暂未提交
+    </div>
   </div>
 </template>
 
 <script>
-import { getStore } from "@/util/store.js";
-import { downLoadFile } from "@/util/util";
+import { getStore } from '@/util/store.js'
+import { downLoadFile } from '@/util/util'
 
 export default {
-  name: "StuffTrain",
+  name: 'StuffTrain',
   props: {
     data: {
       type: Object,
       default() {
-        return {};
-      },
-    },
+        return {}
+      }
+    }
   },
   data() {
     return {
-      courseName: "",
-    };
+      courseName: ''
+    }
   },
   methods: {
     // 打包下载
     downloadZip(table) {
-      table.loading = true;
+      table.loading = true
       let params = {
         filePath: [],
         fileName: [],
-        zipComment: encodeURIComponent("DownloadFiles.zip"),
-        responseType: "blob",
-        emulateJSON: true,
-      };
+        zipComment: encodeURIComponent('DownloadFiles.zip'),
+        responseType: 'blob',
+        emulateJSON: true
+      }
       this.data.train.forEach((c) => {
         c.trainAttachmentVOS.forEach((item) => {
-          let { fileName: name, filePath: path } = item;
-          if (!path || !name) return;
-          if (path.indexOf("http") !== 0) {
-            path = "https://" + path;
+          let { fileName: name, filePath: path } = item
+          if (!path || !name) return
+          if (path.indexOf('http') !== 0) {
+            path = 'https://' + path
           }
-          params.filePath.push(path);
-          params.fileName.push(name);
-        });
-      });
-      params.filePath = params.filePath.join(",");
-      params.fileName = params.fileName.join(",");
+          params.filePath.push(path)
+          params.fileName.push(name)
+        })
+      })
+      params.filePath = params.filePath.join(',')
+      params.fileName = params.fileName.join(',')
 
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
-      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`;
+      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
 
       this.repDownload(url).then(() => {
-        table.loading = false;
-        this.$forceUpdate();
-      });
+        table.loading = false
+        this.$forceUpdate()
+      })
     },
     repDownload(url) {
       return new Promise((resolve) => {
         // 下载
-        let token = getStore({ name: "token" });
-        let x = new XMLHttpRequest();
+        let token = getStore({ name: 'token' })
+        let x = new XMLHttpRequest()
 
-        x.open("GET", url, true);
-        x.setRequestHeader("accessToken", `bearer  ${token}`);
-        x.responseType = "blob";
-        x.onprogress = function () {};
-        x.onload = function () {
-          let url = window.URL.createObjectURL(x.response);
-          let a = document.createElement("a");
-          a.href = url;
-          a.download = ""; //可以填写默认的下载名称
-          a.click();
-          resolve();
-        };
-        x.send();
-      });
+        x.open('GET', url, true)
+        x.setRequestHeader('accessToken', `bearer  ${token}`)
+        x.responseType = 'blob'
+        x.onprogress = function() {}
+        x.onload = function() {
+          let url = window.URL.createObjectURL(x.response)
+          let a = document.createElement('a')
+          a.href = url
+          a.download = '' //可以填写默认的下载名称
+          a.click()
+          resolve()
+        }
+        x.send()
+      })
     },
     download(row, table) {
-      table.loading = true;
-      downLoadFile(row).then(() => (table.loading = false));
-    },
-  },
-};
+      table.loading = true
+      downLoadFile(row).then(() => (table.loading = false))
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
