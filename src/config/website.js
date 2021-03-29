@@ -19,7 +19,7 @@ export default {
   isFirstPage: false,
   fistPage: {
     label: '工作台',
-    value: '/wel',
+    value: '/report/index',
     params: {},
     query: {},
     meta: {
