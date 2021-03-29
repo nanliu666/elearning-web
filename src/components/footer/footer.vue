@@ -19,7 +19,7 @@ export default {
   created() {
     this.copy =
       (this.tenantContent && JSON.parse(this.tenantContent).copyright) ||
-      '版权所有© 2020 上海易宝软件有限公司　苏ICP备09013856号-1'
+      'v2.0.0_20210330_Release  备案号：苏ICP备19010525号-2'
   },
   methods: {}
 }
