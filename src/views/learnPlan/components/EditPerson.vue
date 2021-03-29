@@ -1,8 +1,15 @@
 <template>
   <!-- 人员信息 页面 -->
-  <basic-container block class="basicContainer">
+  <basic-container
+    block
+    class="basicContainer"
+  >
     <div style="text-align: right">
-      <el-button type="primary" size="medium" @click="handleAddUser">
+      <el-button
+        type="primary"
+        size="medium"
+        @click="handleAddUser"
+      >
         添加人员
       </el-button>
     </div>
@@ -14,14 +21,20 @@
       :config="tableConfig"
       :data="currentList"
     >
-      <template slot="department" slot-scope="{ row }">
+      <template
+        slot="department"
+        slot-scope="{ row }"
+      >
         <div>
-          {{ row.department || "-" }}
+          {{ row.department || '-' }}
         </div>
       </template>
-      <template slot="phonenum" slot-scope="{ row }">
+      <template
+        slot="phonenum"
+        slot-scope="{ row }"
+      >
         <div>
-          {{ row.phonenum || "-" }}
+          {{ row.phonenum || '-' }}
         </div>
       </template>
       <template #multiSelectMenu="{ selection }">
@@ -35,7 +48,13 @@
       </template>
 
       <template #oparetion="{ row }">
-        <el-button size="medium" type="text" @click="handleDelete(row)"> 删除 </el-button>
+        <el-button
+          size="medium"
+          type="text"
+          @click="handleDelete(row)"
+        >
+          删除
+        </el-button>
       </template>
     </common-table>
 
@@ -58,71 +77,71 @@
 </template>
 
 <script>
-import UserPicker from "@/components/user-picker/userPicker2";
-import Pagination from "@/components/common-pagination";
+import UserPicker from '@/components/user-picker/userPicker2'
+import Pagination from '@/components/common-pagination'
 
-import { getUserList as getUserByOrgId } from "@/api/examManage/schedule";
+import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: "序号",
-    prop: "index",
-    type: "index",
+    label: '序号',
+    prop: 'index',
+    type: 'index'
   },
   {
-    label: "姓名",
-    prop: "name",
-    width: 300,
+    label: '姓名',
+    prop: 'name',
+    width: 300
   },
   {
-    label: "所在部门",
-    prop: "department",
+    label: '所在部门',
+    prop: 'department',
     minWidth: 100,
-    slot: true,
+    slot: true
   },
   {
-    label: "手机号码",
+    label: '手机号码',
     slot: true,
-    prop: "phonenum",
-    minWidth: 100,
+    prop: 'phonenum',
+    minWidth: 100
   },
   {
-    label: "操作",
+    label: '操作',
     slot: true,
-    prop: "oparetion",
-    minWidth: 100,
-  },
-];
+    prop: 'oparetion',
+    minWidth: 100
+  }
+]
 const TABLE_CONFIG = {
   // enablePagination: true,
 
   showIndexColumn: false,
 
   enableMultiSelect: true,
-  rowKey: "userId",
-  showHandler: false,
-};
-const TABLE_PAGE_CONFIG = {};
+  rowKey: 'userId',
+  showHandler: false
+}
+const TABLE_PAGE_CONFIG = {}
 
 export default {
-  name: "EditPerson",
+  name: 'EditPerson',
   components: {
     UserPicker,
-    Pagination,
+    Pagination
   },
   props: {
     planId: {
       type: String,
-      default: null,
+      default: null
     },
     userList: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     selectedList: {
       type: Array,
-      default: () => [],
-    },
+      default: () => []
+    }
   },
   data() {
     return {
@@ -131,33 +150,33 @@ export default {
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       page: {
         pageSize: 10,
-        pageNo: 1,
+        pageNo: 1
       },
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
       tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG,
-    };
+      tablePageConfig: TABLE_PAGE_CONFIG
+    }
   },
   computed: {
     currentList() {
-      const { pageSize: size, pageNo: no } = this.page;
-      return this.userList.slice(size * (no - 1), size * no);
-    },
+      const { pageSize: size, pageNo: no } = this.page
+      return this.userList.slice(size * (no - 1), size * no)
+    }
   },
   methods: {
     pagination() {},
     handleAddUser() {
-      this.userPicking = true;
+      this.userPicking = true
     },
     async handleSelect(users) {
-      const orgs = _.remove(users, { type: "Org" });
+      const orgs = _.remove(users, { type: 'Org' })
       if (orgs.length > 0) {
-        const orgUsers = await this.getOrgUsers(_.map(orgs, "bizId").join(","));
-        this.$emit("update:user-list", _.concat(users, orgUsers));
+        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
+        this.$emit('update:user-list', _.concat(users, orgUsers))
       } else {
-        this.$emit("update:user-list", users);
+        this.$emit('update:user-list', users)
       }
     },
     // 拉取公司的直属员工
@@ -174,55 +193,55 @@ export default {
                 departmentId: item.orgId,
                 phonenum: item.phoneNum,
                 studyPlanId: this.planId,
-                type: "User",
-                isLeaf: true,
+                type: 'User',
+                isLeaf: true
               },
               item
             )
-          );
-          resolve(users);
-        });
-      });
+          )
+          resolve(users)
+        })
+      })
     },
     handleDelete(row) {
-      this.$confirm("你确定要删除该人员?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('你确定要删除该人员?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
           this.$emit(
-            "update:user-list",
+            'update:user-list',
             _.filter(this.userList, (user) => user.userId !== row.userId)
-          );
-          this.$message.success("删除成功");
+          )
+          this.$message.success('删除成功')
         })
-        .catch(() => {});
+        .catch(() => {})
     },
     handleMultiDelete(selection) {
-      this.$confirm("你确定要批量删除所选人员?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('你确定要批量删除所选人员?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
           let selectedIdMap = _.reduce(
             selection,
             (pre, cur) => {
-              pre[cur.userId] = 1;
-              return pre;
+              pre[cur.userId] = 1
+              return pre
             },
             {}
-          );
-          this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId]);
-          this.$emit("update:user-list", this.userList);
-          this.$message.success("删除成功");
-          this.$refs.table.clearSelection();
+          )
+          this.userList = _.reject(this.userList, (user) => selectedIdMap[user.userId])
+          this.$emit('update:user-list', this.userList)
+          this.$message.success('删除成功')
+          this.$refs.table.clearSelection()
         })
-        .catch(() => {});
-    },
-  },
-};
+        .catch(() => {})
+    }
+  }
+}
 </script>
 <style lang="scss" scoped>
 .requiredSchedule {
@@ -239,7 +258,7 @@ export default {
   }
 }
 .clearfix:after {
-  content: "";
+  content: '';
   display: block;
   clear: both;
 }
