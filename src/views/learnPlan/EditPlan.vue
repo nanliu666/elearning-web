@@ -2,7 +2,10 @@
   <div class="page">
     <header class="page__header">
       <div class="page-actions">
-        <div style="border-right: 1px solid #c5c5c5; cursor: pointer" @click="exit">
+        <div
+          style="border-right: 1px solid #c5c5c5; cursor: pointer"
+          @click="exit"
+        >
           <i class="el-icon-arrow-left" /> 返回
         </div>
       </div>
@@ -14,16 +17,32 @@
           :class="[activeStep === index ? 'active' : '']"
         >
           <span class="step-index">
-            <i class="iconfont" :class="[item.icon]" />
+            <i
+              class="iconfont"
+              :class="[item.icon]"
+            />
           </span>
           {{ item.label }}
         </div>
-        <div class="ghost-step step" :style="{ transform: translateX }" />
+        <div
+          class="ghost-step step"
+          :style="{ transform: translateX }"
+        />
       </div>
 
       <div class="page-right">
-        <el-button v-if="!id" size="medium" @click="handleSubmit(1)"> 存草稿 </el-button>
-        <el-button v-if="activeStep !== 0" size="medium" @click="handlePreviousStep">
+        <el-button
+          v-if="!id"
+          size="medium"
+          @click="handleSubmit(1)"
+        >
+          存草稿
+        </el-button>
+        <el-button
+          v-if="activeStep !== 0"
+          size="medium"
+          @click="handlePreviousStep"
+        >
           上一步
         </el-button>
         <el-button
@@ -44,7 +63,11 @@
         </el-button>
       </div>
     </header>
-    <el-row type="flex" justify="center" class="page__content">
+    <el-row
+      type="flex"
+      justify="center"
+      class="page__content"
+    >
       <el-col
         v-loading="loading"
         :xl="16"
@@ -54,7 +77,11 @@
         :xs="22"
         class="page__content--inner"
       >
-        <EditBasicInfo v-show="activeStep === 0" ref="editBasicInfo" :model="formData" />
+        <EditBasicInfo
+          v-show="activeStep === 0"
+          ref="editBasicInfo"
+          :model="formData"
+        />
         <EditCourse
           v-show="activeStep === 1"
           ref="editCourse"
@@ -73,35 +100,35 @@
 </template>
 
 <script>
-import EditBasicInfo from "./components/EditBasicInfo"; // 基本信息
-import EditCourse from "./components/EditCourse"; // 添加课程
-import EditPerson from "./components/EditPerson"; // 人员信息
-import { addPlan, updatePlan, planDetail } from "@/api/learnPlan";
-import { mapGetters } from "vuex";
-import moment from "moment";
-const REFS_LIST = ["editBasicInfo", "editCourse", "editPerson"];
+import EditBasicInfo from './components/EditBasicInfo' // 基本信息
+import EditCourse from './components/EditCourse' // 添加课程
+import EditPerson from './components/EditPerson' // 人员信息
+import { addPlan, updatePlan, planDetail } from '@/api/learnPlan'
+import { mapGetters } from 'vuex'
+import moment from 'moment'
+const REFS_LIST = ['editBasicInfo', 'editCourse', 'editPerson']
 const defaultFormData = {
   automaticIntegralCount: true,
   categoryId: null,
   categoryName: null,
-  coursePlanName: "",
-  coursePlanNo: "",
-  endDate: "",
-  endTime: "",
-  sponsor: "",
-  creatorName: "",
+  coursePlanName: '',
+  coursePlanNo: '',
+  endDate: '',
+  endTime: '',
+  sponsor: '',
+  creatorName: '',
   createTime: null,
-  startTime: "",
+  startTime: '',
   participantsList: [],
   courseList: [],
-  timeRange: [], // 时间范围
-};
+  timeRange: [] // 时间范围
+}
 export default {
-  name: "EditPlan",
+  name: 'EditPlan',
   components: {
     EditBasicInfo,
     EditCourse,
-    EditPerson,
+    EditPerson
   },
   data() {
     return {
@@ -109,169 +136,168 @@ export default {
       activeStep: 0,
       steps: [
         {
-          label: "填写基本信息",
-          icon: "icon-approval-info-outlined",
+          label: '填写基本信息',
+          icon: 'icon-approval-info-outlined'
         },
         {
-          label: "添加课程",
-          icon: "icon-approval-form-outlined",
+          label: '添加课程',
+          icon: 'icon-approval-form-outlined'
         },
         {
-          label: "人员信息",
-          icon: "icon-approval-flow-outlined",
-        },
+          label: '人员信息',
+          icon: 'icon-approval-flow-outlined'
+        }
       ],
       timer: null,
-      formData: _.cloneDeep(defaultFormData),
-    };
+      formData: _.cloneDeep(defaultFormData)
+    }
   },
   beforeRouteEnter(to, from, next) {
-    let callback;
-    if (from.path !== "/examManagement/examSchedule/preview") {
-      callback = (vm) => vm.init();
+    let callback
+    if (from.path !== '/examManagement/examSchedule/preview') {
+      callback = (vm) => vm.init()
     }
-    next(callback);
+    next(callback)
   },
   beforeRouteLeave(to, from, next) {
     // 离开时重置课程编辑数据
-    if (to.path !== "/examManagement/examSchedule/preview") {
-      this.activeStep = 0;
-      this.$refs.editCourse.reset();
+    if (to.path !== '/examManagement/examSchedule/preview') {
+      this.activeStep = 0
+      this.$refs.editCourse.reset()
     }
-    next();
+    next()
   },
   computed: {
     id() {
-      return this.$route.query.id;
+      return this.$route.query.id
     },
     translateX() {
-      return `translateX(${
-        this.steps.findIndex((item, index) => index === this.activeStep) * 100
-      }%)`;
+      return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
+        100}%)`
     },
-    ...mapGetters(["userInfo"]),
+    ...mapGetters(['userInfo'])
   },
   provide() {
     return {
-      parentObj: this,
-    };
+      parentObj: this
+    }
   },
   watch: {
-    "formData.timeRange": {
+    'formData.timeRange': {
       handler(data) {
-        this.$store.commit("SET_TRAIN_TIME", data);
+        this.$store.commit('SET_TRAIN_TIME', data)
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   methods: {
     init() {
       if (this.id) {
-        this.getPlanDetail();
+        this.getPlanDetail()
       } else {
-        this.setupDefaultFields();
+        this.setupDefaultFields()
       }
     },
     setupDefaultFields() {
-      this.formData = _.cloneDeep(defaultFormData);
-      this.formData.creatorName = this.userInfo.nick_name;
+      this.formData = _.cloneDeep(defaultFormData)
+      this.formData.creatorName = this.userInfo.nick_name
       this.formData.coursePlanNo =
-        moment().format("YYYYMMDDHHmmss") + this.userInfo.user_id.slice(0, 2);
+        moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
     },
     exit() {
-      this.$confirm("离开此页面您得修改将会丢失, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
-          this.$router.go(-1);
-          this.resetData();
+          this.$router.go(-1)
+          this.resetData()
         })
-        .catch(() => {});
+        .catch(() => {})
     },
     handlePreviousStep() {
-      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1;
+      this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
     handleNextStep() {
       if (this.activeStep !== 2) {
         this.$refs[REFS_LIST[this.activeStep]]
           .getData()
           .then(() => {
-            this.activeStep++;
+            this.activeStep++
           })
           .catch(() => {
             if (this.activeStep === 1) {
-              this.$message.error("请先完善课程信息");
+              this.$message.error('请先完善课程信息')
             }
-          });
+          })
       } else {
-        this.activeStep = 0;
+        this.activeStep = 0
       }
     },
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
-      let data = JSON.parse(JSON.stringify(this.formData));
+      let data = JSON.parse(JSON.stringify(this.formData))
 
-      data.startTime = _.get(data, "timeRange[0]");
-      data.endTime = _.get(data, "timeRange[1]");
-      data.type = type;
-      data.courseList = await this.$refs["editCourse"].getData();
+      data.startTime = _.get(data, 'timeRange[0]')
+      data.endTime = _.get(data, 'timeRange[1]')
+      data.type = type
+      data.courseList = await this.$refs['editCourse'].getData()
       data.courseList.forEach((c) => {
         c.studyExam.forEach((s) => {
-          s.integral = +s.integral;
-          s.publishTime = +s.publishTime;
-        });
-      });
+          s.integral = +s.integral
+          s.publishTime = +s.publishTime
+        })
+      })
       data.participantsList.map((item) => {
-        item.department = item.orgName || item.department;
-        item.phonenum = item.phoneNum || item.phonenum;
-        delete item.orgName;
-        delete item.phoneNum;
-        return item;
-      });
-      let func;
+        item.department = item.orgName || item.department
+        item.phonenum = item.phoneNum || item.phonenum
+        delete item.orgName
+        delete item.phoneNum
+        return item
+      })
+      let func
       if (this.id) {
-        func = updatePlan;
+        func = updatePlan
       } else {
-        data.creatorId = this.userInfo.user_id;
-        data.creatorName = this.userInfo.nick_name;
-        data.phonenum = data.phoneNum;
-        data.createTime = moment().format("yyyy-MM-DD HH:mm:ss");
-        func = addPlan;
+        data.creatorId = this.userInfo.user_id
+        data.creatorName = this.userInfo.nick_name
+        data.phonenum = data.phoneNum
+        data.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
+        func = addPlan
       }
       func(data)
         .then(() => {
-          const tips = type === 1 ? "已发布草稿" : "已成功发布课程安排";
-          this.$message.success(`${tips}，1秒后将自动返回课程安排列表`);
-          this.activeStep = 0;
+          const tips = type === 1 ? '已发布草稿' : '已成功发布课程安排'
+          this.$message.success(`${tips}，1秒后将自动返回课程安排列表`)
+          this.activeStep = 0
           setTimeout(() => {
-            this.activeStep = 0;
-            this.$router.push({ path: "/learnPlan/CoursePlanList" });
-            this.resetData();
-          }, 1000);
+            this.activeStep = 0
+            this.$router.push({ path: '/learnPlan/CoursePlanList' })
+            this.resetData()
+          }, 1000)
         })
-        .catch();
+        .catch()
     },
     resetData() {
-      this.formData = _.cloneDeep(defaultFormData);
+      this.formData = _.cloneDeep(defaultFormData)
     },
     getPlanDetail() {
-      this.loading = true;
+      this.loading = true
       // 获取学习计划详情
       planDetail({ id: this.id })
         .then((res) => {
-          res.timeRange = [res.startTime, res.endTime];
-          this.formData = res;
-          this.$refs.editCourse.setCourseList(res.courseList);
+          res.timeRange = [res.startTime, res.endTime]
+          this.formData = res
+          this.$refs.editCourse.setCourseList(res.courseList)
         })
         .catch()
         .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+          this.loading = false
+        })
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -336,7 +362,7 @@ $header-height: 54px;
           transition: transform 0.5s;
 
           &::after {
-            content: "";
+            content: '';
             border-width: 6px 6px 6px;
             border-style: solid;
             border-color: transparent transparent white;
