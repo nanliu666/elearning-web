@@ -261,16 +261,18 @@
             ></span>
             <el-button
               type="text"
-              @click="setMultipleRegister('agree')"
               style="padding: 0"
-              >批量同意</el-button
+              @click="setMultipleRegister('agree')"
             >
+              批量同意
+            </el-button>
             <el-button
               type="text"
-              @click="setMultipleRegister('reject')"
               style="padding: 0"
-              >批量拒绝</el-button
+              @click="setMultipleRegister('reject')"
             >
+              批量拒绝
+            </el-button>
           </div>
           <div v-else>
             <span>计划人数：</span
@@ -281,13 +283,13 @@
         </div>
 
         <el-table
-          @selection-change="handleSelectionChange"
           v-loading="registerLoading"
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           class="register-table"
           :data="registerData"
           style="width: 100%"
+          @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="55"> </el-table-column>
 
@@ -301,17 +303,17 @@
             <template slot-scope="scope">
               <el-button
                 type="text"
-                @click="setRegister(scope.row, 'agree')"
                 :disabled="scope.row.loading"
                 :loading="scope.row.loading"
+                @click="setRegister(scope.row, 'agree')"
               >
                 同意
               </el-button>
               <el-button
                 type="text"
-                @click="setRegister(scope.row, 'reject')"
                 :disabled="scope.row.loading"
                 :loading="scope.row.loading"
+                @click="setRegister(scope.row, 'reject')"
               >
                 拒绝
               </el-button>
@@ -406,14 +408,15 @@
               <el-button
                 style="margin-bottom: 0"
                 type="text"
+                :disabled="selection.some((item) => item.certificate != 2)"
                 @click="() => handleRemoveItems(selection, 1)"
-                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
               <el-button
                 style="margin-bottom: 0"
                 type="text"
+                :disabled="selection.some((item) => item.certificate != 1)"
                 @click="() => handleRemoveItems(selection, 0)"
               >
                 撤回证书
@@ -518,6 +521,7 @@
 
               <el-button
                 v-if="scope.row.certificate == 1"
+                :disabled="scope.row.certificate != 1"
                 type="text"
                 size="medium"
                 @click.stop="isrevokeCertificate(scope.row)"
@@ -525,11 +529,10 @@
                 撤回证书
               </el-button>
               <el-button
-                v-else
                 type="text"
                 size="medium"
+                :disabled="scope.row.certificate != 2"
                 @click.stop="isgrantCertificate(scope.row)"
-                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
@@ -914,6 +917,7 @@ const TABLE_COLUMNS2 = [
   {
     label: "手机号码",
     prop: "phone",
+    minWidth: 120,
   },
 
   {
@@ -954,7 +958,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: "deptId" },
     data: "",
-    field: "deptId",
+    field: "deptCode",
     label: "所属部门",
     type: "treeSelect",
     config: {
@@ -1577,6 +1581,7 @@ export default {
 
     handleSearch(searchParams) {
       // this.loadTableData(_.pickBy(searchParams))
+      this.page.currentPage = 1;
       this.isStudentList(searchParams);
     },
 
