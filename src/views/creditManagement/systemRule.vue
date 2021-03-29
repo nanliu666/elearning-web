@@ -26,10 +26,10 @@
             </div>
           </div>
         </template>
-        <template #sysRuleSource="{row}">
+        <template #sysRuleSource="{ row }">
           <span :class="{ disabled: row.status == '0' }"> {{ row.sysRuleSource }} </span>
         </template>
-        <template #name="{row}">
+        <template #name="{ row }">
           <el-link
             type="primary"
             style="line-height: 22px"
@@ -37,7 +37,7 @@
             {{ row.name }}
           </el-link>
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="STOP_SYSTEM_RULE"
@@ -185,13 +185,14 @@ export default {
         const params = this.searchParams
         this.tableLoading = true
         getListSysRulus(_.assign(params)).then((res) => {
-          const hasRule = ['登录学分', '在线学习学分', '知识库学分', '资源共享学分']
+          const hasRule = ['登录积分', '在线学习积分', '知识库积分', '资源共享积分']
           const temp = _.filter(res, (item) => {
             return _.some(hasRule, (ruleItem) => {
               return item.sysRuleSource === ruleItem
             })
           })
           this.tableData = temp
+          console.log(this.tableData)
           this.tableLoading = false
         })
       } catch (error) {
