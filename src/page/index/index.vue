@@ -45,8 +45,12 @@
             class="avue-view"
           />
         </div>
+        <div id="avue-footer">
+          v2.0.0_20210330_Release 备案号 ：苏ICP备19010525号-2
+        </div>
       </div>
     </div>
+
     <div
       class="avue-shade"
       @click="showCollapse"
