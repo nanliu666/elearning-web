@@ -529,6 +529,7 @@
                 撤回证书
               </el-button>
               <el-button
+                v-else
                 type="text"
                 size="medium"
                 :disabled="scope.row.certificate != 2"
@@ -977,7 +978,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
           children: "children",
           label: "orgName",
           disabled: "disabled",
-          value: "orgId",
+          value: "code",
         },
       },
     },
