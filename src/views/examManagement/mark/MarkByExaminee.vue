@@ -365,14 +365,19 @@ export default {
       return totalScore
     },
     async loadData(isFrist) {
-      this.impersonalityList = []
-      this.subjectivityList = []
       const loadFun = isFrist ? getExamineePaperDetail : getExamineePaperDetailNext
       const bacisParams = { id: this.$route.query.id }
       const params = isFrist ? bacisParams : _.assign(bacisParams, { examId: this.examData.examId })
       const examData = await loadFun(params)
-      this.handleExamData(examData)
-      this.getPaperData()
+      // 评下一个人，返回空
+      if (_.isEmpty(examData) && !isFrist) {
+        this.$message.error('无下一个请返回上一页')
+      } else {
+        this.impersonalityList = []
+        this.subjectivityList = []
+        this.handleExamData(examData)
+        this.getPaperData()
+      }
     },
     handleExamData(examData) {
       this.examData = examData
