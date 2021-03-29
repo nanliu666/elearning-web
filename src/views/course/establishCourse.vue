@@ -1832,13 +1832,13 @@ export default {
     padding: 10vh 13vw;
     #ruleForm {
       /deep/.el-input {
-        width: 20vw;
+        width: 17vw;
       }
     }
   }
 
   /deep/.el-input-number {
-    width: 20vw;
+    width: 17vw;
   }
   /deep/.el-input-number .el-input__inner {
     text-align: left;
