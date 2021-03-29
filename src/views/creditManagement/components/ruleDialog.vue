@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.id ? '编辑学分规则' : '新建学分规则'"
+    :title="form.id ? '编辑积分规则' : '新建积分规则'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -113,7 +113,7 @@ export default {
       {
         prop: 'stuName',
         itemType: 'input',
-        label: '学分规则名称',
+        label: '积分规则名称',
         maxlength: 10,
         minlength: 2,
         span: 24,
@@ -138,7 +138,7 @@ export default {
         precision: 1,
         step: 0.1,
         maxlength: 32,
-        label: '学分分值',
+        label: '积分分值',
         span: 24,
         required: true
       },

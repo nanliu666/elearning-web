@@ -104,7 +104,7 @@
                     <span> {{ courseData.period }} </span>
                   </li>
                   <li>
-                    <span class="text">学分：</span> <span> {{ courseData.credit }} </span>
+                    <span class="text">积分：</span> <span> {{ courseData.credit }} </span>
                   </li>
                   <li v-if="courseData.passCondition">
                     <span class="text">通过条件：</span>

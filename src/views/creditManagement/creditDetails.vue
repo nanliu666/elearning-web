@@ -128,7 +128,7 @@ const TABLE_COLUMNS = [
   },
   {
     prop: 'stu_name',
-    label: '学分来源',
+    label: '积分来源',
     slot: true,
     minWidth: 180
   },
