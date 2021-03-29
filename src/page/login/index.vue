@@ -61,6 +61,9 @@
                 </div>
               </div>
             </div>
+            <div class="hint">
+              推荐使用谷歌浏览器
+            </div>
           </div>
         </div>
       </div>
@@ -190,9 +193,17 @@ export default {
       }
     }
     .login_content {
+      position: relative;
       width: 50%;
       height: 63vh;
       background: #fff;
+    }
+    .hint {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #a0a8ae;
+      font-size: 14px;
     }
   }
 }
