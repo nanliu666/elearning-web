@@ -36,12 +36,12 @@
             :key="index"
             class="main-question-li"
           >
-            <div>
+            <div style="font-szie: 16px;font-weight: 550">
               <span>{{ (index + 1) | number2zhcn }}、</span>
               <span>{{ item[0].type | typeFilter }}</span>
               <span>（共{{ _.size(item) }}题, 共{{ getItemTotalScore(item) }}分）</span>
             </div>
-            <div style="margin-bottom: 10px; margin-top: 4px;color: #ccc">
+            <div style="margin-bottom: 10px; margin-top: 4px;color: #bfc2c4">
               {{ _.get(item, '[0]title', '') }}
             </div>
             <div
