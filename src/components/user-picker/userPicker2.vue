@@ -8,17 +8,10 @@
     :before-close="close"
   >
     <div class="content-wr">
-      <div
-        v-loading="loading"
-        class="left"
-      >
+      <div v-loading="loading" class="left">
         <div>
           <el-tabs v-model="activeTab">
-            <el-tab-pane
-              v-if="selectTypes.includes('Org')"
-              label="组织架构"
-              name="Org"
-            />
+            <el-tab-pane v-if="selectTypes.includes('Org')" label="组织架构" name="Org" />
             <el-tab-pane
               v-if="selectTypes.includes('OuterUser')"
               label="外部联系人"
@@ -26,14 +19,8 @@
             >
             </el-tab-pane>
           </el-tabs>
-          <div
-            v-if="selectTypes.includes('Org')"
-            v-show="activeTab === 'Org'"
-          >
-            <el-input
-              v-model="orgSearch"
-              placeholder="搜索组织部门或成员姓名"
-            />
+          <div v-if="selectTypes.includes('Org')" v-show="activeTab === 'Org'">
+            <el-input v-model="orgSearch" placeholder="搜索组织部门或成员姓名" />
             <div class="tree">
               <el-tree
                 v-show="!orgSearch"
@@ -88,14 +75,13 @@
                   @change="handleSelectUser(outerData[index])"
                 >
                   {{ outerData[index].bizName
-                  }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                  }}{{
+                    outerData[index].phonenum ? `(${outerData[index].phonenum})` : ""
+                  }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
-            <com-empty
-              v-if="_.isEmpty(usersNameList)"
-              height="31vh"
-            />
+            <com-empty v-if="_.isEmpty(usersNameList)" height="31vh" />
           </div>
         </div>
       </div>
@@ -105,74 +91,54 @@
         </div>
 
         <div
-          v-for="(item, index) of _(selected)
-            .sortBy(['type', 'bizName'])
-            .uniqBy('bizId')
-            .value()"
-          :key="index"
+          v-for="item of _(selected).sortBy(['type', 'bizName']).uniqBy('bizId').value()"
+          :key="item.bizId"
           class="info flex flex-justify-between flex-items"
         >
           <div class="flex flex-justify-between flex-items">
             <!-- 用户图标 -->
-            <i
-              v-if="item.type == 'Org'"
-              class="iconfont icon-usercircle2 imgss"
-            />
-            <i
-              v-else
-              class="iconfont icon-approval-checkin-bicolor imgs"
-            />
+            <i v-if="item.type == 'Org'" class="iconfont icon-usercircle2 imgss" />
+            <i v-else class="iconfont icon-approval-checkin-bicolor imgs" />
             {{ getSelectedName(item) }}
           </div>
           <div class="icon">
-            <i
-              class="el-icon-error pointer"
-              @click="() => handleUncheckItem(item)"
-            />
+            <i class="el-icon-error pointer" @click="() => handleUncheckItem(item)" />
           </div>
         </div>
       </div>
     </div>
-    <span
-      slot="footer"
-      class="dialog-footer"
-    >
-      <el-button
-        size="medium"
-        @click="handleClose"
-      >取 消</el-button>
-      <el-button
-        size="medium"
-        type="primary"
-        @click="handleSubmit"
-      > 确 定 </el-button>
+    <span slot="footer" class="dialog-footer">
+      <el-button size="medium" @click="handleClose">取 消</el-button>
+      <el-button size="medium" type="primary" @click="handleSubmit"> 确 定 </el-button>
     </span>
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getOuterUser } from '@/api/system/user'
-import ComEmpty from '@/components/common-empty/empty'
-import _ from 'lodash'
-const SEARCH_DELAY = 200
+import { getOrgUserChild, getOuterUser } from "@/api/system/user";
+import ComEmpty from "@/components/common-empty/empty";
+import _ from "lodash";
+const SEARCH_DELAY = 200;
 const NODE_TYPE = {
-  All: 'All',
-  Org: 'Org',
-  User: 'User'
-}
-const SELECT_TYPE = ['Org', 'OuterUser']
+  All: "All",
+  Org: "Org",
+  User: "User",
+};
+const SELECT_TYPE = ["Org", "OuterUser"];
 
 const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
-  search = _.trim(search)
+  search = _.trim(search);
   // 只能传入一个参数 当传入search的时候不使用parentId
-  const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
+  const data = await getOrgUserChild(
+    _.pick({ parentId, search }, search ? "search" : "parentId")
+  );
   // 在这里处理两个数组为树形组件需要的结构
-  const { orgs, users } = data
-  const ORG_PROPS = { type: NODE_TYPE.Org }
-  const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
+  const { orgs, users } = data;
+  const ORG_PROPS = { type: NODE_TYPE.Org };
+  const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User };
   return _.concat(
     _.map(orgs, (item) =>
       _.assign(
-        { path: `${parentPath || '0'}_${item.id}`, bizId: item.id, bizName: item.name },
+        { path: `${parentPath || "0"}_${item.id}`, bizId: item.id, bizName: item.name },
         item,
         ORG_PROPS
       )
@@ -180,56 +146,56 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
     _.map(users, (item) =>
       _.assign(
         {
-          path: `${parentPath || '0'}_${item.userId}`,
+          path: `${parentPath || "0"}_${item.userId}`,
           bizId: item.userId,
           bizName: item.name,
           orgName,
-          orgId: parentId
+          orgId: parentId,
         },
         item,
         USER_PROPS
       )
     )
-  )
-}
+  );
+};
 export default {
-  name: 'UserPicker',
+  name: "UserPicker",
   components: {
-    ComEmpty
+    ComEmpty,
   },
   props: {
     // 只选人，选了组织在右侧会显示人
     onlyUser: {
       type: Boolean,
-      default: false
+      default: false,
     },
     value: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     // 是否为单选，默认为多选
     isSingle: {
       type: Boolean,
-      default: false
+      default: false,
     },
     visible: {
       type: Boolean,
-      default: false
+      default: false,
     },
     title: {
       type: String,
       default: () => {
-        return '请选择'
-      }
+        return "请选择";
+      },
     },
     // 选择类型，用逗号分隔，可选项包括 Org(组织机构),OuterUser(外部联系人)
     selectType: {
       type: String,
-      default: 'Org'
-    }
+      default: "Org",
+    },
   },
   data() {
-    const activeTab = this.selectType.split(',')[0] || 'Org'
+    const activeTab = this.selectType.split(",")[0] || "Org";
     return {
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
@@ -238,152 +204,156 @@ export default {
       isIndeterminate: false,
       activeTab,
       loading: false,
-      orgSearch: '',
+      orgSearch: "",
       orgSearchData: [],
       outerParams: {
         pageNo: 1,
         pageSize: 500,
-        search: '',
-        loaded: false
+        search: "",
+        loaded: false,
       },
       outerData: [],
       // 存放node对象
       selected: [],
       debounceOuterScrollHandler: _.debounce(this.handleOuterScroll, SEARCH_DELAY),
-      debounceOuterSearchFn: _.debounce(this.handleSearchOuterUser, SEARCH_DELAY)
-    }
+      debounceOuterSearchFn: _.debounce(this.handleSearchOuterUser, SEARCH_DELAY),
+    };
   },
 
   computed: {
     // 树形组件的props属性
     treeProps() {
       return {
-        disabled: 'disabled',
-        label: function(data) {
-          let { name, phoneNum, phonenum } = data
+        disabled: "disabled",
+        label: function (data) {
+          let { name, phoneNum, phonenum } = data;
           // name = name || bizName
-          phoneNum = phoneNum || phonenum
-          if (!phoneNum) return name
-          return name + '(' + phoneNum + ')'
+          phoneNum = phoneNum || phonenum;
+          if (!phoneNum) return name;
+          return name + "(" + phoneNum + ")";
         },
-        isLeaf: 'isLeaf',
-        children: 'children'
-      }
+        isLeaf: "isLeaf",
+        children: "children",
+      };
     },
     selectTypes() {
-      return this.selectType.split(',').filter((item) => SELECT_TYPE.includes(item))
+      return this.selectType.split(",").filter((item) => SELECT_TYPE.includes(item));
     },
     innerVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(val) {
-        this.$emit('update:visible', val)
-      }
-    }
+        this.$emit("update:visible", val);
+      },
+    },
   },
 
   watch: {
+    value(val) {
+      this.selected = val.slice();
+      const temp = _.map(this.checkedUsers, (item) => {
+        return { name: item };
+      });
+      const diffName = _.differenceBy(temp, val, "name");
+      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
+        return item === _.get(diffName, "[0].name", "");
+      });
+      if (diffIndex !== -1) {
+        this.checkedUsers.splice(diffIndex, 1);
+        this.checkAll = false;
+        this.isIndeterminate = true;
+      }
+    },
     selected(val) {
-      const { orgTree, orgTreeSearch } = this.$refs
-      ;[orgTree, orgTreeSearch].forEach((ref) => {
-        if (_.isNil(ref)) return
-        ref.setCheckedKeys(_.map(val, (item) => item.path))
-      })
+      const { orgTree, orgTreeSearch } = this.$refs;
+      [orgTree, orgTreeSearch].forEach((ref) => {
+        if (_.isNil(ref)) return;
+        ref.setCheckedKeys(_.map(val, (item) => item.path));
+      });
     },
 
     // 在组织架构下使用查询参数
-    orgSearch: _.debounce(function(search) {
-      if (!search) return
-      this.loading = true
+    orgSearch: _.debounce(function (search) {
+      if (!search) return;
+      this.loading = true;
       loadOrgTree({ search })
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>
             _.assign({ isLeaf: true }, item)
-          )
+          );
         })
-        .finally(() => (this.loading = false))
+        .finally(() => (this.loading = false));
     }, SEARCH_DELAY),
-    'outerParams.search'() {
-      this.debounceOuterSearchFn()
+    "outerParams.search"() {
+      this.debounceOuterSearchFn();
     },
     innerVisible(val) {
-      if (!val) return
-      this.selected = JSON.parse(JSON.stringify(this.value))
+      if (!val) return;
+      this.selected = JSON.parse(JSON.stringify(this.value));
       this.selected.forEach((item) => {
-        item.bizId = item.userId || item.id
-        item.bizName = item.name
-        item.type = 'User'
-      })
-      const temp = _.map(this.checkedUsers, (item) => {
-        return { name: item }
-      })
-      const diffName = _.differenceBy(temp, val, 'name')
-      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
-        return item === _.get(diffName, '[0].name', '')
-      })
-      if (diffIndex !== -1) {
-        this.checkedUsers.splice(diffIndex, 1)
-        this.checkAll = false
-        this.isIndeterminate = true
-      }
-      this.$forceUpdate()
-    }
+        item.bizId = item.id;
+        item.bizName = item.name;
+      });
+    },
   },
   mounted() {
-    if (_.includes(this.selectType, 'OuterUser')) {
-      this.loadOuterUser()
+    if (_.includes(this.selectType, "OuterUser")) {
+      this.loadOuterUser();
     }
-    this.listenerScroll()
+    this.listenerScroll();
   },
   beforeDestroy() {
     //移除监听滚动条事件
-    window.removeEventListener('scroll', this.listenerScroll)
+    window.removeEventListener("scroll", this.listenerScroll);
   },
   methods: {
     getSelectedName(item) {
-      const { name, phoneNum, phonenum } = item
-      const phone = phoneNum || phonenum
+      const { name, phoneNum, phonenum } = item;
+      const phone = phoneNum || phonenum;
       if (phone) {
-        return name + '(' + phone + ')'
+        return name + "(" + phone + ")";
       }
-      return name
+      return name;
     },
     listenerScroll() {
-      window.addEventListener('scroll', this.debounceOuterScrollHandler, true)
+      window.addEventListener("scroll", this.debounceOuterScrollHandler, true);
     },
     handleOuterScroll(e) {
-      if (this.isClear) return
-      const refTarget = e.target
+      if (this.isClear) return;
+      const refTarget = e.target;
       if (refTarget.scrollTop + refTarget.offsetHeight >= refTarget.scrollHeight) {
-        this.loadOuterUser()
+        this.loadOuterUser();
       }
     },
     // 切换全选与全删
     handleCheckAllChange(val) {
-      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : []
-      this.isIndeterminate = false
+      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : [];
+      this.isIndeterminate = false;
       // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
-        _.pullAllBy(this.selected, this.outerData, 'bizId')
+        _.pullAllBy(this.selected, this.outerData, "bizId");
       } else {
         // 半选换全选需要把未选上的加入
         if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
-          this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'bizId')
+          this.selected = _.uniqBy(
+            [..._.cloneDeep(this.outerData), ...this.selected],
+            "bizId"
+          );
         } else {
           // 全选需要去重
           _.each(this.outerData, (item) => {
-            this.handleSelectUser(item)
-          })
-          this.selected = _.uniqBy(this.selected, 'bizId')
+            this.handleSelectUser(item);
+          });
+          this.selected = _.uniqBy(this.selected, "bizId");
         }
       }
     },
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
-      let checkedCount = value.length
-      this.checkAll = checkedCount === this.usersNameList.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.usersNameList.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length;
     },
     /**
      * 处理选中单个项
@@ -391,35 +361,37 @@ export default {
      */
     handleCheckItem(node, { checkedNodes }) {
       // 如果disabled则不能check项
-      if (_.get(node, this.treeProps.disabled)) return
+      if (_.get(node, this.treeProps.disabled)) return;
       if (_.some(checkedNodes, (item) => item.bizId === node.bizId)) {
         // this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
         if (node.type !== NODE_TYPE.User) {
           if (!this.onlyUser) {
-            this.selected = _.reject(this.selected, (item) => _.includes(item.path, node.path))
+            this.selected = _.reject(this.selected, (item) =>
+              _.includes(item.path, node.path)
+            );
           }
         }
         // 如果是单选模式
         if (this.isSingle) {
-          this.selected = [node]
+          this.selected = [node];
         } else {
-          this.selected.push(node)
+          this.selected.push(node);
         }
       } else {
         // 连续选中同一个目标则uncheck该选项
-        this.handleUncheckItem(node, checkedNodes)
+        this.handleUncheckItem(node, checkedNodes);
       }
     },
     handleUncheckItem(item, checkedNodes) {
       const outerIndex = _.findIndex(this.checkedUsers, (userItem) => {
-        return item.name === userItem
-      })
+        return item.name === userItem;
+      });
       if (outerIndex !== -1) {
-        this.checkedUsers.splice(outerIndex, 1)
+        this.checkedUsers.splice(outerIndex, 1);
       }
-      const { bizId } = item
+      const { bizId } = item;
       if (_.find(this.selected, { bizId })) {
-        this.selected = _.reject(this.selected, { bizId })
+        this.selected = _.reject(this.selected, { bizId });
       } else {
         // 当前节点不在selected中则父节点被勾选时，取消勾选子节点
         this.selected = _(this.selected)
@@ -427,95 +399,80 @@ export default {
           .reject((i) => _.includes(item.path, i.path) || _.includes(i.path, item.path))
           // 添加其他节点
           .concat(this.getCheckedNodes(checkedNodes))
-          .value()
+          .value();
       }
     },
     // 过滤掉已勾选的父节点下的所有子节点
     getCheckedNodes(checkedNodes) {
-      const orgs = _.filter(checkedNodes, { type: NODE_TYPE.Org })
+      const orgs = _.filter(checkedNodes, { type: NODE_TYPE.Org });
       orgs.forEach((org) => {
         checkedNodes = _.filter(
           checkedNodes,
           (node) => node.path === org.path || !_.includes(node.path, org.path)
-        )
-      })
-      return checkedNodes
+        );
+      });
+      return checkedNodes;
     },
     close() {
-      this.innerVisible = false
+      this.innerVisible = false;
     },
     handleClose() {
-      this.selected = this.value.slice()
-      this.close()
+      this.selected = this.value.slice();
+      this.close();
     },
 
     handleSubmit() {
-      const res = []
-      this.selected.forEach((s) => {
-        let { name, orgName, department, phoneNum, phonenum, userId, workNo } = s
-
-        department = orgName || department
-        phonenum = phoneNum || phonenum
-        const item = {
-          name,
-          department,
-          phonenum,
-          userId,
-          workNo
-        }
-        res.push(item)
-      })
-      this.$emit('input', res)
-      this.close()
+      this.$emit("input", _.uniqBy(this.selected, "bizId"));
+      this.close();
     },
     handleSelectUser(user) {
-      const index = _.findIndex(this.selected, { bizId: user.bizId })
+      const index = _.findIndex(this.selected, { bizId: user.bizId });
       if (index > -1) {
-        this.selected = _.filter(this.selected, (item, i) => i != index)
+        this.selected = _.filter(this.selected, (item, i) => i != index);
       } else {
-        this.selected.push(user)
+        this.selected.push(user);
       }
     },
 
     handleSearchOuterUser() {
-      this.outerParams.loaded = false
-      this.outerParams.pageNo = 1
-      this.loadOuterUser(true)
+      this.outerParams.loaded = false;
+      this.outerParams.pageNo = 1;
+      this.loadOuterUser(true);
     },
     async loadOuterUser(isRefresh) {
       if (this.outerParams.loaded) {
-        return
+        return;
       }
-      const { pageNo, pageSize, search } = this.outerParams
-      this.loading = true
+      const { pageNo, pageSize, search } = this.outerParams;
+      this.loading = true;
       getOuterUser({ pageNo, search, pageSize })
         .then((res) => {
-          const { totalPage } = res
+          const { totalPage } = res;
           if (_.size(res.data) > 0) {
             const data = _.map(res.data, (item) =>
               _.assign(item, {
                 path: item.userId,
                 bizId: item.userId,
                 bizName: item.name,
-                type: NODE_TYPE.User
+                type: NODE_TYPE.User,
               })
-            )
+            );
             if (isRefresh) {
-              this.outerData = data
+              this.outerData = data;
             } else {
-              this.outerData = _.concat(this.outerData, data)
+              this.outerData = _.concat(this.outerData, data);
             }
-            this.usersNameList = _.map(this.outerData, 'name')
+            this.usersNameList = _.map(this.outerData, "name");
           } else {
-            this.usersNameList = []
-            this.outerParams.loaded = true
+            this.usersNameList = [];
+            this.outerParams.loaded = true;
           }
-          this.outerParams.pageNo = pageNo + 1
-          this.isClear = totalPage < pageNo + 1
+          this.outerParams.pageNo = pageNo + 1;
+          this.isClear = totalPage < pageNo + 1;
         })
         .finally(() => {
-          this.loading = false
-        })
+          this.loading = false;
+        });
     },
     /**
      * 懒加载组织树形组件数据
@@ -523,30 +480,30 @@ export default {
      * @returns {void}
      */
     lazyLoadOrgTree(node, resolve) {
-      const parentId = node.level > 0 ? node.data.bizId : '0'
-      if (parentId === '0') this.loading = true
-      let orgName = {}
+      const parentId = node.level > 0 ? node.data.bizId : "0";
+      if (parentId === "0") this.loading = true;
+      let orgName = {};
       if (node) {
-        orgName = node.data && node.data.type === NODE_TYPE.Org ? node.data.bizName : ''
+        orgName = node.data && node.data.type === NODE_TYPE.Org ? node.data.bizName : "";
       }
       loadOrgTree({
         parentId,
-        parentPath: node.level > 0 ? node.data.path : '0',
-        orgName
+        parentPath: node.level > 0 ? node.data.path : "0",
+        orgName,
       })
         .then((res) => resolve(this.thruHandler(res)))
-        .finally(() => (this.loading = false))
+        .finally(() => (this.loading = false));
     },
     // 数据处理中间函数
     thruHandler(arr) {
       if (this.isDepartmentOnly) {
         // 只可以选择部门, 过滤所有的User类型
-        arr = _.reject(arr, { type: NODE_TYPE.User })
+        arr = _.reject(arr, { type: NODE_TYPE.User });
       }
-      return arr
-    }
-  }
-}
+      return arr;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

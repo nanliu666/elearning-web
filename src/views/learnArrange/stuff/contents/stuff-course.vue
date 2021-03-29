@@ -162,6 +162,7 @@ export default {
       this.$message.error('上传失败，请重试')
       this.$forceUpdate()
     },
+
     onUploadComplete(table, item, file, url) {
       const { fileCategory } = item
       const { size: fileSize, uid: id, name: fileName } = file.file
@@ -171,8 +172,8 @@ export default {
         fileName,
         filePath: url,
         fileSize,
-        jobId: item.id ? id : '',
-        id: id + ''
+        jobId: table.id,
+        id: item.id || ''
       }
       saveCourseLinkedStudentOrTeacher(data)
         .then(() => {
