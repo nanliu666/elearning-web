@@ -93,7 +93,6 @@
           ref="editPerson"
           :plan-id="id"
           :user-list.sync="formData.participantsList"
-          :selected-list="formData.participantsList"
         />
       </el-col>
     </el-row>

@@ -420,8 +420,13 @@ export default {
      * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
-    'form.planScore'() {
-      this.questionChange()
+    'form.planScore': {
+      handler() {
+        if (!_.isEmpty(this.tableData)) {
+          this.questionChange()
+        }
+      },
+      deep: true
     },
     'form.isScore'() {
       let planScoreConfig = this.columns.find((it) => it.prop == 'planScore')
@@ -557,7 +562,7 @@ export default {
       this.loading = true
       getTestPaper(params)
         .then(async (res) => {
-          this.form = res
+          this.form = _.cloneDeep(res)
           await Promise.all(
             _.map(res.randomSettings, async (item) => {
               return (async () => {

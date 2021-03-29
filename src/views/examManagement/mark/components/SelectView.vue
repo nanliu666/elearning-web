@@ -87,10 +87,11 @@ export default {
     // 获取考生答案
     getAnswerValue() {
       const target = _.chain(this.data.examinationPaperUserOptionREQS)
-        .find((item) => {
-          return item.optionId === this.data.answerUser
+        .filter((item) => {
+          return _.includes(this.data.answerQuestion, item.optionId)
         })
-        .get('contentOption', '考生未作答')
+        .map('contentOption', '考生未作答')
+        .join(' ')
         .value()
       return target
     }

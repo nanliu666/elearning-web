@@ -148,13 +148,13 @@ export default {
       }
     },
     jumpStep(index) {
-      if (index === 0) {
-        this.activeStep = index
-      } else {
-        this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-          this.activeStep = index
-        })
-      }
+      this.activeStep = index
+      // if (index === 0) {
+      // } else {
+      //   this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
+      //     this.activeStep = index
+      //   })
+      // }
     },
     /***
      * @author guanfenda
@@ -170,9 +170,9 @@ export default {
      *
      * */
     handleNextStep() {
-      this.$refs[REFS_LIST[0]].getData().then(() => {
-        this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
-      })
+      this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
+      // this.$refs[REFS_LIST[0]].getData().then(() => {
+      // })
     },
     initData() {
       const examInfo = this.$refs.examInfo
