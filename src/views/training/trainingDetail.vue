@@ -529,6 +529,7 @@
                 撤回证书
               </el-button>
               <el-button
+                v-else
                 type="text"
                 size="medium"
                 :disabled="scope.row.certificate != 2"
@@ -977,7 +978,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
           children: "children",
           label: "orgName",
           disabled: "disabled",
-          value: "orgId",
+          value: "code",
         },
       },
     },
@@ -1346,7 +1347,7 @@ export default {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
       this.$router.push({
         path: "/training/edit",
-        query: { id: this.showTrainDetail.trainId },
+        query: { id: this.showTrainDetail.trainId, type: "next" },
       });
     },
     // 结办

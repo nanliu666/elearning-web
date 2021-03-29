@@ -80,7 +80,7 @@
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
 
-// import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
+import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -170,10 +170,39 @@ export default {
     handleAddUser() {
       this.userPicking = true
     },
-    handleSelect(users) {
-      this.$emit('update:user-list', users)
+    async handleSelect(users) {
+      const orgs = _.remove(users, { type: 'Org' })
+      if (orgs.length > 0) {
+        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
+        this.$emit('update:user-list', _.concat(users, orgUsers))
+      } else {
+        this.$emit('update:user-list', users)
+      }
     },
-
+    // 拉取公司的直属员工
+    async getOrgUsers(orgId) {
+      return new Promise((resolve) => {
+        getUserByOrgId({ orgId }).then((res) => {
+          const users = _.map(res, (item) =>
+            _.assign(
+              {
+                bizId: item.userId,
+                bizName: item.name,
+                orgName: item.orgName,
+                department: item.orgName,
+                departmentId: item.orgId,
+                phonenum: item.phoneNum,
+                studyPlanId: this.planId,
+                type: 'User',
+                isLeaf: true
+              },
+              item
+            )
+          )
+          resolve(users)
+        })
+      })
+    },
     handleDelete(row) {
       this.$confirm('你确定要删除该人员?', '提示', {
         confirmButtonText: '确定',

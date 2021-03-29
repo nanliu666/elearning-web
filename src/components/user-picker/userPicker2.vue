@@ -105,11 +105,11 @@
         </div>
 
         <div
-          v-for="(item, index) of _(selected)
+          v-for="item of _(selected)
             .sortBy(['type', 'bizName'])
             .uniqBy('bizId')
             .value()"
-          :key="index"
+          :key="item.bizId"
           class="info flex flex-justify-between flex-items"
         >
           <div class="flex flex-justify-between flex-items">
@@ -284,6 +284,21 @@ export default {
   },
 
   watch: {
+    value(val) {
+      this.selected = val.slice()
+      const temp = _.map(this.checkedUsers, (item) => {
+        return { name: item }
+      })
+      const diffName = _.differenceBy(temp, val, 'name')
+      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
+        return item === _.get(diffName, '[0].name', '')
+      })
+      if (diffIndex !== -1) {
+        this.checkedUsers.splice(diffIndex, 1)
+        this.checkAll = false
+        this.isIndeterminate = true
+      }
+    },
     selected(val) {
       const { orgTree, orgTreeSearch } = this.$refs
       ;[orgTree, orgTreeSearch].forEach((ref) => {
@@ -311,23 +326,9 @@ export default {
       if (!val) return
       this.selected = JSON.parse(JSON.stringify(this.value))
       this.selected.forEach((item) => {
-        item.bizId = item.userId || item.id
+        item.bizId = item.id
         item.bizName = item.name
-        item.type = 'User'
       })
-      const temp = _.map(this.checkedUsers, (item) => {
-        return { name: item }
-      })
-      const diffName = _.differenceBy(temp, val, 'name')
-      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
-        return item === _.get(diffName, '[0].name', '')
-      })
-      if (diffIndex !== -1) {
-        this.checkedUsers.splice(diffIndex, 1)
-        this.checkAll = false
-        this.isIndeterminate = true
-      }
-      this.$forceUpdate()
     }
   },
   mounted() {
@@ -450,22 +451,7 @@ export default {
     },
 
     handleSubmit() {
-      const res = []
-      this.selected.forEach((s) => {
-        let { name, orgName, department, phoneNum, phonenum, userId, workNo } = s
-
-        department = orgName || department
-        phonenum = phoneNum || phonenum
-        const item = {
-          name,
-          department,
-          phonenum,
-          userId,
-          workNo
-        }
-        res.push(item)
-      })
-      this.$emit('input', res)
+      this.$emit('input', _.uniqBy(this.selected, 'bizId'))
       this.close()
     },
     handleSelectUser(user) {
