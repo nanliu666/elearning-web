@@ -972,7 +972,7 @@ export default {
       this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
-    this.getInfo()
+    // this.getInfo()
     this.islistTeacher()
     this.disabledBtn = false
     this.reflectionData = []
@@ -997,7 +997,7 @@ export default {
     this.isgetCourseTags()
     this.isgetCatalog()
     this.getInfo()
-    this.islistTeacher()
+
     this.$refs.ruleForm.clearValidate()
     this.disabledBtn = false
     this.reflectionData = []
@@ -1007,6 +1007,22 @@ export default {
     next()
   },
   methods: {
+    // 讲师list
+    async islistTeacher() {
+      let id = this.ruleForm.teacherId
+      let ini = 0
+      let res = await listTeacher()
+      this.TeacherData = res
+      res.forEach((item) => {
+        if (id == item.idStr) {
+          ++ini
+        }
+      })
+      if (ini === 0) {
+        this.ruleForm.teacherId = ''
+      }
+    },
+
     selectChange(scope) {
       if (scope.row.upLoad.length) {
         this.$confirm('切换类型是否需要清除内容?', '提示', {
@@ -1028,8 +1044,6 @@ export default {
             })
           })
       }
-
-      console.log(scope)
     },
     delReflectionData() {
       this.reflectionData = []
@@ -1202,11 +1216,6 @@ export default {
       this.uploadingQueue = []
       this.pendingQueue = []
     },
-    islistTeacher() {
-      listTeacher().then((res) => {
-        this.TeacherData = res
-      })
-    },
 
     // 编辑页面的数据前
     // 编辑页面的数据后
@@ -1220,11 +1229,11 @@ export default {
           introduction,
           // thinkContent,
           passCondition = '',
-          content,
+          contents,
           catalogId
         } = res
         res.passCondition = passCondition.split(',')
-        res.contents = content.map((c) => {
+        res.contents = contents.map((c) => {
           const item = {}
           const { localName = '', content = '', name = '' } = c
           item.upLoad = [{ localName, content: _.unescape(content), name }]
@@ -1271,9 +1280,15 @@ export default {
             res.contents.splice(delIndex, 1)
           }
         })
-
         this.ruleForm = res
+        // 文章富文本回显
+        res.contents.map((item, index) => {
+          if (item.type == 1) {
+            this.ruleForm.contents[index].upLoad[0].content = _.unescape(item.upLoad[0].content)
+          }
+        })
         this.ruleForm.thinkContent = _.unescape(thinkContentData)
+        this.islistTeacher()
       })
     },
 
@@ -1378,6 +1393,9 @@ export default {
           item.content =
             item.upLoad[item.upLoad.length - 1].url || item.upLoad[item.upLoad.length - 1].content
         }
+        if (item.type == 1) {
+          item.content = _.escape(item.content)
+        }
       })
       params.localName = params.imageUrl[params.imageUrl.length - 1]
         ? params.imageUrl[params.imageUrl.length - 1].localName
@@ -1418,7 +1436,7 @@ export default {
           content: params.thinkContent || ''
         })
       }
-
+      delete params.thinkContent
       // console.log(params)
       // return
       // 草稿
