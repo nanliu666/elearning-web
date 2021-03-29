@@ -87,7 +87,7 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
-import { frontBaseUrl } from '@/config/env'
+import { backBaseUrl } from '@/config/env'
 
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
@@ -147,8 +147,8 @@ export default {
         width: CODE_WIDTH,
         height: CODE_HEIGHT
       })
-      let url = frontBaseUrl
-      let baseURL = (url += '/pages/signin/index')
+      let url = backBaseUrl
+      let baseURL = (url += '/mobile/#/pages/login/index')
 
       let p = ''
       Object.keys(params).forEach((key) => {
