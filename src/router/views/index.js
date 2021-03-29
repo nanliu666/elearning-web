@@ -10,7 +10,7 @@ import demoRoutes from './demo'
 export default [
   {
     path: '/',
-    redirect: '/report/index'
+    redirect: '/wel'
   },
 
   {

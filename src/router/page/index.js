@@ -74,7 +74,7 @@ export default [
   {
     path: '/',
     name: '主页',
-    redirect: '/report/index'
+    redirect: '/wel'
   },
   {
     path: '*',
