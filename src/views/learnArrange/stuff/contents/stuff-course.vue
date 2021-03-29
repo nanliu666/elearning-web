@@ -18,6 +18,9 @@
     <div class="table-list">
       <div v-if="data.course.length" class="table-list">
         <el-table
+          v-loading="table.loading"
+          element-loading-background="rgba(0, 0, 0, 0.8)"
+          element-loading-spinner="el-icon-loading"
           v-for="(table, i) in data.course"
           :key="i"
           :data="table.trainAttachmentVOS"
@@ -52,7 +55,7 @@
                 type="text"
                 size="small"
                 :disabled="!table.trainAttachmentVOS.length"
-                @click="downloadZip"
+                @click="downloadZip(table)"
               >
                 打包下载
               </el-button>
@@ -62,16 +65,13 @@
               <common-upload
                 v-if="scope.row.fileCategory"
                 need-handler
-                :disabled="loading[i + scope.$index + '']"
-                :on-upload-start="() => onUploadStart(i + scope.$index + '')"
-                :on-upload-complete="() => onUploadComplete(i + scope.$index + '')"
-                @on-error="onUploadError"
+                :on-upload-start="() => onUploadStart(table)"
+                :on-upload-complete="
+                  (file, url) => onUploadComplete(table, scope.row, file, url)
+                "
+                @on-error="() => onUploadError(table)"
               >
-                <el-button
-                  :loading="loading[i + scope.$index + '']"
-                  type="text"
-                  size="small"
-                >
+                <el-button type="text" size="small">
                   {{
                     scope.row.fileName
                       ? scope.row.fileCategory === "user"
@@ -87,7 +87,7 @@
                 type="text"
                 size="small"
                 :disabled="!scope.row.fileName"
-                @click="download(scope.row)"
+                @click="download(scope.row, table)"
               >
                 下载
               </el-button>
@@ -103,6 +103,7 @@
 <script>
 import { getStore } from "@/util/store.js";
 import { downLoadFile } from "@/util/util";
+import { saveCourseLinkedStudentOrTeacher } from "@/api/learnArrange";
 export default {
   name: "StuffCourse",
   components: {
@@ -129,17 +130,37 @@ export default {
     };
   },
   methods: {
-    onUploadStart(id) {
+    onUploadStart(table) {
       this.$message.warning("正在上传");
-      this.loading[id] = true;
+      table.loading = true;
+      this.$forceUpdate();
     },
-    onUploadError() {
+    onUploadError(table) {
+      table.loading = false;
       this.$message.error("上传失败，请重试");
+      this.$forceUpdate();
     },
-    onUploadComplete(id) {
-      this.$message.success("上传成功");
-      this.parentVm.queryWork();
-      this.loading[id] = false;
+    onUploadComplete(table, item, file, url) {
+      const { fileCategory } = item;
+      const { size: fileSize, uid: id, name: fileName } = file.file;
+      const data = {
+        courseId: table.courseId,
+        fileCategory,
+        fileName,
+        filePath: url,
+        fileSize,
+        jobId: id + "",
+        id: id + "",
+      };
+      saveCourseLinkedStudentOrTeacher(data)
+        .then(() => {
+          this.$message.success("上传成功");
+          this.parentVm.queryWork();
+        })
+        .finally(() => {
+          table.loading = false;
+          this.$forceUpdate();
+        });
     },
     getFileName(row) {
       const fileName = row.fileName || "未提交";
@@ -156,7 +177,9 @@ export default {
       this.parentVm.queryWork(courseId);
     },
     // 打包下载
-    downloadZip() {
+    downloadZip(table) {
+      table.loading = true;
+      this.$forceUpdate();
       let params = {
         filePath: [],
         fileName: [],
@@ -180,28 +203,35 @@ export default {
 
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
       &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`;
-      this.repDownload(url);
+      this.repDownload(url).then(() => {
+        table.loading = false;
+        this.$forceUpdate();
+      });
     },
     repDownload(url) {
-      // 下载
-      let token = getStore({ name: "token" });
-      let x = new XMLHttpRequest();
+      return new Promise((resolve) => {
+        // 下载
+        let token = getStore({ name: "token" });
+        let x = new XMLHttpRequest();
 
-      x.open("GET", url, true);
-      x.setRequestHeader("accessToken", `bearer  ${token}`);
-      x.responseType = "blob";
-      x.onprogress = function () {};
-      x.onload = function () {
-        let url = window.URL.createObjectURL(x.response);
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = ""; //可以填写默认的下载名称
-        a.click();
-      };
-      x.send();
+        x.open("GET", url, true);
+        x.setRequestHeader("accessToken", `bearer  ${token}`);
+        x.responseType = "blob";
+        x.onprogress = function () {};
+        x.onload = function () {
+          let url = window.URL.createObjectURL(x.response);
+          let a = document.createElement("a");
+          a.href = url;
+          a.download = ""; //可以填写默认的下载名称
+          a.click();
+          resolve();
+        };
+        x.send();
+      });
     },
-    download(row) {
-      downLoadFile(row);
+    download(row, table) {
+      table.loading = true;
+      downLoadFile(row).then(() => (table.loading = false));
     },
   },
 };

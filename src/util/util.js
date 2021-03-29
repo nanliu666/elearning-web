@@ -8,7 +8,7 @@ import axios from 'axios'
  */
 export const downLoadFile = (data) => {
   const url = data.url || data.fileUrl || data.filePath
-  axios
+  return axios
     .get(
       url,
       // 将responseType的默认json改为blob

@@ -4,6 +4,9 @@
       <el-table
         v-for="(table, i) in data.study"
         :key="i"
+        v-loading="table.loading"
+        element-loading-background="rgba(0, 0, 0, 0.8)"
+        element-loading-spinner="el-icon-loading"
         :data="table.trainAttachmentVOS"
         empty-text="暂未提交"
       >
@@ -32,14 +35,14 @@
               type="text"
               size="small"
               :disabled="!table.trainAttachmentVOS.length"
-              @click="downloadZip"
+              @click="downloadZip(table)"
             >
               打包下载
             </el-button>
           </template>
 
           <template slot-scope="scope">
-            <el-button type="text" size="small" @click="download(scope.row)">
+            <el-button type="text" size="small" @click="download(scope.row, table)">
               下载
             </el-button>
           </template>
@@ -72,7 +75,8 @@ export default {
   },
   methods: {
     // 打包下载
-    downloadZip() {
+    downloadZip(table) {
+      table.loading = true;
       let params = {
         filePath: [],
         fileName: [],
@@ -96,28 +100,35 @@ export default {
 
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
       &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`;
-      this.repDownload(url);
+      this.repDownload(url).then(() => {
+        table.loading = false;
+        this.$forceUpdate();
+      });
     },
     repDownload(url) {
-      // 下载
-      let token = getStore({ name: "token" });
-      let x = new XMLHttpRequest();
+      return new Promise((resolve) => {
+        // 下载
+        let token = getStore({ name: "token" });
+        let x = new XMLHttpRequest();
 
-      x.open("GET", url, true);
-      x.setRequestHeader("accessToken", `bearer  ${token}`);
-      x.responseType = "blob";
-      x.onprogress = function () {};
-      x.onload = function () {
-        let url = window.URL.createObjectURL(x.response);
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = ""; //可以填写默认的下载名称
-        a.click();
-      };
-      x.send();
+        x.open("GET", url, true);
+        x.setRequestHeader("accessToken", `bearer  ${token}`);
+        x.responseType = "blob";
+        x.onprogress = function () {};
+        x.onload = function () {
+          let url = window.URL.createObjectURL(x.response);
+          let a = document.createElement("a");
+          a.href = url;
+          a.download = ""; //可以填写默认的下载名称
+          a.click();
+          resolve();
+        };
+        x.send();
+      });
     },
-    download(row) {
-      downLoadFile(row);
+    download(row, table) {
+      table.loading = true;
+      downLoadFile(row).then(() => (table.loading = false));
     },
   },
 };

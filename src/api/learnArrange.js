@@ -75,6 +75,14 @@ export const getQrcode = (params) => {
   })
 }
 
+export const saveCourseLinkedStudentOrTeacher = (data) => {
+  return request({
+    url: '/api/manage/v1/web/coursecenter/coursework/saveCourseLinkedStudentOrTeacher',
+    method: 'post',
+    data
+  })
+}
+
 export const downloadZip = (c) => {
   const config = Object.assign(
     {

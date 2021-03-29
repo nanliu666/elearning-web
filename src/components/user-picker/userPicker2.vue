@@ -9,54 +9,80 @@
   >
     <div class="content-wr">
       <div v-loading="loading" class="left">
-        <el-tabs v-model="activeTab">
-          <el-tab-pane label="组织架构" name="Org" />
-          <el-tab-pane label="外部联系人" name="OuterUser"> </el-tab-pane>
-        </el-tabs>
-        <div v-show="activeTab === 'Org'">
-          <el-input v-model="orgSearch" placeholder="搜索组织部门或成员姓名" />
-          <div class="tree">
-            <el-tree
-              ref="tree"
-              :load="lazyLoadOrgTree"
-              :data="orgSearchData"
-              :props="treeProps"
-              node-key="userId"
-              lazy
-              show-checkbox
-              @check="handleCheck"
+        <div>
+          <el-tabs v-model="activeTab">
+            <el-tab-pane v-if="selectTypes.includes('Org')" label="组织架构" name="Org" />
+            <el-tab-pane
+              v-if="selectTypes.includes('OuterUser')"
+              label="外部联系人"
+              name="OuterUser"
+            >
+            </el-tab-pane>
+          </el-tabs>
+          <div v-if="selectTypes.includes('Org')" v-show="activeTab === 'Org'">
+            <el-input v-model="orgSearch" placeholder="搜索组织部门或成员姓名" />
+            <div class="tree">
+              <el-tree
+                v-show="!orgSearch"
+                ref="orgTree"
+                :load="lazyLoadOrgTree"
+                :props="treeProps"
+                lazy
+                node-key="path"
+                show-checkbox
+                @check="handleCheckItem"
+              />
+              <el-tree
+                v-show="orgSearch"
+                ref="orgTreeSearch"
+                :data="orgSearchData"
+                :props="treeProps"
+                lazy
+                node-key="path"
+                show-checkbox
+                @check="handleCheckItem"
+              />
+            </div>
+          </div>
+          <div
+            v-show="activeTab === 'OuterUser'"
+            v-if="selectTypes.includes('OuterUser')"
+            class="outer-user"
+          >
+            <el-input
+              v-model.trim="outerParams.search"
+              placeholder="搜索姓名或手机号码"
             />
-          </div>
-        </div>
-        <div v-show="activeTab === 'OuterUser'" class="outer-user">
-          <el-input v-model.trim="outerParams.search" placeholder="搜索姓名或手机号码" />
-          <div v-if="!_.isEmpty(usersNameList)">
-            <el-checkbox
-              v-model="checkAll"
-              class="total-check"
-              :indeterminate="isIndeterminate"
-              @change="handleCheckAllChange"
-            >
-              全选
-            </el-checkbox>
-            <el-checkbox-group
-              v-model="checkedUsersId"
-              class="check-ul"
-              @change="handleCheckedUserChange"
-            >
+            <div v-if="!_.isEmpty(usersNameList)">
               <el-checkbox
-                v-for="item in usersNameList"
-                :key="item.userId"
-                class="check-li"
-                :value="item.userId"
-                :label="item.name"
-                @change="(val) => handleSelectUser(val, item)"
+                v-model="checkAll"
+                class="total-check"
+                :indeterminate="isIndeterminate"
+                @change="handleCheckAllChange"
               >
-                {{ item.name }}{{ item.phonenum ? `(${item.phonenum})` : "" }}
+                全选
               </el-checkbox>
-            </el-checkbox-group>
+              <el-checkbox-group
+                v-model="checkedUsers"
+                class="check-ul"
+                @change="handleCheckedUserChange"
+              >
+                <el-checkbox
+                  v-for="(item, index) in usersNameList"
+                  :key="item.bizId"
+                  class="check-li"
+                  :label="item"
+                  @change="handleSelectUser(outerData[index])"
+                >
+                  {{ outerData[index].bizName
+                  }}{{
+                    outerData[index].phonenum ? `(${outerData[index].phonenum})` : ""
+                  }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
+            <com-empty v-if="_.isEmpty(usersNameList)" height="31vh" />
           </div>
-          <com-empty v-if="_.isEmpty(usersNameList)" height="31vh" />
         </div>
       </div>
       <div class="right">
@@ -65,16 +91,21 @@
         </div>
 
         <div
-          v-for="item in selected"
-          :key="item.userId"
+          v-for="(item, index) of _(selected)
+            .sortBy(['type', 'bizName'])
+            .uniqBy('bizId')
+            .value()"
+          :key="index"
           class="info flex flex-justify-between flex-items"
         >
           <div class="flex flex-justify-between flex-items">
-            <i class="iconfont icon-approval-checkin-bicolor imgs" />
+            <!-- 用户图标 -->
+            <i v-if="item.type == 'Org'" class="iconfont icon-usercircle2 imgss" />
+            <i v-else class="iconfont icon-approval-checkin-bicolor imgs" />
             {{ getSelectedName(item) }}
           </div>
           <div class="icon">
-            <i class="el-icon-error pointer" @click="() => delItem(item)" />
+            <i class="el-icon-error pointer" @click="() => handleUncheckItem(item)" />
           </div>
         </div>
       </div>
@@ -89,8 +120,6 @@
 import { getOrgUserChild, getOuterUser } from "@/api/system/user";
 import ComEmpty from "@/components/common-empty/empty";
 import _ from "lodash";
-import { getUserList as getUserByOrgId } from "@/api/examManage/schedule";
-
 const SEARCH_DELAY = 200;
 const NODE_TYPE = {
   All: "All",
@@ -171,7 +200,6 @@ export default {
   data() {
     const activeTab = this.selectType.split(",")[0] || "Org";
     return {
-      checkedUsersId: [],
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
       checkedUsers: [],
@@ -225,10 +253,17 @@ export default {
   },
 
   watch: {
-    // 在组织架构下使用查询参数
-    orgSearch: _.debounce(function (search = "") {
-      if (!search) return;
+    selected(val) {
+      const { orgTree, orgTreeSearch } = this.$refs;
+      [orgTree, orgTreeSearch].forEach((ref) => {
+        if (_.isNil(ref)) return;
+        ref.setCheckedKeys(_.map(val, (item) => item.path));
+      });
+    },
 
+    // 在组织架构下使用查询参数
+    orgSearch: _.debounce(function (search) {
+      if (!search) return;
       this.loading = true;
       loadOrgTree({ search })
         .then((res) => {
@@ -241,16 +276,27 @@ export default {
     "outerParams.search"() {
       this.debounceOuterSearchFn();
     },
-    innerVisible() {
+    innerVisible(val) {
+      if (!val) return;
       this.selected = JSON.parse(JSON.stringify(this.value));
-      this.checkedUsersId = this.selected.map((item) => item.userId);
-      // loadOrgTree({ search: "" }).then((res) => {
-      //   this.orgSearchData = _.map(this.thruHandler(res), (item) =>
-      //     _.assign({ isLeaf: true }, item)
-      //   );
-      // });
-      this.checkedUsersId.push("1328663856347668481");
-      this.$nextTick(() => this.$refs.tree.setCheckedKeys(this.checkedUsersId, true));
+      this.selected.forEach((item) => {
+        item.bizId = item.userId || item.id;
+        item.bizName = item.name;
+        item.type = "User";
+      });
+      const temp = _.map(this.checkedUsers, (item) => {
+        return { name: item };
+      });
+      const diffName = _.differenceBy(temp, val, "name");
+      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
+        return item === _.get(diffName, "[0].name", "");
+      });
+      if (diffIndex !== -1) {
+        this.checkedUsers.splice(diffIndex, 1);
+        this.checkAll = false;
+        this.isIndeterminate = true;
+      }
+      this.$forceUpdate();
     },
   },
   mounted() {
@@ -284,10 +330,26 @@ export default {
     },
     // 切换全选与全删
     handleCheckAllChange(val) {
-      this.usersNameList.forEach((user) => {
-        this.handleSelectUser(val, user);
-      });
+      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : [];
       this.isIndeterminate = false;
+      // 全删除需要过滤组织选的人,组织
+      if (_.isEmpty(this.checkedUsers)) {
+        _.pullAllBy(this.selected, this.outerData, "bizId");
+      } else {
+        // 半选换全选需要把未选上的加入
+        if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
+          this.selected = _.uniqBy(
+            [..._.cloneDeep(this.outerData), ...this.selected],
+            "bizId"
+          );
+        } else {
+          // 全选需要去重
+          _.each(this.outerData, (item) => {
+            this.handleSelectUser(item);
+          });
+          this.selected = _.uniqBy(this.selected, "bizId");
+        }
+      }
     },
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
@@ -295,64 +357,51 @@ export default {
       this.checkAll = checkedCount === this.usersNameList.length;
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length;
     },
-    handleSelectUser(val, user) {
-      const index = this.selected.findIndex((item) => item.userId === user.userId);
-      if (index > -1 && !val) {
-        this.selected.splice(index, 1);
-        return;
-      }
-      this.selected.push(user);
-    },
-
     /**
      * 处理选中单个项
      * @param {object} node 树形组件的node结节
      */
-    handleCheck(node) {
-      const nodes = this.$refs.tree.getCheckedNodes();
-      if (nodes.includes(node)) {
-        this.handleCheckItem(node);
+    handleCheckItem(node, { checkedNodes }) {
+      // 如果disabled则不能check项
+      if (_.get(node, this.treeProps.disabled)) return;
+      if (_.some(checkedNodes, (item) => item.bizId === node.bizId)) {
+        // this.handleUncheckItem(node) // 防止选中不同节点下的相同数据
+        if (node.type !== NODE_TYPE.User) {
+          if (!this.onlyUser) {
+            this.selected = _.reject(this.selected, (item) =>
+              _.includes(item.path, node.path)
+            );
+          }
+        }
+        // 如果是单选模式
+        if (this.isSingle) {
+          this.selected = [node];
+        } else {
+          this.selected.push(node);
+        }
       } else {
-        this.handleUncheckItem(node);
+        // 连续选中同一个目标则uncheck该选项
+        this.handleUncheckItem(node, checkedNodes);
       }
     },
-    handleCheckItem(node) {
-      if (node.type && node.type !== "User") {
-        getUserByOrgId({ orgId: node.id }).then((res = []) => {
-          res.forEach((item) => {
-            this.handleCheckItem(item);
-          });
-        });
-        return;
+    handleUncheckItem(item, checkedNodes) {
+      const outerIndex = _.findIndex(this.checkedUsers, (userItem) => {
+        return item.name === userItem;
+      });
+      if (outerIndex !== -1) {
+        this.checkedUsers.splice(outerIndex, 1);
       }
-      if (!this.selected.find((item) => item.userId === node.userId)) {
-        this.selected.push(node);
-      }
-    },
-    handleUncheckItem(node) {
-      if (node.type && node.type !== "User") {
-        getUserByOrgId({ orgId: node.id }).then((res = []) => {
-          res.forEach((item) => {
-            this.handleUncheckItem(item);
-          });
-        });
-        return;
-      }
-
-      const index = this.selected.findIndex((item) => item.userId === node.userId);
-      if (index > -1) {
-        this.selected.splice(index, 1);
-      }
-    },
-    delItem(item) {
-      const userId = item.userId;
-      const index = this.selected.findIndex((item) => item.userId === userId);
-      this.selected.splice(index, 1);
-      let checkedIdx = this.checkedUsersId.indexOf(userId);
-      if (checkedIdx > -1) {
-        this.checkedUsersId.splice(checkedIdx, 1);
+      const { bizId } = item;
+      if (_.find(this.selected, { bizId })) {
+        this.selected = _.reject(this.selected, { bizId });
       } else {
-        this.$refs.tree.setChecked(userId, false);
+        // 当前节点不在selected中则父节点被勾选时，取消勾选子节点
+        this.selected = _(this.selected)
+          // 去除父节点
+          .reject((i) => _.includes(item.path, i.path) || _.includes(i.path, item.path))
+          // 添加其他节点
+          .concat(this.getCheckedNodes(checkedNodes))
+          .value();
       }
     },
     // 过滤掉已勾选的父节点下的所有子节点
@@ -370,6 +419,7 @@ export default {
       this.innerVisible = false;
     },
     handleClose() {
+      this.selected = this.value.slice();
       this.close();
     },
 
@@ -392,6 +442,14 @@ export default {
       this.$emit("input", res);
       this.close();
     },
+    handleSelectUser(user) {
+      const index = _.findIndex(this.selected, { bizId: user.bizId });
+      if (index > -1) {
+        this.selected = _.filter(this.selected, (item, i) => i != index);
+      } else {
+        this.selected.push(user);
+      }
+    },
 
     handleSearchOuterUser() {
       this.outerParams.loaded = false;
@@ -406,19 +464,25 @@ export default {
       this.loading = true;
       getOuterUser({ pageNo, search, pageSize })
         .then((res) => {
-          const { totalPage, data } = res;
-          if (_.size(data) > 0) {
-            this.usersNameList = data;
+          const { totalPage } = res;
+          if (_.size(res.data) > 0) {
+            const data = _.map(res.data, (item) =>
+              _.assign(item, {
+                path: item.userId,
+                bizId: item.userId,
+                bizName: item.name,
+                type: NODE_TYPE.User,
+              })
+            );
+            if (isRefresh) {
+              this.outerData = data;
+            } else {
+              this.outerData = _.concat(this.outerData, data);
+            }
+            this.usersNameList = _.map(this.outerData, "name");
           } else {
             this.usersNameList = [];
             this.outerParams.loaded = true;
-          }
-          if (data.some((item) => this.selected.find((s) => s.userId === item.userId))) {
-            this.isIndeterminate = true;
-          }
-          if (data.every((item) => this.selected.find((s) => s.userId === item.userId))) {
-            this.isIndeterminate = false;
-            this.checkAll = true;
           }
           this.outerParams.pageNo = pageNo + 1;
           this.isClear = totalPage < pageNo + 1;

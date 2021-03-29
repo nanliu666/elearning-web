@@ -41,6 +41,7 @@
 
     <div class="page-container">
       <pagination
+        @pagination="pagination"
         :total="userList.length"
         :page.sync="page.pageNo"
         :limit.sync="page.pageSize"
@@ -146,6 +147,7 @@ export default {
     },
   },
   methods: {
+    pagination() {},
     handleAddUser() {
       this.userPicking = true;
     },

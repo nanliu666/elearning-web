@@ -247,13 +247,50 @@
 
       <div v-show="status === 1 && $route.query.status" class="register-container">
         <div class="register-data">
-          <span>计划人数：</span
-          >{{ !plannedPopulation ? "无限制" : plannedPopulation + "人" }}
-          <span>已参加：{{ participated }}人</span>
-          <span v-if="!!plannedPopulation"> 剩余名额：{{ remainingPlaces }}人</span>
+          <div v-if="multipleSelection.length">
+            <span>{{ `已选中${multipleSelection.length}项` }}</span>
+            <span
+              style="
+                display: inline-block;
+                width: 1px;
+                height: 1em;
+                margin: 0 8px;
+                vertical-align: middle;
+                background-color: #dcdfe6;
+              "
+            ></span>
+            <el-button
+              type="text"
+              @click="setMultipleRegister('agree')"
+              style="padding: 0"
+              >批量同意</el-button
+            >
+            <el-button
+              type="text"
+              @click="setMultipleRegister('reject')"
+              style="padding: 0"
+              >批量拒绝</el-button
+            >
+          </div>
+          <div v-else>
+            <span>计划人数：</span
+            >{{ !plannedPopulation ? "无限制" : plannedPopulation + "人" }}
+            <span>已参加：{{ participated }}人</span>
+            <span v-if="!!plannedPopulation"> 剩余名额：{{ remainingPlaces }}人</span>
+          </div>
         </div>
 
-        <el-table class="register-table" :data="registerData" style="width: 100%">
+        <el-table
+          @selection-change="handleSelectionChange"
+          v-loading="registerLoading"
+          element-loading-spinner="el-icon-loading"
+          element-loading-background="rgba(0, 0, 0, 0.8)"
+          class="register-table"
+          :data="registerData"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55"> </el-table-column>
+
           <el-table-column align="center" prop="name" label="姓名"> </el-table-column>
           <el-table-column align="center" prop="phonenum" label="手机号">
           </el-table-column>
@@ -262,10 +299,20 @@
 
           <el-table-column label="操作" align="center">
             <template slot-scope="scope">
-              <el-button type="text" @click="setRegister(scope.row, 'agree')">
+              <el-button
+                type="text"
+                @click="setRegister(scope.row, 'agree')"
+                :disabled="scope.row.loading"
+                :loading="scope.row.loading"
+              >
                 同意
               </el-button>
-              <el-button type="text" @click="setRegister(scope.row, 'reject')">
+              <el-button
+                type="text"
+                @click="setRegister(scope.row, 'reject')"
+                :disabled="scope.row.loading"
+                :loading="scope.row.loading"
+              >
                 拒绝
               </el-button>
             </template>
@@ -360,6 +407,7 @@
                 style="margin-bottom: 0"
                 type="text"
                 @click="() => handleRemoveItems(selection, 1)"
+                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
@@ -481,6 +529,7 @@
                 type="text"
                 size="medium"
                 @click.stop="isgrantCertificate(scope.row)"
+                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
@@ -547,10 +596,10 @@
           </el-table-column>
           <el-table-column v-if="$route.query.status" prop="status" label="状态">
             <template slot-scope="{ row }">
-              <!-- status	状态（1：已结束；2：进行中；3：未开始） -->
-              <span v-if="row.status === 1">已结束</span>
+              <!-- status	状态（1：未开始；2：进行中；3：已结束） -->
+              <span v-if="row.status === 1">未开始</span>
               <span v-if="row.status === 2">进行中</span>
-              <span v-if="row.status === 3">未开始</span>
+              <span v-if="row.status === 3">已结束</span>
             </template>
           </el-table-column>
         </el-table>
@@ -794,6 +843,8 @@ import {
   stopSchedule,
   querySignList,
 } from "@/api/training/training";
+import { getOrgTreeSimple } from "@/api/org/org";
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -905,8 +956,27 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     data: "",
     field: "deptId",
     label: "所属部门",
-    type: "select",
-    options: [],
+    type: "treeSelect",
+    config: {
+      selectParams: {
+        placeholder: "请输入内容",
+        multiple: false,
+      },
+      treeParams: {
+        data: [],
+        "check-strictly": true,
+        "default-expand-all": false,
+        "expand-on-click-node": false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: "children",
+          label: "orgName",
+          disabled: "disabled",
+          value: "orgId",
+        },
+      },
+    },
   },
   {
     config: { placeholder: "请选择" },
@@ -979,6 +1049,7 @@ export default {
   },
   data() {
     return {
+      registerLoading: false,
       downcodeDlgVisible: false,
       getSigninForm: {
         pageNo: 1,
@@ -1055,6 +1126,7 @@ export default {
       plannedPopulation: 0,
       participated: 0,
       remainingPlaces: 0,
+      multipleSelection: [],
     };
   },
   watch: {
@@ -1074,11 +1146,12 @@ export default {
     // this.isGetTrainDetail()
     // this.isgetTrainEvaluate()
     // this.isExamList()
+    this.loadOrgData();
   },
   async activated() {
     // this.loadData()
     // this.getInfo()
-
+    this.loadOrgData();
     await this.isGetTrainDetail();
     // 获取报名情况数据
     this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId;
@@ -1107,6 +1180,26 @@ export default {
     this.$forceUpdate();
   },
   methods: {
+    loadOrgData() {
+      getOrgTreeSimple({ parentOrgId: 0 }).then(
+        (res) =>
+          (this.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(
+            [
+              {
+                orgName: "全部",
+                orgId: "",
+              },
+            ],
+            res
+          ))
+      );
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    setMultipleRegister(type) {
+      this.setRegister(this.multipleSelection, type);
+    },
     getSigninColumn(value, d) {
       if (d) {
         switch (value) {
@@ -1208,13 +1301,17 @@ export default {
         if (arguments.length === 1) {
           params.rejectDesc = this.approveText;
           params.type = row;
-          params.signUpId = [this.cacherow.signUpId];
+          params.signUpId = Array.isArray(this.cacherow)
+            ? this.cacherow.map((r) => r.signUpId)
+            : [this.cacherow.signUpId];
         } else {
-          params.signUpId = [row.signUpId];
+          params.signUpId = Array.isArray(row)
+            ? row.map((r) => r.signUpId)
+            : [row.signUpId];
           params.type = type;
         }
         params.trainId = this.showTrainDetail.trainId;
-
+        this.registerLoading = true;
         setJoin(params)
           .then(() => {
             this.$message.success("操作成功");
@@ -1226,6 +1323,7 @@ export default {
           .finally(() => {
             this.approveText = "";
             this.approveDlgVisible = false;
+            this.registerLoading = false;
           });
       }
     },
@@ -1386,14 +1484,14 @@ export default {
           return item;
         });
         this.page.total = res.totalNum;
-        SEARCH_POPOVER_POPOVER_OPTIONS[0].options = [];
-        this.tableData.forEach((item) => {
-          // console.log(item.id,item.deptName);
-          SEARCH_POPOVER_POPOVER_OPTIONS[0].options.push({
-            value: item.id,
-            label: item.deptName,
-          });
-        });
+        // SEARCH_POPOVER_POPOVER_OPTIONS[0].options = [];
+        // this.tableData.forEach((item) => {
+        //   // console.log(item.id,item.deptName);
+        //   SEARCH_POPOVER_POPOVER_OPTIONS[0].options.push({
+        //     value: item.id,
+        //     label: item.deptName,
+        //   });
+        // });
       });
     },
 
@@ -1411,13 +1509,13 @@ export default {
     // 编辑&删除&移动
     handleCommand(e) {
       if (e === "edit") {
-        if (this.showTrainDetail.status === 2) {
+        if (this.showTrainDetail.status === 2 && this.$route.query.status) {
           this.$alert("培训正在进行中，不能编辑这条培训记录", {
             confirmButtonText: "确定",
           });
           return;
         }
-        if (this.showTrainDetail.status === 3) {
+        if (this.showTrainDetail.status === 3 && this.$route.query.status) {
           this.$alert("培训已结束，不能编辑这条培训记录", {
             confirmButtonText: "确定",
           });
