@@ -1014,6 +1014,7 @@ export default {
       this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
+      if (!selection.length) return
       if (selection.some((item) => item.status == 2)) {
         this.$confirm(
           '你所选择的数据包含正在进行的培训，不能进行删除操作，是否忽略继续删除其它培训？',
