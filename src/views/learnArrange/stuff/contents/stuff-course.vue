@@ -18,20 +18,22 @@
     <div class="table-list">
       <div v-if="data.course.length" class="table-list">
         <el-table
+          v-for="(table, i) in data.course"
+          :key="i"
           v-loading="table.loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           element-loading-spinner="el-icon-loading"
-          v-for="(table, i) in data.course"
-          :key="i"
           :data="table.trainAttachmentVOS"
         >
-          <el-table-column
-            align="left"
-            :label="'作业来源: ' + table.name"
-            label-class-name="course-name"
-            show-overflow-tooltip
-            width="600"
-          >
+          <el-table-column align="left" width="500" class-name="course-title">
+            <template slot="header">
+              <el-tooltip :content="'作业来源: ' + table.name" placement="top">
+                <div class="course-title">
+                  {{ "作业来源: " + table.name }}
+                </div>
+              </el-tooltip>
+            </template>
+
             <template slot-scope="scope">
               <div>
                 {{ getFileName(scope.row) }}
@@ -144,7 +146,7 @@ export default {
       const { fileCategory } = item;
       const { size: fileSize, uid: id, name: fileName } = file.file;
       const data = {
-        courseId: table.courseId,
+        courseId: table.courseId || "1376063678419365889",
         fileCategory,
         fileName,
         filePath: url,
@@ -239,7 +241,7 @@ export default {
 
 <style lang="scss">
 .stuff-course {
-  .course-name {
+  .course-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

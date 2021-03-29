@@ -12,11 +12,23 @@
       >
         <el-table-column
           align="left"
-          header-align="left"
-          :label="'来源: ' + table.name"
-          prop="fileName"
-          width="600"
+          width="500"
+          class-name="course-title"
+          slot-scope="scope"
         >
+          <template slot="header">
+            <el-tooltip :content="'课程: ' + table.name" placement="top">
+              <div class="course-title">
+                {{ "来源: " + table.name }}
+              </div>
+            </el-tooltip>
+          </template>
+
+          <template>
+            <div>
+              {{ scope.row.fileName }}
+            </div>
+          </template>
         </el-table-column>
 
         <el-table-column align="center">
