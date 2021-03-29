@@ -31,7 +31,7 @@
             </el-tag>
           </div>
           <div class="user-info__row">
-            {{ (userData.sex === 0 ? '女' : '男') || '--' }}
+            {{ userData.sex === 0 ? '女' : userData.sex === 1 ? '男' : '' }}
             <span class="user-info__divider">|</span> {{ userData.birthDate || '--' }}
             <span class="user-info__divider">|</span>
             {{ _.map(userData.roles, 'roleName').join('/') }}
@@ -55,7 +55,7 @@
           角色设置
         </el-button>
         <el-button
-          style="margin-right:8px;"
+          style="margin-right: 8px"
           size="medium"
           @click="handleReset()"
         >
