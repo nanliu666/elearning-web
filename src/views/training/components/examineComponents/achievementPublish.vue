@@ -113,6 +113,7 @@ export default {
           ],
           required: true,
           prop: 'fixedTime',
+          valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '定时发布日期时间'
         }
       ]
