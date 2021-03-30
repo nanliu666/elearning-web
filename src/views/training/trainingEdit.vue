@@ -92,7 +92,6 @@
         <EditDetail
           v-show="activeStep === 2"
           ref="editDetail"
-          @jump="jumpDetail"
         />
       </el-col>
     </el-row>
@@ -172,11 +171,6 @@ export default {
       }
       // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
       return '关闭提示'
-    },
-    jumpDetail() {
-      if (this.activeStep !== 2) {
-        this.jumpStep(2)
-      }
     },
     jumpStep(index) {
       this.activeStep = index
@@ -259,7 +253,14 @@ export default {
       const editArrangement = this.$refs.editArrangement.getData()
       const basicData = this.$refs.editBasicInfo.getData(type)
       const detailData = this.$refs.editDetail.getData(type)
+      // 配置详细信息的错误toast弹窗需要放置在此处进行提示
+      detailData.then((res) => {
+        if (!res) {
+          this.$message.error('请完整填写配置详细信息')
+        }
+      })
       Promise.all([basicData, editArrangement, detailData]).then((res) => {
+        if (!_.every(res, Boolean)) return
         let params = this.handleParams(res, type)
         let editFun = this.id ? putTrain : createTrain
         // 开办下一期，创建接口

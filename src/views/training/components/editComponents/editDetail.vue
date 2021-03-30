@@ -238,14 +238,14 @@ export default {
       return getCertificateList(_.assign(params, { status: 1 }))
     },
     getLiData(name) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         this.$refs[name]
           .validate()
           .then((valid) => {
             resolve(valid)
           })
-          .catch(() => {
-            this.$emit('jump')
+          .catch((err) => {
+            reject(err)
           })
       })
     },
@@ -273,8 +273,8 @@ export default {
           .then(() => {
             return this.formData
           })
-          .catch(() => {
-            this.$message.error('请完整填写详细信息')
+          .catch((err) => {
+            return err
           })
       }
     },
