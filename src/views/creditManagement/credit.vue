@@ -118,7 +118,7 @@ const COLUMNS = [
   },
   {
     prop: 'score',
-    label: '学分分值',
+    label: '积分分值',
     minWidth: 120
   },
   {

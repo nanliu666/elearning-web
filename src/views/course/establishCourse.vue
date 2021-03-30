@@ -166,7 +166,7 @@
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
-          <span> 学分 </span>
+          <span> 积分 </span>
         </div>
         <el-row>
           <el-col :span="11">
@@ -870,7 +870,7 @@ export default {
         isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
         period: '', //时长
-        credit: '', //学分
+        credit: '', //积分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -972,7 +972,7 @@ export default {
       this.isdeleteData()
     this.isgetCourseTags()
     this.isgetCatalog()
-    // this.getInfo()
+    this.getInfo()
     this.islistTeacher()
     this.disabledBtn = false
     this.reflectionData = []
@@ -1594,7 +1594,7 @@ export default {
       //   isRecommend: false, //是否推荐
       //   passCondition: [], //通过条件
       //   period: undefined, //时长
-      //   credit: undefined, //学分
+      //   credit: undefined, //积分
       //   // 所在分类现在没有
       //   type: '', //课程类型
       //   name: '', //课程名称
@@ -1832,13 +1832,13 @@ export default {
     padding: 10vh 13vw;
     #ruleForm {
       /deep/.el-input {
-        width: 20vw;
+        width: 17vw;
       }
     }
   }
 
   /deep/.el-input-number {
-    width: 20vw;
+    width: 17vw;
   }
   /deep/.el-input-number .el-input__inner {
     text-align: left;

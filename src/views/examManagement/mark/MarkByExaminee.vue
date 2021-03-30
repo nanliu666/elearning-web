@@ -273,7 +273,7 @@ export default {
           const list = this.checkEmpty()
           // 空的直接返回
           if (_.isEmpty(list)) return
-          this.loadData(false)
+          this.submitFun(true)
         })
         .catch(() => {
           this.$message.error('请为所有已评出结果的试题输入得分！')
@@ -299,8 +299,11 @@ export default {
         return list
       }
     },
-    // 具体提交函数
-    submitFun() {
+    /**
+     * 具体提交函数
+     * isNext 是否需要请求下一个
+     */
+    submitFun(isNext = false) {
       const list = this.checkEmpty()
       // 空的直接返回
       if (_.isEmpty(list)) return
@@ -310,7 +313,11 @@ export default {
       }
       postSubmitByOne(params)
         .then(() => {
-          this.$router.go(-1)
+          if (isNext) {
+            this.loadData(false)
+          } else {
+            this.$router.go(-1)
+          }
         })
         .catch(() => {
           window.console.error(JSON.stringify(params))
@@ -325,7 +332,7 @@ export default {
         })
       )
         .then(() => {
-          this.submitFun()
+          this.submitFun(false)
         })
         .catch(() => {
           this.$message.error('请为所有已评出结果的试题输入得分！')

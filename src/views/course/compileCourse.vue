@@ -167,7 +167,7 @@
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
-          <span> 学分 </span>
+          <span> 积分 </span>
         </div>
         <el-row>
           <el-col :span="11">
@@ -700,7 +700,7 @@ export default {
         isRecommend: false, //是否推荐
         passCondition: [], //通过条件
         period: undefined, //时长
-        credit: undefined, //学分
+        credit: undefined, //积分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -1216,7 +1216,7 @@ export default {
         isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
         period: undefined, //时长
-        credit: undefined, //学分
+        credit: undefined, //积分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称

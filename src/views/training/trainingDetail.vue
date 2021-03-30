@@ -23,12 +23,16 @@
           <el-button
             type="primary"
             size="mini"
-            :disabled="!issueStatus"
+            :disabled="!$route.query.status"
             @click="handleConfig"
           >
             开办下一期
           </el-button>
-          <el-button size="mini" :disabled="!issueStatus" @click="isstopSchedule">
+          <el-button
+            size="mini"
+            :disabled="showTrainDetail.status == 3 || !$route.query.status"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
@@ -261,16 +265,18 @@
             ></span>
             <el-button
               type="text"
-              @click="setMultipleRegister('agree')"
               style="padding: 0"
-              >批量同意</el-button
+              @click="setMultipleRegister('agree')"
             >
+              批量同意
+            </el-button>
             <el-button
               type="text"
-              @click="setMultipleRegister('reject')"
               style="padding: 0"
-              >批量拒绝</el-button
+              @click="setMultipleRegister('reject')"
             >
+              批量拒绝
+            </el-button>
           </div>
           <div v-else>
             <span>计划人数：</span
@@ -281,13 +287,13 @@
         </div>
 
         <el-table
-          @selection-change="handleSelectionChange"
           v-loading="registerLoading"
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           class="register-table"
           :data="registerData"
           style="width: 100%"
+          @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="55"> </el-table-column>
 
@@ -301,17 +307,17 @@
             <template slot-scope="scope">
               <el-button
                 type="text"
-                @click="setRegister(scope.row, 'agree')"
                 :disabled="scope.row.loading"
                 :loading="scope.row.loading"
+                @click="setRegister(scope.row, 'agree')"
               >
                 同意
               </el-button>
               <el-button
                 type="text"
-                @click="setRegister(scope.row, 'reject')"
                 :disabled="scope.row.loading"
                 :loading="scope.row.loading"
+                @click="setRegister(scope.row, 'reject')"
               >
                 拒绝
               </el-button>
@@ -406,14 +412,15 @@
               <el-button
                 style="margin-bottom: 0"
                 type="text"
+                :disabled="selection.some((item) => item.certificate != 2)"
                 @click="() => handleRemoveItems(selection, 1)"
-                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
               <el-button
                 style="margin-bottom: 0"
                 type="text"
+                :disabled="selection.some((item) => item.certificate != 1)"
                 @click="() => handleRemoveItems(selection, 0)"
               >
                 撤回证书
@@ -518,6 +525,7 @@
 
               <el-button
                 v-if="scope.row.certificate == 1"
+                :disabled="scope.row.certificate != 1"
                 type="text"
                 size="medium"
                 @click.stop="isrevokeCertificate(scope.row)"
@@ -528,8 +536,8 @@
                 v-else
                 type="text"
                 size="medium"
+                :disabled="scope.row.certificate != 2"
                 @click.stop="isgrantCertificate(scope.row)"
-                :disabled="!showTrainDetail.certificate"
               >
                 发放证书
               </el-button>
@@ -855,37 +863,35 @@ const TABLE_COLUMNS = [
   {
     label: "手机号码",
     prop: "phone",
-    minWidth: 180,
   },
   {
     label: "线下签到率",
     prop: "signPercent",
-    minWidth: 180,
+
     slot: true,
   },
   {
     label: "所属部门",
     prop: "deptName",
-    width: 200,
+
     slot: true,
   },
   {
     label: "在线学习进度(必修)",
     prop: "onlineProgress",
-    minWidth: 220,
+
     slot: true,
   },
   {
     label: "选修学习进度",
     prop: "electiveProgress",
     slot: true,
-    minWidth: 220,
   },
   // 1：已通过；2：未通过；3：未开始）
   {
     label: "作业提交率",
     prop: "job",
-    minWidth: 120,
+
     slot: true,
   },
   {
@@ -954,7 +960,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: "deptId" },
     data: "",
-    field: "deptId",
+    field: "deptCode",
     label: "所属部门",
     type: "treeSelect",
     config: {
@@ -973,7 +979,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
           children: "children",
           label: "orgName",
           disabled: "disabled",
-          value: "orgId",
+          value: "code",
         },
       },
     },
@@ -1342,7 +1348,7 @@ export default {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
       this.$router.push({
         path: "/training/edit",
-        query: { id: this.showTrainDetail.trainId },
+        query: { id: this.showTrainDetail.trainId, type: "next" },
       });
     },
     // 结办
@@ -1354,6 +1360,7 @@ export default {
           message: "操作成功",
           type: "success",
         });
+        this.isGetTrainDetail();
       });
     },
     // 去列表页
@@ -1459,6 +1466,7 @@ export default {
       return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res;
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction);
+        this.$forceUpdate();
       });
     },
 
@@ -1577,6 +1585,7 @@ export default {
 
     handleSearch(searchParams) {
       // this.loadTableData(_.pickBy(searchParams))
+      this.page.currentPage = 1;
       this.isStudentList(searchParams);
     },
 

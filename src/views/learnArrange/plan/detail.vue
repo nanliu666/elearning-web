@@ -16,7 +16,11 @@
           </div>
           <div
             class="status"
-            :class="{ will: data.status === 1, doing: data.status === 2, done: data.status === 3 }"
+            :class="{
+              will: data.status === 1,
+              doing: data.status === 2,
+              done: data.status === 3
+            }"
           >
             {{
               data.status === 2
@@ -215,7 +219,7 @@ export default {
         showCancelButton: true,
         callback: (action) => {
           if (action !== 'cancel') {
-            updateStatus({ id: row.id }).then(() => {
+            updateStatus({ id: row.id, status: 3 }).then(() => {
               this.$message({
                 type: 'success',
                 message: '结办成功!'
@@ -244,7 +248,7 @@ export default {
             message: '删除成功!'
           })
           this.$router.push({
-            path: '/learnArrange/plan/index'
+            path: '/learnPlan/CoursePlanList'
           })
         })
         .catch()

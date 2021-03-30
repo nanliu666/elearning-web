@@ -18,20 +18,22 @@
     <div class="table-list">
       <div v-if="data.course.length" class="table-list">
         <el-table
+          v-for="(table, i) in data.course"
+          :key="i"
           v-loading="table.loading"
           element-loading-background="rgba(0, 0, 0, 0.8)"
           element-loading-spinner="el-icon-loading"
-          v-for="(table, i) in data.course"
-          :key="i"
           :data="table.trainAttachmentVOS"
         >
-          <el-table-column
-            align="left"
-            :label="'作业来源: ' + table.name"
-            label-class-name="course-name"
-            show-overflow-tooltip
-            width="600"
-          >
+          <el-table-column align="left" width="500" class-name="course-title">
+            <template slot="header">
+              <el-tooltip :content="'作业来源: ' + table.name" placement="top">
+                <div class="course-title">
+                  {{ "作业来源: " + table.name }}
+                </div>
+              </el-tooltip>
+            </template>
+
             <template slot-scope="scope">
               <div>
                 {{ getFileName(scope.row) }}
@@ -140,6 +142,7 @@ export default {
       this.$message.error("上传失败，请重试");
       this.$forceUpdate();
     },
+
     onUploadComplete(table, item, file, url) {
       const { fileCategory } = item;
       const { size: fileSize, uid: id, name: fileName } = file.file;
@@ -149,12 +152,13 @@ export default {
         fileName,
         filePath: url,
         fileSize,
-        jobId: id + "",
-        id: id + "",
+        jobId: table.id,
+        id: item.id || "",
       };
+      const message = fileName ? "修改成功" : "上传成功";
       saveCourseLinkedStudentOrTeacher(data)
         .then(() => {
-          this.$message.success("上传成功");
+          this.$message.success(message);
           this.parentVm.queryWork();
         })
         .finally(() => {
@@ -239,7 +243,7 @@ export default {
 
 <style lang="scss">
 .stuff-course {
-  .course-name {
+  .course-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

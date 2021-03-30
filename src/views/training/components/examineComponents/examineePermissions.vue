@@ -43,17 +43,6 @@ const switchConfig = [
   //   prop: 'isExamine'
   // }
 ]
-const defaultValue = {
-  id: '',
-  isDecoil: false,
-  openResults: true,
-  openAnswerSheet: true,
-  selfMarking: false,
-  publicAnswers: true,
-  // openEntrance: false,
-  // isExamine: false,
-  openResultsValue: 0 // 默认值0，表示永久
-}
 export default {
   name: 'ExamineePermissions',
   components: {
@@ -62,12 +51,22 @@ export default {
   data() {
     return {
       switchConfig,
-      model: _.cloneDeep(defaultValue)
+      model: {
+        id: '',
+        isDecoil: false,
+        openResults: true,
+        openAnswerSheet: true,
+        selfMarking: false,
+        publicAnswers: true,
+        // openEntrance: false,
+        // isExamine: false,
+        openResultsValue: 0 // 默认值0，表示永久
+      }
     }
   },
   methods: {
     resetFields() {
-      this.model = _.cloneDeep(defaultValue)
+      _.assign(this.$data, this.$options.data())
     }
   }
 }

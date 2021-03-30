@@ -1,7 +1,19 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <img src="../../assets/images/logo.png" />
+      <img
+        v-if="envVar === 'zehui' && orgId === '5263'"
+        src="../../assets/images/logoE.png"
+      />
+      <img
+        v-else-if="envVar === 'xugong'"
+        src="../../assets/images/logo.png"
+      />
+      <img
+        v-else
+        src="../../assets/images/logoZeHui.png"
+      />
+      <!-- <img src="../../assets/images/logo.png" /> -->
     </div>
     <page-header
       style="padding-left:32px"
@@ -44,11 +56,22 @@
 </template>
 
 <script>
+import { getStore } from '@/util/store'
 export default {
   components: {},
   data() {
     return {
       mode: 'phone'
+    }
+  },
+  computed: {
+    envVar() {
+      let envC = process.env
+      return envC.VUE_APP_ENV
+    },
+    orgId() {
+      let userInfo = getStore({ name: 'userInfo' })
+      return userInfo.org_id
     }
   },
   methods: {

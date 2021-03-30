@@ -90,6 +90,7 @@ export default {
 .setting-container {
   width: 600px;
   height: 100%;
+  min-height: calc(100vh - 69px);
   margin: auto;
   background: white;
   padding: 16px;

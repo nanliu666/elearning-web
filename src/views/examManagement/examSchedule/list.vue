@@ -540,8 +540,35 @@ export default {
     },
     // 批量删除
     deleteSelected(selected) {
+      const groupList = _.groupBy(selected, (item) => item.status === '2')
+      const underway = _.get(groupList, 'true', [])
+      const others = _.get(groupList, 'false', [])
+      // 全部选了进行中
+      if (_.isEmpty(others)) {
+        this.$message.error('您所选中的考试都是进行的，无法进行删除操作！')
+      } else {
+        let tips = ''
+        // 全选非进行中
+        if (_.isEmpty(underway)) {
+          tips = '您确定要删除您所选中的考试吗？'
+        } else {
+          // 进行中与其他状态都有
+          tips = `您所选的共有${_.size(
+            underway
+          )}条进行中的考试不能被删除，您希望继续删除其他考试吗？）`
+        }
+        this.$confirm(tips, '提醒', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.deleteBatch(others)
+        })
+      }
+    },
+    deleteBatch(others) {
       let selectedIds = []
-      _.each(selected, (item) => {
+      _.each(others, (item) => {
         selectedIds.push(item.id)
       })
       this.deleteFun(selectedIds.join(','))
@@ -579,7 +606,7 @@ export default {
     handleEdit(row) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'edit', isDraft: this.activeIndex === '1' }
+        query: { id: row.id, type: 'edit' }
       })
     },
     // 递归获取所有的停启用的id集合

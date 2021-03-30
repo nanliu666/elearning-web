@@ -35,10 +35,14 @@
 
     <el-table :data="data">
       <el-table-column
-        prop="todoName"
         align="center"
         label="课程名称"
       >
+        <template slot-scope="scope">
+          <div>
+            {{ scope.row.todoType == 'course' ? scope.row.todoName : scope.row.theme }}
+          </div>
+        </template>
       </el-table-column>
       <el-table-column
         prop="todoType"
@@ -87,6 +91,7 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
+import { backBaseUrl } from '@/config/env'
 
 if (!HTMLCanvasElement.prototype.toBlob) {
   Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
@@ -146,12 +151,8 @@ export default {
         width: CODE_WIDTH,
         height: CODE_HEIGHT
       })
-      let baseURL =
-        process.env.NODE_ENV == 'development'
-          ? 'http://localhost:8080'
-          : 'http://139.159.141.248:8081/mobile'
-
-      baseURL = baseURL += '/pages/signin/index'
+      let url = backBaseUrl
+      let baseURL = (url += '/mobile/#/pages/signin/index')
 
       let p = ''
       Object.keys(params).forEach((key) => {

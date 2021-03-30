@@ -606,7 +606,8 @@ $header-height: 54px;
   height: 100vh;
   padding-top: $header-height;
   box-sizing: border-box;
-
+  overflow: auto;
+  background: #f5f5f7;
   .page__header {
     width: 100%;
     height: $header-height;
@@ -621,6 +622,7 @@ $header-height: 54px;
     font-size: 14px;
     position: fixed;
     top: 0;
+    z-index: 1;
 
     .page-actions {
       height: 100%;
@@ -709,8 +711,8 @@ $header-height: 54px;
 
   .page__content {
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    // height: 100%;
+    overflow: auto;
     box-sizing: border-box;
     background: #f5f5f7;
     padding-top: 15px;

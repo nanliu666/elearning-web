@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 const navList = ['基本设置', '考场环境', '考生权限', '评卷策略', '成绩发布']
 import basicSetting from '../examineComponents/basicSetting'
 import testEnvironment from '../examineComponents/testEnvironment'
@@ -124,6 +125,7 @@ export default {
   },
   methods: {
     assignmentInEdit() {
+      this.currentIndex = 0
       this.title = '编辑考试'
       this.editType = 'edit'
       this.model.operationType = this.examine.operationType
@@ -136,15 +138,20 @@ export default {
         this.$refs.evaluationStrategyRef.model = this.getNavModel(
           this.$refs.evaluationStrategyRef.model
         )
+        this.$refs.achievementPublishRef.model = this.getNavModel(
+          this.$refs.achievementPublishRef.model
+        )
       })
     },
     clearInAdd() {
       // 新增的时候重置数据
       this.editType = 'add'
+      this.currentIndex = 0
       this.$refs.basicSettingRef && this.$refs.basicSettingRef.$refs.form.resetFields()
       this.$refs.testEnvironmentRef && this.$refs.testEnvironmentRef.resetFields()
       this.$refs.examineePermissionsRef && this.$refs.examineePermissionsRef.resetFields()
       this.$refs.evaluationStrategyRef && this.$refs.evaluationStrategyRef.resetFields()
+      this.$refs.achievementPublishRef && this.$refs.achievementPublishRef.resetFields()
     },
     // 获取每个nav的值
     getNavModel(currentRef) {
@@ -163,7 +170,10 @@ export default {
       const testEnvironmentData = this.$refs.testEnvironmentRef.model
       const examinePermissionsData = this.$refs.examineePermissionsRef.model
       const evaluationStrategyData = this.$refs.evaluationStrategyRef.model
-      const achievementPublishData = this.$refs.achievementPublishRef.model
+      let achievementPublishData = this.$refs.achievementPublishRef.model
+      achievementPublishData.fixedTime = !achievementPublishData.fixedTime
+        ? achievementPublishData.fixedTime
+        : moment(achievementPublishData.fixedTime).format('YYYY-MM-DD HH:mm:ss')
       const examineData = {
         ...this.model,
         ...basicSettingData,

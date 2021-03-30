@@ -104,7 +104,7 @@
                     <span> {{ courseData.period }} </span>
                   </li>
                   <li>
-                    <span class="text">学分：</span> <span> {{ courseData.credit }} </span>
+                    <span class="text">积分：</span> <span> {{ courseData.credit }} </span>
                   </li>
                   <li v-if="courseData.passCondition">
                     <span class="text">通过条件：</span>
@@ -567,18 +567,26 @@ export default {
     },
     // 处理重新发起申请
     handleReapplyClick() {
-      let self = this
+      // let self = this
       this.$confirm('您确定要对课程进行修改并重新申请?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          let { id, catalogName } = JSON.parse(self.applyDetail.formData)
           this.$nextTick(() => {
-            self.$router.push({
-              path: '/course/establishCourse',
-              query: { id: id, catalogName: catalogName }
+            let { id, catalogName } = JSON.parse(this.applyDetail.formData)
+            this.$nextTick(() => {
+              console.log(catalogName)
+              console.log(id)
+              this.$router.push({
+                path: '/course/establishCourse',
+                // query: { id: id, catalogName: catalogName }
+                query: {
+                  id,
+                  catalogName
+                }
+              })
             })
           })
         })

@@ -707,6 +707,8 @@ export default {
       handler(value) {
         // 1隐藏， 2显示
         _.set(_.find(this.columns, { prop: 'fixedTime' }), 'isVisible', value === 2)
+        // 隐藏的时候必填校验关闭
+        _.set(_.find(this.columns, { prop: 'fixedTime' }), 'required', value === 2)
       },
       deep: true,
       immediate: true
@@ -821,9 +823,14 @@ export default {
         if (type === 'draft') {
           resolve(this.model)
         } else {
-          this.$refs['form'].validate().then(() => {
-            resolve(this.model)
-          })
+          this.$refs['form']
+            .validate()
+            .then(() => {
+              resolve(this.model)
+            })
+            .catch(() => {
+              this.$message.error('请完整填写考试信息')
+            })
         }
       })
     }
