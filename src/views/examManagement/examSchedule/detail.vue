@@ -12,8 +12,9 @@
             class="title-left"
           >
             <span class="title-text">{{ examDetail.examName }}</span>
+            <!-- 草稿数据不用显示状态 -->
             <el-tag
-              v-if="examDetail.status"
+              v-if="examDetail.status && examDetail.type == 0"
               :type="getStatusType(examDetail.status).color"
             >
               {{ getStatusType(examDetail.status).text }}
@@ -732,7 +733,7 @@ export default {
       const query =
         type === 'copy'
           ? _.assign(basicQuery, { type: 'copy' })
-          : _.assign(basicQuery, { source: 'mark' })
+          : _.assign(basicQuery, { type: 'edit', source: 'mark' })
       this.$router.push({ path: '/examManagement/examSchedule/edit', query })
     },
     deleteFun() {
