@@ -318,7 +318,8 @@ export default {
     const loadMoreFun = (item) => {
       if (item.loading || item.noMore) return
       item.loading = true
-      getCreatUsers({ pageNo: item.pageNo, pageSize: 10, examType: 0 }).then((res) => {
+      const params = { pageNo: item.pageNo + 1, pageSize: 10, examType: 0 }
+      getCreatUsers(params).then((res) => {
         if (res.data.length > 0) {
           item.options.push(...res.data)
           item.pageNo += 1
