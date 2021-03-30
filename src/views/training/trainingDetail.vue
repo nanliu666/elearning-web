@@ -28,7 +28,11 @@
           >
             开办下一期
           </el-button>
-          <el-button size="mini" :disabled="!issueStatus" @click="isstopSchedule">
+          <el-button
+            size="mini"
+            :disabled="showTrainDetail.status == 3 && $route.query.status"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
