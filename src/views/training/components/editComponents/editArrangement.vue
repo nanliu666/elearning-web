@@ -448,7 +448,7 @@ export default {
       if (index >= 0 && type === 'edit') {
         this.$set(this.schedule.data, index, data)
       } else {
-        this.schedule.data.push(data)
+        this.schedule.data = _.sortBy([...this.schedule.data, data], 'todoDate')
       }
     }
   }
