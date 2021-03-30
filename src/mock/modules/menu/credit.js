@@ -1,7 +1,7 @@
 export default {
   sort: 6,
   menuId: '1259467674524567872318',
-  menuName: '学分管理',
+  menuName: '积分管理',
   menuType: 'Dir', // 菜单类型，Dir：目录，Menu：菜单；Button：按钮
   isOwn: 1, // 是否拥有 0：否，1：是
   isShow: 1, // 是否显示在菜单栏 0：否，1：是
@@ -20,7 +20,7 @@ export default {
   children: [
     {
       menuId: '125907341267456735058',
-      menuName: '学分规则管理',
+      menuName: '积分规则管理',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,
@@ -85,7 +85,7 @@ export default {
     },
     {
       menuId: '1259073412671256735038',
-      menuName: '学分明细',
+      menuName: '积分明细',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,
@@ -107,7 +107,7 @@ export default {
     },
     {
       menuId: '1259073412671256735032',
-      menuName: '学分详情',
+      menuName: '积分详情',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,

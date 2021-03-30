@@ -1,7 +1,7 @@
 <template>
   <div class="fill">
     <page-header title="用户管理">
-      <el-dropdown
+      <!-- <el-dropdown
         slot="rightMenu"
         v-p="ADD_USER"
         @command="handleCommand"
@@ -17,12 +17,21 @@
           <el-dropdown-item command="add">
             单个添加
           </el-dropdown-item>
-          <!-- <el-dropdown-item>Excel导入员工</el-dropdown-item> -->
+          <el-dropdown-item>Excel导入员工</el-dropdown-item>
         </el-dropdown-menu>
-      </el-dropdown>
+      </el-dropdown> -->
+      <el-button
+        slot="rightMenu"
+        v-p="ADD_USER"
+        type="primary"
+        size="medium"
+        @click="handleCommand('add')"
+      >
+        添加用户
+      </el-button>
     </page-header>
     <el-row
-      style="height: calc(100% - 92px);"
+      style="height: calc(100% - 92px)"
       :gutter="8"
     >
       <el-col class="fill sidebar">
@@ -31,7 +40,7 @@
             v-model="treeSearch"
             clearable
             placeholder="组织名称"
-            style="margin-bottom:10px;"
+            style="margin-bottom: 10px"
           />
           <el-tree
             ref="orgTree"
@@ -57,12 +66,12 @@
       </el-col>
       <el-col
         class="content"
-        style="height:100%"
+        style="height: 100%"
       >
         <user-list
           ref="userList"
           :active-org="activeOrg"
-          style="padding-right:0;"
+          style="padding-right: 0"
           @refresh="loadData"
         />
       </el-col>

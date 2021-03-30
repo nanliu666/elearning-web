@@ -76,7 +76,7 @@
         <el-row>
           <el-col :span="12">
             <div class="colbox">
-              <span class="text_title">学分：</span>
+              <span class="text_title">积分：</span>
               <span class="text">{{ userData.credit }}</span>
             </div>
           </el-col>

@@ -16,26 +16,28 @@
         :columns="columns"
       >
         <template #passType>
-          <el-radio-group v-model="model.passType">
+          <el-radio-group
+            v-model="model.passType"
+            :disabled="modelDisabled"
+            style="display: flex;"
+          >
             <condition-radio-input
-              v-model="model.passType"
+              v-model="model.passScope"
+              :label="1"
+              :is-show="model.passType === 1"
+              style="margin-right:40px"
               label-text="按成绩"
               text-before="成绩不低于"
               text-after="分"
-              :input-width="60"
-              :default-value="passCondition[0].passType"
-              :number.sync="passCondition[0].passScope"
-              :pass-scope="model.passScope"
               :input-props="{ maxLength: 4 }"
             />
             <condition-radio-input
-              v-model="model.passType"
+              v-model="model.passPercentage"
+              :label="2"
+              :is-show="model.passType === 2"
               label-text="按得分率"
               text-before="得分率不低于"
               text-after="%"
-              :input-width="60"
-              :default-value="passCondition[1].passType"
-              :number.sync="passCondition[1].passScope"
               :input-props="{ maxLength: 4 }"
             />
           </el-radio-group>
@@ -51,7 +53,8 @@ import moment from 'moment'
 const defaultValue = {
   id: '',
   passType: 1,
-  passScope: 0,
+  passScope: 60,
+  passPercentage: 80,
   publishRules: 1,
   autoEvaluate: 1,
   fixedTime: new Date()
@@ -69,16 +72,6 @@ export default {
       },
       hideCondition: {},
       hideFixedTime: {},
-      passCondition: [
-        {
-          passType: 1,
-          passScope: 60
-        },
-        {
-          passType: 2,
-          passScope: 80
-        }
-      ],
       model: _.cloneDeep(defaultValue),
       columns: [
         {
@@ -126,12 +119,6 @@ export default {
     }
   },
   watch: {
-    'model.passType': {
-      handler(i) {
-        this.model.passScope = this.passCondition[i - 1]['passScope']
-      },
-      deep: true
-    },
     'model.publishRules': {
       handler(data) {
         if (data === 1) {

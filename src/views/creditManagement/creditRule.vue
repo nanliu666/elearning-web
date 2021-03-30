@@ -233,8 +233,8 @@ export default {
     handleIsStart(row) {
       let text =
         row.status == 0
-          ? '您确定要启用该学分规则吗？'
-          : '您确定要停用该学分规则吗？停用后，该学分规则将暂停使用。'
+          ? '您确定要启用该积分规则吗？'
+          : '您确定要停用该积分规则吗？停用后，该积分规则将暂停使用。'
       this.$confirm(text, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -271,7 +271,7 @@ export default {
           })
         })
       } else {
-        this.$confirm('该学分规则处于启用状态，请停用后删除。', '提醒', {
+        this.$confirm('该积分规则处于启用状态，请停用后删除。', '提醒', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
