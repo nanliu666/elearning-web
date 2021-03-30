@@ -25,9 +25,9 @@ if (location.host.indexOf('localhost') !== -1) {
 } else if (env.VUE_APP_ENV == 'pro') {
   backBaseUrl = 'http://admin.epro-edu.com' //生产环境地址(后台管理)
 } else if (env.VUE_APP_ENV == 'zehui') {
-  backBaseUrl = 'https://admin.zexueyuan.com.cn' //泽汇生产环境地址（后台管理）
+  backBaseUrl = 'http://admin.zexueyuan.com.cn' //泽汇生产环境地址（后台管理）
 } else if (env.VUE_APP_ENV == 'xugong') {
-  backBaseUrl = 'https://admin.zexueyuan.com.cn' //徐工环境地址（后台管理）
+  backBaseUrl = 'http://admin.zexueyuan.com.cn' //徐工环境地址（后台管理）
 }
 // else if (env.VUE_APP_ENV == 'test') {
 //   backBaseUrl = '' //测试环境地址(后台管理)

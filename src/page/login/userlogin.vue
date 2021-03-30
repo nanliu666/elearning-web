@@ -189,7 +189,7 @@ export default {
       domain =
         process.env.NODE_ENV === 'development' ? '139.159.141.248:8081' : window.location.host
       getTenantInfo({ domain: `${domain}` }).then((res) => {
-        this.loginForm.tenantId = res.tenantId || 'bestgrand'
+        this.loginForm.tenantId = res.tenantId || 'learn'
         this.$store.commit('SET_TENANT_CONTENT', JSON.stringify(res))
         this.$store.commit('SET_TENANT_ID', res.tenantId)
       })
