@@ -1,6 +1,9 @@
 <template>
   <div class="learn-plan-detail">
-    <div class="back-btn" @click="back">
+    <div
+      class="back-btn"
+      @click="back"
+    >
       <i class="icon el-icon-arrow-left"></i>
       <span class="text">线上必修安排详情</span>
     </div>
@@ -16,17 +19,17 @@
             :class="{
               will: data.status === 1,
               doing: data.status === 2,
-              done: data.status === 3,
+              done: data.status === 3
             }"
           >
             {{
               data.status === 2
-                ? "进行中"
+                ? '进行中'
                 : data.status === 1
-                ? "未开始"
-                : data.status === 3
-                ? "已结束"
-                : ""
+                  ? '未开始'
+                  : data.status === 3
+                    ? '已结束'
+                    : ''
             }}
           </div>
         </div>
@@ -44,7 +47,7 @@
           <div class="intro-item">
             创建人：
             <span class="text">{{
-              data.trainWay === 1 ? "在线" : data.trainWay === 2 ? "面授" : "混合"
+              data.trainWay === 1 ? '在线' : data.trainWay === 2 ? '面授' : '混合'
             }}</span>
           </div>
           <div class="intro-item">
@@ -91,10 +94,22 @@
       </div>
     </div>
     <div class="main-container">
-      <el-tabs v-model="activeTab" class="tabs">
-        <el-tab-pane v-for="tab in tabs" :key="tab" :label="reference[tab]" :name="tab">
+      <el-tabs
+        v-model="activeTab"
+        class="tabs"
+      >
+        <el-tab-pane
+          v-for="tab in tabs"
+          :key="tab"
+          :label="reference[tab]"
+          :name="tab"
+        >
           <div class="main-content">
-            <component :is="tab" :data="tabData" :parent-vm="parentVm"></component>
+            <component
+              :is="tab"
+              :data="tabData"
+              :parent-vm="parentVm"
+            ></component>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -103,149 +118,149 @@
 </template>
 
 <script>
-import { StudyState } from "./contents";
-import { queryStudyInfo, queryStudyList } from "@/api/learnArrange";
-import { getOrgTree } from "@/api/org/org";
+import { StudyState } from './contents'
+import { queryStudyInfo, queryStudyList } from '@/api/learnArrange'
+import { getOrgTree } from '@/api/org/org'
 
-import { deletePlan, updateStatus } from "@/api/learnPlan";
+import { deletePlan, updateStatus } from '@/api/learnPlan'
 
 export default {
-  name: "TrainDetail",
+  name: 'TrainDetail',
   components: {
-    StudyState,
+    StudyState
   },
   data() {
     return {
       reference: {
-        "study-state": "学习情况",
+        'study-state': '学习情况'
       },
       data: {},
-      tabs: ["study-state"],
-      activeTab: "study-state",
+      tabs: ['study-state'],
+      activeTab: 'study-state',
       tabData: {
-        "study-state": {
+        'study-state': {
           data: [],
           orgData: [],
-          total: 0,
-        },
-      },
-    };
+          total: 0
+        }
+      }
+    }
   },
   computed: {
     parentVm() {
-      return this;
-    },
+      return this
+    }
   },
   activated() {
-    const $data = JSON.parse(this.$route.query.data);
-    Object.assign(this.data, $data);
-    this.getData();
+    const $data = JSON.parse(this.$route.query.data)
+    Object.assign(this.data, $data)
+    this.getData()
   },
   deactivated() {
-    this.data = {};
+    this.data = {}
     this.tabData = {
-      "study-state": {
+      'study-state': {
         data: [],
         orgData: [],
-        total: 0,
-      },
-    };
-    this.activeTab = "study-state";
+        total: 0
+      }
+    }
+    this.activeTab = 'study-state'
   },
   methods: {
     back() {
-      this.$router.back();
+      this.$router.back()
     },
     getData() {
-      this.queryStudyInfo();
-      this.queryStudyList();
+      this.queryStudyInfo()
+      this.queryStudyList()
       getOrgTree({ parentOrgId: 0 }).then((res) => {
-        this.tabData["study-state"].orgData = res;
-      });
+        this.tabData['study-state'].orgData = res
+      })
     },
     queryStudyList(params = {}) {
-      const data = { id: this.data.id, ...params };
+      const data = { id: this.data.id, ...params }
       if (Array.isArray(data.deptName)) {
-        data.deptName = data.deptName[data.deptName.length - 1];
+        data.deptName = data.deptName[data.deptName.length - 1]
       }
       return queryStudyList(data).then((res) => {
-        const { data = [], totalNum = 0 } = res;
-        this.tabData["study-state"].data = data;
-        this.tabData["study-state"].total = totalNum;
-      });
+        const { data = [], totalNum = 0 } = res
+        this.tabData['study-state'].data = data
+        this.tabData['study-state'].total = totalNum
+      })
     },
     queryStudyInfo() {
       queryStudyInfo({ id: this.data.id }).then((res) => {
-        this.data = Object.assign(this.data, res);
-        this.tabData.studyName = this.data.studyName;
-        this.$forceUpdate();
-      });
+        this.data = Object.assign(this.data, res)
+        this.tabData.studyName = this.data.studyName
+        this.$forceUpdate()
+      })
     },
     handleDelete(selection) {
       if (selection.status === 2) {
-        this.$confirm("选中的课程安排正在进行中，无法进行删除操作。", {
-          confirmButtonText: "关闭",
-          callback: () => {},
-        });
+        this.$confirm('选中的课程安排正在进行中，无法进行删除操作。', {
+          confirmButtonText: '关闭',
+          callback: () => {}
+        })
       } else {
-        this.$confirm("确定要删除选中的课程安排吗？", {
+        this.$confirm('确定要删除选中的课程安排吗？', {
           showCancelButton: true,
           callback: (action) => {
-            if (action !== "cancel") {
-              this.deletePlanFn([selection]);
+            if (action !== 'cancel') {
+              this.deletePlanFn([selection])
             }
-          },
-        });
+          }
+        })
       }
     },
     closePlan(row) {
       // 结办
-      this.$confirm("您确定要提前结办该课程安排吗？", {
+      this.$confirm('您确定要提前结办该课程安排吗？', {
         showCancelButton: true,
         callback: (action) => {
-          if (action !== "cancel") {
+          if (action !== 'cancel') {
             updateStatus({ id: row.id, status: 3 }).then(() => {
               this.$message({
-                type: "success",
-                message: "结办成功!",
-              });
-            });
-            this.queryStudyInfo();
+                type: 'success',
+                message: '结办成功!'
+              })
+            })
+            this.queryStudyInfo()
           }
-        },
-      });
+        }
+      })
     },
     deletePlanFn(arr) {
       // 删除学习计划
       let ids = _(arr)
         .filter((item) => item.status != 2)
-        .map("id")
-        .join(",");
+        .map('id')
+        .join(',')
       if (!ids) {
-        return;
+        return
       }
       deletePlan({
-        ids,
+        ids
       })
         .then(() => {
           this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
+            type: 'success',
+            message: '删除成功!'
+          })
           this.$router.push({
-            path: "/learnPlan/CoursePlanList",
-          });
+            path: '/learnPlan/CoursePlanList'
+          })
         })
-        .catch();
+        .catch()
     },
     jumpEdit(row) {
       this.$router.push({
-        path: "/learnPlan/edit",
-        query: { id: row.id },
-      });
-    },
-  },
-};
+        path: '/learnPlan/edit',
+        query: { id: row.id }
+      })
+    }
+  }
+}
 </script>
 
 <style lang="scss">

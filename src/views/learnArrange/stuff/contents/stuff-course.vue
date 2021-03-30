@@ -155,7 +155,7 @@ export default {
         jobId: table.id,
         id: item.id || "",
       };
-      const message = !!fileName ? "修改成功" : "上传成功";
+      const message = fileName ? "修改成功" : "上传成功";
       saveCourseLinkedStudentOrTeacher(data)
         .then(() => {
           this.$message.success(message);
