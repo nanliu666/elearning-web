@@ -823,9 +823,14 @@ export default {
         if (type === 'draft') {
           resolve(this.model)
         } else {
-          this.$refs['form'].validate().then(() => {
-            resolve(this.model)
-          })
+          this.$refs['form']
+            .validate()
+            .then(() => {
+              resolve(this.model)
+            })
+            .catch(() => {
+              this.$message.error('请完整填写考试信息')
+            })
         }
       })
     }
