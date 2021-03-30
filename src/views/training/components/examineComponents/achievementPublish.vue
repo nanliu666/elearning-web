@@ -18,7 +18,6 @@
         <template #passType>
           <el-radio-group
             v-model="model.passType"
-            :disabled="modelDisabled"
             style="display: flex;"
           >
             <condition-radio-input
@@ -50,15 +49,6 @@
 <script>
 import ConditionRadioInput from '@/components/condition-radio-input/condition-radio-input'
 import moment from 'moment'
-const defaultValue = {
-  id: '',
-  passType: 1,
-  passScope: 60,
-  passPercentage: 80,
-  publishRules: 1,
-  autoEvaluate: 1,
-  fixedTime: new Date()
-}
 export default {
   name: 'AchievementPublish',
   components: {
@@ -72,7 +62,15 @@ export default {
       },
       hideCondition: {},
       hideFixedTime: {},
-      model: _.cloneDeep(defaultValue),
+      model: {
+        id: '',
+        passType: 1, // 通过条件
+        passScope: 60,
+        passPercentage: 80,
+        publishType: 1,
+        autoEvaluate: 1,
+        fixedTime: new Date()
+      },
       columns: [
         {
           itemType: 'slot',
@@ -85,7 +83,7 @@ export default {
           itemType: 'radio',
           span: 24,
           required: true,
-          prop: 'publishRules',
+          prop: 'publishType',
           label: '发布规则',
           options: [
             { label: '系统即时发布', value: 1 },
@@ -120,7 +118,7 @@ export default {
     }
   },
   watch: {
-    'model.publishRules': {
+    'model.publishType': {
       handler(data) {
         if (data === 1) {
           this.columns = this.columns.filter((it) => {
@@ -140,7 +138,7 @@ export default {
   },
   methods: {
     resetFields() {
-      this.model = _.cloneDeep(defaultValue)
+      _.assign(this.$data, this.$options.data())
     },
     changeSwitch(data) {
       this.model.autoEvaluate = data ? 1 : 0

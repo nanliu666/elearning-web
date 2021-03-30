@@ -51,19 +51,6 @@ const switchConfig = [
     prop: 'isHold'
   }
 ]
-const defaultValue = {
-  id: '',
-  isLimitIp: false,
-  isShuffle: false,
-  createAnswers: false,
-  lateBanExam: false,
-  answerBanExam: false,
-  preCreate: true,
-  isHold: false,
-  lateBanExamValue: 15, // 迟到15
-  answerBanExamValue: 30, // 最低30分钟才可交卷
-  preCreateValue: 10 // 预打印10份
-}
 export default {
   name: 'TestEnvironment',
   components: {
@@ -72,12 +59,24 @@ export default {
   data() {
     return {
       switchConfig,
-      model: _.cloneDeep(defaultValue)
+      model: {
+        id: '',
+        isLimitIp: false,
+        isShuffle: false,
+        createAnswers: false,
+        lateBanExam: false,
+        answerBanExam: false,
+        preCreate: true,
+        isHold: false,
+        lateBanExamValue: 15, // 迟到15
+        answerBanExamValue: 30, // 最低30分钟才可交卷
+        preCreateValue: 10 // 预打印10份
+      }
     }
   },
   methods: {
     resetFields() {
-      this.model = _.cloneDeep(defaultValue)
+      _.assign(this.$data, this.$options.data())
     }
   }
 }
