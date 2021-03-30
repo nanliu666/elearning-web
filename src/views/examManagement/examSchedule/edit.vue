@@ -212,13 +212,12 @@ export default {
     },
     // 设置置灰原则
     setDisabled(examInfo) {
-      const type = _.get(this.$route, 'query.type', 'edit')
-      const isDraft = _.get(this.$route, 'query.isDraft', 'false')
+      const type = _.get(this.$route, 'query.type')
       let disable = false
       //非草稿箱
       if (
         type === 'edit' &&
-        isDraft === 'false' &&
+        examInfo.model.type === 0 &&
         (examInfo.model.status === '2' || examInfo.model.status === '3')
       ) {
         // 正在进行中的考试以及已结束的考试需要置灰

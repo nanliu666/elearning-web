@@ -579,7 +579,7 @@ export default {
     handleEdit(row) {
       this.$router.push({
         path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'edit', isDraft: this.activeIndex === '1' }
+        query: { id: row.id, type: 'edit' }
       })
     },
     // 递归获取所有的停启用的id集合
