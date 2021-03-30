@@ -458,6 +458,8 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     this.valid = false
+    // 卸载页面的时候手动清空置灰
+    this.columns.find((it) => it.prop === 'name').disabled = false
     this.$refs.form && this.$refs.form.resetFields()
     this.testPaper = []
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
@@ -554,7 +556,7 @@ export default {
      * @desc 查找试卷详情
      * */
     getData() {
-      this.columns.find((it) => it.prop === 'name').disabled = false
+      this.columns.find((it) => it.prop === 'name').disabled = true
       if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
       let params = {
         id: this.$route.query.id
