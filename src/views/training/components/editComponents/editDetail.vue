@@ -245,7 +245,7 @@ export default {
             resolve(valid)
           })
           .catch(() => {
-            this.$emit('jump')
+            this.$message.error('请完整填写配置详细信息')
           })
       })
     },

@@ -92,7 +92,6 @@
         <EditDetail
           v-show="activeStep === 2"
           ref="editDetail"
-          @jump="jumpDetail"
         />
       </el-col>
     </el-row>
@@ -172,11 +171,6 @@ export default {
       }
       // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
       return '关闭提示'
-    },
-    jumpDetail() {
-      if (this.activeStep !== 2) {
-        this.jumpStep(2)
-      }
     },
     jumpStep(index) {
       this.activeStep = index
