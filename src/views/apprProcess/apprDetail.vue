@@ -574,17 +574,19 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          let { id, catalogName } = JSON.parse(this.applyDetail.formData)
           this.$nextTick(() => {
-            console.log(catalogName)
-            console.log(id)
-            this.$router.push({
-              path: '/course/establishCourse',
-              // query: { id: id, catalogName: catalogName }
-              query: {
-                id,
-                catalogName
-              }
+            let { id, catalogName } = JSON.parse(this.applyDetail.formData)
+            this.$nextTick(() => {
+              console.log(catalogName)
+              console.log(id)
+              this.$router.push({
+                path: '/course/establishCourse',
+                // query: { id: id, catalogName: catalogName }
+                query: {
+                  id,
+                  catalogName
+                }
+              })
             })
           })
         })
