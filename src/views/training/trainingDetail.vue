@@ -23,12 +23,16 @@
           <el-button
             type="primary"
             size="mini"
-            :disabled="!issueStatus"
+            :disabled="!$route.query.status"
             @click="handleConfig"
           >
             开办下一期
           </el-button>
-          <el-button size="mini" :disabled="!issueStatus" @click="isstopSchedule">
+          <el-button
+            size="mini"
+            :disabled="showTrainDetail.status == 3 || !$route.query.status"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
@@ -1356,6 +1360,7 @@ export default {
           message: "操作成功",
           type: "success",
         });
+        this.isGetTrainDetail();
       });
     },
     // 去列表页
@@ -1461,6 +1466,7 @@ export default {
       return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res;
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction);
+        this.$forceUpdate();
       });
     },
 
