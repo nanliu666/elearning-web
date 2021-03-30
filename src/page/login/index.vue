@@ -8,12 +8,25 @@
       <div class="nav flex flex-flow ">
         <div class="LOGO">
           <img
+            v-if="envVar === 'zehui' && orgId === '5263'"
+            src="../../assets/images/logoE.png"
+          />
+          <img
+            v-else-if="envVar === 'xugong'"
+            src="../../assets/images/logo.png"
+          />
+          <img
+            v-else
+            src="../../assets/images/logoZeHui.png"
+          />
+          <!-- <img
             src="../../assets/images/logo.png"
             alt=""
-          />
+          /> -->
         </div>
         <div class="title">
-          elearning后台管理系统
+          {{ systemNameC }}
+          <!-- elearning后台管理系统 -->
         </div>
       </div>
 
@@ -27,11 +40,11 @@
               src="../../assets/images/welcome.png"
               alt=""
             />
-            <img
+            <!-- <img
               class="welcome_logo"
               src="../../assets/images/logo_white.png"
               alt=""
-            />
+            /> -->
             <div>
               <img
                 class="welcome_welcome"
@@ -40,7 +53,8 @@
               />
             </div>
             <div class="welcome_text">
-              欢迎登录elearning管理系统
+              <!-- 欢迎登录elearning管理系统 -->
+              欢迎登录{{ systemNameC }}
             </div>
           </div>
           <!--右边-->
@@ -78,7 +92,8 @@ import thirdLogin from './thirdlogin'
 import { mapGetters } from 'vuex'
 import { dateFormat } from '@/util/date'
 import { validatenull } from '@/util/validate'
-
+import { getStore } from '@/util/store'
+import { systemName } from '@/config/env'
 export default {
   name: 'Login',
   components: {
@@ -95,6 +110,17 @@ export default {
     }
   },
   computed: {
+    systemNameC() {
+      return systemName
+    },
+    envVar() {
+      let envC = process.env
+      return envC.VUE_APP_ENV
+    },
+    orgId() {
+      let userInfo = getStore({ name: 'userInfo' })
+      return userInfo.org_id
+    },
     ...mapGetters(['website'])
   },
   watch: {

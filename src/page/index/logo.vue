@@ -4,18 +4,39 @@
     @click="goWork"
   >
     <!-- <img :src="JSON.parse(tenantContent).logo || logo" /> -->
-    <img src="../../assets/images/logo_white.png" />
+    <!-- <img src="../../assets/images/logo_white.png" /> -->
+    <img
+      v-if="envVar === 'zehui' && orgId === '5263'"
+      src="../../assets/images/logoEWhite.png"
+    />
+    <img
+      v-else-if="envVar === 'xugong'"
+      src="../../assets/images/logoWhite.png"
+    />
+    <img
+      v-else
+      src="../../assets/images/logoZeHuiWhite.png"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import { getStore } from '@/util/store'
 export default {
   name: 'Logo',
   data() {
     return {}
   },
   computed: {
+    envVar() {
+      let envC = process.env
+      return envC.VUE_APP_ENV
+    },
+    orgId() {
+      let userInfo = getStore({ name: 'userInfo' })
+      return userInfo.org_id
+    },
     ...mapGetters(['website', 'keyCollapse', 'tenantContent'])
   },
   created() {},
