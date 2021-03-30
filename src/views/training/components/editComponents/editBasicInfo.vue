@@ -42,6 +42,7 @@ const personOptionProps = {
   value: 'workNo',
   key: 'userId'
 }
+import moment from 'moment'
 export default {
   name: 'EditBasicInfo',
   components: { lazySelect, SelectUser },
@@ -95,6 +96,11 @@ export default {
         },
         {
           itemType: 'datePicker',
+          pickerOptions: {
+            disabledDate(time) {
+              return moment(new Date()).isAfter(time, 'day')
+            }
+          },
           label: '培训时间',
           prop: 'trainTime',
           options: [''],
