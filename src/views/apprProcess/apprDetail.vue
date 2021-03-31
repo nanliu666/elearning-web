@@ -177,7 +177,7 @@
             >
               <ul>
                 <li
-                  v-for="(item, index) in courseData.content"
+                  v-for="(item, index) in courseData.contents"
                   :key="index"
                   @click="jumpToLearn(item)"
                 >

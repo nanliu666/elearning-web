@@ -23,12 +23,12 @@
           :model="filterForm"
           class="filter-form"
           label-width="100px"
-          style="padding: 24px;"
+          style="padding: 24px"
         >
           <el-form-item label="所属部门">
             <el-cascader
               v-model="filterForm.deptName"
-              style="width: 202px;"
+              style="width: 202px"
               placeholder="请选择所属部门"
               :options="data['study-state'].orgData"
               :props="{ checkStrictly: true, label: 'orgName', value: 'orgName' }"
@@ -37,52 +37,22 @@
           </el-form-item>
 
           <el-form-item label="学习进度">
-            <el-select
-              v-model="filterForm.progress"
-              clearable
-              placeholder="请选择状态"
-            >
-              <el-option
-                label="已通过"
-                value="Yes"
-              ></el-option>
-              <el-option
-                label="未通过"
-                value="No"
-              ></el-option>
+            <el-select v-model="filterForm.progress" clearable placeholder="请选择状态">
+              <el-option label="已通过" value="Yes"></el-option>
+              <el-option label="未通过" value="No"></el-option>
             </el-select>
           </el-form-item>
 
           <el-form-item label="作业提交率">
-            <el-select
-              v-model="filterForm.jobPercent"
-              clearable
-              placeholder="请选择状态"
-            >
-              <el-option
-                label="全部提交"
-                value="Yes"
-              ></el-option>
-              <el-option
-                label="未完成"
-                value="No"
-              ></el-option>
+            <el-select v-model="filterForm.jobPercent" clearable placeholder="请选择状态">
+              <el-option label="全部提交" value="Yes"></el-option>
+              <el-option label="未完成" value="No"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="课程通过状态">
-            <el-select
-              v-model="filterForm.isFinish"
-              clearable
-              placeholder="请选择状态"
-            >
-              <el-option
-                label="已通过"
-                value="Yes"
-              ></el-option>
-              <el-option
-                label="未通过"
-                value="No"
-              ></el-option>
+            <el-select v-model="filterForm.isFinish" clearable placeholder="请选择状态">
+              <el-option label="已通过" value="Yes"></el-option>
+              <el-option label="未通过" value="No"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="考试情况">
@@ -91,21 +61,12 @@
               clearable
               placeholder="请选择状态"
             >
-              <el-option
-                label="已通过"
-                value="Yes"
-              ></el-option>
-              <el-option
-                label="未通过"
-                value="No"
-              ></el-option>
-              <el-option
-                label="未开始"
-                value="Init"
-              ></el-option>
+              <el-option label="已通过" value="Yes"></el-option>
+              <el-option label="未通过" value="No"></el-option>
+              <el-option label="未开始" value="Init"></el-option>
             </el-select>
           </el-form-item>
-          <div style="text-align: right; margin-right: 75px;">
+          <div style="text-align: right; margin-right: 75px">
             <el-button
               type="primary"
               size="medium"
@@ -119,7 +80,7 @@
               @click="
                 filterForm = {
                   ...initForm,
-                  titleOrNo: filterForm.deptName
+                  titleOrNo: filterForm.deptName,
                 }
               "
             >
@@ -140,11 +101,7 @@
     </div>
 
     <div class="table-container">
-      <el-table
-        :loading="tableLoading"
-        :data="data['study-state'].data"
-        border
-      >
+      <el-table :loading="tableLoading" :data="data['study-state'].data" border>
         <el-table-column
           fixed
           align="center"
@@ -181,11 +138,7 @@
             <span v-else>--</span>
           </template>
         </el-table-column>
-        <el-table-column
-          align="center"
-          header-align="center"
-          label="作业提交率"
-        >
+        <el-table-column align="center" header-align="center" label="作业提交率">
           <template slot-scope="scope">
             <div>
               {{ scope.row.job }}
@@ -201,7 +154,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.coursePassStatus === 'yes' ? '已通过' : '未通过' }}
+              {{ scope.row.coursePassStatus === "yes" ? "已通过" : "未通过" }}
             </div>
           </template>
         </el-table-column>
@@ -213,20 +166,13 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.isFinish === 'yes' ? '已通过' : '未通过' }}
+              {{ scope.row.isFinish === "yes" ? "已通过" : "未通过" }}
             </div>
           </template>
         </el-table-column>
-        <el-table-column
-          label="操作"
-          header-align="center"
-          align="center"
-        >
+        <el-table-column label="操作" header-align="center" align="center">
           <template slot-scope="scope">
-            <el-button
-              type="text"
-              @click="toStuffDetail(scope.row)"
-            >
+            <el-button type="text" @click="toStuffDetail(scope.row)">
               查看上报材料
             </el-button>
           </template>
@@ -244,97 +190,103 @@
 </template>
 
 <script>
-import Pagination from '@/components/common-pagination'
+import Pagination from "@/components/common-pagination";
 export default {
-  name: 'StudyState',
+  name: "StudyState",
   components: {
-    Pagination
+    Pagination,
   },
   props: {
     data: {
       type: Object,
       default() {
-        return {}
-      }
+        return {};
+      },
     },
     parentVm: {
       type: Object,
       default() {
-        return {}
-      }
-    }
+        return {};
+      },
+    },
   },
   data() {
     return {
       tableLoading: false,
       initForm: {
-        deptName: '',
-        progress: '',
-        jobPercent: '',
-        isFinish: '',
-        isExaimPass: '',
-        coursePassStatus: '',
+        deptName: "",
+        progress: "",
+        jobPercent: "",
+        isFinish: "",
+        isExaimPass: "",
+        coursePassStatus: "",
         pageNo: 1,
-        pageSize: 10
+        pageSize: 10,
       },
       categoryData: [],
       filterFormVisible: false,
       filterForm: {
-        deptName: '',
-        progress: '',
-        jobPercent: '',
-        isFinish: '',
-        isExaimPass: '',
-        coursePassStatus: '',
+        deptName: "",
+        progress: "",
+        jobPercent: "",
+        isFinish: "",
+        isExaimPass: "",
+        coursePassStatus: "",
         pageNo: 1,
-        pageSize: 10
-      }
-    }
+        pageSize: 10,
+      },
+    };
   },
   computed: {
     searchValWatcher() {
-      return this.filterForm.userName
-    }
+      return (this.filterForm.userName + "").trim();
+    },
   },
   watch: {
-    searchValWatcher() {
-      if (this.tableLoading) return
-      this.tableLoading = true
-      this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
-    }
+    searchValWatcher(val) {
+      if (this.tableLoading || !val) return;
+      this.tableLoading = true;
+      this.parentVm
+        .queryStudyList(this.filterForm)
+        .finally(() => (this.tableLoading = false));
+    },
   },
   methods: {
     pagination({ page, limit }) {
-      if (this.tableLoading) return
-      this.tableLoading = true
-      this.filterForm.pageNo = page
-      this.filterForm.pageSize = limit
-      this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
+      if (this.tableLoading) return;
+      this.tableLoading = true;
+      this.filterForm.pageNo = page;
+      this.filterForm.pageSize = limit;
+      this.parentVm
+        .queryStudyList(this.filterForm)
+        .finally(() => (this.tableLoading = false));
     },
 
     resetPageAndGetList() {
-      if (this.tableLoading) return
-      this.tableLoading = true
-      this.filterForm.pageNo = 1
-      this.filterForm.pageSize = 10
-      this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
+      if (this.tableLoading) return;
+      this.tableLoading = true;
+      this.filterForm.pageNo = 1;
+      this.filterForm.pageSize = 10;
+      this.parentVm
+        .queryStudyList(this.filterForm)
+        .finally(() => (this.tableLoading = false));
     },
     toStuffDetail(row) {
-      const data = { ...row }
-      data.type = 'plan'
-      data.studyName = this.data.studyName
-      const query = {}
+      const data = { ...row };
+      data.type = "plan";
+      data.studyName = this.data.studyName;
+      const query = {};
       Object.keys(data).forEach((key) => {
-        query[key] = data[key]
-      })
+        query[key] = data[key];
+      });
 
       this.$router.push({
-        path: '/learnArrange/stuff/index',
-        query
-      })
-    }
-  }
-}
+        path: "/learnArrange/stuff/index",
+        query,
+      });
+    },
+  },
+};
 </script>
 
 <style lang="scss">

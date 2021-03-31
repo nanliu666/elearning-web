@@ -39,7 +39,10 @@ instance.interceptors.request.use(
       `${website.clientId}:${website.clientSecret}`
     )}`
 
-    config.headers['Tenant-Id'] = !config.headers.RemoveTenantId ? store.state.user.tenantId : ''
+    config.headers['Tenant-Id'] =
+      !config.headers.RemoveTenantId && store.state.user.tenantId
+        ? store.state.user.tenantId
+        : 'learn'
     config.headers.appId = 'Admin'
 
     if (!config.url.startsWith('/api') && !config.url.startsWith('api')) {

@@ -69,7 +69,8 @@
                 need-handler
                 :on-upload-start="() => onUploadStart(table)"
                 :on-upload-complete="
-                  (file, url) => onUploadComplete(table, scope.row, file, url)
+                  (file, url) =>
+                    onUploadComplete(table, scope.row, file, url, scope.$index)
                 "
                 @on-error="() => onUploadError(table)"
               >
@@ -143,17 +144,18 @@ export default {
       this.$forceUpdate();
     },
 
-    onUploadComplete(table, item, file, url) {
-      const { fileCategory } = item;
-      const { size: fileSize, uid: id, name: fileName } = file.file;
+    onUploadComplete(table, item, file, url, index) {
+      const target = item.fileName ? item : table.trainAttachmentVOS[0];
+      const { fileCategory, id, bizId: jobId, fileName } = target;
+      const { size: fileSize, name } = file.file;
       const data = {
         courseId: table.courseId,
-        fileCategory,
-        fileName,
+        fileCategory: fileCategory ? fileCategory : index === 1 ? "user" : "teacher",
+        fileName: name,
         filePath: url,
         fileSize,
-        jobId: table.id,
-        id: item.id || "",
+        jobId,
+        id,
       };
       const message = fileName ? "修改成功" : "上传成功";
       saveCourseLinkedStudentOrTeacher(data)

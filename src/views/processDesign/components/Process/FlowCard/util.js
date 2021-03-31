@@ -414,11 +414,14 @@ export class NodeUtils {
     let valid = true
     const props = node.properties
     // this.isStartNode(node) && !props.initiator && (valid = false)
+    // this.isCopyNode(node) &&
+    //     node.properties.members &&
+    //     node.properties.members.length === 0 &&
+    //     (valid = false)
     this.isCopyNode(node) &&
-      node.properties.members &&
-      node.properties.members.length === 0 &&
+      !node.properties.members &&
+      // node.properties.members.length === 0 &&
       (valid = false)
-
     this.isConditionNode(node) &&
       !props.isDefault &&
       (!props.initiator || props.initiator.length === 0) &&

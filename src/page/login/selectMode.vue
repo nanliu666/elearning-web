@@ -1,12 +1,12 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <img
+      <!-- <img
         v-if="envVar === 'zehui' && orgId === '5263'"
         src="../../assets/images/logoE.png"
-      />
+      /> -->
       <img
-        v-else-if="envVar === 'xugong'"
+        v-if="envVar === 'xugong'"
         src="../../assets/images/logo.png"
       />
       <img
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { getStore } from '@/util/store'
+// import { getStore } from '@/util/store'
 export default {
   components: {},
   data() {
@@ -68,11 +68,11 @@ export default {
     envVar() {
       let envC = process.env
       return envC.VUE_APP_ENV
-    },
-    orgId() {
-      let userInfo = getStore({ name: 'userInfo' })
-      return userInfo.org_id
     }
+    // orgId() {
+    //   let userInfo = getStore({ name: 'userInfo' })
+    //   return userInfo.org_id
+    // }
   },
   methods: {
     forgetPW() {

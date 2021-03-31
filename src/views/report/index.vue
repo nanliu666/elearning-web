@@ -349,7 +349,7 @@ export default {
       this.getAnalysis()
     }
   },
-  activated() {
+  created() {
     this.getOrgTree()
     this.getData()
   },
