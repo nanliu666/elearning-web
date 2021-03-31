@@ -632,6 +632,9 @@
               <span>
                 <span v-if="item.type === 1">【面授课程】</span><span v-else>【活动】</span>
                 {{ item.courseName }}</span>
+              <span v-if="item.type === 2">
+                <span>主题</span>
+                {{ item.theme }}</span>
               <span>
                 <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
                 {{ item.lecturerName }}</span>
@@ -2104,13 +2107,13 @@ export default {
             width: 15%;
           }
           &:nth-child(2) {
-            width: 35%;
+            width: 20%;
           }
           &:nth-child(3) {
             width: 20%;
           }
           &:nth-child(4) {
-            width: 20%;
+            width: 15%;
           }
           &:nth-child(5) {
             width: 20%;
