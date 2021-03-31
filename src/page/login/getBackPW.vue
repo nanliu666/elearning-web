@@ -1,7 +1,18 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <img src="../../assets/images/logo.png" />
+      <!-- <img
+        v-if="envVar === 'zehui' && orgId === '5263'"
+        src="../../assets/images/logoE.png"
+      /> -->
+      <img
+        v-if="envVar === 'xugong'"
+        src="../../assets/images/logo.png"
+      />
+      <img
+        v-else
+        src="../../assets/images/logoZeHui.png"
+      />
     </div>
     <pageHeader
       style="padding-left:32px"
@@ -282,7 +293,7 @@ import { getCode, checkPhoneCode, checkPassword } from '@/api/personalInfo.js'
 import md5 from 'js-md5'
 import pageHeader from '@/components/page-header/pageHeader'
 import { getCaptcha } from '@/api/user'
-
+// import { getStore } from '@/util/store'
 export default {
   components: {
     pageHeader
@@ -417,6 +428,10 @@ export default {
     }
   },
   computed: {
+    envVar() {
+      let envC = process.env
+      return envC.VUE_APP_ENV
+    },
     btnDisabled() {
       let disabled = false
       if (this.step === 2) {

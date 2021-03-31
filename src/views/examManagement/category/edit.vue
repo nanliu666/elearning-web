@@ -233,7 +233,7 @@ export default {
       let org = {}
       function deep(arr) {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].idStr === id) {
+          if (arr[i].id === id) {
             org = arr[i]
             return
           }

@@ -23,12 +23,16 @@
           <el-button
             type="primary"
             size="mini"
-            :disabled="!issueStatus"
+            :disabled="!$route.query.status"
             @click="handleConfig"
           >
             开办下一期
           </el-button>
-          <el-button size="mini" :disabled="!issueStatus" @click="isstopSchedule">
+          <el-button
+            size="mini"
+            :disabled="showTrainDetail.status == 3 || !$route.query.status"
+            @click="isstopSchedule"
+          >
             结办
           </el-button>
 
@@ -859,37 +863,35 @@ const TABLE_COLUMNS = [
   {
     label: "手机号码",
     prop: "phone",
-    minWidth: 180,
   },
   {
     label: "线下签到率",
     prop: "signPercent",
-    minWidth: 180,
+
     slot: true,
   },
   {
     label: "所属部门",
     prop: "deptName",
-    width: 200,
+
     slot: true,
   },
   {
     label: "在线学习进度(必修)",
     prop: "onlineProgress",
-    minWidth: 220,
+
     slot: true,
   },
   {
     label: "选修学习进度",
     prop: "electiveProgress",
     slot: true,
-    minWidth: 220,
   },
   // 1：已通过；2：未通过；3：未开始）
   {
     label: "作业提交率",
     prop: "job",
-    minWidth: 120,
+
     slot: true,
   },
   {
@@ -918,7 +920,6 @@ const TABLE_COLUMNS2 = [
   {
     label: "手机号码",
     prop: "phone",
-    minWidth: 120,
   },
 
   {
@@ -1359,6 +1360,7 @@ export default {
           message: "操作成功",
           type: "success",
         });
+        this.isGetTrainDetail();
       });
     },
     // 去列表页
@@ -1464,6 +1466,7 @@ export default {
       return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res;
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction);
+        this.$forceUpdate();
       });
     },
 
