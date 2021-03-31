@@ -2,7 +2,7 @@
   <div class="trainingArrange">
     <div class="box_title">
       <div class="title">
-        培训安排
+        培训项目安排
       </div>
       <div>
         <el-button

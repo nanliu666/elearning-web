@@ -170,14 +170,8 @@ export default {
     handleAddUser() {
       this.userPicking = true
     },
-    async handleSelect(users) {
-      const orgs = _.remove(users, { type: 'Org' })
-      if (orgs.length > 0) {
-        const orgUsers = await this.getOrgUsers(_.map(orgs, 'bizId').join(','))
-        this.$emit('update:user-list', _.concat(users, orgUsers))
-      } else {
-        this.$emit('update:user-list', users)
-      }
+    handleSelect(userList) {
+      this.$emit('update:user-list', userList)
     },
     // 拉取公司的直属员工
     async getOrgUsers(orgId) {
