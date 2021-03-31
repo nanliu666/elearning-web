@@ -144,16 +144,16 @@ export default {
     },
 
     onUploadComplete(table, item, file, url) {
-      const { fileCategory } = item;
-      const { size: fileSize, uid: id, name: fileName } = file.file;
+      const { fileCategory, id, bizId: jobId } = item;
+      const { size: fileSize, name: fileName } = file.file;
       const data = {
         courseId: table.courseId,
         fileCategory,
         fileName,
         filePath: url,
         fileSize,
-        jobId: table.id,
-        id: item.id || "",
+        jobId,
+        id,
       };
       const message = fileName ? "修改成功" : "上传成功";
       saveCourseLinkedStudentOrTeacher(data)

@@ -873,18 +873,19 @@ const TABLE_COLUMNS = [
   {
     label: "所属部门",
     prop: "deptName",
-
+    minWidth: 120,
     slot: true,
   },
   {
     label: "在线学习进度(必修)",
     prop: "onlineProgress",
-
+    minWidth: 120,
     slot: true,
   },
   {
     label: "选修学习进度",
     prop: "electiveProgress",
+    minWidth: 120,
     slot: true,
   },
   // 1：已通过；2：未通过；3：未开始）
@@ -1322,6 +1323,7 @@ export default {
           .then(() => {
             this.$message.success("操作成功");
             this.getRegisterData();
+            this.isStudentList();
           })
           .catch(() => {
             this.$message.error("操作失败");
