@@ -73,7 +73,7 @@ const BASE_COLUMNS = [
     prop: 'categoryName',
     itemType: 'input',
     placeholder: '请输入分类名称',
-    label: '',
+    label: '分类名称',
     span: 24,
     maxlength: 20,
     required: true
