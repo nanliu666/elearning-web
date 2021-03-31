@@ -175,7 +175,7 @@ export default {
         filePath: url,
         fileSize,
         jobId,
-        id
+        id: fileName ? id : ''
       }
       table.loading = true
       const message = fileName ? '修改成功' : '上传成功'
