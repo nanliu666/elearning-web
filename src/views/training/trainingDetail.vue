@@ -1385,7 +1385,7 @@ export default {
 
     //发放学员证书
     isgrantCertificate(row) {
-      grantCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(
+      grantCertificate({ stuIds: row.stuId, trainId: this.showTrainDetail.id }).then(
         () => {
           this.$message({
             message: "操作成功",
@@ -1399,7 +1399,7 @@ export default {
     },
     // 撤回学员证书
     isrevokeCertificate(row) {
-      revokeCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(
+      revokeCertificate({ stuIds: row.stuId, trainId: this.showTrainDetail.id }).then(
         () => {
           this.$message({
             message: "操作成功",
@@ -1621,7 +1621,7 @@ export default {
       this.page.currentPage = 1;
       this.page.size = 10;
       if (i) {
-        grantCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(
+        grantCertificate({ stuIds: idData, trainId: this.showTrainDetail.id }).then(
           () => {
             this.$message({
               message: "操作成功",
@@ -1632,7 +1632,7 @@ export default {
           }
         );
       } else {
-        revokeCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(
+        revokeCertificate({ stuIds: idData, trainId: this.showTrainDetail.id }).then(
           () => {
             this.$message({
               message: "操作成功",
