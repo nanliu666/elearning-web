@@ -780,6 +780,7 @@
           <el-table-column
             v-for="(item, index) in signinLevel"
             :key="index"
+            :fixed="item.prop === 'userName'"
             header-align="center"
             align="center"
             :prop="item.prop"
