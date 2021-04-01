@@ -4,7 +4,6 @@
       <div class="input-wrapper">
         <el-input
           v-model="filterForm.userName"
-          :disabled="tableLoading"
           clearable
           size="medium"
           placeholder="输入学员姓名搜索"
@@ -243,13 +242,13 @@ export default {
     },
   },
   watch: {
-    searchValWatcher(val) {
-      if (this.tableLoading || !val) return;
+    searchValWatcher: _.debounce(function () {
+      if (this.tableLoading) return;
       this.tableLoading = true;
       this.parentVm
         .queryStudyList(this.filterForm)
         .finally(() => (this.tableLoading = false));
-    },
+    }, 1000),
   },
   methods: {
     pagination({ page, limit }) {
