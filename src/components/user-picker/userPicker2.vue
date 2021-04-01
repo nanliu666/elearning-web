@@ -8,17 +8,9 @@
   >
     <div class="body">
       <div class="left-area">
-        <div class="area-header">
-          已选
-        </div>
-        <el-tabs
-          v-model="activeTab"
-          class="tab"
-        >
-          <el-tab-pane
-            label="内部组织"
-            name="tree"
-          >
+        <div class="area-header">已选</div>
+        <el-tabs v-model="activeTab" class="tab">
+          <el-tab-pane label="内部组织" name="tree">
             <el-input
               v-model="search"
               class="search"
@@ -39,10 +31,7 @@
               </el-tree>
             </el-scrollbar>
           </el-tab-pane>
-          <el-tab-pane
-            label="外部联系人"
-            name="checkbox"
-          >
+          <el-tab-pane label="外部联系人" name="checkbox">
             <el-scrollbar>
               <el-scrollbar class="scroll-bar">
                 <div class="checkbox-wrapper">
@@ -66,7 +55,7 @@
                       :value="outer.id"
                       @change="(value) => outerCheckItemChange(value, outer)"
                     >
-                      {{ outer.name + '(' + outer.phonenum + ')' }}
+                      {{ outer.name + "(" + outer.phonenum + ")" }}
                     </el-checkbox>
                   </el-checkbox-group>
                 </div>
@@ -76,19 +65,10 @@
         </el-tabs>
       </div>
       <div class="right-area">
-        <div class="area-header">
-          未选
-        </div>
-        <el-scrollbar
-          class="scroll-bar"
-          style="height: 504px"
-        >
+        <div class="area-header">未选</div>
+        <el-scrollbar class="scroll-bar" style="height: 504px">
           <ul class="select-list">
-            <li
-              v-for="item in selectList"
-              :key="item.id"
-              class="select-item"
-            >
+            <li v-for="item in selectList" :key="item.id" class="select-item">
               <i
                 v-if="item.type != 'User'"
                 class="icon-usercircle2 iconfont select-type-icon"
@@ -101,64 +81,47 @@
                 {{ getSelectedName(item) }}
               </div>
 
-              <i
-                class="select-del-btn el-icon-error"
-                @click="delSelect(item)"
-              ></i>
+              <i class="select-del-btn el-icon-error" @click="delSelect(item)"></i>
             </li>
           </ul>
         </el-scrollbar>
       </div>
     </div>
 
-    <div
-      slot="footer"
-      class="dialog-footer"
-    >
-      <el-button
-        size="medium"
-        @click="dialogVisible = false"
-      >
-        取 消
-      </el-button>
-      <el-button
-        type="primary"
-        size="medium"
-        @click="submit"
-      >
-        确 定
-      </el-button>
+    <div slot="footer" class="dialog-footer">
+      <el-button size="medium" @click="dialogVisible = false"> 取 消 </el-button>
+      <el-button type="primary" size="medium" @click="submit"> 确 定 </el-button>
     </div>
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getOuterUser } from '@/api/system/user'
-import { getUserList } from '@/api/examManage/schedule'
+import { getOrgUserChild, getOuterUser } from "@/api/system/user";
+import { getUserList } from "@/api/examManage/schedule";
 
 export default {
-  name: 'UserPicker2',
+  name: "UserPicker2",
   props: {
     initList: {
       type: Array,
       default() {
-        return []
-      }
+        return [];
+      },
     },
     visible: {
       type: Boolean,
-      default: false
+      default: false,
     },
     value: {
       type: Array,
       default() {
-        return []
-      }
-    }
+        return [];
+      },
+    },
   },
   data() {
     return {
-      search: '',
-      activeTab: 'tree',
+      search: "",
+      activeTab: "tree",
       innerData: [],
       outerData: [],
       selectList: [],
@@ -168,202 +131,206 @@ export default {
       treeLoading: false,
       checkboxLoading: false,
       treeProps: {
-        label: 'name',
-        children: 'children'
-      }
-    }
+        label: "name",
+        children: "children",
+      },
+    };
   },
   computed: {
     dialogVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(val) {
-        this.$emit('update:visible', val)
-      }
-    }
+        this.$emit("update:visible", val);
+      },
+    },
   },
   watch: {
     dialogVisible(val) {
-      if (!val) return
-      this.treeLoading = true
+      if (!val) return;
+      this.treeLoading = true;
       this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(this.value.map((item) => item.id))
-      })
-      this.selectList = JSON.parse(JSON.stringify(this.value))
+        this.$refs.tree.setCheckedKeys(this.value.map((item) => item.id));
+      });
+      this.selectList = JSON.parse(JSON.stringify(this.value));
 
-      this.checkedOuter = this.value.filter((item) => !item.department).map((item) => item.name)
+      this.checkedOuter = this.value
+        .filter((item) => !item.department)
+        .map((item) => item.name);
       this.getTreeData()
         .then((data) => {
-          this.innerData = data
+          this.innerData = data;
         })
         .finally(() => {
-          this.treeLoading = false
-        })
-      this.getOuterData()
+          this.treeLoading = false;
+        });
+      this.getOuterData();
     },
     search(search) {
-      const params = search ? { search } : undefined
+      const params = search ? { search } : undefined;
       this.getTreeData(params).then((data) => {
-        this.innerData = data
-      })
-    }
+        this.innerData = data;
+      });
+    },
   },
   methods: {
     submit() {
-      this.$emit('input', this.selectList)
-      this.dialogVisible = false
+      this.$emit("input", this.selectList);
+      this.dialogVisible = false;
     },
     getSelectedName(item) {
-      const { name, phonenum } = item
+      const { name, phonenum } = item;
       if (phonenum) {
-        return name + '(' + phonenum + ')'
+        return name + "(" + phonenum + ")";
       }
-      return name
+      return name;
     },
     delSelect(del) {
-      const list = this.selectList
-      const index = list.findIndex((item) => item.id === del.id)
-      list.splice(index, 1)
+      const list = this.selectList;
+      const index = list.findIndex((item) => item.id === del.id);
+      list.splice(index, 1);
       if (!del.department) {
-        this.checkedOuter.splice(this.checkedOuter.indexOf(del.name), 1)
+        this.checkedOuter.splice(this.checkedOuter.indexOf(del.name), 1);
         this.isIndeterminate =
-          this.checkedOuter.length > 0 && this.checkedOuter.length < this.outerData.length
-        return
+          this.checkedOuter.length > 0 &&
+          this.checkedOuter.length < this.outerData.length;
+        return;
       }
 
-      this.$refs.tree.setChecked(del.id, false)
+      this.$refs.tree.setChecked(del.id, false);
     },
     innerCheckChange(node, { checkedNodes }) {
-      const list = this.selectList
+      const list = this.selectList;
 
       if (!checkedNodes.includes(node)) {
         if (node.type) {
-          this.treeLoading = true
+          this.treeLoading = true;
           getUserList({ orgId: node.id })
             .then((res = []) => {
-              const data = this.normalizeData(res)
-              let spliceIdx
+              const data = this.normalizeData(res);
+              let spliceIdx;
               data.forEach((item) => {
-                spliceIdx = list.findIndex((s) => s.id === item.id)
-                if (spliceIdx > -1) list.splice(spliceIdx, 1)
-              })
+                spliceIdx = list.findIndex((s) => s.id === item.id);
+                if (spliceIdx > -1) list.splice(spliceIdx, 1);
+              });
             })
-            .finally(() => (this.treeLoading = false))
+            .finally(() => (this.treeLoading = false));
         } else {
-          const index = list.findIndex((item) => item.id === node.id)
+          const index = list.findIndex((item) => item.id === node.id);
           if (index > -1) {
-            list.splice(index, 1)
+            list.splice(index, 1);
           }
         }
       } else {
         if (node.type) {
-          this.treeLoading = true
+          this.treeLoading = true;
           getUserList({ orgId: node.id })
             .then((res = []) => {
-              const data = this.normalizeData(res)
+              const data = this.normalizeData(res);
               data.map((item) => {
                 if (!list.find((s) => s.id === item.id)) {
-                  list.push(item)
+                  list.push(item);
                 }
-              })
+              });
             })
-            .finally(() => (this.treeLoading = false))
+            .finally(() => (this.treeLoading = false));
         } else {
           if (!list.find((s) => s.id === node.id)) {
-            list.push(node)
+            list.push(node);
           }
         }
       }
 
       // 重新排序
       list.sort((a, b) => {
-        return +a.id - +b.id
-      })
+        return +a.id - +b.id;
+      });
     },
     handleCheckAllChange(val) {
-      const list = this.selectList
+      const list = this.selectList;
       if (val) {
-        this.checkedOuter = this.outerData.map((item) => item.name)
+        this.checkedOuter = this.outerData.map((item) => item.name);
 
         this.outerData.map((outer) => {
           if (!list.find((item) => item.id === outer.id)) {
-            list.push(outer)
+            list.push(outer);
           }
-        })
+        });
       } else {
-        this.selectList = list.filter((item) => item.type !== 'outer')
-        this.checkedOuter = []
+        this.selectList = list.filter((item) => item.type !== "outer");
+        this.checkedOuter = [];
       }
-      this.isIndeterminate = false
+      this.isIndeterminate = false;
     },
     outerCheckChange(value) {
-      let checkedCount = value.length
-      this.checkAll = checkedCount === this.outerData.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.outerData.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length;
     },
     outerCheckItemChange(value, item) {
       if (!value) {
         this.selectList.splice(
           this.selectList.findIndex((s) => s.id === item.id),
           1
-        )
-        return
+        );
+        return;
       }
       if (!this.selectList.find((s) => s.id === item.id)) {
-        this.selectList.push(item)
+        this.selectList.push(item);
       }
     },
-    getTreeData(params = { parentId: '0' }) {
+    getTreeData(params = { parentId: "0" }) {
       return new Promise((resolve) => {
         getOrgUserChild(params).then((res) => {
-          const { orgs = [], users = [] } = res
-          resolve(this.normalizeData(orgs.concat(users)))
-        })
-      })
+          const { orgs = [], users = [] } = res;
+          resolve(this.normalizeData(orgs.concat(users)));
+        });
+      });
     },
     loadTreeData(node, resolve) {
-      const parentId = node.data.id
+      const parentId = node.data.id;
       this.getTreeData({ parentId }).then((data) => {
-        resolve(data)
-      })
+        resolve(data);
+      });
     },
     normalizeData(data = []) {
       return data.map((item) => {
-        const { phoneNum: phonenum, name, orgName: department, userId, id, type } = item
+        const { phoneNum: phonenum, name, orgName: department, userId, id, type } = item;
         const newItem = {
           phonenum,
           name,
           department,
           id: id || userId,
-          type
-        }
-        return newItem
-      })
+          type,
+          userId,
+        };
+        return newItem;
+      });
     },
     getOuterData() {
-      this.checkboxLoading = true
+      this.checkboxLoading = true;
       getOuterUser()
         .then((res) => {
-          const { data = [] } = res
+          const { data = [] } = res;
           this.outerData = data.map((item) => {
-            const { phonenum, name, userId } = item
-            return { phonenum, name, userId, id: userId, type: 'outer' }
-          })
+            const { phonenum, name, userId } = item;
+            return { phonenum, name, userId, id: userId, type: "outer" };
+          });
 
-          const length = this.checkedOuter.length
+          const length = this.checkedOuter.length;
           if (length) {
             if (length < this.outerData.length) {
-              this.isIndeterminate = true
+              this.isIndeterminate = true;
             } else {
-              this.checkAll = true
+              this.checkAll = true;
             }
           }
         })
-        .finally(() => (this.checkboxLoading = false))
-    }
-  }
-}
+        .finally(() => (this.checkboxLoading = false));
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
