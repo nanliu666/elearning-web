@@ -302,6 +302,11 @@ export default {
         // 本地文件（是否下载+附件），资源文件（资源路径）
         let tmp = val === 0 ? this.localColumns : this.onlineColumns
         this.formColumns = [...tmp, this.introductionColumn]
+        if (val === 1) {
+          this.formData.attachments = []
+        } else {
+          this.formData.resUrl = ''
+        }
       }
     }
   },

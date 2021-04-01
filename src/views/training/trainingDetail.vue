@@ -629,12 +629,9 @@
               class="arrange_schedule_i"
             >
               <span>{{ item.todoTime }}</span>
-              <span>
-                <span v-if="item.type === 1">【面授课程】</span><span v-else>【活动】</span>
-                {{ item.courseName }}</span>
-              <span v-if="item.type === 2">
-                <span>主题</span>
-                {{ item.theme }}</span>
+
+              <span v-if="item.type === 1">【面授课程】 {{ item.courseName }}</span>
+              <span v-else>【活动】 {{ item.theme }}</span>
               <span>
                 <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
                 {{ item.lecturerName }}</span>
@@ -668,6 +665,7 @@
           </el-table-column>
           <el-table-column
             prop="courseName"
+            show-overflow-tooltip
             label="关联课程"
             width="180"
           >
@@ -787,7 +785,6 @@
             align="center"
             :prop="item.prop"
             :label="item.label"
-            min-width="210"
           >
             <template slot-scope="scope">
               {{ getSigninColumn(scope.row[item.prop], item.dynamic) }}
@@ -1857,7 +1854,7 @@ export default {
       border-top: 1px solid #ebeced;
       padding-top: 25px;
       .introduce_title_l {
-        padding-left: 25px;
+        // padding-left: 25px;
         font-family: PingFangSC-Medium;
         font-size: 18px;
         color: rgba(0, 11, 21, 0.85);
@@ -2099,23 +2096,30 @@ export default {
       }
       padding: 15px 55px;
       .arrange_schedule_i {
-        height: 55px;
-        line-height: 55px;
+        height: auto;
+        min-height: 55px;
+        margin: 25px 0;
         border-bottom: 1px solid #ccc;
         display: flex;
         span {
+          // margin-left: 10px;
+          padding: 0 15px;
+          p {
+            display: inline-block;
+            margin: 0;
+          }
           &:nth-child(1) {
-            padding-left: 20px;
+            // padding-left: 20px;
             width: 15%;
           }
           &:nth-child(2) {
-            width: 20%;
+            width: 30%;
           }
           &:nth-child(3) {
             width: 20%;
           }
           &:nth-child(4) {
-            width: 15%;
+            width: 20%;
           }
           &:nth-child(5) {
             width: 20%;
