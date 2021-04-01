@@ -4,7 +4,7 @@ let systemName = '泽学院管理后台' // 系统名称
 let backBaseUrl = '' // 后台管理地址
 let frontBaseUrl = '' // 用户前台地址
 let iconfontVersion = [
-  '1066523_6bvkeuqao36',
+  '2232073_jslvmfqvu2g',
   '1857563_sw5dkyhhh1o',
   '2178669_zbls3ovulic',
   '2232073_5nxhufhqcst'
