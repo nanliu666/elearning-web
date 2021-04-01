@@ -394,7 +394,7 @@ export default {
     async getPaperData() {
       _.assign(this.queryInfo, {
         userId: this.examineeAchievementDO.examineeId,
-        id: this.$route.query.id
+        id: this.examData.id
       })
       const paperData = await getExamineePaperDetailist(this.queryInfo)
       // 页面一进来就区分是评卷还是查看卷子

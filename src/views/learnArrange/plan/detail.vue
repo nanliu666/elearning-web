@@ -220,12 +220,13 @@ export default {
         callback: (action) => {
           if (action !== 'cancel') {
             updateStatus({ id: row.id, status: 3 }).then(() => {
+              this.data.stauts = 3
               this.$message({
                 type: 'success',
                 message: '结办成功!'
               })
+              this.queryStudyInfo()
             })
-            this.queryStudyInfo()
           }
         }
       })

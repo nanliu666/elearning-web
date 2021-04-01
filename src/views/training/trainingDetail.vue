@@ -566,10 +566,9 @@
 
             <div v-for="(item, i) in todo.data" :key="i" class="arrange_schedule_i">
               <span>{{ item.todoTime }}</span>
-              <span>
-                <span v-if="item.type === 1">【面授课程】</span
-                ><span v-else>【活动】</span> {{ item.courseName }}</span
-              >
+
+              <span v-if="item.type === 1">【面授课程】 {{ item.courseName }}</span>
+              <span v-else>【活动】 {{ item.theme }}</span>
               <span>
                 <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
                 {{ item.lecturerName }}</span
@@ -660,6 +659,7 @@
           <el-table-column
             v-for="(item, index) in signinLevel"
             :key="index"
+            :fixed="item.prop === 'userName'"
             header-align="center"
             align="center"
             :prop="item.prop"
@@ -873,18 +873,19 @@ const TABLE_COLUMNS = [
   {
     label: "所属部门",
     prop: "deptName",
-
+    minWidth: 120,
     slot: true,
   },
   {
     label: "在线学习进度(必修)",
     prop: "onlineProgress",
-
+    minWidth: 120,
     slot: true,
   },
   {
     label: "选修学习进度",
     prop: "electiveProgress",
+    minWidth: 120,
     slot: true,
   },
   // 1：已通过；2：未通过；3：未开始）
@@ -1233,10 +1234,11 @@ export default {
           if (key === "userId") return;
           if (key === "signInSituation") {
             value[key].forEach((obj) => {
-              const sKey = Object.keys(obj)[0];
+              const label = Object.values(obj)[1];
+              const prop = Object.keys(obj)[2];
               level.push({
-                prop: sKey,
-                label: sKey,
+                prop,
+                label,
                 dynamic: true,
               });
             });
@@ -1322,6 +1324,7 @@ export default {
           .then(() => {
             this.$message.success("操作成功");
             this.getRegisterData();
+            this.isStudentList();
           })
           .catch(() => {
             this.$message.error("操作失败");
@@ -1382,7 +1385,7 @@ export default {
 
     //发放学员证书
     isgrantCertificate(row) {
-      grantCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(
+      grantCertificate({ stuIds: row.stuId, trainId: this.showTrainDetail.id }).then(
         () => {
           this.$message({
             message: "操作成功",
@@ -1396,7 +1399,7 @@ export default {
     },
     // 撤回学员证书
     isrevokeCertificate(row) {
-      revokeCertificate({ stuIds: [row.stuId], trainId: this.showTrainDetail.id }).then(
+      revokeCertificate({ stuIds: row.stuId, trainId: this.showTrainDetail.id }).then(
         () => {
           this.$message({
             message: "操作成功",
@@ -1618,7 +1621,7 @@ export default {
       this.page.currentPage = 1;
       this.page.size = 10;
       if (i) {
-        grantCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(
+        grantCertificate({ stuIds: idData, trainId: this.showTrainDetail.id }).then(
           () => {
             this.$message({
               message: "操作成功",
@@ -1629,7 +1632,7 @@ export default {
           }
         );
       } else {
-        revokeCertificate({ stuIds: [idData], trainId: this.showTrainDetail.id }).then(
+        revokeCertificate({ stuIds: idData, trainId: this.showTrainDetail.id }).then(
           () => {
             this.$message({
               message: "操作成功",
@@ -1730,7 +1733,7 @@ export default {
       border-top: 1px solid #ebeced;
       padding-top: 25px;
       .introduce_title_l {
-        padding-left: 25px;
+        // padding-left: 25px;
         font-family: PingFangSC-Medium;
         font-size: 18px;
         color: rgba(0, 11, 21, 0.85);
@@ -1972,17 +1975,24 @@ export default {
       }
       padding: 15px 55px;
       .arrange_schedule_i {
-        height: 55px;
-        line-height: 55px;
+        height: auto;
+        min-height: 55px;
+        margin: 25px 0;
         border-bottom: 1px solid #ccc;
         display: flex;
         span {
+          // margin-left: 10px;
+          padding: 0 15px;
+          p {
+            display: inline-block;
+            margin: 0;
+          }
           &:nth-child(1) {
-            padding-left: 20px;
+            // padding-left: 20px;
             width: 15%;
           }
           &:nth-child(2) {
-            width: 35%;
+            width: 30%;
           }
           &:nth-child(3) {
             width: 20%;

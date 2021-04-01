@@ -1,9 +1,16 @@
 <template>
   <div class="trainingArrange">
     <div class="box_title">
-      <div class="title">培训安排</div>
+      <div class="title">
+        培训项目安排
+      </div>
       <div>
-        <el-button v-p="ADD_TRAIN" type="primary" size="medium" @click="goAdd">
+        <el-button
+          v-p="ADD_TRAIN"
+          type="primary"
+          size="medium"
+          @click="goAdd"
+        >
           &nbsp; 创建培训 &nbsp;
         </el-button>
       </div>
@@ -11,13 +18,22 @@
 
     <div class="box_content">
       <div class="content_nav">
-        <span :class="{ select: status === 0 }" @click="showSelect(0)">已发布</span>
-        <span :class="{ select: status === 1 }" @click="showSelect(1)">草稿</span>
+        <span
+          :class="{ select: status === 0 }"
+          @click="showSelect(0)"
+        >已发布</span>
+        <span
+          :class="{ select: status === 1 }"
+          @click="showSelect(1)"
+        >草稿</span>
       </div>
 
       <!-- 内容 -->
       <div class="draft_issue">
-        <div v-show="status === 0" class="issue_l">
+        <div
+          v-show="status === 0"
+          class="issue_l"
+        >
           <my-column
             :column-interface="columnInterface"
             @treeClick="treeClick"
@@ -173,7 +189,11 @@
         </el-dialog> -->
 
         <!-- 已发布 -->
-        <div v-if="!status" class="issue_r" :class="{ istrainingArrange: status === 1 }">
+        <div
+          v-if="!status"
+          class="issue_r"
+          :class="{ istrainingArrange: status === 1 }"
+        >
           <!-- 表格内容 -->
           <basic-container block>
             <common-table
@@ -219,9 +239,12 @@
                       class="text_refresh"
                       style="cursor: pointer"
                       @click="refreshTableData"
-                      >刷新</span
+                    >刷新</span>
+                    <el-popover
+                      placement="bottom"
+                      width="40"
+                      trigger="click"
                     >
-                    <el-popover placement="bottom" width="40" trigger="click">
                       <el-tooltip
                         slot="reference"
                         class="operations__btns--tooltip"
@@ -270,7 +293,10 @@
                 </el-button>
               </template>
               <!-- 培训名称 -->
-              <template slot="trainName" slot-scope="{ row }">
+              <template
+                slot="trainName"
+                slot-scope="{ row }"
+              >
                 <el-button
                   v-if="$p(VIEW_TRAIN)"
                   type="text"
@@ -284,38 +310,57 @@
               </template>
 
               <!-- 状态 -->
-              <template slot="status" slot-scope="{ row }">
+              <template
+                slot="status"
+                slot-scope="{ row }"
+              >
                 <span v-if="row.status === 3">已结束</span>
                 <span v-if="row.status === 1">未开始</span>
                 <span v-if="row.status === 2">进行中</span>
               </template>
-              <template slot="people" slot-scope="{ row }">
-                <span>{{ typeof row.people !== "number" ? "未限制" : row.people }}</span>
+              <template
+                slot="people"
+                slot-scope="{ row }"
+              >
+                <span>{{ typeof row.people !== 'number' ? '未限制' : row.people }}</span>
               </template>
               <!--培训时间-->
-              <template slot="trainBeginTime" slot-scope="{ row }">
+              <template
+                slot="trainBeginTime"
+                slot-scope="{ row }"
+              >
                 <span>{{ `${row.trainBeginTime}~${row.trainEndTime}` }}</span>
               </template>
               <!-- 培训方式 -->
-              <template slot="trainWay" slot-scope="{ row }">
+              <template
+                slot="trainWay"
+                slot-scope="{ row }"
+              >
                 <span v-if="row.trainWay === 1">在线</span>
                 <span v-if="row.trainWay === 2">面授</span>
                 <span v-if="row.trainWay === 3">混合</span>
               </template>
               <!-- 标签 -->
-              <template slot="trainTagList" slot-scope="{ row }">
+              <template
+                slot="trainTagList"
+                slot-scope="{ row }"
+              >
                 <span
                   v-for="(item, index) in row.trainTagList"
                   :key="index"
                   class="item_icon"
-                  >{{ item }}</span
-                >
+                >{{
+                  item
+                }}</span>
                 <div v-if="row.trainTagList"></div>
               </template>
 
               <!-- 操作 -->
               <!-- 已发布 -->
-              <template slot="handler" slot-scope="scope">
+              <template
+                slot="handler"
+                slot-scope="scope"
+              >
                 <div v-if="status === 0">
                   <el-button
                     v-p="NEXT_TRAIN"
@@ -370,7 +415,10 @@
           </basic-container>
         </div>
 
-        <draftComponents v-else style="width: 100%" />
+        <draftComponents
+          v-else
+          style="width: 100%"
+        />
       </div>
     </div>
   </div>
@@ -386,8 +434,8 @@ import {
   updateCatalogs,
   getScheduleList,
   delTrain,
-  stopSchedule,
-} from "@/api/training/training";
+  stopSchedule
+} from '@/api/training/training'
 import {
   ADD_TRAIN,
   ADD_GROUNP_TRAIN,
@@ -395,210 +443,210 @@ import {
   EDIT_TRAIN,
   END_TRAIN,
   NEXT_TRAIN,
-  VIEW_TRAIN,
-} from "@/const/privileges";
+  VIEW_TRAIN
+} from '@/const/privileges'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: "培训名称",
-    prop: "trainName",
-    width: "180",
+    label: '培训名称',
+    prop: 'trainName',
+    width: '180',
     slot: true,
-    fixed: "left",
+    fixed: 'left'
   },
   {
-    label: "编号",
+    label: '编号',
     minWidth: 200,
-    prop: "trainNo",
+    prop: 'trainNo'
   },
   {
-    label: "状态",
-    prop: "status",
+    label: '状态',
+    prop: 'status',
     minWidth: 80,
-    slot: true,
+    slot: true
   },
   {
-    label: "培训时间",
-    prop: "trainBeginTime",
+    label: '培训时间',
+    prop: 'trainBeginTime',
     minWidth: 180,
-    slot: true,
+    slot: true
   },
   {
-    label: "计划人数",
-    prop: "people",
+    label: '计划人数',
+    prop: 'people',
     minWidth: 80,
+    slot: true
+  },
+  {
+    label: '培训方式',
+    prop: 'trainWay',
     slot: true,
+    minWidth: 80
   },
   {
-    label: "培训方式",
-    prop: "trainWay",
-    slot: true,
-    minWidth: 80,
+    label: '主办单位',
+    prop: 'sponsor',
+    minWidth: 130
   },
   {
-    label: "主办单位",
-    prop: "sponsor",
-    minWidth: 130,
+    label: '承办单位',
+    prop: 'organizer',
+    minWidth: 130
   },
   {
-    label: "承办单位",
-    prop: "organizer",
-    minWidth: 130,
-  },
-  {
-    label: "评分",
-    prop: "composite",
-    minWidth: 130,
-  },
+    label: '评分',
+    prop: 'composite',
+    minWidth: 130
+  }
   // {
   //   label: '标签',
   //   prop: 'trainTagList',
   //   slot: true,
   //   minWidth: 200
   // }
-];
+]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200,
+    width: 200
   },
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
-  showIndexColumn: false,
+  showIndexColumn: false
   // rowKey: (d) => {
   //   Object.keys(d).forEach((key) => {
   //     d[key] = d[key] || '--'
   //   })
   // }
-};
-const TABLE_PAGE_CONFIG = {};
+}
+const TABLE_PAGE_CONFIG = {}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: "请输入培训名称搜索" },
-    data: "",
-    field: "trainName",
-    label: "",
-    type: "input",
-  },
-];
+    config: { placeholder: '请输入培训名称搜索' },
+    data: '',
+    field: 'trainName',
+    label: '',
+    type: 'input'
+  }
+]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    config: { placeholder: "请选择" },
-    data: "",
-    field: "status",
-    label: "状态",
-    type: "select",
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'status',
+    label: '状态',
+    type: 'select',
     options: [
-      { value: 3, label: "已办结" },
-      { value: 1, label: "未开始" },
-      { value: 2, label: "进行中" },
-      { value: "", label: "全部" },
-    ],
+      { value: 3, label: '已办结' },
+      { value: 1, label: '未开始' },
+      { value: 2, label: '进行中' },
+      { value: '', label: '全部' }
+    ]
   },
   {
-    type: "numInterval",
-    field: "peopleMin,peopleMax",
-    data: { min: "", max: "" },
-    label: "计划人数",
-    required: false,
+    type: 'numInterval',
+    field: 'peopleMin,peopleMax',
+    data: { min: '', max: '' },
+    label: '计划人数',
+    required: false
   },
   {
-    config: { placeholder: "请选择" },
-    data: "",
-    field: "trainWay",
-    label: "培训方式",
-    type: "select",
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'trainWay',
+    label: '培训方式',
+    type: 'select',
     options: [
-      { value: 2, label: "面授" },
-      { value: 3, label: "混合" },
-      { value: 1, label: "在线" },
-      { value: "", label: "全部" },
-    ],
+      { value: 2, label: '面授' },
+      { value: 3, label: '混合' },
+      { value: 1, label: '在线' },
+      { value: '', label: '全部' }
+    ]
   },
   {
-    config: { placeholder: "请选择" },
-    data: "",
-    field: "sponsor",
-    label: "主办单位",
-    type: "input",
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'sponsor',
+    label: '主办单位',
+    type: 'input'
   },
   {
-    config: { placeholder: "请选择" },
-    data: "",
-    field: "address",
-    label: "培训地点",
-    type: "input",
-  },
-];
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'address',
+    label: '培训地点',
+    type: 'input'
+  }
+]
 const SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS,
-};
-import { mapGetters } from "vuex";
+  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
+}
+import { mapGetters } from 'vuex'
 
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import("@/components/searchPopOver"),
+    SeachPopover: () => import('@/components/searchPopOver'),
     // 草稿
-    draftComponents: () => import("./draftComponents"),
-    MyColumn: () => import("./components/MyColumn"),
+    draftComponents: () => import('./draftComponents'),
+    MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop)),
+      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   data() {
     return {
-      searchParams: "",
+      searchParams: '',
       // 接口
       columnInterface: {
         listTeacherCategory: getCatalogs, //查询讲师分类列表
         addCatalog: addCatalog, //新增分组/分类
         deleteTeacherCatalog: delCatalogs, //删除分组/分类
         move: move, //移动
-        editTeacherCatalog: updateCatalogs, //编辑
+        editTeacherCatalog: updateCatalogs //编辑
       },
-      idSchedule: "",
-      compileNewly: "",
-      addId: "",
+      idSchedule: '',
+      compileNewly: '',
+      addId: '',
       // 新建分组&分类
-      inputGroupingSon: "",
-      inputGrouping: "",
+      inputGroupingSon: '',
+      inputGrouping: '',
       // nav
       status: 0,
       // tree
       dialogFormVisible: false,
       form: {
-        name: "",
-        region: "",
-        optionData: "",
+        name: '',
+        region: '',
+        optionData: ''
       },
       // tree
-      filterText: "",
+      filterText: '',
       // 侧栏数据
       data: [],
-      input: "",
+      input: '',
       isShowinput: false, //显示分组——输入框
       isEdit: false, //显示分类——输入框
-      isEditId: "", //显示分类——输入框id
-      btnshow: "false", //新增分类&移动
+      isEditId: '', //显示分类——输入框id
+      btnshow: 'false', //新增分类&移动
 
       defaultProps: {
-        children: "children",
-        label: "label",
+        children: 'children',
+        label: 'label'
       },
       // 表格
       query: {
-        name: "",
+        name: ''
       },
       page: {
         pageNo: 1,
         pageSize: 10,
-        total: 0,
+        total: 0
       },
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -607,8 +655,8 @@ export default {
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
       tableData: [],
-      tablePageConfig: TABLE_PAGE_CONFIG,
-    };
+      tablePageConfig: TABLE_PAGE_CONFIG
+    }
   },
   computed: {
     VIEW_TRAIN: () => VIEW_TRAIN,
@@ -618,184 +666,179 @@ export default {
     EDIT_TRAIN: () => EDIT_TRAIN,
     NEXT_TRAIN: () => NEXT_TRAIN,
     END_TRAIN: () => END_TRAIN,
-    ...mapGetters(["privileges"]),
+    ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p([
-          NEXT_TRAIN,
-          END_TRAIN,
-          EDIT_TRAIN,
-          DELETE_TRAIN,
-        ]);
+        this.tableConfig.showHandler = this.$p([NEXT_TRAIN, END_TRAIN, EDIT_TRAIN, DELETE_TRAIN])
       },
-      deep: true,
+      deep: true
     },
     filterText(val) {
-      this.$refs.tree.filter(val);
+      this.$refs.tree.filter(val)
     },
     status() {
       if (this.status) {
         // 草稿
-        SEARCH_POPOVER_CONFIG.popoverOptions = [];
-        TABLE_CONFIG.handlerColumn.width = 120;
+        SEARCH_POPOVER_CONFIG.popoverOptions = []
+        TABLE_CONFIG.handlerColumn.width = 120
       } else {
         // 发布
-        SEARCH_POPOVER_CONFIG.popoverOptions = SEARCH_POPOVER_POPOVER_OPTIONS;
-        TABLE_CONFIG.handlerColumn.width = 200;
+        SEARCH_POPOVER_CONFIG.popoverOptions = SEARCH_POPOVER_POPOVER_OPTIONS
+        TABLE_CONFIG.handlerColumn.width = 200
       }
-    },
+    }
   },
   created() {
-    this.refreshTableData();
-    this.isgetCatalogs();
+    this.refreshTableData()
+    this.isgetCatalogs()
   },
   activated() {
-    this.refreshTableData();
-    this.isgetCatalogs();
+    this.refreshTableData()
+    this.isgetCatalogs()
   },
   methods: {
     treeClick(val) {
       (this.page.pageNo = 1),
         (this.page.pageSize = 10),
         (this.page.total = 0),
-        (this.idSchedule = val);
-      this.isgetScheduleList();
+        (this.idSchedule = val)
+      this.isgetScheduleList()
     },
     // 去开办下一期
     handleConfig(id) {
-      this.$router.push({ path: "/training/edit", query: { id: id, type: "next" } });
+      this.$router.push({ path: '/training/edit', query: { id: id, type: 'next' } })
     },
     // 去创建培训
     toCreateTraining() {},
     goAdd() {
-      this.$router.push({ path: "/training/edit" });
+      this.$router.push({ path: '/training/edit' })
     },
     // 去培训详情
     toTrainingDetail(row) {
       this.$router.push({
-        path: "/training/trainingDetail?id=" + row.id + "&status=" + row.status,
-      });
+        path: '/training/trainingDetail?id=' + row.id + '&status=' + row.status
+      })
     },
     // 草稿删除
     isDraftDel(scope) {
-      let params = { ids: scope.row.id };
+      let params = { ids: scope.row.id }
       delTrain(params).then(() => {
         this.$message({
-          type: "success",
-          message: "删除成功!",
-        });
-        this.isgetScheduleList();
-      });
+          type: 'success',
+          message: '删除成功!'
+        })
+        this.isgetScheduleList()
+      })
     },
     isstopSchedule(id) {
       stopSchedule(id).then(() => {
-        this.isgetScheduleList();
-      });
+        this.isgetScheduleList()
+      })
     },
     // 查询培训安排
     isgetScheduleList(param) {
       let params = {
-        categoryId: "", //分类id
-        type: "", //0.已发布、1.草稿
-      };
-      params.type = this.status;
-      params.categoryId = this.idSchedule;
-      params = { ...params, ...this.page, ...param, ...this.searchParams };
+        categoryId: '', //分类id
+        type: '' //0.已发布、1.草稿
+      }
+      params.type = this.status
+      params.categoryId = this.idSchedule
+      params = { ...params, ...this.page, ...param, ...this.searchParams }
       getScheduleList(params).then((res) => {
         // console.log(res);
         this.tableData = res.data.map((item) => {
           if (!item.organizer) {
-            item.organizer = "--";
+            item.organizer = '--'
           }
           if (!item.composite) {
-            item.composite = "--";
+            item.composite = '--'
           }
-          return item;
-        });
-        this.page.total = res.totalNum;
-        this.$forceUpdate();
-      });
+          return item
+        })
+        this.page.total = res.totalNum
+        this.$forceUpdate()
+      })
     },
 
     // 编辑分组分类
     isupdateCatalogs(params) {
       updateCatalogs(params).then(() => {
         this.$message({
-          message: "操作成功",
-          type: "success",
-        });
-        this.isgetCatalogs();
-      });
+          message: '操作成功',
+          type: 'success'
+        })
+        this.isgetCatalogs()
+      })
     },
 
     // 删除分组分类
     isdelCatalogs(params) {
       delCatalogs(params).then(() => {
         this.$message({
-          message: "操作成功",
-          type: "success",
-        });
-        this.isgetCatalogs();
-      });
+          message: '操作成功',
+          type: 'success'
+        })
+        this.isgetCatalogs()
+      })
     },
 
     // 移动
     ismove() {
-      this.dialogFormVisible = false;
-      this.form;
+      this.dialogFormVisible = false
+      this.form
       let params = {
-        id: "", //讲师所属分类ID
-        parentId: "", //讲师所属分组ID
-      };
-      params.id = this.form.optionData.id;
-      params.parentId = this.form.region;
+        id: '', //讲师所属分类ID
+        parentId: '' //讲师所属分组ID
+      }
+      params.id = this.form.optionData.id
+      params.parentId = this.form.region
       move(params).then(() => {
         this.$message({
-          message: "操作成功",
-          type: "success",
-        });
-        this.isgetCatalogs();
-      });
+          message: '操作成功',
+          type: 'success'
+        })
+        this.isgetCatalogs()
+      })
     },
 
     // 拿左侧列表数据
     isgetCatalogs() {
       getCatalogs().then((res) => {
-        let datar = [];
+        let datar = []
         for (let i = 0; i < res.length; i++) {
           let d = {
             id: 1,
-            label: "一级 1",
+            label: '一级 1',
             btnshow: 1,
-            children: [],
-          };
-          d.id = res[i].id;
-          d.label = res[i].name;
-          d.btnshow = 1;
-          d.children = [];
-          datar.push(d);
+            children: []
+          }
+          d.id = res[i].id
+          d.label = res[i].name
+          d.btnshow = 1
+          d.children = []
+          datar.push(d)
 
           for (let f = 0; f < res[i].list.length; f++) {
             let c = {
               id: 1,
-              label: "一级 1",
+              label: '一级 1',
               btnshow: 1,
-              parentId: "",
-            };
-            c.id = res[i].list[f].id;
-            c.label = res[i].list[f].name;
-            c.btnshow = 0;
-            c.parentId = res[i].list[f].parentId;
-            datar[i].children.push(c);
+              parentId: ''
+            }
+            c.id = res[i].list[f].id
+            c.label = res[i].list[f].name
+            c.btnshow = 0
+            c.parentId = res[i].list[f].parentId
+            datar[i].children.push(c)
           }
         }
-        this.data = datar;
+        this.data = datar
         // this.idSchedule = datar[0].children[0].id || ''
-        this.isgetScheduleList();
-      });
+        this.isgetScheduleList()
+      })
     },
 
     // 新建&编辑分类
@@ -803,15 +846,15 @@ export default {
       if (this.compileNewly) {
         let params = {
           id: this.addId,
-          name: this.inputGroupingSon,
-        };
-        this.isupdateCatalogs(params);
-        this.isEdit = false;
+          name: this.inputGroupingSon
+        }
+        this.isupdateCatalogs(params)
+        this.isEdit = false
       } else {
-        this.isAddCatalog(this.addId, this.inputGroupingSon);
-        this.isEdit = false;
-        this.inputGroupingSon = "";
-        this.isgetCatalogs();
+        this.isAddCatalog(this.addId, this.inputGroupingSon)
+        this.isEdit = false
+        this.inputGroupingSon = ''
+        this.isgetCatalogs()
       }
     },
 
@@ -820,15 +863,15 @@ export default {
       if (this.compileNewly) {
         let params = {
           id: this.addId,
-          name: this.inputGrouping,
-        };
-        this.isupdateCatalogs(params);
-        this.isShowinput = false;
+          name: this.inputGrouping
+        }
+        this.isupdateCatalogs(params)
+        this.isShowinput = false
       } else {
-        this.isAddCatalog("", this.inputGrouping);
-        this.isShowinput = false;
-        this.inputGrouping = "";
-        this.isgetCatalogs();
+        this.isAddCatalog('', this.inputGrouping)
+        this.isShowinput = false
+        this.inputGrouping = ''
+        this.isgetCatalogs()
       }
     },
 
@@ -836,207 +879,207 @@ export default {
     isAddCatalog(id, name) {
       let params = {
         id,
-        name,
-      };
+        name
+      }
       addCatalog(params).then(() => {
         this.$message({
-          message: "操作成功",
-          type: "success",
-        });
-      });
+          message: '操作成功',
+          type: 'success'
+        })
+      })
     },
 
     //   tree节点点击
     treeClickNode(data) {
       if (data.btnshow) {
-        this.idSchedule = data.children[0] ? data.children[0].id : data.id;
+        this.idSchedule = data.children[0] ? data.children[0].id : data.id
       } else {
-        this.idSchedule = data.id;
+        this.idSchedule = data.id
       }
-      this.isgetScheduleList();
+      this.isgetScheduleList()
     },
     // 底部btn
     adddata() {
-      this.isShowinput = true;
+      this.isShowinput = true
     },
     handleCommandSide($event, data) {
       // window.console.log($event, data)
-      this.addId = data.id;
+      this.addId = data.id
       //   编辑
-      if ($event === "edit") {
-        this.isEdit = true;
-        this.isEditId = data.id;
-        this.compileNewly = 1;
+      if ($event === 'edit') {
+        this.isEdit = true
+        this.isEditId = data.id
+        this.compileNewly = 1
       }
       //   新增
-      if ($event === "add") {
-        this.compileNewly = 0;
-        let i = this.data.indexOf(data);
-        let idNum = Math.floor(Math.random() * 10000);
+      if ($event === 'add') {
+        this.compileNewly = 0
+        let i = this.data.indexOf(data)
+        let idNum = Math.floor(Math.random() * 10000)
         this.data[i].children.push({
-          label: "",
+          label: '',
           btnshow: 0,
-          id: idNum,
-        });
-        this.isEdit = true;
-        this.isEditId = idNum;
+          id: idNum
+        })
+        this.isEdit = true
+        this.isEditId = idNum
       }
       //移动
-      if ($event === "move") {
-        this.dialogFormVisible = true;
-        this.form.name = data.label;
-        this.form.optionData = data;
+      if ($event === 'move') {
+        this.dialogFormVisible = true
+        this.form.name = data.label
+        this.form.optionData = data
       }
       // 删除
-      if ($event === "del") {
-        this.$confirm("此操作将删除, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+      if ($event === 'del') {
+        this.$confirm('此操作将删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
           .then(() => {
             // console.log(data);
             if (!data.children) {
               let params = {
-                classifyId: "", //讲师所属分类ID
-                id: "", //讲师所属分组ID
-              };
-              if (data.btnshow) {
-                params.id = data.id;
-              } else {
-                params.classifyId = data.id;
+                classifyId: '', //讲师所属分类ID
+                id: '' //讲师所属分组ID
               }
-              this.isdelCatalogs(params);
+              if (data.btnshow) {
+                params.id = data.id
+              } else {
+                params.classifyId = data.id
+              }
+              this.isdelCatalogs(params)
             } else {
-              this.$message.error("你选中的分类下存在数据，请先调整后再删除");
+              this.$message.error('你选中的分类下存在数据，请先调整后再删除')
             }
           })
           .catch(() => {
             this.$message({
-              type: "info",
-              message: "已取消删除",
-            });
-          });
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
       }
     },
 
     // 编辑&删除&移动
     handleCommand(e, row) {
-      if (e === "edit") {
+      if (e === 'edit') {
         // 编辑
-        this.$router.push({ path: "/training/edit", query: { id: row.id } });
+        this.$router.push({ path: '/training/edit', query: { id: row.id } })
       }
-      if (e === "del") {
+      if (e === 'del') {
         // 删除
 
-        this.$confirm("此操作将删除, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+        this.$confirm('此操作将删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
           .then(() => {
-            let params = { ids: row.id };
+            let params = { ids: row.id }
             delTrain(params).then(() => {
               this.$message({
-                type: "success",
-                message: "删除成功!",
-              });
-              this.isgetCatalogs();
-            });
+                type: 'success',
+                message: '删除成功!'
+              })
+              this.isgetCatalogs()
+            })
           })
           .catch(() => {
             this.$message({
-              type: "info",
-              message: "已取消删除",
-            });
-          });
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
       }
-      if (e === "move") {
+      if (e === 'move') {
         // 移动
       }
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
-      this.page.pageNo = param;
-      this.isgetScheduleList();
+      this.page.pageNo = param
+      this.isgetScheduleList()
     },
     handlePageSizeChange(param) {
-      this.page.pageSize = param;
-      this.isgetScheduleList();
+      this.page.pageSize = param
+      this.isgetScheduleList()
     },
 
     handleSearch(searchParams) {
-      let { peopleMin, peopleMax } = searchParams;
+      let { peopleMin, peopleMax } = searchParams
       if (peopleMin && peopleMax) {
-        if (peopleMin > peopleMax) return;
+        if (peopleMin > peopleMax) return
       }
-      this.page.pageNo = 1;
-      this.searchParams = searchParams;
-      this.isgetScheduleList();
+      this.page.pageNo = 1
+      this.searchParams = searchParams
+      this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
-      if (!selection.length) return;
+      if (!selection.length) return
       if (selection.some((item) => item.status == 2)) {
         this.$confirm(
-          "你所选择的数据包含正在进行的培训，不能进行删除操作，是否忽略继续删除其它培训？",
-          "提示",
+          '你所选择的数据包含正在进行的培训，不能进行删除操作，是否忽略继续删除其它培训？',
+          '提示',
           {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning",
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
           }
         )
           .then(() => {
-            this.handleRemoveItems(selection.filter((item) => item.status != 2));
+            this.handleRemoveItems(selection.filter((item) => item.status != 2))
           })
-          .catch((e) => console.log(e));
-        return;
+          .catch((e) => console.log(e))
+        return
       }
-      this.$confirm("此操作将删除, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('此操作将删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
-          let params = { ids: "" };
+          let params = { ids: '' }
           selection.forEach((item) => {
-            params.ids += item.id + ",";
-          });
+            params.ids += item.id + ','
+          })
           delTrain(params).then(() => {
             this.$message({
-              type: "success",
-              message: "删除成功!",
-            });
-            this.isgetCatalogs();
-            this.isgetScheduleList();
-            this.$refs.table.clearSelection();
-          });
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.isgetCatalogs()
+            this.isgetScheduleList()
+            this.$refs.table.clearSelection()
+          })
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "已取消删除",
-          });
-        });
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
 
     // 刷新列表数据
     refreshTableData() {
-      this.isgetScheduleList();
+      this.isgetScheduleList()
     },
 
     // 已发布&草稿nav
     showSelect(index) {
-      this.status = index;
-      this.isgetScheduleList();
+      this.status = index
+      this.isgetScheduleList()
     },
     // tree
     filterNode(value, data) {
-      if (!value) return true;
-      return data.label.indexOf(value) !== -1;
-    },
-  },
-};
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
+    }
+  }
+}
 </script>
 
 <style lang="sass" scoped>

@@ -40,7 +40,7 @@
       >
         <template slot-scope="scope">
           <div>
-            {{ scope.row.todoType == 'course' ? scope.row.todoName : scope.row.theme }}
+            {{ scope.row.todoName }}
           </div>
         </template>
       </el-table-column>
