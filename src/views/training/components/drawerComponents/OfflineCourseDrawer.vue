@@ -316,13 +316,15 @@ export default {
      * 手动拼接出来授课日期+授课时间的数组
      */
     validateTodoDate(rule, value, callback) {
+      const dateTime = _.isString(this.model.todoDate)
+        ? this.model.todoDate
+        : moment(this.model.todoDate).format('YYYY-MM-DD')
+      const startTime = `${dateTime} ${this.model.todoTimeParams[0]} `
+      const endTime = `${dateTime} ${this.model.todoTimeParams[1]} `
       Validate.validateLegalTime(
         callback,
         this.trainTimeInVuex,
-        [
-          `${this.model.todoDate} ${this.model.todoTimeParams[0]}`,
-          `${this.model.todoDate} ${this.model.todoTimeParams[1]}`
-        ],
+        [startTime, endTime],
         this.model.type === 1 ? '授课日期' : '活动日期'
       )
     },
