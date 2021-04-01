@@ -90,6 +90,9 @@
                 <el-button
                   type="text"
                   size="small"
+                  :disabled="
+                    scope.row.fileCategory === 'teacher' && !table[scope.$index - 1].fileName
+                  "
                 >
                   {{
                     scope.row.fileName

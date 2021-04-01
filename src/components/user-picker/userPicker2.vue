@@ -336,7 +336,8 @@ export default {
           name,
           department,
           id: id || userId,
-          type
+          type,
+          userId
         }
         return newItem
       })
