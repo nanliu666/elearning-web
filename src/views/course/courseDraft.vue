@@ -609,6 +609,7 @@ export default {
 
   data() {
     return {
+      throttle: false,
       formData: {
         catalogId: ''
       },
@@ -1000,6 +1001,9 @@ export default {
       //   this.page.pageNo = 1
       //   this.page.pageSize = 10
       // }
+      this.tableData = []
+      if (this.throttle) return
+      this.throttle = true
       let params = {
         currentPage: '',
         size: '',
@@ -1015,6 +1019,7 @@ export default {
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
+        this.throttle = false
       })
     },
     // 导航
