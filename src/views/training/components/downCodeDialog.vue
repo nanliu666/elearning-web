@@ -37,12 +37,10 @@
       <el-table-column
         align="center"
         label="课程名称"
+        width="210"
+        show-overflow-tooltip
+        prop="todoName"
       >
-        <template slot-scope="scope">
-          <div>
-            {{ scope.row.todoName }}
-          </div>
-        </template>
       </el-table-column>
       <el-table-column
         prop="todoType"
@@ -66,6 +64,8 @@
         prop="todoTime"
         align="center"
         label="授课时间"
+        width="320"
+        show-overflow-tooltip
       >
       </el-table-column>
       <el-table-column
