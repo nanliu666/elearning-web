@@ -393,7 +393,7 @@ export default {
   }
   .active__title {
     cursor: pointer;
-    color: #606266;
+    color: #53b2fd;
   }
 }
 .wrapper {
