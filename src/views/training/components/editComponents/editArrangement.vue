@@ -408,13 +408,12 @@ export default {
     },
     checkOverlapTime(data) {
       let isOverlapping = false
-      // 同一天使用的相同教室
-      const sameClassrommAndDate = _.find(this.schedule.data, {
-        classroomId: data.classroomId,
+      // 禁止同一天存在时间段重叠情况（检验教室使用情况、时间使用情况）
+      const sameDate = _.find(this.schedule.data, {
         todoDate: data.todoDate
       })
-      if (sameClassrommAndDate) {
-        const time1 = sameClassrommAndDate.todoTimeParams
+      if (sameDate) {
+        const time1 = sameDate.todoTimeParams
         const time2 = data.todoTimeParams
         const time1List = [
           moment(`${data.todoDate} ${time1[0]}`),
@@ -429,7 +428,7 @@ export default {
           moment(time1List[0]).isSameOrBefore(moment(time2List[1], 'minute')) &&
           moment(time1List[1]).isSameOrAfter(moment(time2List[0], 'minute'))
         ) {
-          this.$message.error('您所选的教室存在重叠时段，请重新选择！')
+          this.$message.error('您所选的时段与现存的时段存在重叠时段，请重新选择！')
           isOverlapping = true
         }
       }
