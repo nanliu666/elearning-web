@@ -42,6 +42,7 @@
         <basic-container block>
           <common-table
             ref="table"
+            v-loading="loading"
             :columns="columnsVisible | columnsFilter"
             :config="tableConfig"
             :data="tableData"
@@ -609,6 +610,8 @@ export default {
 
   data() {
     return {
+      throttle: false, // 节流阀
+      loading: false,
       formData: {
         catalogId: ''
       },
@@ -1000,12 +1003,16 @@ export default {
       //   this.page.pageNo = 1
       //   this.page.pageSize = 10
       // }
+      this.tableData = []
+      this.page.total = 0
+      if (this.throttle) return
+      this.throttle = true
+      this.loading = true
       let params = {
         currentPage: '',
         size: '',
         status: ''
       }
-
       params = { ...this.page, ...this.searchParams }
       params.status = this.status
 
@@ -1015,6 +1022,8 @@ export default {
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
+        this.throttle = false
+        this.loading = false
       })
     },
     // 导航

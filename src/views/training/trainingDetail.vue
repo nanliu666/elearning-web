@@ -664,7 +664,7 @@
             align="center"
             :prop="item.prop"
             :label="item.label"
-            :width="
+            :min-width="
               item.prop === 'orgName' ? '160' : item.prop === 'phonenum' ? '120' : '100'
             "
           >
@@ -1237,10 +1237,9 @@ export default {
           if (key === "userId") return;
           if (key === "signInSituation") {
             value[key].forEach((obj) => {
-              const label = Object.values(obj)[1];
-              const prop = Object.keys(obj)[2];
+              const label = obj["todoTime"];
               level.push({
-                prop,
+                prop: label,
                 label,
                 dynamic: true,
               });
@@ -1255,7 +1254,8 @@ export default {
         this.signinLevel = level;
         this.signinData = data.map((item) => {
           item.signInSituation.forEach((sign) => {
-            item = Object.assign(item, sign);
+            const { todoTime, signStatus } = sign;
+            item[todoTime] = signStatus;
           });
           delete item.signInSituation;
           return item;

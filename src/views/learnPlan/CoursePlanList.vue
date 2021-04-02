@@ -116,15 +116,6 @@
             >
               删除
             </el-button>
-            <el-button
-              v-p="VIEW_REQUIRED"
-              type="text"
-              size="medium"
-              :disabled="[1].includes(row.status)"
-              @click="jumpUserList(row)"
-            >
-              查看完成率
-            </el-button>
           </template>
         </common-table>
       </div>
@@ -219,18 +210,23 @@ const TABLE_COLUMNS = [
     slot: true,
     fixed: true,
     minWidth: 180,
+    // headerAlign: "center",
   },
   {
     label: "编号",
     prop: "coursePlanNo",
     slot: false,
     minWidth: 180,
+    headerAlign: "center",
+    align: "center",
   },
   {
     label: "主办单位",
     prop: "sponsor",
     slot: false,
-    minWidth: 180,
+    minWidth: 120,
+    headerAlign: "center",
+    align: "center",
   },
   // {
   //   label: '分类',
@@ -248,6 +244,8 @@ const TABLE_COLUMNS = [
     formatter: (row) => ({ 1: "未开始", 2: "进行中", 3: "已结束" }[row.status] || "-"),
     prop: "status",
     minWidth: 100,
+    headerAlign: "center",
+    align: "center",
   },
   {
     label: "课程时间",
@@ -257,6 +255,8 @@ const TABLE_COLUMNS = [
       else return "-";
     },
     minWidth: 300,
+    headerAlign: "center",
+    align: "center",
   },
 ];
 const TABLE_CONFIG = {
@@ -265,7 +265,7 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   rowKey: "id",
   showHandler: true,
-  handlerColumn: { label: "操作", minWidth: 220, fixed: "right" },
+  handlerColumn: { label: "操作", minWidth: 170, fixed: "right" },
 };
 
 // 搜索配置
