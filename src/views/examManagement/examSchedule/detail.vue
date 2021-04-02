@@ -148,7 +148,7 @@
               考场环境：
             </div>
             <div class="li-content">
-              <div class="content">
+              <!-- <div class="content">
                 <span>是否启用IP限制(需设定考生合法IP范围)：</span>
                 <span>{{ examDetail.isLimitIp ? '是' : '否' }}</span>
               </div>
@@ -159,7 +159,7 @@
               <div class="content">
                 <span>交卷即时是否生成答案统计数据(建议大规模考试时不启用)：</span>
                 <span>{{ examDetail.createAnswers ? '是' : '否' }}</span>
-              </div>
+              </div> -->
               <div class="content">
                 <span>是否允许迟到分钟后禁止参加考试：</span>
                 <span>{{
@@ -184,10 +184,10 @@
                     : '否'
                 }}</span>
               </div> -->
-              <div class="content">
+              <!-- <div class="content">
                 <span>是否自动保存答案到服务器：</span>
                 <span>{{ examDetail.isHold ? '是' : '否' }}</span>
-              </div>
+              </div> -->
             </div>
           </li>
           <li class="extend-li">
