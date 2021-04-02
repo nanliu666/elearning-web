@@ -47,11 +47,10 @@ const insertConfig = {
   prop: 'modifyLimit'
 }
 const switchConfig = [
-  {
-    label: '允许评卷人修改考生答案',
-    prop: 'modifyAnswer'
-  },
-
+  // {
+  //   label: '允许评卷人修改考生答案',
+  //   prop: 'modifyAnswer'
+  // },
   {
     label: '评卷限定最高得分',
     prop: 'scopeLimit',
