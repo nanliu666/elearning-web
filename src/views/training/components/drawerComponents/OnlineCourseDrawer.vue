@@ -122,12 +122,15 @@ export default {
         if (val) {
           if (!_.isEmpty(this.course)) {
             this.model = _.cloneDeep(this.course)
-            this.courseDefault = [
-              {
-                courseName: _.get(this.model, 'courseName', null),
-                courseId: _.get(this.model, 'courseId', null)
-              }
-            ]
+            const courseName = _.get(this.model, 'courseName', null)
+            if (courseName) {
+              this.courseDefault = [
+                {
+                  courseName: courseName,
+                  courseId: _.get(this.model, 'courseId', null)
+                }
+              ]
+            }
             this.title = '编辑在线课程'
             this.editType = 'edit'
           } else {
