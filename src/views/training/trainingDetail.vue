@@ -1,9 +1,6 @@
 <template>
   <div class="trainingDetail">
-    <div
-      class="trainingDetail_title"
-      @click="toTrainingArrange"
-    >
+    <div class="trainingDetail_title" @click="toTrainingArrange">
       <i class="el-icon-arrow-left"></i> 培训详情
     </div>
 
@@ -11,10 +8,9 @@
       <div class="title_box_headline">
         <div class="title_box_headline_l">
           {{ showTrainDetail.trainName }}
-          <span
-            v-if="!$route.query.status"
-            style="background-color: #fffce6; color: #fcba00"
-          >草稿</span>
+          <span v-if="!$route.query.status" style="background-color: #fffce6; color: #fcba00"
+            >草稿</span
+          >
           <span v-else>
             <span v-if="showTrainDetail.status === 3">已结束</span>
             <span v-if="showTrainDetail.status === 1">未开始</span>
@@ -38,10 +34,7 @@
             结办
           </el-button>
 
-          <el-dropdown
-            class="isel-dropdown"
-            @command="handleCommand($event)"
-          >
+          <el-dropdown class="isel-dropdown" @command="handleCommand($event)">
             <span class="el-dropdown-link">
               更多<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
@@ -200,24 +193,15 @@
           培训介绍
         </div>
         <div class="introduce_title_r">
-          <span
-            v-show="isShowIntroduce"
-            style="cursor: pointer"
-            @click="isShowIntroduce = false"
+          <span v-show="isShowIntroduce" style="cursor: pointer" @click="isShowIntroduce = false">
+            <i class="el-icon-arrow-up"></i>&nbsp;收起</span
           >
-            <i class="el-icon-arrow-up"></i>&nbsp;收起</span>
-          <span
-            v-show="!isShowIntroduce"
-            style="cursor: pointer"
-            @click="isShowIntroduce = true"
+          <span v-show="!isShowIntroduce" style="cursor: pointer" @click="isShowIntroduce = true">
+            <i class="el-icon-arrow-down"></i>&nbsp;展开</span
           >
-            <i class="el-icon-arrow-down"></i>&nbsp;展开</span>
         </div>
       </div>
-      <div
-        v-show="isShowIntroduce"
-        class="introduce_content"
-      >
+      <div v-show="isShowIntroduce" class="introduce_content">
         <div class="introduce_content_t">
           <div v-html="showTrainDetail.introduction"></div>
         </div>
@@ -231,35 +215,31 @@
           :class="{ select: status === 1 }"
           style="cursor: pointer"
           @click="status = 1"
-        >报名情况</span>
-        <span
-          :class="{ select: status === 2 }"
-          style="cursor: pointer"
-          @click="status = 2"
-        >学习情况</span>
+          >报名情况</span
+        >
+        <span :class="{ select: status === 2 }" style="cursor: pointer" @click="status = 2"
+          >学习情况</span
+        >
         <span
           v-if="showTrainDetail.signIn && $route.query.status"
           :class="{ select: status === 3 }"
           style="cursor: pointer"
           @click="status = 3"
-        >签到情况</span>
-        <span
-          :class="{ select: status === 4 }"
-          style="cursor: pointer"
-          @click="status = 4"
-        >培训安排</span>
+          >签到情况</span
+        >
+        <span :class="{ select: status === 4 }" style="cursor: pointer" @click="status = 4"
+          >培训安排</span
+        >
         <span
           v-if="$route.query.status"
           :class="{ select: status === 5 }"
           style="cursor: pointer"
           @click="status = 5"
-        >评估结果</span>
+          >评估结果</span
+        >
       </div>
 
-      <div
-        v-show="status === 1 && $route.query.status"
-        class="register-container"
-      >
+      <div v-show="status === 1 && $route.query.status" class="register-container">
         <div class="register-data">
           <div v-if="multipleSelection.length">
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
@@ -273,18 +253,10 @@
                 background-color: #dcdfe6;
               "
             ></span>
-            <el-button
-              type="text"
-              style="padding: 0"
-              @click="setMultipleRegister('agree')"
-            >
+            <el-button type="text" style="padding: 0" @click="setMultipleRegister('agree')">
               批量同意
             </el-button>
-            <el-button
-              type="text"
-              style="padding: 0"
-              @click="setMultipleRegister('reject')"
-            >
+            <el-button type="text" style="padding: 0" @click="setMultipleRegister('reject')">
               批量拒绝
             </el-button>
           </div>
@@ -304,35 +276,13 @@
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column
-            type="selection"
-            width="55"
-          >
-          </el-table-column>
+          <el-table-column type="selection" width="55"> </el-table-column>
 
-          <el-table-column
-            align="center"
-            prop="name"
-            label="姓名"
-          >
-          </el-table-column>
-          <el-table-column
-            align="center"
-            prop="phonenum"
-            label="手机号"
-          >
-          </el-table-column>
-          <el-table-column
-            align="center"
-            prop="orgName"
-            label="所属部门"
-          >
-          </el-table-column>
+          <el-table-column align="center" prop="name" label="姓名"> </el-table-column>
+          <el-table-column align="center" prop="phonenum" label="手机号"> </el-table-column>
+          <el-table-column align="center" prop="orgName" label="所属部门"> </el-table-column>
 
-          <el-table-column
-            label="操作"
-            align="center"
-          >
+          <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button
                 type="text"
@@ -353,10 +303,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <div
-          class="page-container"
-          style="margin-right: 45px"
-        >
+        <div class="page-container" style="margin-right: 45px">
           <pagination
             :total="registerTotal"
             :page="getRegisterForm.pageNo"
@@ -367,10 +314,7 @@
       </div>
 
       <!-- 学习情况 -->
-      <div
-        v-show="status === 2"
-        class="general"
-      >
+      <div v-show="status === 2" class="general">
         <!-- 表格内容 -->
         <basic-container block>
           <common-table
@@ -443,10 +387,7 @@
               </div>
             </template>
 
-            <template
-              v-if="showTrainDetail.isArranged"
-              #multiSelectMenu="{ selection }"
-            >
+            <template v-if="showTrainDetail.isArranged" #multiSelectMenu="{ selection }">
               <el-button
                 style="margin-bottom: 0"
                 type="text"
@@ -466,22 +407,13 @@
             </template>
 
             <!-- 姓名 -->
-            <template
-              slot="stuName"
-              slot-scope="{ row }"
-            >
-              <el-button
-                type="text"
-                @click="toUserDetail(row)"
-              >
+            <template slot="stuName" slot-scope="{ row }">
+              <el-button type="text" @click="toUserDetail(row)">
                 {{ row.stuName }}
               </el-button>
             </template>
 
-            <template
-              slot="signPercent"
-              slot-scope="{ row }"
-            >
+            <template slot="signPercent" slot-scope="{ row }">
               <span>{{
                 !!row.signTimes && !!row.signPercent
                   ? row.signTimes + '次/' + row.signPercent + '%'
@@ -554,10 +486,7 @@
               <span v-if="row.examStatus == 1">未开始</span>
             </template>
             <!-- 评估情况 // （1：已评估；2：未评估；3：未开始）-->
-            <template
-              slot="evaluate"
-              slot-scope="{ row }"
-            >
+            <template slot="evaluate" slot-scope="{ row }">
               <span v-if="row.evaluate == 1">已评估</span>
               <span v-if="row.evaluate == 2">未评估</span>
               <span v-if="row.evaluate == 3">未开始</span>
@@ -569,11 +498,7 @@
               slot="handler"
               slot-scope="scope"
             >
-              <el-button
-                type="text"
-                size="medium"
-                @click.stop="toStuffDetail(scope.row)"
-              >
+              <el-button type="text" size="medium" @click.stop="toStuffDetail(scope.row)">
                 查看上报材料
               </el-button>
 
@@ -601,47 +526,35 @@
       </div>
 
       <!-- 培训安排 -->
-      <div
-        v-show="status === 4"
-        class="arrange"
-      >
+      <div v-show="status === 4" class="arrange">
         <p class="offline_title">
           线下日程
         </p>
-        <el-collapse
-          v-if="isOfflineTodo.length"
-          v-model="activeNames"
-          @change="handleChange"
-        >
-          <el-collapse-item
-            v-for="(todo, index) in isOfflineTodo"
-            :key="index"
-            :name="index + 1"
-          >
+        <el-collapse v-if="isOfflineTodo.length" v-model="activeNames" @change="handleChange">
+          <el-collapse-item v-for="(todo, index) in isOfflineTodo" :key="index" :name="index + 1">
             <template slot="title">
               &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天
               {{ todo.date }}
             </template>
 
-            <div
-              v-for="(item, i) in todo.data"
-              :key="i"
-              class="arrange_schedule_i"
-            >
+            <div v-for="(item, i) in todo.data" :key="i" class="arrange_schedule_i">
               <span>{{ item.todoTime }}</span>
 
               <span v-if="item.type === 1">【面授课程】 {{ item.courseName }}</span>
               <span v-else>【活动】 {{ item.theme }}</span>
               <span>
                 <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
-                {{ item.lecturerName }}</span>
+                {{ item.lecturerName }}</span
+              >
 
               <span> 地点： {{ item.address }}</span>
 
               <!-- 状态（1：已结束；2：进行中；3：未开始） -->
               <span v-if="$route.query.status">
                 状态：<span v-if="item.status === 1">未开始</span>
-                <span v-if="item.status === 2">进行中</span><span v-if="item.status === 3">已结束</span></span>
+                <span v-if="item.status === 2">进行中</span
+                ><span v-if="item.status === 3">已结束</span></span
+              >
             </div>
           </el-collapse-item>
         </el-collapse>
@@ -653,41 +566,17 @@
         <p class="course_title offline_title">
           在线课程
         </p>
-        <el-table
-          :data="showOnlineCourse"
-          style="width: 100%"
-        >
-          <el-table-column
-            prop="classTime"
-            label="上课日期"
-            width="180"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="courseName"
-            label="关联课程"
-            width="180"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="lecturerName"
-            label="讲师"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="studyType"
-            label="修读类型"
-          >
+        <el-table :data="showOnlineCourse" style="width: 100%">
+          <el-table-column prop="classTime" label="上课日期" width="180"> </el-table-column>
+          <el-table-column prop="courseName" label="关联课程" width="180"> </el-table-column>
+          <el-table-column prop="lecturerName" label="讲师"> </el-table-column>
+          <el-table-column prop="studyType" label="修读类型">
             <template slot-scope="{ row }">
               <span v-if="row.studyType === 1">选修</span>
               <span v-else> 必修 </span>
             </template>
           </el-table-column>
-          <el-table-column
-            v-if="$route.query.status"
-            prop="status"
-            label="状态"
-          >
+          <el-table-column v-if="$route.query.status" prop="status" label="状态">
             <template slot-scope="{ row }">
               <!-- status	状态（1：未开始；2：进行中；3：已结束） -->
               <span v-if="row.status === 1">未开始</span>
@@ -699,31 +588,11 @@
         <p class="course_title offline_title">
           考试安排
         </p>
-        <el-table
-          :data="showExamList"
-          style="width: 100%"
-        >
-          <el-table-column
-            prop="examTime"
-            label="考试日期"
-            width="280"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="examName"
-            label="关联考试"
-            width="280"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="period"
-            label="考试时间(分钟)"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="status"
-            label="状态"
-          >
+        <el-table :data="showExamList" style="width: 100%">
+          <el-table-column prop="examTime" label="考试日期" width="280"> </el-table-column>
+          <el-table-column prop="examName" label="关联考试" width="280"> </el-table-column>
+          <el-table-column prop="period" label="考试时间(分钟)"> </el-table-column>
+          <el-table-column prop="status" label="状态">
             <template slot-scope="{ row }">
               <!-- status	状态（1：已结束；2：进行中；3：未开始） -->
               <span v-if="row.status === 1">未开始</span>
@@ -731,15 +600,9 @@
               <span v-if="row.status === 3">已结束</span>
             </template>
           </el-table-column>
-          <el-table-column
-            v-if="$route.query.status"
-            label="操作"
-          >
+          <el-table-column v-if="$route.query.status" label="操作">
             <template slot-scope="{ row }">
-              <el-button
-                type="text"
-                @click="toexamDetail(row)"
-              >
+              <el-button type="text" @click="toexamDetail(row)">
                 考试详情
               </el-button>
             </template>
@@ -748,10 +611,7 @@
       </div>
 
       <!-- 签到情况 -->
-      <div
-        v-show="status === 3 && $route.query.status"
-        class="signin-container"
-      >
+      <div v-show="status === 3 && $route.query.status" class="signin-container">
         <div class="signin-header">
           <el-input
             v-model="getSigninForm.name"
@@ -772,10 +632,7 @@
           </el-button>
         </div>
 
-        <el-table
-          class="signin-table"
-          :data="signinData"
-        >
+        <el-table class="signin-table" :data="signinData">
           <el-table-column
             v-for="(item, index) in signinLevel"
             :key="index"
@@ -803,10 +660,7 @@
       </div>
 
       <!-- 评估结果 -->
-      <div
-        v-show="status === 5 && $route.query.status"
-        class="result"
-      >
+      <div v-show="status === 5 && $route.query.status" class="result">
         <div>
           <div class="result_rate1">
             <span>培训班整体满意度：</span>
@@ -937,19 +791,9 @@
         placeholder="请填写拒绝原因（选填）"
       >
       </el-input>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button
-          size="small"
-          @click="approveDlgVisible = false"
-        >取 消</el-button>
-        <el-button
-          type="primary"
-          size="small"
-          @click="setRegister('reject')"
-        >确 定</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="approveDlgVisible = false">取 消</el-button>
+        <el-button type="primary" size="small" @click="setRegister('reject')">确 定</el-button>
       </span>
     </el-dialog>
 
