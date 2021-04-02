@@ -80,6 +80,9 @@
             <template slot-scope="scope">
               <common-upload
                 v-if="scope.row.fileCategory"
+                :disabled="
+                  scope.row.fileCategory === 'teacher' && !table[scope.$index - 1].fileName
+                "
                 need-handler
                 :on-upload-start="() => onUploadStart(table)"
                 :on-upload-complete="
@@ -105,6 +108,7 @@
                   }}
                 </el-button>
               </common-upload>
+
               <el-button
                 type="text"
                 size="small"
@@ -178,7 +182,8 @@ export default {
         filePath: url,
         fileSize,
         jobId,
-        id: fileName ? id : ''
+        id: fileName ? id : '',
+        userId: this.parentVm.data.stuId
       }
       table.loading = true
       const message = fileName ? '修改成功' : '上传成功'

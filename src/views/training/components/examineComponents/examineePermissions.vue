@@ -26,10 +26,10 @@ const switchConfig = [
     label: '允许考生查看答卷',
     prop: 'openAnswerSheet'
   },
-  {
-    label: '允许考生自己评卷',
-    prop: 'selfMarking'
-  },
+  // {
+  //   label: '允许考生自己评卷',
+  //   prop: 'selfMarking'
+  // },
   {
     label: '允许考生查看标准答案',
     prop: 'publicAnswers'

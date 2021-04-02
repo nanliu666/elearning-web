@@ -31,7 +31,7 @@ export default {
   created() {
     this.copy =
       (this.tenantContent && JSON.parse(this.tenantContent).copyright) ||
-      'v2.0.0_20210330_Release  备案号：苏ICP备19010525号-2'
+      'v2.0.1_20210401_Release  备案号：苏ICP备19010525号-2'
   },
   methods: {}
 }

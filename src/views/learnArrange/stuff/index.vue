@@ -174,7 +174,7 @@ export default {
         params.courseId = courseId
       }
 
-      api(params).then((res) => {
+      api(params).then((res = []) => {
         res.forEach((item) => {
           if (!item.find((r) => r.fileCategory === 'user')) {
             const { id, bizId, courseId } = item[0]

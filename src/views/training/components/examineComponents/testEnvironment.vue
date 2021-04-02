@@ -10,18 +10,18 @@
 <script>
 import CustomSwitch from '../atomComponents/customSwitch'
 const switchConfig = [
-  {
-    label: '启用IP限制(需设定考生合法IP范围)',
-    prop: 'isLimitIp'
-  },
-  {
-    label: '生成试卷时打乱试题和选项顺序',
-    prop: 'isShuffle'
-  },
-  {
-    label: '交卷即时生成答案统计数据(建议大规模考试时不启用)',
-    prop: 'createAnswers'
-  },
+  // {
+  //   label: '启用IP限制(需设定考生合法IP范围)',
+  //   prop: 'isLimitIp'
+  // },
+  // {
+  //   label: '生成试卷时打乱试题和选项顺序',
+  //   prop: 'isShuffle'
+  // },
+  // {
+  //   label: '交卷即时生成答案统计数据(建议大规模考试时不启用)',
+  //   prop: 'createAnswers'
+  // },
   {
     label: '迟到后禁止考试',
     prop: 'lateBanExam',
@@ -37,7 +37,7 @@ const switchConfig = [
       pre: '开始答卷',
       before: '分钟内禁止交卷'
     }
-  },
+  }
   // {
   //   label: '启用试卷预生成服务',
   //   prop: 'preCreate',
@@ -46,10 +46,10 @@ const switchConfig = [
   //     before: '份'
   //   }
   // },
-  {
-    label: '自动保存答案到服务器',
-    prop: 'isHold'
-  }
+  // {
+  //   label: '自动保存答案到服务器',
+  //   prop: 'isHold'
+  // }
 ]
 export default {
   name: 'TestEnvironment',

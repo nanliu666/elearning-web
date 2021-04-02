@@ -413,35 +413,36 @@ const EventColumns = [
     span: 24,
     label: ''
   },
-  {
-    itemType: 'switch',
-    span: 11,
-    prop: 'isLimitIp',
-    label: '启用IP限制(需设定考生合法IP范围)'
-  },
-  {
-    itemType: 'switch',
-    prop: 'isShuffle',
-    label: '生成试卷时打乱试题和选项顺序',
-    offset: 2,
-    span: 11
-  },
-  {
-    itemType: 'switch',
-    span: 11,
-    prop: 'createAnswers',
-    label: '交卷即时生成答案统计数据(建议大规模考试时不启用)'
-  },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   prop: 'isLimitIp',
+  //   label: '启用IP限制(需设定考生合法IP范围)'
+  // },
+  // {
+  //   itemType: 'switch',
+  //   prop: 'isShuffle',
+  //   label: '生成试卷时打乱试题和选项顺序',
+  //   offset: 2,
+  //   span: 11
+  // },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   prop: 'createAnswers',
+  //   label: '交卷即时生成答案统计数据(建议大规模考试时不启用)'
+  // },
   {
     itemType: 'slot',
     prop: 'lateBanExam',
     label: '迟到后禁止考试',
-    offset: 2,
+    // offset: 2,
     span: 11
   },
   {
     itemType: 'slot',
     span: 11,
+    offset: 2,
     prop: 'answerBanExam',
     label: '答卷时间过少禁止交卷'
   },
@@ -452,13 +453,13 @@ const EventColumns = [
   //   prop: 'preCreate',
   //   label: '启用试卷预生成服务'
   // },
-  {
-    itemType: 'switch',
-    span: 11,
-    offset: 2,
-    prop: 'isHold',
-    label: '自动保存答案到服务器'
-  },
+  // {
+  //   itemType: 'switch',
+  //   span: 11,
+  //   offset: 2,
+  //   prop: 'isHold',
+  //   label: '自动保存答案到服务器'
+  // },
   {
     prop: 'privilegeTitle',
     itemType: 'slotout',
