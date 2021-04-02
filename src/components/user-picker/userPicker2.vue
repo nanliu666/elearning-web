@@ -187,9 +187,6 @@ export default {
     dialogVisible(val) {
       if (!val) return
       this.treeLoading = true
-      this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(this.value.map((item) => item.id))
-      })
       this.selectList = JSON.parse(JSON.stringify(this.value))
 
       this.checkedOuter = this.value.filter((item) => !item.department).map((item) => item.name)
@@ -210,6 +207,11 @@ export default {
     }
   },
   methods: {
+    setCheckedKeys(keys = []) {
+      this.$nextTick(() => {
+        this.$refs.tree.setCheckedKeys(keys)
+      })
+    },
     submit() {
       this.$emit('input', this.selectList)
       this.dialogVisible = false
@@ -222,9 +224,7 @@ export default {
       return name
     },
     delSelect(del) {
-      const list = this.selectList
-      const index = list.findIndex((item) => item.id === del.id)
-      list.splice(index, 1)
+      this.updateSelectList(del, true)
       if (!del.department) {
         this.checkedOuter.splice(this.checkedOuter.indexOf(del.name), 1)
         this.isIndeterminate =
@@ -236,24 +236,21 @@ export default {
     },
     innerCheckChange(node, { checkedNodes }) {
       const list = this.selectList
-
       if (!checkedNodes.includes(node)) {
         if (node.type) {
           this.treeLoading = true
           getUserList({ orgId: node.id })
             .then((res = []) => {
               const data = this.normalizeData(res)
-              let spliceIdx
               data.forEach((item) => {
-                spliceIdx = list.findIndex((s) => s.id === item.id)
-                if (spliceIdx > -1) list.splice(spliceIdx, 1)
+                this.updateSelectList(item, true)
               })
             })
             .finally(() => (this.treeLoading = false))
         } else {
-          const index = list.findIndex((item) => item.id === node.id)
-          if (index > -1) {
-            list.splice(index, 1)
+          this.updateSelectList(node, true)
+          if (this.selectList.includes(node.parent)) {
+            this.updateSelectList(node.parent, true)
           }
         }
       } else {
@@ -263,16 +260,13 @@ export default {
             .then((res = []) => {
               const data = this.normalizeData(res)
               data.map((item) => {
-                if (!list.find((s) => s.id === item.id)) {
-                  list.push(item)
-                }
+                item.parent = node
+                this.updateSelectList(item)
               })
             })
             .finally(() => (this.treeLoading = false))
         } else {
-          if (!list.find((s) => s.id === node.id)) {
-            list.push(node)
-          }
+          this.updateSelectList(node, false)
         }
       }
 
@@ -287,9 +281,7 @@ export default {
         this.checkedOuter = this.outerData.map((item) => item.name)
 
         this.outerData.map((outer) => {
-          if (!list.find((item) => item.id === outer.id)) {
-            list.push(outer)
-          }
+          this.updateSelectList(outer, false)
         })
       } else {
         this.selectList = list.filter((item) => item.type !== 'outer')
@@ -303,16 +295,7 @@ export default {
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
     },
     outerCheckItemChange(value, item) {
-      if (!value) {
-        this.selectList.splice(
-          this.selectList.findIndex((s) => s.id === item.id),
-          1
-        )
-        return
-      }
-      if (!this.selectList.find((s) => s.id === item.id)) {
-        this.selectList.push(item)
-      }
+      this.updateSelectList(item, !value)
     },
     getTreeData(params = { parentId: '0' }) {
       return new Promise((resolve) => {
@@ -326,6 +309,7 @@ export default {
       const parentId = node.data.id
       this.getTreeData({ parentId }).then((data) => {
         resolve(data)
+        this.setCheckedKeys(this.selectList.map((s) => s.userId))
       })
     },
     normalizeData(data = []) {
@@ -362,6 +346,19 @@ export default {
           }
         })
         .finally(() => (this.checkboxLoading = false))
+    },
+    updateSelectList(item, isRemove) {
+      const list = this.selectList
+      const index = list.findIndex((select) => select.id === item.id)
+      if (isRemove) {
+        if (index > -1) {
+          list.splice(index, 1)
+        }
+      } else {
+        if (index < 0) {
+          list.push(item)
+        }
+      }
     }
   }
 }
