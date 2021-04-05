@@ -349,7 +349,7 @@ export default {
       this.getAnalysis()
     }
   },
-  activated() {
+  created() {
     this.getOrgTree()
     this.getData()
   },
@@ -416,7 +416,9 @@ export default {
       this.getAnalysis()
     },
     getAnalysis() {
-      this.$refs.charts.setLoadingVisbile(true)
+      if (this.$refs.charts) {
+        this.$refs.charts.setLoadingVisbile(true)
+      }
       analysis({ type: this.chartsType, ...this.query })
         .then((res = {}) => {
           this.chartsData = res

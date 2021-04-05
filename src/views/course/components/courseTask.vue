@@ -1,88 +1,99 @@
 <template>
   <div class="courseTask">
-    <div
-      v-for="(items, index) in tableData"
-      :key="index"
-    >
-      <el-table
-        v-loading="isLoading && indexLoading == index"
-        :data="items.fileInfoList"
-        style="width: 100%"
-        element-loading-text="拼命打包下载中，请稍等！！！"
-        element-loading-spinner="el-icon-loading"
-        element-loading-background="rgba(0, 0, 0, 0.8)"
+    <div v-if="tableData.length">
+      <div
+        v-for="(items, index) in tableData"
+        :key="index"
       >
-        <el-table-column
-          :label="'作业来源： ' + items.jobName"
-          prop="name"
-          width="550px"
+        <el-table
+          v-loading="isLoading && indexLoading == index"
+          :data="items.fileInfoList"
+          style="width: 100%"
+          element-loading-text="拼命打包下载中，请稍等！！！"
+          element-loading-spinner="el-icon-loading"
+          element-loading-background="rgba(0, 0, 0, 0.8)"
         >
-          <template slot-scope="scope">
-            <div>
-              <span v-show="scope.$index == 0"> 作业内容： </span>
-              <span v-show="scope.$index == 1"> 学员作业： </span>
-              <span v-show="scope.$index == 2"> 教师评改： </span>
-              <span> {{ scope.row.fileName }} </span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label=""
-          prop="fileSize"
-        >
-          <template slot-scope="scope">
-            <div>
-              <span> {{ scope.row.fileSize + `${scope.row.fileSize == '' ? '--' : 'k'}` }} </span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label=""
-          prop="updateTime"
-        >
-        </el-table-column>
-        <el-table-column align="right">
-          <template slot="header">
-            <el-button
-              type="text"
-              @click="handleUpload(items, index)"
-            >
-              打包下载
-            </el-button>
-          </template>
-          <template slot-scope="scope">
-            <span>
-              <common-upload
-                v-model="uploadData"
-                :before-upload="beforeUpload"
-                :multiple="false"
-                :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
-                @input="onSuccess(scope, items.id)"
+          <el-table-column
+            :label="'作业来源： ' + items.jobName"
+            prop="name"
+            width="550px"
+          >
+            <template slot-scope="scope">
+              <div>
+                <span v-show="scope.$index == 0"> 作业内容： </span>
+                <span v-show="scope.$index == 1"> 学员作业： </span>
+                <span v-show="scope.$index == 2"> 教师评改： </span>
+                <span> {{ scope.row.fileName }} </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label=""
+            prop="fileSize"
+          >
+            <template slot-scope="scope">
+              <div>
+                <span> {{ scope.row.fileSize + `${scope.row.fileSize == '' ? '--' : 'k'}` }} </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label=""
+            prop="updateTime"
+          >
+          </el-table-column>
+          <el-table-column align="right">
+            <template slot="header">
+              <el-button
+                type="text"
+                @click="handleUpload(items, index)"
               >
-                <el-button
-                  type="text"
+                打包下载
+              </el-button>
+            </template>
+            <template slot-scope="scope">
+              <span>
+                <common-upload
+                  v-model="uploadData"
+                  :before-upload="beforeUpload"
+                  :multiple="false"
                   :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
+                  @input="onSuccess(scope, items.id)"
                 >
-                  <span v-if="scope.$index == 1">
-                    {{ scope.row.updateTime == '--' ? '上传作业' : '修改作业' }}
-                  </span>
-                  <span
-                    v-if="scope.$index == 2"
-                  >{{ scope.row.updateTime == '--' ? '上传评改' : '修改评改' }}
-                  </span>
-                </el-button>
-              </common-upload>
-            </span>
-            <el-button
-              type="text"
-              :disabled="scope.row.updateTime == '--'"
-              @click="downLoadInfo(scope.row)"
-            >
-              &nbsp;&nbsp;&nbsp;&nbsp; 下载
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+                  <el-button
+                    type="text"
+                    :disabled="items.fileInfoList[1].updateTime == '--' && scope.$index == 2"
+                  >
+                    <span v-if="scope.$index == 1">
+                      {{ scope.row.updateTime == '--' ? '上传作业' : '修改作业' }}
+                    </span>
+                    <span
+                      v-if="scope.$index == 2"
+                    >{{ scope.row.updateTime == '--' ? '上传评改' : '修改评改' }}
+                    </span>
+                  </el-button>
+                </common-upload>
+              </span>
+              <el-button
+                type="text"
+                :disabled="scope.row.updateTime == '--'"
+                @click="downLoadInfo(scope.row)"
+              >
+                &nbsp;&nbsp;&nbsp;&nbsp; 下载
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+
+    <div
+      v-else
+      class="noInfo"
+    >
+      <span>
+        暂无数据
+      </span>
     </div>
   </div>
 </template>
@@ -219,6 +230,13 @@ export default {
   border: 1px solid #dcdee3;
   /deep/.el-table tr {
     height: 50px !important;
+  }
+
+  .noInfo {
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+    color: #718199;
   }
 }
 </style>

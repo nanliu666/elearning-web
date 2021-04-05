@@ -174,17 +174,24 @@ export default {
         params.courseId = courseId
       }
 
-      api(params).then((res) => {
+      api(params).then((res = []) => {
         res.forEach((item) => {
-          const { trainAttachmentVOS: rows } = item
-          if (!rows.find((r) => r.fileCategory === 'user')) {
-            rows.push({
+          if (!item.find((r) => r.fileCategory === 'user')) {
+            const { id, bizId, courseId } = item[0]
+            item.push({
+              id,
+              bizId,
+              courseId,
               fileCategory: 'user',
               updateTime: '--'
             })
           }
-          if (!rows.find((r) => r.fileCategory === 'teacher')) {
-            rows.push({
+          if (!item.find((r) => r.fileCategory === 'teacher')) {
+            const { id, bizId, courseId } = item[0]
+            item.push({
+              id,
+              bizId,
+              courseId,
               fileCategory: 'teacher',
               updateTime: '--'
             })

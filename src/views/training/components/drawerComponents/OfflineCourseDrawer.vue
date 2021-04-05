@@ -188,7 +188,7 @@ export default {
         // 给datepick显示用的数据
         todoTime: [START_TIME, END_TIME],
         // 入参数据，以及列表的展示数据
-        todoTimeParams: [START_TIME.format('HH:mm'), END_TIME.format('HH:mm')],
+        todoTimeParams: [START_TIME.format('HH:mm:ss'), END_TIME.format('HH:mm:ss')],
         lecturerId: null,
         lecturerName: null,
         classroomId: null,
@@ -248,8 +248,8 @@ export default {
     'model.todoTime': {
       handler() {
         this.model.todoTimeParams = [
-          moment(this.model.todoTime[0]).format('HH:mm'),
-          moment(this.model.todoTime[1]).format('HH:mm')
+          moment(this.model.todoTime[0]).format('HH:mm:ss'),
+          moment(this.model.todoTime[1]).format('HH:mm:ss')
         ]
         // 授课时间改变，再去手动校验下是否符合规格
         this.$refs.form && this.$refs.form.validateField('todoDate')
@@ -393,7 +393,7 @@ export default {
   }
   .active__title {
     cursor: pointer;
-    color: #606266;
+    color: #53b2fd;
   }
 }
 .wrapper {

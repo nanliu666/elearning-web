@@ -4,7 +4,6 @@
       <div class="input-wrapper">
         <el-input
           v-model="filterForm.userName"
-          :disabled="tableLoading"
           clearable
           size="medium"
           placeholder="输入学员姓名搜索"
@@ -23,12 +22,12 @@
           :model="filterForm"
           class="filter-form"
           label-width="100px"
-          style="padding: 24px;"
+          style="padding: 24px"
         >
           <el-form-item label="所属部门">
             <el-cascader
               v-model="filterForm.deptName"
-              style="width: 202px;"
+              style="width: 202px"
               placeholder="请选择所属部门"
               :options="data['study-state'].orgData"
               :props="{ checkStrictly: true, label: 'orgName', value: 'orgName' }"
@@ -71,7 +70,7 @@
           </el-form-item>
           <el-form-item label="课程通过状态">
             <el-select
-              v-model="filterForm.isFinish"
+              v-model="filterForm.isOnlineCourse"
               clearable
               placeholder="请选择状态"
             >
@@ -105,7 +104,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <div style="text-align: right; margin-right: 75px;">
+          <div style="text-align: right; margin-right: 75px">
             <el-button
               type="primary"
               size="medium"
@@ -196,12 +195,12 @@
         <el-table-column
           align="center"
           header-align="center"
-          prop="coursePassStatus"
+          prop="isOnlineCourse"
           label="课程通过状态"
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.coursePassStatus === 'yes' ? '已通过' : '未通过' }}
+              {{ scope.row.isOnlineCourse === 'yes' ? '已通过' : '未通过' }}
             </div>
           </template>
         </el-table-column>
@@ -271,7 +270,7 @@ export default {
         deptName: '',
         progress: '',
         jobPercent: '',
-        isFinish: '',
+        isOnlineCourse: '',
         isExaimPass: '',
         coursePassStatus: '',
         pageNo: 1,
@@ -283,7 +282,7 @@ export default {
         deptName: '',
         progress: '',
         jobPercent: '',
-        isFinish: '',
+        isOnlineCourse: '',
         isExaimPass: '',
         coursePassStatus: '',
         pageNo: 1,
@@ -293,15 +292,15 @@ export default {
   },
   computed: {
     searchValWatcher() {
-      return this.filterForm.userName
+      return (this.filterForm.userName + '').trim()
     }
   },
   watch: {
-    searchValWatcher() {
+    searchValWatcher: _.debounce(function() {
       if (this.tableLoading) return
       this.tableLoading = true
       this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
-    }
+    }, 1000)
   },
   methods: {
     pagination({ page, limit }) {

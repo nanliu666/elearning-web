@@ -4,7 +4,7 @@ let systemName = '泽学院管理后台' // 系统名称
 let backBaseUrl = '' // 后台管理地址
 let frontBaseUrl = '' // 用户前台地址
 let iconfontVersion = [
-  '1066523_6bvkeuqao36',
+  '2232073_jslvmfqvu2g',
   '1857563_sw5dkyhhh1o',
   '2178669_zbls3ovulic',
   '2232073_5nxhufhqcst'
@@ -25,9 +25,9 @@ if (location.host.indexOf('localhost') !== -1) {
 } else if (env.VUE_APP_ENV == 'pro') {
   backBaseUrl = 'http://admin.epro-edu.com' //生产环境地址(后台管理)
 } else if (env.VUE_APP_ENV == 'zehui') {
-  backBaseUrl = 'https://admin.zexueyuan.com.cn' //泽汇生产环境地址（后台管理）
+  backBaseUrl = 'http://admin.zexueyuan.com.cn' //泽汇生产环境地址（后台管理）
 } else if (env.VUE_APP_ENV == 'xugong') {
-  backBaseUrl = 'https://admin.zexueyuan.com.cn' //徐工环境地址（后台管理）
+  backBaseUrl = 'http://admin.zexueyuan.com.cn' //徐工环境地址（后台管理）
 }
 // else if (env.VUE_APP_ENV == 'test') {
 //   backBaseUrl = '' //测试环境地址(后台管理)

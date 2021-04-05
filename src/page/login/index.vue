@@ -7,12 +7,12 @@
       <!--图片-->
       <div class="nav flex flex-flow ">
         <div class="LOGO">
-          <img
+          <!-- <img
             v-if="envVar === 'zehui' && orgId === '5263'"
             src="../../assets/images/logoE.png"
-          />
+          /> -->
           <img
-            v-else-if="envVar === 'xugong'"
+            v-if="envVar === 'xugong'"
             src="../../assets/images/logo.png"
           />
           <img
@@ -92,7 +92,7 @@ import thirdLogin from './thirdlogin'
 import { mapGetters } from 'vuex'
 import { dateFormat } from '@/util/date'
 import { validatenull } from '@/util/validate'
-import { getStore } from '@/util/store'
+// import { getStore } from '@/util/store'
 import { systemName } from '@/config/env'
 export default {
   name: 'Login',
@@ -117,10 +117,11 @@ export default {
       let envC = process.env
       return envC.VUE_APP_ENV
     },
-    orgId() {
-      let userInfo = getStore({ name: 'userInfo' })
-      return userInfo.org_id
-    },
+    // orgId() {
+    //   let userInfo = getStore({ name: 'userInfo' })
+    //   // console.log('userInfo',userInfo)
+    //   return userInfo.org_id
+    // },
     ...mapGetters(['website'])
   },
   watch: {

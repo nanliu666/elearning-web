@@ -69,7 +69,8 @@ export default {
         xAxis: [
           {
             type: 'category',
-            data: this.data.dept
+            data: this.data.dept,
+            boundaryGap: ['5%', '5%']
           }
         ],
         yAxis: [
@@ -142,18 +143,20 @@ export default {
             itemStyle: {
               color: '#5ab1ef'
             },
-            barWidth: 60
+            barWidth: '30%',
+            barMaxWidth: 60
           },
           {
             name: '参考人数',
             type: 'bar',
             stack: 'total',
+            barWidth: '30%',
+            barMaxWidth: 60,
             label: {
               show: false
             },
             data: this.data.joinNum,
-            itemStyle,
-            barWidth: 60
+            itemStyle
           },
           {
             name: '通过率',
@@ -198,7 +201,8 @@ export default {
           itemStyle: {
             color: '#5ab1ef'
           },
-          barWidth: 60
+          barWidth: '30%',
+          barMaxWidth: 60
         })
       }
       this.charts.setOption(option)

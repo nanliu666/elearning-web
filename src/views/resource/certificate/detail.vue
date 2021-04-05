@@ -321,7 +321,7 @@ export default {
         currentStatus = ''
       }
       let currentParams = {
-        pageNo: this.queryInfo.pageNo,
+        pageNo: 1,
         pageSize: this.queryInfo.pageSize,
         stuName: params.stuName,
         templateId: this.queryInfo.templateId,

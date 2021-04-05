@@ -79,13 +79,21 @@ export default [
           isTab: false
         }
       },
+      // {
+      //   path: '',
+      //   name: '工作台',
+      //   meta: {
+      //     i18n: 'dashboard'
+      //   },
+      //   component: () => import('@/views/wel/index')
+      // }
       {
         path: '',
-        name: '工作台',
+        name: '统计报表',
         meta: {
           i18n: 'dashboard'
         },
-        component: () => import('@/views/wel/index')
+        component: () => import('@/views/report/index')
       }
     ]
   },

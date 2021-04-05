@@ -2,7 +2,7 @@
   <div class="trainingArrange">
     <div class="box_title">
       <div class="title">
-        培训安排
+        培训项目安排
       </div>
       <div>
         <el-button
@@ -695,7 +695,10 @@ export default {
     this.refreshTableData()
     this.isgetCatalogs()
   },
-  activated() {},
+  activated() {
+    this.refreshTableData()
+    this.isgetCatalogs()
+  },
   methods: {
     treeClick(val) {
       (this.page.pageNo = 1),
@@ -756,6 +759,7 @@ export default {
           return item
         })
         this.page.total = res.totalNum
+        this.$forceUpdate()
       })
     },
 

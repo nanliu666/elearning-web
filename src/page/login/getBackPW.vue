@@ -1,12 +1,12 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <img
+      <!-- <img
         v-if="envVar === 'zehui' && orgId === '5263'"
         src="../../assets/images/logoE.png"
-      />
+      /> -->
       <img
-        v-else-if="envVar === 'xugong'"
+        v-if="envVar === 'xugong'"
         src="../../assets/images/logo.png"
       />
       <img
@@ -293,7 +293,7 @@ import { getCode, checkPhoneCode, checkPassword } from '@/api/personalInfo.js'
 import md5 from 'js-md5'
 import pageHeader from '@/components/page-header/pageHeader'
 import { getCaptcha } from '@/api/user'
-import { getStore } from '@/util/store'
+// import { getStore } from '@/util/store'
 export default {
   components: {
     pageHeader
@@ -431,10 +431,6 @@ export default {
     envVar() {
       let envC = process.env
       return envC.VUE_APP_ENV
-    },
-    orgId() {
-      let userInfo = getStore({ name: 'userInfo' })
-      return userInfo.org_id
     },
     btnDisabled() {
       let disabled = false
