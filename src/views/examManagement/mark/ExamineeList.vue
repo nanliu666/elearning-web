@@ -110,7 +110,7 @@
 <script>
 // 逐人评卷列表
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCreatUsers } from '@/api/knowledge/knowledge'
+import { getReviewerList } from '@/api/examManage/schedule'
 import { listManualEvaluationOnce, listManualEvaluationOnceCount } from '@/api/examManage/mark'
 import { mapGetters } from 'vuex'
 let TABLE_COLUMNS = [
@@ -207,21 +207,7 @@ const SEARCH_CONFIG = {
       config: { optionLabel: 'name', optionValue: 'userId' },
       loading: false,
       noMore: false,
-      pageNo: 2,
-      loadMoreFun(item) {
-        if (item.loading || item.noMore) return
-        item.loading = true
-        getCreatUsers().then((res) => {
-          if (res.length > 0) {
-            item.options.push(...res)
-            item.pageNo += 1
-            item.loading = false
-          } else {
-            item.noMore = true
-            item.loading = false
-          }
-        })
-      }
+      pageNo: 1
     }
   ]
 }
@@ -273,19 +259,34 @@ export default {
   async activated() {
     this.evaluationCount = await listManualEvaluationOnceCount({ id: this.$route.query.id })
     this.queryInfo = _.assign(this.queryInfo, { id: this.$route.query.id })
-    let reviewer = _.filter(this.searchConfig.popoverOptions, (item) => {
-      return item.field === 'reviewer'
-    })[0]
-    if (_.size(reviewer.options) === 0) {
-      getCreatUsers().then((res) => {
-        if (reviewer) {
-          reviewer.options.push(...res)
-        }
-      })
-    }
+    this.initCreator()
     this.loadTableData()
   },
   methods: {
+    initCreator() {
+      let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
+        return item.field === 'reviewer'
+      })[0]
+      getReviewerList({ pageNo: 1, pageSize: 10, examId: this.$route.query.id }).then((res) => {
+        creatorId.options = res
+      })
+      const loadMoreFun = (item) => {
+        if (item.loading || item.noMore) return
+        item.loading = true
+        const params = { pageNo: item.pageNo, pageSize: 10, examId: this.$route.query.id }
+        getReviewerList(params).then((res) => {
+          if (res.data.length > 0) {
+            item.options.push(...res)
+            item.pageNo += 1
+            item.loading = false
+          } else {
+            item.noMore = true
+            item.loading = false
+          }
+        })
+      }
+      creatorId.loadMoreFun = loadMoreFun
+    },
     getHandleButtonText(row) {
       const STATUS_DICTS = {
         3: '开始评卷',

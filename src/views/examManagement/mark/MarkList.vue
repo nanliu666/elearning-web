@@ -309,28 +309,7 @@ export default {
     }
   },
   activated() {
-    let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
-      return item.field === 'creatorId'
-    })[0]
-    getCreatUsers({ pageNo: 1, pageSize: 10, examType: 0 }).then((res) => {
-      creatorId.options.push(...res.data)
-    })
-    const loadMoreFun = (item) => {
-      if (item.loading || item.noMore) return
-      item.loading = true
-      const params = { pageNo: item.pageNo + 1, pageSize: 10, examType: 0 }
-      getCreatUsers(params).then((res) => {
-        if (res.data.length > 0) {
-          item.options.push(...res.data)
-          item.pageNo += 1
-          item.loading = false
-        } else {
-          item.noMore = true
-          item.loading = false
-        }
-      })
-    }
-    creatorId.loadMoreFun = loadMoreFun
+    this.initCreator()
     this.loadTableData()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
     getCategoryList().then((res) => {
@@ -346,6 +325,30 @@ export default {
     })
   },
   methods: {
+    initCreator() {
+      let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
+        return item.field === 'creatorId'
+      })[0]
+      getCreatUsers({ pageNo: 1, pageSize: 10, examType: 0 }).then((res) => {
+        creatorId.options.push(...res.data)
+      })
+      const loadMoreFun = (item) => {
+        if (item.loading || item.noMore) return
+        item.loading = true
+        const params = { pageNo: item.pageNo + 1, pageSize: 10, examType: 0 }
+        getCreatUsers(params).then((res) => {
+          if (res.data.length > 0) {
+            item.options.push(...res.data)
+            item.pageNo += 1
+            item.loading = false
+          } else {
+            item.noMore = true
+            item.loading = false
+          }
+        })
+      }
+      creatorId.loadMoreFun = loadMoreFun
+    },
     moment,
     /**
      * 处理页码改变

@@ -24,10 +24,12 @@
               class="search"
               placeholder="搜索组织部门或成员姓名"
             ></el-input>
-            <el-scrollbar class="scroll-bar tree">
+            <el-scrollbar
+              v-loading="treeLoading"
+              class="scroll-bar tree"
+            >
               <el-tree
                 ref="tree"
-                v-loading="treeLoading"
                 lazy
                 show-checkbox
                 node-key="id"
@@ -43,34 +45,32 @@
             label="外部联系人"
             name="checkbox"
           >
-            <el-scrollbar>
-              <el-scrollbar class="scroll-bar">
-                <div class="checkbox-wrapper">
+            <el-scrollbar class="scroll-bar">
+              <div class="checkbox-wrapper">
+                <el-checkbox
+                  v-model="checkAll"
+                  :indeterminate="isIndeterminate"
+                  @change="handleCheckAllChange"
+                >
+                  全选
+                </el-checkbox>
+                <el-checkbox-group
+                  v-model="checkedOuter"
+                  v-loading="checkboxLoading"
+                  @change="outerCheckChange"
+                >
                   <el-checkbox
-                    v-model="checkAll"
-                    :indeterminate="isIndeterminate"
-                    @change="handleCheckAllChange"
+                    v-for="outer in outerData"
+                    :key="outer.id"
+                    class="outer-item"
+                    :label="outer.name"
+                    :value="outer.id"
+                    @change="(value) => outerCheckItemChange(value, outer)"
                   >
-                    全选
+                    {{ outer.name + '(' + outer.phonenum + ')' }}
                   </el-checkbox>
-                  <el-checkbox-group
-                    v-model="checkedOuter"
-                    v-loading="checkboxLoading"
-                    @change="outerCheckChange"
-                  >
-                    <el-checkbox
-                      v-for="outer in outerData"
-                      :key="outer.id"
-                      class="outer-item"
-                      :label="outer.name"
-                      :value="outer.id"
-                      @change="(value) => outerCheckItemChange(value, outer)"
-                    >
-                      {{ outer.name + '(' + outer.phonenum + ')' }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </div>
-              </el-scrollbar>
+                </el-checkbox-group>
+              </div>
             </el-scrollbar>
           </el-tab-pane>
         </el-tabs>
@@ -79,35 +79,44 @@
         <div class="area-header">
           未选
         </div>
-        <el-scrollbar
-          class="scroll-bar"
-          style="height: 504px"
-        >
-          <ul class="select-list">
-            <li
-              v-for="item in selectList"
-              :key="item.id"
-              class="select-item"
-            >
-              <i
-                v-if="item.type != 'User'"
-                class="icon-usercircle2 iconfont select-type-icon"
-              ></i>
-              <i
-                v-else
-                class="iconfont icon-approval-checkin-bicolor select-type-icon"
-              ></i>
-              <div class="select-name">
-                {{ getSelectedName(item) }}
-              </div>
+        <div class="select-wrapper">
+          <el-scrollbar
+            v-if="selectList.length"
+            class="scroll-bar"
+            style="height: 100%"
+          >
+            <ul class="select-list">
+              <li
+                v-for="item in selectList"
+                :key="item.id"
+                class="select-item"
+              >
+                <i class="iconfont icon-approval-checkin-bicolor select-type-icon"></i>
+                <div class="select-name">
+                  {{ getSelectedName(item) }}
+                </div>
 
-              <i
-                class="select-del-btn el-icon-error"
-                @click="delSelect(item)"
-              ></i>
-            </li>
-          </ul>
-        </el-scrollbar>
+                <i
+                  class="select-del-btn el-icon-error"
+                  @click="delSelect(item)"
+                ></i>
+              </li>
+            </ul>
+          </el-scrollbar>
+
+          <div
+            v-else
+            class="empty-tips"
+          >
+            <img
+              src="@/assets/images/nodata.png"
+              class="empty-img"
+            />
+            <div class="empty-text">
+              未选择人员
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -187,12 +196,10 @@ export default {
     dialogVisible(val) {
       if (!val) return
       this.treeLoading = true
-      this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(this.value.map((item) => item.id))
-      })
       this.selectList = JSON.parse(JSON.stringify(this.value))
-
-      this.checkedOuter = this.value.filter((item) => !item.department).map((item) => item.name)
+      this.checkedOuter = this.selectList
+        .filter((item) => !item.department)
+        .map((item) => item.name)
       this.getTreeData()
         .then((data) => {
           this.innerData = data
@@ -210,7 +217,13 @@ export default {
     }
   },
   methods: {
+    setCheckedKeys(keys = []) {
+      this.$nextTick(() => {
+        this.$refs.tree.setCheckedKeys(keys)
+      })
+    },
     submit() {
+      this.selectList.forEach((select) => delete select.parent)
       this.$emit('input', this.selectList)
       this.dialogVisible = false
     },
@@ -222,9 +235,7 @@ export default {
       return name
     },
     delSelect(del) {
-      const list = this.selectList
-      const index = list.findIndex((item) => item.id === del.id)
-      list.splice(index, 1)
+      this.updateSelectList(del, true)
       if (!del.department) {
         this.checkedOuter.splice(this.checkedOuter.indexOf(del.name), 1)
         this.isIndeterminate =
@@ -236,24 +247,21 @@ export default {
     },
     innerCheckChange(node, { checkedNodes }) {
       const list = this.selectList
-
       if (!checkedNodes.includes(node)) {
         if (node.type) {
           this.treeLoading = true
           getUserList({ orgId: node.id })
             .then((res = []) => {
               const data = this.normalizeData(res)
-              let spliceIdx
               data.forEach((item) => {
-                spliceIdx = list.findIndex((s) => s.id === item.id)
-                if (spliceIdx > -1) list.splice(spliceIdx, 1)
+                this.updateSelectList(item, true)
               })
             })
             .finally(() => (this.treeLoading = false))
         } else {
-          const index = list.findIndex((item) => item.id === node.id)
-          if (index > -1) {
-            list.splice(index, 1)
+          this.updateSelectList(node, true)
+          if (this.selectList.includes(node.parent)) {
+            this.updateSelectList(node.parent, true)
           }
         }
       } else {
@@ -263,16 +271,13 @@ export default {
             .then((res = []) => {
               const data = this.normalizeData(res)
               data.map((item) => {
-                if (!list.find((s) => s.id === item.id)) {
-                  list.push(item)
-                }
+                item.parent = node
+                this.updateSelectList(item)
               })
             })
             .finally(() => (this.treeLoading = false))
         } else {
-          if (!list.find((s) => s.id === node.id)) {
-            list.push(node)
-          }
+          this.updateSelectList(node, false)
         }
       }
 
@@ -287,12 +292,10 @@ export default {
         this.checkedOuter = this.outerData.map((item) => item.name)
 
         this.outerData.map((outer) => {
-          if (!list.find((item) => item.id === outer.id)) {
-            list.push(outer)
-          }
+          this.updateSelectList(outer)
         })
       } else {
-        this.selectList = list.filter((item) => item.type !== 'outer')
+        this.selectList = list.filter((item) => item.department)
         this.checkedOuter = []
       }
       this.isIndeterminate = false
@@ -303,16 +306,7 @@ export default {
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
     },
     outerCheckItemChange(value, item) {
-      if (!value) {
-        this.selectList.splice(
-          this.selectList.findIndex((s) => s.id === item.id),
-          1
-        )
-        return
-      }
-      if (!this.selectList.find((s) => s.id === item.id)) {
-        this.selectList.push(item)
-      }
+      this.updateSelectList(item, !value)
     },
     getTreeData(params = { parentId: '0' }) {
       return new Promise((resolve) => {
@@ -326,6 +320,7 @@ export default {
       const parentId = node.data.id
       this.getTreeData({ parentId }).then((data) => {
         resolve(data)
+        this.setCheckedKeys(this.selectList.map((s) => s.userId))
       })
     },
     normalizeData(data = []) {
@@ -349,7 +344,7 @@ export default {
           const { data = [] } = res
           this.outerData = data.map((item) => {
             const { phonenum, name, userId } = item
-            return { phonenum, name, userId, id: userId, type: 'outer' }
+            return { phonenum, name, userId, id: userId }
           })
 
           const length = this.checkedOuter.length
@@ -362,11 +357,31 @@ export default {
           }
         })
         .finally(() => (this.checkboxLoading = false))
+    },
+    updateSelectList(item, isRemove) {
+      const list = this.selectList
+      const index = list.findIndex((select) => select.userId === item.userId)
+      if (isRemove) {
+        if (index > -1) {
+          list.splice(index, 1)
+        }
+      } else {
+        if (index < 0) {
+          list.push(item)
+        }
+      }
     }
   }
 }
 </script>
 
+<style lang="scss">
+.user-picker {
+  .el-scrollbar__wrap {
+    overflow-x: hidden;
+  }
+}
+</style>
 <style lang="scss" scoped>
 .user-picker {
   .body {
@@ -374,8 +389,10 @@ export default {
     display: flex;
     .scroll-bar {
       height: 450px;
+      width: 100%;
       overflow: hidden;
       overflow-y: auto;
+      box-sizing: border-box;
       &.tree {
         height: 416px;
       }
@@ -409,31 +426,49 @@ export default {
     .right-area {
       height: 100%;
       width: 40%;
-      .select-list {
-        .select-item {
-          cursor: default;
-          display: flex;
-          padding: 5px 8px;
-          align-items: center;
-          .select-type-icon {
-            flex: 0 0 32px;
-            font-size: 32px;
-            margin-right: 5px;
-            color: #01aafc;
+      .select-wrapper {
+        position: relative;
+        height: 504px;
+        .select-list {
+          .select-item {
+            cursor: default;
+            display: flex;
+            padding: 5px 8px;
+            align-items: center;
+            .select-type-icon {
+              flex: 0 0 32px;
+              font-size: 32px;
+              margin-right: 5px;
+              color: #01aafc;
+            }
+            .select-name {
+              flex: 1;
+              width: 0;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              color: #333;
+              font-size: 14px;
+            }
+            .select-del-btn {
+              cursor: pointer;
+              flex: 0 0 20px;
+              font-size: 20px;
+            }
           }
-          .select-name {
-            flex: 1;
-            width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: #333;
-            font-size: 14px;
+        }
+        .empty-tips {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+          .empty-img {
+            width: 120px;
+            height: 120px;
           }
-          .select-del-btn {
-            cursor: pointer;
-            flex: 0 0 20px;
-            font-size: 20px;
+          .empty-text {
+            font-size: 12px;
           }
         }
       }
