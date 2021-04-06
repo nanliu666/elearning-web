@@ -207,7 +207,7 @@ const SEARCH_CONFIG = {
       config: { optionLabel: 'name', optionValue: 'userId' },
       loading: false,
       noMore: false,
-      pageNo: 2
+      pageNo: 1
     }
   ]
 }
@@ -268,7 +268,7 @@ export default {
         return item.field === 'reviewer'
       })[0]
       getReviewerList({ pageNo: 1, pageSize: 10, examId: this.$route.query.id }).then((res) => {
-        creatorId.options.push(...res.data)
+        creatorId.options.push(...res)
       })
       const loadMoreFun = (item) => {
         if (item.loading || item.noMore) return
@@ -276,7 +276,7 @@ export default {
         const params = { pageNo: item.pageNo, pageSize: 10, examId: this.$route.query.id }
         getReviewerList(params).then((res) => {
           if (res.data.length > 0) {
-            item.options.push(...res.data)
+            item.options.push(...res)
             item.pageNo += 1
             item.loading = false
           } else {
