@@ -268,7 +268,7 @@ export default {
         return item.field === 'reviewer'
       })[0]
       getReviewerList({ pageNo: 1, pageSize: 10, examId: this.$route.query.id }).then((res) => {
-        creatorId.options.push(...res)
+        creatorId.options = res
       })
       const loadMoreFun = (item) => {
         if (item.loading || item.noMore) return
