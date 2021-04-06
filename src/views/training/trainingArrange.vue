@@ -297,16 +297,17 @@
                 slot="trainName"
                 slot-scope="{ row }"
               >
-                <el-button
+                <span
                   v-if="$p(VIEW_TRAIN)"
-                  type="text"
+                  style="cursor:pointer; color:#53aafc; "
                   @click="toTrainingDetail(row)"
                 >
                   {{ row.trainName }}
-                </el-button>
-                <div v-else>
+                </span>
+
+                <span v-else>
                   {{ row.trainName }}
-                </div>
+                </span>
               </template>
 
               <!-- 状态 -->

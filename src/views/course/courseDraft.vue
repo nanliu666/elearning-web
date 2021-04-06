@@ -155,12 +155,10 @@
               <!-- <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
                 {{ row.courseName }}
               </el-button> -->
-              <el-button
-                type="text"
+              <span
+                style="cursor:pointer;"
                 @click="todetail(row.id)"
-              >
-                {{ row.courseName }}
-              </el-button>
+              >{{ row.courseName }}</span>
             </template>
             <!-- 课程类型 -->
             <template
