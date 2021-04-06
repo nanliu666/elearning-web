@@ -16,6 +16,10 @@ export const getCopyPaperList = (params) => get('/manage/v1/exam/paper/copy/list
  */
 export const getCreatUsers = (params) => get('/manage/v1/exam/creator', params)
 /**
+ * 获取评卷人接口
+ */
+export const getReviewerList = (params) => get('/manage/v1/exam/getReviewerList', params)
+/**
  * 分页查询试卷列表
  */
 export const delExamList = (params) => del('/manage/v1/exam/paper', params)
