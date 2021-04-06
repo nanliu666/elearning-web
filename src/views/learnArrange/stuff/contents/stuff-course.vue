@@ -61,6 +61,8 @@
 
           <el-table-column
             align="center"
+            width="210"
+            show-overflow-tooltip
             prop="updateTime"
           >
           </el-table-column>
