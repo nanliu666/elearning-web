@@ -512,6 +512,7 @@
                       placeholder="请选择"
                       :disabled="scope.row.type == 4"
                       @change="() => selectChange(scope)"
+                      @visible-change="() => selectVisibleChange(scope)"
                     >
                       <el-option
                         v-for="item in typeOption"
@@ -838,6 +839,8 @@ export default {
       // 页面切换
       headIndex: 1,
       // 上传课程内容章节类型
+      chapterType: '',
+      openChange: 1,
       typeOption: [
         {
           name: '文章',
@@ -1022,6 +1025,12 @@ export default {
         this.ruleForm.teacherId = ''
       }
     },
+    selectVisibleChange(scope) {
+      ++this.openChange
+      if (this.openChange % 2 === 0) {
+        this.chapterType = scope.row.type
+      }
+    },
 
     selectChange(scope) {
       if (scope.row.upLoad.length) {
@@ -1038,6 +1047,7 @@ export default {
             })
           })
           .catch(() => {
+            this.ruleForm.contents[scope.$index].type = this.chapterType
             this.$message({
               type: 'info',
               message: '已取消清除'
