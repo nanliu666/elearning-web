@@ -14,17 +14,30 @@
           element-loading-background="rgba(0, 0, 0, 0.8)"
         >
           <el-table-column
-            :label="'作业来源： ' + items.jobName"
             prop="name"
-            width="550px"
+            min-width="200px"
           >
+            <template slot="header">
+              <span>
+                <span></span>
+                <span>
+                  <text-over-tooltip
+                    ref-name="testName1"
+                    class-name="fs20"
+                    :content="'作业来源：' + items.jobName"
+                  ></text-over-tooltip>
+                </span>
+              </span>
+            </template>
             <template slot-scope="scope">
-              <div>
-                <span v-show="scope.$index == 0"> 作业内容： </span>
-                <span v-show="scope.$index == 1"> 学员作业： </span>
-                <span v-show="scope.$index == 2"> 教师评改： </span>
-                <span> {{ scope.row.fileName }} </span>
-              </div>
+              <text-over-tooltip
+                ref-name="testName1"
+                class-name="fs20"
+                :content="taskType(scope.$index) + scope.row.fileName"
+              ></text-over-tooltip>
+
+              <!-- <span> {{ taskType(scope.$index) }} </span>
+              <span> {{ scope.row.fileName }} </span> -->
             </template>
           </el-table-column>
           <el-table-column
@@ -41,6 +54,13 @@
             label=""
             prop="updateTime"
           >
+            <template slot-scope="scope">
+              <text-over-tooltip
+                ref-name="testName1"
+                class-name="fs20"
+                :content="scope.row.updateTime"
+              ></text-over-tooltip>
+            </template>
           </el-table-column>
           <el-table-column align="right">
             <template slot="header">
@@ -99,17 +119,20 @@
 </template>
 
 <script>
+import TextOverTooltip from './TextOverTooltip'
 import { downLoadFile } from '@/util/util'
 import { listCourseJob, saveCourseLinkedStudentOrTeacher } from '@/api/course/course'
 import { getStore } from '@/util/store.js'
 export default {
   components: {
-    commonUpload: () => import('@/components/common-upload/commonUpload')
+    commonUpload: () => import('@/components/common-upload/commonUpload'),
+    TextOverTooltip
   },
   data() {
     return {
       tableData: [],
       uploadData: [],
+
       stuId: '',
       isLoading: false,
       indexLoading: ''
@@ -126,6 +149,11 @@ export default {
     this.getInfo()
   },
   methods: {
+    taskType(i) {
+      let taskList = ['作业内容：', '学员作业：', '教师评改：']
+      // return taskList.filter((item, index) => i == index)
+      return taskList[i]
+    },
     // 打包下载
     handleUpload(items, index) {
       this.isLoading = true
