@@ -38,21 +38,21 @@
                     class="ope-item"
                     @click="deliverSolutions(z)"
                   >
-                    <el-image :src="require('@/assets/images/xxdt_ck.png')"></el-image>
+                    <i class="iconimage_icon_Preview1 iconfont"></i>
                     <span>发布</span>
                   </div>
                   <div
                     class="ope-item"
                     @click="editSolutions(z)"
                   >
-                    <el-image :src="require('@/assets/images/xxdt_bj.png')"></el-image>
+                    <i class="iconimage_icon_edit iconfont"></i>
                     <span>编辑</span>
                   </div>
                   <div
                     class="ope-item"
                     @click="deleteSolutions(z)"
                   >
-                    <el-image :src="require('@/assets/images/xxdt_sc.png')"></el-image>
+                    <i class="iconimage_icon_close iconfont"></i>
                     <span>删除</span>
                   </div>
                 </div>
@@ -187,6 +187,10 @@ export default {
         font-size: 14px;
         .ope-item {
           cursor: pointer;
+          text-align: center;
+          .iconfont {
+            font-size: 26px;
+          }
           span {
             display: block;
             margin-top: 5px;
