@@ -42,11 +42,10 @@
         <basic-container block>
           <common-table
             ref="table"
-            v-loading="loading"
+            :loading="loading"
             :columns="columnsVisible | columnsFilter"
             :config="tableConfig"
             :data="tableData"
-            :page-config="tablePageConfig"
             :page="page"
             @current-page-change="handleCurrentPageChange"
             @page-size-change="handlePageSizeChange"
@@ -632,7 +631,7 @@ export default {
         name: ''
       },
       page: {
-        pageNo: 1,
+        currentPage: 1,
         pageSize: 10,
         total: 0
       },
@@ -870,7 +869,8 @@ export default {
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
-      this.page.pageNo = param
+      this.page.currentPage = param
+
       this.getInfo()
     },
     handlePageSizeChange(param) {
@@ -880,7 +880,6 @@ export default {
 
     handleSearch(searchParams) {
       this.searchParams = searchParams
-      this.page.pageNo = 1
       this.page.currentPage = 1
       this.getInfo()
     },
@@ -999,21 +998,14 @@ export default {
 
     // 拿数据
     getInfo() {
-      // if (this.searchParams) {
-      //   this.page.pageNo = 1
-      //   this.page.pageSize = 10
-      // }
-      this.tableData = []
-      this.page.total = 0
       if (this.throttle) return
       this.throttle = true
       this.loading = true
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
+      let page = {
+        pageNo: this.page.currentPage,
+        pageSize: this.page.size
       }
-      params = { ...this.page, ...this.searchParams }
+      let params = { ...page, ...this.searchParams }
       params.status = this.status
 
       if (params.isPutaway == 2) {
@@ -1031,7 +1023,6 @@ export default {
       this.status = index
       // 把筛选数据清空
       this.searchParams = ''
-      this.page.pageNo = 1
       this.page.currentPage = 1
 
       this.getInfo()
