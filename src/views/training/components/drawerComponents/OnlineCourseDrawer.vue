@@ -134,6 +134,7 @@ export default {
             this.title = '编辑在线课程'
             this.editType = 'edit'
           } else {
+            this.courseDefault = []
             this.model = _.assign(_.cloneDeep(modelCopy), { id: _.uniqueId('12454611451154') })
             this.editType = 'add'
           }
