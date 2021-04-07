@@ -156,9 +156,11 @@
                 {{ row.courseName }}
               </el-button> -->
               <span
-                style="cursor:pointer;"
+                style="cursor:pointer; color:#53c9fe;"
                 @click="todetail(row.id)"
-              >{{ row.courseName }}</span>
+              >{{
+                row.courseName
+              }}</span>
             </template>
             <!-- 课程类型 -->
             <template

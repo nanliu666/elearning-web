@@ -18,16 +18,11 @@
             min-width="200px"
           >
             <template slot="header">
-              <span>
-                <span></span>
-                <span>
-                  <text-over-tooltip
-                    ref-name="testName1"
-                    class-name="fs20"
-                    :content="'作业来源：' + items.jobName"
-                  ></text-over-tooltip>
-                </span>
-              </span>
+              <text-over-tooltip
+                ref-name="testName1"
+                class-name="fs20"
+                :content="'作业来源：' + items.jobName"
+              ></text-over-tooltip>
             </template>
             <template slot-scope="scope">
               <text-over-tooltip
