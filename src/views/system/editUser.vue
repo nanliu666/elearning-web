@@ -312,19 +312,19 @@ export default {
           label: '入职日期',
           itemType: 'datePicker'
         },
-        {
-          itemType: 'input',
-          prop: 'ipScope',
-          offset: 4,
-          label: '允许IP范围',
-          rules: [
-            {
-              pattern: /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))$/,
-              message: 'IP地址格式错误',
-              trigger: 'blur'
-            }
-          ]
-        },
+        // {
+        //   itemType: 'input',
+        //   prop: 'ipScope',
+        //   offset: 4,
+        //   label: '允许IP范围',
+        //   rules: [
+        //     {
+        //       pattern: /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))$/,
+        //       message: 'IP地址格式错误',
+        //       trigger: 'blur'
+        //     }
+        //   ]
+        // },
         {
           itemType: 'input',
           type: 'textarea',
