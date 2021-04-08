@@ -264,7 +264,10 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   showIndexColumn: false,
   rowKey: 'id',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  treeProps: { hasChildren: 'hasChildren', children: 'children' },
+  handlerColumn: {
+    fixed: false
+  }
 }
 const TABLE_PAGE_CONFIG = {}
 

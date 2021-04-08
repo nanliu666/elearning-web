@@ -81,7 +81,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 50
+    minWidth: 50,
+    fixed: false
   }
 }
 const SEARCH_CONFIG = {

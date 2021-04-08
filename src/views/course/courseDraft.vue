@@ -455,7 +455,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
 
   enableMultiSelect: true,

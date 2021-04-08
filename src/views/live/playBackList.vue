@@ -129,7 +129,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 50
+    minWidth: 80,
+    fixed: false
   }
 }
 

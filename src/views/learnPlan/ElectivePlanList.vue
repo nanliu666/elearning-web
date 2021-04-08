@@ -108,7 +108,7 @@ const TABLE_COLUMNS = [
   {
     label: '操作',
     slot: true,
-    fixed: 'right',
+    // fixed: 'right',
     prop: 'oparetion',
     minWidth: 100
   }
