@@ -74,6 +74,7 @@
                 v-model="ruleForm.name"
                 placeholder="请输入"
                 maxlength="32"
+                @blur="ruleForm.name = $event.target.value.trim()"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -1857,7 +1858,7 @@ export default {
     padding-bottom: 8px;
     span {
       display: inline-block;
-      width: 58%;
+      width: 55%;
       &:nth-child(2) {
         width: 42%;
       }
