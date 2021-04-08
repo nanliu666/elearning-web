@@ -185,7 +185,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   // enableMultiSelect: true, // TODO：树无法做批量选择,暂时关闭多选
   handlerColumn: {
-    minWidth: 100
+    minWidth: 100,
+    fixed: false
   }
 }
 import {

@@ -178,7 +178,8 @@ export default {
         showIndexColumn: false,
         rowKey: 'id',
         handlerColumn: {
-          width: 120
+          width: 120,
+          fixed: false
         }
       },
       page: {

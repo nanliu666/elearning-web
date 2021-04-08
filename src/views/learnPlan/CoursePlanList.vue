@@ -1,21 +1,45 @@
 <template>
-  <div id="requiredSchedule" class="requiredSchedule Menu fill">
+  <div
+    id="requiredSchedule"
+    class="requiredSchedule Menu fill"
+  >
     <!-- 必修课安排 页面 -->
     <page-header>
-      <template slot="title"> 线上必修安排 </template>
+      <template slot="title">
+        线上必修安排
+      </template>
       <template slot="rightMenu">
-        <el-button v-p="ADD_REQUIRED" type="primary" size="medium" @click="jumpEdit">
+        <el-button
+          v-p="ADD_REQUIRED"
+          type="primary"
+          size="medium"
+          @click="jumpEdit"
+        >
           新建课程安排
         </el-button>
       </template>
     </page-header>
-    <basic-container block class="basicContainer clearfix">
+    <basic-container
+      block
+      class="basicContainer clearfix"
+    >
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="已发布" name="published"> </el-tab-pane>
-        <el-tab-pane label="草稿" name="draft"> </el-tab-pane>
+        <el-tab-pane
+          label="已发布"
+          name="published"
+        >
+        </el-tab-pane>
+        <el-tab-pane
+          label="草稿"
+          name="draft"
+        >
+        </el-tab-pane>
       </el-tabs>
 
-      <div v-show="activeTab === 'published'" class="content published">
+      <div
+        v-show="activeTab === 'published'"
+        class="content published"
+      >
         <!-- <div class="left-container"> -->
         <!-- <leftColumn
             :search="true"
@@ -25,7 +49,10 @@
             @refreshTree="getCategoryData"
           ></leftColumn> -->
 
-        <my-column :column-interface="columnInterface" @treeClick="treeClick"></my-column>
+        <my-column
+          :column-interface="columnInterface"
+          @treeClick="treeClick"
+        ></my-column>
         <!-- </div> -->
         <div class="divider"></div>
         <common-table
@@ -48,12 +75,23 @@
                 @submit="handlePublishedSearch"
               />
               <div class="operations-right">
-                <div class="refresh-container" @click="refreshPublished">
+                <div
+                  class="refresh-container"
+                  @click="refreshPublished"
+                >
                   <i class="el-icon-refresh-right" />
                   <span>刷新</span>
                 </div>
-                <el-popover placement="bottom" width="40" trigger="click">
-                  <i slot="reference" style="cursor: pointer" class="el-icon-setting" />
+                <el-popover
+                  placement="bottom"
+                  width="40"
+                  trigger="click"
+                >
+                  <i
+                    slot="reference"
+                    style="cursor: pointer"
+                    class="el-icon-setting"
+                  />
                   <!-- 设置表格列可见性 -->
                   <div class="operations__column--visible">
                     <el-checkbox-group v-model="published.columnsVisible">
@@ -71,13 +109,22 @@
               </div>
             </div>
           </template>
-          <template slot="coursePlanName" slot-scope="{ row }">
-            <el-button type="text" @click="jumpDetail(row)">
+          <template
+            slot="coursePlanName"
+            slot-scope="{ row }"
+          >
+            <el-button
+              type="text"
+              @click="jumpDetail(row)"
+            >
               {{ row.coursePlanName }}
             </el-button>
           </template>
 
-          <template slot="multiSelectMenu" slot-scope="{ selection }">
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
             <el-button
               v-p="DELETE_REQUIRED"
               type="text"
@@ -120,7 +167,10 @@
         </common-table>
       </div>
 
-      <div v-show="activeTab === 'draft'" class="content">
+      <div
+        v-show="activeTab === 'draft'"
+        class="content"
+      >
         <common-table
           ref="draftTable"
           class="draftTable"
@@ -140,12 +190,23 @@
                 @submit="handleDraftSearch"
               />
               <div class="operations-right">
-                <div class="refresh-container" @click="loadDraftData">
+                <div
+                  class="refresh-container"
+                  @click="loadDraftData"
+                >
                   <i class="el-icon-refresh-right" />
                   <span>刷新</span>
                 </div>
-                <el-popover placement="bottom" width="40" trigger="click">
-                  <i slot="reference" style="cursor: pointer" class="el-icon-setting" />
+                <el-popover
+                  placement="bottom"
+                  width="40"
+                  trigger="click"
+                >
+                  <i
+                    slot="reference"
+                    style="cursor: pointer"
+                    class="el-icon-setting"
+                  />
                   <!-- 设置表格列可见性 -->
                   <div class="operations__column--visible">
                     <el-checkbox-group v-model="draft.columnsVisible">
@@ -163,7 +224,10 @@
               </div>
             </div>
           </template>
-          <template slot="multiSelectMenu" slot-scope="{ selection }">
+          <template
+            slot="multiSelectMenu"
+            slot-scope="{ selection }"
+          >
             <el-button
               v-p="DELETE_REQUIRED"
               type="text"
@@ -175,10 +239,18 @@
             </el-button>
           </template>
           <template #handler="{ row }">
-            <el-button v-p="EDIT_REQUIRED" type="text" @click="jumpEdit(row)">
+            <el-button
+              v-p="EDIT_REQUIRED"
+              type="text"
+              @click="jumpEdit(row)"
+            >
               编辑
             </el-button>
-            <el-button v-p="DELETE_REQUIRED" type="text" @click="handleDelete(row)">
+            <el-button
+              v-p="DELETE_REQUIRED"
+              type="text"
+              @click="handleDelete(row)"
+            >
               删除
             </el-button>
           </template>
@@ -189,7 +261,7 @@
 </template>
 
 <script>
-import SearchPopover from "@/components/searchPopOver/index";
+import SearchPopover from '@/components/searchPopOver/index'
 // import leftColumn from '@/components/leftColumn'
 import {
   getlearnPlanList,
@@ -199,34 +271,34 @@ import {
   delCatalogs,
   updateCatalogs,
   moveCatalogs,
-  updateStatus,
-} from "@/api/learnPlan";
+  updateStatus
+} from '@/api/learnPlan'
 
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: "线上必修名称",
-    prop: "coursePlanName",
+    label: '线上必修名称',
+    prop: 'coursePlanName',
     slot: true,
-    fixed: true,
-    minWidth: 180,
+    // fixed: true,
+    minWidth: 180
     // headerAlign: "center",
   },
   {
-    label: "编号",
-    prop: "coursePlanNo",
+    label: '编号',
+    prop: 'coursePlanNo',
     slot: false,
     minWidth: 180,
-    headerAlign: "center",
-    align: "center",
+    headerAlign: 'center',
+    align: 'center'
   },
   {
-    label: "主办单位",
-    prop: "sponsor",
+    label: '主办单位',
+    prop: 'sponsor',
     slot: false,
     minWidth: 120,
-    headerAlign: "center",
-    align: "center",
+    headerAlign: 'center',
+    align: 'center'
   },
   // {
   //   label: '分类',
@@ -240,50 +312,50 @@ const TABLE_COLUMNS = [
   //   minWidth: 100
   // },
   {
-    label: "状态",
-    formatter: (row) => ({ 1: "未开始", 2: "进行中", 3: "已结束" }[row.status] || "-"),
-    prop: "status",
+    label: '状态',
+    formatter: (row) => ({ 1: '未开始', 2: '进行中', 3: '已结束' }[row.status] || '-'),
+    prop: 'status',
     minWidth: 100,
-    headerAlign: "center",
-    align: "center",
+    headerAlign: 'center',
+    align: 'center'
   },
   {
-    label: "课程时间",
-    prop: "time",
+    label: '课程时间',
+    prop: 'time',
     formatter: (row) => {
-      if (row.startTime && row.endTime) return row.startTime + "~" + row.endTime;
-      else return "-";
+      if (row.startTime && row.endTime) return row.startTime + '~' + row.endTime
+      else return '-'
     },
     minWidth: 300,
-    headerAlign: "center",
-    align: "center",
-  },
-];
+    headerAlign: 'center',
+    align: 'center'
+  }
+]
 const TABLE_CONFIG = {
   enablePagination: true,
-  height: "calc(100% - 94px)",
+  height: 'calc(100% - 94px)',
   enableMultiSelect: true,
-  rowKey: "id",
+  rowKey: 'id',
   showHandler: true,
-  handlerColumn: { label: "操作", minWidth: 170, fixed: "right" },
-};
+  handlerColumn: { label: '操作', minWidth: 170, fixed: false }
+}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: "课程名称搜索", "suffix-icon": "el-icon-search" },
-    data: "",
-    field: "coursePlanName",
-    label: "",
-    type: "input",
-  },
-];
+    config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
+    data: '',
+    field: 'coursePlanName',
+    label: '',
+    type: 'input'
+  }
+]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: "input",
-    field: "coursePlanNo",
-    label: "课程编号",
-    data: "",
+    type: 'input',
+    field: 'coursePlanNo',
+    label: '课程编号',
+    data: ''
   },
   // {
   //   type: 'input',
@@ -298,54 +370,54 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   //   data: ''
   // },
   {
-    type: "select",
-    field: "status",
-    label: "状态",
-    data: "",
+    type: 'select',
+    field: 'status',
+    label: '状态',
+    data: '',
     options: [
-      { value: 1, label: "未开始" },
-      { value: 2, label: "进行中" },
-      { value: 3, label: "已结束" },
-    ],
+      { value: 1, label: '未开始' },
+      { value: 2, label: '进行中' },
+      { value: 3, label: '已结束' }
+    ]
   },
   {
-    data: "",
-    label: "时间选择",
-    type: "dataPicker",
-    field: "startTime,endTime",
-    config: { type: "daterange", "value-format": "yyyy-MM-dd HH:mm:ss" },
+    data: '',
+    label: '时间选择',
+    type: 'dataPicker',
+    field: 'startTime,endTime',
+    config: { type: 'daterange', 'value-format': 'yyyy-MM-dd HH:mm:ss' }
   },
   {
-    type: "input",
-    field: "sponsor",
-    label: "主办单位",
-    data: "",
-  },
-];
+    type: 'input',
+    field: 'sponsor',
+    label: '主办单位',
+    data: ''
+  }
+]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS,
-};
+  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
+}
 import {
   ADD_REQUIRED,
   EDIT_REQUIRED,
   DELETE_REQUIRED,
   VIEW_REQUIRED,
-  STOP_REQUIRED,
-} from "@/const/privileges";
-import { mapGetters } from "vuex";
+  STOP_REQUIRED
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
 
 export default {
-  name: "CoursePlanList",
+  name: 'CoursePlanList',
   components: {
     SearchPopover,
     // leftColumn,
-    MyColumn: () => import("./components/MyColumn"),
+    MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop)),
+      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
   data() {
     return {
@@ -355,11 +427,11 @@ export default {
         addCatalog: addCatalog, //新增分组/分类
         deleteTeacherCatalog: delCatalogs, //删除分组/分类
         move: moveCatalogs, //移动
-        editTeacherCatalog: updateCatalogs, //编辑
+        editTeacherCatalog: updateCatalogs //编辑
       },
       data: [],
-      currentNodeKey: "", // 默认选中的节点key
-      activeTab: "published",
+      currentNodeKey: '', // 默认选中的节点key
+      activeTab: 'published',
       moveKnowledgeRow: {},
 
       published: {
@@ -369,48 +441,48 @@ export default {
         tableData: [],
         tableLoading: false,
         queryInfo: {
-          sponsor: "",
+          sponsor: '',
           type: 0,
-          courseCatalogName: "",
-          startTime: "",
-          coursePlanName: "",
-          coursePlanNo: "",
-          id: "",
+          courseCatalogName: '',
+          startTime: '',
+          coursePlanName: '',
+          coursePlanNo: '',
+          id: ''
         },
         columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
         page: {
           currentPage: 1,
           size: 10,
-          total: 0,
-        },
+          total: 0
+        }
       },
       draft: {
         searchPopoverConfig: {
           requireOptions: [
             {
-              config: { placeholder: "课程名称搜索", "suffix-icon": "el-icon-search" },
-              data: "",
-              field: "coursePlanName",
-              label: "",
-              type: "input",
-            },
-          ],
+              config: { placeholder: '课程名称搜索', 'suffix-icon': 'el-icon-search' },
+              data: '',
+              field: 'coursePlanName',
+              label: '',
+              type: 'input'
+            }
+          ]
         },
         tableColumns: _.cloneDeep(TABLE_COLUMNS),
         tableConfig: TABLE_CONFIG,
         tableData: [],
         tableLoading: false,
         queryInfo: {
-          type: 1,
+          type: 1
         },
         columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
         page: {
           currentPage: 1,
           size: 10,
-          total: 0,
-        },
-      },
-    };
+          total: 0
+        }
+      }
+    }
   },
   computed: {
     ADD_REQUIRED: () => ADD_REQUIRED,
@@ -418,7 +490,7 @@ export default {
     DELETE_REQUIRED: () => DELETE_REQUIRED,
     VIEW_REQUIRED: () => VIEW_REQUIRED,
     STOP_REQUIRED: () => STOP_REQUIRED,
-    ...mapGetters(["privileges"]),
+    ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
@@ -428,153 +500,153 @@ export default {
           EDIT_REQUIRED,
           DELETE_REQUIRED,
           VIEW_REQUIRED,
-          STOP_REQUIRED,
-        ]);
+          STOP_REQUIRED
+        ])
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   activated() {
-    this.refreshPublished();
-    this.loadDraftData();
+    this.refreshPublished()
+    this.loadDraftData()
   },
 
   methods: {
     // 点击左侧档返回数据
     treeClick(id) {
-      this.published.queryInfo.categoryId = id;
-      this.loadPublishedData();
+      this.published.queryInfo.categoryId = id
+      this.loadPublishedData()
     },
     jumpUserList(row) {
       // 查看完成率
-      this.$router.push({ path: "/learnPlan/CourseUserList", query: { id: row.id } });
+      this.$router.push({ path: '/learnPlan/CourseUserList', query: { id: row.id } })
     },
     jumpEdit(row) {
       this.$router.push({
-        path: "/learnPlan/edit",
-        query: { id: row.id },
-      });
+        path: '/learnPlan/edit',
+        query: { id: row.id }
+      })
     },
     closePlan(row) {
       // 结办
-      this.$confirm("您确定要提前结办该课程安排吗？", {
+      this.$confirm('您确定要提前结办该课程安排吗？', {
         showCancelButton: true,
         callback: (action) => {
-          if (action !== "cancel") {
+          if (action !== 'cancel') {
             updateStatus({ id: row.id }).then(() => {
               this.$message({
-                type: "success",
-                message: "结办成功!",
-              });
-              this.refreshPublished();
-            });
+                type: 'success',
+                message: '结办成功!'
+              })
+              this.refreshPublished()
+            })
           }
-        },
-      });
+        }
+      })
     },
     refreshPublished() {
-      this.loadPublishedData();
+      this.loadPublishedData()
     },
 
     handleDelete(selection) {
       if (Array.isArray(selection)) {
         if (_.some(selection, { status: 2 })) {
           this.$confirm(
-            "你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？",
+            '你选择的课程安排中包含正在进行中的，不能进行删除操作，是否忽略继续删除其它课程安排？',
             {
-              confirmButtonText: "知道了",
+              confirmButtonText: '知道了',
               showCancelButton: true,
               callback: (action) => {
-                if (action !== "cancel") {
-                  this.deletePlanFn(selection);
+                if (action !== 'cancel') {
+                  this.deletePlanFn(selection)
                 }
-              },
+              }
             }
-          );
-          return;
+          )
+          return
         }
-        this.$confirm("确定要删除选中的课程安排吗？", {
+        this.$confirm('确定要删除选中的课程安排吗？', {
           showCancelButton: true,
           callback: (action) => {
-            if (action !== "cancel") {
-              this.deletePlanFn(selection);
+            if (action !== 'cancel') {
+              this.deletePlanFn(selection)
             }
-          },
-        });
+          }
+        })
       } else {
         if (selection.status === 2) {
-          this.$confirm("选中的课程安排正在进行中，无法进行删除操作。", {
-            confirmButtonText: "关闭",
-            callback: () => {},
-          });
+          this.$confirm('选中的课程安排正在进行中，无法进行删除操作。', {
+            confirmButtonText: '关闭',
+            callback: () => {}
+          })
         }
-        this.$confirm("确定要删除选中的课程安排吗？", {
+        this.$confirm('确定要删除选中的课程安排吗？', {
           showCancelButton: true,
           callback: (action) => {
-            if (action !== "cancel") {
-              this.deletePlanFn([selection]);
+            if (action !== 'cancel') {
+              this.deletePlanFn([selection])
             }
-          },
-        });
+          }
+        })
       }
     },
     deletePlanFn(arr) {
-      let isDraft = _.head(arr).type === 1;
+      let isDraft = _.head(arr).type === 1
       // 删除学习计划
       let ids = _(arr)
         .filter((item) => item.status != 2)
-        .map("id")
-        .join(",");
+        .map('id')
+        .join(',')
       if (!ids) {
-        return;
+        return
       }
       deletePlan({
-        ids,
+        ids
       })
         .then(() => {
           this.$message({
-            type: "success",
-            message: "删除成功!",
-          });
+            type: 'success',
+            message: '删除成功!'
+          })
           if (isDraft) {
-            this.$refs.draftTable.clearSelection();
-            this.loadDraftData();
+            this.$refs.draftTable.clearSelection()
+            this.loadDraftData()
           } else {
-            this.$refs.table.clearSelection();
-            this.loadPublishedData();
+            this.$refs.table.clearSelection()
+            this.loadPublishedData()
           }
         })
-        .catch();
+        .catch()
     },
 
     handlePublishedPageChange(param) {
-      this.published.queryInfo.pageNo = param;
-      this.loadPublishedData();
+      this.published.queryInfo.pageNo = param
+      this.loadPublishedData()
     },
     handleDraftPageChange(param) {
-      this.draft.queryInfo.pageNo = param;
-      this.loadDraftData();
+      this.draft.queryInfo.pageNo = param
+      this.loadDraftData()
     },
     handlePublishedPageSizeChange(param) {
-      this.published.queryInfo.pageSize = param;
-      this.loadPublishedData();
+      this.published.queryInfo.pageSize = param
+      this.loadPublishedData()
     },
     handleDraftPageSizeChange(param) {
-      this.draft.queryInfo.pageSize = param;
-      this.loadDraftData();
+      this.draft.queryInfo.pageSize = param
+      this.loadDraftData()
     },
     /**
      * 搜索
      */
     handlePublishedSearch(searchParams) {
-      this.published.queryInfo = _.assign(this.published.queryInfo, searchParams);
-      this.published.page.currentPage = 1;
-      this.loadPublishedData();
+      this.published.queryInfo = _.assign(this.published.queryInfo, searchParams)
+      this.published.page.currentPage = 1
+      this.loadPublishedData()
     },
     handleDraftSearch(searchParams) {
-      this.draft.queryInfo = _.assign(this.draft.queryInfo, searchParams);
-      this.draft.page.currentPage = 1;
-      this.loadDraftData();
+      this.draft.queryInfo = _.assign(this.draft.queryInfo, searchParams)
+      this.draft.page.currentPage = 1
+      this.loadDraftData()
     },
     // 跳去详情
     // jumpDetail({ id }) {
@@ -584,68 +656,68 @@ export default {
     //   })
     // },
     jumpDetail(row) {
-      var data = { ...row };
+      var data = { ...row }
       this.$router.push({
-        path: "/learnArrange/plan/detail",
+        path: '/learnArrange/plan/detail',
         query: {
-          data: decodeURIComponent(JSON.stringify(data)),
-        },
-      });
+          data: decodeURIComponent(JSON.stringify(data))
+        }
+      })
     },
     async loadDraftData() {
-      const draft = this.draft;
-      if (draft.tableLoading) return;
-      draft.tableLoading = true;
+      const draft = this.draft
+      if (draft.tableLoading) return
+      draft.tableLoading = true
       try {
         let { totalNum, data } = await getlearnPlanList({
           ...draft.queryInfo,
           pageNo: draft.page.currentPage,
-          pageSize: draft.page.size,
-        });
+          pageSize: draft.page.size
+        })
         draft.tableData = data.map((item) => {
           if (!item.courseList || !item.courseList.length) {
-            item.courseList = [{ courseName: "-" }];
+            item.courseList = [{ courseName: '-' }]
           }
-          if (!item.coursePlanNo) item.coursePlanNo = "-";
-          if (!item.sponsor) item.sponsor = "-";
-          return item;
-        });
-        draft.page.total = totalNum;
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          if (!item.sponsor) item.sponsor = '-'
+          return item
+        })
+        draft.page.total = totalNum
       } catch (error) {
         // window.console.log(error)
       } finally {
-        draft.tableLoading = false;
+        draft.tableLoading = false
       }
     },
     // 加载表格数据
     async loadPublishedData() {
-      const published = this.published;
-      if (published.tableLoading) return;
-      published.tableLoading = true;
+      const published = this.published
+      if (published.tableLoading) return
+      published.tableLoading = true
       try {
         let { totalNum, data } = await getlearnPlanList({
           ...published.queryInfo,
           pageNo: published.page.currentPage,
-          pageSize: published.page.size,
-        });
-        published.tableData = data;
+          pageSize: published.page.size
+        })
+        published.tableData = data
         published.tableData = data.map((item) => {
           if (!item.courseList || !item.courseList.length) {
-            item.courseList = [{ courseName: "-" }];
+            item.courseList = [{ courseName: '-' }]
           }
-          if (!item.coursePlanNo) item.coursePlanNo = "-";
-          if (!item.sponsor) item.sponsor = "-";
-          return item;
-        });
-        published.page.total = totalNum;
+          if (!item.coursePlanNo) item.coursePlanNo = '-'
+          if (!item.sponsor) item.sponsor = '-'
+          return item
+        })
+        published.page.total = totalNum
       } catch (error) {
         // window.console.log(error)
       } finally {
-        published.tableLoading = false;
+        published.tableLoading = false
       }
-    },
-  },
-};
+    }
+  }
+}
 </script>
 <style lang="scss" scoped>
 .requiredSchedule {
@@ -690,7 +762,7 @@ export default {
   }
 }
 .clearfix:after {
-  content: "";
+  content: '';
   display: block;
   clear: both;
 }
@@ -756,7 +828,7 @@ export default {
   line-height: 34px;
   vertical-align: middle;
   &::after {
-    content: "/";
+    content: '/';
     display: inline-block;
     margin: 0 5px;
   }
@@ -824,7 +896,7 @@ export default {
     }
     &::before {
       position: absolute;
-      content: "";
+      content: '';
       top: 3px;
       right: 0px;
       width: 0.5px;

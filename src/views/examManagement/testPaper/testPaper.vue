@@ -166,7 +166,7 @@ const TABLE_COLUMNS = [
     label: '试卷名称',
     prop: 'name',
     slot: true,
-    fixed: true,
+    // fixed: true,
     minWidth: 150
   },
   {
@@ -215,7 +215,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: true, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 import {
@@ -415,7 +416,10 @@ export default {
         type: '1'
       }
       getcategoryTree(params).then((res) => {
-        this.searchConfig.popoverOptions[0].config.treeParams.data = [{id: '0', name: '未分类'}, ...res]
+        this.searchConfig.popoverOptions[0].config.treeParams.data = [
+          { id: '0', name: '未分类' },
+          ...res
+        ]
       })
     },
     /**

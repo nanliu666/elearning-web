@@ -452,8 +452,8 @@ const TABLE_COLUMNS = [
     label: '培训名称',
     prop: 'trainName',
     width: '180',
-    slot: true,
-    fixed: 'left'
+    slot: true
+    // fixed: 'left'
   },
   {
     label: '编号',
@@ -508,7 +508,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
   enableMultiSelect: true,
   enablePagination: true,

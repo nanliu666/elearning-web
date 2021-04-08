@@ -155,7 +155,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   // enableMultiSelect: true, // TODO: 以后添加多选
   handlerColumn: {
-    minWidth: 100
+    minWidth: 100,
+    fixed: false
   }
 }
 const searchConfig = {

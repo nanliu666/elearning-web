@@ -133,7 +133,8 @@ export default {
         showIndexColumn: false,
         rowKey: 'id',
         handlerColumn: {
-          width: '80'
+          width: '80',
+          fixed: false
         }
       },
       tableData: [
