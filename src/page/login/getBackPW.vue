@@ -3,15 +3,15 @@
     <div class="logo">
       <!-- <img
         v-if="envVar === 'zehui' && orgId === '5263'"
-        src="../../assets/images/logoE.png"
+        src="../../assets/images/logo_yb.png"
       /> -->
       <img
         v-if="envVar === 'xugong'"
-        src="../../assets/images/logo.png"
+        src="../../assets/images/logo_yb.png"
       />
       <img
         v-else
-        src="../../assets/images/logoZeHui.png"
+        src="../../assets/images/logo_yb.png"
       />
     </div>
     <pageHeader
