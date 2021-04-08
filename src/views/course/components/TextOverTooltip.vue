@@ -74,11 +74,8 @@ export default {
   //     color: green;
   //     line-height: 22px;
   //   }
-  //   .fs12 {
-  //     font-size: 12px;
-  //     font-weight: 400;
-  //     color: orange;
-  //     line-height: 14px;
-  //   }
+  .blueColor {
+    color: #53c9fe;
+  }
 }
 </style>
