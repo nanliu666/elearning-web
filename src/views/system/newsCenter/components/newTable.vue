@@ -70,7 +70,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   handlerColumn: {
-    width: 150
+    width: 150,
+    fixed: false
   },
   enableMultiSelect: false,
   rowKey: 'id',

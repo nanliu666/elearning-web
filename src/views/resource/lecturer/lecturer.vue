@@ -329,8 +329,8 @@ const TABLE_COLUMNS = [
     label: '讲师姓名',
     prop: 'name',
     width: '160',
-    slot: true,
-    fixed: 'left'
+    slot: true
+    // fixed: 'left'
   },
   {
     label: '手机号码',
@@ -406,7 +406,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
   enableMultiSelect: true,
   enablePagination: true,

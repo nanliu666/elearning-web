@@ -152,7 +152,8 @@ const TABLE_CONFIG = {
   showIndexColumn: false,
   enablePagination: true,
   handlerColumn: {
-    minWidth: 50
+    minWidth: 50,
+    fixed: false
   }
 }
 

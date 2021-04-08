@@ -190,7 +190,8 @@ export default {
         enableMultiSelect: true,
         rowKey: 'roleId',
         handlerColumn: {
-          width: 200
+          width: 200,
+          fixed: false
         }
       },
       columns: [

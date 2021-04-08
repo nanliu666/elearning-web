@@ -175,6 +175,7 @@ let TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   handlerColumn: {
     // width: 100
+    fixed: false
   },
   enablePagination: true,
   showHandler: true,

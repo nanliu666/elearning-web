@@ -320,7 +320,8 @@ export default {
         showIndexColumn: false,
         rowKey: 'userId',
         handlerColumn: {
-          width: '180'
+          width: '180',
+          fixed: false
         }
       },
       columns: COLUMNS,

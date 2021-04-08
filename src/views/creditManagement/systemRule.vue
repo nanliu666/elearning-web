@@ -91,7 +91,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 import { STOP_SYSTEM_RULE } from '@/const/privileges'
