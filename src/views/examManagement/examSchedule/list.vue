@@ -220,7 +220,7 @@ let TABLE_COLUMNS = [
   {
     label: '有效时间',
     prop: 'effectiveTime',
-    minWidth: 120
+    minWidth: 300
   }
 ]
 const TABLE_CONFIG = {
