@@ -160,6 +160,7 @@
               >
                 <div class="coverUrl">
                   <img
+                    v-if="row.coverUrl"
                     :src="row.coverUrl"
                     alt=""
                   />
@@ -171,6 +172,7 @@
                     class-name="blueColor"
                     :content="row.courseName"
                   ></text-over-tooltip>
+                  <span v-if="row.courseName == ''">--</span>
                 </div>
               </div>
             </template>
@@ -1370,6 +1372,7 @@ export default {
   .coverUrl {
     width: 100px;
     height: 80px;
+    background-color: #ccc;
     img {
       width: 100%;
       height: 100%;
