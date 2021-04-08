@@ -1,14 +1,21 @@
 <template>
-  <div class="diyHomePc">
-    <page-header title="首页定制">
-      <el-button
-        slot="rightMenu"
-        type="primary"
-        size="medium"
-        @click="addNewPlan"
-      >
-        新建方案
-      </el-button>
+  <div class="bannerPc">
+    <page-header title="bannerPc">
+      <div slot="rightMenu">
+        <el-button
+          size="medium"
+          @click="preview"
+        >
+          预览效果
+        </el-button>
+        <el-button
+          type="primary"
+          size="medium"
+          @click="releaseBanner"
+        >
+          发布Banner
+        </el-button>
+      </div>
     </page-header>
     <el-row
       style="height: calc(100% - 92px)"
@@ -41,18 +48,22 @@
         class="content"
         style="height: 100%"
       >
-        <custom-list></custom-list>
+        <banner-table @bj="editActive"></banner-table>
       </el-col>
     </el-row>
+    <!-- 抽屉 -->
+    <banner-drawer ref="bannerDrawer"></banner-drawer>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import customList from './components/customList'
+import bannerTable from './components/bannerTable'
+import bannerDrawer from './components/bannerDrawer'
 export default {
-  name: 'DiyHomePc',
+  name: 'BannerPc',
   components: {
-    customList
+    bannerTable,
+    bannerDrawer
   },
   data() {
     return {
@@ -65,7 +76,7 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: { orgId: '0' }
+      activeOrg: {}
     }
   },
   watch: {
@@ -77,8 +88,23 @@ export default {
     this.loadTree()
   },
   methods: {
-    //  新建方案
-    addNewPlan() {},
+    //   预览效果
+    preview() {},
+    //  发布Banner
+    releaseBanner() {
+      //   if (!Object.keys(this.activeOrg).length) {
+      //     this.$message({
+      //       type: 'error',
+      //       message: '请先在左侧选择一个部门!'
+      //     })
+      //     return
+      //   }
+      this.$refs.bannerDrawer.showDrawer('add')
+    },
+    // 编辑
+    editActive(data) {
+      this.$refs.bannerDrawer.showDrawer('edit', data)
+    },
     // tree结构子节点过滤
     filterNode(value, data) {
       if (!value) return true
@@ -107,7 +133,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.diyHomePc {
+.bannerPc {
   .sidebar {
     width: 300px;
   }
