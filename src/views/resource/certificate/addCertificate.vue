@@ -112,22 +112,21 @@
             </div>
           </div>
         </div>
-
-        <div class="btn">
-          <el-button
-            type="primary"
-            size="medium"
-            @click="isAddCertificate(1)"
-          >
-            保存
-          </el-button>
-          <el-button
-            size="medium"
-            @click="isAddCertificate(0)"
-          >
-            取消
-          </el-button>
-        </div>
+      </div>
+      <div class="btn">
+        <el-button
+          type="primary"
+          size="medium"
+          @click="isAddCertificate(1)"
+        >
+          保存
+        </el-button>
+        <el-button
+          size="medium"
+          @click="isAddCertificate(0)"
+        >
+          取消
+        </el-button>
       </div>
     </basic-container>
   </div>
@@ -294,7 +293,8 @@ export default {
 .content {
   overflow: hidden;
   display: flex;
-  height: 90vh;
+  // height: 90vh;
+  margin-bottom: 100px;
   .form_left {
     box-sizing: border-box;
     flex: 1;
