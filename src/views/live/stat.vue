@@ -43,12 +43,12 @@
                 :model="filterForm[currentTable]"
                 class="filter-form"
                 label-width="80px"
-                style="padding: 24px;"
+                style="padding: 24px"
               >
                 <el-form-item label="所属分类">
                   <el-cascader
                     v-model="filterForm[currentTable].categoryId"
-                    style="width: 202px;"
+                    style="width: 202px"
                     placeholder="请选择所属分类"
                     :options="categoryData"
                     :props="{ checkStrictly: true, label: 'name', value: 'idStr' }"
@@ -60,7 +60,7 @@
                   <el-input
                     v-model="filterForm[currentTable].creatorId"
                     clearable
-                    style="width: 202px;"
+                    style="width: 202px"
                     placeholder="请输入创建人"
                   >
                   </el-input>
@@ -81,7 +81,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <div style="text-align: right; margin-right: 75px;">
+                <div style="text-align: right; margin-right: 75px">
                   <el-button
                     type="primary"
                     size="medium"
@@ -111,7 +111,7 @@
                 :model="filterForm[currentTable]"
                 class="filter-form"
                 label-width="80px"
-                style="padding: 24px;"
+                style="padding: 24px"
               >
                 <el-form-item label="所属部门">
                   <el-cascader
@@ -122,7 +122,7 @@
                   ></el-cascader>
                 </el-form-item>
 
-                <div style="text-align: right; margin-right: 75px;">
+                <div style="text-align: right; margin-right: 75px">
                   <el-button
                     type="primary"
                     size="medium"
@@ -164,7 +164,7 @@
               >
                 <i
                   class="el-icon-refresh-right"
-                  style="margin-right: 2px;"
+                  style="margin-right: 2px"
                 ></i>刷新
               </div>
             </div>
@@ -412,9 +412,9 @@ export default {
     }
   },
   watch: {
-    searchValWatcher() {
+    searchValWatcher: _.debounce(function() {
       this.resetPageAndGetList()
-    },
+    }, 500),
     currentTable() {
       this.getList()
     }
