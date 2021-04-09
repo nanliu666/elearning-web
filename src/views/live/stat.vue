@@ -19,9 +19,17 @@
         <div class="operate-wrapper">
           <div class="operate-left">
             <div class="input-wrapper">
-              <el-input
+              <!-- <el-input
                 v-model="filterForm[currentTable].name"
                 :disabled="loading[currentTable]"
+                clearable
+                size="medium"
+                :placeholder="
+                  currentTable === 'live' ? '输入直播标题或编号搜索' : '输入用户名称搜索'
+                "
+              ></el-input> -->
+              <el-input
+                v-model="filterForm[currentTable].name"
                 clearable
                 size="medium"
                 :placeholder="
