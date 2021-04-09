@@ -48,7 +48,7 @@
         <div id="avue-footer">
           <!-- v2.0.0_20210330_Release &nbsp;&nbsp;&nbsp; 备案号：苏ICP备19010525号-2 -->
           <div class="footer">
-            <span>v2.0.1_20210401_Release &nbsp; &nbsp; &nbsp;</span>
+            <span>v2.1.0_20210410_Release &nbsp; &nbsp; &nbsp;</span>
             <span class="policeLogo"><img
               src="../../../public/img/policeLogo.png"
               alt=""
