@@ -568,14 +568,14 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'sponsor',
     label: '主办单位',
     type: 'input'
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'address',
     label: '培训地点',
