@@ -9,7 +9,7 @@
     <div class="body">
       <div class="left-area">
         <div class="area-header">
-          已选
+          请选择人员
         </div>
         <el-tabs
           v-model="activeTab"
@@ -23,10 +23,12 @@
               v-model="search"
               class="search"
               placeholder="搜索组织部门或成员姓名"
+              clearable
             ></el-input>
             <el-scrollbar
               v-loading="treeLoading"
-              class="scroll-bar tree"
+              class="scroll-bar"
+              native
             >
               <el-tree
                 ref="tree"
@@ -45,8 +47,21 @@
             label="外部联系人"
             name="checkbox"
           >
-            <el-scrollbar class="scroll-bar">
-              <div class="checkbox-wrapper">
+            <el-input
+              v-model="outerForm.search"
+              class="search"
+              clearable
+              placeholder="搜索成员姓名"
+            ></el-input>
+            <el-scrollbar
+              v-loading="checkboxLoading"
+              class="scroll-bar check-list"
+              native
+            >
+              <div
+                v-if="outerData.length"
+                class="checkbox-wrapper"
+              >
                 <el-checkbox
                   v-model="checkAll"
                   :indeterminate="isIndeterminate"
@@ -56,7 +71,6 @@
                 </el-checkbox>
                 <el-checkbox-group
                   v-model="checkedOuter"
-                  v-loading="checkboxLoading"
                   @change="outerCheckChange"
                 >
                   <el-checkbox
@@ -71,19 +85,37 @@
                   </el-checkbox>
                 </el-checkbox-group>
               </div>
+
+              <div
+                v-else-if="!outerData.length && !checkboxLoading"
+                style="text-align: center; font-size: 12px"
+              >
+                暂无数据
+              </div>
             </el-scrollbar>
+
+            <pagination
+              style="margin-top: 0; margin-bottom: 20px"
+              small
+              layout="prev, pager, next"
+              :total="outerTotal"
+              :page="outerForm.pageNo"
+              :limit="outerForm.pageSize"
+              @pagination="pagination"
+            ></pagination>
           </el-tab-pane>
         </el-tabs>
       </div>
       <div class="right-area">
         <div class="area-header">
-          未选
+          已选
         </div>
         <div class="select-wrapper">
           <el-scrollbar
             v-if="selectList.length"
             class="scroll-bar"
             style="height: 100%"
+            native
           >
             <ul class="select-list">
               <li
@@ -143,9 +175,12 @@
 <script>
 import { getOrgUserChild, getOuterUser } from '@/api/system/user'
 import { getUserList } from '@/api/examManage/schedule'
-
+import Pagination from '@/components/common-pagination'
 export default {
   name: 'UserPicker2',
+  components: {
+    Pagination
+  },
   props: {
     initList: {
       type: Array,
@@ -179,7 +214,13 @@ export default {
       treeProps: {
         label: 'name',
         children: 'children'
-      }
+      },
+      outerForm: {
+        search: '',
+        pageNo: 1,
+        pageSize: 10
+      },
+      outerTotal: 0
     }
   },
   computed: {
@@ -214,9 +255,17 @@ export default {
       this.getTreeData(params).then((data) => {
         this.innerData = data
       })
-    }
+    },
+    'outerForm.search': _.debounce(function() {
+      this.getOuterData()
+    }, 1000)
   },
   methods: {
+    pagination({ page, limit }) {
+      this.outerForm.pageNo = page
+      this.outerForm.pageSize = limit
+      this.getOuterData()
+    },
     setCheckedKeys(keys = []) {
       this.$nextTick(() => {
         this.$refs.tree.setCheckedKeys(keys)
@@ -287,23 +336,28 @@ export default {
       })
     },
     handleCheckAllChange(val) {
-      const list = this.selectList
+      const outerData = this.outerData
       if (val) {
-        this.checkedOuter = this.outerData.map((item) => item.name)
+        this.checkedOuter = this.checkedOuter.concat(outerData.map((item) => item.name))
 
-        this.outerData.map((outer) => {
+        outerData.map((outer) => {
           this.updateSelectList(outer)
         })
       } else {
-        this.selectList = list.filter((item) => item.department)
-        this.checkedOuter = []
+        if (this.isIndeterminate) {
+          this.isIndeterminate = false
+          this.handleCheckAllChange((this.checkAll = true))
+          return
+        }
+        outerData.map((outer) => {
+          this.checkedOuter = this.checkedOuter.filter((name) => name !== outer.name)
+          this.selectList = this.selectList.filter((item) => item.id !== outer.id)
+        })
       }
       this.isIndeterminate = false
     },
-    outerCheckChange(value) {
-      let checkedCount = value.length
-      this.checkAll = checkedCount === this.outerData.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
+    outerCheckChange() {
+      this.updateCheckBoxState()
     },
     outerCheckItemChange(value, item) {
       this.updateSelectList(item, !value)
@@ -318,6 +372,7 @@ export default {
     },
     loadTreeData(node, resolve) {
       const parentId = node.data.id
+      if (!parentId) return
       this.getTreeData({ parentId }).then((data) => {
         resolve(data)
         this.setCheckedKeys(this.selectList.map((s) => s.userId))
@@ -339,24 +394,33 @@ export default {
     },
     getOuterData() {
       this.checkboxLoading = true
-      getOuterUser()
+      getOuterUser(this.outerForm)
         .then((res) => {
-          const { data = [] } = res
+          const { data = [], totalNum } = res
+          this.outerTotal = totalNum
           this.outerData = data.map((item) => {
             const { phonenum, name, userId } = item
             return { phonenum, name, userId, id: userId }
           })
 
-          const length = this.checkedOuter.length
-          if (length) {
-            if (length < this.outerData.length) {
-              this.isIndeterminate = true
-            } else {
-              this.checkAll = true
-            }
-          }
+          this.updateCheckBoxState()
         })
         .finally(() => (this.checkboxLoading = false))
+    },
+    updateCheckBoxState() {
+      const length = this.checkedOuter.length
+      const total = this.outerTotal
+      if (length && total) {
+        if (length < total) {
+          this.isIndeterminate = true
+        } else if (length === total) {
+          this.checkAll = true
+          this.isIndeterminate = false
+        }
+      }
+      this.checkedOuter = this.selectList
+        .filter((item) => !item.department)
+        .map((item) => item.name)
     },
     updateSelectList(item, isRemove) {
       const list = this.selectList
@@ -388,13 +452,13 @@ export default {
     border: 1px solid #f2f2f2;
     display: flex;
     .scroll-bar {
-      height: 450px;
-      width: 100%;
+      height: 416px;
+      margin: 10px;
       overflow: hidden;
       overflow-y: auto;
       box-sizing: border-box;
-      &.tree {
-        height: 416px;
+      &.check-list {
+        height: 390px;
       }
     }
     .area-header {
@@ -428,7 +492,7 @@ export default {
       width: 40%;
       .select-wrapper {
         position: relative;
-        height: 504px;
+        height: 530px;
         .select-list {
           .select-item {
             cursor: default;
