@@ -6,10 +6,25 @@
         placeholder="输入方案名称查找..."
         suffix-icon="el-icon-search"
         style="width: 250px"
+        @input.native="searchName"
       >
       </el-input>
+      <el-select
+        v-model="device"
+        style="margin-left: 20px"
+        @change="initHomeData"
+      >
+        <el-option
+          v-for="item in deviceOpt"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        >
+        </el-option>
+      </el-select>
       <!-- 定制列表 -->
       <el-row
+        v-loading="loading"
         :gutter="16"
         style="margin-top: 30px"
       >
@@ -25,7 +40,7 @@
               @mouseleave=";(maskVisiable = false), (n = i)"
             >
               <el-image
-                :src="z.src"
+                src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
                 style="display: block"
               >
               </el-image>
@@ -58,7 +73,7 @@
                 </div>
               </transition>
               <div
-                v-if="z.isUse"
+                v-if="z.status"
                 class="useTag"
               >
                 <el-tag size="small">
@@ -72,6 +87,12 @@
           </div>
         </el-col>
       </el-row>
+      <div
+        v-if="!customData.length"
+        class="empty-block"
+      >
+        暂无数据
+      </div>
       <div class="page">
         <el-pagination
           :current-page="pageConfig.current"
@@ -88,80 +109,140 @@
 </template>
 
 <script>
+import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
 export default {
   name: 'CustomList',
+  props: {
+    activeOrg: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
       customName: '',
-      customData: [
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案1',
-          isUse: false
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案2',
-          isUse: false
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案3',
-          isUse: true
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案4',
-          isUse: false
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案5',
-          isUse: true
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案6',
-          isUse: false
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案7',
-          isUse: false
-        },
-        {
-          src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-          name: '方案8',
-          isUse: false
-        }
-      ],
+      customData: [],
       pageConfig: {
         current: 1,
         pageSize: 8,
         total: 0
       },
       maskVisiable: false,
-      n: 0
+      n: 0,
+      device: 'all',
+      deviceOpt: [
+        {
+          label: '全部',
+          value: 'all'
+        },
+        {
+          label: 'PC',
+          value: 0
+        },
+        {
+          label: 'APP',
+          value: 1
+        }
+      ],
+      loading: false
+    }
+  },
+  watch: {
+    activeOrg: {
+      handler(val) {
+        this.activeOrg = val
+        this.initHomeData()
+      },
+      deep: true,
+      immediate: true
     }
   },
   methods: {
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      this.pageConfig.pageSize = val
+      this.initHomeData()
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      this.pageConfig.current = val
+      this.initHomeData()
     },
     // 发布操作
-    deliverSolutions(data) {
-      console.log(data)
+    async deliverSolutions(data) {
+      await releaseHomePc({ id: data.id }).then((res) => {
+        this.$confirm('您确认要发布选中的方案吗？', '确认发布？', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '发布成功!'
+            })
+            this.initHomeData()
+          } else {
+            this.$message({
+              type: 'error',
+              message: '发布失败,请联系管理人员!'
+            })
+          }
+        })
+      })
     },
     // 编辑操作
     editSolutions(data) {
-      console.log(data)
+      this.$router.push({ path: '/diy/diyHomeEditPc', query: { id: data.id, orgId: data.orgId } })
     },
     // 删除操作
-    deleteSolutions(data) {
-      console.log(data)
+    async deleteSolutions(data) {
+      await deleteHomePc({ ids: data.id }).then((res) => {
+        this.$confirm('您确认要删除选中的方案吗？', '确认删除？', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.initHomeData()
+          } else {
+            this.$confirm
+            this.$message({
+              type: 'error',
+              message: '删除失败,请联系管理人员!'
+            })
+          }
+        })
+      })
+    },
+    // 查询
+    searchName: _.debounce(function() {
+      this.initHomeData()
+    }, 500),
+    // 初始化数据
+    async initHomeData() {
+      this.loading = true
+      let params = {
+        name: this.customName,
+        device: this.device == 'all' ? '' : this.device,
+        pageNo: this.pageConfig.current,
+        pageSize: this.pageConfig.pageSize
+      }
+      if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
+      //   判断是否是全部
+      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      await getHomePc(params)
+        .then((res) => {
+          this.customData = res.data
+          this.pageConfig.total = res.totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
     }
   }
 }
@@ -209,6 +290,9 @@ export default {
     .name {
       text-align: center;
     }
+  }
+  .empty-block {
+    text-align: center;
   }
   .page {
     text-align: right;
