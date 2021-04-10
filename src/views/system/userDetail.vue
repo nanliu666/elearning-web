@@ -197,10 +197,10 @@ export default {
           label: '入职日期',
           prop: 'entryDate'
         },
-        {
-          label: '允许IP范围',
-          prop: 'IP'
-        },
+        // {
+        //   label: '允许IP范围',
+        //   prop: 'IP'
+        // },
         {
           label: '备注',
           prop: 'remark'

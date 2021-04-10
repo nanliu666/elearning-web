@@ -88,12 +88,12 @@ export default {
     getAnswerValue() {
       const target = _.chain(this.data.examinationPaperUserOptionREQS)
         .filter((item) => {
-          return _.includes(this.data.answerQuestion, item.optionId)
+          return _.includes(this.data.answerUser, item.optionId)
         })
-        .map('contentOption', '考生未作答')
-        .join(' ')
+        .map('contentOption')
+        .join(',')
         .value()
-      return target
+      return target ? target : '考生未作答'
     }
   }
 }
