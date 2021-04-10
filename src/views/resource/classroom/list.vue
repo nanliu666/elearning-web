@@ -285,7 +285,9 @@ export default {
       tableData: [],
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'roomAddr' && v != 'createTime'
+      }),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: SEARCH_CONFIG,
       queryInfo: {

@@ -364,8 +364,8 @@ export default {
           直播编号: true,
           直播名称: true,
           所属分类: true,
-          包含课程: true,
-          创建人: true,
+          包含课程: false,
+          创建人: false,
           状态: true
         },
         person: { 用户编号: true, 用户名称: true, 所属部门: true, 累计时长: true }

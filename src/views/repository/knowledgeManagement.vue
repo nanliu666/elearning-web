@@ -401,7 +401,9 @@ export default {
       },
       dialogTableVisible: false,
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'creatorName' && v != 'updateTime'
+      }),
       page: {
         currentPage: 1,
         size: 10,

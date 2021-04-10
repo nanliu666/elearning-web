@@ -584,7 +584,16 @@ export default {
         total: 0
       },
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return (
+          v != 'user_email' &&
+          v != 'status' &&
+          v != 'is_recommend' &&
+          v != 'is_popular_teacher' &&
+          v != 'createName' &&
+          v != 'create_time'
+        )
+      }),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       // query: {},
       tableColumns: TABLE_COLUMNS,

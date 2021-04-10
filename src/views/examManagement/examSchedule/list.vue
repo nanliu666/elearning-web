@@ -385,7 +385,9 @@ export default {
       },
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'testPaper' && v != 'createUser'
+      }),
       searchConfig: SEARCH_CONFIG,
       data: [],
       createOrgDailog: false,
