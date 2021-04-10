@@ -385,9 +385,7 @@ export default {
       },
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
-        return v != 'testPaper' && v != 'createUser'
-      }),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       searchConfig: SEARCH_CONFIG,
       data: [],
       createOrgDailog: false,
@@ -496,7 +494,9 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
-      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'testPaper' && v != 'createUser'
+      })
     },
     // 切换nav
     handleSelect(key) {
