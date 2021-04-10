@@ -679,9 +679,9 @@ export default {
       display: inline-block;
       width: 15px;
       margin-right: 10px;
-      position: absolute;
-      top: 0;
-      right: 0;
+      // position: absolute;
+      // top: 0;
+      // right: 0;
     }
   }
   // /deep/ .el-icon-more {
