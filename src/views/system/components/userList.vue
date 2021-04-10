@@ -1,7 +1,7 @@
 <template>
   <basic-container
     block
-    style="padding-top:0;"
+    style="padding-top: 0"
   >
     <common-table
       ref="crud"
@@ -20,7 +20,7 @@
         <el-button
           v-p="RESET_USER"
           type="text"
-          style="margin-bottom:0;"
+          style="margin-bottom: 0"
           @click="handleReset(selection)"
         >
           批量重置密码
@@ -50,7 +50,7 @@
             >
               <i
                 slot="reference"
-                style="padding-left: 10px;cursor: pointer;"
+                style="padding-left: 10px; cursor: pointer"
                 class="el-icon-setting"
               />
               <!-- 设置表格列可见性 -->
@@ -71,7 +71,7 @@
           </div>
         </div>
       </template>
-      <template #name="{row}">
+      <template #name="{ row }">
         <el-button
           type="text"
           @click="handleUserClick(row)"
@@ -100,13 +100,13 @@
           密码重置
         </el-button>
         <el-dropdown
-          style="float:right;"
+          style="float: right"
           @command="(command) => handleCommand(command, row)"
         >
           <el-button
             type="text"
             class="el-dropdown-link"
-            style="padding:0;"
+            style="padding: 0"
           >
             <i class="el-icon-more" />
           </el-button>
@@ -181,8 +181,8 @@ const COLUMNS = [
     formatter(record) {
       return (
         {
-          '1': '正常',
-          '2': '冻结'
+          1: '正常',
+          2: '冻结'
         }[record.userStatus] || ''
       )
     }
@@ -191,7 +191,7 @@ const COLUMNS = [
     label: '性别',
     prop: 'sex',
     formatter(record) {
-      return { '1': '男', '0': '女' }[record.sex] || ''
+      return { 1: '男', 0: '女' }[record.sex] || ''
     }
   },
   {
@@ -325,7 +325,9 @@ export default {
         }
       },
       columns: COLUMNS,
-      columnsVisible: _.map(COLUMNS, 'prop'),
+      columnsVisible: _.map(COLUMNS, 'prop').filter((v) => {
+        return v != 'userStatus' && v != 'userEmail' && v != 'creatorName' && v != 'createTime'
+      }),
       data: [],
       editVisible: false,
       editingUser: {}

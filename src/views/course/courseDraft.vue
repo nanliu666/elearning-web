@@ -70,7 +70,7 @@
                       class="operations__btns--item"
                       size="mini"
                       icon="el-icon-refresh-right"
-                      style=" font-size: 18px;"
+                      style="font-size: 18px"
                       type="text"
                       @click="refreshTableData"
                     >
@@ -80,7 +80,7 @@
                   <span
                     v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
-                    style="cursor: pointer; font-size: 18px;"
+                    style="cursor: pointer; font-size: 18px"
                     @click="refreshTableData"
                   >刷新</span>
                   <el-popover
@@ -666,7 +666,9 @@ export default {
       },
       searchParams: '',
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'passCondition' && v != 'creatorName' && v != 'updateTime'
+      }),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       // query: {},
       tableColumns: TABLE_COLUMNS,
