@@ -1,7 +1,7 @@
 <template>
   <basic-container
     block
-    style="padding-top:0;"
+    style="padding-top: 0"
   >
     <common-table
       ref="crud"
@@ -20,7 +20,7 @@
         <el-button
           v-p="RESET_USER"
           type="text"
-          style="margin-bottom:0;"
+          style="margin-bottom: 0"
           @click="handleReset(selection)"
         >
           批量重置密码
@@ -50,7 +50,7 @@
             >
               <i
                 slot="reference"
-                style="padding-left: 10px;cursor: pointer;"
+                style="padding-left: 10px; cursor: pointer"
                 class="el-icon-setting"
               />
               <!-- 设置表格列可见性 -->
@@ -71,7 +71,7 @@
           </div>
         </div>
       </template>
-      <template #name="{row}">
+      <template #name="{ row }">
         <el-button
           type="text"
           @click="handleUserClick(row)"
@@ -100,13 +100,13 @@
           密码重置
         </el-button>
         <el-dropdown
-          style="float:right;"
+          style="float: right"
           @command="(command) => handleCommand(command, row)"
         >
           <el-button
             type="text"
             class="el-dropdown-link"
-            style="padding:0;"
+            style="padding: 0"
           >
             <i class="el-icon-more" />
           </el-button>
@@ -168,21 +168,24 @@ const COLUMNS = [
   {
     label: '姓名',
     prop: 'name',
+    align: 'left',
     slot: true
   },
   {
     label: '用户编号',
+    align: 'center',
     prop: 'workNo'
   },
   //状态，1-正常，2-禁用
   {
     label: '状态',
     prop: 'userStatus',
+    align: 'center',
     formatter(record) {
       return (
         {
-          '1': '正常',
-          '2': '冻结'
+          1: '正常',
+          2: '冻结'
         }[record.userStatus] || ''
       )
     }
@@ -190,20 +193,25 @@ const COLUMNS = [
   {
     label: '性别',
     prop: 'sex',
+    align: 'center',
+    width: 60,
     formatter(record) {
-      return { '1': '男', '0': '女' }[record.sex] || ''
+      return { 1: '男', 0: '女' }[record.sex] || ''
     }
   },
   {
     label: '部门',
+    align: 'left',
     prop: 'orgName'
   },
   {
     label: '电话',
+    align: 'center',
     prop: 'phonenum'
   },
   {
     label: '邮箱',
+    align: 'center',
     prop: 'userEmail'
   },
 
@@ -211,16 +219,19 @@ const COLUMNS = [
     label: '角色',
     prop: 'roles',
     width: 100,
+    align: 'center',
     formatter(record) {
       return record.roles.map((role) => role.roleName).join(';')
     }
   },
   {
     label: '创建人',
+    align: 'center',
     prop: 'creatorName'
   },
   {
     label: '创建时间',
+    align: 'center',
     prop: 'createTime'
   }
 ]
@@ -320,11 +331,14 @@ export default {
         showIndexColumn: false,
         rowKey: 'userId',
         handlerColumn: {
-          width: '180'
+          width: '180',
+          fixed: false
         }
       },
       columns: COLUMNS,
-      columnsVisible: _.map(COLUMNS, 'prop'),
+      columnsVisible: _.map(COLUMNS, 'prop').filter((v) => {
+        return v != 'userStatus' && v != 'userEmail' && v != 'creatorName' && v != 'createTime'
+      }),
       data: [],
       editVisible: false,
       editingUser: {}

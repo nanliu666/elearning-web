@@ -101,7 +101,7 @@ const TABLE_COLUMNS = [
     label: '考试名称',
     prop: 'examName',
     slot: true,
-    fixed: true,
+    // fixed: true,
     minWidth: 150
   },
   {
@@ -143,7 +143,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 import { VIEW_GRADE } from '@/const/privileges'

@@ -285,6 +285,9 @@ export default {
             })
           }, 1000)
         })
+        .catch(() => {
+          window.console.error(JSON.stringify(fixParams))
+        })
         .finally(() => {
           this.loading = false
         })

@@ -129,7 +129,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 50
+    minWidth: 80,
+    fixed: false
   }
 }
 
@@ -236,7 +237,9 @@ export default {
       },
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'courses' && v != 'creatorName'
+      }),
       searchConfig: SEARCH_CONFIG,
       queryInfo: {
         categoryId: '', // 分类ID

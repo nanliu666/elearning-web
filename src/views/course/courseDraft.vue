@@ -70,7 +70,7 @@
                       class="operations__btns--item"
                       size="mini"
                       icon="el-icon-refresh-right"
-                      style=" font-size: 18px;"
+                      style="font-size: 18px"
                       type="text"
                       @click="refreshTableData"
                     >
@@ -80,7 +80,7 @@
                   <span
                     v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
-                    style="cursor: pointer; font-size: 18px;"
+                    style="cursor: pointer; font-size: 18px"
                     @click="refreshTableData"
                   >刷新</span>
                   <el-popover
@@ -154,12 +154,27 @@
               <!-- <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
                 {{ row.courseName }}
               </el-button> -->
-              <span
-                style="cursor:pointer; color:#53c9fe;"
+              <div
+                class="courseNameBox"
                 @click="todetail(row.id)"
-              >{{
-                row.courseName
-              }}</span>
+              >
+                <div class="coverUrl">
+                  <img
+                    v-if="row.coverUrl"
+                    :src="row.coverUrl"
+                    alt=""
+                  />
+                </div>
+                <!-- <span class="coverName">{{ row.courseName }}</span> -->
+                <div>
+                  <text-over-tooltip
+                    ref-name="testName1"
+                    class-name="blueColor"
+                    :content="row.courseName"
+                  ></text-over-tooltip>
+                  <span v-if="row.courseName == ''">--</span>
+                </div>
+              </div>
             </template>
             <!-- 课程类型 -->
             <template
@@ -193,6 +208,7 @@
                 >达到课程学时
                   {{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}</span>
               </span>
+              <span v-if="row.passCondition == ''">--</span>
             </template>
 
             <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
@@ -372,6 +388,7 @@ import {
   getCourseInfoUserList
 } from '@/api/course/course'
 // import { delete } from 'vue/types/umd'
+import TextOverTooltip from './components/TextOverTooltip'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -383,18 +400,23 @@ const TABLE_COLUMNS = [
   },
   {
     label: '课程名称',
-    minWidth: 140,
+    minWidth: 130,
     prop: 'courseName',
-    slot: true
+    slot: true,
+    showOverflowTooltip: false,
+    headerAlign: 'center'
   },
   {
     label: '讲师',
-    prop: 'teacherName'
+    prop: 'teacherName',
+    width: 80,
+    slot: false
   },
   {
     label: '状态',
     prop: 'isPutaway',
-    slot: true
+    slot: true,
+    width: 80
   },
   {
     label: '所在分类',
@@ -418,6 +440,7 @@ const TABLE_COLUMNS = [
   {
     label: '是否推荐',
     prop: 'isRecommend',
+    width: 80,
     slot: true
   },
   {
@@ -426,13 +449,18 @@ const TABLE_COLUMNS = [
   },
   {
     label: '更新时间',
-    prop: 'updateTime'
+    prop: 'updateTime',
+    width: 170,
+    headerAlign: 'center',
+    align: 'center'
   }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
+
   enableMultiSelect: true,
   enablePagination: true,
   showHandler: true,
@@ -599,7 +627,8 @@ import {
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    TextOverTooltip
   },
   filters: {
     // 过滤不可见的列
@@ -637,7 +666,9 @@ export default {
       },
       searchParams: '',
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'passCondition' && v != 'creatorName' && v != 'updateTime'
+      }),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       // query: {},
       tableColumns: TABLE_COLUMNS,
@@ -1048,7 +1079,8 @@ export default {
         TABLE_COLUMNS[3] = {
           label: '状态',
           prop: 'isPutaway',
-          slot: true
+          slot: true,
+          width: 80
         }
 
         if (unshiftData.label != SEARCH_POPOVER_POPOVER_OPTIONS[0].label) {
@@ -1335,5 +1367,22 @@ export default {
       }
     }
   }
+}
+.courseNameBox {
+  cursor: pointer;
+  padding: 10px 10px 0;
+  .coverUrl {
+    width: 100px;
+    height: 80px;
+    background-color: #ccc;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
 }
 </style>

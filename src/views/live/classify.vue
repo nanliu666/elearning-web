@@ -192,7 +192,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   // enableMultiSelect: true, // TODO：树无法做批量选择   //先不做批量删除
   handlerColumn: {
-    minWidth: 100
+    minWidth: 100,
+    fixed: false
   }
 }
 export default {

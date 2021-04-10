@@ -61,7 +61,9 @@ export default {
           itemType: 'input',
           label: '培训班名称',
           prop: 'trainName',
-          required: true,
+          rules: [
+            { required: true, validator: this.validateTrainName, trigger: ['blur', 'change'] }
+          ],
           span: 11,
           maxlength: 32,
           offset: 0
@@ -322,6 +324,14 @@ export default {
       }
       this.userList = data
       this.$refs.form && this.$refs.form.validateField('trainObjectsList')
+    },
+    validateTrainName(rule, value, callback) {
+      const target = value.trim()
+      if (!target) {
+        return callback(new Error('请输入培训名称'))
+      } else {
+        callback()
+      }
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {

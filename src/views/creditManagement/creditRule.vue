@@ -92,7 +92,7 @@ const TABLE_COLUMNS = [
     label: '规则名称',
     prop: 'stu_name',
     slot: true,
-    fixed: true,
+    // fixed: true,
     minWidth: 150
   },
   {
@@ -144,7 +144,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: false, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 
@@ -170,7 +171,9 @@ export default {
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'sys_rule_source' && v != 'update_time'
+      }),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
       searchConfig: {
         requireOptions: [

@@ -452,8 +452,8 @@ const TABLE_COLUMNS = [
     label: '培训名称',
     prop: 'trainName',
     width: '180',
-    slot: true,
-    fixed: 'left'
+    slot: true
+    // fixed: 'left'
   },
   {
     label: '编号',
@@ -508,7 +508,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
   enableMultiSelect: true,
   enablePagination: true,
@@ -567,14 +568,14 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'sponsor',
     label: '主办单位',
     type: 'input'
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'address',
     label: '培训地点',

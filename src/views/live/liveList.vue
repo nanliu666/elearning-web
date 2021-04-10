@@ -170,7 +170,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   //   enableMultiSelect: true, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 

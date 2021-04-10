@@ -220,7 +220,10 @@ const TABLE_CONFIG = {
   showHandler: true,
   enableMultiSelect: true,
   rowKey: 'id',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  treeProps: { hasChildren: 'hasChildren', children: 'children' },
+  handlerColumn: {
+    fixed: false
+  }
 }
 const TABLE_PAGE_CONFIG = {}
 

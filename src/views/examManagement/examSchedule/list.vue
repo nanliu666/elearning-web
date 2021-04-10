@@ -220,7 +220,7 @@ let TABLE_COLUMNS = [
   {
     label: '有效时间',
     prop: 'effectiveTime',
-    minWidth: 120
+    minWidth: 300
   }
 ]
 const TABLE_CONFIG = {
@@ -230,7 +230,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 const STATUS_STATUS = [
@@ -493,7 +494,9 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
-      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'testPaper' && v != 'createUser'
+      })
     },
     // 切换nav
     handleSelect(key) {

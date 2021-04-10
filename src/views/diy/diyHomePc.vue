@@ -41,7 +41,7 @@
         class="content"
         style="height: 100%"
       >
-        <custom-list></custom-list>
+        <custom-list :active-org="activeOrg"></custom-list>
       </el-col>
     </el-row>
   </div>
@@ -65,7 +65,7 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: { orgId: '0' }
+      activeOrg: {}
     }
   },
   watch: {
@@ -78,7 +78,19 @@ export default {
   },
   methods: {
     //  新建方案
-    addNewPlan() {},
+    addNewPlan() {
+      if (!this.activeOrg.orgId || this.activeOrg.orgId == '0') {
+        this.$message({
+          type: 'error',
+          message: '请先在左侧选择部门!'
+        })
+        return
+      }
+      this.$router.push({
+        path: '/diy/diyHomeEditPc',
+        query: { orgId: this.activeOrg.orgId }
+      })
+    },
     // tree结构子节点过滤
     filterNode(value, data) {
       if (!value) return true
@@ -97,6 +109,7 @@ export default {
             data.push({ orgId: null, orgName: '外部人员' })
           }
           this.treeData = data
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {
