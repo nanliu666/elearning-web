@@ -428,7 +428,18 @@ export default {
   }
 }
 </script>
-
+<style lang="scss">
+.report {
+  .header-area {
+    .date-picker {
+      width: 365px;
+      .el-range-separator {
+        min-width: 25px;
+      }
+    }
+  }
+}
+</style>
 <style lang="scss" scoped>
 .report {
   padding: 24px 16px;
@@ -448,9 +459,6 @@ export default {
       .selector {
         width: 355px;
         margin-right: 16px;
-      }
-      .date-picker {
-        width: 365px;
       }
     }
   }

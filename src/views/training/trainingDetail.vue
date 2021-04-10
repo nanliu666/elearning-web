@@ -1460,9 +1460,6 @@ export default {
             this.getRegisterData()
             this.isStudentList()
           })
-          .catch(() => {
-            this.$message.error('操作失败')
-          })
           .finally(() => {
             this.approveText = ''
             this.approveDlgVisible = false
