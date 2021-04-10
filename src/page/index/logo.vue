@@ -39,11 +39,16 @@ export default {
       let envC = process.env
       return envC.VUE_APP_ENV
     },
-    orgId() {
-      let userInfo = getStore({ name: 'userInfo' })
-      return userInfo.org_id
-    },
-    ...mapGetters(['website', 'keyCollapse', 'tenantContent'])
+    // orgId() {
+    //   let userInfo = getStore({ name: 'userInfo' })
+    //   return userInfo.org_id
+    // },
+    ...mapGetters(['website', 'keyCollapse', 'tenantContent', 'orgIds'])
+  },
+  watch: {
+    orgIds(val) {
+      this.isOrgIdE = val.indexOf('5263') !== -1 ? true : false
+    }
   },
   created() {
     this.isOrgIdEFn()
