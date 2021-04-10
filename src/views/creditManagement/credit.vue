@@ -108,22 +108,23 @@ const COLUMNS = [
   {
     prop: 'name',
     label: '姓名',
-    slot: true,
-    minWidth: 180
+    slot: true
   },
-  {
-    prop: 'user_id_str',
-    label: '用户编号',
-    minWidth: 180
-  },
+  //   {
+  //     prop: 'user_id_str',
+  //     label: '用户编号',
+  //     align:'center',
+  //     minWidth: 180
+  //   },
   {
     prop: 'score',
     label: '积分分值',
-    minWidth: 120
+    align: 'center'
   },
   {
     prop: 'user_status',
     label: '状态',
+    align: 'center',
     slot: true
 
     // formatter: (row) => {
@@ -139,12 +140,12 @@ const COLUMNS = [
     prop: 'dept',
     label: '所在部门',
     slot: true,
-    minWidth: 180
+    align: 'center'
   },
   {
     prop: 'create_time',
     label: '更新时间',
-    minWidth: 180
+    align: 'center'
   }
 ]
 import { VIEW_CREDIT } from '@/const/privileges'

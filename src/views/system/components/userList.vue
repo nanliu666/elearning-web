@@ -168,16 +168,19 @@ const COLUMNS = [
   {
     label: '姓名',
     prop: 'name',
+    align: 'left',
     slot: true
   },
   {
     label: '用户编号',
+    align: 'center',
     prop: 'workNo'
   },
   //状态，1-正常，2-禁用
   {
     label: '状态',
     prop: 'userStatus',
+    align: 'center',
     formatter(record) {
       return (
         {
@@ -190,20 +193,25 @@ const COLUMNS = [
   {
     label: '性别',
     prop: 'sex',
+    align: 'center',
+    width: 60,
     formatter(record) {
       return { 1: '男', 0: '女' }[record.sex] || ''
     }
   },
   {
     label: '部门',
+    align: 'left',
     prop: 'orgName'
   },
   {
     label: '电话',
+    align: 'center',
     prop: 'phonenum'
   },
   {
     label: '邮箱',
+    align: 'center',
     prop: 'userEmail'
   },
 
@@ -211,16 +219,19 @@ const COLUMNS = [
     label: '角色',
     prop: 'roles',
     width: 100,
+    align: 'center',
     formatter(record) {
       return record.roles.map((role) => role.roleName).join(';')
     }
   },
   {
     label: '创建人',
+    align: 'center',
     prop: 'creatorName'
   },
   {
     label: '创建时间',
+    align: 'center',
     prop: 'createTime'
   }
 ]

@@ -335,29 +335,34 @@ const TABLE_COLUMNS = [
   {
     label: '手机号码',
     prop: 'phonenum',
+    align: 'center',
     width: '160'
   },
   {
     label: '电子邮箱',
     prop: 'user_email',
+    align: 'center',
     width: '200'
   },
   {
     label: '状态',
     prop: 'status',
     slot: true,
+    align: 'center',
     width: '80'
   },
   {
     label: '性别',
     prop: 'sex',
     slot: true,
-    width: '120'
+    align: 'center',
+    width: '60'
   },
   {
     label: '讲师类型',
     prop: 'type',
     slot: true,
+    align: 'center',
     width: '120'
   },
   // {
@@ -368,39 +373,46 @@ const TABLE_COLUMNS = [
   {
     label: '讲师级别',
     prop: 'teacher_level',
+    align: 'center',
     minWidth: '120'
   },
   {
     label: '讲师职称',
     prop: 'teacher_title',
+    align: 'center',
     minWidth: '80'
   },
   {
     label: '是否推荐',
     prop: 'is_recommend',
     slot: true,
+    align: 'center',
     minWidth: '80'
   },
   {
     label: '是否最新讲师',
     prop: 'is_latest_teacher',
     slot: true,
+    align: 'center',
     minWidth: '120'
   },
   {
     label: '是否热门讲师',
     prop: 'is_popular_teacher',
     slot: true,
+    align: 'center',
     minWidth: '120'
   },
   {
     label: '创建人',
     prop: 'createName',
+    align: 'center',
     minWidth: '160'
   },
   {
     label: '创建时间',
     prop: 'create_time',
+    align: 'center',
     minWidth: '160'
   }
 ]
@@ -590,6 +602,7 @@ export default {
           v != 'status' &&
           v != 'is_recommend' &&
           v != 'is_popular_teacher' &&
+          v != 'is_latest_teacher' &&
           v != 'createName' &&
           v != 'create_time'
         )
