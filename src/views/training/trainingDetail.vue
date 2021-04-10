@@ -707,6 +707,7 @@
           <el-table-column
             prop="examTime"
             label="考试日期"
+            show-overflow-tooltip
             width="250"
           >
           </el-table-column>
@@ -784,9 +785,10 @@
             :fixed="item.prop === 'userName'"
             header-align="center"
             align="center"
+            show-overflow-tooltip
             :prop="item.prop"
             :label="item.label"
-            :min-width="item.prop === 'orgName' ? '160' : item.prop === 'phonenum' ? '120' : '100'"
+            :min-width="item.prop === 'orgName' ? '80' : item.prop === 'phonenum' ? '100' : '200'"
           >
             <template slot-scope="scope">
               {{ getSigninColumn(scope.row[item.prop], item.dynamic) }}
