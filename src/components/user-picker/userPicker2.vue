@@ -248,6 +248,8 @@ export default {
         .finally(() => {
           this.treeLoading = false
         })
+      this.isIndeterminate = false
+      this.checkAll = false
       this.getOuterData()
     },
     search(search) {
@@ -366,6 +368,7 @@ export default {
       return new Promise((resolve) => {
         getOrgUserChild(params).then((res) => {
           const { orgs = [], users = [] } = res
+          this.setCheckedKeys(this.selectList.map((s) => s.userId))
           resolve(this.normalizeData(orgs.concat(users)))
         })
       })
@@ -375,7 +378,6 @@ export default {
       if (!parentId) return
       this.getTreeData({ parentId }).then((data) => {
         resolve(data)
-        this.setCheckedKeys(this.selectList.map((s) => s.userId))
       })
     },
     normalizeData(data = []) {
