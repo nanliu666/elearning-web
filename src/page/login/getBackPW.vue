@@ -7,7 +7,11 @@
       /> -->
       <img
         v-if="envVar === 'xugong'"
-        src="../../assets/images/logo_yb.png"
+        src="../../assets/images/logo.png"
+      />
+      <img
+        v-else-if="envVar === 'zehui'"
+        src="../../assets/images/logoZeHui.png"
       />
       <img
         v-else

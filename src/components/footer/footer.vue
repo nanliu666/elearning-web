@@ -1,7 +1,7 @@
 <template>
   <div class="footer-container">
     <!-- {{ copy }} -->
-    <span>v2.0.1_20210401_Release &nbsp; &nbsp; &nbsp;</span>
+    <span>v2.1.0_20210410_Release &nbsp; &nbsp; &nbsp;</span>
     <span
       style="opacity: 1;"
       class="policeLogo"
@@ -29,9 +29,9 @@ export default {
     ...mapGetters(['tenantContent'])
   },
   created() {
-    this.copy =
-      (this.tenantContent && JSON.parse(this.tenantContent).copyright) ||
-      'v2.0.1_20210401_Release  备案号：苏ICP备19010525号-2'
+    // this.copy =
+    //   (this.tenantContent && JSON.parse(this.tenantContent).copyright) ||
+    //   'v2.0.1_20210401_Release  备案号：苏ICP备19010525号-2'
   },
   methods: {}
 }

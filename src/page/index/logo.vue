@@ -7,11 +7,15 @@
     <!-- <img src="../../assets/images/logo_white.png" /> -->
     <img
       v-if="envVar === 'zehui' && orgId === '5263'"
-      src="../../assets/images/logo_white_yb.png"
+      src="../../assets/images/logoEWhite.png"
     />
     <img
       v-else-if="envVar === 'xugong'"
-      src="../../assets/images/logo_white_yb.png"
+      src="../../assets/images/logoWhite.png"
+    />
+    <img
+      v-else-if="envVar === 'zehui'"
+      src="../../assets/images/logoZeHuiWhite.png"
     />
     <img
       v-else
