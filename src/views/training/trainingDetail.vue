@@ -1855,6 +1855,9 @@ export default {
         margin-top: 8px;
       }
     }
+    .title_box_headline_r {
+      min-width: 240px;
+    }
   }
   .introduce {
     color: #333333;
