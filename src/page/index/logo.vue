@@ -6,7 +6,7 @@
     <!-- <img :src="JSON.parse(tenantContent).logo || logo" /> -->
     <!-- <img src="../../assets/images/logo_white.png" /> -->
     <img
-      v-if="envVar === 'zehui' && orgId === '5263'"
+      v-if="envVar === 'zehui' && isOrgIdE"
       src="../../assets/images/logoEWhite.png"
     />
     <img
@@ -30,7 +30,9 @@ import { getStore } from '@/util/store'
 export default {
   name: 'Logo',
   data() {
-    return {}
+    return {
+      isOrgIdE: false
+    }
   },
   computed: {
     envVar() {
@@ -43,8 +45,17 @@ export default {
     },
     ...mapGetters(['website', 'keyCollapse', 'tenantContent'])
   },
-  created() {},
+  created() {
+    this.isOrgIdEFn()
+  },
   methods: {
+    isOrgIdEFn() {
+      // 判断是否是挖机组织
+      // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+      let orgIdsVuex = this.orgIds
+      this.orgIdsD = orgIdsVuex || getStore({ name: 'orgIds' })
+      this.isOrgIdE = this.orgIdsD.indexOf('5263') !== -1 ? true : false
+    },
     goWork() {
       this.$router.replace({ path: '/wel' })
     }

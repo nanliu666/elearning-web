@@ -167,6 +167,7 @@ export default {
           this.$store
             .dispatch('LoginByUsername', this.loginForm)
             .then((res) => {
+              this.$store.dispatch('getOrgIdsAc', this.loginForm.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
               let path = this.$route.query.previewUrl
                 ? decodeURI(this.$route.query.previewUrl)
                 : this.tagWel.value
