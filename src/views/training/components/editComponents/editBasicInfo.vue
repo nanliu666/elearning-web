@@ -202,7 +202,20 @@ export default {
           label: '主办单位',
           prop: 'sponsor',
           maxlength: 32,
-          required: true,
+          rules: [
+            {
+              required: true,
+              validator: (rule, value, callback) => {
+                const target = value.trim()
+                if (!target) {
+                  return callback(new Error('请输入主办单位'))
+                } else {
+                  callback()
+                }
+              },
+              trigger: ['blur', 'change']
+            }
+          ],
           span: 11,
           offset: 2
         },
