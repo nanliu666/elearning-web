@@ -103,6 +103,7 @@
             >
               <OrgTree
                 :id-list="form.orgIdList"
+                :org-source="1"
                 @selectedValue="getOrgList"
               ></OrgTree>
             </el-tab-pane>

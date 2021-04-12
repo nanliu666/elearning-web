@@ -51,7 +51,8 @@
 <script>
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
-  props: ['idList', 'isload'],
+  // 可见范围组织列表增加入参，orgSource:1  如果不是就不用 传
+  props: ['idList', 'isload', 'orgSource'],
   data() {
     return {
       filterText: '',
@@ -101,7 +102,7 @@ export default {
     },
     loadOrgData() {
       this.selected = []
-      return getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      return getOrgTreeSimple({ parentOrgId: 0, orgSource: this.orgSource }).then((res) => {
         this.orgData = res
       })
     },
