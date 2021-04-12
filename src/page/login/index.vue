@@ -7,13 +7,17 @@
       <!--图片-->
       <div class="nav flex flex-flow ">
         <div class="LOGO">
-          <!-- <img
-            v-if="envVar === 'zehui' && orgId === '5263'"
-            src="../../assets/images/logoE.png"
-          /> -->
           <img
-            v-if="envVar === 'xugong'"
-            src="../../assets/images/logo_yb.png"
+            v-if="envVar === 'zehui' && isOrgIdE"
+            src="../../assets/images/logoE.png"
+          />
+          <img
+            v-else-if="envVar === 'zehui'"
+            src="../../assets/images/logoZeHui.png"
+          />
+          <img
+            v-else-if="envVar === 'xugong'"
+            src="../../assets/images/logo.png"
           />
           <img
             v-else
@@ -92,7 +96,7 @@ import thirdLogin from './thirdlogin'
 import { mapGetters } from 'vuex'
 import { dateFormat } from '@/util/date'
 import { validatenull } from '@/util/validate'
-// import { getStore } from '@/util/store'
+import { getStore } from '@/util/store'
 import { systemName } from '@/config/env'
 export default {
   name: 'Login',
@@ -105,6 +109,7 @@ export default {
   props: [],
   data() {
     return {
+      isOrgIdE: false,
       time: '',
       activeName: 'user'
     }
@@ -148,8 +153,17 @@ export default {
       this.getTime()
     }, 1000)
   },
-  mounted() {},
+  mounted() {
+    this.isOrgIdEFn()
+  },
   methods: {
+    isOrgIdEFn() {
+      // 判断是否是挖机组织
+      // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+      let orgIdsVuex = this.orgIds
+      this.orgIdsD = orgIdsVuex || getStore({ name: 'orgIds' })
+      this.isOrgIdE = this.orgIdsD.indexOf('5263') !== -1 ? true : false
+    },
     getTime() {
       this.time = dateFormat(new Date())
     }

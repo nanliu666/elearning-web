@@ -19,9 +19,17 @@
         <div class="operate-wrapper">
           <div class="operate-left">
             <div class="input-wrapper">
-              <el-input
+              <!-- <el-input
                 v-model="filterForm[currentTable].name"
                 :disabled="loading[currentTable]"
+                clearable
+                size="medium"
+                :placeholder="
+                  currentTable === 'live' ? '输入直播标题或编号搜索' : '输入用户名称搜索'
+                "
+              ></el-input> -->
+              <el-input
+                v-model="filterForm[currentTable].name"
                 clearable
                 size="medium"
                 :placeholder="
@@ -356,8 +364,8 @@ export default {
           直播编号: true,
           直播名称: true,
           所属分类: true,
-          包含课程: true,
-          创建人: true,
+          包含课程: false,
+          创建人: false,
           状态: true
         },
         person: { 用户编号: true, 用户名称: true, 所属部门: true, 累计时长: true }

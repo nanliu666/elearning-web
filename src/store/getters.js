@@ -33,6 +33,7 @@ const getters = {
   fieldList: (state) => state.process.fieldList,
   trainTimeInVuex: (state) => state.train.trainTimeInVuex,
   paperTimeInVuex: (state) => state.train.paperTimeInVuex,
-  processData: (state) => state.process.processData
+  processData: (state) => state.process.processData,
+  orgIds: (state) => state.user.orgIds
 }
 export default getters

@@ -494,7 +494,9 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
-      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'testPaper' && v != 'createUser'
+      })
     },
     // 切换nav
     handleSelect(key) {

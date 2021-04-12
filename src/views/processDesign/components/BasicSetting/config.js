@@ -1,12 +1,25 @@
 import { categoryOptions } from '@/const/approve'
+const processNameXSS = (rule, value, callback) => {
+  const pattern = new RegExp(
+    // eslint-disable-next-line quotes
+    "[`~!@#$^&*()=|{}':;',\\[\\].<>~！@#￥……&*（）——|{}【】‘；：”“'。，、？]"
+  )
+  if (pattern.test(value)) {
+    callback(new Error('不允许存在特殊字符'))
+  }
+  callback()
+}
 export const columns = [
   {
     span: 24,
     prop: 'processName',
     itemType: 'input',
     maxlength: 32,
-    label: '审批名称',
-    required: true
+    rules: [
+      { validator: processNameXSS, trigger: ['blur', 'change'] },
+      { required: true, message: '请输入审批名称', trigger: 'blur' }
+    ],
+    label: '审批名称'
   },
   {
     span: 24,

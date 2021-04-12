@@ -109,131 +109,6 @@ import {
 import { mapGetters } from 'vuex'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import CommonImageView from '@/components/common-image-viewer/viewer'
-const FORM_COLUMNS = [
-  {
-    prop: 'basicTitle',
-    itemType: 'slotout',
-    span: 24,
-    label: ''
-  },
-  {
-    itemType: 'input',
-    label: '教室名称',
-    prop: 'roomName',
-    required: true,
-    maxLength: 200,
-    span: 11,
-    offset: 0
-  },
-  {
-    label: '所在分类',
-    itemType: 'treeSelect',
-    prop: 'categoryId',
-    required: true,
-    span: 11,
-    offset: 1,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在分类',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  },
-  {
-    itemType: 'input',
-    label: '地址',
-    required: true,
-    maxLength: 300,
-    prop: 'roomAddr',
-    span: 11
-  },
-  {
-    itemType: 'inputNumber',
-    label: '最大容纳人数',
-    prop: 'maxCapacity',
-    max: 100000,
-    min: 0,
-    precision: 0,
-    offset: 1,
-    span: 11
-  },
-  {
-    prop: 'expendTitle',
-    itemType: 'slotout',
-    span: 24,
-    label: ''
-  },
-  {
-    itemType: 'select',
-    label: '投影仪',
-    prop: 'hasProjector',
-    placeholder: '请选择',
-    options: [
-      { label: '有', value: 1 },
-      { label: '没有', value: 0 }
-    ],
-    span: 11,
-    offset: 0
-  },
-  {
-    itemType: 'slot',
-    label: '面积',
-    prop: 'roomArea',
-    rules: [
-      {
-        validator: (rule, value, callback) => {
-          const numberValue = Number(value)
-          if (_.isNaN(numberValue)) {
-            return callback(new Error('面积必须填数字'))
-          } else {
-            if (!_.isInteger(numberValue)) {
-              if (value.split('.')[1].length > 1) {
-                return callback(new Error('面积最多存在一位小数点'))
-              }
-            }
-            if (value > 100000) {
-              return callback(new Error('面积最大限制输入值 100000'))
-            } else if (value <= 100000 && value >= 0) {
-              callback()
-            } else {
-              return callback(new Error('面积必须为正整数'))
-            }
-          }
-        },
-        trigger: ['blur', 'change']
-      }
-    ],
-    span: 11,
-    offset: 1
-  },
-  {
-    prop: 'imageTitle',
-    itemType: 'slotout',
-    span: 24,
-    label: ''
-  },
-  {
-    itemType: 'slot',
-    label: '',
-    prop: 'picReqList',
-    required: false,
-    span: 11
-  }
-]
 export default {
   name: 'ClassroomEdit',
   components: {
@@ -243,7 +118,143 @@ export default {
   data() {
     return {
       pageTitle: '创建教室',
-      formColumns: FORM_COLUMNS,
+      formColumns: [
+        {
+          prop: 'basicTitle',
+          itemType: 'slotout',
+          span: 24,
+          label: ''
+        },
+        {
+          itemType: 'input',
+          label: '教室名称',
+          maxLength: 300,
+          prop: 'roomName',
+          rules: [
+            {
+              required: true,
+              validator: this.validateRoomName,
+              trigger: ['blur', 'change']
+            },
+            { validator: this.checkClassroomName, trigger: ['blur'] }
+          ],
+          span: 11
+        },
+        {
+          label: '所在分类',
+          itemType: 'treeSelect',
+          prop: 'categoryId',
+          required: true,
+          span: 11,
+          offset: 1,
+          props: {
+            selectParams: {
+              placeholder: '请选择所在分类',
+              multiple: false
+            },
+            treeParams: {
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              data: [],
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'name',
+                value: 'id'
+              },
+              required: true
+            }
+          }
+        },
+        {
+          itemType: 'input',
+          label: '地址',
+          rules: [
+            {
+              required: true,
+              validator: this.validateRoomAddr,
+              trigger: ['blur', 'change']
+            }
+          ],
+          maxLength: 300,
+          prop: 'roomAddr',
+          span: 11
+        },
+        {
+          itemType: 'inputNumber',
+          label: '最大容纳人数',
+          prop: 'maxCapacity',
+          max: 100000,
+          min: 0,
+          precision: 0,
+          offset: 1,
+          span: 11
+        },
+        {
+          prop: 'expendTitle',
+          itemType: 'slotout',
+          span: 24,
+          label: ''
+        },
+        {
+          itemType: 'select',
+          label: '投影仪',
+          prop: 'hasProjector',
+          placeholder: '请选择',
+          options: [
+            { label: '有', value: 1 },
+            { label: '没有', value: 0 }
+          ],
+          span: 11,
+          offset: 0
+        },
+        {
+          itemType: 'slot',
+          label: '面积',
+          prop: 'roomArea',
+          rules: [
+            {
+              validator: (rule, value, callback) => {
+                const numberValue = Number(value)
+                if (_.isNaN(numberValue)) {
+                  return callback(new Error('面积必须填数字'))
+                } else {
+                  if (!_.isInteger(numberValue)) {
+                    if (value.split('.')[1].length > 1) {
+                      return callback(new Error('面积最多存在一位小数点'))
+                    }
+                  }
+                  if (value > 100000) {
+                    return callback(new Error('面积最大限制输入值 100000'))
+                  } else if (value <= 100000 && value >= 0) {
+                    callback()
+                  } else {
+                    return callback(new Error('面积必须为正整数'))
+                  }
+                }
+              },
+              trigger: ['blur', 'change']
+            }
+          ],
+          span: 11,
+          offset: 1
+        },
+        {
+          prop: 'imageTitle',
+          itemType: 'slotout',
+          span: 24,
+          label: ''
+        },
+        {
+          itemType: 'slot',
+          label: '',
+          prop: 'picReqList',
+          required: false,
+          span: 11
+        }
+      ],
       formData: {
         roomName: '',
         categoryId: '',
@@ -278,10 +289,24 @@ export default {
     this.initData()
   },
   methods: {
+    validateRoomName(rule, value, callback) {
+      const target = value.trim()
+      if (!target) {
+        return callback(new Error('请输入课室名称'))
+      } else {
+        callback()
+      }
+    },
+    validateRoomAddr(rule, value, callback) {
+      const target = value.trim()
+      if (!target) {
+        return callback(new Error('请输入地址'))
+      } else {
+        callback()
+      }
+    },
     initSetting() {
       this.pageTitle = this.id ? '编辑教室' : '创建教室'
-      const rules = [{ required: false, validator: this.checkClassroomName, trigger: ['blur'] }]
-      _.set(this.formColumns, '[1].rules', rules)
       if (this.categoryId) {
         this.formData.categoryId = this.categoryId
       }
