@@ -148,6 +148,7 @@ export default {
   }
 }
 .content-wr {
+  margin-top: 10px;
   display: flex;
   border: 1px solid #efefef;
   .left {
