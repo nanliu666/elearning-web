@@ -74,3 +74,10 @@ export const updateKnowledge = (params) => put('/manage/v1/knowledge/update', pa
  * 移动
  */
 export const moveKnowledge = (params) => post('/manage/v1/knowledge/list/move', params)
+/**
+ * 查询知识库评价
+ * @param {string} params.knowledgeId  知识库id
+ * @param {string} params.pageNo  页码
+ * @param {string} params.pageSize  页面数量
+ */
+export const getScopeList = (params) => get('/manage/v1/web/knowledge/getScopeList', params)

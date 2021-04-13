@@ -7,7 +7,6 @@
       ref="tree"
       :data="treeList || []"
       :default-expanded-keys="[]"
-      :default-checked-keys="defaultValue"
       :highlight-current="true"
       show-checkbox
       :check-strictly="false"
@@ -49,6 +48,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    visible: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -57,30 +60,24 @@ export default {
       activeData: {}
     }
   },
-  watch: {
-    treeList: {
-      handler(val) {
-        if (val.length > 0) {
-          this.defaultValue = []
-          let filterVal = []
-          this.filterData(val, filterVal)
-          let fiterTree = flatTree(filterVal)
-          fiterTree.map((it) => {
-            // 修复当菜单类型为目录以及菜单都被勾选中
-            // TODO: 待补充：父级内有未被勾选的子集时应该显示半选，即删除父级id
-            if (it.isOwn !== 0 && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
-              this.defaultValue.push(it.menuId)
-            }
-          })
-          // console.log('==', _.find(this.defaultValue, item => {return item === '1353966316758769666'}))
-        }
-      },
-      immediate: true,
-      deep: true
-    }
-  },
-  created() {},
   methods: {
+    initDefault() {
+      this.defaultValue = []
+      let filterVal = []
+      this.filterData(this.treeList, filterVal)
+      let fiterTree = flatTree(filterVal)
+
+      const keys = []
+      fiterTree.map((it) => {
+        // 修复当菜单类型为目录以及菜单都被勾选中
+        // TODO: 待补充：父级内有未被勾选的子集时应该显示半选，即删除父级id
+        if (it.isOwn !== 0 && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
+          this.defaultValue.push(it.menuId)
+          keys.push(it.menuId)
+        }
+      })
+      this.$refs.tree.setCheckedKeys(keys)
+    },
     filterData(data, table) {
       data.map((it) => {
         if (it.isOwn) {
