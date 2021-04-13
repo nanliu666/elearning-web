@@ -41,18 +41,18 @@
         class="content"
         style="height: 100%"
       >
-        <custom-list :active-org="activeOrg"></custom-list>
+        <custom-list-pc :active-org="activeOrg"></custom-list-pc>
       </el-col>
     </el-row>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import customList from './components/customList'
+import customListPc from './components/customListPc'
 export default {
   name: 'DiyHomePc',
   components: {
-    customList
+    customListPc
   },
   data() {
     return {
@@ -105,9 +105,6 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
-          if (parentOrgId === '0') {
-            data.push({ orgId: null, orgName: '外部人员' })
-          }
           this.treeData = data
           this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
