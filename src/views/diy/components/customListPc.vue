@@ -200,13 +200,13 @@ export default {
       this.loading = true
       let params = {
         name: this.customName,
-        device: 0, //写死0：PC
+        device: 1, //写死1：PC
         pageNo: this.pageConfig.current,
         pageSize: this.pageConfig.pageSize
       }
       if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getHomePc(params)
         .then((res) => {
           this.customData = res.data
