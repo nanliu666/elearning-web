@@ -45,9 +45,9 @@
       </div>
     </div>
     <div class="page">
-      <div class="menu">
+      <div>
         <img
-          src="/img/diyPc1.jpg"
+          src="/img/diyMbH.jpg"
           alt=""
         />
       </div>
@@ -56,14 +56,20 @@
         @click="checkFn($event, item, 'banner')"
       >
         <img
-          src="/img/diyPc2.jpg"
+          src="/img/diyMbBanner.jpg"
+          alt=""
+        />
+      </div>
+      <div class="menu">
+        <img
+          src="/img/diyMbMenu.jpg"
           alt=""
         />
       </div>
       <div class="contet">
         <div class="contetL">
           <draggable
-            v-model="contetArrL"
+            v-model="contetArr"
             group="a"
             animation="300"
             drag-class="dragClass"
@@ -73,7 +79,7 @@
           >
             <transition-group>
               <div
-                v-for="item in contetArrL"
+                v-for="item in contetArr"
                 :key="item.id"
                 :class="['contetItem', activeClassKey === item.id ? 'activeClass' : '']"
                 @click="checkFn($event, item, 'left')"
@@ -86,30 +92,7 @@
             </transition-group>
           </draggable>
         </div>
-        <div class="contetR">
-          <draggable
-            v-model="contetArrR"
-            group="b"
-            animation="300"
-            drag-class="dragClass"
-            ghost-class="ghostClass"
-            chosen-class="chosenClass"
-          >
-            <transition-group>
-              <div
-                v-for="item in contetArrR"
-                :key="item.id"
-                :class="['contetItem', activeClassKey === item.id ? 'activeClass' : '']"
-                @click="checkFn($event, item, 'right')"
-              >
-                <img
-                  :src="`/img/${item.id}.jpg`"
-                  alt=""
-                />
-              </div>
-            </transition-group>
-          </draggable>
-        </div>
+
         <div
           v-show="activeClassKey"
           class="edit1"
@@ -129,28 +112,21 @@
           </div>
         </div>
       </div>
+      <div>
+        <img
+          src="/img/diyMbBottom.jpg"
+          alt=""
+        />
+      </div>
     </div>
     <div class="addModule">
-      <h3>添加栏目</h3>
+      <h3>添加栏目：</h3>
       <div class="addModule2">
-        <span>左侧栏目：</span>
         <ul>
           <li
-            v-for="item in baseContetArrL"
+            v-for="item in baseContetArr"
             :key="item.id"
-            @click="addTempFn(item, 'left')"
-          >
-            {{ item.name }}
-          </li>
-        </ul>
-      </div>
-      <div class="addModule2">
-        <span>右侧栏目：</span>
-        <ul>
-          <li
-            v-for="item in baseContetArrR"
-            :key="item.id"
-            @click="addTempFn(item, 'right')"
+            @click="addTempFn(item, 'content')"
           >
             {{ item.name }}
           </li>
@@ -178,7 +154,7 @@ export default {
       formData: {
         orgId: '',
         name: '',
-        device: 1,
+        device: 0,
         item: ''
       },
       editStyle: {
@@ -188,31 +164,20 @@ export default {
       formRules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }]
       },
-      baseContetArrL: [
-        { id: 'diyPcL1', name: '我的任务' },
-        { id: 'diyPcL2', name: '最新直播' },
-        { id: 'diyPcL3', name: '热门课程' },
-        { id: 'diyPcL4', name: '培训中心' },
-        { id: 'diyPcL5', name: '新闻中心' }
+      baseContetArr: [
+        { id: 'diyMb1', name: '我的任务' },
+        { id: 'diyMb2', name: '最新直播' },
+        { id: 'diyMb3', name: '热门课程' },
+        { id: 'diyMb4', name: '培训中心' },
+        { id: 'diyMb5', name: '月度排行榜' },
+        { id: 'diyMb6', name: '新闻资讯' }
       ],
-      baseContetArrR: [
-        { id: 'diyPcR1', name: '个人信息' },
-        { id: 'diyPcR2', name: '学习中的课程' },
-        { id: 'diyPcR3', name: '月度积分排行榜' },
-        { id: 'diyPcR4', name: '月度学时排行榜' }
-      ],
-      contetArrL: [
+      contetArr: [
         // { id: 'diyPcL1', name: '我的任务' },
         // { id: 'diyPcL2', name: '最新直播' },
         // { id: 'diyPcL3', name: '热门课程' },
         // { id: 'diyPcL4', name: '培训中心' },
         // { id: 'diyPcL5', name: '新闻中心' }
-      ],
-      contetArrR: [
-        // { id: 'diyPcR1', name: '个人信息' },
-        // { id: 'diyPcR2', name: '学习中的课程' },
-        // { id: 'diyPcR3', name: '月度积分排行榜' },
-        // { id: 'diyPcR4', name: '月度学时排行榜' }
       ]
     }
   },
@@ -235,7 +200,7 @@ export default {
         console.log('initData', res)
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
-        this.contetArrL = itemObj.content
+        this.contetArr = itemObj.content
         this.contetArrR = itemObj.side
       })
     },
@@ -262,8 +227,8 @@ export default {
     deleteModule() {
       if (this.moduleType === 'left') {
         // 删除左侧模板
-        this.contetArrL.splice(
-          this.contetArrL.findIndex((e) => e.id === this.activeClassKey),
+        this.contetArr.splice(
+          this.contetArr.findIndex((e) => e.id === this.activeClassKey),
           1
         )
       } else if (this.moduleType === 'right') {
@@ -285,25 +250,15 @@ export default {
     },
     addTempFn(item, type) {
       // 添加模板
-      if (type === 'left') {
+      if (type === 'content') {
         // 添加左侧模板
-        let isRepetition = this.contetArrL.some((val) => {
+        let isRepetition = this.contetArr.some((val) => {
           return val.id === item.id
         })
         if (isRepetition) {
           this.$message.error('不能重复添加')
         } else {
-          this.contetArrL.push(item)
-        }
-      } else if (type === 'right') {
-        // 添加右侧模板
-        let isRepetition = this.contetArrR.some((val) => {
-          return val.id === item.id
-        })
-        if (isRepetition) {
-          this.$message.error('不能重复添加')
-        } else {
-          this.contetArrR.push(item)
+          this.contetArr.push(item)
         }
       }
     },
@@ -318,8 +273,7 @@ export default {
           let sendData = {}
           sendData = _.clone(this.formData)
           let items = {}
-          items.content = this.contetArrL
-          items.side = this.contetArrR
+          items.content = this.contetArr
           sendData.item = JSON.stringify(items)
           postSaveTemp(sendData).then((res) => {
             this.tempId = res
@@ -334,8 +288,7 @@ export default {
       sendData = _.clone(this.formData)
       sendData.id = this.tempId
       let items = {}
-      items.content = this.contetArrL
-      items.side = this.contetArrR
+      items.content = this.contetArr
       sendData.item = JSON.stringify(items)
       putUpdataTemp(sendData).then(() => {
         this.$message.success('保存成功')
@@ -362,11 +315,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 .diyHomePc {
-  width: 1500px;
+  text-align: center;
 }
 .operation {
   box-sizing: border-box;
-  width: 1360px;
   padding: 20px 20px 0px 20px;
 }
 .operation .left {
@@ -382,7 +334,8 @@ export default {
   clear: both;
 }
 .page {
-  width: 1360px;
+  margin: auto;
+  width: 502px;
   text-align: center;
   background: #fafafa;
   position: relative;
@@ -395,7 +348,7 @@ export default {
 }
 .contet {
   display: flex;
-  width: 1200px;
+  width: 720px;
   margin: auto;
   padding-top: 50px;
 }
@@ -403,7 +356,6 @@ export default {
   cursor: pointer;
 }
 .contet .contetL {
-  width: 916px;
 }
 .contet .contetR {
   flex: 1;
@@ -423,6 +375,7 @@ export default {
   padding: 30px 0 50px 80px;
 }
 .addModule h3 {
+  text-align: left;
   margin: 0 0 20px 0;
 }
 .addModule .addModule2::after {
