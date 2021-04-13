@@ -3,7 +3,7 @@
     <div class="crumbs">
       <span
         class="back-btn"
-        @click="$router.back()"
+        @click="gotoPlayBack"
       > <i class="el-icon-arrow-left"></i></span>
       <span class="title">查看直播回放</span><!-- class="title iconfont  iconimage_icon_leftarrow" -->
       <span class="tip">直播回放回传到平台需要一段时间，请耐心等待。</span>
@@ -254,6 +254,9 @@ export default {
       } else {
         return (num / 10000).toFixed(2) + '万'
       }
+    },
+    gotoPlayBack() {
+      this.$router.push({ path: '/live/playBackList' })
     }
   }
 }

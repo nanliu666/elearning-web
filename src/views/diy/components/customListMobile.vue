@@ -9,19 +9,6 @@
         @input.native="searchName"
       >
       </el-input>
-      <el-select
-        v-model="device"
-        style="margin-left: 20px"
-        @change="initHomeData"
-      >
-        <el-option
-          v-for="item in deviceOpt"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
-        </el-option>
-      </el-select>
       <!-- 定制列表 -->
       <el-row
         v-loading="loading"
@@ -111,7 +98,7 @@
 <script>
 import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
 export default {
-  name: 'CustomList',
+  name: 'CustomListMobile',
   props: {
     activeOrg: {
       type: Object,
@@ -131,21 +118,6 @@ export default {
       },
       maskVisiable: false,
       n: 0,
-      device: 'all',
-      deviceOpt: [
-        {
-          label: '全部',
-          value: 'all'
-        },
-        {
-          label: 'PC',
-          value: 0
-        },
-        {
-          label: 'APP',
-          value: 1
-        }
-      ],
       loading: false
     }
   },
@@ -228,7 +200,7 @@ export default {
       this.loading = true
       let params = {
         name: this.customName,
-        device: this.device == 'all' ? '' : this.device,
+        device: 1, //写死1：APP
         pageNo: this.pageConfig.current,
         pageSize: this.pageConfig.pageSize
       }

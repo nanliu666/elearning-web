@@ -2,12 +2,7 @@
   <div class="bannerPc">
     <page-header title="bannerPc">
       <div slot="rightMenu">
-        <el-button
-          size="medium"
-          @click="preview"
-        >
-          预览效果
-        </el-button>
+        <!-- <el-button size="medium" @click="preview"> 预览效果 </el-button> -->
         <el-button
           type="primary"
           size="medium"
@@ -48,22 +43,29 @@
         class="content"
         style="height: 100%"
       >
-        <banner-table @bj="editActive"></banner-table>
+        <banner-table-pc
+          ref="bannerTable"
+          :active-org="activeOrg"
+          @bj="editActive"
+        ></banner-table-pc>
       </el-col>
     </el-row>
     <!-- 抽屉 -->
-    <banner-drawer ref="bannerDrawer"></banner-drawer>
+    <banner-drawer-pc
+      ref="bannerDrawer"
+      @addSuccess="addSuccess"
+    ></banner-drawer-pc>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import bannerTable from './components/bannerTable'
-import bannerDrawer from './components/bannerDrawer'
+import bannerTablePc from './components/bannerTablePc'
+import bannerDrawerPc from './components/bannerDrawerPc'
 export default {
   name: 'BannerPc',
   components: {
-    bannerTable,
-    bannerDrawer
+    bannerTablePc,
+    bannerDrawerPc
   },
   data() {
     return {
@@ -92,13 +94,13 @@ export default {
     preview() {},
     //  发布Banner
     releaseBanner() {
-      //   if (!Object.keys(this.activeOrg).length) {
-      //     this.$message({
-      //       type: 'error',
-      //       message: '请先在左侧选择一个部门!'
-      //     })
-      //     return
-      //   }
+      if (!Object.keys(this.activeOrg).length || this.activeOrg.orgId == '0') {
+        this.$message({
+          type: 'error',
+          message: '请先在左侧选择一个部门!'
+        })
+        return
+      }
       this.$refs.bannerDrawer.showDrawer('add')
     },
     // 编辑
@@ -119,15 +121,16 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
-          if (parentOrgId === '0') {
-            data.push({ orgId: null, orgName: '外部人员' })
-          }
           this.treeData = data
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {
           this.treeLoading = false
         })
+    },
+    addSuccess() {
+      this.$refs.bannerTable.initBannerData()
     }
   }
 }
