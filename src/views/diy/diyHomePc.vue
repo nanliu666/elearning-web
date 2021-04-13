@@ -79,7 +79,7 @@ export default {
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId || this.activeOrg.orgId == '0') {
+      if (!this.activeOrg.orgId) {
         this.$message({
           type: 'error',
           message: '请先在左侧选择部门!'
@@ -99,6 +99,7 @@ export default {
     // tree节点点击
     nodeClick(data) {
       this.activeOrg = data
+      console.log(this.activeOrg)
     },
     // 初始化组织架构
     async loadTree(parentOrgId = '0') {

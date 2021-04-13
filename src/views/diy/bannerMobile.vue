@@ -8,7 +8,7 @@
           size="medium"
           @click="releaseBanner"
         >
-          发布Banner
+          新建Banner
         </el-button>
       </div>
     </page-header>
@@ -53,7 +53,9 @@
     <!-- 抽屉 -->
     <banner-drawer-mobile
       ref="bannerDrawer"
+      :active-org="activeOrg"
       @addSuccess="addSuccess"
+      @init="addSuccess"
     ></banner-drawer-mobile>
   </div>
 </template>
@@ -94,7 +96,7 @@ export default {
     preview() {},
     //  发布Banner
     releaseBanner() {
-      if (!Object.keys(this.activeOrg).length || this.activeOrg.orgId == '0') {
+      if (!Object.keys(this.activeOrg).length) {
         this.$message({
           type: 'error',
           message: '请先在左侧选择一个部门!'

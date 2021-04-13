@@ -104,6 +104,14 @@ export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
+  props: {
+    activeOrg: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
       title: '',
@@ -134,12 +142,22 @@ export default {
       loading: false
     }
   },
+  watch: {
+    activeOrg: {
+      handler(val) {
+        this.activeOrg = val
+        this.$emit('init')
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
     showDrawer(value, data) {
       // add新增,edit编辑
       switch (value) {
         case 'add':
-          this.title = '发布Banner'
+          this.title = '新建Banner'
           break
         case 'edit':
           this.title = '编辑Banner'
@@ -201,11 +219,12 @@ export default {
         picUrl: this.uploadData[0].fileUrl,
         ...this.form
       }
-      if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId || '' })
-      //   判断是否是全部
-      if (this.rowData && this.rowData.orgId == '0') Object.assign(params, { orgId: '' })
+
       // 编辑操作
       if (this.bannerId) {
+        if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId || '' })
+        //   判断是否是全部
+        //   if (this.rowData && this.rowData.orgId == '0') Object.assign(params, { orgId: '' })
         params.id = this.bannerId
         await updateBanner(params)
           .then(() => {
@@ -226,6 +245,8 @@ export default {
             this.cancelDrawer()
           })
       } else {
+        if (this.activeOrg && this.activeOrg.orgId)
+          Object.assign(params, { orgId: this.activeOrg.orgId })
         // 新增操作
         await addBanner(params)
           .then(() => {

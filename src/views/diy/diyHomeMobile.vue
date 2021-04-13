@@ -79,7 +79,7 @@ export default {
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId || this.activeOrg.orgId == '0') {
+      if (!this.activeOrg.orgId) {
         this.$message({
           type: 'error',
           message: '请先在左侧选择部门!'
