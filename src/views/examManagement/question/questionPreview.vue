@@ -27,7 +27,7 @@
       class="qustion__options"
     >
       <li
-        v-for="option in data.options"
+        v-for="(option, index) in data.options"
         :key="option.key"
       >
         <div class="wrap">
@@ -48,7 +48,13 @@
           >
             {{ '' }}
           </el-checkbox>
-          <span>{{ _.unescape(option.content) }}</span>
+          <span>
+            <span
+              v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(data.type)"
+              style="margin-right: 4px"
+            >{{ QUESTION_PREFACE[index] }}.</span>
+            <span>{{ _.unescape(option.content) }}</span>
+          </span>
           <div
             v-if="option.url"
             class="qustion__options-image"
@@ -88,6 +94,7 @@
 <script>
 import ImageViewer from '@/components/image-viewer/ImageViewer'
 import {
+  QUESTION_PREFACE,
   QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
   QUESTION_TYPE_SINGLE,
@@ -119,6 +126,7 @@ export default {
     }
   },
   computed: {
+    QUESTION_PREFACE: () => QUESTION_PREFACE,
     QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
     QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
@@ -141,6 +149,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/ .el-radio__label {
+  padding-left: 0px;
+}
 .qustion {
   &__attachments {
     margin-top: 12px;
@@ -178,13 +189,7 @@ export default {
     margin-top: 12px;
     li {
       margin-bottom: 12px;
-      // &:last-of-type {
-      //   margin-bottom: 0;
-      // }
       .el-radio {
-        margin-right: 10px;
-      }
-      .el-checkbox {
         margin-right: 10px;
       }
     }
