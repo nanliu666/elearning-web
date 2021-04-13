@@ -1,13 +1,17 @@
 <template>
   <div class="fill page">
     <div class="logo">
-      <!-- <img
-        v-if="envVar === 'zehui' && orgId === '5263'"
-        src="../../assets/images/logo_yb.png"
-      /> -->
       <img
-        v-if="envVar === 'xugong'"
-        src="../../assets/images/logo_yb.png"
+        v-if="envVar === 'zehui' && isOrgIdE"
+        src="../../assets/images/logoE.png"
+      />
+      <img
+        v-else-if="envVar === 'xugong'"
+        src="../../assets/images/logo.png"
+      />
+      <img
+        v-else-if="envVar === 'zehui'"
+        src="../../assets/images/logoZeHui.png"
       />
       <img
         v-else
@@ -293,7 +297,7 @@ import { getCode, checkPhoneCode, checkPassword } from '@/api/personalInfo.js'
 import md5 from 'js-md5'
 import pageHeader from '@/components/page-header/pageHeader'
 import { getCaptcha } from '@/api/user'
-// import { getStore } from '@/util/store'
+import { getStore } from '@/util/store'
 export default {
   components: {
     pageHeader
@@ -348,6 +352,7 @@ export default {
       }
     }
     return {
+      isOrgIdE: false,
       userId: '',
       step: 1,
       steps: {
@@ -456,8 +461,16 @@ export default {
     this.refreshCode()
     this.identity.msgText = this.config.MSGINIT
     this.identity.msgTime = this.config.MSGTIME
+    this.isOrgIdEFn()
   },
   methods: {
+    isOrgIdEFn() {
+      // 判断是否是挖机组织
+      // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+      let orgIdsVuex = this.orgIds
+      this.orgIdsD = orgIdsVuex || getStore({ name: 'orgIds' })
+      this.isOrgIdE = this.orgIdsD.indexOf('5263') !== -1 ? true : false
+    },
     refreshCode() {
       getCaptcha().then((res) => {
         this.identity.form.captchaKey = res.key
