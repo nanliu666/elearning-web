@@ -8,7 +8,7 @@
     :limit="limit"
     :accept="accept"
     :multiple="multiple"
-    :show-file-list="false"
+    :show-file-list="showFileList"
     :http-request="httpRequest"
     :before-upload="beforeUpload"
     :file-list="value"
@@ -71,6 +71,10 @@ export default {
     value: {
       type: Array,
       default: () => []
+    },
+    showFileList: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
