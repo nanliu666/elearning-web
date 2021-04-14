@@ -390,12 +390,16 @@
             #handler="{row}"
           >
             <div class="menuClass">
+              <!-- 发布规则为手动发布的时候显示发布成绩的按钮 -->
+              <!-- 手动修改过成绩后（已自动发布）不许再手动发布成绩 isPublish 是否已经发布过成绩 true-发布 false-未发布-->
+              <!-- 成绩未出，不许发布成绩 status 答卷状态: 1-已发布 2-考试中 3-已提交 4-阅卷中 5-已阅卷-->
               <el-button
-                v-if="!examDetail.autoEvaluate"
+                v-if="examDetail.publishType == 3"
                 type="text"
-                @click="pubulishAchievement({ ids: row.id })"
+                :disabled="row.status == 5 && row.isPublish"
+                @click="pubulishAchievement(row.id)"
               >
-                发布成绩
+                {{ !row.isPublish ? '' : '已' }}发布成绩
               </el-button>
               <!-- 显示条件：开启发放证书功能 -->
               <!-- 置灰条件：考试未通过 -->
@@ -607,7 +611,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        putAchievement(ids).then(() => {
+        putAchievement({ ids: ids, examId: this.$route.query.id }).then(() => {
           this.$message.success('发布成功')
           this.loadTableData()
         })
@@ -619,7 +623,7 @@ export default {
       _.each(selection, (item) => {
         ids.push(item.id)
       })
-      this.pubulishAchievement({ ids: ids })
+      this.pubulishAchievement(ids)
     },
     // 发放与撤回证书操作放一起
     handleCertificate(selection, operation, type) {

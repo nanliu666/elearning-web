@@ -9,19 +9,6 @@
         @input.native="searchName"
       >
       </el-input>
-      <el-select
-        v-model="device"
-        style="margin-left: 20px"
-        @change="initHomeData"
-      >
-        <el-option
-          v-for="item in deviceOpt"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        >
-        </el-option>
-      </el-select>
       <!-- 定制列表 -->
       <el-row
         v-loading="loading"
@@ -40,7 +27,7 @@
               @mouseleave=";(maskVisiable = false), (n = i)"
             >
               <el-image
-                src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
+                :src="require('@/assets/images/diybanner.png')"
                 style="display: block"
               >
               </el-image>
@@ -111,7 +98,7 @@
 <script>
 import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
 export default {
-  name: 'CustomList',
+  name: 'CustomListPc',
   props: {
     activeOrg: {
       type: Object,
@@ -131,21 +118,6 @@ export default {
       },
       maskVisiable: false,
       n: 0,
-      device: 'all',
-      deviceOpt: [
-        {
-          label: '全部',
-          value: 'all'
-        },
-        {
-          label: 'PC',
-          value: 0
-        },
-        {
-          label: 'APP',
-          value: 1
-        }
-      ],
       loading: false
     }
   },
@@ -228,13 +200,13 @@ export default {
       this.loading = true
       let params = {
         name: this.customName,
-        device: this.device == 'all' ? '' : this.device,
+        device: 1, //写死1：PC
         pageNo: this.pageConfig.current,
         pageSize: this.pageConfig.pageSize
       }
       if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getHomePc(params)
         .then((res) => {
           this.customData = res.data

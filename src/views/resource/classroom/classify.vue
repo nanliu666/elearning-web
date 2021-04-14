@@ -335,7 +335,7 @@ export default {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
       const statusText = row.status == 0 ? '启用' : '停用'
-      const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
+      const stopContent = `您确定要停用该分类吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`

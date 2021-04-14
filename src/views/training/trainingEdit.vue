@@ -207,8 +207,11 @@ export default {
             const detailData = _.pick(trainInfo, detailKeyList)
             this.$refs.editBasicInfo.formData = basicInfo
             const { headTeacher, teachAssistant } = detailData
-            this.$refs.editDetail.teacherDefault = [headTeacher]
+            this.$refs.editDetail.teacherDefault = Object.keys(headTeacher).length
+              ? [headTeacher]
+              : []
             this.$refs.editDetail.teachAssistantDefault = teachAssistant
+            console.log(teachAssistant)
             detailData.headTeacher = detailData.headTeacher.userId
             detailData.teachAssistant = _.map(detailData.teachAssistant, 'userId')
             this.$refs.editDetail.formData = detailData
