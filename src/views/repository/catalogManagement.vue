@@ -416,7 +416,7 @@ export default {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
       const statusText = row.status === '0' ? '停用' : '启用'
-      const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
+      const stopContent = `您确定要停用该分类吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       // 获取到当前分类以及子分类的id集合
