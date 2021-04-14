@@ -295,10 +295,11 @@ export default {
     flex: 1;
   }
   .drawer__footer {
-    display: flex;
-    button {
-      flex: 1;
-    }
+    text-align: right;
+    // display: flex;
+    // button {
+    //   flex: 1;
+    // }
   }
 }
 </style>
