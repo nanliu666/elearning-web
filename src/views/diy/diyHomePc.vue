@@ -41,18 +41,18 @@
         class="content"
         style="height: 100%"
       >
-        <custom-list :active-org="activeOrg"></custom-list>
+        <custom-list-pc :active-org="activeOrg"></custom-list-pc>
       </el-col>
     </el-row>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import customList from './components/customList'
+import customListPc from './components/customListPc'
 export default {
   name: 'DiyHomePc',
   components: {
-    customList
+    customListPc
   },
   data() {
     return {
@@ -79,7 +79,7 @@ export default {
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId || this.activeOrg.orgId == '0') {
+      if (!this.activeOrg.orgId) {
         this.$message({
           type: 'error',
           message: '请先在左侧选择部门!'
@@ -99,15 +99,13 @@ export default {
     // tree节点点击
     nodeClick(data) {
       this.activeOrg = data
+      console.log(this.activeOrg)
     },
     // 初始化组织架构
     async loadTree(parentOrgId = '0') {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
-          if (parentOrgId === '0') {
-            data.push({ orgId: null, orgName: '外部人员' })
-          }
           this.treeData = data
           this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
