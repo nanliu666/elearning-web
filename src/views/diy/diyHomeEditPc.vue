@@ -6,17 +6,17 @@
           ref="diyFormRef"
           :rules="formRules"
           :model="formData"
-          label-width="80px"
+          label-width="100px"
         >
           <el-form-item
             prop="name"
-            label="名称："
+            label="方案名称："
           >
             <el-input
               v-model="formData.name"
               type="text"
               size="small"
-              placeholder="请输名称"
+              placeholder="请输方案名称"
             ></el-input>
           </el-form-item>
         </el-form>
@@ -232,7 +232,6 @@ export default {
       let sendData = {}
       sendData.id = this.tempId
       getDetailTemp(sendData).then((res) => {
-        console.log('initData', res)
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
         this.contetArrL = itemObj.content
@@ -241,7 +240,6 @@ export default {
     },
     checkFn(event, item, moduleType) {
       // 选中模块时触发
-      console.log('event', event)
       if (item) {
         this.activeClassKey = item.id
       }
@@ -251,13 +249,11 @@ export default {
       this.moduleType = moduleType
       this.editStyle.top = event.target.offsetTop
       this.editStyle.left = event.target.offsetLeft + event.target.offsetWidth + 10
-      console.log('item', item)
     },
-    moveFn(event) {
+    moveFn() {
       // 移动模块时触发
       this.activeClassKey = ''
       this.moduleType = ''
-      console.log('event', event)
     },
     deleteModule() {
       if (this.moduleType === 'left') {
@@ -391,8 +387,6 @@ export default {
   border: #f00 solid 1px;
 }
 
-.page .menu {
-}
 .contet {
   display: flex;
   width: 1200px;
@@ -412,8 +406,7 @@ export default {
   position: absolute;
   z-index: 2000;
 }
-.contet .edit2 {
-}
+
 .contet .edit2 span {
   color: #333;
   font-size: 22px;
