@@ -29,7 +29,7 @@ export const getCreateUserId = (params) =>
 /**
  * 分类查询接口
  * */
-// export const getCategoryList = (params) => get('/manage/v1/evaluation/category', params)
+export const getCategoryList = (params) => get('/api/common/v1/category/getCategoryTree', params)
 /**
  * 修改分类
  * */

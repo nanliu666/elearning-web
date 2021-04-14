@@ -326,6 +326,7 @@ export default {
       getAudience(this.getData2params)
         .then((res) => {
           this.tableData = res.data
+          this.total = res.totalNum
           this.tableLoading = false
         })
         .catch(() => {
