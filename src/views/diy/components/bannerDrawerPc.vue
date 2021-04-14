@@ -175,6 +175,7 @@ export default {
           url: data.picUrl,
           uid: Math.round(Math.random() * 10000 + 1000)
         })
+        console.log(this.uploadData)
       }
       this.visible = true
     },
@@ -231,7 +232,7 @@ export default {
               type: 'success',
               message: '保存成功!'
             })
-            // this.$emit('addSuccess')
+            this.$emit('addSuccess')
           })
           .catch(() => {
             this.$message({
@@ -253,7 +254,7 @@ export default {
               type: 'success',
               message: '添加banner成功!'
             })
-            // this.$emit('addSuccess')
+            this.$emit('addSuccess')
           })
           .catch(() => {
             this.$message({
