@@ -237,7 +237,7 @@ export default {
       await getBannerList(params)
         .then((res) => {
           this.tableData = res.data
-          this.page.total = res.totalPage
+          this.page.total = res.totalNum
         })
         .finally(() => {
           this.tableLoading = false
