@@ -131,6 +131,9 @@ export default {
       immediate: true
     }
   },
+  activated() {
+    this.initHomeData()
+  },
   methods: {
     handleSizeChange(val) {
       this.pageConfig.pageSize = val
