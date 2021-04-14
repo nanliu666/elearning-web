@@ -78,7 +78,13 @@
         v-if="!customData.length"
         class="empty-block"
       >
-        暂无数据
+        <img
+          src="@/assets/images/nodata.png"
+          class="empty-img"
+        />
+        <div class="nodata">
+          暂无数据
+        </div>
       </div>
       <div class="page">
         <el-pagination
@@ -209,7 +215,7 @@ export default {
       }
       if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getHomePc(params)
         .then((res) => {
           this.customData = res.data
@@ -268,6 +274,9 @@ export default {
   }
   .empty-block {
     text-align: center;
+    .empty-img {
+      text-align: center;
+    }
   }
   .page {
     text-align: right;

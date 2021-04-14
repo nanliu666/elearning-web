@@ -80,16 +80,9 @@ export default {
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId) {
-        this.$message({
-          type: 'error',
-          message: '请先在左侧选择部门!'
-        })
-        return
-      }
       this.$router.push({
         path: '/diy/diyHomeEditPc',
-        query: { orgId: this.activeOrg.orgId == '0' ? '' : this.activeOrg.orgId }
+        query: { orgId: this.activeOrg.orgId }
       })
     },
     // tree结构子节点过滤
@@ -106,8 +99,11 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
+          if (parentOrgId === '0') {
+            data.push({ orgId: null, orgName: '外部人员' })
+          }
           this.treeData = data
-          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '默认方案', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {
