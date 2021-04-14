@@ -65,7 +65,7 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: {}
+      activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
   },
   watch: {
@@ -73,8 +73,9 @@ export default {
       this.$refs.orgTree.filter(val)
     }
   },
-  mounted() {
-    this.loadTree()
+  async mounted() {
+    await this.loadTree()
+    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
   },
   methods: {
     //  新建方案

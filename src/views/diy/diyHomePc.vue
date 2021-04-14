@@ -65,7 +65,7 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: {}
+      activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
   },
   watch: {
@@ -73,8 +73,9 @@ export default {
       this.$refs.orgTree.filter(val)
     }
   },
-  mounted() {
-    this.loadTree()
+  async mounted() {
+    await this.loadTree()
+    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
   },
   methods: {
     //  新建方案
@@ -99,7 +100,6 @@ export default {
     // tree节点点击
     nodeClick(data) {
       this.activeOrg = data
-      console.log(this.activeOrg)
     },
     // 初始化组织架构
     async loadTree(parentOrgId = '0') {
