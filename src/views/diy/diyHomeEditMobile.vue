@@ -308,7 +308,7 @@ export default {
     },
     goBack() {
       // 返回
-      this.$router.push({ path: '/diy/diyHomePc' })
+      this.$router.push({ path: '/diy/diyHomeMobile' })
     }
   }
 }
