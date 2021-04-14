@@ -142,6 +142,21 @@ const TABLE_COLUMNS = [
     prop: 'jobPercent',
     slot: true,
     minWidth: 100
+  },
+  {
+    label: '用户岗位',
+    minWidth: 100,
+    prop: 'position'
+  },
+  {
+    label: '学习开始时间',
+    minWidth: 150,
+    prop: 'startTime'
+  },
+  {
+    label: '学习结束时间',
+    minWidth: 150,
+    prop: 'endTime'
   }
 ]
 const TABLE_CONFIG = {
@@ -149,6 +164,9 @@ const TABLE_CONFIG = {
   showHandler: true,
   enableMultiSelect: true,
   showIndexColumn: false,
+  handlerColumn: {
+    minWidth: 150
+  },
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
