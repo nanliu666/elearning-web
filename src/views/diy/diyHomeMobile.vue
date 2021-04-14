@@ -1,5 +1,5 @@
 <template>
-  <div class="diyHomePc">
+  <div class="diyHomeMobile">
     <page-header title="首页定制">
       <el-button
         slot="rightMenu"
@@ -41,18 +41,18 @@
         class="content"
         style="height: 100%"
       >
-        <custom-list :active-org="activeOrg"></custom-list>
+        <custom-list-mobile :active-org="activeOrg"></custom-list-mobile>
       </el-col>
     </el-row>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import customList from './components/customList'
+import customListMobile from './components/customListMobile'
 export default {
-  name: 'DiyHomePc',
+  name: 'DiyHomeMobile',
   components: {
-    customList
+    customListMobile
   },
   data() {
     return {
@@ -79,7 +79,7 @@ export default {
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId || this.activeOrg.orgId == '0') {
+      if (!this.activeOrg.orgId) {
         this.$message({
           type: 'error',
           message: '请先在左侧选择部门!'
@@ -87,7 +87,7 @@ export default {
         return
       }
       this.$router.push({
-        path: '/diy/diyHomeEditPc',
+        path: '/diy/diyHomeEditMobile',
         query: { orgId: this.activeOrg.orgId }
       })
     },
@@ -105,9 +105,6 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
-          if (parentOrgId === '0') {
-            data.push({ orgId: null, orgName: '外部人员' })
-          }
           this.treeData = data
           this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
@@ -120,7 +117,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.diyHomePc {
+.diyHomeMobile {
   .sidebar {
     width: 300px;
   }

@@ -2,18 +2,13 @@
   <div class="bannerPc">
     <page-header title="bannerPc">
       <div slot="rightMenu">
-        <el-button
-          size="medium"
-          @click="preview"
-        >
-          预览效果
-        </el-button>
+        <!-- <el-button size="medium" @click="preview"> 预览效果 </el-button> -->
         <el-button
           type="primary"
           size="medium"
           @click="releaseBanner"
         >
-          发布Banner
+          新建Banner
         </el-button>
       </div>
     </page-header>
@@ -48,22 +43,31 @@
         class="content"
         style="height: 100%"
       >
-        <banner-table @bj="editActive"></banner-table>
+        <banner-table-mobile
+          ref="bannerTable"
+          :active-org="activeOrg"
+          @bj="editActive"
+        ></banner-table-mobile>
       </el-col>
     </el-row>
     <!-- 抽屉 -->
-    <banner-drawer ref="bannerDrawer"></banner-drawer>
+    <banner-drawer-mobile
+      ref="bannerDrawer"
+      :active-org="activeOrg"
+      @addSuccess="addSuccess"
+      @init="addSuccess"
+    ></banner-drawer-mobile>
   </div>
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
-import bannerTable from './components/bannerTable'
-import bannerDrawer from './components/bannerDrawer'
+import bannerTableMobile from './components/bannerTableMobile'
+import bannerDrawerMobile from './components/bannerDrawerMobile'
 export default {
-  name: 'BannerPc',
+  name: 'BannerMobile',
   components: {
-    bannerTable,
-    bannerDrawer
+    bannerTableMobile,
+    bannerDrawerMobile
   },
   data() {
     return {
@@ -92,13 +96,13 @@ export default {
     preview() {},
     //  发布Banner
     releaseBanner() {
-      //   if (!Object.keys(this.activeOrg).length) {
-      //     this.$message({
-      //       type: 'error',
-      //       message: '请先在左侧选择一个部门!'
-      //     })
-      //     return
-      //   }
+      if (!Object.keys(this.activeOrg).length) {
+        this.$message({
+          type: 'error',
+          message: '请先在左侧选择一个部门!'
+        })
+        return
+      }
       this.$refs.bannerDrawer.showDrawer('add')
     },
     // 编辑
@@ -119,15 +123,16 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
-          if (parentOrgId === '0') {
-            data.push({ orgId: null, orgName: '外部人员' })
-          }
           this.treeData = data
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {
           this.treeLoading = false
         })
+    },
+    addSuccess() {
+      this.$refs.bannerTable.initBannerData()
     }
   }
 }
