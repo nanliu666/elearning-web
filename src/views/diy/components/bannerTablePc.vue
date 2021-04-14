@@ -169,7 +169,7 @@ export default {
     }
   },
   mounted() {
-    this.initBannerData()
+    // this.initBannerData()
   },
   methods: {
     //  处理页码改变

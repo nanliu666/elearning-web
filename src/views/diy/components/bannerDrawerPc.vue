@@ -231,7 +231,7 @@ export default {
               type: 'success',
               message: '保存成功!'
             })
-            this.$emit('addSuccess')
+            // this.$emit('addSuccess')
           })
           .catch(() => {
             this.$message({
@@ -253,7 +253,7 @@ export default {
               type: 'success',
               message: '添加banner成功!'
             })
-            this.$emit('addSuccess')
+            // this.$emit('addSuccess')
           })
           .catch(() => {
             this.$message({

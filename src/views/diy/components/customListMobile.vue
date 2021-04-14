@@ -206,7 +206,7 @@ export default {
       }
       if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getHomePc(params)
         .then((res) => {
           this.customData = res.data
