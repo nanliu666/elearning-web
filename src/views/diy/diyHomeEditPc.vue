@@ -1,5 +1,8 @@
 <template>
-  <div class="diyHomePc">
+  <div
+    v-loading="loading"
+    class="diyHomePc"
+  >
     <div class="operation">
       <div class="left">
         <el-form
@@ -169,6 +172,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       activeClassKey: '',
       tempId: '', // 模板id
       moduleType: '', // 模块类型，判断是左边还是右边或者是头部banner
@@ -307,6 +311,7 @@ export default {
       // 新增模板时保存
       this.$refs['diyFormRef'].validate((valid) => {
         if (valid) {
+          this.loading = true
           if (this.tempId && this.tempId.length > 0) {
             this.updataTempFn()
             return
@@ -318,14 +323,18 @@ export default {
           items.side = this.contetArrR
           sendData.item = JSON.stringify(items)
           postSaveTemp(sendData).then((res) => {
+            this.loading = false
             this.tempId = res
             this.$message.success('保存成功')
           })
+        } else {
+          this.loading = false
         }
       })
     },
     updataTempFn() {
       // 修改模板
+      this.loading = true
       let sendData = {}
       sendData = _.clone(this.formData)
       sendData.id = this.tempId
@@ -334,15 +343,18 @@ export default {
       items.side = this.contetArrR
       sendData.item = JSON.stringify(items)
       putUpdataTemp(sendData).then(() => {
+        this.loading = false
         this.$message.success('保存成功')
       })
     },
     releaseFn() {
       // 发布
+      this.loading = true
       if (this.tempId && this.tempId.length > 0) {
         let sendData = {}
         sendData.id = this.tempId
         putReleaseTemp(sendData).then(() => {
+          this.loading = false
           this.$message.success('发布成功')
         })
       } else {
