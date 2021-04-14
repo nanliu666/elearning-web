@@ -85,7 +85,7 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 // import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { getLiveList, getcategoryTree, getCreateUserId } from '@/api/live/liveList'
+import { getLiveList, getCategoryList, getCreateUserId } from '@/api/live/liveList'
 let TABLE_COLUMNS = [
   { type: 'index', label: '序号', width: 100 },
   {
@@ -262,7 +262,7 @@ export default {
   },
   methods: {
     getCategoryList() {
-      return getcategoryTree({ source: 'live' }).then((res) => {
+      return getCategoryList({ source: 'live' }).then((res) => {
         return _.concat(
           [
             {
