@@ -89,7 +89,7 @@ export default {
       }
       this.$router.push({
         path: '/diy/diyHomeEditPc',
-        query: { orgId: this.activeOrg.orgId }
+        query: { orgId: this.activeOrg.orgId == '0' ? '' : this.activeOrg.orgId }
       })
     },
     // tree结构子节点过滤
