@@ -17,6 +17,7 @@
         :model="form"
         label-width="100px"
         label-position="left"
+        :rules="rules"
       >
         <!-- <el-form-item label="设备类型：">
           <el-select v-model="form.deviceType">
@@ -24,7 +25,10 @@
             <el-option label="PC" value="PC"></el-option>
           </el-select>
         </el-form-item> -->
-        <el-form-item label="Banner图：">
+        <el-form-item
+          label="Banner图："
+          prop="banner"
+        >
           <common-upload
             v-model="uploadData"
             :before-upload="beforeUpload"
@@ -139,7 +143,10 @@ export default {
           value: 2
         }
       ],
-      loading: false
+      loading: false,
+      rules: {
+        banner: [{ required: true, message: '请上传banner图!', trigger: 'change' }]
+      }
     }
   },
   watch: {
