@@ -22,6 +22,7 @@
     </page-header>
     <basic-container>
       <preview-content
+        v-loading="contentLoading"
         :has-answer="true"
         :paper-data="paperData"
       />
@@ -44,6 +45,7 @@ export default {
   },
   data() {
     return {
+      contentLoading: false,
       previewDialogVisible: false,
       paperData: []
     }
@@ -78,8 +80,8 @@ export default {
         .value()
     },
     initData() {
+      this.contentLoading = true
       this.paperData = []
-      this.loading = true
       // 手工卷子接口 getManualPreview
       // 随机卷子接口统一接口 createRandomPaper
       let loadFun = this.$route.query.paperType === 'manual' ? getManualPreview : createRandomPaper
@@ -95,7 +97,7 @@ export default {
           this.paperData = res
         })
         .finally(() => {
-          this.loading = false
+          this.contentLoading = false
         })
     }
   }

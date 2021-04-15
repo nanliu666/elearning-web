@@ -3,7 +3,6 @@
  */
 import html2canvas from 'html2canvas'
 import JsPDF from 'jspdf'
-
 /* eslint-disable */
 
 const PDF = {}
@@ -15,12 +14,12 @@ let a4Height = 841.89
 let defaultOptions = {
   allowTaint: true,
   useCORS: true,
-  dpi: 120, // 图片清晰度问题
+  dpi: window.devicePixelRatio * 4,
   background: '#FFFFFF' //如果指定的div没有设置背景色会默认成黑色,这里是个坑
 }
 
 PDF.install = function(Vue, rootOptions = {}) {
-  Vue.prototype.$pdf = function(dom, options = rootOptions) {
+  Vue.prototype.$pdf = function(dom, options = rootOptions, loadingInstance) {
     options = Object.assign(defaultOptions, options)
     html2canvas(dom, options).then((canvas) => {
       const { name } = options
@@ -40,7 +39,7 @@ PDF.install = function(Vue, rootOptions = {}) {
       pdf.setDisplayMode('fullwidth', 'continuous', 'FullScreen')
 
       function createImpl(canvas) {
-        console.log(leftHeight, a4HeightRef)
+        // console.log(leftHeight, a4HeightRef)
         if (leftHeight > 0) {
           index++
 
@@ -77,7 +76,7 @@ PDF.install = function(Vue, rootOptions = {}) {
           canvas1.width = canvas.width
           canvas1.height = height
 
-          console.log(index, 'height:', height, 'pos', position)
+          // console.log(index, 'height:', height, 'pos', position)
 
           var ctx = canvas1.getContext('2d')
           ctx.drawImage(canvas, 0, position, canvas.width, height, 0, 0, canvas.width, height)
@@ -99,6 +98,7 @@ PDF.install = function(Vue, rootOptions = {}) {
             setTimeout(createImpl, 500, canvas)
           } else {
             pdf.save(name + '.pdf')
+            loadingInstance && loadingInstance.close()
           }
         }
       }

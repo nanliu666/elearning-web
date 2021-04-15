@@ -1,7 +1,8 @@
 <template>
+  <!-- 因为A4纸的宽为841.89像素，取大一点就可以了 -->
   <el-dialog
     :close-on-click-modal="false"
-    width="70%"
+    width="600px"
     append-to-body
     :visible="innerVisible"
     :modal-append-to-body="false"
@@ -44,6 +45,7 @@
 
 <script>
 import PreviewContent from './previewContent'
+import { Loading } from 'element-ui'
 export default {
   name: 'PreviewDialog',
   components: {
@@ -77,13 +79,22 @@ export default {
       this.innerVisible = false
     },
     dropdownClick(e) {
+      const loadingOptions = {
+        text: '生成试卷中...',
+        lock: true,
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      }
+      const loadingInstance = Loading.service(loadingOptions)
       switch (e) {
         case 'pdf':
-          this.$nextTick(() => {
-            this.$pdf(this.$refs.contentRef.$refs.testPaper, {
+          this.$pdf(
+            this.$refs.contentRef.$refs.testPaper,
+            {
               name: this.paperData.name // 导出文件名
-            })
-          })
+            },
+            loadingInstance
+          )
           break
         case 'word':
           break
