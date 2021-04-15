@@ -8,6 +8,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page="page"
+        :page-config="pageConfig"
         @current-page-change="currentChange"
         @page-size-change="sizeChange"
       >
@@ -132,6 +133,10 @@ export default {
         currentPage: 1,
         size: 5,
         total: 0
+      },
+      pageConfig: {
+        pageSizes: [5, 10, 20, 50, 100],
+        layout: 'total,prev,pager,next,sizes,jumper,->'
       },
       searchPopoverConfig: {
         requireOptions: [
