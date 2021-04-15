@@ -24,7 +24,10 @@
             />
             <div class="operations-right">
               <div>
-                <el-button size="mini">
+                <el-button
+                  size="mini"
+                  @click="exportFn"
+                >
                   导出
                 </el-button>
               </div>
@@ -52,9 +55,13 @@
           </div>
         </template>
 
-        <!-- <template #progress="{row}">
-          <el-progress :percentage="row.progress || 0"></el-progress>
-        </template> -->
+        <template #courseTime="{row}">
+          {{ formatSeconds(row.courseTime) || 0 }}
+        </template>
+
+        <template #period="{row}">
+          {{ formatSeconds(row.period) || 0 }}
+        </template>
 
         <!-- <template slot="name" slot-scope="{ row }">
           <div class="ellipsis title" @click="jumpDetail(row)">
@@ -78,17 +85,23 @@
 import { queryCourseCountList } from '@/api/courseForm'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
+import { getStore } from '@/util/store.js'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '课程名称',
-    minWidth: 150,
-    prop: 'name',
-    fixed: 'left'
+    label: '序号',
+    width: 70,
+    type: 'index'
   },
   {
-    label: '课时',
+    label: '课程名称',
+    minWidth: 150,
+    prop: 'name'
+  },
+  {
+    label: '课时（秒）',
     prop: 'courseTime',
+    slot: true,
     maxWidth: 100
   },
   {
@@ -115,7 +128,7 @@ const TABLE_COLUMNS = [
     minWidth: 100
   },
   {
-    label: '学习总时长',
+    label: '学习总时长（秒）',
     prop: 'period',
     slot: true,
     minWidth: 100
@@ -131,7 +144,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   //   enableMultiSelect: true,
-  showIndexColumn: true,
+  // showIndexColumn: true,
   rowKey: 'id'
   //   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
@@ -190,35 +203,7 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
+const FORM_COLUMNS = []
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -238,21 +223,13 @@ export default {
       },
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       // 请求参数
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
         total: 0,
-        resName: '',
-        catalogId: '',
-        uploadType: '',
-        // tagId: '',
-        status: ''
+        courseName: '',
+        orgId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
@@ -272,6 +249,69 @@ export default {
     this.loadOrgData()
   },
   methods: {
+    /**
+     * 格式化秒
+     * @param int  value 总秒数
+     * @return string result 格式化后的字符串
+     */
+    formatSeconds(value) {
+      let theTime = parseInt(value) // 需要转换的时间秒
+      let theTime1 = 0 // 分
+      let theTime2 = 0 // 小时
+      let theTime3 = 0 // 天
+      if (theTime > 60) {
+        theTime1 = parseInt(theTime / 60)
+        theTime = parseInt(theTime % 60)
+        if (theTime1 > 60) {
+          theTime2 = parseInt(theTime1 / 60)
+          theTime1 = parseInt(theTime1 % 60)
+          if (theTime2 > 24) {
+            //大于24小时
+            theTime3 = parseInt(theTime2 / 24)
+            theTime2 = parseInt(theTime2 % 24)
+          }
+        }
+      }
+      let result = ''
+      if (theTime > 0) {
+        result = '' + parseInt(theTime) + '秒'
+      }
+      if (theTime1 > 0) {
+        result = '' + parseInt(theTime1) + '分钟' + result
+      }
+      if (theTime2 > 0) {
+        result = '' + parseInt(theTime2) + '小时' + result
+      }
+      if (theTime3 > 0) {
+        result = '' + parseInt(theTime3) + '天' + result
+      }
+      return result
+    },
+    // 导出
+    exportFn() {
+      let url = `api/manage/v1/web/coursecenter/queryCourseCountListExcelExport?courseName=${this.queryInfo.courseName}&orgId=${this.queryInfo.orgId}&pageNo=${this.queryInfo.pageNo}&pageSize=${this.queryInfo.pageSize}&`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = () => {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '导出文件.xlsx' //可以填写默认的下载名称
+        a.click()
+        this.isLoading = false
+      }
+
+      x.send()
+    },
+
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: 0 }).then(
         (res) =>
@@ -307,14 +347,15 @@ export default {
     handleSearch(searchParams) {
       this.queryInfo = _.assign(this.queryInfo, searchParams)
       this.queryInfo.pageNo = 1
-      this.page.currentPage = 1
+      this.queryInfo.currentPage = 1
+
       this.loadTableData()
     },
     // 跳去详情
     jumpDetail(row) {
       this.$router.push({
-        path: '/course/materials',
-        query: { row: JSON.stringify(row), courseId: this.$route.query.id }
+        path: '/report/courseFormDraft',
+        query: { courseId: row.id, courseName: row.name }
       })
     },
     // 刷新列表数据
@@ -328,6 +369,7 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
+        this.tableData = []
         this.queryInfo.courseId = this.$route.query.id
         let { totalNum, data } = await queryCourseCountList(this.queryInfo)
         this.tableData = data
