@@ -1,6 +1,6 @@
 <template>
   <div class="bannerPc">
-    <page-header title="bannerPc">
+    <page-header title="banner(移动)">
       <div slot="rightMenu">
         <!-- <el-button size="medium" @click="preview"> 预览效果 </el-button> -->
         <el-button
