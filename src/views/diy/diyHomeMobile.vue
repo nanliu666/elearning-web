@@ -3,6 +3,7 @@
     <page-header title="首页定制">
       <el-button
         slot="rightMenu"
+        v-p="DIY_HOME_ADD_MOBILE"
         type="primary"
         size="medium"
         @click="addNewPlan"
@@ -49,6 +50,7 @@
 <script>
 import { getOrganization } from '@/api/system/user'
 import customListMobile from './components/customListMobile'
+import { DIY_HOME_ADD_MOBILE } from '@/const/privileges'
 export default {
   name: 'DiyHomeMobile',
   components: {
@@ -67,6 +69,9 @@ export default {
       },
       activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
+  },
+  computed: {
+    DIY_HOME_ADD_MOBILE: () => DIY_HOME_ADD_MOBILE
   },
   watch: {
     treeSearch(val) {
