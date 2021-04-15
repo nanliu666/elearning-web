@@ -234,16 +234,13 @@ export default {
 .qustion {
   &__attachments {
     margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
     .el-image {
       vertical-align: middle;
     }
   }
   &__attachment {
-    display: inline-block;
-    position: relative;
-    margin-right: 10px;
-    width: calc(20% - 10px);
-
     &:hover {
       .upload__cover {
         display: flex;
