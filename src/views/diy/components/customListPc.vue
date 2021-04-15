@@ -37,6 +37,7 @@
                   class="operation"
                 >
                   <div
+                    v-p="DIY_HOME_RELEASE_PC"
                     class="ope-item"
                     @click="deliverSolutions(z)"
                   >
@@ -44,6 +45,7 @@
                     <span>发布</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_EDIT_PC"
                     class="ope-item"
                     @click="editSolutions(z)"
                   >
@@ -51,6 +53,7 @@
                     <span>编辑</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_DELETE_PC"
                     class="ope-item"
                     @click="deleteSolutions(z)"
                   >
@@ -103,6 +106,7 @@
 
 <script>
 import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
+import { DIY_HOME_RELEASE_PC, DIY_HOME_EDIT_PC, DIY_HOME_DELETE_PC } from '@/const/privileges'
 export default {
   name: 'CustomListPc',
   props: {
@@ -126,6 +130,11 @@ export default {
       n: 0,
       loading: false
     }
+  },
+  computed: {
+    DIY_HOME_RELEASE_PC: () => DIY_HOME_RELEASE_PC,
+    DIY_HOME_EDIT_PC: () => DIY_HOME_EDIT_PC,
+    DIY_HOME_DELETE_PC: () => DIY_HOME_DELETE_PC
   },
   watch: {
     activeOrg: {

@@ -3,6 +3,7 @@
     <page-header title="首页定制">
       <el-button
         slot="rightMenu"
+        v-p="DIY_HOME_ADD_PC"
         type="primary"
         size="medium"
         @click="addNewPlan"
@@ -49,6 +50,7 @@
 <script>
 import { getOrganization } from '@/api/system/user'
 import customListPc from './components/customListPc'
+import { DIY_HOME_ADD_PC } from '@/const/privileges'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -67,6 +69,9 @@ export default {
       },
       activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
+  },
+  computed: {
+    DIY_HOME_ADD_PC: () => DIY_HOME_ADD_PC
   },
   watch: {
     treeSearch(val) {

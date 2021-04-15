@@ -18,6 +18,7 @@
           <!-- <el-button type="text" @click="setToVisible(selection)"> 设为可见 </el-button>
           <el-button type="text" @click="setToUnVisible(selection)"> 设为不可见 </el-button> -->
           <el-button
+            v-p="DIY_BANNER_DELETE_MOBILE"
             type="text"
             @click="deleteBanner(selection)"
           >
@@ -50,6 +51,7 @@
         <template #handler="{ row }">
           <div class="table__handler">
             <el-button
+              v-p="DIY_BANNER_EDIT_MOBILE"
               type="primary"
               icon="el-icon-edit"
               size="mini"
@@ -75,6 +77,7 @@
 
 <script>
 import { getBannerList, removeBanner } from '@/api/diy/diyHomePc'
+import { DIY_BANNER_EDIT_MOBILE, DIY_BANNER_DELETE_MOBILE } from '@/const/privileges'
 export default {
   name: 'BannerTableMobile',
   components: {
@@ -155,6 +158,10 @@ export default {
       device: 'all'
     }
   },
+  computed: {
+    DIY_BANNER_EDIT_MOBILE: () => DIY_BANNER_EDIT_MOBILE,
+    DIY_BANNER_DELETE_MOBILE: () => DIY_BANNER_DELETE_MOBILE
+  },
   watch: {
     activeOrg: {
       handler(val) {
@@ -215,6 +222,9 @@ export default {
               message: '删除失败，请联系管理员!'
             })
           })
+          .finally(() => {
+            this.$refs.multipleTable.clearSelection()
+          })
       })
     },
     // 输入框搜索
@@ -229,9 +239,9 @@ export default {
         pageSize: this.page.size,
         deviceType: 'APP'
       }
-      if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId || '' })
+      if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getBannerList(params)
         .then((res) => {
           this.tableData = res.data

@@ -146,7 +146,7 @@ export default {
     activeOrg: {
       handler(val) {
         this.activeOrg = val
-        this.$emit('init')
+        // this.$emit('init')
       },
       deep: true,
       immediate: true
@@ -222,7 +222,7 @@ export default {
       }
       // 编辑操作
       if (this.bannerId) {
-        if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId || '' })
+        if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId })
         //   判断是否是全部
         //   if (this.rowData && this.rowData.orgId == '0') Object.assign(params, { orgId: '' })
         params.id = this.bannerId
