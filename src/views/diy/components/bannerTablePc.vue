@@ -45,13 +45,7 @@
           slot="linkUrl"
           slot-scope="scope"
         >
-          <el-link
-            :href="scope.row.banner"
-            target="_blank"
-            type="primary"
-          >
-            {{ scope.row.linkUrl || '无' }}
-          </el-link>
+          {{ scope.row.linkUrl || '无' }}
         </template>
         <template #handler="{ row }">
           <div class="table__handler">
