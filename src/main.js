@@ -19,7 +19,10 @@ import commonForm from './components/common-form/commonForm'
 import OrgSelect from './components/OrgSelect/orgSelect'
 import commonTable from 'vue-common-table'
 import website from '@/config/website'
-
+// 在 main.js 中导入插件
+import pdf from '@/util/jspdf'
+// 注册插件
+Vue.use(pdf)
 import Permission from '@/directive/pcheck'
 import _ from 'lodash'
 import loadmore from './directive/loadmore'
