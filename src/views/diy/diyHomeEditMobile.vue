@@ -23,6 +23,7 @@
       </div>
       <div class="right">
         <el-button
+          v-p="DIY_EDIT_RELEASE_MB"
           type="primary"
           size="small"
           @click="releaseFn"
@@ -30,6 +31,7 @@
           发布
         </el-button>
         <el-button
+          v-p="DIY_EDIT_SAVE_MB"
           type="primary"
           size="small"
           @click="saveTempFn"
