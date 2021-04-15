@@ -140,6 +140,7 @@
 <script>
 import draggable from 'vuedraggable'
 import { postSaveTemp, putReleaseTemp, putUpdataTemp, getDetailTemp } from '@/api/diy/diy'
+import { DIY_EDIT_RELEASE_MB, DIY_EDIT_SAVE_MB } from '@/const/privileges'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -182,6 +183,10 @@ export default {
         // { id: 'diyPcL5', name: '新闻中心' }
       ]
     }
+  },
+  computed: {
+    DIY_EDIT_RELEASE_MB: () => DIY_EDIT_RELEASE_MB,
+    DIY_EDIT_SAVE_MB: () => DIY_EDIT_SAVE_MB
   },
   mounted() {
     // this.formData.orgId = this.$route.query.orgId

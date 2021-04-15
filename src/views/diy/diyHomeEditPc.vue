@@ -167,6 +167,7 @@
 <script>
 import draggable from 'vuedraggable'
 import { postSaveTemp, putReleaseTemp, putUpdataTemp, getDetailTemp } from '@/api/diy/diy'
+import { DIY_EDIT_RELEASE_PC, DIY_EDIT_SAVE_PC } from '@/const/privileges'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -221,6 +222,10 @@ export default {
         // { id: 'diyPcR4', name: '月度学时排行榜' }
       ]
     }
+  },
+  computed: {
+    DIY_EDIT_RELEASE_PC: () => DIY_EDIT_RELEASE_PC,
+    DIY_EDIT_SAVE_PC: () => DIY_EDIT_SAVE_PC
   },
   mounted() {
     // this.formData.orgId = this.$route.query.orgId
