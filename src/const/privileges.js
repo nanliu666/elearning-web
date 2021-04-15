@@ -184,3 +184,9 @@ export const DETAIL_STATION = '/system/station/detail' // 查看用户
 export const EDIT_STATION = '/system/station/edit' // 岗位编辑
 export const DELETE_STATION = '/system/station/delete' // 岗位删除
 export const EXPORTS_STATIONDETAIL = '/system/stationDetail/exports' // 批量导出(查看用户)
+
+// 运营管理
+export const DIY_EDIT_RELEASE_PC = '/diy/diyHomeEditPc/release' // 自定义案例编辑页发布（pc）
+export const DIY_EDIT_SAVE_PC = '/diy/diyHomeEditPc/save' // 自定义案例编辑页保存（pc）
+export const DIY_EDIT_RELEASE_MB = '/diy/diyHomeEditMb/release' // 自定义案例编辑页发布（移动端）
+export const DIY_EDIT_SAVE_MB = '/diy/diyHomeEditMb/save' // 自定义案例编辑页保存（移动端）
