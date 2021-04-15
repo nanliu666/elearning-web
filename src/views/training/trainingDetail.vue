@@ -191,6 +191,18 @@
             </div>
           </el-col>
         </el-row>
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '结业状态：    ' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.endStatus == 0 ? '未结业' : '已结业' }}
+            </div>
+          </el-col>
+        </el-row>
       </div>
     </div>
 
