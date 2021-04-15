@@ -182,13 +182,26 @@ export default {
     }
   },
   mounted() {
+    // this.formData.orgId = this.$route.query.orgId
+    // if (this.$route.query.id) {
+    //   this.initData()
+    // }
+  },
+  activated() {
     this.formData.orgId = this.$route.query.orgId
     if (this.$route.query.id) {
       this.initData()
     }
   },
-  destroyed() {
+  deactivated() {
     this.tempId = ''
+    let newData = {
+      orgId: '',
+      name: '',
+      device: 1,
+      item: ''
+    }
+    this.formData = { ...newData }
   },
   methods: {
     initData() {
@@ -197,7 +210,6 @@ export default {
       let sendData = {}
       sendData.id = this.tempId
       getDetailTemp(sendData).then((res) => {
-        console.log('initData', res)
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
         this.contetArr = itemObj.content
@@ -206,7 +218,6 @@ export default {
     },
     checkFn(event, item, moduleType) {
       // 选中模块时触发
-      console.log('event', event)
       if (item) {
         this.activeClassKey = item.id
       }
@@ -216,13 +227,11 @@ export default {
       this.moduleType = moduleType
       this.editStyle.top = event.target.offsetTop
       this.editStyle.left = event.target.offsetLeft + event.target.offsetWidth + 10
-      console.log('item', item)
     },
-    moveFn(event) {
+    moveFn() {
       // 移动模块时触发
       this.activeClassKey = ''
       this.moduleType = ''
-      console.log('event', event)
     },
     deleteModule() {
       if (this.moduleType === 'left') {
