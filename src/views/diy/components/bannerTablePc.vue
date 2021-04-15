@@ -45,13 +45,7 @@
           slot="linkUrl"
           slot-scope="scope"
         >
-          <el-link
-            :href="scope.row.banner"
-            target="_blank"
-            type="primary"
-          >
-            {{ scope.row.linkUrl || '无' }}
-          </el-link>
+          {{ scope.row.linkUrl || '无' }}
         </template>
         <template #handler="{ row }">
           <div class="table__handler">
@@ -89,39 +83,32 @@ export default {
         {
           label: 'Banner图',
           prop: 'picUrl',
-          slot: true,
-          sortable: true
+          slot: true
         },
         {
           label: '设备类型',
-          prop: 'deviceType',
-          sortable: true
+          prop: 'deviceType'
         },
         {
           label: '排序',
-          prop: 'sort',
-          sortable: true
+          prop: 'sort'
         },
         {
           label: '链接地址',
           prop: 'linkUrl',
-          slot: true,
-          sortable: true
+          slot: true
         },
         {
           label: '发布时间',
-          prop: 'createTime',
-          sortable: true
+          prop: 'createTime'
         },
         {
           label: '发布者',
-          prop: 'creatorName',
-          sortable: true
+          prop: 'creatorName'
         },
         {
           label: '绑定部门',
-          prop: 'orgName',
-          sortable: true
+          prop: 'orgName'
         }
       ],
       tableConfig: {

@@ -52,7 +52,7 @@
         <el-form-item label="排序：">
           <el-input v-model="form.sort"></el-input>
           <div style="color: #ff0000; font-size: 12px; margin-top: 5px; line-height: 12px">
-            说明：数值越大越靠前
+            说明：数值越小越靠前
           </div>
         </el-form-item>
         <el-form-item label="链接地址：">
@@ -295,10 +295,11 @@ export default {
     flex: 1;
   }
   .drawer__footer {
-    display: flex;
-    button {
-      flex: 1;
-    }
+    text-align: center;
+    // display: flex;
+    // button {
+    //   flex: 1;
+    // }
   }
 }
 </style>
