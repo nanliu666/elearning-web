@@ -15,10 +15,16 @@
       >
         <template #topMenu>
           <div class="operations">
-            <div></div>
+            <div class="courseNameTitle">
+              <div>课程名： {{ $route.query.courseName }}</div>
+              <div>学员名： {{ $route.query.name }}</div>
+            </div>
             <div class="operations-right">
               <div>
-                <el-button size="mini">
+                <el-button
+                  size="mini"
+                  @click="exportFn"
+                >
                   导出
                 </el-button>
               </div>
@@ -30,19 +36,17 @@
           <el-progress :percentage="row.progress || 0"></el-progress>
         </template> -->
 
-        <!-- <template slot="name" slot-scope="{ row }">
-          <div class="ellipsis title" @click="jumpDetail(row)">
-            {{ row.name }}
-          </div>
-        </template> -->
-        <template #handler="{row}">
+        <template #progress="{row}">
+          {{ row.progress + '%' }}
+        </template>
+        <!-- <template #handler="{row}">
           <el-button
             type="text"
             @click="jumpDetail(row)"
           >
             详情
           </el-button>
-        </template>
+        </template> -->
       </common-table>
     </basic-container>
   </div>
@@ -50,23 +54,27 @@
 
 <script>
 import { contentCountList } from '@/api/courseForm'
-import { mapGetters } from 'vuex'
+import { getStore } from '@/util/store.js'
 // 表格属性
 const TABLE_COLUMNS = [
   {
+    label: '序号',
+    width: 70,
+    type: 'index'
+  },
+  {
     label: '章节名称',
     minWidth: 150,
-    prop: 'name',
-    fixed: 'left'
+    prop: 'contentName'
   },
   {
     label: '章节时长',
-    prop: 'phonenum',
+    prop: 'coursePeriod',
     maxWidth: 100
   },
   {
     label: '学习时长',
-    prop: 'deptName',
+    prop: 'studyPeriod',
     minWidth: 100
   },
   {
@@ -80,7 +88,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   //   showHandler: true,
   //   enableMultiSelect: true,
-  showIndexColumn: true,
+  // showIndexColumn: true,
   rowKey: 'id'
 }
 const TABLE_PAGE_CONFIG = {}
@@ -115,6 +123,7 @@ export default {
         courseId: '',
         userId: ''
       },
+      userId: '',
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
@@ -126,23 +135,46 @@ export default {
 
   activated() {
     this.loadTableData()
+    this.userId = this.$route.query.userId
   },
   created() {
+    this.userId = this.$route.query.userId
     this.loadTableData()
   },
-  computed: {
-    ...mapGetters(['userId'])
-  },
   methods: {
+    // 导出
+    exportFn() {
+      let url = `api/manage/v1/content/exportContentList?courseId=${this.$route.query.courseId}&userId=${this.userId}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = () => {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '导出文件.xlsx' //可以填写默认的下载名称
+        a.click()
+        this.isLoading = false
+      }
+
+      x.send()
+    },
     // 加载表格数据
     async loadTableData() {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        this.queryInfo.courseId = this.$route.query.id
+        this.queryInfo.courseId = this.$route.query.courseId
         this.queryInfo.userId = this.userId
-        let { data } = await contentCountList(this.queryInfo)
-        this.tableData = data
+        let res = await contentCountList(this.queryInfo)
+        this.tableData = res
       } catch (error) {
         window.console.log(error)
       } finally {
@@ -192,6 +224,11 @@ export default {
 }
 /deep/.el-card {
   border: none;
+}
+.courseNameTitle {
+  font-size: 14px;
+  font-weight: bold;
+  color: #777;
 }
 </style>
 <style lang="sass" scoped>

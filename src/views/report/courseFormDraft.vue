@@ -13,7 +13,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
-        :page="page"
+        :page="queryInfo"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
@@ -25,10 +25,15 @@
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
             /> -->
-            <div></div>
+            <div class="courseNameTitle">
+              课程名： {{ $route.query.courseName }}
+            </div>
             <div class="operations-right">
               <div>
-                <el-button size="mini">
+                <el-button
+                  size="mini"
+                  @click="exportFn"
+                >
                   导出
                 </el-button>
               </div>
@@ -56,9 +61,9 @@
           </div>
         </template>
 
-        <!-- <template #progress="{row}">
-          <el-progress :percentage="row.progress || 0"></el-progress>
-        </template> -->
+        <template #courseTime="{row}">
+          {{ parseInt(row.courseTime) || 0 }}
+        </template>
 
         <!-- <template slot="name" slot-scope="{ row }">
           <div class="ellipsis title" @click="jumpDetail(row)">
@@ -81,48 +86,48 @@
 <script>
 import { queryCourseCountStudentList } from '@/api/courseForm'
 import { getOrgTreeSimple } from '@/api/org/org'
+import { getStore } from '@/util/store.js'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
+    label: '序号',
+    width: 70,
+    type: 'index'
+  },
+  {
     label: '姓名',
-    minWidth: 150,
-    prop: 'name',
-    fixed: 'left'
+    prop: 'name'
   },
   {
     label: '部门',
-    prop: 'phonenum',
-    maxWidth: 100
+    prop: 'orgName'
   },
   {
     label: '岗位',
-    prop: 'deptName',
-    minWidth: 100
+    prop: 'positionName'
   },
   {
     label: '课程总时长',
     slot: true,
-    prop: 'progress',
-    minWidth: 100
+    prop: 'courseTime'
   },
   {
     label: '学习次数',
-    prop: 'jobPercent1',
-    slot: true,
-    minWidth: 100
+    prop: 'studyTimes',
+    slot: true
   },
   {
     label: '学习时长',
-    prop: 'jobPercent',
-    slot: true,
-    minWidth: 100
+    prop: 'period',
+    slot: true
   }
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
   //   enableMultiSelect: true,
-  showIndexColumn: true,
+  // showIndexColumn: true,
   rowKey: 'id'
   //   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
@@ -181,35 +186,7 @@ let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
+const FORM_COLUMNS = []
 export default {
   // components: {
   //   SearchPopover
@@ -228,20 +205,12 @@ export default {
       },
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       // 请求参数
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        resName: '',
-        catalogId: '',
-        uploadType: '',
-        // tagId: '',
-        status: ''
+        total: 0,
+        courseId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
@@ -261,6 +230,32 @@ export default {
     this.loadOrgData()
   },
   methods: {
+    // 导出
+    exportFn() {
+      this.queryInfo.courseId = this.$route.query.courseId
+      let url = `api/manage/v1/web/coursecenter/queryCourseCountStudentListExcelExport?courseId=${this.queryInfo.courseId}&pageNo=${this.queryInfo.pageNo}&pageSize=${this.queryInfo.pageSize}`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = () => {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '导出文件.xlsx' //可以填写默认的下载名称
+        a.click()
+        this.isLoading = false
+      }
+
+      x.send()
+    },
+
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: 0 }).then(
         (res) =>
@@ -290,20 +285,18 @@ export default {
       this.queryInfo = _.assign(this.queryInfo, { pageSize: param })
       this.loadTableData()
     },
-    /**
-     * 搜索
-     */
-    handleSearch(searchParams) {
-      this.queryInfo = _.assign(this.queryInfo, searchParams)
-      this.queryInfo.pageNo = 1
-      this.page.currentPage = 1
-      this.loadTableData()
-    },
+
     // 跳去详情
     jumpDetail(row) {
+      console.log(row)
       this.$router.push({
-        path: '/course/materials',
-        query: { row: JSON.stringify(row), courseId: this.$route.query.id }
+        path: '/report/courseFormDraftIn',
+        query: {
+          userId: row.userId,
+          courseId: this.$route.query.courseId,
+          courseName: this.$route.query.courseName,
+          name: row.name
+        }
       })
     },
     // 刷新列表数据
@@ -317,12 +310,12 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
-        this.queryInfo.courseId = this.$route.query.id
+        this.queryInfo.courseId = this.$route.query.courseId
         let { totalNum, data } = await queryCourseCountStudentList(this.queryInfo)
         this.tableData = data
-        this.page.total = totalNum
+        this.queryInfo.total = totalNum
       } catch (error) {
-        // window.console.log(error)
+        window.console.log(error)
       } finally {
         this.tableLoading = false
       }
@@ -370,6 +363,11 @@ export default {
 }
 /deep/.el-card {
   border: none;
+}
+.courseNameTitle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #777;
 }
 </style>
 <style lang="sass" scoped>
