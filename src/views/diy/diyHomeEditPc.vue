@@ -221,21 +221,36 @@ export default {
     }
   },
   mounted() {
+    // this.formData.orgId = this.$route.query.orgId
+    // if (this.$route.query.id) {
+    //   this.initData()
+    // }
+  },
+  activated() {
     this.formData.orgId = this.$route.query.orgId
     if (this.$route.query.id) {
       this.initData()
     }
   },
-  destroyed() {
+  deactivated() {
     this.tempId = ''
+    let newData = {
+      orgId: '',
+      name: '',
+      device: 1,
+      item: ''
+    }
+    this.formData = { ...newData }
   },
   methods: {
     initData() {
       // 编辑时初始化数据
+      this.loading = true
       this.tempId = this.$route.query.id
       let sendData = {}
       sendData.id = this.tempId
       getDetailTemp(sendData).then((res) => {
+        this.loading = false
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
         this.contetArrL = itemObj.content
