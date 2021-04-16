@@ -47,7 +47,7 @@ export default {
     },
     /* 初始值 */
     value: {
-      type: Number,
+      type: String,
       default: () => {
         return null
       }
@@ -81,7 +81,18 @@ export default {
   watch: {
     value() {
       this.valueId = this.value
-      this.initHandle()
+      this.$nextTick(() => {
+        this.initHandle()
+      })
+    },
+    options: {
+      handler() {
+        this.valueId = this.value
+        this.$nextTick(() => {
+          this.initHandle()
+        })
+      },
+      deep: true
     }
   },
   mounted() {
@@ -107,6 +118,11 @@ export default {
       this.valueTitle = node[this.props.label]
       this.valueId = node[this.props.value]
       this.$emit('getValue', this.valueId)
+      const data = {
+        label: this.valueTitle,
+        value: this.valueId
+      }
+      this.$emit('change', data)
       this.defaultExpandedKey = []
       this.$refs.selector.blur()
     },

@@ -1,0 +1,376 @@
+<template>
+  <div class="qn-detail">
+    <div
+      class="header"
+      @click="$router.back()"
+    >
+      <i class="el-icon-arrow-left"> </i>
+      <span class="title">问卷安排详情</span>
+    </div>
+
+    <div class="pane">
+      <div class="pane-header">
+        <div class="pane-header-l">
+          <span class="title">{{ data.planName }}</span>
+          <span
+            class="status doing"
+            :class="{ doing: data.status == 2, will: data.status == 1, done: data.status == 3 }"
+          >{{ getStatusName(data.status) }}</span>
+        </div>
+        <div class="pane-header-r">
+          <el-button
+            type="primary"
+            :loading="btn1Loading"
+            :disabled="data.status == 3"
+            size="mini"
+            @click="handleStatusChange(data.status == 2 ? 1 : 2)"
+          >
+            {{ data.status == 2 ? '暂停' : '开始' }}
+          </el-button>
+          <el-button
+            type="default"
+            :loading="btn2Loading"
+            size="mini"
+            :disabled="data.status === 3"
+            @click="handleStatusChange(3)"
+          >
+            结束
+          </el-button>
+          <el-button
+            type="default"
+            size="mini"
+            @click="handleEdit"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="default"
+            size="mini"
+            @click="handleDelete"
+          >
+            删除
+          </el-button>
+        </div>
+      </div>
+
+      <div class="pane-body">
+        <div class="pane-body-list">
+          <div class="pane-body-item">
+            <div class="name">
+              所在分类：
+            </div>
+            <div class="content">
+              {{ data.category }}
+            </div>
+          </div>
+          <div class="pane-body-item">
+            <div class="name">
+              有效期：
+            </div>
+            <div class="content">
+              {{ data.publishTime }}～{{ data.endTime }}
+            </div>
+          </div>
+          <div class="pane-body-item">
+            <div class="name">
+              关联问卷：
+            </div>
+            <div class="content">
+              {{ data.subjectName
+              }}<el-button
+                type="text"
+                style="margin-left: 12px"
+                @click="viewPaper"
+              >
+                查看关联问卷
+              </el-button>
+            </div>
+          </div>
+          <div class="pane-body-item">
+            <div class="name">
+              问卷学分：
+            </div>
+            <div class="content">
+              {{ data.asqScore }}分
+            </div>
+          </div>
+        </div>
+        <div class="pane-code">
+          <div class="code-img">
+            <img src="./code.png" />
+          </div>
+          <div class="code-text">
+            扫码查看<el-button
+              type="text"
+              style="margin-left: 5px"
+            >
+              复制链接
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-wrapper">
+      <el-tabs v-model="activeComponent">
+        <el-tab-pane
+          v-for="tab in tabs"
+          :key="tab.component"
+          :label="tab.label"
+          :name="tab.component"
+        >
+          <component
+            :is="tab.component"
+            id="1381777442804695041"
+            :should-resize-chart="activeComponent == 'Distribution'"
+          ></component>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+  </div>
+</template>
+
+<script>
+import { Situation, Distribution } from './tabs'
+import { queryPlanDetail, end, suspend, start } from '@/api/questionnaire'
+
+export default {
+  components: {
+    Situation,
+    Distribution
+  },
+  data() {
+    return {
+      activeComponent: 'Situation',
+      tabs: [
+        {
+          component: 'Situation',
+          label: '完成情况'
+        },
+        {
+          component: 'Distribution',
+          label: '选项分布'
+        }
+      ],
+      data: {},
+      btn1Loading: false,
+      btn2Loading: false
+    }
+  },
+  activated() {
+    this.getData()
+  },
+  methods: {
+    handleEdit() {
+      this.$router.push({
+        path: '/questionnaire/eidt'
+      })
+    },
+    handleDelete() {},
+    async handleStatusChange(status) {
+      if (status === 'finish') {
+        const result = await this.confirmFinish()
+        if (!result) return
+      }
+      let api, loading
+      switch (type) {
+        case 'pause':
+          api = suspend
+          loading = 'btn1Loading'
+          break
+        case 'start':
+          api = start
+          loading = 'btn1Loading'
+          break
+        case 'finish':
+          api = end
+          loading = 'btn2Loading'
+      }
+      this[loading] = true
+      api({ id: '1381777442804695041' })
+        .then(() => {
+          this.$message.success('操作成功')
+          if (type === 'finish') {
+            this.data.status = 3
+          } else {
+            this.data.isSuspend = type === 'start' ? 1 : 2
+          }
+        })
+        .finally(() => {
+          this[loading] = false
+        })
+    },
+    confirmFinish() {
+      return this.$confirm('是否结束该问卷安排?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(() => {})
+    },
+    getData() {
+      this.getStudent()
+      this.queryPlanDetail()
+    },
+    viewPaper() {
+      this.$router.push({
+        path: '/questionnaire/preview',
+        params: {
+          id: this.data.subjectId
+        }
+      })
+    },
+    getStatusName(status) {
+      switch (status) {
+        case 1:
+          return '未开始'
+        case 2:
+          return '进行中'
+        case 3:
+          return '已结束'
+        default:
+          return '草稿'
+      }
+    },
+    getStudent() {},
+    queryPlanDetail() {
+      const id = this.$route.query.id
+      queryPlanDetail({ id: '1381777442804695041' }).then((res) => {
+        this.data = res
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.qn-detail {
+  .el-form-item {
+    margin-right: 20px;
+  }
+  .operate-wrapper .operate-left .input-wrapper {
+    .el-input__inner {
+      height: 34px;
+      line-height: 34px;
+    }
+  }
+  .icon-basics-filter-outlined {
+    font-size: 14px;
+  }
+
+  .filter-form {
+    .el-form-item__label {
+      text-align: center;
+    }
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+.qn-detail {
+  cursor: default;
+  .header {
+    width: fit-content;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 29px 0 21px;
+    i {
+      color: #8c9195;
+      font-size: 16px;
+    }
+    .title {
+      font-family: PingFangSC-Medium;
+      font-size: 22px;
+      color: rgba(0, 11, 21, 0.85);
+      margin-left: 8px;
+    }
+  }
+  .pane {
+    padding: 28px 24px 42px;
+    background-color: #fff;
+    box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
+    border-radius: 4px;
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      .pane-header-l {
+        display: flex;
+        align-items: center;
+        height: 22px;
+        .title {
+          font-family: PingFangSC-Medium;
+          font-size: 18px;
+          color: rgba(0, 11, 21, 0.85);
+          margin-right: 16px;
+        }
+        .status {
+          width: 52px;
+          height: 20px;
+          line-height: 20px;
+          text-align: center;
+          font-size: 12px;
+          border-radius: 4px;
+          margin-top: 3px;
+          &.will {
+            color: #00b061;
+            background-color: #e7ffee;
+          }
+          &.doing {
+            color: #fcba00;
+            background-color: #fffce6;
+          }
+          &.done {
+            color: #01aafc;
+            background-color: #e7fbff;
+          }
+        }
+      }
+    }
+    .pane-body {
+      position: relative;
+      .pane-body-list {
+        .pane-body-item {
+          display: flex;
+          align-items: center;
+          margin-bottom: 16px;
+          .name {
+            font-family: PingFangSC-Regular;
+            font-size: 14px;
+            color: rgba(0, 11, 21, 0.45);
+          }
+          .content {
+            font-size: 14px;
+            color: rgba(0, 11, 21, 0.85);
+          }
+        }
+      }
+      .pane-code {
+        position: absolute;
+        top: 23px;
+        right: 5px;
+        .code-img {
+          width: 112px;
+          height: 112px;
+          img {
+            width: 100%;
+          }
+        }
+        .code-text {
+          font-size: 12px;
+          color: rgba(0, 11, 21, 0.85);
+        }
+      }
+    }
+  }
+  .tab-wrapper {
+    margin-top: 12px;
+    margin-bottom: 24px;
+    background-color: #fff;
+    padding: 24px;
+    box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
+    border-radius: 4px;
+  }
+}
+</style>

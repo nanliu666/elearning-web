@@ -26,6 +26,26 @@ import loadmore from './directive/loadmore'
 Vue.prototype._ = _
 
 import tinymce from '@/components/tinymce'
+
+if (!HTMLCanvasElement.prototype.toBlob) {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    value: function(callback, type, quality) {
+      var dataURL = this.toDataURL(type, quality).split(',')[1]
+      setTimeout(function() {
+        var binStr = atob(dataURL),
+          len = binStr.length,
+          arr = new Uint8Array(len)
+
+        for (var i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i)
+        }
+
+        callback(new Blob([arr], { type: type || 'image/png' }))
+      })
+    }
+  })
+}
+
 // if (process.env.NODE_ENV !== 'production') {
 //   const mock = require('@/mock')
 //   mock.default(true)
