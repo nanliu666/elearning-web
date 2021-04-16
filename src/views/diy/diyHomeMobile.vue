@@ -3,6 +3,7 @@
     <page-header title="首页定制">
       <el-button
         slot="rightMenu"
+        v-p="DIY_HOME_ADD_MOBILE"
         type="primary"
         size="medium"
         @click="addNewPlan"
@@ -49,6 +50,7 @@
 <script>
 import { getOrganization } from '@/api/system/user'
 import customListMobile from './components/customListMobile'
+import { DIY_HOME_ADD_MOBILE } from '@/const/privileges'
 export default {
   name: 'DiyHomeMobile',
   components: {
@@ -65,27 +67,24 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: {}
+      activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
+  },
+  computed: {
+    DIY_HOME_ADD_MOBILE: () => DIY_HOME_ADD_MOBILE
   },
   watch: {
     treeSearch(val) {
       this.$refs.orgTree.filter(val)
     }
   },
-  mounted() {
-    this.loadTree()
+  async mounted() {
+    await this.loadTree()
+    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
   },
   methods: {
     //  新建方案
     addNewPlan() {
-      if (!this.activeOrg.orgId) {
-        this.$message({
-          type: 'error',
-          message: '请先在左侧选择部门!'
-        })
-        return
-      }
       this.$router.push({
         path: '/diy/diyHomeEditMobile',
         query: { orgId: this.activeOrg.orgId }
@@ -105,8 +104,11 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
+          if (parentOrgId === '0') {
+            data.push({ orgId: null, orgName: '外部人员' })
+          }
           this.treeData = data
-          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '默认方案', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {
