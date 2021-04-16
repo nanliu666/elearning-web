@@ -4,6 +4,7 @@
       <div slot="rightMenu">
         <!-- <el-button size="medium" @click="preview"> 预览效果 </el-button> -->
         <el-button
+          v-p="DIY_BANNER_ADD_PC"
           type="primary"
           size="medium"
           @click="releaseBanner"
@@ -63,6 +64,7 @@
 import { getOrganization } from '@/api/system/user'
 import bannerTablePc from './components/bannerTablePc'
 import bannerDrawerPc from './components/bannerDrawerPc'
+import { DIY_BANNER_ADD_PC } from '@/const/privileges'
 export default {
   name: 'BannerPc',
   components: {
@@ -80,29 +82,26 @@ export default {
         value: 'orgId',
         children: 'children'
       },
-      activeOrg: {}
+      activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
     }
+  },
+  computed: {
+    DIY_BANNER_ADD_PC: () => DIY_BANNER_ADD_PC
   },
   watch: {
     treeSearch(val) {
       this.$refs.orgTree.filter(val)
     }
   },
-  mounted() {
-    this.loadTree()
+  async mounted() {
+    await this.loadTree()
+    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
   },
   methods: {
     //   预览效果
     preview() {},
     //  发布Banner
     releaseBanner() {
-      if (!Object.keys(this.activeOrg).length) {
-        this.$message({
-          type: 'error',
-          message: '请先在左侧选择一个部门!'
-        })
-        return
-      }
       this.$refs.bannerDrawer.showDrawer('add')
     },
     // 编辑
@@ -123,8 +122,11 @@ export default {
       this.treeLoading = true
       await getOrganization({ parentOrgId })
         .then((data) => {
+          if (parentOrgId === '0') {
+            data.push({ orgId: '', orgName: '外部人员' })
+          }
           this.treeData = data
-          this.treeData.unshift({ id: '0', orgId: '0', orgName: '全部', hasChildren: false })
+          this.treeData.unshift({ id: '0', orgId: '0', orgName: '默认banner', hasChildren: false })
           this.treeLoading = false
         })
         .catch(() => {

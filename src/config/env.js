@@ -7,7 +7,7 @@ let iconfontVersion = [
   '2232073_jslvmfqvu2g',
   '1857563_sw5dkyhhh1o',
   '2178669_zbls3ovulic',
-  '2232073_bhvuvfmsh4'
+  '2232073_r8brn4wnx9d'
 ]
 let iconfontUrl = '//at.alicdn.com/t/font_$key.css'
 let codeUrl = `${backBaseUrl}/code`

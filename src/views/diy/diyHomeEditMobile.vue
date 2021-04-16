@@ -23,6 +23,7 @@
       </div>
       <div class="right">
         <el-button
+          v-p="DIY_EDIT_RELEASE_MB"
           type="primary"
           size="small"
           @click="releaseFn"
@@ -30,6 +31,7 @@
           发布
         </el-button>
         <el-button
+          v-p="DIY_EDIT_SAVE_MB"
           type="primary"
           size="small"
           @click="saveTempFn"
@@ -138,6 +140,7 @@
 <script>
 import draggable from 'vuedraggable'
 import { postSaveTemp, putReleaseTemp, putUpdataTemp, getDetailTemp } from '@/api/diy/diy'
+import { DIY_EDIT_RELEASE_MB, DIY_EDIT_SAVE_MB } from '@/const/privileges'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -181,14 +184,31 @@ export default {
       ]
     }
   },
+  computed: {
+    DIY_EDIT_RELEASE_MB: () => DIY_EDIT_RELEASE_MB,
+    DIY_EDIT_SAVE_MB: () => DIY_EDIT_SAVE_MB
+  },
   mounted() {
+    // this.formData.orgId = this.$route.query.orgId
+    // if (this.$route.query.id) {
+    //   this.initData()
+    // }
+  },
+  activated() {
     this.formData.orgId = this.$route.query.orgId
     if (this.$route.query.id) {
       this.initData()
     }
   },
-  destroyed() {
+  deactivated() {
     this.tempId = ''
+    let newData = {
+      orgId: '',
+      name: '',
+      device: 1,
+      item: ''
+    }
+    this.formData = { ...newData }
   },
   methods: {
     initData() {
@@ -197,7 +217,6 @@ export default {
       let sendData = {}
       sendData.id = this.tempId
       getDetailTemp(sendData).then((res) => {
-        console.log('initData', res)
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
         this.contetArr = itemObj.content
@@ -206,7 +225,6 @@ export default {
     },
     checkFn(event, item, moduleType) {
       // 选中模块时触发
-      console.log('event', event)
       if (item) {
         this.activeClassKey = item.id
       }
@@ -216,13 +234,11 @@ export default {
       this.moduleType = moduleType
       this.editStyle.top = event.target.offsetTop
       this.editStyle.left = event.target.offsetLeft + event.target.offsetWidth + 10
-      console.log('item', item)
     },
-    moveFn(event) {
+    moveFn() {
       // 移动模块时触发
       this.activeClassKey = ''
       this.moduleType = ''
-      console.log('event', event)
     },
     deleteModule() {
       if (this.moduleType === 'left') {
@@ -308,7 +324,7 @@ export default {
     },
     goBack() {
       // 返回
-      this.$router.push({ path: '/diy/diyHomePc' })
+      this.$router.push({ path: '/diy/diyHomeMobile' })
     }
   }
 }

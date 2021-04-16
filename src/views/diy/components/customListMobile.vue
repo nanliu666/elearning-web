@@ -37,6 +37,7 @@
                   class="operation"
                 >
                   <div
+                    v-p="DIY_HOME_RELEASE_MOBILE"
                     class="ope-item"
                     @click="deliverSolutions(z)"
                   >
@@ -44,6 +45,7 @@
                     <span>发布</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_EDIT_MOBILE"
                     class="ope-item"
                     @click="editSolutions(z)"
                   >
@@ -51,6 +53,7 @@
                     <span>编辑</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_DELETE_MOBILE"
                     class="ope-item"
                     @click="deleteSolutions(z)"
                   >
@@ -78,7 +81,13 @@
         v-if="!customData.length"
         class="empty-block"
       >
-        暂无数据
+        <img
+          src="@/assets/images/nodata.png"
+          class="empty-img"
+        />
+        <div class="nodata">
+          暂无数据
+        </div>
       </div>
       <div class="page">
         <el-pagination
@@ -97,6 +106,11 @@
 
 <script>
 import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
+import {
+  DIY_HOME_RELEASE_MOBILE,
+  DIY_HOME_EDIT_MOBILE,
+  DIY_HOME_DELETE_MOBILE
+} from '@/const/privileges'
 export default {
   name: 'CustomListMobile',
   props: {
@@ -121,6 +135,11 @@ export default {
       loading: false
     }
   },
+  computed: {
+    DIY_HOME_RELEASE_MOBILE: () => DIY_HOME_RELEASE_MOBILE,
+    DIY_HOME_EDIT_MOBILE: () => DIY_HOME_EDIT_MOBILE,
+    DIY_HOME_DELETE_MOBILE: () => DIY_HOME_DELETE_MOBILE
+  },
   watch: {
     activeOrg: {
       handler(val) {
@@ -130,6 +149,9 @@ export default {
       deep: true,
       immediate: true
     }
+  },
+  activated() {
+    this.initHomeData()
   },
   methods: {
     handleSizeChange(val) {
@@ -165,7 +187,10 @@ export default {
     },
     // 编辑操作
     editSolutions(data) {
-      this.$router.push({ path: '/diy/diyHomeEditPc', query: { id: data.id, orgId: data.orgId } })
+      this.$router.push({
+        path: '/diy/diyHomeEditMobile',
+        query: { id: data.id, orgId: data.orgId }
+      })
     },
     // 删除操作
     async deleteSolutions(data) {
