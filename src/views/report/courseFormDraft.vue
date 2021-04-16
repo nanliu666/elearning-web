@@ -369,6 +369,10 @@ export default {
   font-weight: bold;
   color: #777;
 }
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
+}
 </style>
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
