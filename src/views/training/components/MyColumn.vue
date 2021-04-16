@@ -378,7 +378,7 @@ export default {
             .listTeacherCategory({ test: '123', parentId: params.id })
             .then((res) => {
               // 去找到相应的数据push进去
-
+              this.compileNewly = ''
               if (params.id) {
                 this.data.map((item) => {
                   if (item.id == params.id) {
@@ -419,8 +419,10 @@ export default {
     isShowinputFn() {
       this.isShowinput = false
       this.dataAddCatalog.input = ''
+      this.compileNewly = 0
     },
     isEditFn(data) {
+      this.compileNewly = 0
       this.isEdit = false
       this.dataAddCatalog.input = ''
       // this.expandedKeysData = []
