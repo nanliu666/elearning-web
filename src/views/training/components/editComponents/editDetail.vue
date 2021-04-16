@@ -141,7 +141,7 @@ export default {
           label: '助教',
           prop: 'teachAssistant',
           rules: [{ required: true, validator: this.checkTeachAssistant, trigger: ['blur'] }],
-          required: true,
+          //   required: true,
           span: 11,
           offset: 2
         },
