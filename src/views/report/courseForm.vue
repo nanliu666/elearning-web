@@ -65,6 +65,9 @@
         <template #credit="{row}">
           {{ row.credit == '0.0' ? 0 : row.credit }}
         </template>
+        <template #scope="{row}">
+          {{ row.scope == '0.0' ? 0 : row.scope }}
+        </template>
 
         <!-- <template slot="name" slot-scope="{ row }">
           <div class="ellipsis title" @click="jumpDetail(row)">
