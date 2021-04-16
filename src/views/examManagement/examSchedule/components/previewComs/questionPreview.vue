@@ -29,7 +29,7 @@
         v-if="
           [QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_JUDGE].includes(data.type)
         "
-        class="qustion__options"
+        class="qustion__options__box"
       >
         <li
           v-for="(option, index) in data.options"
@@ -197,6 +197,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.qustion__options__box {
+  margin-top: 4px;
+}
 .hidden__pre {
   display: none;
 }

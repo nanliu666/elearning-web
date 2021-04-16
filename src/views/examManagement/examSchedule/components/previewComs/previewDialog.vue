@@ -2,7 +2,7 @@
   <!-- 因为A4纸的宽为841.89像素，取大一点就可以了 -->
   <el-dialog
     :close-on-click-modal="false"
-    width="600px"
+    width="580px"
     append-to-body
     :visible="innerVisible"
     :modal-append-to-body="false"
@@ -104,9 +104,15 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+/deep/ .el-dialog__body {
+  font-size: 10px;
+  font-variant: small-caps;
+  padding: 0 0 30px 0;
+}
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
+  padding-right: 20px;
 }
 </style>

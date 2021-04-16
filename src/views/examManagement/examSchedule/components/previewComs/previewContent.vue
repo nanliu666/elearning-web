@@ -34,6 +34,7 @@
           v-for="(sonitem, sonindex) in item"
           :key="sonindex"
           class="sub-question-li"
+          :class="[!hasAnswer ? 'low__bottom' : 'height__bottom']"
         >
           <div v-if="QUESTION_TYPE_GROUP !== sonitem.type">
             <span>{{ sonindex + 1 }}.</span>
@@ -137,6 +138,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+.preview-container {
+  padding: 20px;
+}
 .preview-title-box {
   display: flex;
   align-items: center;
@@ -146,6 +150,7 @@ export default {
     font-weight: 550;
     font-size: 18px;
     margin-bottom: 10px;
+    color: rgba(0, 11, 21, 0.85);
   }
   .preview-subhead {
     font-size: 12px;
@@ -153,7 +158,7 @@ export default {
   }
 }
 .main-question-li {
-  padding: 40px 0;
+  padding: 20px 0;
   border-bottom: 1px solid #e4e7e9;
   .li__title {
     font-family: PingFangSC-Medium;
@@ -163,7 +168,6 @@ export default {
     margin-bottom: 4px;
   }
   .sub-question-li {
-    margin-bottom: 40px;
     &:last-child {
       margin-bottom: 0;
     }
@@ -173,5 +177,11 @@ export default {
       }
     }
   }
+}
+.low__bottom {
+  margin-bottom: 10px;
+}
+.height__bottom {
+  margin-bottom: 40px;
 }
 </style>
