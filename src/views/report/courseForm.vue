@@ -56,11 +56,14 @@
         </template>
 
         <template #courseTime="{row}">
-          {{ formatSeconds(row.courseTime) || 0 }}
+          {{ formatSeconds(row.courseTime) || '0秒' }}
         </template>
 
         <template #period="{row}">
-          {{ formatSeconds(row.period) || 0 }}
+          {{ formatSeconds(row.period) || '0秒' }}
+        </template>
+        <template #credit="{row}">
+          {{ row.credit == '0.0' ? 0 : row.credit }}
         </template>
 
         <!-- <template slot="name" slot-scope="{ row }">
@@ -107,7 +110,8 @@ const TABLE_COLUMNS = [
   {
     label: '积分',
     prop: 'credit',
-    minWidth: 100
+    minWidth: 100,
+    slot: true
   },
   {
     label: '讲师',
@@ -423,6 +427,10 @@ export default {
 }
 /deep/.el-card {
   border: none;
+}
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
 }
 </style>
 <style lang="sass" scoped>
