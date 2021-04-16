@@ -132,9 +132,7 @@ export default {
           itemType: 'slot',
           label: '班主任',
           prop: 'headTeacher',
-          rules: [
-            { required: true, validator: this.checkHeadTeacher, trigger: ['blur', 'change'] }
-          ],
+          rules: [{ required: true, validator: this.checkHeadTeacher, trigger: ['blur'] }],
           span: 11,
           offset: 0
         },
@@ -142,9 +140,7 @@ export default {
           itemType: 'slot',
           label: '助教',
           prop: 'teachAssistant',
-          rules: [
-            { required: true, validator: this.checkTeachAssistant, trigger: ['blur', 'change'] }
-          ],
+          rules: [{ required: true, validator: this.checkTeachAssistant, trigger: ['blur'] }],
           required: true,
           span: 11,
           offset: 2
