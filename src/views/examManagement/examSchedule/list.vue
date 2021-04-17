@@ -240,11 +240,13 @@ let TABLE_COLUMNS = [
   {
     label: '通过率',
     prop: 'passRate',
+    formatter: (row) => `${row.passRate}%`,
     minWidth: 120
   },
   {
     label: '正确率',
     prop: 'rightRate',
+    formatter: (row) => `${row.rightRate}%`,
     minWidth: 120
   },
   {
