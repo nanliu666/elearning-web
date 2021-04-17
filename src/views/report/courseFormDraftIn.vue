@@ -68,12 +68,12 @@ const TABLE_COLUMNS = [
     prop: 'contentName'
   },
   {
-    label: '章节时长',
+    label: '章节时长（秒）',
     prop: 'coursePeriod',
     maxWidth: 100
   },
   {
-    label: '学习时长',
+    label: '学习时长（秒）',
     prop: 'studyPeriod',
     minWidth: 100
   },
