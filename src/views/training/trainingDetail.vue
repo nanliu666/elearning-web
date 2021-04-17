@@ -191,18 +191,6 @@
             </div>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="2">
-            <div class="col_title">
-              {{ '结业状态：    ' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.endStatus == 0 ? '未结业' : '已结业' }}
-            </div>
-          </el-col>
-        </el-row>
       </div>
     </div>
 
@@ -1055,6 +1043,17 @@ const TABLE_COLUMNS = [
     prop: 'examStatus',
     slot: true
   },
+  {
+    label: '结业状态',
+    prop: 'endStatus',
+    formatter: (row) => {
+      const END_STATUS = {
+        0: '未结业',
+        1: '已结业'
+      }
+      return END_STATUS[row.endStatus]
+    }
+  },
   // （1：已评估；2：未评估；3：未开始）
   {
     label: '评估情况',
@@ -1077,6 +1076,17 @@ const TABLE_COLUMNS2 = [
     label: '所属部门',
     prop: 'deptName'
     // slot: true,
+  },
+  {
+    label: '结业状态',
+    prop: 'endStatus',
+    formatter: (row) => {
+      const END_STATUS = {
+        0: '未结业',
+        1: '已结业'
+      }
+      return END_STATUS[row.endStatus]
+    }
   },
   {
     label: '评估情况',
