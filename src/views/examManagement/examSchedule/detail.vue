@@ -498,7 +498,7 @@ const TABLE_COLUMNS_EXTENDED = [
   },
   {
     label: '提交次数',
-    prop: 'submitCoun',
+    prop: 'submitCount',
     minWidth: 120
   },
   {
