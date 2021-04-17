@@ -105,7 +105,7 @@ const TABLE_COLUMNS = [
     prop: 'name'
   },
   {
-    label: '课时（秒）',
+    label: '课时',
     prop: 'courseTime',
     slot: true,
     maxWidth: 100
@@ -135,7 +135,7 @@ const TABLE_COLUMNS = [
     minWidth: 100
   },
   {
-    label: '学习总时长（秒）',
+    label: '学习总时长',
     prop: 'period',
     slot: true,
     minWidth: 100

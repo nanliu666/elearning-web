@@ -62,7 +62,11 @@
         </template>
 
         <template #courseTime="{row}">
-          {{ parseInt(row.courseTime) || 0 }}
+          {{ formatSeconds(row.courseTime) || '0秒' }}
+        </template>
+
+        <template #period="{row}">
+          {{ formatSeconds(row.period) || '0秒' }}
         </template>
 
         <!-- <template slot="name" slot-scope="{ row }">
@@ -230,6 +234,45 @@ export default {
     this.loadOrgData()
   },
   methods: {
+    /**
+     * 格式化秒
+     * @param int  value 总秒数
+     * @return string result 格式化后的字符串
+     */
+    formatSeconds(value) {
+      let theTime = parseInt(value) // 需要转换的时间秒
+      let theTime1 = 0 // 分
+      let theTime2 = 0 // 小时
+      let theTime3 = 0 // 天
+      if (theTime > 60) {
+        theTime1 = parseInt(theTime / 60)
+        theTime = parseInt(theTime % 60)
+        if (theTime1 > 60) {
+          theTime2 = parseInt(theTime1 / 60)
+          theTime1 = parseInt(theTime1 % 60)
+          if (theTime2 > 24) {
+            //大于24小时
+            theTime3 = parseInt(theTime2 / 24)
+            theTime2 = parseInt(theTime2 % 24)
+          }
+        }
+      }
+      let result = ''
+      if (theTime > 0) {
+        result = '' + parseInt(theTime) + '秒'
+      }
+      if (theTime1 > 0) {
+        result = '' + parseInt(theTime1) + '分钟' + result
+      }
+      if (theTime2 > 0) {
+        result = '' + parseInt(theTime2) + '小时' + result
+      }
+      if (theTime3 > 0) {
+        result = '' + parseInt(theTime3) + '天' + result
+      }
+      return result
+    },
+
     // 导出
     exportFn() {
       this.queryInfo.courseId = this.$route.query.courseId

@@ -39,6 +39,13 @@
         <template #progress="{row}">
           {{ row.progress + '%' }}
         </template>
+
+        <template #coursePeriod="{row}">
+          {{ formatSeconds(row.coursePeriod) || '0秒' }}
+        </template>
+        <template #studyPeriod="{row}">
+          {{ formatSeconds(row.studyPeriod) || '0秒' }}
+        </template>
         <!-- <template #handler="{row}">
           <el-button
             type="text"
@@ -68,14 +75,16 @@ const TABLE_COLUMNS = [
     prop: 'contentName'
   },
   {
-    label: '章节时长（秒）',
+    label: '章节时长',
     prop: 'coursePeriod',
-    maxWidth: 100
+    maxWidth: 100,
+    slot: true
   },
   {
-    label: '学习时长（秒）',
+    label: '学习时长',
     prop: 'studyPeriod',
-    minWidth: 100
+    minWidth: 100,
+    slot: true
   },
   {
     label: '学习进度统计',
@@ -142,6 +151,45 @@ export default {
     this.loadTableData()
   },
   methods: {
+    /**
+     * 格式化秒
+     * @param int  value 总秒数
+     * @return string result 格式化后的字符串
+     */
+    formatSeconds(value) {
+      let theTime = parseInt(value) // 需要转换的时间秒
+      let theTime1 = 0 // 分
+      let theTime2 = 0 // 小时
+      let theTime3 = 0 // 天
+      if (theTime > 60) {
+        theTime1 = parseInt(theTime / 60)
+        theTime = parseInt(theTime % 60)
+        if (theTime1 > 60) {
+          theTime2 = parseInt(theTime1 / 60)
+          theTime1 = parseInt(theTime1 % 60)
+          if (theTime2 > 24) {
+            //大于24小时
+            theTime3 = parseInt(theTime2 / 24)
+            theTime2 = parseInt(theTime2 % 24)
+          }
+        }
+      }
+      let result = ''
+      if (theTime > 0) {
+        result = '' + parseInt(theTime) + '秒'
+      }
+      if (theTime1 > 0) {
+        result = '' + parseInt(theTime1) + '分钟' + result
+      }
+      if (theTime2 > 0) {
+        result = '' + parseInt(theTime2) + '小时' + result
+      }
+      if (theTime3 > 0) {
+        result = '' + parseInt(theTime3) + '天' + result
+      }
+      return result
+    },
+
     // 导出
     exportFn() {
       let url = `api/manage/v1/content/exportContentList?courseId=${this.$route.query.courseId}&userId=${this.userId}`
