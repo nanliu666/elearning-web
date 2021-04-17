@@ -473,7 +473,9 @@ const TABLE_COLUMNS = [
   {
     label: '考试时限',
     prop: 'reckonTimeValue',
-    minWidth: 120
+    minWidth: 120,
+    formatter: (row) =>
+      row.reckonTime && row.reckonTimeValue ? `${row.reckonTimeValue}分钟` : '不限时'
   }
 ]
 //未考试不存在的
