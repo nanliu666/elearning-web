@@ -205,6 +205,7 @@ export default {
     },
     handleNodeClick(data) {
       this.orgData = data
+      console.log(this.orgData)
     },
     goBack() {
       this.$router.push('/orgs/orgManagement')
