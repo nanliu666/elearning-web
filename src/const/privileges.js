@@ -184,3 +184,24 @@ export const DETAIL_STATION = '/system/station/detail' // 查看用户
 export const EDIT_STATION = '/system/station/edit' // 岗位编辑
 export const DELETE_STATION = '/system/station/delete' // 岗位删除
 export const EXPORTS_STATIONDETAIL = '/system/stationDetail/exports' // 批量导出(查看用户)
+
+// 运营管理
+export const DIY_EDIT_RELEASE_PC = '/diy/diyHomeEditPc/release' // 自定义案例编辑页发布（pc）
+export const DIY_EDIT_SAVE_PC = '/diy/diyHomeEditPc/save' // 自定义案例编辑页保存（pc）
+export const DIY_EDIT_RELEASE_MB = '/diy/diyHomeEditMb/release' // 自定义案例编辑页发布（移动端）
+export const DIY_EDIT_SAVE_MB = '/diy/diyHomeEditMb/save' // 自定义案例编辑页保存（移动端）
+
+export const DIY_HOME_ADD_PC = '/diy/diyHomePc/add' // 首页定制-新建方案（pc）
+export const DIY_HOME_RELEASE_PC = '/diy/diyHomePc/release' // 首页定制-发布（pc）
+export const DIY_HOME_EDIT_PC = '/diy/diyHomePc/edit' // 首页定制-编辑（pc）
+export const DIY_HOME_DELETE_PC = '/diy/diyHomePc/delete' // 首页定制-删除（pc）
+export const DIY_HOME_ADD_MOBILE = '/diy/diyHomeMobile/add' // 首页定制-新建方案（移动端）
+export const DIY_HOME_RELEASE_MOBILE = '/diy/diyHomeMobile/release' // 首页定制-发布（移动端）
+export const DIY_HOME_EDIT_MOBILE = '/diy/diyHomeMobile/edit' // 首页定制-编辑（移动端）
+export const DIY_HOME_DELETE_MOBILE = '/diy/diyHomeMobile/delete' // 首页定制-删除（移动端）
+export const DIY_BANNER_ADD_PC = '/diy/bannerPc/add' // 首页定制-新建banner（pc）
+export const DIY_BANNER_EDIT_PC = '/diy/bannerPc/edit' // 首页定制-编辑banner（pc）
+export const DIY_BANNER_DELETE_PC = '/diy/bannerPc/DELETE' // 首页定制-删除banner（pc）
+export const DIY_BANNER_ADD_MOBILE = '/diy/bannerMobile/add' // 首页定制-新建banner（移动端）
+export const DIY_BANNER_EDIT_MOBILE = '/diy/bannerMobile/edit' // 首页定制-编辑banner（移动端）
+export const DIY_BANNER_DELETE_MOBILE = '/diy/bannerMobile/DELETE' // 首页定制-删除banner（移动端）

@@ -37,6 +37,7 @@
                   class="operation"
                 >
                   <div
+                    v-p="DIY_HOME_RELEASE_PC"
                     class="ope-item"
                     @click="deliverSolutions(z)"
                   >
@@ -44,6 +45,7 @@
                     <span>发布</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_EDIT_PC"
                     class="ope-item"
                     @click="editSolutions(z)"
                   >
@@ -51,6 +53,7 @@
                     <span>编辑</span>
                   </div>
                   <div
+                    v-p="DIY_HOME_DELETE_PC"
                     class="ope-item"
                     @click="deleteSolutions(z)"
                   >
@@ -78,7 +81,13 @@
         v-if="!customData.length"
         class="empty-block"
       >
-        暂无数据
+        <img
+          src="@/assets/images/nodata.png"
+          class="empty-img"
+        />
+        <div class="nodata">
+          暂无数据
+        </div>
       </div>
       <div class="page">
         <el-pagination
@@ -97,6 +106,7 @@
 
 <script>
 import { getHomePc, releaseHomePc, deleteHomePc } from '@/api/diy/diyHomePc'
+import { DIY_HOME_RELEASE_PC, DIY_HOME_EDIT_PC, DIY_HOME_DELETE_PC } from '@/const/privileges'
 export default {
   name: 'CustomListPc',
   props: {
@@ -121,6 +131,11 @@ export default {
       loading: false
     }
   },
+  computed: {
+    DIY_HOME_RELEASE_PC: () => DIY_HOME_RELEASE_PC,
+    DIY_HOME_EDIT_PC: () => DIY_HOME_EDIT_PC,
+    DIY_HOME_DELETE_PC: () => DIY_HOME_DELETE_PC
+  },
   watch: {
     activeOrg: {
       handler(val) {
@@ -130,6 +145,9 @@ export default {
       deep: true,
       immediate: true
     }
+  },
+  activated() {
+    this.initHomeData()
   },
   methods: {
     handleSizeChange(val) {
@@ -206,7 +224,7 @@ export default {
       }
       if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
-      if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
+      //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getHomePc(params)
         .then((res) => {
           this.customData = res.data
@@ -265,6 +283,9 @@ export default {
   }
   .empty-block {
     text-align: center;
+    .empty-img {
+      text-align: center;
+    }
   }
   .page {
     text-align: right;

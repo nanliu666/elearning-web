@@ -17,6 +17,7 @@
         :model="form"
         label-width="100px"
         label-position="left"
+        :rules="rules"
       >
         <!-- <el-form-item label="设备类型：">
           <el-select v-model="form.deviceType">
@@ -24,7 +25,10 @@
             <el-option label="PC" value="PC"></el-option>
           </el-select>
         </el-form-item> -->
-        <el-form-item label="Banner图：">
+        <el-form-item
+          label="Banner图："
+          prop="banner"
+        >
           <common-upload
             v-model="uploadData"
             :before-upload="beforeUpload"
@@ -52,13 +56,13 @@
         <el-form-item label="排序：">
           <el-input v-model="form.sort"></el-input>
           <div style="color: #ff0000; font-size: 12px; margin-top: 5px; line-height: 12px">
-            说明：数值越大越靠前
+            说明：数值越小越靠前
           </div>
         </el-form-item>
         <el-form-item label="链接地址：">
           <el-input v-model="form.linkUrl"></el-input>
           <div style="color: #ff0000; font-size: 12px; margin-top: 5px; line-height: 12px">
-            例如：http://www.qht-training.com.cn/Reception/NewIndex/Product-233.html
+            例如：https://user.zexueyuan.com.cn/#/home
           </div>
         </el-form-item>
         <!-- <el-form-item label="链接模块：">
@@ -139,14 +143,17 @@ export default {
           value: 2
         }
       ],
-      loading: false
+      loading: false,
+      rules: {
+        banner: [{ required: true, message: '请上传banner图!', trigger: 'change' }]
+      }
     }
   },
   watch: {
     activeOrg: {
       handler(val) {
         this.activeOrg = val
-        this.$emit('init')
+        // this.$emit('init')
       },
       deep: true,
       immediate: true
@@ -222,7 +229,7 @@ export default {
       }
       // 编辑操作
       if (this.bannerId) {
-        if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId || '' })
+        if (this.rowData) Object.assign(params, { orgId: this.rowData.orgId })
         //   判断是否是全部
         //   if (this.rowData && this.rowData.orgId == '0') Object.assign(params, { orgId: '' })
         params.id = this.bannerId
@@ -295,10 +302,11 @@ export default {
     flex: 1;
   }
   .drawer__footer {
-    display: flex;
-    button {
-      flex: 1;
-    }
+    text-align: center;
+    // display: flex;
+    // button {
+    //   flex: 1;
+    // }
   }
 }
 </style>

@@ -1,28 +1,32 @@
 <template>
-  <div class="diyHomePc">
+  <div
+    v-loading="loading"
+    class="diyHomePc"
+  >
     <div class="operation">
       <div class="left">
         <el-form
           ref="diyFormRef"
           :rules="formRules"
           :model="formData"
-          label-width="80px"
+          label-width="100px"
         >
           <el-form-item
             prop="name"
-            label="名称："
+            label="方案名称："
           >
             <el-input
               v-model="formData.name"
               type="text"
               size="small"
-              placeholder="请输名称"
+              placeholder="请输方案名称"
             ></el-input>
           </el-form-item>
         </el-form>
       </div>
       <div class="right">
         <el-button
+          v-p="DIY_EDIT_RELEASE_PC"
           type="primary"
           size="small"
           @click="releaseFn"
@@ -30,6 +34,7 @@
           发布
         </el-button>
         <el-button
+          v-p="DIY_EDIT_SAVE_PC"
           type="primary"
           size="small"
           @click="saveTempFn"
@@ -162,6 +167,7 @@
 <script>
 import draggable from 'vuedraggable'
 import { postSaveTemp, putReleaseTemp, putUpdataTemp, getDetailTemp } from '@/api/diy/diy'
+import { DIY_EDIT_RELEASE_PC, DIY_EDIT_SAVE_PC } from '@/const/privileges'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -169,6 +175,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       activeClassKey: '',
       tempId: '', // 模板id
       moduleType: '', // 模块类型，判断是左边还是右边或者是头部banner
@@ -216,23 +223,41 @@ export default {
       ]
     }
   },
+  computed: {
+    DIY_EDIT_RELEASE_PC: () => DIY_EDIT_RELEASE_PC,
+    DIY_EDIT_SAVE_PC: () => DIY_EDIT_SAVE_PC
+  },
   mounted() {
+    // this.formData.orgId = this.$route.query.orgId
+    // if (this.$route.query.id) {
+    //   this.initData()
+    // }
+  },
+  activated() {
     this.formData.orgId = this.$route.query.orgId
     if (this.$route.query.id) {
       this.initData()
     }
   },
-  destroyed() {
+  deactivated() {
     this.tempId = ''
+    let newData = {
+      orgId: '',
+      name: '',
+      device: 1,
+      item: ''
+    }
+    this.formData = { ...newData }
   },
   methods: {
     initData() {
       // 编辑时初始化数据
+      this.loading = true
       this.tempId = this.$route.query.id
       let sendData = {}
       sendData.id = this.tempId
       getDetailTemp(sendData).then((res) => {
-        console.log('initData', res)
+        this.loading = false
         this.formData = { ...res }
         let itemObj = JSON.parse(res.item)
         this.contetArrL = itemObj.content
@@ -241,7 +266,6 @@ export default {
     },
     checkFn(event, item, moduleType) {
       // 选中模块时触发
-      console.log('event', event)
       if (item) {
         this.activeClassKey = item.id
       }
@@ -251,13 +275,11 @@ export default {
       this.moduleType = moduleType
       this.editStyle.top = event.target.offsetTop
       this.editStyle.left = event.target.offsetLeft + event.target.offsetWidth + 10
-      console.log('item', item)
     },
-    moveFn(event) {
+    moveFn() {
       // 移动模块时触发
       this.activeClassKey = ''
       this.moduleType = ''
-      console.log('event', event)
     },
     deleteModule() {
       if (this.moduleType === 'left') {
@@ -311,6 +333,7 @@ export default {
       // 新增模板时保存
       this.$refs['diyFormRef'].validate((valid) => {
         if (valid) {
+          this.loading = true
           if (this.tempId && this.tempId.length > 0) {
             this.updataTempFn()
             return
@@ -322,14 +345,18 @@ export default {
           items.side = this.contetArrR
           sendData.item = JSON.stringify(items)
           postSaveTemp(sendData).then((res) => {
+            this.loading = false
             this.tempId = res
             this.$message.success('保存成功')
           })
+        } else {
+          this.loading = false
         }
       })
     },
     updataTempFn() {
       // 修改模板
+      this.loading = true
       let sendData = {}
       sendData = _.clone(this.formData)
       sendData.id = this.tempId
@@ -338,15 +365,18 @@ export default {
       items.side = this.contetArrR
       sendData.item = JSON.stringify(items)
       putUpdataTemp(sendData).then(() => {
+        this.loading = false
         this.$message.success('保存成功')
       })
     },
     releaseFn() {
       // 发布
+      this.loading = true
       if (this.tempId && this.tempId.length > 0) {
         let sendData = {}
         sendData.id = this.tempId
         putReleaseTemp(sendData).then(() => {
+          this.loading = false
           this.$message.success('发布成功')
         })
       } else {
@@ -391,8 +421,6 @@ export default {
   border: #f00 solid 1px;
 }
 
-.page .menu {
-}
 .contet {
   display: flex;
   width: 1200px;
@@ -412,8 +440,7 @@ export default {
   position: absolute;
   z-index: 2000;
 }
-.contet .edit2 {
-}
+
 .contet .edit2 span {
   color: #333;
   font-size: 22px;
