@@ -18,7 +18,7 @@ import { Base64 } from 'js-base64'
 
 const instance = axios.create({
   timeout: 100000, //默认超时时间
-  withCredentials: true, //跨域请求，允许保存cookie
+  withCredentials: false, //跨域请求，允许保存cookie
   validateStatus: function(status) {
     return status >= 200 && status <= 500
   }
