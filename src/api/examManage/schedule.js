@@ -97,3 +97,9 @@ export const putAchievement = (params) => put('/manage/v1/achievement/publish', 
  * operation: 证书操作类型 grant-发放 revoke-撤销,
  */
 export const putCertificate = (params) => put('/manage/v1/revoke/certificate', params)
+/**
+ * 导出试卷word
+ * 1.paperId : 试卷id    2. paperType : 试卷类型 manual-手工试卷  random-随机试卷
+ */
+export const exportPaperWord = (params) =>
+  get('/manage/v1/paper/show/export', params, { responseType: 'blob' })

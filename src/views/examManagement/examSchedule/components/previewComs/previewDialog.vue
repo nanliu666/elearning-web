@@ -45,6 +45,7 @@
 
 <script>
 import PreviewContent from './previewContent'
+import { exportPaperWord } from '@/api/examManage/schedule'
 import { Loading } from 'element-ui'
 export default {
   name: 'PreviewDialog',
@@ -86,6 +87,11 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       }
       const loadingInstance = Loading.service(loadingOptions)
+      const { type, id } = this.paperData
+      const parmas = {
+        paperId: id,
+        paperType: type
+      }
       switch (e) {
         case 'pdf':
           this.$pdf(
@@ -97,6 +103,21 @@ export default {
           )
           break
         case 'word':
+          exportPaperWord(parmas).then((res) => {
+            loadingInstance.close()
+            const { data, headers } = res
+            const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
+            const blob = new Blob([data], { type: headers['content-type'] })
+            let dom = document.createElement('a')
+            let url = window.URL.createObjectURL(blob)
+            dom.href = url
+            dom.download = decodeURI(fileName)
+            dom.style.display = 'none'
+            document.body.appendChild(dom)
+            dom.click()
+            dom.parentNode.removeChild(dom)
+            window.URL.revokeObjectURL(url)
+          })
           break
       }
     }
