@@ -21,6 +21,7 @@
             ref="form"
             :model="form"
             :columns="columns"
+            @node-click="_nodeClickFun"
           >
             <template slot="title1">
               <h3>基本信息</h3>
@@ -385,6 +386,9 @@ export default {
   },
 
   methods: {
+    _nodeClickFun(val) {
+      this.form.position = val.name
+    },
     onUploadExceed() {
       this.$message.warning('上传附件不能超过5个')
     },

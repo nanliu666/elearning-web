@@ -130,6 +130,7 @@
               :tree-params="column.props && column.props.treeParams"
               v-bind="itemAttrs(column)"
               :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+              @node-click="_nodeClickFun"
             />
             <lazy-select
               v-if="column.itemType === 'lazySelect'"
@@ -222,6 +223,9 @@ export default {
   },
   mounted() {},
   methods: {
+    _nodeClickFun(data, node) {
+      this.$emit('node-click', data, node)
+    },
     changeLabel(column, value) {
       _.set(column, 'disabled', !value)
     },

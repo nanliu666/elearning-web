@@ -137,7 +137,7 @@
 
     <!-- 移动选择框 -->
     <el-dialog
-      title="收货地址"
+      title="移动"
       :visible.sync="dialogFormVisible"
       :modal-append-to-body="false"
     >

@@ -62,7 +62,7 @@
         <el-form-item label="链接地址：">
           <el-input v-model="form.linkUrl"></el-input>
           <div style="color: #ff0000; font-size: 12px; margin-top: 5px; line-height: 12px">
-            例如：http://www.qht-training.com.cn/Reception/NewIndex/Product-233.html
+            例如：https://user.zexueyuan.com.cn/#/home
           </div>
         </el-form-item>
         <!-- <el-form-item label="链接模块：">
