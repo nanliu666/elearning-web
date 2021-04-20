@@ -432,7 +432,7 @@ export default {
       } else {
         ids = data.userId
       }
-      this.$confirm('确定将选择账号密码重置为123456?', {
+      this.$confirm('确定将选择账号密码重置为epro123456?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
