@@ -1,5 +1,23 @@
 <template>
   <div class="situation">
+    <div class="data-area">
+      <div class="data-item">
+        <div class="name">回收量/次</div>
+        <div class="content">432</div>
+      </div>
+      <div class="data-item">
+        <div class="name">浏览量/次</div>
+        <div class="content">432</div>
+      </div>
+      <div class="data-item">
+        <div class="name">回收率/人</div>
+        <div class="content">432</div>
+      </div>
+      <div class="data-item">
+        <div class="name">平均完成时间/分钟</div>
+        <div class="content">432</div>
+      </div>
+    </div>
     <div class="table-wrapper">
       <div class="filter-container">
         <div class="operate-wrapper">
@@ -15,7 +33,11 @@
               ></el-input>
             </div>
 
-            <el-popover v-model="queryFormVisible" placement="bottom" transition="false">
+            <el-popover
+              v-model="queryFormVisible"
+              placement="bottom"
+              transition="false"
+            >
               <el-form
                 label-position="left"
                 :inline="true"
@@ -30,9 +52,8 @@
                     :options="treeData"
                     placeholder="请选择组织"
                     :props="seletorProps"
-                    @getValue="(name) => queryForm.dept = name"
+                    @getValue="(name) => (queryForm.dept = name)"
                   />
-
                 </el-form-item>
                 <el-form-item label="完成时间">
                   <el-date-picker
@@ -45,9 +66,19 @@
                 </el-form-item>
 
                 <el-form-item label="完成情况">
-                  <el-select v-model="queryForm.status" clearable placeholder="请选择">
-                    <el-option label="已完成" :value="1"></el-option>
-                    <el-option label="未完成" :value="0"></el-option>
+                  <el-select
+                    v-model="queryForm.status"
+                    clearable
+                    placeholder="请选择"
+                  >
+                    <el-option
+                      label="已完成"
+                      :value="1"
+                    ></el-option>
+                    <el-option
+                      label="未完成"
+                      :value="0"
+                    ></el-option>
                   </el-select>
                 </el-form-item>
 
@@ -82,7 +113,10 @@
       </div>
 
       <div class="table-container">
-        <div style="margin-bottom: 8px" v-if="multipleSelection.length">
+        <div
+          v-if="multipleSelection.length"
+          style="margin-bottom: 8px"
+        >
           <span>{{ `已选中${multipleSelection.length}项` }}</span>
           <span
             style="
@@ -94,9 +128,13 @@
               background-color: #dcdfe6;
             "
           ></span>
-          <el-button type="text" style="padding: 0" @click="handleDelete"
-            >批量删除</el-button
+          <el-button
+            type="text"
+            style="padding: 0"
+            @click="handleDelete"
           >
+            批量删除
+          </el-button>
         </div>
 
         <el-table
@@ -105,7 +143,10 @@
           height="45vh"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" />
+          <el-table-column
+            type="selection"
+            width="55"
+          />
           <el-table-column
             fixed="left"
             align="center"
@@ -165,12 +206,12 @@
 <script>
 import TreeSelector from '@/components/tree-selector'
 
-import Pagination from "@/components/common-pagination";
+import Pagination from '@/components/common-pagination'
 import { students } from '@/api/questionnaire'
 import { getOrgTreeSimple } from '@/api/org/org'
 
 export default {
-  name: "situation",
+  name: 'Situation',
   components: {
     Pagination,
     TreeSelector
@@ -190,7 +231,7 @@ export default {
       },
       queryForm: {
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 10
       },
       tableData: [],
       multipleSelection: [],
@@ -203,7 +244,7 @@ export default {
         userName: '',
         status: '',
         dept: '',
-        subTime: '',
+        subTime: ''
       },
       queryForm: {
         pageSize: 10,
@@ -211,15 +252,15 @@ export default {
         userName: '',
         status: '',
         dept: '',
-        subTime: '',
+        subTime: ''
       },
       treeData: []
-    };
+    }
   },
   activated() {
     this.initForm.id = this.queryForm.id = this.id
-    this.getData();
-    this.getOrgTree();
+    this.getData()
+    this.getOrgTree()
   },
   methods: {
     resetPageAndGetList() {
@@ -240,48 +281,52 @@ export default {
     },
     getData() {
       this.loading = true
-      students(this.queryForm).then(res => {
-        const { data, totalNum } = res
-        this.tableData = data
-        this.total = totalNum
-      }).finally(() => {
-        this.loading = false
-      })
+      students(this.queryForm)
+        .then((res) => {
+          const { data, totalNum } = res
+          this.tableData = data
+          this.total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val
     },
     handleDelete(target) {
-      this.$confirm("您确定要批量删除选中的问卷吗？", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      this.$confirm('您确定要批量删除选中的问卷吗？', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
-          if (!Array.isArray(target)) target = [target];
-          const ids = target.map((item) => item.id);
-          this.confirmDelete(ids);
+          if (!Array.isArray(target)) target = [target]
+          const ids = target.map((item) => item.id)
+          this.confirmDelete(ids)
         })
-        .catch(() => {});
+        .catch(() => {})
     },
-    confirmDelete(target) {},
+    confirmDelete(target) {}
   },
   watch: {
     'queryForm.userName': _.debounce(function() {
       this.getData()
-    }, 1000),
+    }, 1000)
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>
 .situation {
   .data-area {
+    background-color: #FAFAFA;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 24px 0;
     box-sizing: border-box;
+    margin-bottom: 24px;
     .data-item {
       display: flex;
       flex: 1;

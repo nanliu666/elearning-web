@@ -13,8 +13,8 @@
         <div class="pane-header-l">
           <span class="title">{{ data.planName }}</span>
           <span
-            class="status doing"
-            :class="{ doing: data.status == 2, will: data.status == 1, done: data.status == 3 }"
+            class="status"
+            :class="{ 'doing': data.status == 2, 'will': data.status == 1, 'done': data.status == 3 }"
           >{{ getStatusName(data.status) }}</span>
         </div>
         <div class="pane-header-r">
@@ -96,11 +96,10 @@
           </div>
         </div>
         <div class="pane-code">
-          <div class="code-img">
-            <img src="./code.png" />
-          </div>
+          <div class="code-img" ref="code"></div>
           <div class="code-text">
             扫码查看<el-button
+            @click="handleCopy"
               type="text"
               style="margin-left: 5px"
             >
@@ -121,7 +120,7 @@
         >
           <component
             :is="tab.component"
-            id="1381777442804695041"
+            :id="id"
             :should-resize-chart="activeComponent == 'Distribution'"
           ></component>
         </el-tab-pane>
@@ -131,8 +130,12 @@
 </template>
 
 <script>
+// :id="$route.query.id"
 import { Situation, Distribution } from './tabs'
 import { queryPlanDetail, end, suspend, start } from '@/api/questionnaire'
+import QRCode from 'qrcodejs2'
+const CODE_HEIGHT = 112
+const CODE_WIDTH = 112
 
 export default {
   components: {
@@ -154,13 +157,29 @@ export default {
       ],
       data: {},
       btn1Loading: false,
-      btn2Loading: false
+      btn2Loading: false,
+      id: ''
     }
   },
   activated() {
+    const { id, toTab2 } = this.$route.query
+    if (toTab2) {
+      this.activeComponent = 'Distribution'
+    }
+    this.id = '1381777442804695041'
+    // this.id = id
     this.getData()
   },
   methods: {
+    handleCopy() {
+      const input = document.createElement('input')
+      document.body.appendChild(input)
+      input.value = this.data.asqUrl
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      this.$message.success('已复制')
+    },
     handleEdit() {
       this.$router.push({
         path: '/questionnaire/eidt'
@@ -168,33 +187,30 @@ export default {
     },
     handleDelete() {},
     async handleStatusChange(status) {
-      if (status === 'finish') {
+      if (status === 3) {
         const result = await this.confirmFinish()
         if (!result) return
       }
       let api, loading
-      switch (type) {
-        case 'pause':
+      switch (status) {
+        case 1:
           api = suspend
           loading = 'btn1Loading'
           break
-        case 'start':
+        case 2:
           api = start
           loading = 'btn1Loading'
           break
-        case 'finish':
+        case 3:
           api = end
           loading = 'btn2Loading'
       }
       this[loading] = true
-      api({ id: '1381777442804695041' })
+      api({ id: this.id })
         .then(() => {
           this.$message.success('操作成功')
-          if (type === 'finish') {
-            this.data.status = 3
-          } else {
-            this.data.isSuspend = type === 'start' ? 1 : 2
-          }
+          this.data.status = status
+          this.$forceUpdate()
         })
         .finally(() => {
           this[loading] = false
@@ -208,7 +224,6 @@ export default {
       }).catch(() => {})
     },
     getData() {
-      this.getStudent()
       this.queryPlanDetail()
     },
     viewPaper() {
@@ -231,11 +246,16 @@ export default {
           return '草稿'
       }
     },
-    getStudent() {},
     queryPlanDetail() {
-      const id = this.$route.query.id
-      queryPlanDetail({ id: '1381777442804695041' }).then((res) => {
+      queryPlanDetail({ id: this.id }).then((res) => {
         this.data = res
+        this.$nextTick(() => {
+          const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
+            width: CODE_WIDTH,
+            height: CODE_HEIGHT
+          }))
+          qrcode.makeCode(this.data.asqUrl)
+        })
       })
     }
   }
@@ -353,9 +373,6 @@ export default {
         .code-img {
           width: 112px;
           height: 112px;
-          img {
-            width: 100%;
-          }
         }
         .code-text {
           font-size: 12px;

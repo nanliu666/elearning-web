@@ -1,4 +1,3 @@
-
 import request from '@/router/axios'
 
 export const queryPlanDetail = (params) => {
@@ -94,5 +93,77 @@ export const deleteQuestionnaire = (data) => {
     url: '/api/blade-margin/v1/QuestionnaireArrange/deleteQuestionnaire',
     method: 'post',
     data
+  })
+}
+
+export const saveAsqUrl = (data) => {
+  return request({
+    url: '/api/blade-margin/v1/asq/plan/saveAsqUrl',
+    method: 'put',
+    data
+  })
+}
+
+export const questionnaireList = (data) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/list',
+    method: 'post',
+    data
+  })
+}
+
+export const listCreatorId = (params) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/listCreatorId',
+    method: 'get',
+    params
+  })
+}
+
+export const questionnaireDelete = (data) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/delete',
+    method: 'post',
+    data
+  })
+}
+
+export const questionnaireCopy = (params) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/copyAction',
+    method: 'get',
+    params
+  })
+}
+
+export const questionnaireAdd = (data) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/add',
+    method: 'post',
+    data
+  })
+}
+
+export const questionnaireEdit = (data) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/editAction',
+    method: 'post',
+    data
+  })
+}
+
+export const editView = (params) => {
+  return request({
+    url: '/api/margin/v1/questionnaireTemplate/editView',
+    method: 'get',
+    params
+  })
+}
+
+export const count = (params) => {
+  return request({
+    url: '/api/manage/v1/asq/plan/detail/count',
+    method: 'get',
+    params
   })
 }

@@ -81,6 +81,7 @@ export default {
   watch: {
     value() {
       this.valueId = this.value
+      if (!this.options.length) return
       this.$nextTick(() => {
         this.initHandle()
       })
@@ -94,9 +95,6 @@ export default {
       },
       deep: true
     }
-  },
-  mounted() {
-    this.initHandle()
   },
   methods: {
     // 初始化值

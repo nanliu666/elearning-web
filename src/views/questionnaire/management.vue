@@ -1,18 +1,23 @@
 <template>
   <div class="management">
     <page-header title="问卷管理">
-      <el-button slot="rightMenu" type="primary" size="medium" @click="handleEdit">
+      <el-button
+        slot="rightMenu"
+        type="primary"
+        size="medium"
+        @click="handleEdit"
+      >
         创建问卷
       </el-button>
     </page-header>
 
     <div class="body">
       <div class="filter-container">
-        <div class="operate-wrapper"> 
+        <div class="operate-wrapper">
           <div class="operate-left">
             <div class="input-wrapper">
               <el-input
-                v-model="queryForm.name"
+                v-model="queryForm.asqName"
                 :disabled="loading"
                 clearable
                 size="medium"
@@ -21,7 +26,11 @@
               ></el-input>
             </div>
 
-            <el-popover v-model="queryFormVisible" placement="bottom" transition="false">
+            <el-popover
+              v-model="queryFormVisible"
+              placement="bottom"
+              transition="false"
+            >
               <el-form
                 label-position="left"
                 :inline="true"
@@ -31,34 +40,42 @@
                 style="padding: 24px"
               >
                 <el-form-item label="问卷分类">
-                  <el-select v-model="queryForm.isUsed" clearable placeholder="请选择">
-                    <el-option label="正常" value="1"></el-option>
-                    <el-option label="禁用" value="0"></el-option>
-                  </el-select>
+                  <tree-selector
+                    class="selector"
+                    :options="treeData"
+                    placeholder="请选择组织"
+                    :props="seletorProps"
+                    @getValue="(id) => (queryForm.categoryId = id)"
+                  />
                 </el-form-item>
                 <el-form-item label="创建人">
-                  <el-input
-                    v-model="queryForm.creatorId"
-                    clearable
-                    style="width: 202px"
-                    placeholder="请输入创建人"
-                  >
-                  </el-input>
+                  <el-select v-model="queryForm.creatorId" placeholder="请选择创建人" clearable>
+                    <el-option
+                      v-for="item in creatorList"
+                      :key="item.creatorId"
+                      :label="item.name"
+                      :value="item.creatorId">
+                    </el-option>
+                  </el-select>
+
+
                 </el-form-item>
 
                 <el-form-item label="题目数量">
-                  <el-input
-                    v-model="queryForm.min"
+                  <el-input-number
+                    v-model="queryForm.minNum"
+                    controls-position="right"
                     clearable
-                    style="width: 100px"
                     placeholder="最小值"
+                    width="110"
                   />
                   ~
-                  <el-input
-                    v-model="queryForm.max"
+                  <el-input-number
+                    v-model="queryForm.maxNum"
+                    controls-position="right"
                     clearable
-                    style="width: 100px"
                     placeholder="最大值"
+                    width="110"
                   />
                 </el-form-item>
                 <div style="text-align: right; margin-right: 75px">
@@ -72,7 +89,7 @@
                   </el-button>
                   <el-button
                     size="medium"
-                    @click="queryForm = { ...initForm, name: queryForm.name }"
+                    @click="queryForm = { ...initForm, name: queryForm.asqName }"
                   >
                     重置
                   </el-button>
@@ -96,13 +113,22 @@
                 :style="{ cursor: loading ? 'not-allowed' : 'pointer' }"
                 @click="resetFormAndGetList"
               >
-                <i class="el-icon-refresh-right" style="margin-right: 2px"></i>刷新
+                <i
+                  class="el-icon-refresh-right"
+                  style="margin-right: 2px"
+                ></i>刷新
               </div>
             </div>
-            <el-dropdown :hide-on-click="false" trigger="click">
+            <el-dropdown
+              :hide-on-click="false"
+              trigger="click"
+            >
               <i class="el-icon-setting set-btn"></i>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item v-for="(val, key) in columns" :key="key">
+                <el-dropdown-item
+                  v-for="(val, key) in columns"
+                  :key="key"
+                >
                   <el-checkbox v-model="columns[key]">
                     {{ key }}
                   </el-checkbox>
@@ -114,22 +140,28 @@
       </div>
 
       <div class="table-container">
-        <div style="margin-bottom: 8px" v-if="multipleSelection.length">
-          <span>{{ `已选中${multipleSelection.length}项` }}</span>
-          <span
-            style="
-              display: inline-block;
-              width: 1px;
-              height: 1em;
-              margin: 0 8px;
-              vertical-align: middle;
-              background-color: #dcdfe6;
-            "
-          ></span>
-          <el-button type="text" style="padding: 0" @click="handleDelete"
-            >批量删除</el-button
-          >
+        <!-- <div style="margin-bottom: 8px; height:21px;">
+        <div v-if="multipleSelection.length">
+            <span>{{ `已选中${multipleSelection.length}项` }}</span>
+            <span
+              style="
+                display: inline-block;
+                width: 1px;
+                margin: 0 8px;
+                vertical-align: middle;
+                background-color: #dcdfe6;
+              "
+            ></span>
+            <el-button
+              type="text"
+              style="padding: 0"
+              @click="() => handleDelete"
+            >
+              批量删除
+            </el-button>
         </div>
+
+        </div> -->
 
         <el-table
           v-loading="loading"
@@ -137,24 +169,31 @@
           height="60vh"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" />
+          <!-- <el-table-column
+            type="selection"
+            width="55"
+          /> -->
           <el-table-column
             v-if="columns['问卷名称']"
             fixed="left"
-            prop="name"
             align="center"
             label="问卷名称"
             :show-overflow-tooltip="true"
             width="180"
           >
             <template slot-scope="scope">
-              <el-button type="text" @click="toPreview(scope.row)">{{ scope.row.name }}</el-button>
+              <el-button
+                type="text"
+                @click="toPreview(scope.row)"
+              >
+                {{ scope.row.asqName }}
+              </el-button>
             </template>
           </el-table-column>
           <el-table-column
             v-if="columns['问卷分类']"
             align="center"
-            prop="catalog"
+            prop="categoryName"
             :show-overflow-tooltip="true"
             label="问卷分类"
           >
@@ -162,7 +201,7 @@
           <el-table-column
             v-if="columns['问卷简介']"
             align="center"
-            prop="intro"
+            prop="remark"
             :show-overflow-tooltip="true"
             label="问卷简介"
           >
@@ -170,7 +209,7 @@
           <el-table-column
             v-if="columns['题目数量']"
             align="center"
-            prop="count"
+            prop="questionNum"
             :show-overflow-tooltip="true"
             label="题目数量"
           >
@@ -187,23 +226,37 @@
             v-if="columns['创建人']"
             align="center"
             :show-overflow-tooltip="true"
-            prop="creator"
+            prop="name"
             label="创建人"
           >
           </el-table-column>
 
-          <el-table-column prop="operate" align="center" label="操作" fixed="right">
+          <el-table-column
+            prop="operate"
+            align="center"
+            label="操作"
+            fixed="right"
+          >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="handleEdit(scope.row)">
+              <el-button
+                type="text"
+                size="small"
+                @click="handleEdit(scope.row)"
+              >
                 编辑
               </el-button>
-              <el-button type="text" size="small" @click="handleDelete(scope.row)">
+              <el-button
+                type="text"
+                size="small"
+                @click="handleDelete(scope.row)"
+              >
                 删除
               </el-button>
               <el-button
                 type="text"
                 size="small"
-                @click="handleCopy(scope.row, scope.$index)"
+                :loading="scope.row.copyLoading"
+                @click="handleCopy(scope.row)"
               >
                 复制
               </el-button>
@@ -215,8 +268,8 @@
       <div class="page-container">
         <pagination
           :total="total"
-          :page="queryForm.pageNo"
-          :limit="queryForm.pageSize"
+          :page="queryForm.currentPage"
+          :limit="queryForm.size"
           @pagination="pagination"
         ></pagination>
       </div>
@@ -225,12 +278,16 @@
 </template>
 
 <script>
-import Pagination from "@/components/common-pagination";
-import { deepClone } from "@/util/util";
+import Pagination from '@/components/common-pagination'
+import { questionnaireList, listCreatorId, questionnaireDelete, questionnaireCopy } from '@/api/questionnaire'
+import TreeSelector from '@/components/tree-selector'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
+
 export default {
-  name: "management",
+  name: 'Management',
   components: {
     Pagination,
+    TreeSelector
   },
   data() {
     return {
@@ -241,75 +298,142 @@ export default {
         问卷简介: true,
         题目数量: true,
         创建时间: true,
-        创建人: true,
+        创建人: true
+      },
+      seletorProps: {
+        value: 'id',
+        label: 'name',
+        children: 'children'
+      },
+      initForm: {
+        currentPage: 1,
+        size: 10,
+        creatorId: '',
+        minNum: '',
+        maxNum: '',
+        categoryId: '',
+        asqName: ''
       },
       queryForm: {
-        pageNo: 1,
-        pageSize: 10,
+        currentPage: 1,
+        size: 10,
+        creatorId: '',
+        minNum: '',
+        maxNum: '',
+        categoryId: '',
+        asqName: ''
       },
       loading: false,
       data: [],
+      treeData: [],
       multipleSelection: [],
-      total: 0,
-    };
+      creatorList: [],
+      total: 0
+    }
   },
-  created() {
-    this.getData();
+  activated() {
+    this.getData()
+  },
+  computed: {
+    minInit() {
+      const maxNum = this.queryForm.maxNum
+      if (typeof maxNum === 'number') {
+        return maxNum
+      }
+      return 0
+    },
+    maxInit() {
+      const minNum = this.queryForm.minNum
+      if (typeof minNum === 'number') {
+        return minNum + 1
+      }
+      return 0
+    },
   },
   methods: {
+    resetPageAndGetList() {
+      this.queryForm.currentPage = 1
+      this.queryForm.size = 10
+      this.getList()
+    },
     toPreview(item) {
       this.$router.push({
-        path:'/questionnaire/preview'
+        path: '/questionnaire/preview',
+        query: {
+          id: item.id
+        }
       })
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val;
+      this.multipleSelection = val
     },
-    handleEdit() {
+    handleEdit(item) {
       this.$router.push({
-        path: '/questionnaire/edit'
+        path: '/questionnaire/edit',
+        query: {
+          id: item.id
+        }
       })
     },
     handleDelete(target) {
-      this.$confirm("您确定要批量删除选中的问卷吗？", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+      const message = target ? '您确定删除选中的问卷吗？' : '您确定要批量删除选中的问卷吗？'
+      this.$confirm(message, {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
         .then(() => {
-          if (!Array.isArray(target)) target = [target];
-          const ids = target.map((item) => item.id);
-          this.confirmDelete(ids);
-        })
-        .catch(() => {});
+          if (!Array.isArray(target)) target = [target]
+          const ids = target.map((item) => item.id)
+          const formData = new FormData()
+          formData.append('id', ids.join(''))
+          questionnaireDelete(formData).then(() => {
+            this.$message.success(`已成功删除${ids.length}条问卷`)
+            this.getList()
+          })
+        }).catch(() => {})
     },
-    confirmDelete(target) {},
-    handleCopy(target, index) {
-      const newItem = deepClone(target);
-      newItem.name = newItem.name + '(副本)'
-      this.data.splice(index + 1, 0, newItem)
+    handleCopy(target) {
+      questionnaireCopy({ id: target.id }).then(() => {
+        this.getList()
+      })
     },
     getData() {
-      this.data = [
-        {
-          name: "网购用户满意度调查",
-          catalog: "问卷调查组>市场部门内部>推广组>A推广人员",
-          intro:
-            "为了了解网购相关问题，提高网购为了了解网购相关问题，提高网购为了了解网购相关问题，提高网购",
-          count: "题目数量",
-          createTime: "创建时间",
-          creator: "tom",
-        },
-      ];
+      this.getList()
+      queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
+        this.treeData = res
+      })
+      listCreatorId({ id: '' }).then(res => {
+        this.creatorList = res
+      })
+    },
+    getList() {
+      if (this.loading) return
+      this.loading = true
+      questionnaireList(this.queryForm).then(res => {
+        const { list, totalNum } = res
+        this.data = list
+        this.total = totalNum
+      }).finally(() => {
+        this.loading = false
+      })
     },
     resetFormAndGetList() {
-      if (this.loading) return;
-      this.filterForm = { ...this.initForm };
-      this.getData();
+      this.queryForm = { ...this.initForm }
+      this.getList()
     },
-    pagination() {},
+    pagination({ page, limit }) {
+      this.queryForm.currentPage = page
+      this.queryForm.size = limit
+      this.getList()
+    }
   },
-};
+  watch: {
+    'queryForm.asqName': _.debounce(function() {
+      this.getList()
+    }, 1000)
+  }
+}
 </script>
 <style lang="scss">
 .management {
