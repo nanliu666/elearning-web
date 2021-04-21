@@ -131,7 +131,10 @@
             评分：
           </el-col>
           <el-col :span="7">
-            <el-rate v-model="teacherData.teacherScore"></el-rate>
+            <el-rate
+              v-model="teacherData.teacherScore"
+              disabled
+            ></el-rate>
           </el-col>
         </el-row>
       </div>
