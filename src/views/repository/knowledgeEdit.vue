@@ -207,8 +207,8 @@ const uploadConfigList = [
     label: '是否允许下载',
     prop: 'allowDownload',
     required: false,
-    activeValue: 1,
-    inactiveValue: 0,
+    activeValue: 0,
+    inactiveValue: 1,
     span: 11,
     offset: 1
   },
