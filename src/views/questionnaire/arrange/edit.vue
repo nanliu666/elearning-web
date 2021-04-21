@@ -21,9 +21,7 @@
             type="flex"
             justify="center"
           >
-            <el-col
-              style="text-align: center;"
-            >
+            <el-col style="text-align: center;">
               <el-button
                 icon="el-icon-edit-outline"
                 type="text"
@@ -34,9 +32,7 @@
                 基本信息
               </el-button>
             </el-col>
-            <el-col
-              style="text-align: center;"
-            >
+            <el-col style="text-align: center;">
               <el-button
                 icon="el-icon-setting"
                 type="text"
@@ -310,6 +306,7 @@
               <el-button
                 slot="append"
                 type="primary"
+                @click="handleCopy"
               >
                 复制
               </el-button>
@@ -452,8 +449,16 @@ export default {
     this.getCategoryData()
     this.initData()
   },
-  destroyed() {},
   methods: {
+    handleCopy() {
+      const input = document.createElement('input')
+      document.body.appendChild(input)
+      input.value = this.href
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      this.$message.success('已复制')
+    },
     confirm() {
       this.$router.back()
     },

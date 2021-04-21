@@ -45,20 +45,24 @@
                     :options="treeData"
                     placeholder="请选择组织"
                     :props="seletorProps"
+                    :value="queryForm.categoryId"
                     @getValue="(id) => (queryForm.categoryId = id)"
                   />
                 </el-form-item>
                 <el-form-item label="创建人">
-                  <el-select v-model="queryForm.creatorId" placeholder="请选择创建人" clearable>
+                  <el-select
+                    v-model="queryForm.creatorId"
+                    placeholder="请选择创建人"
+                    clearable
+                  >
                     <el-option
                       v-for="item in creatorList"
                       :key="item.creatorId"
                       :label="item.name"
-                      :value="item.creatorId">
+                      :value="item.creatorId"
+                    >
                     </el-option>
                   </el-select>
-
-
                 </el-form-item>
 
                 <el-form-item label="题目数量">
@@ -89,7 +93,7 @@
                   </el-button>
                   <el-button
                     size="medium"
-                    @click="queryForm = { ...initForm, name: queryForm.asqName }"
+                    @click="queryForm = { ...initForm, asqName: queryForm.asqName }"
                   >
                     重置
                   </el-button>
@@ -279,7 +283,12 @@
 
 <script>
 import Pagination from '@/components/common-pagination'
-import { questionnaireList, listCreatorId, questionnaireDelete, questionnaireCopy } from '@/api/questionnaire'
+import {
+  questionnaireList,
+  listCreatorId,
+  questionnaireDelete,
+  questionnaireCopy
+} from '@/api/questionnaire'
 import TreeSelector from '@/components/tree-selector'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 
@@ -331,9 +340,6 @@ export default {
       total: 0
     }
   },
-  activated() {
-    this.getData()
-  },
   computed: {
     minInit() {
       const maxNum = this.queryForm.maxNum
@@ -348,7 +354,15 @@ export default {
         return minNum + 1
       }
       return 0
-    },
+    }
+  },
+  watch: {
+    'queryForm.asqName': _.debounce(function() {
+      this.getList()
+    }, 1000)
+  },
+  activated() {
+    this.getData()
   },
   methods: {
     resetPageAndGetList() {
@@ -391,7 +405,8 @@ export default {
             this.$message.success(`已成功删除${ids.length}条问卷`)
             this.getList()
           })
-        }).catch(() => {})
+        })
+        .catch(() => {})
     },
     handleCopy(target) {
       questionnaireCopy({ id: target.id }).then(() => {
@@ -403,20 +418,22 @@ export default {
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
         this.treeData = res
       })
-      listCreatorId({ id: '' }).then(res => {
+      listCreatorId({ id: '' }).then((res) => {
         this.creatorList = res
       })
     },
     getList() {
       if (this.loading) return
       this.loading = true
-      questionnaireList(this.queryForm).then(res => {
-        const { list, totalNum } = res
-        this.data = list
-        this.total = totalNum
-      }).finally(() => {
-        this.loading = false
-      })
+      questionnaireList(this.queryForm)
+        .then((res) => {
+          const { list, totalNum } = res
+          this.data = list
+          this.total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     resetFormAndGetList() {
       this.queryForm = { ...this.initForm }
@@ -427,11 +444,6 @@ export default {
       this.queryForm.size = limit
       this.getList()
     }
-  },
-  watch: {
-    'queryForm.asqName': _.debounce(function() {
-      this.getList()
-    }, 1000)
   }
 }
 </script>

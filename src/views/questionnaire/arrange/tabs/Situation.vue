@@ -2,20 +2,36 @@
   <div class="situation">
     <div class="data-area">
       <div class="data-item">
-        <div class="name">回收量/次</div>
-        <div class="content">432</div>
+        <div class="name">
+          回收量/次
+        </div>
+        <div class="content">
+          {{ count.backCount }}
+        </div>
       </div>
       <div class="data-item">
-        <div class="name">浏览量/次</div>
-        <div class="content">432</div>
+        <div class="name">
+          浏览量/次
+        </div>
+        <div class="content">
+          {{ count.viewCount }}
+        </div>
       </div>
       <div class="data-item">
-        <div class="name">回收率/人</div>
-        <div class="content">432</div>
+        <div class="name">
+          回收率/人
+        </div>
+        <div class="content">
+          {{ count.backRate }}
+        </div>
       </div>
       <div class="data-item">
-        <div class="name">平均完成时间/分钟</div>
-        <div class="content">432</div>
+        <div class="name">
+          平均完成时间/分钟
+        </div>
+        <div class="content">
+          {{ count.avgTime }}
+        </div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -143,10 +159,10 @@
           height="45vh"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column
+          <!-- <el-table-column
             type="selection"
             width="55"
-          />
+          /> -->
           <el-table-column
             fixed="left"
             align="center"
@@ -189,6 +205,20 @@
             label="完成时间"
           >
           </el-table-column>
+          <el-table-column
+            align="center"
+            label="操作"
+          >
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                size="mini"
+                @click="showPreview(scope.row)"
+              >
+                查看问卷
+              </el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
       <div class="page-container">
@@ -200,6 +230,91 @@
         ></pagination>
       </div>
     </div>
+
+    <el-dialog
+      :visible.sync="dialogVisible"
+      class="question-dialog"
+      destroy-on-close
+      :show-close="false"
+    >
+      <div
+        v-loading="dialogLoading"
+        class="preview-wrapper"
+      >
+        <el-scrollbar>
+          <div>
+            <div class="preview-header-area">
+              <div class="preview-title">
+                {{ questionData.planName }}
+              </div>
+              <div class="preview-intro">
+                {{ questionData.remark }}
+              </div>
+            </div>
+
+            <div class="preview-topic">
+              <div
+                v-for="(question, index) in questionData.questionCpList"
+                :key="question.questionId"
+                class="question-item"
+              >
+                <div class="question-type">
+                  {{ getTypeName(question) }}
+                </div>
+                <div class="question-title">
+                  <span
+                    name="number"
+                    style="font-weight: bold;"
+                  >{{ index + 1 }}.</span>
+                  <span
+                    v-if="question.status == 1"
+                    name="request"
+                    style="display: inline-block; margin-right: 5px; color: red;"
+                  >*</span>{{ question.content }}
+                </div>
+                <div class="question-content">
+                  <el-input
+                    v-if="question.type == 'short_answer'"
+                    v-model="questionResults[index]"
+                  ></el-input>
+
+                  <el-radio-group
+                    v-if="question.type == 'single_choice'"
+                    v-model="questionResults[index]"
+                  >
+                    <el-radio
+                      v-for="(option, option_index) in question.optionCpList"
+                      :key="option_index"
+                      :label="option.content"
+                    ></el-radio>
+                  </el-radio-group>
+
+                  <el-checkbox-group
+                    v-if="question.type == 'multi_choice'"
+                    v-model="questionResults[index]"
+                  >
+                    <el-checkbox
+                      v-for="(option, option_index) in question.optionCpList"
+                      :key="option_index"
+                      :label="option.content"
+                    />
+                  </el-checkbox-group>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-scrollbar>
+      </div>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="dialogVisible = false"
+        >关闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -207,7 +322,7 @@
 import TreeSelector from '@/components/tree-selector'
 
 import Pagination from '@/components/common-pagination'
-import { students } from '@/api/questionnaire'
+import { students, count, viewAnswer } from '@/api/questionnaire'
 import { getOrgTreeSimple } from '@/api/org/org'
 
 export default {
@@ -224,14 +339,11 @@ export default {
   },
   data() {
     return {
+      dialogLoading: false,
       seletorProps: {
         value: 'orgName',
         label: 'orgName',
         children: 'children'
-      },
-      queryForm: {
-        pageNo: 1,
-        pageSize: 10
       },
       tableData: [],
       multipleSelection: [],
@@ -254,15 +366,65 @@ export default {
         dept: '',
         subTime: ''
       },
-      treeData: []
+      treeData: [],
+      count: {},
+      questionData: {
+        asqQuestions: []
+      },
+      dialogVisible: false,
+      questionResults: []
     }
   },
-  activated() {
-    this.initForm.id = this.queryForm.id = this.id
-    this.getData()
-    this.getOrgTree()
+  watch: {
+    id() {
+      this.initData()
+    },
+    'queryForm.userName': _.debounce(function() {
+      this.getData()
+    }, 1000)
   },
   methods: {
+    getTypeName(item) {
+      let result = ''
+      switch (item.type) {
+        case 'short_answer':
+          result += '简答题'
+          break
+        case 'single_choice':
+          result += '单选题'
+          break
+        case 'multi_choice':
+          result += '多选题'
+          break
+        default:
+          break
+      }
+      return result
+    },
+    showPreview(item) {
+      this.dialogVisible = true
+      this.dialogLoading = true
+      viewAnswer({ subjectCpId: item.subjectCpId })
+        .then((res) => {
+          this.questionData = res
+          if (!res.questionCpList) return
+          res.questionCpList.forEach((question) => {
+            this.questionResults.push(
+              question.type == 'short_answer'
+                ? ''
+                : question.type == 'single_choice'
+                ? question.optionCpList[0].content
+                : [question.optionCpList[0].content]
+            )
+          })
+        })
+        .finally(() => (this.dialogLoading = false))
+    },
+    initData() {
+      this.initForm.id = this.queryForm.id = this.id
+      this.getData()
+      this.getOrgTree()
+    },
     resetPageAndGetList() {
       this.queryForm.pageSize = 10
       this.queryForm.pageNo = 1
@@ -290,37 +452,103 @@ export default {
         .finally(() => {
           this.loading = false
         })
+
+      const data = JSON.parse(JSON.stringify(this.queryForm))
+      delete data.pageNo
+      delete data.pageSize
+      count(data).then((res = {}) => {
+        Object.keys(res).forEach((key) => {
+          this.count[key] = res[key] || 0
+        })
+      })
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
-    },
-    handleDelete(target) {
-      this.$confirm('您确定要批量删除选中的问卷吗？', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          if (!Array.isArray(target)) target = [target]
-          const ids = target.map((item) => item.id)
-          this.confirmDelete(ids)
-        })
-        .catch(() => {})
-    },
-    confirmDelete(target) {}
-  },
-  watch: {
-    'queryForm.userName': _.debounce(function() {
-      this.getData()
-    }, 1000)
+    }
+    // handleDelete(target) {
+    //   this.$confirm('您确定要批量删除选中的问卷吗？', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     type: 'warning'
+    //   })
+    //     .then(() => {
+    //       if (!Array.isArray(target)) target = [target]
+    //       const ids = target.map((item) => item.id)
+    //       this.confirmDelete(ids)
+    //     })
+    //     .catch(() => {})
+    // },
+    // confirmDelete(target) {}
   }
 }
 </script>
-
+<style lang="scss">
+.situation {
+  .preview-wrapper {
+    margin: 40px;
+    overflow-y: auto;
+    height: 550px;
+    .preview-header-area {
+      width: 100%;
+      text-align: center;
+      .preview-title {
+        font-size: 18px;
+        color: rgba(0, 11, 21, 0.85);
+        font-weight: bold;
+      }
+      .preview-intro {
+        font-size: 12px;
+        color: rgba(0, 11, 21, 0.45);
+        max-width: 800px;
+        margin: 16px auto 0;
+      }
+    }
+    .question-content {
+      margin-left: 12px;
+      .el-radio,
+      .el-checkbox {
+        display: block;
+        line-height: 22px;
+        margin-bottom: 0;
+        &:not(:first-child) {
+          margin-top: 16px;
+        }
+      }
+    }
+    .preview-topic {
+      margin-top: 40px;
+      .question-item {
+        font-size: 14px;
+        max-width: 452px;
+        margin-bottom: 40px;
+        .question-type {
+          font-family: emoji;
+          font-size: 14px;
+          color: #000b15;
+          line-height: 24px;
+          margin-bottom: 24px;
+          font-weight: bold;
+        }
+        .question-title {
+          font-family: PingFangSC-Regular;
+          font-size: 14px;
+          color: rgba(0, 11, 21, 0.65);
+          letter-spacing: 0;
+          line-height: 22px;
+          margin-bottom: 8px;
+        }
+      }
+    }
+  }
+  .el-dialog__footer {
+    border-top: 1px solid #ddd;
+  }
+}
+</style>
 <style lang="scss" scoped>
 .situation {
   .data-area {
-    background-color: #FAFAFA;
+    background-color: #fafafa;
     display: flex;
     align-items: center;
     justify-content: space-between;

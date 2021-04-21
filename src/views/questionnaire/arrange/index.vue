@@ -204,24 +204,24 @@
           height="50vh"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column
+          <!-- <el-table-column
             type="selection"
             width="55"
-          />
+          /> -->
           <el-table-column
             v-if="columns['编号']"
             fixed="left"
             align="center"
             prop="planCode"
             label="编号"
-            width="220"
+            width="180"
             :show-overflow-tooltip="true"
           >
           </el-table-column>
           <el-table-column
             v-if="columns['问卷安排名称']"
             align="center"
-            prop="planName"
+            width="180"
             :show-overflow-tooltip="true"
             label="问卷安排名称"
           >
@@ -230,9 +230,7 @@
                 type="text"
                 @click="toDetail(scope.row)"
               >
-                {{
-                  scope.row.planName
-                }}
+                {{ scope.row.planName }}
               </el-button>
             </template>
           </el-table-column>
@@ -322,20 +320,33 @@
                 删除
               </el-button>
 
-              <el-dropdown>
-                <i class="el-icon-arrow-more"></i>
+              <el-dropdown
+                trigger="click"
+                style="margin-left: 10px;"
+              >
+                <el-button
+                  type="text"
+                  size="small"
+                >
+                  更多<i class="el-icon-arrow-more"></i>
+                </el-button>
 
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    :disabled="scope.row.status == 3"
-                    @click="handleStatusChange(scope.row)"
+                    :disabled="shouldbeDisabled(scope.row)"
+                    @click.native="handleStatusChange(scope.row.id, scope.row.status == 2 ? 1 : 2)"
                   >
                     {{ scope.row.status == 1 ? '暂停' : '开始' }}
                   </el-dropdown-item>
-                  <el-dropdown-item :disabled="scope.row.status == 0" @click="handleStatusChange(scope.row)">
+                  <el-dropdown-item
+                    :disabled="scope.row.status !== 2 || scope.row.option == 0"
+                    @click.native="handleStatusChange(scope.row.id, 3)"
+                  >
                     结束
                   </el-dropdown-item>
-                  <el-dropdown-item @click="toDetail(scope.row, true)">选项分布</el-dropdown-item>
+                  <el-dropdown-item @click.native="toDetail(scope.row, true)">
+                    选项分布
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>
@@ -424,39 +435,44 @@ export default {
       pickerOptionsEnd: {}
     }
   },
-  created() {
+  watch: {
+    'queryForm.subjectName': _.debounce(function() {
+      this.getList()
+    }, 1000)
+  },
+  activated() {
     this.getData()
   },
   methods: {
-    async handleStatusChange(item) {
-      const { id, status } = item
+    shouldbeDisabled(item) {
+      const { option } = item
+      if (option == 0) return true
+      if (item.status == 1) {
+        return option != 1
+      } else {
+        return option != 2
+      }
+    },
+    async handleStatusChange(id, status) {
       if (status === 3) {
         const result = await this.confirmFinish()
         if (!result) return
       }
-      let api, loading
+      let api
       switch (status) {
         case 1:
           api = suspend
-          loading = 'btn1Loading'
           break
         case 2:
           api = start
-          loading = 'btn1Loading'
           break
         case 3:
           api = end
-          loading = 'btn2Loading'
       }
-      this[loading] = true
-      api({ id })
-        .then(() => {
-          this.$message.success('操作成功')
-          this.data.status = status
-        })
-        .finally(() => {
-          this[loading] = false
-        })
+      api({ id }).then(() => {
+        this.$message.success('操作成功')
+        this.getList()
+      })
     },
     confirmFinish() {
       return this.$confirm('是否结束该问卷安排?', '提示', {
@@ -493,11 +509,10 @@ export default {
       this.getList()
     },
     toDetail(item, toTab2) {
-      const query = {}
-      Object.keys(item).forEach((key) => {
-        query[key] = item[key]
-      })
-      query.toTab2 = !!toTab2
+      const query = {
+        id: item.id,
+        toTab2: !!toTab2
+      }
       this.$router.push({
         path: '/questionnaire/arrange/detail',
         query
@@ -519,32 +534,34 @@ export default {
       })
     },
     handleDelete(target) {
-      const message = target ? '您确定删除选中的问卷吗？' : '您确定要批量删除选中的问卷吗？'
+      const message = target ? '您确定删除选中的问卷安排吗？' : '您确定要批量删除选中的问卷安排吗？'
       this.$confirm(message, {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        let ids = target ? [target] : this.multipleSelection
-
-        ids = ids.map((item) => item.id).join('')
-        if (target) {
-          target.deleteLoading = true
-        } else {
-          this.multipleDelLoading = true
-        }
-        deleteQuestionnaire(ids)
-          .then(() => {
-            this.$message.success('删除成功')
-          })
-          .finally(() => {
-            if (target) {
-              target.deleteLoading = false
-            } else {
-              this.multipleDelLoading = false
-            }
-          })
       })
+        .then(() => {
+          let ids = target ? [target] : this.multipleSelection
+
+          ids = ids.map((item) => item.id).join('')
+          if (target) {
+            target.deleteLoading = true
+          } else {
+            this.multipleDelLoading = true
+          }
+          deleteQuestionnaire(ids)
+            .then(() => {
+              this.$message.success('删除成功')
+            })
+            .finally(() => {
+              if (target) {
+                target.deleteLoading = false
+              } else {
+                this.multipleDelLoading = false
+              }
+            })
+        })
+        .catch(() => {})
     },
     getData() {
       this.getList()
@@ -573,11 +590,6 @@ export default {
       this.queryForm.pageSize = limit
       this.getList()
     }
-  },
-  watch: {
-    'queryForm.subjectName': _.debounce(function() {
-      this.getList()
-    }, 1000)
   }
 }
 </script>
