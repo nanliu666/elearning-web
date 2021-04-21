@@ -11,7 +11,7 @@
           size="medium"
           @click="toAddLecturer"
         >
-          &nbsp; 添加讲师 &nbsp;
+          &nbsp; 创建讲师 &nbsp;
         </el-button>
       </div>
     </div>

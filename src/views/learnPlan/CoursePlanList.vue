@@ -15,7 +15,7 @@
           size="medium"
           @click="jumpEdit"
         >
-          新建课程安排
+          创建课程安排
         </el-button>
       </template>
     </page-header>

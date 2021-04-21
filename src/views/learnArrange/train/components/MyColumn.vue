@@ -117,8 +117,8 @@
               href="#/training/trainingArrange"
               @click="adddata"
             >
-              <i class="el-icon-plus btn_icon"></i> 新建分组</a>
-            <!-- <span class="btn2">新建分类</span> -->
+              <i class="el-icon-plus btn_icon"></i> 创建分组</a>
+            <!-- <span class="btn2">创建分类</span> -->
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@
           size="medium"
           @click="handleAddRule"
         >
-          新建规则
+          创建规则
         </el-button>
       </div>
     </page-header>

@@ -10,7 +10,7 @@
           type="primary"
           size="medium"
         >
-          添加用户
+          创建用户
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
         <el-dropdown-menu slot="dropdown">
@@ -27,7 +27,7 @@
         size="medium"
         @click="handleCommand('add')"
       >
-        添加用户
+        创建用户
       </el-button>
     </page-header>
     <el-row

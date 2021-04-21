@@ -8,7 +8,7 @@
         size="medium"
         @click="addNewPlan"
       >
-        新建方案
+        创建方案
       </el-button>
     </page-header>
     <el-row
@@ -83,7 +83,7 @@ export default {
     this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
   },
   methods: {
-    //  新建方案
+    //  创建方案
     addNewPlan() {
       this.$router.push({
         path: '/diy/diyHomeEditMobile',

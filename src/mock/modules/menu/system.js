@@ -54,7 +54,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '新建子组织',
+              menuName: '创建子组织',
               isEnabled: 1,
               path: '/orgs/orgManagement/addChild'
             },
@@ -244,7 +244,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '新建角色',
+              menuName: '创建角色',
               isEnabled: 1,
               path: '/system/role/add'
             },
@@ -279,7 +279,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '新建分类',
+              menuName: '创建分类',
               isEnabled: 1,
               path: '/system/role/addCatalog'
             }

@@ -9,7 +9,7 @@
           size="medium"
           @click="releaseBanner"
         >
-          新建Banner
+          创建Banner
         </el-button>
       </div>
     </page-header>

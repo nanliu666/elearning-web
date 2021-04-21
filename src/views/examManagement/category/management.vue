@@ -38,7 +38,7 @@
               size="medium"
               @click="addCategory"
             >
-              新建分类
+              创建分类
             </el-button>
           </div>
         </template>
@@ -101,7 +101,7 @@
                   v-p="ADD_GROUNP_EXAM_CATALOG"
                   command="addChild"
                 >
-                  新建子分类
+                  创建子分类
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
