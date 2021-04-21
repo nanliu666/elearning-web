@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header
-      title="新建证书模版"
+      title="创建证书模版"
       show-back
     />
     <basic-container>

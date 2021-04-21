@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -283,7 +283,7 @@ export default {
         }
       })
     },
-    // 新建分类
+    // 创建分类
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''

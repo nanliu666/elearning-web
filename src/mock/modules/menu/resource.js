@@ -46,7 +46,7 @@ export default {
           children: [
             {
               menuType: 'Button',
-              menuName: '新建分类',
+              menuName: '创建分类',
               isOwn: 1,
               isEnabled: 1,
               path: '/resource/classroom/classify/add'
@@ -74,7 +74,7 @@ export default {
             },
             {
               menuType: 'Button',
-              menuName: '新建子分类',
+              menuName: '创建子分类',
               isOwn: 1,
               isEnabled: 1,
               path: '/resource/classroom/classify/addNewGroup'
@@ -176,7 +176,7 @@ export default {
       children: [
         {
           menuType: 'Button',
-          menuName: '添加讲师',
+          menuName: '创建讲师',
           isOwn: 1,
           isEnabled: 1,
           path: '/lecturer/lecturer/add'
@@ -204,7 +204,7 @@ export default {
         },
         {
           menuType: 'Button',
-          menuName: '新建分组',
+          menuName: '创建分组',
           isOwn: 1,
           isEnabled: 1,
           path: '/lecturer/lecturer/addNewGroup'
@@ -213,7 +213,7 @@ export default {
     },
     {
       menuId: '12512312345778934534558',
-      menuName: '添加讲师',
+      menuName: '创建讲师',
       menuType: 'Menu',
       isEnabled: 1,
       isOwn: 1,
@@ -282,7 +282,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '新建模板',
+              menuName: '创建模板',
               isEnabled: 1,
               path: '/certificate/certificateManage/add'
             },
@@ -311,7 +311,7 @@ export default {
         },
         {
           menuId: '1212437546742158',
-          menuName: '新建证书模版',
+          menuName: '创建证书模版',
           menuType: 'Menu',
           isEnabled: 1,
           isOwn: 1,

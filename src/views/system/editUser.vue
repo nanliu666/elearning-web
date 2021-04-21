@@ -1,7 +1,7 @@
 <template>
   <div style="height">
     <page-header
-      :title="`${id ? '编辑' : '添加'}用户`"
+      :title="`${id ? '编辑' : '创建'}用户`"
       show-back
       :back="goBack"
     />

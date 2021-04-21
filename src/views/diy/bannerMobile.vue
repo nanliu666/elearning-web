@@ -9,7 +9,7 @@
           size="medium"
           @click="releaseBanner"
         >
-          新建Banner
+          创建Banner
         </el-button>
       </div>
     </page-header>
@@ -145,7 +145,7 @@ export default {
     width: 300px;
   }
   .content {
-    width: calc(100% - 300px);
+    width: calc(99.9% - 300px); //100% 谷歌页面会抖动，所以设置99.9%
   }
   .fill /deep/.el-tree-node__content {
     line-height: 36px;

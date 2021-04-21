@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="user-picker"
-    title="请选择"
+    title="添加人员"
     :visible.sync="dialogVisible"
     width="700px"
     append-to-body

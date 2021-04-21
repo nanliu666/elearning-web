@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.id ? '编辑积分规则' : '新建积分规则'"
+    :title="form.id ? '编辑积分规则' : '创建积分规则'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"

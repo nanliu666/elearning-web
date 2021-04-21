@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="type === 'create' ? '新建组织' : type === 'createChild' ? '新建子组织' : '编辑组织'"
+    :title="type === 'create' ? '新建组织' : type === 'createChild' ? '创建子组织' : '编辑组织'"
     :visible="visible"
     width="550px"
     :modal-append-to-body="false"

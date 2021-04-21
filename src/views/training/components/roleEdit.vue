@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="form.roleId ? '编辑角色' : '新建角色'"
+    :title="form.roleId ? '编辑角色' : '创建角色'"
     :visible.sync="roleVisible"
     width="500px"
     :close-on-click-modal="false"
@@ -193,7 +193,7 @@ export default {
         }
       })
     },
-    //新建角色
+    //创建角色
     createFunc(callback) {
       const params = {
         ...this.form,
@@ -203,7 +203,7 @@ export default {
       createRole(params)
         .then(() => {
           this.loading = false
-          this.$message.success('新建角色成功')
+          this.$message.success('创建角色成功')
           this.$emit('reload')
           callback()
         })

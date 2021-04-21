@@ -8,7 +8,7 @@
           size="medium"
           @click="toAddCertificate"
         >
-          新建模板
+          创建模板
         </el-button>
       </template>
     </page-header>

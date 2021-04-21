@@ -107,7 +107,7 @@
       class="addGroup"
       @click="commandChange('add')"
     >
-      <i class="el-icon-circle-plus-outline"></i>新建分组
+      <i class="el-icon-circle-plus-outline"></i>创建分组
     </div>
 
     <el-dialog
