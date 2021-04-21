@@ -92,26 +92,6 @@ import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
 import { backBaseUrl } from '@/config/env'
-
-if (!HTMLCanvasElement.prototype.toBlob) {
-  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
-    value: function(callback, type, quality) {
-      var dataURL = this.toDataURL(type, quality).split(',')[1]
-      setTimeout(function() {
-        var binStr = atob(dataURL),
-          len = binStr.length,
-          arr = new Uint8Array(len)
-
-        for (var i = 0; i < len; i++) {
-          arr[i] = binStr.charCodeAt(i)
-        }
-
-        callback(new Blob([arr], { type: type || 'image/png' }))
-      })
-    }
-  })
-}
-
 const CODE_HEIGHT = 100
 const CODE_WIDTH = 100
 const FOLDER_NAME = '签到二维码'

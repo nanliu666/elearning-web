@@ -62,7 +62,20 @@ export default {
           label: '培训班名称',
           prop: 'trainName',
           rules: [
-            { required: true, validator: this.validateTrainName, trigger: ['blur', 'change'] }
+            {
+              required: true,
+              validator: (rule, value, callback) => {
+                const target = value.trim()
+                if (!target) {
+                  this.$nextTick(() => {
+                    return callback(new Error('请输入培训班名称'))
+                  })
+                } else {
+                  callback()
+                }
+              },
+              trigger: ['blur', 'change']
+            }
           ],
           span: 11,
           maxlength: 32,
@@ -337,14 +350,6 @@ export default {
       }
       this.userList = data
       this.$refs.form && this.$refs.form.validateField('trainObjectsList')
-    },
-    validateTrainName(rule, value, callback) {
-      const target = value.trim()
-      if (!target) {
-        return callback(new Error('请输入培训名称'))
-      } else {
-        callback()
-      }
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
