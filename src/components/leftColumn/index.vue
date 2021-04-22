@@ -112,7 +112,7 @@
         />
       </label>
       <label class="dialog_label">
-        <i class="requiredStart">*</i>上级分类组
+        <i class="requiredStart">*</i>上级分类
         <el-select
           v-model="upGroup"
           class="block"
@@ -176,8 +176,8 @@ export default {
       currentNodeKey: '', // 当前选中的行
       moreMenuShow: false, // 更多菜单显示
       groupName: '', // 分类名称
-      upGroup: '', // 选中的上级分类组
-      upGroupList: [], // 当前选中的所有上级分类组的列表
+      upGroup: '', // 选中的上级分类
+      upGroupList: [], // 当前选中的所有上级分类的列表
       currentData: '', // 当前选中的节点数据
       currentNode: '', // 当前选中的节点的node
       options: '', // 当前的操作类型
