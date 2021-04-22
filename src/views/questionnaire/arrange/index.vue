@@ -192,7 +192,7 @@
             type="text"
             style="padding: 0"
             :loading="multipleDelLoading"
-            @click="() => handleDelete"
+            @click="() => handleDelete()"
           >
             批量删除
           </el-button>
@@ -314,6 +314,7 @@
               <el-button
                 type="text"
                 size="small"
+                :disabled="scope.row.status == 2"
                 :loading="scope.row.deleteLoading"
                 @click="handleDelete(scope.row)"
               >
@@ -336,7 +337,7 @@
                     :disabled="shouldbeDisabled(scope.row)"
                     @click.native="handleStatusChange(scope.row.id, scope.row.status == 2 ? 1 : 2)"
                   >
-                    {{ scope.row.status == 1 ? '暂停' : '开始' }}
+                    {{ scope.row.status == 1 ? '开始' : '暂停' }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     :disabled="scope.row.status !== 2 || scope.row.option == 0"
@@ -549,7 +550,7 @@ export default {
           } else {
             this.multipleDelLoading = true
           }
-          deleteQuestionnaire(ids)
+          deleteQuestionnaire({ ids })
             .then(() => {
               this.$message.success('删除成功')
             })
