@@ -68,18 +68,12 @@
                 ></el-progress>
               </template>
             </el-table-column>
-
-            <el-table-column
-              label="操作"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <el-button @click="viewPaper(scope.row)">查看问卷</el-button>
-              </template>
-            </el-table-column>
           </el-table>
         </div>
-        <div class="topic-chart">
+        <div
+          v-if="item.items.length"
+          class="topic-chart"
+        >
           <div
             :ref="'chart_' + item.questionId"
             class="chart"
@@ -168,24 +162,26 @@ export default {
     }
   },
   watch: {
-    viewPaper(paper) {
-
-    },
     shouldResizeChart(val) {
       if (val) {
         this.resizeCharts()
       }
+    },
+    id() {
+      this.initData()
     }
   },
   created() {
-    this.query.id = this.id
-    this.getData()
     const that = this
     window.addEventListener('resize', () => {
       that.resizeCharts()
     })
   },
   methods: {
+    initData() {
+      this.query.id = this.id
+      this.getData()
+    },
     getType(type) {
       switch (type) {
         case 'single_choice':
@@ -252,13 +248,14 @@ export default {
       return colors[index]
     },
     initChart(item) {
+      if (!item.items || !item.items.length) return
       const dom = this.$refs['chart_' + item.questionId]
       const chart = echarts.init(dom[0])
       const data = []
       const { type, items } = item
       const colors = type == 'single_choice' ? singleTypeColors : multipleTypeColors
       for (let index = 0; index < items.length; index++) {
-        const row = items[index];
+        const row = items[index]
         const { content, writeRate = 0 } = row
         data.push({
           name: content,
