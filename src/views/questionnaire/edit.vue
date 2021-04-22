@@ -175,8 +175,9 @@
       <div
         v-show="drawerVisible"
         class="asqQuestion-drawer-wrapper"
+        ref="draw-wrapper"
       >
-        <div class="asqQuestion-drawer">
+        <div class="asqQuestion-drawer" ref="asqQuestion-drawer">
           <div class="drawer-header">
             <div class="drawer-title">
               添加题目
@@ -187,7 +188,9 @@
             ></i>
           </div>
 
-          <el-form
+          <div class="drawer-body" ref="drawer-body">
+          
+                    <el-form
             ref="questionForm"
             label-position="top"
             label-width="80px"
@@ -273,8 +276,8 @@
               >
                 <draggable
                   v-model="asqQuestion.asqQuestionOptions"
-                  :animation="200"
                   @end="onDraggbleEnd"
+                  :animation="200"
                 >
                   <transition-group>
                     <el-form-item
@@ -285,6 +288,7 @@
                     >
                       <i class="icon-drag"></i>
                       <el-input
+                        :disabled="option.disabled"
                         v-model="option.content"
                         placeholder="请输入内容"
                         class="option-input"
@@ -315,9 +319,10 @@
               v-if="asqQuestion.type && asqQuestion.type !== 'short_answer'"
               type="text"
               class="other-option-btn"
-              @click="hasOtherOptions = !hasOtherOptions"
+              @click="addOtherOptions"
+        
             >
-              添加其他选项
+              添加“其他”选项
             </el-button>
 
             <div
@@ -376,6 +381,8 @@
               </el-form>
             </div>
           </div>
+          </div>
+
         </div>
 
         <div class="drawer-footer">
@@ -412,7 +419,7 @@ const OTHER_OPTIONS = ['不限', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 const ASQ_QUESTION = {
   content: '',
-  type: '',
+  type: 'single_choice',
   sort: '',
   status: 0,
   multiMin: '',
@@ -456,7 +463,7 @@ export default {
       optionForm: {},
       optionRules: {},
       treeData: [],
-      submitLoading: false
+      submitLoading: false,
     }
   },
   computed: {
@@ -486,21 +493,46 @@ export default {
             { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
           ]
         })
+
+        this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
+        this.clearValidate(this.$refs.optionForm)
       },
       deep: true
-    }
+    },
+    asqQuestion: {
+      handler(question) {
+        const type = question.type
+        if (type === 'multi_choice') {
+          const singleOtherIndex = this.asqQuestion.asqQuestionOptions.findIndex(option => option.disabled)
+          if (singleOtherIndex < 0) return
+          this.asqQuestion.asqQuestionOptions.splice(singleOtherIndex, 1)
+        } else if (type === 'single_choice') {
+          if (this.hasOtherOptions) this.hasOtherOptions = false
+        }
+      },
+      deep: true
+    },
   },
   activated() {
     this.initData()
   },
   mounted() {
-    this.$refs.form.resetFields()
+    this.clearValidate()
   },
   methods: {
     onDraggbleEnd() {
-      this.$nextTick(() => {
-        this.$refs.optionForm.clearValidate()
-      })
+      // this.clearValidate(this.$refs.optionForm)
+    },
+    addOtherOptions() {
+      if (this.asqQuestion.type === 'multi_choice') {
+        this.hasOtherOptions = !this.hasOtherOptions
+      } else {
+        if (this.asqQuestion.asqQuestionOptions.find(option => option.content === '其他')) return
+        this.asqQuestion.asqQuestionOptions.push({
+          content: '其他',
+          disabled: true
+        })
+      }
     },
     async handleSubmit() {
       const valid = await this.formValidate()
@@ -584,9 +616,7 @@ export default {
         this.hasOtherOptions = false
         this.asqQuestion = {}
       }
-      this.$nextTick(() => {
-        this.$refs.questionForm.clearValidate()
-      })
+      this.clearValidate(this.$refs.questionForm)
       this.drawerVisible = visible
     },
     addQuestionOption() {
@@ -596,10 +626,6 @@ export default {
       }
       this.asqQuestion.asqQuestionOptions.push({
         content: ''
-      })
-      if (!this.$refs.optionForm) return
-      this.$nextTick(() => {
-        this.$refs.optionForm.clearValidate()
       })
     },
 
@@ -678,9 +704,6 @@ export default {
         this.asqQuestion.asqQuestionOptions.indexOf(option),
         1
       )
-      if (this.asqQuestion.asqQuestionOptions.length) {
-        this.clearValidate(this.$refs.optionForm)
-      }
     },
     handleDelete(index) {
       this.form.asqQuestions.splice(index, 1)
@@ -688,6 +711,7 @@ export default {
     },
     clearValidate(formDom) {
       this.$nextTick(() => {
+        formDom = formDom || this.$refs.form
         formDom.clearValidate()
       })
     }

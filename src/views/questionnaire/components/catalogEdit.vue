@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -56,19 +56,6 @@
             可通过选择上级类目为其创建子分类，子分类可见范围跟随父分类
           </div>
         </el-col>
-      </el-form-item>
-      <!-- 可见范围 -->
-      <el-form-item
-        v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
-        label="可见范围"
-      >
-        <div>
-          <OrgTree
-            :id-list="form.orgIdList"
-            @selectedValue="getOrgList"
-          ></OrgTree>
-        </div>
-        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
