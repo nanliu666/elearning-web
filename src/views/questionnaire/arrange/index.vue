@@ -314,7 +314,6 @@
               <el-button
                 type="text"
                 size="small"
-                :disabled="scope.row.status == 2"
                 :loading="scope.row.deleteLoading"
                 @click="handleDelete(scope.row)"
               >
@@ -535,6 +534,13 @@ export default {
       })
     },
     handleDelete(target) {
+      if (target.status == 2) {
+        this.$alert('你选择的问卷安排正在进行中，不能进行删除操作！', '提醒', {
+          confirmButtonText: '确认',
+          type: 'warning'
+        })
+        return
+      }
       const message = target ? '您确定删除选中的问卷安排吗？' : '您确定要批量删除选中的问卷安排吗？'
       this.$confirm(message, {
         confirmButtonText: '确定',
