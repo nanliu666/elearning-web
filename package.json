@@ -48,6 +48,7 @@
     "qiniu-js": "^2.5.5",
     "qrcodejs2": "0.0.2",
     "script-loader": "^0.7.2",
+    "sortable.js": "^0.3.0",
     "tinymce": "^5.4.1",
     "uuid": "^7.0.3",
     "vue": "^2.6.12",

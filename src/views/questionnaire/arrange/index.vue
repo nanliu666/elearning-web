@@ -192,7 +192,7 @@
             type="text"
             style="padding: 0"
             :loading="multipleDelLoading"
-            @click="() => handleDelete"
+            @click="() => handleDelete()"
           >
             批量删除
           </el-button>
@@ -336,7 +336,7 @@
                     :disabled="shouldbeDisabled(scope.row)"
                     @click.native="handleStatusChange(scope.row.id, scope.row.status == 2 ? 1 : 2)"
                   >
-                    {{ scope.row.status == 1 ? '暂停' : '开始' }}
+                    {{ scope.row.status == 1 ? '开始' : '暂停' }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     :disabled="scope.row.status !== 2 || scope.row.option == 0"
@@ -534,6 +534,13 @@ export default {
       })
     },
     handleDelete(target) {
+      if (target.status == 2) {
+        this.$alert('你选择的问卷安排正在进行中，不能进行删除操作！', '提醒', {
+          confirmButtonText: '确认',
+          type: 'warning'
+        })
+        return
+      }
       const message = target ? '您确定删除选中的问卷安排吗？' : '您确定要批量删除选中的问卷安排吗？'
       this.$confirm(message, {
         confirmButtonText: '确定',
@@ -549,7 +556,7 @@ export default {
           } else {
             this.multipleDelLoading = true
           }
-          deleteQuestionnaire(ids)
+          deleteQuestionnaire({ ids })
             .then(() => {
               this.$message.success('删除成功')
             })

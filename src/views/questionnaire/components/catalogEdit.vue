@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -92,13 +92,9 @@
 </template>
 
 <script>
-import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 export default {
   name: 'CatalogEdit',
-  components: {
-    OrgTree
-  },
   props: {
     visible: {
       type: Boolean,
