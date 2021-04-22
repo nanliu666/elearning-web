@@ -4,7 +4,7 @@
     class="NewsEdit wrapper"
   >
     <page-header
-      title="新建公告"
+      title="创建公告"
       :back="() => handleBack()"
       show-back
     />
