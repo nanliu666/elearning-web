@@ -79,16 +79,14 @@ export default {
     }
   },
   watch: {
-    value() {
-      this.valueId = this.value
-      if (!this.options.length) return
+    value(val) {
+      this.valueId = val
       this.$nextTick(() => {
         this.initHandle()
       })
     },
     options: {
       handler() {
-        this.valueId = this.value
         this.$nextTick(() => {
           this.initHandle()
         })
@@ -100,7 +98,9 @@ export default {
     // 初始化值
     initHandle() {
       if (this.valueId) {
-        this.valueTitle = this.$refs.selectTree.getNode(this.valueId).data[this.props.label] // 初始化显示
+        const node = this.$refs.selectTree.getNode(this.valueId)
+        if (!node) return
+        this.valueTitle = node.data[this.props.label] // 初始化显示
         this.$refs.selectTree.setCurrentKey(this.valueId) // 设置默认选中
         this.defaultExpandedKey = [this.valueId] // 设置默认展开
       }
