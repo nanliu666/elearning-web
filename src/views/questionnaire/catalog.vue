@@ -8,7 +8,7 @@
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        新建分类
+        创建分类
       </el-button>
     </page-header>
     <basic-container block>
@@ -69,7 +69,7 @@
                   v-p="ADD_NEW_GROUNP_CLASSROOM_CLASSIFY"
                   command="addChild"
                 >
-                  新建子分类
+                  创建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_CLASSROOM_CLASSIFY"

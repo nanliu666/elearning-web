@@ -175,7 +175,7 @@ export default {
           if (this.type !== 'edit') {
             this.loading = true
             addCategory(this.form)
-              .then((res) => {
+              .then(() => {
                 this.$message.success('创建成功')
                 this.loading = false
                 this.$emit('changevisible', false)
@@ -210,7 +210,7 @@ export default {
         }
       })
     },
-    // 新建分类
+    // 创建分类
     create() {
       this.type = 'create'
       _.assign(this.$data, this.$options.data())
