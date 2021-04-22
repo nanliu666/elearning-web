@@ -526,7 +526,7 @@ export default {
             {
               menuType: 'Button',
               isOwn: 1,
-              menuName: '新建公告',
+              menuName: '创建公告',
               isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
               path: '/system/newsCenter/newsManage/add'
             },

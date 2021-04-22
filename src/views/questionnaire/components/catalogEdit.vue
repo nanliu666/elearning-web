@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -188,7 +188,7 @@ export default {
           if (this.type !== 'edit') {
             this.loading = true
             addCategory(this.form)
-              .then((res) => {
+              .then(() => {
                 this.$message.success('创建成功')
                 this.loading = false
                 this.$emit('changevisible', false)
@@ -223,7 +223,7 @@ export default {
         }
       })
     },
-    // 新建分类
+    // 创建分类
     create() {
       this.type = 'create'
       _.assign(this.$data, this.$options.data())
