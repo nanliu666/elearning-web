@@ -8,7 +8,7 @@
           size="medium"
           @click="() => handlePublishBtnClick()"
         >
-          新建公告
+          创建公告
         </el-button>
       </template>
     </page-header>
