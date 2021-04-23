@@ -208,6 +208,14 @@ export default {
           prop: 'userNum'
         },
         {
+          label: '角色级别',
+          prop: 'orgType',
+          formatter(row) {
+            let arr = { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' }
+            return arr[row.orgType]
+          }
+        },
+        {
           label: '角色描述',
           prop: 'remark'
         }
@@ -254,7 +262,7 @@ export default {
     },
     user(data) {
       this.row = _.cloneDeep(data)
-      return data.userNum ? '查看用户' : '添加用户'
+      return '查看用户' //data.userNum ? '查看用户' : '添加用户'
     },
     handlerDeleteAll(list) {
       this.$confirm('您确定要删除你所选中的角色吗?', {
@@ -393,11 +401,12 @@ export default {
     },
     handleCheck(row) {
       this.roleId = row.roleId
-      if (!row.userNum) {
-        this.editVisible = true
-      } else {
-        this.$router.push({ path: '/system/roleUsers?roleId=' + row.roleId })
-      }
+      this.$router.push({ path: '/system/roleUsers?roleId=' + row.roleId })
+      // if (!row.userNum) {
+      //   this.editVisible = true
+      // } else {
+      //   this.$router.push({ path: '/system/roleUsers?roleId=' + row.roleId })
+      // }
 
       // this.userVisible = !this.userVisible
     },

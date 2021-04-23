@@ -34,12 +34,15 @@
           >
           </el-input>
         </template>
-        <template slot="range">
+        <!-- <template slot="roleGrade">
+
+        </template> -->
+        <!-- <template slot="range">
           <OrgTree
             :id-list="form.orgIdList"
             @selectedValue="getOrgList"
           ></OrgTree>
-        </template>
+        </template> -->
       </commonForm>
       <div
         slot="footer"
@@ -74,12 +77,12 @@
 <script>
 import treeSelect from '@/components/treeSelect/treeSelect'
 import { createRole, updateRole } from '../../../api/system/role'
-import OrgTree from '@/components/UserOrg-Tree/OrgTree'
+// import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 
 export default {
   name: 'RoleEdit',
   components: {
-    OrgTree,
+    // OrgTree,
     treeSelect
   },
   props: {
@@ -162,10 +165,16 @@ export default {
         span: 24
       },
       {
-        prop: 'range',
-        label: '管理范围',
-        itemType: 'slot',
-        span: 24
+        itemType: 'radio',
+        prop: 'orgType',
+        label: '角色级别',
+        span: 24,
+        options: [
+          { label: '企业', value: 'Enterprise' },
+          { label: '公司', value: 'Company' },
+          { label: '部门', value: 'Department' },
+          { label: '小组', value: 'Group' }
+        ]
       }
     ]
     return {
@@ -178,7 +187,8 @@ export default {
         orgIds: [],
         roleId: '',
         roleName: '',
-        remark: ''
+        remark: '',
+        orgType: ''
       },
       jobDicData: []
     }
@@ -186,6 +196,9 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
+        if (!(newVal && newVal.length > 0)) {
+          return
+        }
         let { roleId, roleName, remark, orgIds } = { ...newVal }
         this.form = {
           roleId,
