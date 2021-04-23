@@ -5,7 +5,7 @@
   >
     <div class="login-content">
       <!--图片-->
-      <div class="nav flex flex-flow ">
+      <!-- <div class="nav flex flex-flow ">
         <div class="LOGO">
           <img
             v-if="envVar === 'zehui' && isOrgIdE"
@@ -22,17 +22,12 @@
           <img
             v-else
             src="../../assets/images/logo_yb.png"
-          />
-          <!-- <img
-            src="../../assets/images/logo.png"
-            alt=""
-          /> -->
+          />          
         </div>
         <div class="title">
-          {{ systemNameC }}
-          <!-- elearning后台管理系统 -->
+          {{ systemNameC }}          
         </div>
-      </div>
+      </div> -->
 
       <!--内容-->
       <div class="container ">
