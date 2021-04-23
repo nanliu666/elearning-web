@@ -4,7 +4,7 @@
  * @Autor: Xie Mingwei
  * @Date: 2021-04-08 15:23:36
  * @LastEditors: Xie Mingwei
- * @LastEditTime: 2021-04-14 09:44:31
+ * @LastEditTime: 2021-04-21 16:08:37
  */
 import { get, put, del, post } from '@/router/axios'
 /**
@@ -55,3 +55,24 @@ export const updateBanner = (params) => post('/api/common/v1/banner/updateBanner
  * @return {*}
  */
 export const removeBanner = (params) => post('/api/common/v1/banner/removeBanner', params)
+
+/**
+ * @description: 查询logo定制列表
+ * @param {*} pageNo，pageSize，deviceType，orgId
+ * @return {*}
+ */
+export const logoList = (params) => post('/api/common/v1/base/logo/list', params)
+
+/**
+ * @description: 添加修改logo接口
+ * @param {*} id,orgId,frontUrl,backgroundUrl,deviceType,remark
+ * @return {*}
+ */
+export const updateLogo = (params) => post('/api/common/v1/base/logo/update', params)
+
+/**
+ * @description: 重置logo
+ * @param {*} ids:需要重置的logo id，有多个时用逗号隔开
+ * @return {*}
+ */
+export const removeLogo = (params) => post('/api/common/v1/base/logo/remove', params)

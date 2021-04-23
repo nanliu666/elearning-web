@@ -1034,7 +1034,7 @@ export default {
       this.loading = true
       let page = {
         pageNo: this.page.currentPage,
-        pageSize: this.page.size
+        pageSize: this.page.pageSize
       }
       let params = { ...page, ...this.searchParams }
       params.status = this.status

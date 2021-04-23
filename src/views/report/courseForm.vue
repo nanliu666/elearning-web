@@ -1,5 +1,7 @@
 <template>
   <div class="Menu fill">
+    <page-header title="课程报表" />
+
     <basic-container block>
       <common-table
         ref="table"
@@ -8,7 +10,7 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
-        :page="page"
+        :page="queryInfo"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
@@ -21,24 +23,20 @@
               @submit="handleSearch"
             />
             <div class="operations-right">
-              <div
-                class="refresh-container"
-                @click="loadTableData"
-              >
+              <div>
+                <!-- <el-button
+                  size="mini"
+                  @click="exportFn"
+                >
+                  导出
+                </el-button> -->
+              </div>
+              <!-- <div class="refresh-container" @click="loadTableData">
                 <i class="el-icon-refresh-right" />
                 <span>刷新</span>
-              </div>
-              <el-popover
-                placement="bottom"
-                width="40"
-                trigger="click"
-              >
-                <i
-                  slot="reference"
-                  style="cursor: pointer;"
-                  class="el-icon-setting"
-                />
-                <!-- 设置表格列可见性 -->
+              </div> -->
+              <!-- <el-popover placement="bottom" width="40" trigger="click">
+                <i slot="reference" style="cursor: pointer;" class="el-icon-setting" />
                 <div class="operations__column--visible">
                   <el-checkbox-group v-model="columnsVisible">
                     <el-checkbox
@@ -52,50 +50,36 @@
                     </el-checkbox>
                   </el-checkbox-group>
                 </div>
-              </el-popover>
+              </el-popover> -->
             </div>
           </div>
         </template>
-        <template #progress="{row}">
-          <el-progress :percentage="row.progress || 0"></el-progress>
+
+        <template #courseTime="{row}">
+          {{ formatSeconds(row.courseTime) || '0秒' }}
         </template>
 
-        <template #jobPercent="{row}">
-          {{ row.jobTimes || 0 }}次/{{ row.jobPercent || 0 }}%
+        <template #period="{row}">
+          {{ formatSeconds(row.period) || '0秒' }}
         </template>
-        <template #uploadType="{row}">
-          {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
+        <template #credit="{row}">
+          {{ row.credit == '0.0' ? 0 : row.credit }}
         </template>
-        <template
-          slot="multiSelectMenu"
-          slot-scope="{ selection }"
-        >
-          <el-button
-            type="text"
-            size="medium"
-            icon="el-icon-delete"
-            @click="multipleDeleteClick(selection)"
-          >
-            批量导出
-          </el-button>
+        <template #scope="{row}">
+          {{ row.scope == '0.0' ? 0 : row.scope }}
         </template>
-        <template
-          slot="name"
-          slot-scope="{ row }"
-        >
-          <div
-            class="ellipsis title"
-            @click="jumpDetail(row)"
-          >
+
+        <!-- <template slot="name" slot-scope="{ row }">
+          <div class="ellipsis title" @click="jumpDetail(row)">
             {{ row.name }}
           </div>
-        </template>
+        </template> -->
         <template #handler="{row}">
           <el-button
             type="text"
             @click="jumpDetail(row)"
           >
-            查看上报材料
+            详情
           </el-button>
         </template>
       </common-table>
@@ -104,85 +88,97 @@
 </template>
 
 <script>
-import { getStudyList, exportStudyList } from '@/api/course/course'
+import { queryCourseCountList } from '@/api/courseForm'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
+import { getStore } from '@/util/store.js'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '姓名',
-    minWidth: 150,
-    slot: true,
-    prop: 'name',
-    fixed: 'left'
+    label: '序号',
+    width: 70,
+    type: 'index'
   },
   {
-    label: '手机号',
-    prop: 'phonenum',
+    label: '课程名称',
+    minWidth: 150,
+    prop: 'name'
+  },
+  {
+    label: '课时',
+    prop: 'courseTime',
+    slot: true,
     maxWidth: 100
   },
   {
-    label: '所属部门',
-    prop: 'deptName',
-    minWidth: 100
-  },
-  {
-    label: '学习进度',
-    slot: true,
-    prop: 'progress',
-    minWidth: 100
-  },
-  // {
-  //   label: '课程通过状态',
-  //   prop: 'creatorName',
-  //   minWidth: 100
-  // },
-  {
-    label: '作业提交率',
-    prop: 'jobPercent',
-    slot: true,
-    minWidth: 100
-  },
-  {
-    label: '用户岗位',
+    label: '积分',
+    prop: 'credit',
     minWidth: 100,
-    prop: 'position'
+    slot: true
   },
   {
-    label: '学习开始时间',
-    minWidth: 150,
-    prop: 'startTime'
+    label: '讲师',
+    slot: true,
+    prop: 'teacherName',
+    minWidth: 100
   },
   {
-    label: '学习结束时间',
-    minWidth: 150,
-    prop: 'endTime'
+    label: '学习中人数',
+    prop: 'count',
+    slot: true,
+    minWidth: 100
+  },
+  {
+    label: '已完成人数',
+    prop: 'passCount',
+    slot: true,
+    minWidth: 100
+  },
+  {
+    label: '学习总时长',
+    prop: 'period',
+    slot: true,
+    minWidth: 100
+  },
+  {
+    label: '课程评分',
+    prop: 'scope',
+    slot: true,
+    minWidth: 100
   }
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
   showHandler: true,
-  enableMultiSelect: true,
-  showIndexColumn: false,
-  handlerColumn: {
-    minWidth: 150
-  },
-  rowKey: 'id',
-  treeProps: { hasChildren: 'hasChildren', children: 'children' }
+  //   enableMultiSelect: true,
+  // showIndexColumn: true,
+  rowKey: 'id'
+  //   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 const TABLE_PAGE_CONFIG = {}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入学员姓名搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入课程名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
-    field: 'name',
+    field: 'courseName',
     label: '',
     type: 'input'
   }
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
+  // {
+  //   type: 'dataPicker',
+  //   label: '日期范围',
+  //   data: '',
+  //   field: 'startTime,endTime',
+  //   config: {
+  //     type: 'daterange'
+  //     //   'range-separator': '至',
+  //     //   'value-format': 'yyyy-MM-dd HH:mm:ss'
+  //   }
+  // },
   {
     type: 'treeSelect',
     field: 'orgId',
@@ -208,71 +204,13 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
         }
       }
     }
-  },
-  {
-    type: 'select',
-    field: 'progress',
-    label: '学习进度',
-    data: '',
-    options: [
-      { value: 0, label: '未完成' },
-      { value: 100, label: '已完成' }
-    ]
-  },
-  {
-    type: 'select',
-    field: 'jobSubmitRate',
-    label: '作业提交率',
-    data: '',
-    options: [
-      { value: 0, label: '未完成' },
-      { value: 100, label: '全部提交' }
-    ]
   }
-  // {
-  //   type: 'select',
-  //   field: 'status2',
-  //   label: '课程通过状态',
-  //   data: '',
-  //   options: [
-  //     { value: 0, label: '已通过' },
-  //     { value: 1, label: '未通过' }
-  //   ]
-  // }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
-const FORM_COLUMNS = [
-  {
-    label: '移动到新目录',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
-      selectParams: {
-        placeholder: '请选择所在目录',
-        multiple: false
-      },
-      treeParams: {
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        data: [],
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        },
-        required: true
-      }
-    }
-  }
-]
+const FORM_COLUMNS = []
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -290,28 +228,20 @@ export default {
       formData: {
         catalogId: ''
       },
-      dialogTableVisible: false,
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       // 请求参数
       queryInfo: {
         pageNo: 1,
         pageSize: 10,
-        resName: '',
-        catalogId: '',
-        uploadType: '',
-        // tagId: '',
-        status: ''
+        total: 0,
+        courseName: '',
+        orgId: ''
       },
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       tableColumns: TABLE_COLUMNS,
       tableConfig: TABLE_CONFIG,
-      tableData: [],
+      tableData: [1, 2, 3, 4, 5, 6],
       tableLoading: false,
       tablePageConfig: TABLE_PAGE_CONFIG
     }
@@ -326,6 +256,69 @@ export default {
     this.loadOrgData()
   },
   methods: {
+    /**
+     * 格式化秒
+     * @param int  value 总秒数
+     * @return string result 格式化后的字符串
+     */
+    formatSeconds(value) {
+      let theTime = parseInt(value) // 需要转换的时间秒
+      let theTime1 = 0 // 分
+      let theTime2 = 0 // 小时
+      let theTime3 = 0 // 天
+      if (theTime > 60) {
+        theTime1 = parseInt(theTime / 60)
+        theTime = parseInt(theTime % 60)
+        if (theTime1 > 60) {
+          theTime2 = parseInt(theTime1 / 60)
+          theTime1 = parseInt(theTime1 % 60)
+          if (theTime2 > 24) {
+            //大于24小时
+            theTime3 = parseInt(theTime2 / 24)
+            theTime2 = parseInt(theTime2 % 24)
+          }
+        }
+      }
+      let result = ''
+      if (theTime > 0) {
+        result = '' + parseInt(theTime) + '秒'
+      }
+      if (theTime1 > 0) {
+        result = '' + parseInt(theTime1) + '分钟' + result
+      }
+      if (theTime2 > 0) {
+        result = '' + parseInt(theTime2) + '小时' + result
+      }
+      if (theTime3 > 0) {
+        result = '' + parseInt(theTime3) + '天' + result
+      }
+      return result
+    },
+    // 导出
+    exportFn() {
+      let url = `api/manage/v1/web/coursecenter/queryCourseCountListExcelExport?courseName=${this.queryInfo.courseName}&orgId=${this.queryInfo.orgId}&pageNo=${this.queryInfo.pageNo}&pageSize=${this.queryInfo.pageSize}&`
+      this.repDownload(url)
+    },
+    repDownload(url) {
+      // 下载
+      let token = getStore({ name: 'token' })
+      let x = new XMLHttpRequest()
+      x.open('GET', url, true)
+      x.setRequestHeader('accessToken', `bearer  ${token}`)
+      x.responseType = 'blob'
+      x.onprogress = function() {}
+      x.onload = () => {
+        let url = window.URL.createObjectURL(x.response)
+        let a = document.createElement('a')
+        a.href = url
+        a.download = '导出文件.xlsx' //可以填写默认的下载名称
+        a.click()
+        this.isLoading = false
+      }
+
+      x.send()
+    },
+
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: 0 }).then(
         (res) =>
@@ -339,21 +332,6 @@ export default {
             res
           ))
       )
-    },
-
-    // 批量操作
-    async multipleDeleteClick(selected) {
-      let selectedIds = []
-      _.each(selected, (item) => {
-        selectedIds.push(item.courseId)
-      })
-      console.log(selected)
-      // await deleteKnowledgeList({ id: selectedIds.join(',') })
-      let res = await exportStudyList({ courseId: this.$route.query.id })
-      console.log(res)
-      this.$message.success('操作成功')
-      this.$refs.table.clearSelection()
-      this.loadTableData()
     },
 
     /**
@@ -376,14 +354,15 @@ export default {
     handleSearch(searchParams) {
       this.queryInfo = _.assign(this.queryInfo, searchParams)
       this.queryInfo.pageNo = 1
-      this.page.currentPage = 1
+      this.queryInfo.currentPage = 1
+
       this.loadTableData()
     },
     // 跳去详情
     jumpDetail(row) {
       this.$router.push({
-        path: '/course/materials',
-        query: { row: JSON.stringify(row), courseId: this.$route.query.id }
+        path: '/report/courseFormDraft',
+        query: { courseId: row.id, courseName: row.name }
       })
     },
     // 刷新列表数据
@@ -397,12 +376,13 @@ export default {
       if (this.tableLoading) return
       this.tableLoading = true
       try {
+        this.tableData = []
         this.queryInfo.courseId = this.$route.query.id
-        let { totalNum, data } = await getStudyList(this.queryInfo)
+        let { totalNum, data } = await queryCourseCountList(this.queryInfo)
         this.tableData = data
-        this.page.total = totalNum
+        this.queryInfo.total = totalNum
       } catch (error) {
-        // window.console.log(error)
+        window.console.log(error)
       } finally {
         this.tableLoading = false
       }
@@ -450,6 +430,10 @@ export default {
 }
 /deep/.el-card {
   border: none;
+}
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
 }
 </style>
 <style lang="sass" scoped>
