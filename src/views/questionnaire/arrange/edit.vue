@@ -520,6 +520,10 @@ export default {
       saveLink.dispatchEvent(event)
     },
     publish() {
+      if (!this.personList.length) {
+        this.$message.error('至少添加一个人员')
+        return
+      }
       let api
       let tenantId = 'learn'
       try {
