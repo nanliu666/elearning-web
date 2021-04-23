@@ -91,7 +91,7 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
-          menuName: '新建分类',
+          menuName: '创建分类',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/catalog/add'
         },
@@ -126,7 +126,7 @@ export default {
         {
           menuType: 'Button',
           isOwn: 1,
-          menuName: '新建子分类',
+          menuName: '创建子分类',
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/course/catalog/addNewGroup'
         }

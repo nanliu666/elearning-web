@@ -7,12 +7,12 @@ import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
 import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
+import questionnaireArrange from '@/views/questionnaire/arrange/edit'
 export default [
   {
     path: '/',
     redirect: '/wel'
   },
-
   {
     path: '/process/design',
     name: '流程设计器',
@@ -26,6 +26,15 @@ export default [
     path: '/training/edit',
     name: '编辑培训',
     component: TrainingEdit,
+    meta: {
+      keepAlive: false,
+      isTab: false
+    }
+  },
+  {
+    path: '/questionnaire-arrange',
+    name: 'questionnaire-arrange',
+    component: questionnaireArrange,
     meta: {
       keepAlive: false,
       isTab: false

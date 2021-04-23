@@ -8,12 +8,14 @@ import {
   logout,
   refreshToken,
   getUserPrivilege,
-  userDetailByToken
+  userDetailByToken,
+  getOrgIds
 } from '@/api/user'
 import md5 from 'js-md5'
 
 const user = {
   state: {
+    orgIds: '',
     tenantId: getStore({ name: 'tenantId' }) || '',
     tenantContent: getStore({ name: 'tenantContent' }) || '',
     userInfo: getStore({ name: 'userInfo' }) || [],
@@ -30,6 +32,13 @@ const user = {
   actions: {
     set_info: ({ commit }, info) => {
       commit('SET_INFO', info)
+    },
+    // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+    getOrgIdsAc({ commit }, telNub) {
+      return getOrgIds({ account: telNub }).then((res) => {
+        commit('SET_ORG_IDS', res)
+        setStore({ name: 'orgIds', content: res })
+      })
     },
     // token登录
     tokeLogin({ commit }, token) {
@@ -196,6 +205,9 @@ const user = {
     }
   },
   mutations: {
+    SET_ORG_IDS: (state, orgIds) => {
+      state.orgIds = orgIds
+    },
     SET_INFO: (state, info) => {
       state.info = info
       setStore({ name: 'info', content: state.info })

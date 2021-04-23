@@ -1,6 +1,16 @@
 import request from '@/router/axios'
 import website from '@/config/website'
 
+// 获取用户的组织id（包括当前和当前以上的）
+export const getOrgIds = (params) => {
+  return request({
+    url: '/api/manage/v1/web/index/queryOrgIds',
+    method: 'get',
+    params: params
+  })
+  // return get('/api/manage/v1/web/index/queryOrgIds', params)
+}
+
 export const loginByUsername = (tenantId, username, password, type, key, code, account) =>
   request({
     url: '/api/blade-auth/oauth/token',
