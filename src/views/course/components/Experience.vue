@@ -12,14 +12,22 @@
       element-loading-background="rgba(0, 0, 0, 0.8)"
     >
       <el-table-column
-        :label="'课程: ' + rowData.courseName"
         prop="name"
-        width="550px"
+        min-width="200px"
       >
+        <template slot="header">
+          <text-over-tooltip
+            ref-name="testName1"
+            class-name="fs20"
+            :content="'课程: ' + rowData.courseName"
+          ></text-over-tooltip>
+        </template>
         <template slot-scope="scope">
-          <div>
-            <span> {{ scope.row.fileName }} </span>
-          </div>
+          <text-over-tooltip
+            ref-name="testName1"
+            class-name="fs20"
+            :content="scope.row.fileName"
+          ></text-over-tooltip>
         </template>
       </el-table-column>
       <el-table-column
@@ -27,15 +35,20 @@
         prop="fileSize"
       >
         <template slot-scope="scope">
-          <div>
-            <span> {{ scope.row.fileSize + 'k' }} </span>
-          </div>
+          {{ scope.row.fileSize + 'k' }}
         </template>
       </el-table-column>
       <el-table-column
         label=""
         prop="updateTime"
       >
+        <template slot-scope="scope">
+          <text-over-tooltip
+            ref-name="testName1"
+            class-name="fs20"
+            :content="scope.row.updateTime"
+          ></text-over-tooltip>
+        </template>
       </el-table-column>
       <el-table-column align="right">
         <template #header>
@@ -61,11 +74,15 @@
 </template>
 
 <script>
+import TextOverTooltip from './TextOverTooltip'
 import { courseFeelListByUserId } from '@/api/course/course'
 import { downLoadFile } from '@/util/util'
 import { getStore } from '@/util/store.js'
 // import axios from 'axios'
 export default {
+  components: {
+    TextOverTooltip
+  },
   data() {
     return {
       tableData: [],

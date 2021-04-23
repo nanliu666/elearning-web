@@ -39,18 +39,18 @@
                   class="refresh-container"
                   @click="loadTableData"
                 >
-                  <span class="icon  el-icon-refresh-right" />
+                  <span class="icon el-icon-refresh-right" />
                   <span class="refresh-text">刷新</span>
                 </div>
                 <el-popover
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin-left:10px"
+                  style="margin-left: 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
+                    style="display: flex; flex-direction: column"
                   >
                     <el-checkbox
                       v-for="item in tableColumns"
@@ -65,7 +65,7 @@
                   <i
                     slot="reference"
                     class="el-icon-setting"
-                    style="cursor: pointer;"
+                    style="cursor: pointer"
                   />
                 </el-popover>
               </div>
@@ -83,7 +83,7 @@
           <span v-show="row.isUsed == 1">正常</span>
           <span v-show="row.isUsed == 0">禁用</span>
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="EDIT_LIVE"
@@ -168,9 +168,10 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: true, // TODO：关闭批量删除
+  //   enableMultiSelect: true, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 

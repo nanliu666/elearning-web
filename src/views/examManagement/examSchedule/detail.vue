@@ -77,6 +77,27 @@
             <span class="li-label">证书模板：</span>
             <span class="li-value">{{ examDetail.certificateName }}</span>
           </li>
+          <li
+            v-if="examDetail.totalScore"
+            class="details-li"
+          >
+            <span class="li-label">总分：</span>
+            <span class="li-value">{{ examDetail.totalScore }}</span>
+          </li>
+          <li
+            v-if="examDetail.passScope"
+            class="details-li"
+          >
+            <span class="li-label">及格分：</span>
+            <span class="li-value">{{ examDetail.passScope }}</span>
+          </li>
+          <li
+            v-if="examDetail.maxUserScore"
+            class="details-li"
+          >
+            <span class="li-label">最高分：</span>
+            <span class="li-value">{{ examDetail.maxUserScore }}</span>
+          </li>
         </ul>
       </div>
     </basic-container>
@@ -452,10 +473,43 @@ const TABLE_COLUMNS = [
     slot: true,
     prop: 'isTested', //true-已经通过 false-未通过
     minWidth: 120
+  },
+  {
+    label: '考试时限',
+    prop: 'reckonTimeValue',
+    minWidth: 120,
+    formatter: (row) =>
+      row.reckonTime && row.reckonTimeValue ? `${row.reckonTimeValue}分钟` : '不限时'
   }
 ]
 //未考试不存在的
 const TABLE_COLUMNS_EXTENDED = [
+  {
+    label: '进入考试时间',
+    prop: 'answerBeginTime',
+    minWidth: 120
+  },
+  {
+    label: '考试结束时间',
+    prop: 'answerEndTime',
+    minWidth: 120
+  },
+  {
+    label: '通过状态统计',
+    prop: 'isPass',
+    minWidth: 120,
+    formatter: (row) => (row.isPass ? '通过' : '未通过')
+  },
+  {
+    label: '提交次数',
+    prop: 'submitCount',
+    minWidth: 120
+  },
+  {
+    label: '最高得分',
+    prop: 'maxScore',
+    minWidth: 120
+  },
   {
     label: '考试分数',
     prop: 'score',

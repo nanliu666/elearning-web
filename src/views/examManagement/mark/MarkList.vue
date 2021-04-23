@@ -167,7 +167,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 const STATUS_STATUS = [

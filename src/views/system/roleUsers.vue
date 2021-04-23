@@ -284,7 +284,7 @@ export default {
     handleConfig() {
       // this.configVisible = !this.configVisible
       this.isEdit = false
-      this.title = '新建子组织'
+      this.title = '创建子组织'
       // this.positionDialog = true
     },
     handleAside(item, index) {

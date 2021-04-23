@@ -707,6 +707,7 @@
           <el-table-column
             prop="examTime"
             label="考试日期"
+            show-overflow-tooltip
             width="250"
           >
           </el-table-column>
@@ -784,9 +785,10 @@
             :fixed="item.prop === 'userName'"
             header-align="center"
             align="center"
+            show-overflow-tooltip
             :prop="item.prop"
             :label="item.label"
-            :min-width="item.prop === 'orgName' ? '160' : item.prop === 'phonenum' ? '120' : '100'"
+            :min-width="item.prop === 'orgName' ? '80' : item.prop === 'phonenum' ? '100' : '200'"
           >
             <template slot-scope="scope">
               {{ getSigninColumn(scope.row[item.prop], item.dynamic) }}
@@ -814,7 +816,7 @@
             <span>培训班整体满意度：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.composite"
+                :value="parseFloat(showTrainEvaluate.composite || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -827,7 +829,7 @@
             <span>内容符合预期：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.fifth"
+                :value="parseFloat(showTrainEvaluate.fifth || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -840,7 +842,7 @@
             <span>课程设置合理：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.first"
+                :value="parseFloat(showTrainEvaluate.first || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -853,7 +855,7 @@
             <span>培训所有收获：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.fourth"
+                :value="parseFloat(showTrainEvaluate.fourth || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -866,7 +868,7 @@
             <span>教材容易理解：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.second"
+                :value="parseFloat(showTrainEvaluate.second || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -879,7 +881,7 @@
             <span>形式利于掌握：</span>
             <span>
               <el-rate
-                v-model="showTrainEvaluate.third"
+                :value="parseFloat(showTrainEvaluate.third || 0)"
                 disabled
                 show-score
                 text-color="#333"
@@ -898,10 +900,10 @@
           >
             <div class="result_bottom_l">
               <span>
-                <img
+                <!-- <img
                   src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3952183824,1808487741&fm=26&gp=0.jpg"
                   alt=""
-                />
+                /> -->
               </span>
               <span>
                 {{ item.teacher_name }}
@@ -911,7 +913,7 @@
               <span>授课质量：</span>
               <span>
                 <el-rate
-                  v-model="item.teacherScore"
+                  :value="parseFloat(item.teacherScore || 0)"
                   disabled
                   show-score
                   text-color="#333"
@@ -1041,6 +1043,17 @@ const TABLE_COLUMNS = [
     prop: 'examStatus',
     slot: true
   },
+  {
+    label: '结业状态',
+    prop: 'endStatus',
+    formatter: (row) => {
+      const END_STATUS = {
+        0: '未结业',
+        1: '已结业'
+      }
+      return END_STATUS[row.endStatus]
+    }
+  },
   // （1：已评估；2：未评估；3：未开始）
   {
     label: '评估情况',
@@ -1063,6 +1076,17 @@ const TABLE_COLUMNS2 = [
     label: '所属部门',
     prop: 'deptName'
     // slot: true,
+  },
+  {
+    label: '结业状态',
+    prop: 'endStatus',
+    formatter: (row) => {
+      const END_STATUS = {
+        0: '未结业',
+        1: '已结业'
+      }
+      return END_STATUS[row.endStatus]
+    }
   },
   {
     label: '评估情况',
@@ -1095,7 +1119,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    config: { placeholder: 'deptId' },
+    // config: { placeholder: 'deptId' },
     data: '',
     field: 'deptCode',
     label: '所属部门',
@@ -1460,9 +1484,6 @@ export default {
             this.getRegisterData()
             this.isStudentList()
           })
-          .catch(() => {
-            this.$message.error('操作失败')
-          })
           .finally(() => {
             this.approveText = ''
             this.approveDlgVisible = false
@@ -1640,7 +1661,14 @@ export default {
       // console.log('id', this.$route.query.id)
       let params = { trainId: this.showTrainDetail.trainId }
       getTrainEvaluate(params).then((res) => {
-        this.showTrainEvaluate = res
+        for (let key in res) {
+          if (key != 'teachersEvaluate') {
+            this.showTrainEvaluate[key] = res[key].toFixed(1)
+          } else {
+            this.showTrainEvaluate[key] = res[key]
+          }
+        }
+        // this.showTrainEvaluate = res
       })
     },
 
@@ -1677,7 +1705,7 @@ export default {
           return
         }
         // 删除
-        this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
+        this.$confirm('此操作将删除该培训, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -1848,6 +1876,9 @@ export default {
       /deep/.el-row {
         margin-top: 8px;
       }
+    }
+    .title_box_headline_r {
+      min-width: 240px;
     }
   }
   .introduce {

@@ -10,7 +10,7 @@
           type="primary"
           size="medium"
         >
-          新建试卷<i class="el-icon-arrow-down el-icon--right"></i>
+          创建试卷<i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="random">
@@ -166,7 +166,7 @@ const TABLE_COLUMNS = [
     label: '试卷名称',
     prop: 'name',
     slot: true,
-    fixed: true,
+    // fixed: true,
     minWidth: 150
   },
   {
@@ -215,7 +215,8 @@ const TABLE_CONFIG = {
   enablePagination: false,
   enableMultiSelect: true, // TODO：关闭批量删除
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 import {
@@ -415,7 +416,10 @@ export default {
         type: '1'
       }
       getcategoryTree(params).then((res) => {
-        this.searchConfig.popoverOptions[0].config.treeParams.data = [{id: '0', name: '未分类'}, ...res]
+        this.searchConfig.popoverOptions[0].config.treeParams.data = [
+          { id: '0', name: '未分类' },
+          ...res
+        ]
       })
     },
     /**
@@ -451,10 +455,10 @@ export default {
      * */
     handleRandom(id, copy) {
       let query = {
-        tagName: '新建随机试卷'
+        tagName: '创建随机试卷'
       }
       id && ((query.id = id), (query.tagName = '编辑随机试卷'))
-      copy && ((query.copy = copy), (query.tagName = '新建随机试卷'))
+      copy && ((query.copy = copy), (query.tagName = '创建随机试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/randomTestPaper',
         query
@@ -467,10 +471,10 @@ export default {
      * */
     handleManual(id, copy) {
       let query = {
-        tagName: '新建手工试卷'
+        tagName: '创建手工试卷'
       }
       id && ((query.id = id), (query.tagName = '编辑手工试卷'))
-      copy && ((query.copy = copy), (query.tagName = '新建手工试卷'))
+      copy && ((query.copy = copy), (query.tagName = '创建手工试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/handmadeTestPaper',
         query

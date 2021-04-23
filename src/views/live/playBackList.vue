@@ -85,7 +85,7 @@
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
 // import { getCreatUsers } from '@/api/knowledge/knowledge'
-import { getLiveList, getcategoryTree, getCreateUserId } from '@/api/live/liveList'
+import { getLiveList, getCategoryList, getCreateUserId } from '@/api/live/liveList'
 let TABLE_COLUMNS = [
   { type: 'index', label: '序号', width: 100 },
   {
@@ -129,7 +129,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 50
+    minWidth: 80,
+    fixed: false
   }
 }
 
@@ -236,7 +237,9 @@ export default {
       },
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'courses' && v != 'creatorName'
+      }),
       searchConfig: SEARCH_CONFIG,
       queryInfo: {
         categoryId: '', // 分类ID
@@ -259,7 +262,7 @@ export default {
   },
   methods: {
     getCategoryList() {
-      return getcategoryTree({ source: 'live' }).then((res) => {
+      return getCategoryList({ source: 'live' }).then((res) => {
         return _.concat(
           [
             {

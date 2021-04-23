@@ -218,9 +218,71 @@ let TABLE_COLUMNS = [
     minWidth: 120
   },
   {
+    label: '参考人数',
+    prop: 'takeExamUsers',
+    minWidth: 120
+  },
+  {
+    label: '参考人次',
+    prop: 'takeExamTimes',
+    minWidth: 120
+  },
+  {
+    label: '通过人数',
+    prop: 'usersOfPass',
+    minWidth: 120
+  },
+  {
+    label: '未通过人数',
+    prop: 'usersOfNotPass',
+    minWidth: 120
+  },
+  {
+    label: '通过率',
+    prop: 'passRate',
+    formatter: (row) => `${row.passRate}%`,
+    minWidth: 120
+  },
+  {
+    label: '正确率',
+    prop: 'rightRate',
+    formatter: (row) => `${row.rightRate}%`,
+    minWidth: 120
+  },
+  {
+    label: '平均分',
+    prop: 'avgScore',
+    minWidth: 120
+  },
+  {
+    label: '最高分',
+    prop: 'maxScore',
+    minWidth: 120
+  },
+  {
+    label: '最低分',
+    prop: 'minScore',
+    minWidth: 120
+  },
+  {
+    label: '试题数量',
+    prop: 'quesNum',
+    minWidth: 120
+  },
+  {
+    label: '客观题数量',
+    prop: 'objectiveQuesNum',
+    minWidth: 120
+  },
+  {
+    label: '主观题数量',
+    prop: 'subjectiveQuesNum',
+    minWidth: 120
+  },
+  {
     label: '有效时间',
     prop: 'effectiveTime',
-    minWidth: 120
+    minWidth: 300
   }
 ]
 const TABLE_CONFIG = {
@@ -230,7 +292,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   enableMultiSelect: true,
   handlerColumn: {
-    minWidth: 150
+    minWidth: 150,
+    fixed: false
   }
 }
 const STATUS_STATUS = [
@@ -493,7 +556,9 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
-      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop)
+      this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return v != 'testPaper' && v != 'createUser'
+      })
     },
     // 切换nav
     handleSelect(key) {

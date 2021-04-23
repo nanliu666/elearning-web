@@ -241,17 +241,19 @@ const TABLE_COLUMNS = [
     label: '讲师姓名',
     prop: 'name',
     width: '160',
-    slot: true,
-    fixed: 'left'
+    slot: true
+    // fixed: 'left'
   },
   {
     label: '手机号码',
     prop: 'phonenum',
+    align: 'center',
     width: '160'
   },
   {
     label: '电子邮箱',
     prop: 'user_email',
+    align: 'center',
     width: '200'
   },
   {
@@ -290,35 +292,41 @@ const TABLE_COLUMNS = [
   {
     label: '是否推荐',
     prop: 'is_recommend',
+    align: 'center',
     formatter: (row) => (row.is_recommend === 1 ? '是' : '否'),
     minWidth: '80'
   },
   {
     label: '是否最新讲师',
     prop: 'is_latest_teacher',
+    align: 'center',
     formatter: (row) => (row.is_latest_teacher === 1 ? '是' : '否'),
     minWidth: '120'
   },
   {
     label: '是否热门讲师',
     prop: 'is_popular_teacher',
+    align: 'center',
     formatter: (row) => (row.is_popular_teacher === 1 ? '是' : '否'),
     minWidth: '120'
   },
   {
     label: '创建人',
     prop: 'createName',
+    align: 'center',
     minWidth: '160'
   },
   {
     label: '创建时间',
     prop: 'create_time',
+    align: 'center',
     minWidth: '160'
   }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
   enableMultiSelect: true,
   enablePagination: true,
@@ -485,7 +493,17 @@ export default {
         total: 0
       },
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+        return (
+          v != 'user_email' &&
+          v != 'status' &&
+          v != 'is_recommend' &&
+          v != 'is_popular_teacher' &&
+          v != 'is_latest_teacher' &&
+          v != 'createName' &&
+          v != 'create_time'
+        )
+      }),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       // query: {},
       tableColumns: TABLE_COLUMNS,

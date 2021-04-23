@@ -19,9 +19,17 @@
         <div class="operate-wrapper">
           <div class="operate-left">
             <div class="input-wrapper">
-              <el-input
+              <!-- <el-input
                 v-model="filterForm[currentTable].name"
                 :disabled="loading[currentTable]"
+                clearable
+                size="medium"
+                :placeholder="
+                  currentTable === 'live' ? '输入直播标题或编号搜索' : '输入用户名称搜索'
+                "
+              ></el-input> -->
+              <el-input
+                v-model="filterForm[currentTable].name"
                 clearable
                 size="medium"
                 :placeholder="
@@ -43,12 +51,12 @@
                 :model="filterForm[currentTable]"
                 class="filter-form"
                 label-width="80px"
-                style="padding: 24px;"
+                style="padding: 24px"
               >
                 <el-form-item label="所属分类">
                   <el-cascader
                     v-model="filterForm[currentTable].categoryId"
-                    style="width: 202px;"
+                    style="width: 202px"
                     placeholder="请选择所属分类"
                     :options="categoryData"
                     :props="{ checkStrictly: true, label: 'name', value: 'idStr' }"
@@ -60,7 +68,7 @@
                   <el-input
                     v-model="filterForm[currentTable].creatorId"
                     clearable
-                    style="width: 202px;"
+                    style="width: 202px"
                     placeholder="请输入创建人"
                   >
                   </el-input>
@@ -81,7 +89,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <div style="text-align: right; margin-right: 75px;">
+                <div style="text-align: right; margin-right: 75px">
                   <el-button
                     type="primary"
                     size="medium"
@@ -111,7 +119,7 @@
                 :model="filterForm[currentTable]"
                 class="filter-form"
                 label-width="80px"
-                style="padding: 24px;"
+                style="padding: 24px"
               >
                 <el-form-item label="所属部门">
                   <el-cascader
@@ -122,7 +130,7 @@
                   ></el-cascader>
                 </el-form-item>
 
-                <div style="text-align: right; margin-right: 75px;">
+                <div style="text-align: right; margin-right: 75px">
                   <el-button
                     type="primary"
                     size="medium"
@@ -164,7 +172,7 @@
               >
                 <i
                   class="el-icon-refresh-right"
-                  style="margin-right: 2px;"
+                  style="margin-right: 2px"
                 ></i>刷新
               </div>
             </div>
@@ -356,8 +364,8 @@ export default {
           直播编号: true,
           直播名称: true,
           所属分类: true,
-          包含课程: true,
-          创建人: true,
+          包含课程: false,
+          创建人: false,
           状态: true
         },
         person: { 用户编号: true, 用户名称: true, 所属部门: true, 累计时长: true }
@@ -412,9 +420,9 @@ export default {
     }
   },
   watch: {
-    searchValWatcher() {
+    searchValWatcher: _.debounce(function() {
       this.resetPageAndGetList()
-    },
+    }, 500),
     currentTable() {
       this.getList()
     }

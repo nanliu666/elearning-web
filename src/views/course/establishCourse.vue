@@ -74,6 +74,7 @@
                 v-model="ruleForm.name"
                 placeholder="请输入"
                 maxlength="32"
+                @blur="ruleForm.name = $event.target.value.trim()"
               ></el-input>
             </el-form-item>
           </el-col>
@@ -512,6 +513,7 @@
                       placeholder="请选择"
                       :disabled="scope.row.type == 4"
                       @change="() => selectChange(scope)"
+                      @visible-change="() => selectVisibleChange(scope)"
                     >
                       <el-option
                         v-for="item in typeOption"
@@ -838,6 +840,8 @@ export default {
       // 页面切换
       headIndex: 1,
       // 上传课程内容章节类型
+      chapterType: '',
+      openChange: 1,
       typeOption: [
         {
           name: '文章',
@@ -1022,6 +1026,12 @@ export default {
         this.ruleForm.teacherId = ''
       }
     },
+    selectVisibleChange(scope) {
+      ++this.openChange
+      if (this.openChange % 2 === 0) {
+        this.chapterType = scope.row.type
+      }
+    },
 
     selectChange(scope) {
       if (scope.row.upLoad.length) {
@@ -1038,6 +1048,7 @@ export default {
             })
           })
           .catch(() => {
+            this.ruleForm.contents[scope.$index].type = this.chapterType
             this.$message({
               type: 'info',
               message: '已取消清除'
@@ -1745,7 +1756,7 @@ export default {
     //   // res, file
     // },
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpeg|png|bmp)$/
+      const regx = /^.*\.(jpg|jpeg|png|bmp|JPG)$/
       const isLt10M = file.size / 1024 / 1024 < 10
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 10MB!')
@@ -1847,7 +1858,7 @@ export default {
     padding-bottom: 8px;
     span {
       display: inline-block;
-      width: 58%;
+      width: 55%;
       &:nth-child(2) {
         width: 42%;
       }

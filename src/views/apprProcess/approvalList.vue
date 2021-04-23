@@ -159,7 +159,8 @@ const TABLE_CONFIG = {
   showIndexColumn: false,
   // enablePagination: true,
   handlerColumn: {
-    width: 180
+    width: 180,
+    fixed: false
   }
 }
 

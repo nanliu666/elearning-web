@@ -156,6 +156,16 @@ export default {
     }
   },
   watch: {
+    menuData: {
+      handler() {
+        if (this.isInitDefault) return
+        this.isInitDefault = true
+        this.$nextTick(() => {
+          this.$refs.privilege.initDefault()
+        })
+      },
+      deep: true
+    },
     menuPrivileges: {
       handler(val) {
         let data = []
@@ -168,9 +178,9 @@ export default {
   },
   created() {
     this.roleId = this.$route.query.roleId
+
     this.getRolePrivilege()
   },
-  mounted() {},
   methods: {
     filterData(data, table) {
       data.map((it, i) => {

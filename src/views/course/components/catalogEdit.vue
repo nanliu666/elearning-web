@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -90,15 +90,34 @@
       <!-- 可见范围 -->
       <el-form-item
         v-show="!parentOrgIdLabel"
-        label="可见范围"
+        label=""
       >
         <div>
-          <OrgTree
-            :id-list="form.orgIdList"
-            @selectedValue="getOrgList"
-          ></OrgTree>
+          <el-tabs
+            v-model="activeName"
+            @tab-click="handleClick"
+          >
+            <el-tab-pane
+              label="可见范围"
+              name="first"
+            >
+              <OrgTree
+                :id-list="form.orgIdList"
+                :org-source="1"
+                @selectedValue="getOrgList"
+              ></OrgTree>
+            </el-tab-pane>
+            <el-tab-pane
+              label="所属范围"
+              name="second"
+            >
+              <OrgTree
+                :id-list="form.orgIdListBackstage"
+                @selectedValue="getOrgIdsBackstage"
+              ></OrgTree>
+            </el-tab-pane>
+          </el-tabs>
         </div>
-        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
@@ -150,6 +169,7 @@ export default {
   },
   data() {
     return {
+      activeName: 'first',
       type: 'create',
       form: {
         parentId: '',
@@ -165,9 +185,16 @@ export default {
     }
   },
   methods: {
+    handleClick(tab, event) {
+      console.log(tab, event)
+    },
     // 可见范围返回数据
     getOrgList(val) {
       this.form.orgIds = val.map((item) => item.id)
+    },
+    // 所属范围返回数据
+    getOrgIdsBackstage(val) {
+      this.form.orgIdsBackstage = val.map((item) => item.id)
     },
     async loadOrgTree() {
       let res = await getCatalog({ source: 'course', addFlag: '1' })
@@ -214,6 +241,7 @@ export default {
       if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         this.form.orgIds = this.form.orgIds.toString()
+        this.form.orgIdsBackstage = this.form.orgIdsBackstage.toString()
         this.form.source = 'course'
         if (valid) {
           if (this.type !== 'edit') {
@@ -255,7 +283,7 @@ export default {
         }
       })
     },
-    // 新建分类
+    // 创建分类
     create() {
       this.type = 'create'
       this.parentOrgIdLabel = ''

@@ -108,7 +108,7 @@
               type="text"
               @click="handleCreateChild(row)"
             >
-              新建子组织
+              创建子组织
             </el-button>
             <el-button
               v-p="EDIT_ORG"
@@ -196,7 +196,8 @@ const TABLE_CONFIG = {
   showIndexColumn: false,
   enablePagination: true,
   handlerColumn: {
-    width: 160
+    width: 160,
+    fixed: false
   }
 }
 import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG } from '@/const/privileges'

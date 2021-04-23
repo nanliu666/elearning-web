@@ -8,7 +8,7 @@
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        新建分类
+        创建分类
       </el-button>
     </page-header>
 
@@ -120,7 +120,7 @@
                   v-p="ADD_CHILD_REP_CATALOG"
                   command="addChild"
                 >
-                  新建子分类
+                  创建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_REP_CATALOG"
@@ -185,7 +185,8 @@ const TABLE_CONFIG = {
   enablePagination: true,
   // enableMultiSelect: true, // TODO：树无法做批量选择,暂时关闭多选
   handlerColumn: {
-    minWidth: 100
+    minWidth: 100,
+    fixed: false
   }
 }
 import {

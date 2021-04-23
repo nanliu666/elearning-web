@@ -220,7 +220,8 @@ export default {
           this.loadTree(tree, treeNode, resolve)
         },
         handlerColumn: {
-          width: '200'
+          width: '200',
+          fixed: false
         }
       },
       fullscreenLoading: false,

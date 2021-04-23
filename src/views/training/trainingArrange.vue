@@ -139,7 +139,7 @@
 
         <!-- 移动选择框 -->
         <!-- <el-dialog
-          title="收货地址"
+          title="移动"
           :visible.sync="dialogFormVisible"
           :modal-append-to-body="false"
         >
@@ -156,7 +156,7 @@
               ></el-input>
             </el-form-item>
             <el-form-item
-              label="上级分类组"
+              label="上级分类"
               label-width="120px"
             >
               <el-select
@@ -297,16 +297,17 @@
                 slot="trainName"
                 slot-scope="{ row }"
               >
-                <el-button
+                <span
                   v-if="$p(VIEW_TRAIN)"
-                  type="text"
+                  style="cursor:pointer; color:#53aafc; "
                   @click="toTrainingDetail(row)"
                 >
                   {{ row.trainName }}
-                </el-button>
-                <div v-else>
+                </span>
+
+                <span v-else>
                   {{ row.trainName }}
-                </div>
+                </span>
               </template>
 
               <!-- 状态 -->
@@ -451,8 +452,8 @@ const TABLE_COLUMNS = [
     label: '培训名称',
     prop: 'trainName',
     width: '180',
-    slot: true,
-    fixed: 'left'
+    slot: true
+    // fixed: 'left'
   },
   {
     label: '编号',
@@ -494,6 +495,16 @@ const TABLE_COLUMNS = [
     minWidth: 130
   },
   {
+    label: '培训人数',
+    prop: 'participated',
+    minWidth: 130
+  },
+  {
+    label: '培训天数',
+    prop: 'trainDays',
+    minWidth: 130
+  },
+  {
     label: '评分',
     prop: 'composite',
     minWidth: 130
@@ -507,7 +518,8 @@ const TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
-    width: 200
+    width: 200,
+    fixed: false
   },
   enableMultiSelect: true,
   enablePagination: true,
@@ -566,14 +578,14 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     ]
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'sponsor',
     label: '主办单位',
     type: 'input'
   },
   {
-    config: { placeholder: '请选择' },
+    config: { placeholder: '请输入' },
     data: '',
     field: 'address',
     label: '培训地点',
