@@ -1,4 +1,4 @@
-import { setToken, setRefreshToken, removeToken, removeRefreshToken } from '@/util/auth'
+import { setToken, removeToken, removeRefreshToken } from '@/util/auth'
 import { Message } from 'element-ui'
 import { setStore, getStore } from '@/util/store'
 import { filterTree, sortTree } from '@/util/util'
@@ -206,7 +206,6 @@ const user = {
       setStore({ name: 'token', content: state.token })
     },
     SET_REFRESH_TOKEN: (state, refreshToken) => {
-      setRefreshToken(refreshToken)
       state.refreshToken = refreshToken
       setStore({ name: 'refreshToken', content: state.refreshToken })
     },
