@@ -111,6 +111,9 @@
         >
           附件
         </el-menu-item>
+        <el-menu-item index="3">
+          评价
+        </el-menu-item>
       </el-menu>
       <div style="padding: 20px; min-height:32vh">
         <div
@@ -147,6 +150,9 @@
             </li>
           </ul>
         </section>
+        <div v-if="activeIndex === '3'">
+          <Evaluate :evaluate-score="konwledgeDetail.evaluateScore" />
+        </div>
       </div>
     </basic-container>
   </div>
@@ -157,6 +163,7 @@ import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
 import CommonImageView from '@/components/common-image-viewer/viewer'
 import styles from '@/styles/variables.scss'
 import axios from 'axios'
+import Evaluate from './components/Evaluate'
 export default {
   filters: {
     statusFilterer(data) {
@@ -164,7 +171,8 @@ export default {
     }
   },
   components: {
-    CommonImageView
+    CommonImageView,
+    Evaluate
   },
   data() {
     return {

@@ -27,24 +27,31 @@
           :default-expanded-keys="expandedKeysData"
           @node-click="treeClickNode"
         >
-          <span slot-scope="{ node, data }" class="custom-tree-node">
+          <span
+            slot-scope="{ node, data }"
+            class="custom-tree-node"
+          >
             <span
               v-show="!isEdit || data.id !== isEditId"
               :class="node.label == '未分类' ? 'paddingRight' : ''"
               class="custom-tree-node-text"
-              >{{ node.label }}&nbsp;
-              <span class="custom-tree-node-text-num">
-                &nbsp; {{ `(${data.count || 0})` }}</span
-              >
+            >{{ node.label }}&nbsp;
+              <span class="custom-tree-node-text-num"> &nbsp; {{ `(${data.count || 0})` }}</span>
             </span>
 
-            <span v-show="isEdit && data.id === isEditId" class="tree_input">
+            <span
+              v-show="isEdit && data.id === isEditId"
+              class="tree_input"
+            >
               <el-input
                 v-model="dataAddCatalog.input"
                 placeholder="请输入分类名称"
                 maxlength="20"
               ></el-input>
-              &nbsp;<el-button type="text" @click="isaddCatalog(data)">确认</el-button>
+              &nbsp;<el-button
+                type="text"
+                @click="isaddCatalog(data)"
+              >确认</el-button>
               <span @click="isEditFn(data)"> 取消</span>
               <!-- <span @click="isEdit = false"> 取消</span> -->
             </span>
@@ -61,10 +68,16 @@
                   <i class="el-icon-more" />
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item v-show="data.btnshow" command="add">
+                  <el-dropdown-item
+                    v-show="data.btnshow"
+                    command="add"
+                  >
                     新增分类
                   </el-dropdown-item>
-                  <el-dropdown-item v-show="!data.btnshow" command="move">
+                  <el-dropdown-item
+                    v-show="!data.btnshow"
+                    command="move"
+                  >
                     移动
                   </el-dropdown-item>
                   <el-dropdown-item command="edit"> 编辑 </el-dropdown-item>
@@ -75,7 +88,10 @@
           </span>
         </el-tree>
 
-        <div v-show="isShowinput" class="isShowinput">
+        <div
+          v-show="isShowinput"
+          class="isShowinput"
+        >
           <el-input
             id="/lecturer/lecturer"
             v-model="dataAddCatalog.input"
@@ -83,16 +99,28 @@
             placeholder="请输入分组名称"
             maxlength="20"
           ></el-input>
-          <span class="isShowinput_yes" @click="isaddCatalog(data)">确认</span>
-          <span class="isShowinput_no" @click="isShowinputFn"> 取消</span>
+          <span
+            class="isShowinput_yes"
+            @click="isaddCatalog(data)"
+          >确认</span>
+          <span
+            class="isShowinput_no"
+            @click="isShowinputFn"
+          > 取消</span>
           <!-- <span @click="isShowinput = false"> 取消</span> -->
         </div>
         <div class="btn_bottom_box">
-          <div v-show="!isShowinput" class="btn_bottom">
-            <a class="btn1" href="#/learnPlan/CoursePlanList" @click="adddata">
-              <i class="el-icon-plus btn_icon"></i> 新建分组</a
+          <div
+            v-show="!isShowinput"
+            class="btn_bottom"
+          >
+            <a
+              class="btn1"
+              href="#/learnPlan/CoursePlanList"
+              @click="adddata"
             >
-            <!-- <span class="btn2">新建分类</span> -->
+              <i class="el-icon-plus btn_icon"></i> 创建分组</a>
+            <!-- <span class="btn2">创建分类</span> -->
           </div>
         </div>
       </div>
@@ -100,12 +128,15 @@
 
     <!-- 移动选择框 -->
     <el-dialog
-      title="收货地址"
+      title="移动"
       :visible.sync="dialogFormVisible"
       :modal-append-to-body="false"
     >
       <el-form :model="form">
-        <el-form-item label="分类名称" label-width="120px">
+        <el-form-item
+          label="分类名称"
+          label-width="120px"
+        >
           <el-input
             v-model="form.name"
             autocomplete="off"
@@ -113,8 +144,14 @@
             disabled
           ></el-input>
         </el-form-item>
-        <el-form-item label="上级分类组" label-width="120px">
-          <el-select v-model="form.region" placeholder="请选择">
+        <el-form-item
+          label="上级分类"
+          label-width="120px"
+        >
+          <el-select
+            v-model="form.region"
+            placeholder="请选择"
+          >
             <el-option
               v-for="(item, index) in data"
               v-show="item.label !== '未分类'"
@@ -125,9 +162,19 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> 取 消 </el-button>
-        <el-button type="primary" @click="ismove"> 确 定 </el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisible = false">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="ismove"
+        >
+          确 定
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -144,213 +191,212 @@ export default {
           addCatalog: Promise.reject(), //新增分组/分类
           deleteTeacherCatalog: Promise.reject(), //删除分组/分类
           move: Promise.reject(), //移动
-          editTeacherCatalog: Promise.reject(), //编辑
-        };
-      },
-    },
+          editTeacherCatalog: Promise.reject() //编辑
+        }
+      }
+    }
   },
   data() {
     return {
       // 侧栏数据
-      filterText: "",
+      filterText: '',
       data: [],
       props: {
         lazy: true,
         isLeaf: (data, node) => {
-          if (node.level === 2 || data.label == "未分类") {
-            return true;
+          if (node.level === 2 || data.label == '未分类') {
+            return true
           }
-        },
+        }
       },
       expandedKeysData: [], //是否展开
-      dataAddCatalog: { input: "" }, //输入框
+      dataAddCatalog: { input: '' }, //输入框
       dialogFormVisible: false,
       form: {
-        name: "",
-        region: "",
-        optionData: "",
+        name: '',
+        region: '',
+        optionData: ''
       },
       inputAddMark: false,
-      addSonInputData: "",
-      compileNewly: "",
+      addSonInputData: '',
+      compileNewly: '',
       isShowinput: false, //显示分组——输入框
       isEdit: false, //显示分类——输入框
-      isEditId: "", //显示分类——输入框id
-      btnshow: "false", //新增分类&移动
-    };
+      isEditId: '', //显示分类——输入框id
+      btnshow: 'false' //新增分类&移动
+    }
   },
   watch: {
     filterText(val) {
-      this.$refs.tree.filter(val);
-    },
+      this.$refs.tree.filter(val)
+    }
   },
   created() {
-    this.islistTeacherCategory();
+    this.islistTeacherCategory()
   },
   activated() {
-    this.islistTeacherCategory();
+    this.islistTeacherCategory()
   },
   methods: {
     // tree
     filterNode(value, data) {
-      if (!value) return true;
-      return data.label.indexOf(value) !== -1;
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
     },
     // 树数据懒加载
     async loadNode(node, resolve) {
       if (node.level === 0) {
-        return resolve([{ name: "region" }]);
+        return resolve([{ name: 'region' }])
       }
-      if (node.level > 1) return resolve([]);
+      if (node.level > 1) return resolve([])
 
       let res = await this.columnInterface.listTeacherCategory({
-        parentId: node.data.id,
-      });
+        parentId: node.data.id
+      })
       let filterArr = res.son.map((item) => {
         return {
           id: item.idStr,
           parent_id: item.parentStr,
           label: item.name,
           btnshow: 0,
-          count: item.count,
-        };
-      });
+          count: item.count
+        }
+      })
 
-      node.data.children = filterArr;
-      resolve(filterArr);
+      node.data.children = filterArr
+      resolve(filterArr)
 
       if (this.inputAddMark) {
-        this.inputAddMark = false;
-        this.addSonInput(this.addSonInputData);
+        this.inputAddMark = false
+        this.addSonInput(this.addSonInputData)
       }
     },
     //   tree节点点击 返回ID拿右侧list
     treeClickNode(data) {
-      this.clickId = data.id;
+      this.clickId = data.id
       // if (data.num === 1) {
       // }
       //   拿右侧list
-      this.$emit("treeClick", data.id);
+      this.$emit('treeClick', data.id)
     },
     // 新增分组/分类&编辑
     isaddCatalog(node) {
       if (this.compileNewly == 1) {
         // 编辑
         let params = {
-          id: "",
-          name: "",
-        };
-        params.id = node.id;
-        params.name = this.dataAddCatalog.input;
-        if (params.name.trim() == "") {
+          id: '',
+          name: ''
+        }
+        params.id = node.id
+        params.name = this.dataAddCatalog.input
+        if (params.name.trim() == '') {
           this.$message({
-            message: "名称不能为空",
-            type: "warning",
-          });
-          return;
+            message: '名称不能为空',
+            type: 'warning'
+          })
+          return
         }
         // 做一个判断二级否有重名的
-        let ifReturn = false;
+        let ifReturn = false
         this.data.map((item) => {
           if (item.id == node.parent_id) {
             item.children.map((item) => {
               if (item.label == params.name) {
                 this.$message({
-                  message: "该名称已存在，请重新编辑",
-                  type: "warning",
-                });
-                ifReturn = true;
-                return;
+                  message: '该名称已存在，请重新编辑',
+                  type: 'warning'
+                })
+                ifReturn = true
+                return
               }
-            });
+            })
           }
-        });
+        })
         // 做一个判断一级否有重名的
         if (node.btnshow) {
           this.data.map((item) => {
             if (item.label == params.name) {
               this.$message({
-                message: "该名称已存在，请重新编辑",
-                type: "warning",
-              });
-              ifReturn = true;
-              return;
+                message: '该名称已存在，请重新编辑',
+                type: 'warning'
+              })
+              ifReturn = true
+              return
             }
-          });
+          })
         }
 
-        if (ifReturn) return;
+        if (ifReturn) return
         this.columnInterface.editTeacherCatalog(params).then(() => {
           // this.islistTeacherCategory()
 
           if (node.btnshow) {
             this.data.map((item, index) => {
               if (item.id == node.id) {
-                this.data[index].label = params.name;
+                this.data[index].label = params.name
               }
-            });
+            })
           } else {
             this.data.map((item, index) => {
               if (node.parent_id == item.id) {
                 item.children.map((itemi, indexi) => {
                   if (node.id == itemi.id) {
-                    this.data[index].children[indexi].label = params.name;
+                    this.data[index].children[indexi].label = params.name
                   }
-                });
+                })
               }
-            });
+            })
           }
-
-          this.isEdit = false;
-          this.dataAddCatalog.input = "";
+          this.compileNewly = ''
+          this.isEdit = false
+          this.dataAddCatalog.input = ''
           this.$message({
-            message: "保存成功",
-            type: "success",
-          });
-        });
+            message: '保存成功',
+            type: 'success'
+          })
+        })
       } else {
         // 新增
         let params = {
           // creatorId: '', //	分组id	query	false
-          name: "", //	名称	query	false
-          parentId: "", //	类id	query	false
-        };
+          name: '', //	名称	query	false
+          parentId: '' //	类id	query	false
+        }
         if (node) {
-          params.id = node.myid;
+          params.id = node.myid
           // params.parentId = node.parentId
         }
-        params.name = this.dataAddCatalog.input;
-        if (params.name.trim() == "") {
+        params.name = this.dataAddCatalog.input
+        if (params.name.trim() == '') {
           this.$message({
-            message: "名称不能为空",
-            type: "warning",
-          });
-          return;
+            message: '名称不能为空',
+            type: 'warning'
+          })
+          return
         }
         this.columnInterface.addCatalog(params).then(() => {
           // this.islistTeacherCategory()
           // 不再收起BUG
           // 再请求回来数据
           this.columnInterface
-            .listTeacherCategory({ test: "123", parentId: params.id })
+            .listTeacherCategory({ test: '123', parentId: params.id })
             .then((res) => {
               // 去找到相应的数据push进去
+              this.compileNewly = ''
               if (params.id) {
                 this.data.map((item) => {
                   if (item.id == params.id) {
-                    item.children[item.children.length - 1].id =
-                      res.son[res.son.length - 1].idStr;
+                    item.children[item.children.length - 1].id = res.son[res.son.length - 1].idStr
                     item.children[item.children.length - 1].parent_id =
-                      res.son[res.son.length - 1].parentStr;
-                    item.children[item.children.length - 1].label =
-                      res.son[res.son.length - 1].name;
-                    item.children[item.children.length - 1].btnshow = 0;
+                      res.son[res.son.length - 1].parentStr
+                    item.children[item.children.length - 1].label = res.son[res.son.length - 1].name
+                    item.children[item.children.length - 1].btnshow = 0
                     item.children[item.children.length - 1].count =
-                      res.son[res.son.length - 1].count;
+                      res.son[res.son.length - 1].count
                   }
-                });
-                this.isEdit = false;
-                this.dataAddCatalog.input = "";
+                })
+                this.isEdit = false
+                this.dataAddCatalog.input = ''
               } else {
                 this.data.push({
                   label: res.group[res.group.length - 1].name,
@@ -358,209 +404,209 @@ export default {
                   id: res.group[res.group.length - 1].idStr,
                   myid: res.group[res.group.length - 1].idStr,
                   count: res.group[res.group.length - 1].count,
-                  children: [],
-                });
-                this.dataAddCatalog.input = "";
-                this.isShowinput = false;
+                  children: []
+                })
+                this.dataAddCatalog.input = ''
+                this.isShowinput = false
               }
 
               this.$message({
-                message: "新增成功",
-                type: "success",
-              });
-            });
-        });
+                message: '新增成功',
+                type: 'success'
+              })
+            })
+        })
       }
     },
     // 输入框取消按钮
     isShowinputFn() {
-      this.isShowinput = false;
-      this.dataAddCatalog.input = "";
+      this.isShowinput = false
+      this.dataAddCatalog.input = ''
+      this.compileNewly = 0
     },
     isEditFn(data) {
-      this.isEdit = false;
-      this.dataAddCatalog.input = "";
+      this.compileNewly = 0
+      this.isEdit = false
+      this.dataAddCatalog.input = ''
       // this.expandedKeysData = []
       // this.expandedKeysData.push(data.myid)
-      this.expandedKeysData = [];
-      if (data.parent_id) this.expandedKeysData.push(data.parent_id);
-      this.islistTeacherCategory();
+      this.expandedKeysData = []
+      if (data.parent_id) this.expandedKeysData.push(data.parent_id)
+      this.islistTeacherCategory()
     },
     // 增删改查
     handleCommandSide($event, data, node) {
       //   编辑
-      if ($event === "edit") {
-        this.isEdit = true;
-        this.isEditId = data.id;
-        this.compileNewly = 1;
-        this.dataAddCatalog.input = data.label;
+      if ($event === 'edit') {
+        this.isEdit = true
+        this.isEditId = data.id
+        this.compileNewly = 1
+        this.dataAddCatalog.input = data.label
       }
       //   新增
-      if ($event === "add") {
-        this.addSonInputData = data;
-        this.compileNewly = 0;
+      if ($event === 'add') {
+        this.addSonInputData = data
+        this.compileNewly = 0
         // 展开
-        this.expandedKeysData = [];
-        this.expandedKeysData.push(data.id);
-        this.inputAddMark = true;
-        this.addSonInput(data);
+        this.expandedKeysData = []
+        this.expandedKeysData.push(data.id)
+        this.inputAddMark = true
+        this.addSonInput(data)
       }
       //移动
-      if ($event === "move") {
-        this.compileNewly = "";
-        this.dialogFormVisible = true;
-        this.form.name = data.label;
-        this.form.optionData = data;
+      if ($event === 'move') {
+        this.compileNewly = ''
+        this.dialogFormVisible = true
+        this.form.name = data.label
+        this.form.optionData = data
       }
       // 删除
-      if ($event === "del") {
-        this.compileNewly = "";
+      if ($event === 'del') {
+        this.compileNewly = ''
         if (data.count) {
           this.$message({
-            message: `您选择的${
-              data.btnshow ? "分组" : "分类"
-            }下存在数据，请调整后再删除！`,
-            type: "error",
-          });
-          return;
+            message: `您选择的${data.btnshow ? '分组' : '分类'}下存在数据，请调整后再删除！`,
+            type: 'error'
+          })
+          return
         }
 
-        this.$confirm(`确定要删除选中的${data.btnshow ? "分组" : "分类"}么?`, "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+        this.$confirm(`确定要删除选中的${data.btnshow ? '分组' : '分类'}么?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
           .then(() => {
-            this.iddeleteTeacherCatalog(data, node);
+            this.iddeleteTeacherCatalog(data, node)
           })
           .catch(() => {
             this.$message({
-              type: "info",
-              message: "已取消删除",
-            });
-          });
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
       }
     },
     // 底部btn
     adddata() {
-      this.isShowinput = true;
+      this.isShowinput = true
     },
     // 移动
     ismove() {
-      this.dialogFormVisible = false;
-      this.form;
+      this.dialogFormVisible = false
+      this.form
       let params = {
-        id: "", //讲师所属分类ID
-        parentId: "", //讲师所属分组ID
-      };
-      params.id = this.form.optionData.id;
-      params.parentId = this.form.region;
+        id: '', //讲师所属分类ID
+        parentId: '' //讲师所属分组ID
+      }
+      params.id = this.form.optionData.id
+      params.parentId = this.form.region
       this.columnInterface.move(params).then(() => {
         this.$message({
-          message: "操作成功",
-          type: "success",
-        });
-        this.islistTeacherCategory();
-      });
+          message: '操作成功',
+          type: 'success'
+        })
+        this.islistTeacherCategory()
+      })
     },
     // 新增子类输入框
     addSonInput(data) {
-      this.compileNewly = 0;
-      let i = this.data.indexOf(data);
-      let idNum = Math.floor(Math.random() * 10000);
-      if (i == "-1") return;
+      this.compileNewly = 0
+      let i = this.data.indexOf(data)
+      let idNum = Math.floor(Math.random() * 10000)
+      if (i == '-1') return
       this.data[i].children.push({
-        label: "- -",
+        label: '- -',
         btnshow: 0,
         id: idNum,
-        myid: data.id,
-      });
-      this.isEdit = true;
-      this.isEditId = idNum;
+        myid: data.id
+      })
+      this.isEdit = true
+      this.isEditId = idNum
     },
     // 查询讲师分类列表
     islistTeacherCategory(id) {
-      let params = {};
+      let params = {}
       if (id) {
         params = {
-          test: "123",
-          parentId: "", // 父ID
-        };
-        params.parentId = id;
+          test: '123',
+          parentId: '' // 父ID
+        }
+        params.parentId = id
       } else {
         params = {
-          test: "123",
-        };
+          test: '123'
+        }
       }
       return this.columnInterface.listTeacherCategory(params).then((res) => {
-        this.data = [];
+        this.data = []
         res.group.forEach((item) => {
           let i = {
             id: 1,
-            label: "一级 1",
+            label: '一级 1',
             btnshow: 1,
             children: [],
             num: 1,
-            count: 0,
-          };
-          i.id = item.idStr;
-          i.label = item.name;
-          i.btnshow = 1;
-          i.children = [];
-          i.count = item.count;
-          this.data.push(i);
-        });
+            count: 0
+          }
+          i.id = item.idStr
+          i.label = item.name
+          i.btnshow = 1
+          i.children = []
+          i.count = item.count
+          this.data.push(i)
+        })
         this.data.forEach((item) => {
-          let filterArr = res.son.filter((list) => list.parentStr == item.id) || [];
+          let filterArr = res.son.filter((list) => list.parentStr == item.id) || []
           filterArr = filterArr.map((item) => {
             return {
               id: item.idStr,
               parent_id: item.parentStr,
               label: item.name,
               btnshow: 0,
-              count: item.count,
-            };
-          });
-          filterArr.length > 0 ? (item.children = filterArr) : "";
-        });
+              count: item.count
+            }
+          })
+          filterArr.length > 0 ? (item.children = filterArr) : ''
+        })
 
-        this.clickId = this.data[0].id;
-      });
+        this.clickId = this.data[0].id
+      })
     },
     // 删除分组/分类
     iddeleteTeacherCatalog(data) {
-      let treeNode = this.$refs.tree.getNode(data.parent_id);
+      let treeNode = this.$refs.tree.getNode(data.parent_id)
       this.columnInterface.deleteTeacherCatalog({ id: data.id }).then(() => {
         this.$message({
-          message: "删除成功",
-          type: "success",
-        });
+          message: '删除成功',
+          type: 'success'
+        })
 
         if (data.btnshow) {
-          this.data = this.data.filter(function (item) {
+          this.data = this.data.filter(function(item) {
             if (data.id != item.id) {
-              return item;
+              return item
             }
-          });
+          })
         } else {
           this.data.map((item, index) => {
             if (data.parent_id == item.id) {
               item.children.map((itemi, indexi) => {
                 if (data.id == itemi.id) {
-                  this.data[index].children.splice(indexi, 1);
-                  treeNode.setData(treeNode.data);
+                  this.data[index].children.splice(indexi, 1)
+                  treeNode.setData(treeNode.data)
                 }
-              });
+              })
             }
-          });
+          })
           // this.islistTeacherCategory()
           // this.expandedKeysData = []
           // if (data.parent_id) this.expandedKeysData.push(data.parent_id)
         }
-      });
-    },
-  },
-};
+      })
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

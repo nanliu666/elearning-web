@@ -1,7 +1,7 @@
 <template>
   <div style="height">
     <page-header
-      :title="`${id ? '编辑' : '添加'}用户`"
+      :title="`${id ? '编辑' : '创建'}用户`"
       show-back
       :back="goBack"
     />
@@ -21,6 +21,7 @@
             ref="form"
             :model="form"
             :columns="columns"
+            @node-click="_nodeClickFun"
           >
             <template slot="title1">
               <h3>基本信息</h3>
@@ -385,6 +386,9 @@ export default {
   },
 
   methods: {
+    _nodeClickFun(val) {
+      this.form.position = val.name
+    },
     onUploadExceed() {
       this.$message.warning('上传附件不能超过5个')
     },

@@ -207,8 +207,11 @@ export default {
             const detailData = _.pick(trainInfo, detailKeyList)
             this.$refs.editBasicInfo.formData = basicInfo
             const { headTeacher, teachAssistant } = detailData
-            this.$refs.editDetail.teacherDefault = [headTeacher]
+            this.$refs.editDetail.teacherDefault = Object.keys(headTeacher).length
+              ? [headTeacher]
+              : []
             this.$refs.editDetail.teachAssistantDefault = teachAssistant
+            console.log(teachAssistant)
             detailData.headTeacher = detailData.headTeacher.userId
             detailData.teachAssistant = _.map(detailData.teachAssistant, 'userId')
             this.$refs.editDetail.formData = detailData
@@ -250,8 +253,8 @@ export default {
     },
     // 发布区分编辑发布还是新增发布
     publish(type) {
-      const editArrangement = this.$refs.editArrangement.getData()
       const basicData = this.$refs.editBasicInfo.getData(type)
+      const editArrangement = this.$refs.editArrangement.getData()
       const detailData = this.$refs.editDetail.getData(type)
       // 配置详细信息的错误toast弹窗需要放置在此处进行提示
       detailData.then((res) => {

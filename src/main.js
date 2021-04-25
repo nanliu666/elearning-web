@@ -19,13 +19,36 @@ import commonForm from './components/common-form/commonForm'
 import OrgSelect from './components/OrgSelect/orgSelect'
 import commonTable from 'vue-common-table'
 import website from '@/config/website'
-
+// 在 main.js 中导入插件
+import pdf from '@/util/jspdf'
+// 注册插件
+Vue.use(pdf)
 import Permission from '@/directive/pcheck'
 import _ from 'lodash'
 import loadmore from './directive/loadmore'
 Vue.prototype._ = _
 
 import tinymce from '@/components/tinymce'
+
+if (!HTMLCanvasElement.prototype.toBlob) {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    value: function(callback, type, quality) {
+      var dataURL = this.toDataURL(type, quality).split(',')[1]
+      setTimeout(function() {
+        var binStr = atob(dataURL),
+          len = binStr.length,
+          arr = new Uint8Array(len)
+
+        for (var i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i)
+        }
+
+        callback(new Blob([arr], { type: type || 'image/png' }))
+      })
+    }
+  })
+}
+
 // if (process.env.NODE_ENV !== 'production') {
 //   const mock = require('@/mock')
 //   mock.default(true)

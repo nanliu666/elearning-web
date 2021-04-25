@@ -620,7 +620,7 @@ export default {
           // 进行中与其他状态都有
           tips = `您所选的共有${_.size(
             underway
-          )}条进行中的考试不能被删除，您希望继续删除其他考试吗？）`
+          )}条进行中的考试不能被删除，您希望继续删除其他考试吗？`
         }
         this.$confirm(tips, '提醒', {
           confirmButtonText: '确定',

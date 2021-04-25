@@ -20,12 +20,12 @@
           @click="createNew()"
         >
           <i class="el-icon-circle-plus" />
-          新建分类
+          创建分类
         </div>
       </div>
     </div>
     <el-dialog
-      :title="cateForm.categoryId ? '重命名' : '新建分类'"
+      :title="cateForm.categoryId ? '重命名' : '创建分类'"
       :visible.sync="cateVisible"
       width="550px"
       append-to-body
@@ -211,7 +211,7 @@ export default {
         .then(() => {
           this.initCatform()
           this.loading = false
-          this.$message.success('新建分组成功')
+          this.$message.success('创建分组成功')
           this.onClickVisible(str)
           this.$emit('reload')
         })

@@ -10,7 +10,7 @@
           type="primary"
           size="medium"
         >
-          新建试卷<i class="el-icon-arrow-down el-icon--right"></i>
+          创建试卷<i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="random">
@@ -455,10 +455,10 @@ export default {
      * */
     handleRandom(id, copy) {
       let query = {
-        tagName: '新建随机试卷'
+        tagName: '创建随机试卷'
       }
       id && ((query.id = id), (query.tagName = '编辑随机试卷'))
-      copy && ((query.copy = copy), (query.tagName = '新建随机试卷'))
+      copy && ((query.copy = copy), (query.tagName = '创建随机试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/randomTestPaper',
         query
@@ -471,10 +471,10 @@ export default {
      * */
     handleManual(id, copy) {
       let query = {
-        tagName: '新建手工试卷'
+        tagName: '创建手工试卷'
       }
       id && ((query.id = id), (query.tagName = '编辑手工试卷'))
-      copy && ((query.copy = copy), (query.tagName = '新建手工试卷'))
+      copy && ((query.copy = copy), (query.tagName = '创建手工试卷'))
       this.$router.push({
         path: '/examManagement/testPaper/handmadeTestPaper',
         query

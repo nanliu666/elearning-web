@@ -108,7 +108,7 @@
               type="text"
               @click="handleCreateChild(row)"
             >
-              新建子组织
+              创建子组织
             </el-button>
             <el-button
               v-p="EDIT_ORG"

@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header
-      :title="form.id && !copy ? '编辑随机试卷' : '新建随机试卷'"
+      :title="form.id && !copy ? '编辑随机试卷' : '创建随机试卷'"
       show-back
     />
     <basic-container

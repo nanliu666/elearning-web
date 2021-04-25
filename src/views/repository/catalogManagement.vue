@@ -8,7 +8,7 @@
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        新建分类
+        创建分类
       </el-button>
     </page-header>
 
@@ -120,7 +120,7 @@
                   v-p="ADD_CHILD_REP_CATALOG"
                   command="addChild"
                 >
-                  新建子分类
+                  创建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
                   v-p="DELETE_REP_CATALOG"
@@ -416,7 +416,7 @@ export default {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
       const statusText = row.status === '0' ? '停用' : '启用'
-      const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
+      const stopContent = `您确定要停用该分类吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       // 获取到当前分类以及子分类的id集合

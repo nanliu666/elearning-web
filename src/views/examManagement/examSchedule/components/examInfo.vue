@@ -576,6 +576,7 @@ const EventColumns = [
     prop: 'publishType',
     label: '发布规则',
     options: [
+      { label: '手动发布', value: 3 },
       { label: '系统即时发布', value: 1 },
       { label: '定时自动发布', value: 2 }
     ]

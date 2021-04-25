@@ -5,7 +5,7 @@
 import router from './router/router'
 import store from './store'
 import { validatenull } from '@/util/validate'
-import { getToken } from '@/util/auth'
+import { getToken, removeToken, removeRefreshToken } from '@/util/auth'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 NProgress.configure({ showSpinner: false })
@@ -107,6 +107,8 @@ router.afterEach(() => {
   router.$avueRouter.setTitle(title)
 })
 function isToken(tid, next) {
+  removeToken()
+  removeRefreshToken()
   // 如果url带token，做token登录处理
   store.dispatch('tokeLogin', tid).then((res) => {
     if (res.account) {

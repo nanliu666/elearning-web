@@ -164,7 +164,7 @@ export default {
       // add新增,edit编辑
       switch (value) {
         case 'add':
-          this.title = '新建Banner'
+          this.title = '创建Banner'
           break
         case 'edit':
           this.title = '编辑Banner'
