@@ -201,6 +201,16 @@ const TABLE_COLUMNS = [
     minWidth: 130
   },
   {
+    label: '培训人数',
+    prop: 'participated',
+    minWidth: 130
+  },
+  {
+    label: '培训天数',
+    prop: 'trainDays',
+    minWidth: 130
+  },
+  {
     label: '承办单位',
     prop: 'organizer',
     minWidth: 130
