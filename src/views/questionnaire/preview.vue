@@ -40,6 +40,9 @@
               >
                 <div class="question-type">
                   {{ getTypeName(question) }}
+                  <span class="question-limit" v-if="question.multiMin">
+                    【最少可选{{question.multiMin}}项，最多可选{{question.multiMax}}项】
+                  </span>
                 </div>
                 <div class="question-title">
                   <span
@@ -55,12 +58,10 @@
                 <div class="question-content">
                   <el-input
                     v-if="question.type == 'short_answer'"
-                    v-model="questionResults[index]"
                   ></el-input>
 
                   <el-radio-group
                     v-if="question.type == 'single_choice'"
-                    v-model="questionResults[index]"
                   >
                     <el-radio
                       v-for="(option, option_index) in question.asqQuestionOptions"
@@ -71,7 +72,6 @@
 
                   <el-checkbox-group
                     v-if="question.type == 'multi_choice'"
-                    v-model="questionResults[index]"
                   >
                     <el-checkbox
                       v-for="(option, option_index) in question.asqQuestionOptions"
@@ -250,6 +250,10 @@ export default {
             line-height: 24px;
             margin-bottom: 24px;
             font-weight: bold;
+          }
+          .question-limit {
+            font-weight: 500;
+            color: rgba(0, 11, 21, 0.65);
           }
           .question-title {
             font-family: PingFangSC-Regular;

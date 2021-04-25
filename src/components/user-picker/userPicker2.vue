@@ -16,7 +16,7 @@
           class="tab"
         >
           <el-tab-pane
-            label="内部组织"
+            label="组织机构"
             name="tree"
           >
             <el-input
@@ -44,7 +44,7 @@
             </el-scrollbar>
           </el-tab-pane>
           <el-tab-pane
-            label="外部联系人"
+            label="外部人员"
             name="checkbox"
           >
             <el-input
@@ -108,7 +108,7 @@
       </div>
       <div class="right-area">
         <div class="area-header">
-          已选
+          已选：{{selectList.length}}人
         </div>
         <div class="select-wrapper">
           <el-scrollbar
