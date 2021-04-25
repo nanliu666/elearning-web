@@ -170,7 +170,7 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addCategory(this.form)
+            addCategory(_.assign(this.form, { addFlag: '1' }))
               .then(() => {
                 this.$message.success('创建成功')
                 this.loading = false
@@ -189,7 +189,7 @@ export default {
               })
           } else {
             this.loading = true
-            editCategory(_.assign(this.form, { source: 'questionnaire' }))
+            editCategory(_.assign(this.form, { source: 'questionnaire', addFlag: '1' }))
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')

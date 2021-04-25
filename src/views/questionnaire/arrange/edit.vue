@@ -56,10 +56,19 @@
             </el-button>
             <el-button
               v-show="step == 2"
+              type="default"
+              size="medium"
+              :loading="publishLoading"
+              @click="publish(1)"
+            >
+              存草稿
+            </el-button>
+            <el-button
+              v-show="step == 2"
               type="primary"
               size="medium"
               :loading="publishLoading"
-              @click="publish"
+              @click="publish(0)"
             >
               发布
             </el-button>
@@ -98,10 +107,14 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="所在分类"
           prop="categoryId"
-          class="half-form-item"
+          class="half-form-item category-form-item"
         >
+        <div slot="label" class="category-header">
+          <span class="label-name">所在分类</span>
+
+          <el-button type="text" @click.native="toCategory">分类管理</el-button>
+        </div>
           <tree-selector
             style="width: 100%;"
             class="selector"
@@ -154,7 +167,6 @@
             v-el-select-loadmore="loadmoreSubject"
             placeholder="请选择"
             style="width: 100%;"
-            :loading="subjectLoading"
             @change="handleSubjectChange"
           >
             <el-option
@@ -164,6 +176,8 @@
               :value="item.id"
             >
             </el-option>
+            <div style="color: #9c9c9c; line-height: 34px;text-align: center;" v-if="subjectLoading">加载中...</div>
+            <div style="color: #9c9c9c;line-height: 34px;text-align: center;" v-if="noMoreSubject && !subjectLoading">没有更多了</div>
           </el-select>
         </el-form-item>
         <el-form-item
@@ -173,6 +187,8 @@
         >
           <el-input-number
             v-model="form.asqScore"
+            :precision="1"
+            :step="0.5"
             :min="0"
             type="number"
             controls-position="right"
@@ -350,12 +366,12 @@ const CODE_NAME = '问卷二维码'
 export default {
   name: 'QuestionnaireArrange',
 
-  directives: {
+directives: {
     'el-select-loadmore': {
       bind(el, binding) {
         // 获取element-ui定义好的scroll盒子
         const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
-        SELECTWRAP_DOM.addEventListener('scroll', function() {
+        SELECTWRAP_DOM.addEventListener('scroll', () => {
           /**
            * scrollHeight 获取元素内容高度(只读)
            * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
@@ -363,13 +379,13 @@ export default {
            * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
            * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
            */
-          const condition = this.scrollHeight - this.scrollTop <= this.clientHeight
+          const condition = SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
           if (condition) {
             binding.value()
           }
         })
-      }
-    }
+      },
+    },
   },
   components: {
     TreeSelector,
@@ -422,7 +438,8 @@ export default {
       href: '',
       dialogVisible: false,
       publishLoading: false,
-      subjectLoading: false
+      subjectLoading: false,
+      noMoreSubject: false
     }
   },
   computed: {
@@ -450,6 +467,12 @@ export default {
     this.initData()
   },
   methods: {
+    toCategory() {
+      const routeData = this.$router.resolve({
+        path: '/questionnaire/catalog',
+      })
+      window.open(routeData.href, '_blank')
+    },
     handleCopy() {
       const input = document.createElement('input')
       document.body.appendChild(input)
@@ -472,7 +495,7 @@ export default {
         disabledDate: (time) => {
           if (this.form.publishTime) {
             const publishTime = new Date(this.form.publishTime)
-            return time.getTime() < publishTime.getTime()
+            return time.getTime() < publishTime.getTime() && time.getDate() != publishTime.getDate()
           }
         }
       })
@@ -483,7 +506,7 @@ export default {
         disabledDate: (time) => {
           if (this.form.endTime) {
             const endTime = new Date(this.form.endTime)
-            return time.getTime() > endTime.getTime()
+            return time.getTime() > endTime.getTime() && time.getDate() != endTime.getDate()
           }
         }
       })
@@ -529,7 +552,9 @@ export default {
       try {
         tenantId = JSON.parse(localStorage.getItem('elearning-tenantId'))
         tenantId = tenantId.content
-      } catch (e) {}
+      } catch (e) {
+        tenantId = 'learn'
+      }
       const date = new Date()
       const $data = {
         tenantId,
@@ -558,10 +583,12 @@ export default {
       this.publishLoading = true
       api($data)
         .then((res) => {
+          
           if (!this.id) {
-            this.href = window.location.origin + '/questionnaire/arrange?id=' + res
-            saveAsqUrl({ id: res.id, asqUrl: this.href })
-            this.dialogVisible = true
+            this.href = window.location.origin + '/#/questionnaire/arrange?id=' + res
+            saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
+              this.dialogVisible = true
+            })
           } else {
             this.$message.success('操作成功')
             this.$router.back()
@@ -590,7 +617,8 @@ export default {
       this.querySubject()
     },
     loadmoreSubject() {
-      this.getSubjectParams.pageSize++
+      if (this.subjectLoading || this.noMoreSubject) return
+      this.getSubjectParams.pageNo++
       this.querySubject()
     },
     querySubject() {
@@ -598,7 +626,9 @@ export default {
       querySubject(this.getSubjectParams)
         .then((res) => {
           const { data = [] } = res
-          this.subjectOptions = data
+          this.noMoreSubject = !data.length
+          this.subjectOptions = this.subjectOptions.concat(data)
+          this.$forceUpdate()
         })
         .finally(() => {
           this.subjectLoading = false
@@ -622,15 +652,21 @@ export default {
       this.multipleSelection = val
     },
     handleDeletePerson(target) {
-      const list = this.personList
-      if (target) {
-        list.splice(
-          list.findIndex((person) => person.id === target.id),
-          1
-        )
-        return
-      }
-      this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+      this.$confirm('您确定删除所选人员吗？', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+         type: 'warning'
+      }).then(() => {
+        const list = this.personList
+        if (target) {
+          list.splice(
+            list.findIndex((person) => person.id === target.id),
+            1
+          )
+          return
+        }
+        this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+      }).catch(() => {})
     },
     getCategoryData() {
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
@@ -642,10 +678,29 @@ export default {
 </script>
 <style lang="scss">
 .questionnaire-arrange {
+  .options-loading-tips {
+    color: #9c9c9c;
+    line-height: 34px;
+    text-align: center;
+  }
   .el-form--label-top .el-form-item__label {
     padding: 0;
     line-height: 22px;
     margin-bottom: 8px;
+  }
+  .category-form-item {
+    .el-form-item__label {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      .category-header {
+        height: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
   }
   .el-dialog__footer {
     text-align: center;

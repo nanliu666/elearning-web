@@ -28,16 +28,18 @@
           <el-form-item
             label="问卷名称"
             prop="asqName"
+            
             class="half-form-item"
-            style="margin-right: 10%;"
+            style="margin-right: 50px;"
           >
             <el-input
+              clearable
               v-model="form.asqName"
               placeholder="请输入"
             ></el-input>
           </el-form-item>
           <el-form-item
-            label="问卷类别"
+            label="所在分类"
             prop="categoryId"
             class="half-form-item"
           >
@@ -46,7 +48,7 @@
               class="selector"
               :value="form.categoryId"
               :options="treeData"
-              placeholder="请选择类别"
+              placeholder="请选择所在分类"
               :props="seletorProps"
               @getValue="(id) => (form.categoryId = id)"
             />
@@ -55,11 +57,15 @@
           <el-form-item
             label="问卷简介"
             prop="intro"
+            style="width: 1090px;"
           >
             <el-input
+              :autosize="{ minRows: 6 }"
               v-model="form.remark"
               type="textarea"
               placeholder="请输入"
+              :maxlength="500"
+              show-word-limit	
             ></el-input>
           </el-form-item>
         </el-form>
@@ -86,6 +92,7 @@
           height="462px"
           row-key="content"
         >
+          
           <el-table-column
             type="index"
             align="center"
@@ -211,7 +218,7 @@
                   v-model="asqQuestion.content"
                   type="textarea"
                   placeholder="请输入"
-                  maxlength="200"
+                  :maxlength="200"
                   show-word-limit
                 ></el-input>
               </el-form-item>
@@ -285,7 +292,6 @@
                   <draggable
                     v-model="asqQuestion.asqQuestionOptions"
                     :animation="200"
-                    @end="onDraggbleEnd"
                   >
                     <transition-group>
                       <el-form-item
@@ -298,7 +304,7 @@
                         <el-input
                           v-model="option.content"
                           :disabled="option.disabled"
-                          placeholder="请输入内容"
+                          :placeholder="option.placeholder"
                           class="option-input"
                         ></el-input>
 
@@ -320,7 +326,7 @@
                 @click="addQuestionOption"
               >
                 <i class="el-icon-plus"></i>
-                <span class="add-option-text">添加选项</span>
+                <span class="add-option-text">新建选项</span>
               </div>
 
               <el-button
@@ -422,15 +428,15 @@ import Sortable from 'sortablejs'
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
-const OTHER_OPTIONS = ['不限', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+const OTHER_OPTIONS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
 
 const ASQ_QUESTION = {
   content: '',
   type: 'single_choice',
   sort: '',
-  status: 0,
-  multiMin: '',
-  multiMax: '',
+  status: 1,
+  multiMin: '2',
+  multiMax: '不限',
   asqQuestionOptions: [{ content: '' }, { content: '' }]
 }
 export default {
@@ -475,16 +481,20 @@ export default {
   },
   computed: {
     otherMinOptions() {
-      let maxValue = this.asqQuestion.multiMax
-      if (!maxValue) return OTHER_OPTIONS.slice(1)
-      maxValue = maxValue + ''
-      return OTHER_OPTIONS.slice(1, OTHER_OPTIONS.indexOf(maxValue) + 1)
+      const maxValue = this.asqQuestion.multiMax
+      let endIndex = this.asqQuestion.asqQuestionOptions.length - 1
+      if (maxValue && maxValue !== '不限') {
+        endIndex = OTHER_OPTIONS.indexOf(maxValue + '') + 1
+      }
+      return OTHER_OPTIONS.slice(0, endIndex)
     },
     otherMaxOptions() {
-      let minValue = this.asqQuestion.multiMin
-      if (!minValue) return OTHER_OPTIONS
-      minValue = minValue + ''
-      return ['不限'].concat(OTHER_OPTIONS.slice(OTHER_OPTIONS.indexOf(minValue)))
+      const minValue = this.asqQuestion.multiMin
+      let startIndex = 0
+      if (minValue) {
+        startIndex = OTHER_OPTIONS.indexOf(minValue + '')
+      }
+      return ['不限'].concat(OTHER_OPTIONS.slice(startIndex, this.asqQuestion.asqQuestionOptions.length - 1))
     }
   },
   watch: {
@@ -493,6 +503,9 @@ export default {
         if (!val) return
         const form = (this.optionForm = {})
         const rules = (this.optionRules = {})
+        val.forEach((item, index) => {
+          item.placeholder = '选项' + (index + 1)
+        })
         val.forEach((opt, i) => {
           form['content' + i] = opt.content
           rules['content' + i] = [
@@ -500,7 +513,7 @@ export default {
             { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
           ]
         })
-
+        Object.assign(this.asqQuestion, {multiMin: '2', multiMax: '不限'})
         this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
         this.clearValidate(this.$refs.optionForm)
       },
@@ -541,15 +554,14 @@ export default {
         }
       })
     },
-    onDraggbleEnd() {
-      // this.clearValidate(this.$refs.optionForm)
-    },
     addOtherOptions() {
       if (this.asqQuestion.type === 'multi_choice') {
         this.hasOtherOptions = !this.hasOtherOptions
       } else {
-        if (this.asqQuestion.asqQuestionOptions.find((option) => option.content === '其他')) return
-        this.asqQuestion.asqQuestionOptions.push({
+        const asqQuestionOptions = this.asqQuestion.asqQuestionOptions
+        if (asqQuestionOptions.length >= 15) return
+        if (asqQuestionOptions.find((option) => option.content === '其他')) return
+        asqQuestionOptions.push({
           content: '其他',
           disabled: true
         })
@@ -557,40 +569,61 @@ export default {
     },
     async handleSubmit() {
       const valid = await this.formValidate()
-      if (!valid) return
+      if (!valid) {
+        this.$message.error('创建失败，请输入必填项')
+        return
+      }
 
+      if (!this.form.asqQuestions.length) {
+        this.$message.error('创建失败，至少添加一条题目')
+        return
+      }
       this.processQuestionData(this.form.asqQuestions)
-
-      const request = this.form.id ? questionnaireEdit : questionnaireAdd
-
+      let request
+      let typeMsg
+      if (this.form.id) {
+        request = questionnaireEdit
+        typeMsg = '编辑'
+      } else {
+        request = questionnaireAdd
+        typeMsg = '新增'
+      }
       this.submitLoading = true
       request(this.form)
         .then(() => {
-          this.$message.success('操作成功')
+          this.$message.success(`${typeMsg}成功`)
           this.$router.back()
+        }).catch(e => {
+          this.$message.error(`${typeMsg}失败，${e}`)
         })
         .finally(() => (this.submitLoading = false))
     },
     processQuestionData(data) {
       if (!data || !data.length) return
-      const keys = ['content', 'type', 'asqQuestionOptions', '']
+      const keys = ['content', 'type', 'asqQuestionOptions', 'status']
       data.forEach((item, index) => {
         Object.keys(item).forEach((key) => {
           if (!keys.includes(key)) {
             delete item[key]
           }
         })
-        item.sort = index
+        item.sort = index + 1
         if (!item.asqQuestionOptions) {
           return
         }
         item.asqQuestionOptions.forEach((q, idx) => {
-          q.sort = idx
+          q.sort = idx + 1
         })
       })
     },
     initData() {
       const id = this.$route.query.id
+      this.form = {
+        asqName: '',
+        categoryId: '',
+        remark: '',
+        asqQuestions: []
+      }
       if (id) {
         this.form.id = id
         editView({ id }).then((res) => {
@@ -642,7 +675,6 @@ export default {
     },
     addQuestionOption() {
       if (this.asqQuestion.asqQuestionOptions.length >= 15) {
-        this.$message.warning('最多添加15条')
         return
       }
       this.asqQuestion.asqQuestionOptions.push({
@@ -687,9 +719,7 @@ export default {
     formValidate() {
       return new Promise((resolve) => {
         this.$refs['form'].validate((valid) => {
-          if (valid) {
-            resolve('valid')
-          }
+          resolve(valid)
         })
       })
     },
@@ -827,7 +857,7 @@ export default {
     }
     .half-form-item {
       display: inline-block;
-      width: 45%;
+      width: 520px;
     }
   }
   .drawer-cover {
@@ -921,6 +951,7 @@ export default {
         border-radius: 3px;
         &.disabled {
           cursor: not-allowed;
+          color: #ddd;
         }
         .el-icon-plus {
           font-size: 16px;

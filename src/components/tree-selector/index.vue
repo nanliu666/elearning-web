@@ -1,13 +1,13 @@
 <template>
   <el-select
     ref="selector"
-    :value="valueTitle"
+    v-model="valueId"
     :clearable="clearable"
     :placeholder="placeholder"
     @clear="clearHandle"
   >
     <el-option
-      :value="valueTitle"
+      :value="valueId"
       :label="valueTitle"
     >
       <el-tree
@@ -48,9 +48,7 @@ export default {
     /* 初始值 */
     value: {
       type: String,
-      default: () => {
-        return null
-      }
+      default: ''
     },
     /* 可清空选项 */
     clearable: {
@@ -103,13 +101,16 @@ export default {
         this.valueTitle = node.data[this.props.label] // 初始化显示
         this.$refs.selectTree.setCurrentKey(this.valueId) // 设置默认选中
         this.defaultExpandedKey = [this.valueId] // 设置默认展开
+        this.$nextTick(() => {
+          let scrollWrap = document.querySelectorAll('.el-scrollbar .el-select-dropdown__wrap')[0]
+          let scrollBar = document.querySelectorAll('.el-scrollbar .el-scrollbar__bar')
+          scrollWrap.style.cssText = 'margin: 0px; max-height: none; overflow: hidden;'
+          scrollBar.forEach((ele) => (ele.style.width = 0))
+        })
+      } else {
+        this.valueTitle = ''
       }
-      this.$nextTick(() => {
-        let scrollWrap = document.querySelectorAll('.el-scrollbar .el-select-dropdown__wrap')[0]
-        let scrollBar = document.querySelectorAll('.el-scrollbar .el-scrollbar__bar')
-        scrollWrap.style.cssText = 'margin: 0px; max-height: none; overflow: hidden;'
-        scrollBar.forEach((ele) => (ele.style.width = 0))
-      })
+
     },
     // 切换选项
     handleNodeClick(node) {
