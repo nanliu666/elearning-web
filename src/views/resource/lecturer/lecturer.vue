@@ -1,250 +1,171 @@
 <template>
   <div class="trainingArrange">
-    <div class="box_title">
-      <div class="title">
-        讲师管理
-      </div>
-      <div>
-        <el-button
-          v-p="ADD_LECTURER"
-          type="primary"
-          size="medium"
-          @click="toAddLecturer"
-        >
-          &nbsp; 创建讲师 &nbsp;
-        </el-button>
-      </div>
-    </div>
+    <page-header title="讲师管理">
+      <el-button
+        slot="rightMenu"
+        v-p="ADD_LECTURER"
+        type="primary"
+        size="medium"
+        @click="toAddLecturer"
+      >
+        添加讲师
+      </el-button>
+    </page-header>
+    <basic-container block>
+      <common-table
+        ref="table"
+        :columns="columnsVisible | columnsFilter"
+        :config="tableConfig"
+        :data="tableData"
+        :page-config="tablePageConfig"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
+      >
+        <template #topMenu>
+          <div class="operations">
+            <seach-popover
+              :popover-options="searchPopoverConfig.popoverOptions"
+              :require-options="searchPopoverConfig.requireOptions"
+              @submit="handleSearch"
+            />
+            <div class="operations__btns">
+              <el-tooltip
+                class="operations__btns--tooltip"
+                content="刷新"
+                effect="dark"
+                placement="top"
+                style="color:#acb3b8;"
+              >
+                <el-button
+                  style="font-size: 16px; cursor:pointer;"
+                  class="operations__btns--item"
+                  size="mini"
+                  icon="el-icon-refresh-right"
+                  type="text"
+                  @click="islistTeacher(undefined)"
+                >
+                  <!-- <i class="iconfont iconicon_refresh" /> -->
+                </el-button>
+              </el-tooltip>
+              <span
+                class="text_refresh"
+                style="font-size: 16px; cursor:pointer;"
+                @click="islistTeacher(undefined)"
+              >刷新</span>
+              <el-popover
+                placement="bottom"
+                width="40"
+                trigger="click"
+              >
+                <el-tooltip
+                  slot="reference"
+                  class="operations__btns--tooltip"
+                  content="显隐"
+                  effect="dark"
+                  placement="top"
+                >
+                  <el-button
+                    class="operations__btns--item"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-setting"
+                    style="color:#acb3b8; font-size: 16px;"
+                  >
+                    <!-- <i class="iconfont iconicon_setting" /> -->
+                  </el-button>
+                </el-tooltip>
 
-    <div class="box_content">
-      <!-- 内容 -->
-      <div class="draft_issue">
-        <div class="issue_l">
-          <my-column
-            ref="myTree"
-            :column-interface="columnInterface"
-            @treeClick="treeClick"
-          ></my-column>
-        </div>
-
-        <div class="issue_r">
-          <!-- 表格内容 -->
-          <basic-container block>
-            <common-table
-              ref="table"
-              :columns="columnsVisible | columnsFilter"
-              :config="tableConfig"
-              :data="tableData"
-              :page-config="tablePageConfig"
-              :page="page"
-              @current-page-change="handleCurrentPageChange"
-              @page-size-change="handlePageSizeChange"
-            >
-              <template #topMenu>
-                <div class="operations">
-                  <seach-popover
-                    :popover-options="searchPopoverConfig.popoverOptions"
-                    :require-options="searchPopoverConfig.requireOptions"
-                    @submit="handleSearch"
-                  />
-                  <div class="operations__btns">
-                    <!-- <i class="el-icon-upload2"></i>
-                    &nbsp; &nbsp;
-                    <span>导出</span> -->
-                    &nbsp; &nbsp;
-                    <el-tooltip
-                      class="operations__btns--tooltip"
-                      content="刷新"
-                      effect="dark"
-                      placement="top"
-                      style="color:#acb3b8;"
+                <!-- 设置表格列可见性 -->
+                <div class="operations__column--visible">
+                  <el-checkbox-group v-model="columnsVisible">
+                    <el-checkbox
+                      v-for="item of tableColumns"
+                      :key="item.prop"
+                      :disabled="item.prop === 'name'"
+                      :label="item.prop"
+                      class="operations__column--item"
                     >
-                      <el-button
-                        style="font-size: 16px; cursor:pointer;"
-                        class="operations__btns--item"
-                        size="mini"
-                        icon="el-icon-refresh-right"
-                        type="text"
-                        @click="islistTeacher(undefined)"
-                      >
-                        <!-- <i class="iconfont iconicon_refresh" /> -->
-                      </el-button>
-                    </el-tooltip>
-                    <span
-                      class="text_refresh"
-                      style="font-size: 16px; cursor:pointer;"
-                      @click="islistTeacher(undefined)"
-                    >刷新</span>
-                    <el-popover
-                      placement="bottom"
-                      width="40"
-                      trigger="click"
-                    >
-                      <el-tooltip
-                        slot="reference"
-                        class="operations__btns--tooltip"
-                        content="显隐"
-                        effect="dark"
-                        placement="top"
-                      >
-                        <el-button
-                          class="operations__btns--item"
-                          size="mini"
-                          type="text"
-                          icon="el-icon-setting"
-                          style="color:#acb3b8; font-size: 16px;"
-                        >
-                          <!-- <i class="iconfont iconicon_setting" /> -->
-                        </el-button>
-                      </el-tooltip>
-
-                      <!-- 设置表格列可见性 -->
-                      <div class="operations__column--visible">
-                        <el-checkbox-group v-model="columnsVisible">
-                          <el-checkbox
-                            v-for="item of tableColumns"
-                            :key="item.prop"
-                            :disabled="item.prop === 'name'"
-                            :label="item.prop"
-                            class="operations__column--item"
-                          >
-                            {{ item.label }}
-                          </el-checkbox>
-                        </el-checkbox-group>
-                      </div>
-                    </el-popover>
-                  </div>
+                      {{ item.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
                 </div>
-              </template>
+              </el-popover>
+            </div>
+          </div>
+        </template>
 
-              <template #multiSelectMenu="{ selection }">
-                <el-button
-                  v-p="DELETE_LECTURER"
-                  style="margin-bottom:0;"
-                  type="text"
-                  @click="() => handleRemoveItems(selection)"
-                >
-                  批量删除
-                </el-button>
-              </template>
-              <!-- 培训名称 -->
-              <template
-                slot="name"
-                slot-scope="{ row }"
-              >
-                <el-button
-                  type="text"
-                  @click="toParticularsLecturer(row)"
-                >
-                  {{ row.name }}
-                </el-button>
-              </template>
+        <template #multiSelectMenu="{ selection }">
+          <el-button
+            v-p="DELETE_LECTURER"
+            style="margin-bottom:0;"
+            type="text"
+            @click="() => handleRemoveItems(selection)"
+          >
+            批量删除
+          </el-button>
+        </template>
+        <!-- 培训名称 -->
+        <template
+          slot="name"
+          slot-scope="{ row }"
+        >
+          <el-button
+            type="text"
+            @click="toParticularsLecturer(row)"
+          >
+            {{ row.name }}
+          </el-button>
+        </template>
 
-              <!-- 状态 -->
-              <template
-                slot="status"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.status == 0">停用</span>
-                <span v-if="row.status == 1">正常</span>
-              </template>
+        <!-- 操作 -->
+        <template
+          slot="handler"
+          slot-scope="scope"
+        >
+          <el-button
+            v-if="scope.row.status == 1"
+            v-p="STOP_LECTURER"
+            class="marginLine"
+            type="text"
+            size="medium"
+            @click.stop="iseditSysRulus(scope.row, 0, '停用')"
+          >
+            停用
+          </el-button>
+          <span
+            v-else
+            v-p="STOP_LECTURER"
+            class="marginLineColor"
+            style=" cursor:pointer; "
+            size="medium"
+            @click.stop="iseditSysRulus(scope.row, 1, '启用')"
+          >
+            启用
+          </span>
 
-              <!-- 性别 -->
-              <template
-                slot="sex"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.sex == 0">女</span>
-                <span v-if="row.sex == 1">男</span>
-              </template>
+          <el-button
+            v-p="EDIT_LECTURER"
+            class="marginLine"
+            type="text"
+            size="medium"
+            @click.stop="tocompileLecturer(scope.row)"
+          >
+            编辑
+          </el-button>
 
-              <!-- '讲师类型（1：内训，2：外聘）',-->
-              <template
-                slot="type"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.type == 1">内训</span>
-                <span v-if="row.type == 2">外聘</span>
-              </template>
-
-              <!--  是否推荐（1：是，0：否）',-->
-              <template
-                slot="is_recommend"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.is_recommend == 1">是</span>
-                <span v-if="row.is_recommend == 0">否</span>
-              </template>
-
-              <!-- '是否最新讲师（1：是，0：否）', -->
-
-              <template
-                slot="is_latest_teacher"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.is_latest_teacher == 1">是</span>
-                <span v-if="row.is_latest_teacher == 0">否</span>
-              </template>
-              <!-- '是否热门讲师（1：是，0：否）', -->
-              <template
-                slot="is_popular_teacher"
-                slot-scope="{ row }"
-              >
-                <span v-if="row.is_popular_teacher == 1">是</span>
-                <span v-if="row.is_popular_teacher == 0">否</span>
-              </template>
-
-              <!-- 操作 -->
-              <template
-                slot="handler"
-                slot-scope="scope"
-              >
-                <el-button
-                  v-if="scope.row.status == 1"
-                  v-p="STOP_LECTURER"
-                  class="marginLine"
-                  type="text"
-                  size="medium"
-                  @click.stop="iseditSysRulus(scope.row, 0, '停用')"
-                >
-                  停用
-                </el-button>
-                <span
-                  v-else
-                  v-p="STOP_LECTURER"
-                  class="marginLineColor"
-                  style=" cursor:pointer; "
-                  size="medium"
-                  @click.stop="iseditSysRulus(scope.row, 1, '启用')"
-                >
-                  启用
-                </span>
-
-                <el-button
-                  v-p="EDIT_LECTURER"
-                  class="marginLine"
-                  type="text"
-                  size="medium"
-                  @click.stop="tocompileLecturer(scope.row)"
-                >
-                  编辑
-                </el-button>
-
-                <el-button
-                  v-p="DELETE_LECTURER"
-                  class="marginLine"
-                  type="text"
-                  size="medium"
-                  @click.stop="isTeacherdelete(scope.row)"
-                >
-                  删除
-                </el-button>
-              </template>
-            </common-table>
-          </basic-container>
-        </div>
-      </div>
-    </div>
+          <el-button
+            v-p="DELETE_LECTURER"
+            class="marginLine"
+            type="text"
+            size="medium"
+            @click.stop="isTeacherdelete(scope.row)"
+          >
+            删除
+          </el-button>
+        </template>
+      </common-table>
+    </basic-container>
 
     <!-- 停用弹框 -->
     <el-dialog
@@ -310,16 +231,7 @@
 
 <script>
 import { getCourseListData } from '@/api/course/course'
-import {
-  listTeacherCategory,
-  addCatalog,
-  listTeacher,
-  editSysRulus,
-  deleteTeacherCatalog,
-  Teacherdelete,
-  move,
-  editTeacherCatalog
-} from '@/api/lecturer/lecturer'
+import { listTeacher, editSysRulus, Teacherdelete } from '@/api/lecturer/lecturer'
 // import { delete } from 'vue/types/umd'
 // 侧栏数据
 
@@ -347,22 +259,19 @@ const TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'status',
-    slot: true,
-    align: 'center',
+    formatter: (row) => (row.status === 0 ? '停用' : '正常'),
     width: '80'
   },
   {
     label: '性别',
     prop: 'sex',
-    slot: true,
-    align: 'center',
-    width: '60'
+    formatter: (row) => (row.sex === 0 ? '女' : '男'),
+    width: '120'
   },
   {
     label: '讲师类型',
     prop: 'type',
-    slot: true,
-    align: 'center',
+    formatter: (row) => (row.type === 1 ? '内训' : '外聘'),
     width: '120'
   },
   // {
@@ -373,34 +282,32 @@ const TABLE_COLUMNS = [
   {
     label: '讲师级别',
     prop: 'teacher_level',
-    align: 'center',
     minWidth: '120'
   },
   {
     label: '讲师职称',
     prop: 'teacher_title',
-    align: 'center',
     minWidth: '80'
   },
   {
     label: '是否推荐',
     prop: 'is_recommend',
-    slot: true,
     align: 'center',
+    formatter: (row) => (row.is_recommend === 1 ? '是' : '否'),
     minWidth: '80'
   },
   {
     label: '是否最新讲师',
     prop: 'is_latest_teacher',
-    slot: true,
     align: 'center',
+    formatter: (row) => (row.is_latest_teacher === 1 ? '是' : '否'),
     minWidth: '120'
   },
   {
     label: '是否热门讲师',
     prop: 'is_popular_teacher',
-    slot: true,
     align: 'center',
+    formatter: (row) => (row.is_popular_teacher === 1 ? '是' : '否'),
     minWidth: '120'
   },
   {
@@ -529,8 +436,7 @@ import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver'),
-    MyColumn: () => import('./components/MyColumn')
+    SeachPopover: () => import('@/components/searchPopOver')
   },
   filters: {
     // 过滤不可见的列
@@ -545,15 +451,6 @@ export default {
       showBtnData: false,
       showBtnDel: false,
       rowData: '',
-      // 接口
-      columnInterface: {
-        listTeacherCategory, //查询讲师分类列表
-        addCatalog, //新增分组/分类
-        deleteTeacherCatalog, //删除分组/分类
-        move, //移动
-        editTeacherCatalog //编辑
-      },
-
       // 保存左栏点过的的id或者默认id
       clickId: '',
       props: {
@@ -641,10 +538,6 @@ export default {
     this.islistTeacher(undefined)
   },
   methods: {
-    treeClick(val) {
-      this.clickId = val
-      this.islistTeacher(val)
-    },
     isgetCatalogs() {},
     // 去添加
     toAddLecturer() {
@@ -971,160 +864,6 @@ $color_icon: #A0A8AE
   .item_box {
     color: #606266;
     margin-top: 5px;
-  }
-}
-
-.trainingArrange {
-  .box_title {
-    height: 60px;
-    display: flex;
-    justify-content: space-between;
-    line-height: 60px;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  .box_content {
-    background-color: #fff;
-    .content_nav {
-      height: 50px;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      span {
-        height: 50px;
-        line-height: 50px;
-        margin-left: 30px;
-      }
-      .select {
-        border-bottom: 3px solid #1677ff;
-      }
-    }
-    .draft_issue {
-      padding-top: 25px;
-      display: flex;
-      height: 710px;
-      // overflow: hidden;
-      .issue_l {
-        position: relative;
-        width: 20%;
-        border-right: 1px solid #ccc;
-        padding-top: 7px;
-        height: 100%;
-        .issue_l_tree {
-          padding: 20px;
-          // padding: 0 25px;
-          width: 100%;
-          height: 100%;
-          padding-bottom: 200px;
-          overflow: auto;
-          // &::-webkit-scrollbar {
-          //   display: none;
-          // }
-          /deep/.el-input {
-            margin-bottom: 15px;
-          }
-          .ungrouped {
-            color: #606266;
-            margin: 0 0 5px 22px;
-            font-size: 14px;
-            cursor: pointer;
-          }
-        }
-        .btn_bottom_box {
-          position: absolute;
-          width: 100%;
-          bottom: 0;
-          left: 0;
-          .btn_bottom {
-            position: relative;
-            bottom: 0;
-            left: 0;
-            height: 50px;
-            width: 100%;
-            border-top: 1px solid #ccc;
-            .btn1 {
-              display: block;
-              background-color: #fff;
-              cursor: pointer;
-              line-height: 50px;
-              height: 100%;
-              width: 100%;
-              text-align: center;
-              color: #1677ff;
-            }
-          }
-        }
-      }
-      .issue_r {
-        width: 75%;
-        padding: 0 40px;
-      }
-      .istrainingArrange {
-        width: 100%;
-      }
-    }
-
-    .custom-tree-node {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 14px;
-      padding-right: 8px;
-
-      // /deep/ .el-icon-more {
-      //   transform: rotate(-90deg);
-      // }
-      .right-content {
-        display: none;
-      }
-
-      &:hover {
-        .right-content {
-          display: inline-block;
-        }
-      }
-      .more-column {
-        display: inline-block;
-        transform: rotate(90deg);
-        -ms-transform: rotate(90deg); /* IE 9 */
-        -moz-transform: rotate(90deg); /* Firefox */
-        -webkit-transform: rotate(90deg); /* Safari 和 Chrome */
-        -o-transform: rotate(90deg);
-      }
-    }
-    .tree_input {
-      width: 60%;
-      font-size: 14px;
-
-      /deep/ input {
-        height: 25px;
-        margin-left: -15px;
-      }
-    }
-    /deep/ .el-tree-node__content {
-      margin-top: 10px;
-    }
-
-    .isShowinput {
-      margin-top: 5px;
-      display: flex;
-      line-height: 35px;
-      .isShowinput_input {
-        width: 65%;
-      }
-
-      .isShowinput_yes {
-        color: #2092fb;
-        padding: 0 12px;
-        cursor: pointer;
-      }
-      .isShowinput_no {
-        cursor: pointer;
-      }
-      /deep/ input {
-        height: 25px;
-      }
-    }
   }
 }
 /deep/.el-card,

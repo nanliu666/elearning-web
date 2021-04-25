@@ -162,96 +162,161 @@ export default {
       ]
     },
     {
-      menuId: '12591231312434234658',
+      sort: 0,
+      menuId: '12124375467421522',
       menuName: '讲师管理',
-      menuType: 'Menu',
+      menuType: 'Dir',
       isEnabled: 1,
       isOwn: 1,
       isShow: 1,
       code: 'org_user',
       alias: 'user',
-      path: '/resource/lecturer/lecturer',
       icon: 'iconfont iconicon_boss',
       dataPrivileges: [],
       children: [
         {
-          menuType: 'Button',
-          menuName: '创建讲师',
-          isOwn: 1,
+          menuId: '12124375467342158',
+          menuName: '分类管理',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/lecturer/lecturer/add'
+          isOwn: 1,
+          isShow: 1,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/lecturer/classify',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              menuName: '新建分类',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/lecturer/classify/add'
+            },
+            {
+              menuType: 'Button',
+              menuName: '启用/停用',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/lecturer/classify/stop'
+            },
+            {
+              menuType: 'Button',
+              menuName: '编辑',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/lecturer/classify/eidt'
+            },
+            {
+              menuType: 'Button',
+              menuName: '删除',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/lecturer/classify/delete'
+            },
+            {
+              menuType: 'Button',
+              menuName: '新建子分类',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/resource/lecturer/classify/addNewGroup'
+            }
+          ]
         },
         {
-          menuType: 'Button',
-          menuName: '停用',
-          isOwn: 1,
+          menuId: '1212437546742158',
+          menuName: '讲师管理',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/lecturer/lecturer/stop'
+          isOwn: 1,
+          isShow: 1,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/lecturer/lecturer',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: [
+            {
+              menuType: 'Button',
+              menuName: '添加讲师',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/lecturer/lecturer/add'
+            },
+            {
+              menuType: 'Button',
+              menuName: '停用',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/lecturer/lecturer/stop'
+            },
+            {
+              menuType: 'Button',
+              menuName: '编辑',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/lecturer/lecturer/edit'
+            },
+            {
+              menuType: 'Button',
+              menuName: '删除',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/lecturer/lecturer/delete'
+            },
+            {
+              menuType: 'Button',
+              menuName: '新建分组',
+              isOwn: 1,
+              isEnabled: 1,
+              path: '/lecturer/lecturer/addNewGroup'
+            }
+          ]
         },
         {
-          menuType: 'Button',
-          menuName: '编辑',
-          isOwn: 1,
+          menuId: '12512312345778934534558',
+          menuName: '添加讲师',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/lecturer/lecturer/edit'
+          isOwn: 1,
+          isShow: 0,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/lecturer/addLecturer',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: []
         },
         {
-          menuType: 'Button',
-          menuName: '删除',
-          isOwn: 1,
+          menuId: '12567867895468534558',
+          menuName: '编辑讲师',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/lecturer/lecturer/delete'
+          isOwn: 1,
+          isShow: 0,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/lecturer/compileLecturer',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: []
         },
         {
-          menuType: 'Button',
-          menuName: '创建分组',
-          isOwn: 1,
+          menuId: '1212312312345626364558',
+          menuName: '讲师详情',
+          menuType: 'Menu',
           isEnabled: 1,
-          path: '/lecturer/lecturer/addNewGroup'
+          isOwn: 1,
+          isShow: 0,
+          code: 'org_user',
+          alias: 'user',
+          path: '/resource/lecturer/particularsLecturer',
+          icon: 'iconfont iconicon_boss',
+          dataPrivileges: [],
+          children: []
         }
       ]
-    },
-    {
-      menuId: '12512312345778934534558',
-      menuName: '创建讲师',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 0,
-      code: 'org_user',
-      alias: 'user',
-      path: '/resource/lecturer/addLecturer',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
-    },
-    {
-      menuId: '12567867895468534558',
-      menuName: '编辑讲师',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 0,
-      code: 'org_user',
-      alias: 'user',
-      path: '/resource/lecturer/compileLecturer',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
-    },
-    {
-      menuId: '1212312312345626364558',
-      menuName: '讲师详情',
-      menuType: 'Menu',
-      isEnabled: 1,
-      isOwn: 1,
-      isShow: 0,
-      code: 'org_user',
-      alias: 'user',
-      path: '/resource/lecturer/particularsLecturer',
-      icon: 'iconfont iconicon_boss',
-      dataPrivileges: [],
-      children: []
     },
     {
       sort: 4,

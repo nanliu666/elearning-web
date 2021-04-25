@@ -28,13 +28,12 @@
           <el-form-item
             label="问卷名称"
             prop="asqName"
-            
             class="half-form-item"
             style="margin-right: 50px;"
           >
             <el-input
-              clearable
               v-model="form.asqName"
+              clearable
               placeholder="请输入"
             ></el-input>
           </el-form-item>
@@ -60,12 +59,12 @@
             style="width: 1090px;"
           >
             <el-input
-              :autosize="{ minRows: 6 }"
               v-model="form.remark"
+              :autosize="{ minRows: 6 }"
               type="textarea"
               placeholder="请输入"
               :maxlength="500"
-              show-word-limit	
+              show-word-limit
             ></el-input>
           </el-form-item>
         </el-form>
@@ -92,7 +91,6 @@
           height="462px"
           row-key="content"
         >
-          
           <el-table-column
             type="index"
             align="center"
@@ -494,7 +492,9 @@ export default {
       if (minValue) {
         startIndex = OTHER_OPTIONS.indexOf(minValue + '')
       }
-      return ['不限'].concat(OTHER_OPTIONS.slice(startIndex, this.asqQuestion.asqQuestionOptions.length - 1))
+      return ['不限'].concat(
+        OTHER_OPTIONS.slice(startIndex, this.asqQuestion.asqQuestionOptions.length - 1)
+      )
     }
   },
   watch: {
@@ -513,7 +513,7 @@ export default {
             { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
           ]
         })
-        Object.assign(this.asqQuestion, {multiMin: '2', multiMax: '不限'})
+        Object.assign(this.asqQuestion, { multiMin: '2', multiMax: '不限' })
         this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
         this.clearValidate(this.$refs.optionForm)
       },
@@ -593,7 +593,8 @@ export default {
         .then(() => {
           this.$message.success(`${typeMsg}成功`)
           this.$router.back()
-        }).catch(e => {
+        })
+        .catch((e) => {
           this.$message.error(`${typeMsg}失败，${e}`)
         })
         .finally(() => (this.submitLoading = false))

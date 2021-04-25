@@ -67,21 +67,23 @@
                 </el-form-item>
 
                 <el-form-item label="题目数量">
-                  <el-form-item prop="minNum" style="margin-right: 0">
+                  <el-form-item
+                    prop="minNum"
+                    style="margin-right: 0"
+                  >
                     <el-input-number
-                      controls-position="right"
                       v-model="queryForm.minNum"
+                      controls-position="right"
                       clearable
                       placeholder="最小值"
                       width="110"
                     />
                   </el-form-item>
-                    <span style="display: inline-block; margin: 0 5px;">~</span>
+                  <span style="display: inline-block; margin: 0 5px;">~</span>
                   <el-form-item prop="maxNum">
                     <el-input-number
-                                          controls-position="right"
-
                       v-model="queryForm.maxNum"
+                      controls-position="right"
                       clearable
                       placeholder="最大值"
                       width="110"
@@ -151,7 +153,7 @@
 
       <div class="table-container">
         <div style="margin-bottom: 8px; height:21px;">
-        <!-- <div v-if="multipleSelection.length">
+          <!-- <div v-if="multipleSelection.length">
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
             <span
               style="
@@ -170,7 +172,6 @@
               批量删除
             </el-button>
         </div> -->
-
         </div>
 
         <el-table
@@ -344,7 +345,7 @@ export default {
       treeData: [],
       multipleSelection: [],
       creatorList: [],
-      total: 0,
+      total: 0
     }
   },
   computed: {

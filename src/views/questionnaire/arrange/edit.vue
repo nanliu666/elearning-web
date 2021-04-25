@@ -110,11 +110,19 @@
           prop="categoryId"
           class="half-form-item category-form-item"
         >
-        <div slot="label" class="category-header">
-          <span class="label-name">所在分类</span>
+          <div
+            slot="label"
+            class="category-header"
+          >
+            <span class="label-name">所在分类</span>
 
-          <el-button type="text" @click.native="toCategory">分类管理</el-button>
-        </div>
+            <el-button
+              type="text"
+              @click.native="toCategory"
+            >
+              分类管理
+            </el-button>
+          </div>
           <tree-selector
             style="width: 100%;"
             class="selector"
@@ -176,8 +184,18 @@
               :value="item.id"
             >
             </el-option>
-            <div style="color: #9c9c9c; line-height: 34px;text-align: center;" v-if="subjectLoading">加载中...</div>
-            <div style="color: #9c9c9c;line-height: 34px;text-align: center;" v-if="noMoreSubject && !subjectLoading">没有更多了</div>
+            <div
+              v-if="subjectLoading"
+              style="color: #9c9c9c; line-height: 34px;text-align: center;"
+            >
+              加载中...
+            </div>
+            <div
+              v-if="noMoreSubject && !subjectLoading"
+              style="color: #9c9c9c;line-height: 34px;text-align: center;"
+            >
+              没有更多了
+            </div>
           </el-select>
         </el-form-item>
         <el-form-item
@@ -366,7 +384,7 @@ const CODE_NAME = '问卷二维码'
 export default {
   name: 'QuestionnaireArrange',
 
-directives: {
+  directives: {
     'el-select-loadmore': {
       bind(el, binding) {
         // 获取element-ui定义好的scroll盒子
@@ -379,13 +397,14 @@ directives: {
            * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
            * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
            */
-          const condition = SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
+          const condition =
+            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
           if (condition) {
             binding.value()
           }
         })
-      },
-    },
+      }
+    }
   },
   components: {
     TreeSelector,
@@ -469,7 +488,7 @@ directives: {
   methods: {
     toCategory() {
       const routeData = this.$router.resolve({
-        path: '/questionnaire/catalog',
+        path: '/questionnaire/catalog'
       })
       window.open(routeData.href, '_blank')
     },
@@ -558,6 +577,7 @@ directives: {
       const date = new Date()
       const $data = {
         tenantId,
+        // eslint-disable-next-line no-useless-escape
         planCode: date.toISOString().replace(/\-|T|\:|\.|Z/g, '')
       }
       if (this.id) {
@@ -583,7 +603,6 @@ directives: {
       this.publishLoading = true
       api($data)
         .then((res) => {
-          
           if (!this.id) {
             this.href = window.location.origin + '/#/questionnaire/arrange?id=' + res
             saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
@@ -655,18 +674,20 @@ directives: {
       this.$confirm('您确定删除所选人员吗？', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-         type: 'warning'
-      }).then(() => {
-        const list = this.personList
-        if (target) {
-          list.splice(
-            list.findIndex((person) => person.id === target.id),
-            1
-          )
-          return
-        }
-        this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
-      }).catch(() => {})
+        type: 'warning'
+      })
+        .then(() => {
+          const list = this.personList
+          if (target) {
+            list.splice(
+              list.findIndex((person) => person.id === target.id),
+              1
+            )
+            return
+          }
+          this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+        })
+        .catch(() => {})
     },
     getCategoryData() {
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {

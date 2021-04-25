@@ -108,7 +108,7 @@
       </div>
       <div class="right-area">
         <div class="area-header">
-          已选：{{selectList.length}}人
+          已选：{{ selectList.length }}人
         </div>
         <div class="select-wrapper">
           <el-scrollbar
