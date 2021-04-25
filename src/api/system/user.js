@@ -53,7 +53,9 @@ export const getOuterUserList = (params) => get('/user/v1/user/outer/list', para
  * @param {String} userId - 用户ID
  * */
 export const resetPwd = (userIds) => {
-  return post('/user/v1/user/pwd/reset', { userIds })
+  return post('/user/v1/user/pwd/reset', {
+    userIds
+  })
 }
 
 /**
@@ -74,7 +76,10 @@ export const getTagUserList = (params) => {
  * @param {String} userStatus - 用户状态，1-正常（解冻），2-禁用（冻结）
  * */
 export const modifyUserStatus = (userId, userStatus) => {
-  return post('/user/v1/user/status/reset', { userId, userStatus })
+  return post('/user/v1/user/status/reset', {
+    userId,
+    userStatus
+  })
 }
 
 /**
@@ -101,7 +106,10 @@ export const getAllUserList = (params) => {
  * @param {String} userId 用户ID，多个以英文逗号分隔
  */
 export const delTagUser = (tagId, userId) => {
-  return del('/user/v1/tag/user', { tagId, userId })
+  return del('/user/v1/tag/user', {
+    tagId,
+    userId
+  })
 }
 
 /**
@@ -110,14 +118,19 @@ export const delTagUser = (tagId, userId) => {
  * @param {Array<String>} users 用户ID
  */
 export const createTagUser = (tagId, users) => {
-  return post('/user/v1/tag/user', { tagId, users })
+  return post('/user/v1/tag/user', {
+    tagId,
+    users
+  })
 }
 /**
  * 用户拥有角色查询接口
  * @param {String} userId 用户ID
  */
 export const getUserRole = (userId) => {
-  return get('/user/v1/user/role', { userId })
+  return get('/user/v1/user/role', {
+    userId
+  })
 }
 
 /**
@@ -126,7 +139,10 @@ export const getUserRole = (userId) => {
  * @param {Array<Object>} roles 角色
  */
 export const modifyUserRole = (userId, roles) => {
-  return put('/user/v1/user/role', { userId, roles })
+  return put('/user/v1/user/role', {
+    userId,
+    roles
+  })
 }
 
 /**
@@ -293,3 +309,17 @@ export const getTrainGetCatalogs = (params) => get('/api/manage/v1/train/getCata
  * @desc 获取所有的培训分类
  */
 export const getAllCatalog = (params) => get('/api/manage/v1/train/queryAllCatalog', params)
+/**
+ * @desc 获取用户当前组织范围列表
+ * @param {String} params.type 新增页面传值0,修改页面传值1
+ * @param {String} params.roleId
+ * @param {String} params.userId
+ */
+export const getMgmtOrgIds = (params) => get('/api/user/v1/user/getMgmtOrgIds', params)
+/**
+ * @desc 新增角色
+ * @param {String} params.orgIds
+ * @param {String} params.roleId
+ * @param {String} params.userId
+ */
+export const addEditUser = (params) => post('/api/sys/v1/role/user', params)

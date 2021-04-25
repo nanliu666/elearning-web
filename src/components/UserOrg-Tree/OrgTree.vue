@@ -72,16 +72,22 @@ export default {
     },
     selected() {
       this.handleSubmit()
+    },
+    idList() {
+      this.createdSetCheckedKeys()
     }
   },
-  created() {
-    this.loadOrgData().then(() => {
-      const list = this.idList
-      this.$refs.tree.setCheckedKeys(list)
-      this.updateSelected(this.orgData)
-    })
-  },
+  // created() {
+  //   this.createdSetCheckedKeys()
+  // },
   methods: {
+    createdSetCheckedKeys() {
+      this.loadOrgData().then(() => {
+        const list = this.idList
+        this.$refs.tree.setCheckedKeys(list)
+        this.updateSelected(this.orgData)
+      })
+    },
     updateSelected(list = []) {
       list.forEach((item) => {
         const { id, children = [] } = item
