@@ -40,6 +40,12 @@
               >
                 <div class="question-type">
                   {{ getTypeName(question) }}
+                  <span
+                    v-if="question.multiMin"
+                    class="question-limit"
+                  >
+                    【最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项】
+                  </span>
                 </div>
                 <div class="question-title">
                   <span
@@ -53,15 +59,9 @@
                   >*</span>{{ question.content }}
                 </div>
                 <div class="question-content">
-                  <el-input
-                    v-if="question.type == 'short_answer'"
-                    v-model="questionResults[index]"
-                  ></el-input>
+                  <el-input v-if="question.type == 'short_answer'"></el-input>
 
-                  <el-radio-group
-                    v-if="question.type == 'single_choice'"
-                    v-model="questionResults[index]"
-                  >
+                  <el-radio-group v-if="question.type == 'single_choice'">
                     <el-radio
                       v-for="(option, option_index) in question.asqQuestionOptions"
                       :key="option_index"
@@ -69,10 +69,7 @@
                     ></el-radio>
                   </el-radio-group>
 
-                  <el-checkbox-group
-                    v-if="question.type == 'multi_choice'"
-                    v-model="questionResults[index]"
-                  >
+                  <el-checkbox-group v-if="question.type == 'multi_choice'">
                     <el-checkbox
                       v-for="(option, option_index) in question.asqQuestionOptions"
                       :key="option_index"
@@ -250,6 +247,10 @@ export default {
             line-height: 24px;
             margin-bottom: 24px;
             font-weight: bold;
+          }
+          .question-limit {
+            font-weight: 500;
+            color: rgba(0, 11, 21, 0.65);
           }
           .question-title {
             font-family: PingFangSC-Regular;
