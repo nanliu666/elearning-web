@@ -132,8 +132,10 @@ export default {
 
     // 编辑回显
     getData() {
-      this.formData.userId = this.row.userId || ''
-      this.formData.name = this.row.name || ''
+      this.formData.userId = this.row.name || '' //显示名字
+      this.formData._userId = this.row.userId || '' //真实ID
+      // this.formData.userId = this.row.userId || ''
+      // this.formData.name = this.row.name || ''
       if (this.row.orgIds) {
         this.formData.orgIdList = this.row.orgIds.split(',')
       } else {
@@ -155,6 +157,10 @@ export default {
         orgIds: this.form.orgIds.join(','),
         roleId: this.$route.query.roleId,
         userId: this.formData.userId
+      }
+
+      if (this.row.name) {
+        params.userId = this.formData._userId
       }
       addEditUser(params).then(() => {
         this.$message({
