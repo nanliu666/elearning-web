@@ -76,6 +76,8 @@
                       controls-position="right"
                       clearable
                       placeholder="最小值"
+                      :min="0"
+                      :max="queryForm.maxNum - 1"
                       width="110"
                     />
                   </el-form-item>
@@ -86,6 +88,7 @@
                       controls-position="right"
                       clearable
                       placeholder="最大值"
+                      :min="(queryForm.minNum && queryForm.minNum + 1) || 0"
                       width="110"
                     />
                   </el-form-item>
@@ -348,22 +351,7 @@ export default {
       total: 0
     }
   },
-  computed: {
-    minInit() {
-      const maxNum = this.queryForm.maxNum
-      if (typeof maxNum === 'number') {
-        return maxNum
-      }
-      return 0
-    },
-    maxInit() {
-      const minNum = this.queryForm.minNum
-      if (typeof minNum === 'number') {
-        return minNum + 1
-      }
-      return 0
-    }
-  },
+  computed: {},
   watch: {
     'queryForm.asqName': _.debounce(function() {
       this.resetPageAndGetList()

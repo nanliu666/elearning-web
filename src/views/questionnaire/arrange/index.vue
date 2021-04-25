@@ -79,10 +79,13 @@
                     clearable
                     placeholder="最小值"
                     width="110"
+                    :min="0"
+                    :max="queryForm.maxBackCount - 1"
                   />
                   ~
                   <el-input-number
                     v-model="queryForm.maxBackCount"
+                    :min="(queryForm.minBackCount && queryForm.minBackCount + 1) || 0"
                     controls-position="right"
                     clearable
                     placeholder="最大值"
@@ -488,7 +491,7 @@ export default {
         disabledDate: (time) => {
           if (this.queryForm.publishTime) {
             const publishTime = new Date(this.queryForm.publishTime)
-            return time.getTime() < publishTime.getTime()
+            return time.getTime() < publishTime.getTime() && time.getDate() != publishTime.getDate()
           }
         }
       })
@@ -499,7 +502,7 @@ export default {
         disabledDate: (time) => {
           if (this.queryForm.endTime) {
             const endTime = new Date(this.queryForm.endTime)
-            return time.getTime() > endTime.getTime()
+            return time.getTime() > endTime.getTime() && time.getDate() != endTime.getDate()
           }
         }
       })
