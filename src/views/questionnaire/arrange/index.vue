@@ -17,7 +17,7 @@
           <div class="operate-left">
             <div class="input-wrapper">
               <el-input
-                v-model="queryForm.subjectName"
+                v-model="queryForm.planName"
                 :disabled="loading"
                 clearable
                 size="medium"
@@ -30,9 +30,11 @@
               v-model="queryFormVisible"
               placement="bottom"
               transition="false"
-              width="1230"
+              width="1327"
             >
               <el-form
+                ref="queryForm"
+                :rules="queryFormRules"
                 label-position="left"
                 :inline="true"
                 :model="queryForm"
@@ -40,7 +42,10 @@
                 label-width="80px"
                 style="padding: 24px"
               >
-                <el-form-item label="状态">
+                <el-form-item
+                  label="状态"
+                  style="margin-right: 50px;"
+                >
                   <el-select
                     v-model="queryForm.status"
                     clearable
@@ -49,11 +54,11 @@
                   >
                     <el-option
                       label="进行中"
-                      value="1"
+                      value="2"
                     ></el-option>
                     <el-option
                       label="未开始"
-                      value="2"
+                      value="1"
                     ></el-option>
                     <el-option
                       label="已过期"
@@ -61,7 +66,10 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="所在分类">
+                <el-form-item
+                  label="所在分类"
+                  style="margin-right: 50px;"
+                >
                   <tree-selector
                     style="width: 217px;"
                     class="selector"
@@ -72,46 +80,59 @@
                     @getValue="(id) => (queryForm.categoryId = id)"
                   />
                 </el-form-item>
-                <el-form-item label="题目数量">
-                  <el-input-number
-                    v-model="queryForm.minBackCount"
-                    controls-position="right"
+
+                <el-form-item
+                  label="关联问卷"
+                  prop="subjectName"
+                  style="margin-right: 0"
+                >
+                  <el-input
+                    v-model="queryForm.subjectName"
+                    style="width: 457px;"
                     clearable
-                    placeholder="最小值"
-                    width="110"
-                    :min="0"
-                    :max="queryForm.maxBackCount - 1"
-                  />
-                  ~
-                  <el-input-number
-                    v-model="queryForm.maxBackCount"
-                    :min="(queryForm.minBackCount && queryForm.minBackCount + 1) || 0"
-                    controls-position="right"
-                    clearable
-                    placeholder="最大值"
-                    width="110"
+                    placeholder="请输入"
                   />
                 </el-form-item>
 
-                <el-form-item label="开始时间">
+                <el-form-item
+                  style="margin-right: 50px;"
+                  label="发布时间"
+                  prop="publishTime"
+                >
                   <el-date-picker
-                    v-model="queryForm.publishTime"
-                    style="width: 100%;"
-                    value-format="yyyy-MM-dd"
-                    :picker-options="pickerOptionsStart"
-                    placeholder="发布时间"
-                    @change="publishTimeChange"
+                    v-model="dateValue"
+                    style="width: 564px"
+                    type="datetimerange"
+                    format="yyyy-MM-dd HH:mm"
+                    value-format="yyyy-MM-dd HH:mm"
+                    start-placeholder="开始日期"
+                    end-placeholder="截止日期"
                   />
                 </el-form-item>
-                <el-form-item label="截止时间">
-                  <el-date-picker
-                    v-model="queryForm.endTime"
-                    style="width: 100%;"
-                    value-format="yyyy-MM-dd"
-                    :picker-options="pickerOptionsEnd"
-                    placeholder="截止时间"
-                    @change="endTimeChange"
-                  />
+
+                <el-form-item label="回收数量">
+                  <el-form-item
+                    prop="minBackCount"
+                    style="margin-right: 0"
+                  >
+                    <el-input
+                      v-model.number="queryForm.minBackCount"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
+                      clearable
+                      placeholder="最小值"
+                      style="width: 220px"
+                    />
+                  </el-form-item>
+                  <span style="display: inline-block; margin: 0 5px;">~</span>
+                  <el-form-item prop="maxBackCount">
+                    <el-input
+                      v-model.number="queryForm.maxBackCount"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
+                      clearable
+                      placeholder="最大值"
+                      style="width: 220px"
+                    />
+                  </el-form-item>
                 </el-form-item>
 
                 <div style="text-align: right; margin-right: 75px">
@@ -119,13 +140,13 @@
                     type="primary"
                     size="medium"
                     :disabled="loading"
-                    @click.native="resetPageAndGetList"
+                    @click.native="handleSearch"
                   >
                     搜索
                   </el-button>
                   <el-button
                     size="medium"
-                    @click="queryForm = { ...initForm, subjectName: queryForm.subjectName }"
+                    @click="resetQueryForm"
                   >
                     重置
                   </el-button>
@@ -202,6 +223,7 @@
         </div>
 
         <el-table
+          ref="table"
           v-loading="loading"
           :data="data"
           height="50vh"
@@ -389,6 +411,26 @@ export default {
     TreeSelector
   },
   data() {
+    var minBackCountValidate = (_, value, callback) => {
+      const maxBackCount = this.queryForm.maxBackCount
+      if (maxBackCount != '' && maxBackCount <= value) {
+        callback(new Error('最小值不得大于或等于最大值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+
+        callback()
+      }
+    }
+    var maxBackCountValidate = (_, value, callback) => {
+      const minBackCount = this.queryForm.minBackCount
+      if (minBackCount != '' && minBackCount >= value) {
+        callback(new Error('最大值不得小于或等于最小值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+
+        callback()
+      }
+    }
     return {
       queryFormVisible: false,
       columns: {
@@ -435,12 +477,36 @@ export default {
         label: 'name',
         children: 'children'
       },
+      queryFormRules: {
+        minBackCount: [{ type: 'number', validator: minBackCountValidate, trigger: 'blur' }],
+        maxBackCount: [{ type: 'number', validator: maxBackCountValidate, trigger: 'blur' }]
+      },
       pickerOptionsStart: {},
       pickerOptionsEnd: {}
     }
   },
+  computed: {
+    dateValue: {
+      get: function() {
+        const { publishTime, endTime } = this.queryForm
+        return [publishTime, endTime]
+      },
+      set: function([publishTime, endTime]) {
+        Object.assign(this.queryForm, { publishTime, endTime })
+      }
+    }
+  },
   watch: {
-    'queryForm.subjectName': _.debounce(function() {
+    columns: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.table.doLayout()
+          this.$refs.table.$forceUpdate()
+        })
+      },
+      deep: true
+    },
+    'queryForm.planName': _.debounce(function() {
       this.resetPageAndGetList()
     }, 1000)
   },
@@ -448,6 +514,17 @@ export default {
     this.getData()
   },
   methods: {
+    resetQueryForm() {
+      this.queryForm = { ...this.initForm, planName: this.queryForm.planName }
+      this.$refs.queryForm.clearValidate()
+    },
+    handleSearch() {
+      this.$refs.queryForm.validate((valid) => {
+        if (valid) {
+          this.resetPageAndGetList()
+        }
+      })
+    },
     shouldbeDisabled(item) {
       const { option } = item
       if (option == 0) return true
@@ -605,6 +682,14 @@ export default {
 }
 </script>
 <style lang="scss">
+.filter-form {
+  .el-form-item__label {
+    text-align: center;
+  }
+  .el-form--inline .el-form-item {
+    margin-right: 50px !important;
+  }
+}
 .arrange {
   .el-form-item {
     margin-right: 20px;
@@ -620,12 +705,6 @@ export default {
   }
   .icon-basics-filter-outlined {
     font-size: 14px;
-  }
-
-  .filter-form {
-    .el-form-item__label {
-      text-align: center;
-    }
   }
 }
 </style>

@@ -13,9 +13,9 @@
         <div class="side-item active">
           电脑预览
         </div>
-        <div class="side-item">
+        <!-- <div class="side-item">
           手机预览
-        </div>
+        </div> -->
       </div>
       <div
         v-loading="loading"
@@ -69,13 +69,13 @@
                     ></el-radio>
                   </el-radio-group>
 
-                  <el-checkbox-group v-if="question.type == 'multi_choice'">
+                  <div v-if="question.type == 'multi_choice'">
                     <el-checkbox
                       v-for="(option, option_index) in question.asqQuestionOptions"
                       :key="option_index"
                       :label="option.content"
                     />
-                  </el-checkbox-group>
+                  </div>
                 </div>
               </div>
             </div>
