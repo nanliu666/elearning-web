@@ -33,6 +33,8 @@
               transition="false"
             >
               <el-form
+                ref="queryForm"
+                :rules="queryFormRules"
                 label-position="left"
                 :inline="true"
                 :model="queryForm"
@@ -71,24 +73,21 @@
                     prop="minNum"
                     style="margin-right: 0"
                   >
-                    <el-input-number
-                      v-model="queryForm.minNum"
-                      controls-position="right"
+                    <el-input
+                      v-model.number="queryForm.minNum"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
                       clearable
                       placeholder="最小值"
-                      :min="0"
-                      :max="queryForm.maxNum - 1"
                       width="110"
                     />
                   </el-form-item>
                   <span style="display: inline-block; margin: 0 5px;">~</span>
                   <el-form-item prop="maxNum">
-                    <el-input-number
-                      v-model="queryForm.maxNum"
-                      controls-position="right"
+                    <el-input
+                      v-model.number="queryForm.maxNum"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
                       clearable
                       placeholder="最大值"
-                      :min="(queryForm.minNum && queryForm.minNum + 1) || 0"
                       width="110"
                     />
                   </el-form-item>
@@ -98,13 +97,13 @@
                     type="primary"
                     size="medium"
                     :disabled="loading"
-                    @click.native="resetPageAndGetList"
+                    @click.native="handleSearch"
                   >
                     搜索
                   </el-button>
                   <el-button
                     size="medium"
-                    @click="queryForm = { ...initForm, asqName: queryForm.asqName }"
+                    @click.native="resetQueryForm"
                   >
                     重置
                   </el-button>
@@ -178,6 +177,7 @@
         </div>
 
         <el-table
+          ref="table"
           v-loading="loading"
           :data="data"
           height="60vh"
@@ -192,16 +192,24 @@
             fixed="left"
             align="center"
             label="问卷名称"
-            show-overflow-tooltip
-            width="220"
+            :show-overflow-tooltip="true"
+            width="320"
           >
             <template slot-scope="scope">
-              <el-button
-                type="text"
-                @click="toPreview(scope.row)"
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="scope.row.asqName"
+                placement="top"
               >
-                {{ scope.row.asqName }}
-              </el-button>
+                <div
+                  class="column-title"
+                  style="color: #01aafc; cursor: pointer;"
+                  @click="toPreview(scope.row)"
+                >
+                  {{ scope.row.asqName }}
+                </div>
+              </el-tooltip>
             </template>
           </el-table-column>
           <el-table-column
@@ -210,6 +218,7 @@
             prop="categoryName"
             :show-overflow-tooltip="true"
             label="问卷分类"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
@@ -218,7 +227,13 @@
             prop="remark"
             :show-overflow-tooltip="true"
             label="问卷简介"
+            min-width="180"
           >
+            <template slot-scope="scope">
+              <div class="column-title">
+                {{ scope.row.remark || '--' }}
+              </div>
+            </template>
           </el-table-column>
           <el-table-column
             v-if="columns['题目数量']"
@@ -226,6 +241,7 @@
             prop="questionNum"
             :show-overflow-tooltip="true"
             label="题目数量"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
@@ -234,6 +250,7 @@
             :show-overflow-tooltip="true"
             prop="createTime"
             label="创建时间"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
@@ -242,6 +259,7 @@
             :show-overflow-tooltip="true"
             prop="name"
             label="创建人"
+            min-width="180"
           >
           </el-table-column>
 
@@ -310,6 +328,24 @@ export default {
     TreeSelector
   },
   data() {
+    var minNumValidate = (_, value, callback) => {
+      const maxNum = this.queryForm.maxNum
+      if (maxNum != '' && value >= maxNum) {
+        callback(new Error('最小值不得大于或等于最大值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+        callback()
+      }
+    }
+    var maxNumValidate = (_, value, callback) => {
+      const minNum = this.queryForm.minNum
+      if (minNum != '' && minNum >= value) {
+        callback(new Error('最大值不得小于或等于最小值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+        callback()
+      }
+    }
     return {
       queryFormVisible: false,
       columns: {
@@ -343,6 +379,10 @@ export default {
         categoryId: '',
         asqName: ''
       },
+      queryFormRules: {
+        minNum: [{ type: 'number', validator: minNumValidate, trigger: 'blur' }],
+        maxNum: [{ type: 'number', validator: maxNumValidate, trigger: 'blur' }]
+      },
       loading: false,
       data: [],
       treeData: [],
@@ -353,6 +393,15 @@ export default {
   },
   computed: {},
   watch: {
+    columns: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.table.doLayout()
+          this.$refs.table.$forceUpdate()
+        })
+      },
+      deep: true
+    },
     'queryForm.asqName': _.debounce(function() {
       this.resetPageAndGetList()
     }, 1000)
@@ -361,6 +410,17 @@ export default {
     this.getData()
   },
   methods: {
+    handleSearch() {
+      this.$refs.queryForm.validate((valid) => {
+        if (valid) {
+          this.resetPageAndGetList()
+        }
+      })
+    },
+    resetQueryForm() {
+      this.queryForm = { ...this.initForm, asqName: this.queryForm.asqName }
+      this.$refs.queryForm.clearValidate()
+    },
     resetPageAndGetList() {
       this.queryForm.currentPage = 1
       this.queryForm.size = 10
@@ -445,6 +505,26 @@ export default {
 </script>
 <style lang="scss">
 .management {
+  .column-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .el-table th.gutter {
+    display: table-cell !important;
+  }
+
+  .el-table colgroup.gutter {
+    display: table-cell !important;
+  }
+
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
   .el-form-item {
     margin-right: 20px;
   }

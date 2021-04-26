@@ -68,6 +68,7 @@
                     :options="treeData"
                     placeholder="请选择组织"
                     :props="seletorProps"
+                    :value="queryForm.dept"
                     @getValue="(name) => (queryForm.dept = name)"
                   />
                 </el-form-item>

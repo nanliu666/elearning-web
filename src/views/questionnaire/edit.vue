@@ -35,6 +35,7 @@
               v-model="form.asqName"
               clearable
               placeholder="请输入"
+              :maxlength="32"
             ></el-input>
           </el-form-item>
           <el-form-item
@@ -91,6 +92,7 @@
           height="462px"
           row-key="content"
         >
+          <el-table-column> </el-table-column>
           <el-table-column
             type="index"
             align="center"
@@ -129,6 +131,7 @@
           <el-table-column
             label="操作"
             align="center"
+            width="180"
           >
             <template slot-scope="scope">
               <el-button
@@ -164,7 +167,7 @@
         </el-button>
         <el-button
           size="medium"
-          @click="$router.back()"
+          @click="handleCancel"
         >
           取消
         </el-button>
@@ -536,11 +539,9 @@ export default {
     }
   },
   activated() {
-    this.initData()
-  },
-  mounted() {
     this.clearValidate()
-    this.rowDrop()
+    this.$refs.form.resetFields()
+    this.$nextTick(() => this.rowDrop())
   },
   methods: {
     //行拖拽
@@ -566,6 +567,10 @@ export default {
           disabled: true
         })
       }
+    },
+    handleCancel() {
+      this.$message.info('创建问卷取消')
+      this.$router.back()
     },
     async handleSubmit() {
       const valid = await this.formValidate()

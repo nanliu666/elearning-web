@@ -58,7 +58,7 @@
               v-show="step == 2"
               type="default"
               size="medium"
-              :loading="publishLoading"
+              :loading="publishLoading1"
               @click="publish(1)"
             >
               存草稿
@@ -67,7 +67,7 @@
               v-show="step == 2"
               type="primary"
               size="medium"
-              :loading="publishLoading"
+              :loading="publishLoading0"
               @click="publish(0)"
             >
               发布
@@ -98,7 +98,7 @@
           label="问卷安排名称"
           prop="planName"
           class="half-form-item"
-          style="margin-right: 10%;"
+          style="margin-right: 160px;"
         >
           <el-input
             v-model="form.planName"
@@ -135,40 +135,10 @@
         </el-form-item>
 
         <el-form-item
-          label="发布时间"
-          prop="publishTime"
-          class="half-form-item"
-          style="margin-right: 10%;"
-        >
-          <el-date-picker
-            v-model="form.publishTime"
-            style="width: 100%;"
-            value-format="yyyy-MM-dd"
-            :picker-options="pickerOptionsStart"
-            placeholder="发布时间"
-            @change="publishTimeChange"
-          />
-        </el-form-item>
-        <el-form-item
-          label="截止时间"
-          prop="endTime"
-          class="half-form-item"
-        >
-          <el-date-picker
-            v-model="form.endTime"
-            style="width: 100%;"
-            value-format="yyyy-MM-dd"
-            :picker-options="pickerOptionsEnd"
-            placeholder="截止时间"
-            @change="endTimeChange"
-          />
-        </el-form-item>
-
-        <el-form-item
           label="关联问卷"
           prop="subjectId"
           class="half-form-item"
-          style="margin-right: 10%;"
+          style="margin-right: 160px;"
         >
           <el-select
             v-model="form.subjectId"
@@ -212,6 +182,21 @@
             controls-position="right"
             style="width: 100%;"
             placeholder="请输入"
+          />
+        </el-form-item>
+        <el-form-item
+          class="half-form-item"
+          label="发布时间"
+          prop="publishTime"
+        >
+          <el-date-picker
+            v-model="dateValue"
+            style="width: 100%;"
+            type="datetimerange"
+            format="yyyy-MM-dd HH:mm"
+            value-format="yyyy-MM-dd HH:mm"
+            start-placeholder="开始日期"
+            end-placeholder="截止日期"
           />
         </el-form-item>
       </el-form>
@@ -441,7 +426,7 @@ export default {
           { required: true, message: '请输入问卷名称', trigger: 'blur' },
           { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
         ],
-        publishTime: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
+        publishTime: [{ required: true, message: '请选择发布时间', trigger: 'change' }],
         endTime: [{ required: true, message: '请选择截止时间', trigger: 'change' }],
         categoryId: [{ required: true, message: '请选择所在分类', trigger: 'change' }],
         subjectId: [{ required: true, message: '请选择关联问卷', trigger: 'change' }]
@@ -456,7 +441,8 @@ export default {
       userPickerVisible: false,
       href: '',
       dialogVisible: false,
-      publishLoading: false,
+      publishLoading1: false,
+      publishLoading0: false,
       subjectLoading: false,
       noMoreSubject: false
     }
@@ -465,6 +451,15 @@ export default {
     currentPersonList() {
       const { pageSize: size, pageNo: no } = this.page
       return this.personList.slice(size * (no - 1), size * no)
+    },
+    dateValue: {
+      get: function() {
+        const { publishTime, endTime } = this.form
+        return [publishTime, endTime]
+      },
+      set: function([publishTime, endTime]) {
+        Object.assign(this.form, { publishTime, endTime })
+      }
     }
   },
   watch: {
@@ -484,6 +479,9 @@ export default {
     this.id = this.$route.params.id
     this.getCategoryData()
     this.initData()
+  },
+  mounted() {
+    this.$refs.form.resetFields()
   },
   methods: {
     toCategory() {
@@ -513,7 +511,16 @@ export default {
       this.pickerOptionsEnd = Object.assign({}, this.pickerOptionsEnd, {
         disabledDate: (time) => {
           if (this.form.publishTime) {
-            const publishTime = new Date(this.form.publishTime)
+            let date = this.form.publishTime + ''
+            date = date.split(' ')
+            let [year, month, day] = date[0].split('-')
+            year = +year
+            month = month - 1
+            day = +day
+            let [hour, minute] = date[1].split(':')
+            hour = +hour
+            minute = +minute
+            let publishTime = new Date(year, month, day, hour, minute)
             return time.getTime() < publishTime.getTime() && time.getDate() != publishTime.getDate()
           }
         }
@@ -524,8 +531,17 @@ export default {
       this.pickerOptionsStart = Object.assign({}, this.pickerOptionsStart, {
         disabledDate: (time) => {
           if (this.form.endTime) {
-            const endTime = new Date(this.form.endTime)
-            return time.getTime() > endTime.getTime() && time.getDate() != endTime.getDate()
+            let date = this.form.endTime + ''
+            date = date.split(' ')
+            let [year, month, day] = date[0].split('-')
+            year = +year
+            month = month - 1
+            day = +day
+            let [hour, minute] = date[1].split(':')
+            hour = +hour
+            minute = +minute
+            let endTime = new Date(year, month, day, hour, minute)
+            return time.getTime() < endTime.getTime() && time.getDate() != endTime.getDate()
           }
         }
       })
@@ -561,7 +577,7 @@ export default {
       )
       saveLink.dispatchEvent(event)
     },
-    publish() {
+    publish(type) {
       if (!this.personList.length) {
         this.$message.error('至少添加一个人员')
         return
@@ -586,11 +602,12 @@ export default {
       } else {
         api = save
         $data.asqUrl = ''
+        $data.type = type
       }
 
       Object.assign($data, this.form)
-      $data.publishTime = $data.publishTime + ' 00:00:00'
-      $data.endTime = $data.endTime + ' 00:00:00'
+      $data.publishTime = $data.publishTime + ':00'
+      $data.endTime = $data.endTime + ':00'
       $data.users = this.personList.map((person) => {
         const { userId, name, phonenum, department = '' } = person
         return {
@@ -600,7 +617,7 @@ export default {
           userDeptStr: department
         }
       })
-      this.publishLoading = true
+      this['publishLoading' + type] = true
       api($data)
         .then((res) => {
           if (!this.id) {
@@ -614,7 +631,7 @@ export default {
           }
         })
         .finally(() => {
-          this.publishLoading = false
+          this['publishLoading' + type] = false
         })
     },
     initData() {
@@ -622,11 +639,12 @@ export default {
         saveQuery({ id: this.id }).then((res) => {
           const { users = [] } = res
           this.personList = users.map((user) => {
-            const { userName, userPhone, userDeptStr } = user
+            const { userName, userPhone, userDeptStr, userId } = user
             return {
               name: userName,
               phonenum: userPhone,
-              department: userDeptStr
+              department: userDeptStr,
+              userId: userId + ''
             }
           })
           delete res.users
@@ -671,7 +689,13 @@ export default {
       this.multipleSelection = val
     },
     handleDeletePerson(target) {
-      this.$confirm('您确定删除所选人员吗？', '提醒', {
+      let message = ''
+      if (target) {
+        message = '您确定要删除该人员吗？'
+      } else {
+        message = '您确定要批量删除该人员吗？'
+      }
+      this.$confirm(message, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -748,13 +772,14 @@ export default {
   .body {
     flex: 1;
     background-color: #fff;
-    margin: 15px 300px 25px;
+    margin: 15px auto 25px;
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
     border-radius: 4px;
     padding: 35px 120px;
+    width: 1300px;
     .half-form-item {
       display: inline-block;
-      width: 45%;
+      width: 450px;
     }
 
     .person-table {
