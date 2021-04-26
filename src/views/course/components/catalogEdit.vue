@@ -192,10 +192,10 @@ export default {
     getOrgList(val) {
       this.form.orgIds = val.map((item) => item.id)
     },
-    // 所属范围返回数据
-    getOrgIdsBackstage(val) {
-      this.form.orgIdsBackstage = val.map((item) => item.id)
-    },
+    // // 所属范围返回数据
+    // getOrgIdsBackstage(val) {
+    //   this.form.orgIdsBackstage = val.map((item) => item.id)
+    // },
     async loadOrgTree() {
       let res = await getCatalog({ source: 'course', addFlag: '1' })
       if (this.type === 'edit') {
@@ -241,7 +241,7 @@ export default {
       if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
         this.form.orgIds = this.form.orgIds.toString()
-        this.form.orgIdsBackstage = this.form.orgIdsBackstage.toString()
+        // this.form.orgIdsBackstage = this.form.orgIdsBackstage.toString()
         this.form.source = 'course'
         if (valid) {
           if (this.type !== 'edit') {
