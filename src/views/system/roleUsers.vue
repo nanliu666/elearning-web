@@ -213,7 +213,6 @@ export default {
       })
     },
     handleAfterSubmit() {
-      console.log(1111)
       this.page.currentPage = 1
       this.getData()
     },

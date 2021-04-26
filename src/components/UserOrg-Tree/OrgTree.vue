@@ -83,8 +83,9 @@ export default {
   methods: {
     createdSetCheckedKeys() {
       this.loadOrgData().then(() => {
-        const list = this.idList
+        let list = this.idList
         this.$refs.tree.setCheckedKeys(list)
+        this.selected = []
         this.updateSelected(this.orgData)
       })
     },
