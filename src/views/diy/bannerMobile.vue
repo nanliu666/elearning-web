@@ -95,7 +95,7 @@ export default {
   },
   async mounted() {
     await this.loadTree()
-    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
+    this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
   },
   methods: {
     //   预览效果
