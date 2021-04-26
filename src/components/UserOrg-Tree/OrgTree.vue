@@ -77,9 +77,9 @@ export default {
       this.createdSetCheckedKeys()
     }
   },
-  // created() {
-  //   this.createdSetCheckedKeys()
-  // },
+  created() {
+    this.createdSetCheckedKeys()
+  },
   methods: {
     createdSetCheckedKeys() {
       this.loadOrgData().then(() => {
