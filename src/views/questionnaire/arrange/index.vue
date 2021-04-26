@@ -79,10 +79,13 @@
                     clearable
                     placeholder="最小值"
                     width="110"
+                    :min="0"
+                    :max="queryForm.maxBackCount - 1"
                   />
                   ~
                   <el-input-number
                     v-model="queryForm.maxBackCount"
+                    :min="(queryForm.minBackCount && queryForm.minBackCount + 1) || 0"
                     controls-position="right"
                     clearable
                     placeholder="最大值"
@@ -244,7 +247,7 @@
           >
             <template slot-scope="scope">
               <div>
-                {{ scope.row.state == 1 ? '未开始' : scope.row.status == 2 ? '进行中' : '已过期' }}
+                {{ scope.row.status == 1 ? '未开始' : scope.row.status == 2 ? '进行中' : '已过期' }}
               </div>
             </template>
           </el-table-column>
@@ -302,6 +305,7 @@
             align="center"
             label="操作"
             fixed="right"
+            width="180"
           >
             <template slot-scope="scope">
               <el-button
@@ -437,7 +441,7 @@ export default {
   },
   watch: {
     'queryForm.subjectName': _.debounce(function() {
-      this.getList()
+      this.resetPageAndGetList()
     }, 1000)
   },
   activated() {
@@ -475,7 +479,7 @@ export default {
       })
     },
     confirmFinish() {
-      return this.$confirm('是否结束该问卷安排?', '提示', {
+      return this.$confirm('结束后，问卷将结束投放，并停止统计，确定要结束吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -487,7 +491,7 @@ export default {
         disabledDate: (time) => {
           if (this.queryForm.publishTime) {
             const publishTime = new Date(this.queryForm.publishTime)
-            return time.getTime() < publishTime.getTime()
+            return time.getTime() < publishTime.getTime() && time.getDate() != publishTime.getDate()
           }
         }
       })
@@ -498,7 +502,7 @@ export default {
         disabledDate: (time) => {
           if (this.queryForm.endTime) {
             const endTime = new Date(this.queryForm.endTime)
-            return time.getTime() > endTime.getTime()
+            return time.getTime() > endTime.getTime() && time.getDate() != endTime.getDate()
           }
         }
       })
@@ -510,9 +514,9 @@ export default {
     },
     toDetail(item, toTab2) {
       const query = {
-        id: item.id,
-        toTab2: !!toTab2
+        id: item.id
       }
+      if (toTab2) query.toTab2 = true
       this.$router.push({
         path: '/questionnaire/arrange/detail',
         query

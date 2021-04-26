@@ -117,7 +117,7 @@ const COLUMNS = [
   //     minWidth: 180
   //   },
   {
-    prop: 'score',
+    prop: 'totalScore',
     label: '积分分值',
     align: 'center'
   },

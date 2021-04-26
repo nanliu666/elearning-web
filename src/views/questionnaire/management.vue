@@ -23,12 +23,13 @@
                 size="medium"
                 placeholder="输入问卷名称搜索"
                 suffix-icon="el-icon-search"
+                :maxlength="32"
               ></el-input>
             </div>
 
             <el-popover
               v-model="queryFormVisible"
-              placement="bottom"
+              placement="bottom-end"
               transition="false"
             >
               <el-form
@@ -43,7 +44,7 @@
                   <tree-selector
                     class="selector"
                     :options="treeData"
-                    placeholder="请选择组织"
+                    placeholder="请选择"
                     :props="seletorProps"
                     :value="queryForm.categoryId"
                     @getValue="(id) => (queryForm.categoryId = id)"
@@ -52,7 +53,7 @@
                 <el-form-item label="创建人">
                   <el-select
                     v-model="queryForm.creatorId"
-                    placeholder="请选择创建人"
+                    placeholder="请选择"
                     clearable
                   >
                     <el-option
@@ -66,21 +67,31 @@
                 </el-form-item>
 
                 <el-form-item label="题目数量">
-                  <el-input-number
-                    v-model="queryForm.minNum"
-                    controls-position="right"
-                    clearable
-                    placeholder="最小值"
-                    width="110"
-                  />
-                  ~
-                  <el-input-number
-                    v-model="queryForm.maxNum"
-                    controls-position="right"
-                    clearable
-                    placeholder="最大值"
-                    width="110"
-                  />
+                  <el-form-item
+                    prop="minNum"
+                    style="margin-right: 0"
+                  >
+                    <el-input-number
+                      v-model="queryForm.minNum"
+                      controls-position="right"
+                      clearable
+                      placeholder="最小值"
+                      :min="0"
+                      :max="queryForm.maxNum - 1"
+                      width="110"
+                    />
+                  </el-form-item>
+                  <span style="display: inline-block; margin: 0 5px;">~</span>
+                  <el-form-item prop="maxNum">
+                    <el-input-number
+                      v-model="queryForm.maxNum"
+                      controls-position="right"
+                      clearable
+                      placeholder="最大值"
+                      :min="(queryForm.minNum && queryForm.minNum + 1) || 0"
+                      width="110"
+                    />
+                  </el-form-item>
                 </el-form-item>
                 <div style="text-align: right; margin-right: 75px">
                   <el-button
@@ -144,8 +155,8 @@
       </div>
 
       <div class="table-container">
-        <!-- <div style="margin-bottom: 8px; height:21px;">
-        <div v-if="multipleSelection.length">
+        <div style="margin-bottom: 8px; height:21px;">
+          <!-- <div v-if="multipleSelection.length">
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
             <span
               style="
@@ -159,13 +170,12 @@
             <el-button
               type="text"
               style="padding: 0"
-              @click="() => handleDelete"
+              @click="() => handleDelete()"
             >
               批量删除
             </el-button>
-        </div>
-
         </div> -->
+        </div>
 
         <el-table
           v-loading="loading"
@@ -182,8 +192,8 @@
             fixed="left"
             align="center"
             label="问卷名称"
-            :show-overflow-tooltip="true"
-            width="180"
+            show-overflow-tooltip
+            width="220"
           >
             <template slot-scope="scope">
               <el-button
@@ -240,6 +250,7 @@
             align="center"
             label="操作"
             fixed="right"
+            width="180"
           >
             <template slot-scope="scope">
               <el-button
@@ -340,25 +351,10 @@ export default {
       total: 0
     }
   },
-  computed: {
-    minInit() {
-      const maxNum = this.queryForm.maxNum
-      if (typeof maxNum === 'number') {
-        return maxNum
-      }
-      return 0
-    },
-    maxInit() {
-      const minNum = this.queryForm.minNum
-      if (typeof minNum === 'number') {
-        return minNum + 1
-      }
-      return 0
-    }
-  },
+  computed: {},
   watch: {
     'queryForm.asqName': _.debounce(function() {
-      this.getList()
+      this.resetPageAndGetList()
     }, 1000)
   },
   activated() {
@@ -391,16 +387,16 @@ export default {
     },
     handleDelete(target) {
       const message = target ? '您确定删除选中的问卷吗？' : '您确定要批量删除选中的问卷吗？'
-      this.$confirm(message, {
+      this.$confirm(message, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          if (!Array.isArray(target)) target = [target]
+          target = (target && [target]) || this.multipleSelection
           const ids = target.map((item) => item.id)
           const formData = new FormData()
-          formData.append('id', ids.join(''))
+          formData.append('id', ids.join(','))
           questionnaireDelete(formData).then(() => {
             this.$message.success(`已成功删除${ids.length}条问卷`)
             this.getList()

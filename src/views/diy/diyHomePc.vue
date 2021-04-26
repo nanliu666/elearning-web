@@ -1,6 +1,6 @@
 <template>
   <div class="diyHomePc">
-    <page-header title="首页定制">
+    <page-header title="首页定制PC">
       <el-button
         slot="rightMenu"
         v-p="DIY_HOME_ADD_PC"

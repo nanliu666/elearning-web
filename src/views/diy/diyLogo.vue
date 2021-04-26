@@ -172,7 +172,7 @@
             发布
           </el-button>
           <el-button
-            v-if="this.logoData.id"
+            v-if="logoData.id"
             type="success"
             :loading="resetLoading"
             @click="resetLogo"

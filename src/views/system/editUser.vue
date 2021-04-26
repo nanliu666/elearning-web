@@ -364,10 +364,12 @@ export default {
       let leaders = _.filter(selectedOrg.leaders, 'userId')
       if (leaders.length > 0) {
         this.form.leaderId = _.head(leaders).userId
-        this.columns.find((item) => item.prop === 'leaderId').firstOption = {
-          userId: _.head(leaders).userId + '',
-          name: _.head(leaders).userName
-        }
+        this.columns.find((item) => item.prop === 'leaderId').firstOption = [
+          {
+            userId: _.head(leaders).userId + '',
+            name: _.head(leaders).userName
+          }
+        ]
       }
     }
   },

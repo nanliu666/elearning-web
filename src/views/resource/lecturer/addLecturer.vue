@@ -154,10 +154,11 @@
                     <el-tree
                       ref="orgTree"
                       :data="data"
-                      node-key="categoryId"
-                      :props="props"
-                      lazy
-                      :load="loadNode"
+                      node-key="id"
+                      :props="{
+                        children: 'children',
+                        label: 'name'
+                      }"
                       @node-click="handleOrgNodeClick"
                     />
                   </el-option>
@@ -335,13 +336,9 @@
 </template>
 
 <script>
-import {
-  addTeacher,
-  queryTeacherlist,
-  listTeacherCategory,
-  getTeacher
-} from '@/api/lecturer/lecturer'
+import { addTeacher, queryTeacherlist, getTeacher } from '@/api/lecturer/lecturer'
 // import { uploadQiniu } from '@/util/uploadQiniu'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
 
 export default {
   components: {
@@ -428,7 +425,7 @@ export default {
       if (data !== undefined) {
         this.ruleForm.catalogId = data.id
         this.ruleForm.categoryId = data.id
-        this.parentOrgIdLabel = data.label
+        this.parentOrgIdLabel = data.name
       }
     },
     remoteMethod(v) {
@@ -441,25 +438,6 @@ export default {
       queryTeacherlist(params).then((res) => {
         this.Teacherlist = res.data
       })
-    },
-
-    async loadNode(node, resolve) {
-      if (node.level === 0) {
-        return resolve([{ name: 'region' }])
-      }
-      if (node.level > 1) return resolve([])
-      let res = await listTeacherCategory({ parentId: node.data.id })
-      let filterArr = res.son.map((item) => {
-        return {
-          id: item.idStr,
-          parent_id: item.parentStr,
-          label: item.name,
-          btnshow: 0
-        }
-      })
-
-      node.data.children = filterArr
-      resolve(filterArr)
     },
 
     // 拿到数据
@@ -482,69 +460,10 @@ export default {
       }
     },
 
-    // 点击节点
-    treeClickNode(data) {
-      if (data) {
-        this.islistTeacherCategory(data[0])
-      }
-    },
-
     // 查询讲师分类列表
-    islistTeacherCategory(id) {
-      let params = {}
-      if (id) {
-        params = {
-          test: '123',
-          parentId: '' // 父ID
-        }
-        params.parentId = id
-      } else {
-        params = {
-          test: '123'
-        }
-      }
-      listTeacherCategory(params).then((res) => {
-        this.data = []
-        for (let key in res) {
-          if (key == 'group') {
-            res[key].forEach((item) => {
-              let i = {
-                id: 1,
-                label: '一级 1',
-                btnshow: 1,
-                children: []
-              }
-              i.id = item.idStr
-              i.label = item.name
-              i.btnshow = 1
-              i.children = ''
-              this.data.push(i)
-            })
-          }
-        }
-
-        for (let key in res) {
-          if (key == 'son') {
-            this.data.forEach((item, index) => {
-              res[key].forEach((istem) => {
-                if (item.id == istem.parentStr) {
-                  let i = {
-                    id: 1,
-                    label: '一级 1',
-                    btnshow: 1
-                  }
-                  i.id = istem.idStr
-                  i.parent_id = istem.parentStr
-                  i.label = istem.name
-                  i.btnshow = 0
-                  this.data[index].children = []
-                  this.data[index].children.push(i)
-                }
-              })
-            })
-          }
-        }
-        this.data.splice(0, 1)
+    islistTeacherCategory() {
+      queryCategoryOrgList({ source: 'teacher' }).then((res) => {
+        this.data = res
       })
     },
 
