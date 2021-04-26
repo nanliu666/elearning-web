@@ -107,7 +107,7 @@
                 @selectedValue="getOrgList"
               ></OrgTree>
             </el-tab-pane>
-            <el-tab-pane
+            <!-- <el-tab-pane
               label="所属范围"
               name="second"
             >
@@ -115,7 +115,7 @@
                 :id-list="form.orgIdListBackstage"
                 @selectedValue="getOrgIdsBackstage"
               ></OrgTree>
-            </el-tab-pane>
+            </el-tab-pane> -->
           </el-tabs>
         </div>
       </el-form-item>
