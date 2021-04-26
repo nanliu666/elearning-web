@@ -205,7 +205,7 @@ export default {
     let newData = {
       orgId: '',
       name: '',
-      device: 1,
+      device: 0,
       item: ''
     }
     this.formData = { ...newData }
