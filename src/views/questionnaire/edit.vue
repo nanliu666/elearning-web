@@ -57,7 +57,6 @@
           <el-form-item
             label="问卷简介"
             prop="intro"
-            style="width: 1090px;"
           >
             <el-input
               v-model="form.remark"
@@ -542,6 +541,7 @@ export default {
     this.clearValidate()
     this.$refs.form.resetFields()
     this.$nextTick(() => this.rowDrop())
+    this.initData()
   },
   methods: {
     //行拖拽
