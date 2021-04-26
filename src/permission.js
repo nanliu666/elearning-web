@@ -113,7 +113,8 @@ function isToken(tid, next) {
   store.dispatch('tokeLogin', tid).then((res) => {
     if (res.account) {
       next({ path: '/' })
-      store.dispatch('getOrgIdsAc', res.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+      store.dispatch('getDiyInforAc', { device: '1' }) // 用户的logo banner 首页布局等信息，存放在localstore，vuex
+      //store.dispatch('getOrgIdsAc', res.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
     }
   })
 }
