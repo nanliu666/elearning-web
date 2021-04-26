@@ -260,7 +260,7 @@ export default {
     confingFn() {
       // 跳转设置banner
       this.$router.push({
-        path: '/diy/bannerPc',
+        path: '/diy/bannerMobile',
         query: { orgId: this.formData.orgId }
       })
     },
