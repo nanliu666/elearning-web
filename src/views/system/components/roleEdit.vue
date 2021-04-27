@@ -39,16 +39,28 @@
             v-model="form.orgType"
             :disabled="form.roleId ? true : false"
           >
-            <el-radio label="Enterprise">
+            <el-radio
+              :disabled="radioDisabled('Enterprise')"
+              label="Enterprise"
+            >
               企业
             </el-radio>
-            <el-radio label="Company">
+            <el-radio
+              :disabled="radioDisabled('Company')"
+              label="Company"
+            >
               公司
             </el-radio>
-            <el-radio label="Department">
+            <el-radio
+              :disabled="radioDisabled('Department')"
+              label="Department"
+            >
               部门
             </el-radio>
-            <el-radio label="Group">
+            <el-radio
+              :disabled="radioDisabled('Group')"
+              label="Group"
+            >
               小组
             </el-radio>
           </el-radio-group>
@@ -94,6 +106,7 @@
 import treeSelect from '@/components/treeSelect/treeSelect'
 import { createRole, updateRole } from '../../../api/system/role'
 // import OrgTree from '@/components/UserOrg-Tree/OrgTree'
+import { queryMaxOrgType } from '@/api/system/role'
 
 export default {
   name: 'RoleEdit',
@@ -196,6 +209,7 @@ export default {
       }
     ]
     return {
+      MaxOrgType: [],
       jobColumn: JOBS_COLUMN,
       columns: BASE_COLUMNS,
       loading: false,
@@ -239,7 +253,20 @@ export default {
     }
   },
   mounted() {},
+  created() {
+    this.getQueryMaxOrgType()
+  },
   methods: {
+    radioDisabled(label) {
+      let swData = true
+      this.MaxOrgType.forEach((item) => {
+        if (label == item) swData = false
+      })
+      return swData
+    },
+    async getQueryMaxOrgType() {
+      this.MaxOrgType = await queryMaxOrgType()
+    },
     getOrgList(val) {
       this.form.orgIds = val.map((item) => item.id)
     },

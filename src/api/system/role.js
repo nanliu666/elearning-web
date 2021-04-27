@@ -402,3 +402,14 @@ export const getOrgMember = (params) => {
     }
   })
 }
+
+//角色级别范围查询
+export const queryMaxOrgType = (params) => {
+  return request({
+    url: '/blade-system/v1/role/queryMaxOrgType',
+    method: 'post',
+    params: {
+      ...params
+    }
+  })
+}
