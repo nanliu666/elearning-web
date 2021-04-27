@@ -10,7 +10,7 @@
     @opened="onOpened"
   >
     <div v-loading="loading">
-      <commonForm
+      <common-form
         ref="form"
         :model="form"
         :columns="columns"
@@ -34,16 +34,32 @@
           >
           </el-input>
         </template>
-        <!-- <template slot="roleGrade">
-
-        </template> -->
+        <template slot="orgType">
+          <el-radio-group
+            v-model="form.orgType"
+            :disabled="form.roleId ? true : false"
+          >
+            <el-radio label="Enterprise">
+              企业
+            </el-radio>
+            <el-radio label="Company">
+              公司
+            </el-radio>
+            <el-radio label="Department">
+              部门
+            </el-radio>
+            <el-radio label="Group">
+              小组
+            </el-radio>
+          </el-radio-group>
+        </template>
         <!-- <template slot="range">
           <OrgTree
             :id-list="form.orgIdList"
             @selectedValue="getOrgList"
           ></OrgTree>
         </template> -->
-      </commonForm>
+      </common-form>
       <div
         slot="footer"
         class="dialog-footer"
@@ -165,16 +181,18 @@ export default {
         span: 24
       },
       {
-        itemType: 'radio',
+        itemType: 'slot',
         prop: 'orgType',
         label: '角色级别',
         span: 24,
-        options: [
-          { label: '企业', value: 'Enterprise' },
-          { label: '公司', value: 'Company' },
-          { label: '部门', value: 'Department' },
-          { label: '小组', value: 'Group' }
-        ]
+        required: true
+        // disabled: true,
+        // options: [
+        //   { label: '企业', value: 'Enterprise' },
+        //   { label: '公司', value: 'Company' },
+        //   { label: '部门', value: 'Department' },
+        //   { label: '小组', value: 'Group' }
+        // ]
       }
     ]
     return {
@@ -196,16 +214,20 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        if (!(newVal && newVal.length > 0)) {
-          return
-        }
-        let { roleId, roleName, remark, orgIds } = { ...newVal }
-        this.form = {
-          roleId,
-          roleName,
-          remark,
-          orgIdList: orgIds.split(',')
-        }
+        this.$nextTick(() => {
+          if (!newVal.roleName) {
+            return
+          }
+
+          let { roleId, roleName, remark, orgType } = { ...newVal }
+          this.form = {
+            roleId,
+            roleName,
+            remark,
+            orgType
+            // orgIdList: orgIds.split(',')
+          }
+        })
       },
       immediate: true,
       deep: true
@@ -241,6 +263,7 @@ export default {
       this.$refs.form.validate((vaild) => {
         if (vaild) {
           this.form.roleId ? this.updateFunc() : this.createFunc(callback)
+          this.$refs['form'].resetFields()
         }
       })
     },
