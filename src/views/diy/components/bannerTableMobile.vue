@@ -242,9 +242,10 @@ export default {
       let params = {
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        deviceType: 'APP'
+        deviceType: 'APP',
+        orgId: this.$route.query.orgId || this.activeOrg.orgId
       }
-      if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
+      //   if (this.activeOrg) Object.assign(params, { orgId: this.activeOrg.orgId })
       //   判断是否是全部
       //   if (this.activeOrg && this.activeOrg.orgId == '0') Object.assign(params, { orgId: '' })
       await getBannerList(params)
