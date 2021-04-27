@@ -25,6 +25,11 @@
               name="OuterUser"
             >
             </el-tab-pane>
+            <el-tab-pane
+              v-if="selectTypes.includes('Position')"
+              label="岗位"
+              name="Position"
+            />
           </el-tabs>
           <div
             v-if="selectTypes.includes('Org')"
@@ -37,7 +42,6 @@
             <div class="tree">
               <el-tree
                 v-show="!orgSearch"
-                ref="orgTree"
                 :load="lazyLoadOrgTree"
                 :props="treeProps"
                 lazy
@@ -97,6 +101,36 @@
               height="31vh"
             />
           </div>
+          <div
+            v-if="selectTypes.includes('Position')"
+            v-show="activeTab === 'Position'"
+          >
+            <el-input
+              v-model="postionSearch"
+              placeholder="搜索岗位"
+            />
+            <div class="tree">
+              <el-tree
+                v-show="!postionSearch"
+                :load="lazyLoadPositionTree"
+                :props="positionTreeProps"
+                lazy
+                node-key="path"
+                show-checkbox
+                @check="handleCheckPositionItem"
+              />
+              <el-tree
+                v-show="postionSearch"
+                ref="orgTreeSearch"
+                :data="positionSearchData"
+                :props="positionTreeProps"
+                lazy
+                node-key="path"
+                show-checkbox
+                @check="handleCheckPositionItem"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div class="right">
@@ -119,10 +153,10 @@
               class="iconfont icon-usercircle2 imgss"
             />
             <i
-              v-else-if="item.type === 'User'"
+              v-else
               class="iconfont  icon-approval-checkin-bicolor imgs"
             />
-            {{ item.bizName }}
+            <span>{{ item.bizName }}</span>
           </div>
           <div class="icon">
             <i
@@ -152,7 +186,7 @@
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getOuterUser } from '@/api/system/user'
+import { getOrgUserChild, getOuterUser, getPostionUserChild } from '@/api/system/user'
 import ComEmpty from '@/components/common-empty/empty'
 import _ from 'lodash'
 const SEARCH_DELAY = 200
@@ -161,7 +195,7 @@ const NODE_TYPE = {
   Org: 'Org',
   User: 'User'
 }
-const SELECT_TYPE = ['Org', 'OuterUser']
+const SELECT_TYPE = ['Org', 'OuterUser', 'Position']
 
 const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
   search = _.trim(search)
@@ -190,6 +224,28 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
         },
         item,
         USER_PROPS
+      )
+    )
+  )
+}
+const loadPostionTree = async ({ parentId, parentPath, search }) => {
+  search = _.trim(search)
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getPostionUserChild(
+    _.pick({ parentId, search }, search ? 'search' : 'parentId')
+  )
+  // 在这里处理两个数组为树形组件需要的结构
+  const { positions } = data
+  return _.concat(
+    _.map(positions, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.positionId}`,
+          bizId: item.positionId,
+          bizName: item.positionName,
+          type: 'Position'
+        },
+        item
       )
     )
   )
@@ -241,7 +297,9 @@ export default {
       activeTab,
       loading: false,
       orgSearch: '',
+      postionSearch: '',
       orgSearchData: [],
+      positionSearchData: [],
       outerParams: {
         pageNo: 1,
         pageSize: 500,
@@ -263,6 +321,13 @@ export default {
         disabled: 'disabled',
         label: 'bizName',
         isLeaf: 'isLeaf',
+        children: 'children'
+      }
+    },
+    positionTreeProps() {
+      return {
+        disabled: 'disabled',
+        label: 'positionName',
         children: 'children'
       }
     },
@@ -315,6 +380,17 @@ export default {
         })
         .finally(() => (this.loading = false))
     }, SEARCH_DELAY),
+    // 在岗位架构下使用查询参数
+    postionSearch: _.debounce(function(search) {
+      if (!search) return
+      this.loading = true
+      loadPostionTree({ search })
+        .then((res) => {
+          this.positionSearchData = _.map(this.thruHandler(res), (item) => _.assign(item))
+        })
+        .finally(() => (this.loading = false))
+    }, SEARCH_DELAY),
+
     'outerParams.search'() {
       this.debounceOuterSearchFn()
     }
@@ -380,6 +456,23 @@ export default {
             this.selected = _.reject(this.selected, (item) => _.includes(item.path, node.path))
           }
         }
+        // 如果是单选模式
+        if (this.isSingle) {
+          this.selected = [node]
+        } else {
+          this.selected.push(node)
+        }
+      } else {
+        // 连续选中同一个目标则uncheck该选项
+        this.handleUncheckItem(node, checkedNodes)
+      }
+    },
+    // 选择岗位
+    handleCheckPositionItem(node, { checkedNodes }) {
+      // console.log('node, checkedNodes', node, checkedNodes)
+      // 如果disabled则不能check项
+      if (_.get(node, this.positionTreeProps.disabled)) return
+      if (_.some(checkedNodes, (item) => item.positionId === node.positionId)) {
         // 如果是单选模式
         if (this.isSingle) {
           this.selected = [node]
@@ -482,6 +575,16 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    lazyLoadPositionTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.positionId : '0'
+      if (parentId === '0') this.loading = true
+      loadPostionTree({
+        parentId,
+        parentPath: node.level > 0 ? node.data.path : '0'
+      })
+        .then((res) => resolve(this.thruHandler(res)))
+        .finally(() => (this.loading = false))
     },
     /**
      * 懒加载组织树形组件数据

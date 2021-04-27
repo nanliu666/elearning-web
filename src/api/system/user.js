@@ -26,7 +26,14 @@ export const getOrgUserTree = () => {
  * @returns {{orgs: Array<any>; users: Array<any>}}
  */
 export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
-
+/**
+ * 获取子组织岗位和直属员工接口
+ * @param {object} params 参数
+ * @param {string} params.parentId 父组织ID，顶级父节点为"0"
+ * @param {string} [params.search] 工号或姓名，支持模糊查询
+ * @returns {{orgs: Array<any>; users: Array<any>}}
+ */
+export const getPostionUserChild = (params) => get('/manage/v1/position/user/child', params)
 /**
  * 获取子业务部门和直属员工接口
  * @param {object} params 参数

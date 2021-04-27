@@ -34,7 +34,7 @@
       v-model="userList"
       :visible.sync="visible"
       :is-only-person="true"
-      select-type="Org,OuterUser"
+      :select-type="selectType"
       :title="title"
     ></user-picker>
   </div>
@@ -52,6 +52,12 @@ export default {
   mixins: [elFormEmitter],
 
   props: {
+    selectType: {
+      type: String,
+      default: () => {
+        return 'Org,OuterUser'
+      }
+    },
     title: {
       type: String,
       default: () => {
