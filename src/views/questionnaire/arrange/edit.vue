@@ -270,7 +270,7 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
-                v-if="!hisPersonList.find((person) => person.userId === scope.row.userId)"
+                v-if="deleteBtnVisible(scope.row)"
                 size="mini"
                 type="text"
                 @click="handleDeletePerson(scope.row)"
@@ -490,6 +490,14 @@ export default {
     this.$refs.form.resetFields()
   },
   methods: {
+    deleteBtnVisible(row) {
+      const status = this.$route.params.status
+      if (status == 2) {
+        return !this.hisPersonList.find((person) => person.userId === row.userId)
+      } else {
+        return true
+      }
+    },
     selectEnable(row) {
       if (this.$route.params.status != 2) return true
       if (this.hisPersonList.some((person) => person.userId === row.userId)) {
