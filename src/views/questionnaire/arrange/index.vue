@@ -18,7 +18,6 @@
             <div class="input-wrapper">
               <el-input
                 v-model="queryForm.planName"
-                :disabled="loading"
                 clearable
                 size="medium"
                 placeholder="输入问卷安排名称搜索"
@@ -28,6 +27,7 @@
 
             <el-popover
               v-model="queryFormVisible"
+              :offset="900"
               placement="bottom"
               transition="false"
               width="1327"
@@ -86,12 +86,40 @@
                   prop="subjectName"
                   style="margin-right: 0"
                 >
-                  <el-input
+                  <el-select
                     v-model="queryForm.subjectName"
+                    v-el-select-loadmore="loadmoreSubject"
                     style="width: 457px;"
                     clearable
+                    filterable
+                    remote
+                    reserve-keyword
+                    :loading="remoteLoading"
                     placeholder="请输入"
-                  />
+                    :remote-method="(query) => remoteMethod(query)"
+                    @focus="() => remoteMethod('')"
+                  >
+                    <el-option
+                      v-for="item in subjectOptions"
+                      :key="item.id"
+                      :label="item.asqName"
+                      :value="item.asqName"
+                    >
+                    </el-option>
+
+                    <div
+                      v-if="subjectLoading"
+                      style="color: #9c9c9c; line-height: 34px;text-align: center;"
+                    >
+                      加载中...
+                    </div>
+                    <div
+                      v-if="noMoreSubject && !subjectLoading"
+                      style="color: #9c9c9c;line-height: 34px;text-align: center;"
+                    >
+                      没有更多了
+                    </div>
+                  </el-select>
                 </el-form-item>
 
                 <el-form-item
@@ -246,17 +274,19 @@
           <el-table-column
             v-if="columns['问卷安排名称']"
             align="center"
-            width="180"
+            min-width="180"
+            prop="planName"
             :show-overflow-tooltip="true"
             label="问卷安排名称"
           >
             <template slot-scope="scope">
-              <el-button
-                type="text"
+              <div
+                class="column-title"
+                style="color: #01aafc; cursor: pointer;"
                 @click="toDetail(scope.row)"
               >
                 {{ scope.row.planName }}
-              </el-button>
+              </div>
             </template>
           </el-table-column>
 
@@ -360,7 +390,13 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
                     :disabled="shouldbeDisabled(scope.row)"
-                    @click.native="handleStatusChange(scope.row.id, scope.row.status == 2 ? 1 : 2)"
+                    @click.native="
+                      handleStatusChange(
+                        scope.row.id,
+                        scope.row.status == 2 ? 1 : 2,
+                        scope.row.planName
+                      )
+                    "
                   >
                     {{ scope.row.status == 1 ? '开始' : '暂停' }}
                   </el-dropdown-item>
@@ -396,6 +432,7 @@
 import Pagination from '@/components/common-pagination'
 import {
   queryQuestionnaireList,
+  questionnaireList,
   deleteQuestionnaire,
   end,
   suspend,
@@ -410,6 +447,29 @@ export default {
     Pagination,
     TreeSelector
   },
+  directives: {
+    'el-select-loadmore': {
+      bind(el, binding) {
+        // 获取element-ui定义好的scroll盒子
+        const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
+        SELECTWRAP_DOM.addEventListener('scroll', () => {
+          /**
+           * scrollHeight 获取元素内容高度(只读)
+           * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
+           * clientHeight 读取元素的可见高度(只读)
+           * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
+           * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
+           */
+          const condition =
+            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
+          if (condition) {
+            binding.value()
+          }
+        })
+      }
+    }
+  },
+
   data() {
     var minBackCountValidate = (_, value, callback) => {
       const maxBackCount = this.queryForm.maxBackCount
@@ -432,6 +492,10 @@ export default {
       }
     }
     return {
+      subjectLoading: false,
+      remoteLoading: false,
+      subjectOptions: [],
+      noMoreSubject: false,
       queryFormVisible: false,
       columns: {
         编号: true,
@@ -482,7 +546,12 @@ export default {
         maxBackCount: [{ type: 'number', validator: maxBackCountValidate, trigger: 'blur' }]
       },
       pickerOptionsStart: {},
-      pickerOptionsEnd: {}
+      pickerOptionsEnd: {},
+      subjectQuery: {
+        currentPage: 1,
+        size: 20,
+        asqName: ''
+      }
     }
   },
   computed: {
@@ -514,6 +583,35 @@ export default {
     this.getData()
   },
   methods: {
+    loadmoreSubject() {
+      if (this.subjectLoading) return
+      this.subjectQuery.currentPage++
+      this.remoteMethod(true)
+    },
+
+    remoteMethod(query) {
+      this.subjectLoading = true
+      if (typeof query != 'boolean') {
+        this.subjectQuery.asqName = query
+        this.subjectQuery.currentPage = 1
+        this.subjectOptions = []
+        this.remoteLoading = true
+      }
+      questionnaireList(this.subjectQuery)
+        .then((res) => {
+          const { list = [] } = res
+          if (typeof query != 'boolean') {
+            this.noMoreSubject = true
+          } else {
+            this.noMoreSubject = !list.length
+          }
+          this.subjectOptions = this.subjectOptions.concat(list)
+        })
+        .finally(() => {
+          this.subjectLoading = false
+          this.remoteLoading = false
+        })
+    },
     resetQueryForm() {
       this.queryForm = { ...this.initForm, planName: this.queryForm.planName }
       this.$refs.queryForm.clearValidate()
@@ -534,29 +632,48 @@ export default {
         return option != 2
       }
     },
-    async handleStatusChange(id, status) {
-      if (status === 3) {
-        const result = await this.confirmFinish()
-        if (!result) return
-      }
+    async handleStatusChange(id, status, name) {
+      let result
       let api
       switch (status) {
         case 1:
           api = suspend
+          result = await this.confirmSuspend(name)
           break
         case 2:
           api = start
+          result = await this.confirmStart()
           break
         case 3:
           api = end
+          result = await this.confirmFinish()
       }
+      if (!result) return
       api({ id }).then(() => {
         this.$message.success('操作成功')
         this.getList()
       })
     },
     confirmFinish() {
-      return this.$confirm('结束后，问卷将结束投放，并停止统计，确定要结束吗？', '提示', {
+      return this.$confirm('结束后，问卷将结束投放，并停止统计，确定要结束吗？', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(() => {})
+    },
+    confirmSuspend(name) {
+      return this.$confirm(
+        `暂停期间，问卷链接关闭，问卷不回收数据。确定要暂停回收问卷《${name}》吗？`,
+        '提醒',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).catch(() => {})
+    },
+    confirmStart() {
+      return this.$confirm('该问卷将会继续投放，确认开始吗？', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -691,6 +808,11 @@ export default {
   }
 }
 .arrange {
+  .column-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .el-form-item {
     margin-right: 20px;
   }

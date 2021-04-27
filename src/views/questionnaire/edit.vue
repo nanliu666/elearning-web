@@ -86,12 +86,12 @@
         </div>
         <el-table
           :data="form.asqQuestions"
+          class=""
           align="center"
           header-align="center"
           height="462px"
           row-key="content"
         >
-          <el-table-column> </el-table-column>
           <el-table-column
             type="index"
             align="center"
@@ -103,12 +103,13 @@
             prop="content"
             label="题干"
             align="center"
-            width="220"
+            min-width="220"
             show-overflow-tooltip
           ></el-table-column>
           <el-table-column
             align="center"
             label="题目类型"
+            min-width="220"
           >
             <template slot-scope="scope">
               <div>
@@ -218,6 +219,7 @@
                   v-model="asqQuestion.content"
                   type="textarea"
                   placeholder="请输入"
+                  :autosize="{ minRows: 3 }"
                   :maxlength="200"
                   show-word-limit
                 ></el-input>
@@ -303,8 +305,7 @@
                         <i class="icon-drag"></i>
                         <el-input
                           v-model="option.content"
-                          :disabled="option.disabled"
-                          :placeholder="option.placeholder"
+                          :placeholder="'选项' + (index + 1)"
                           class="option-input"
                         ></el-input>
 
@@ -339,7 +340,7 @@
               </el-button>
 
               <div
-                v-if="hasOtherOptions"
+                v-if="asqQuestion.type == 'multi_choice'"
                 class="other-option-container"
               >
                 <el-form
@@ -428,7 +429,7 @@ import Sortable from 'sortablejs'
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
-const OTHER_OPTIONS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
+const OTHER_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
 const ASQ_QUESTION = {
   content: '',
@@ -450,7 +451,6 @@ export default {
       otherMinValue: '',
       otherMaxValue: '',
       drawerVisible: false,
-      hasOtherOptions: false,
       form: {
         asqName: '',
         categoryId: '',
@@ -484,7 +484,7 @@ export default {
       const maxValue = this.asqQuestion.multiMax
       let endIndex = this.asqQuestion.asqQuestionOptions.length - 1
       if (maxValue && maxValue !== '不限') {
-        endIndex = OTHER_OPTIONS.indexOf(maxValue + '') + 1
+        endIndex = OTHER_OPTIONS.indexOf(maxValue) + 1
       }
       return OTHER_OPTIONS.slice(0, endIndex)
     },
@@ -492,7 +492,7 @@ export default {
       const minValue = this.asqQuestion.multiMin
       let startIndex = 0
       if (minValue) {
-        startIndex = OTHER_OPTIONS.indexOf(minValue + '')
+        startIndex = OTHER_OPTIONS.indexOf(minValue)
       }
       return ['不限'].concat(
         OTHER_OPTIONS.slice(startIndex, this.asqQuestion.asqQuestionOptions.length - 1)
@@ -505,9 +505,6 @@ export default {
         if (!val) return
         const form = (this.optionForm = {})
         const rules = (this.optionRules = {})
-        val.forEach((item, index) => {
-          item.placeholder = '选项' + (index + 1)
-        })
         val.forEach((opt, i) => {
           form['content' + i] = opt.content
           rules['content' + i] = [
@@ -515,32 +512,19 @@ export default {
             { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
           ]
         })
-        Object.assign(this.asqQuestion, { multiMin: '2', multiMax: '不限' })
+        Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
         this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
         this.clearValidate(this.$refs.optionForm)
-      },
-      deep: true
-    },
-    asqQuestion: {
-      handler(question) {
-        const type = question.type
-        if (type === 'multi_choice') {
-          const singleOtherIndex = this.asqQuestion.asqQuestionOptions.findIndex(
-            (option) => option.disabled
-          )
-          if (singleOtherIndex < 0) return
-          this.asqQuestion.asqQuestionOptions.splice(singleOtherIndex, 1)
-        } else if (type === 'single_choice') {
-          if (this.hasOtherOptions) this.hasOtherOptions = false
-        }
       },
       deep: true
     }
   },
   activated() {
     this.clearValidate()
-    this.$refs.form.resetFields()
-    this.$nextTick(() => this.rowDrop())
+    this.$nextTick(() => {
+      this.rowDrop()
+      this.$refs.form.resetFields()
+    })
     this.initData()
   },
   methods: {
@@ -556,17 +540,12 @@ export default {
       })
     },
     addOtherOptions() {
-      if (this.asqQuestion.type === 'multi_choice') {
-        this.hasOtherOptions = !this.hasOtherOptions
-      } else {
-        const asqQuestionOptions = this.asqQuestion.asqQuestionOptions
-        if (asqQuestionOptions.length >= 15) return
-        if (asqQuestionOptions.find((option) => option.content === '其他')) return
-        asqQuestionOptions.push({
-          content: '其他',
-          disabled: true
-        })
-      }
+      const asqQuestionOptions = this.asqQuestion.asqQuestionOptions
+      if (asqQuestionOptions.length >= 15) return
+      if (asqQuestionOptions.find((option) => option.content === '其他')) return
+      asqQuestionOptions.push({
+        content: '其他'
+      })
     },
     handleCancel() {
       this.$message.info('创建问卷取消')
@@ -606,7 +585,8 @@ export default {
     },
     processQuestionData(data) {
       if (!data || !data.length) return
-      const keys = ['content', 'type', 'asqQuestionOptions', 'status']
+      const keys = ['content', 'type', 'asqQuestionOptions', 'status', 'multiMax', 'multiMin']
+      const optionKeys = ['content']
       data.forEach((item, index) => {
         Object.keys(item).forEach((key) => {
           if (!keys.includes(key)) {
@@ -618,6 +598,11 @@ export default {
           return
         }
         item.asqQuestionOptions.forEach((q, idx) => {
+          Object.keys(q).forEach((key) => {
+            if (!optionKeys.includes(key)) {
+              delete q[key]
+            }
+          })
           q.sort = idx + 1
         })
       })
@@ -664,16 +649,10 @@ export default {
       if (target) {
         this.asqQuestion.target = target
       }
-      const { multiMin, multiMax } = this.asqQuestion
-      if (multiMin && multiMax) {
-        this.hasOtherOptions = true
-      }
-
       this.handleDrawerVisible(true)
     },
     handleDrawerVisible(visible) {
       if (!visible) {
-        this.hasOtherOptions = false
         this.asqQuestion = {}
       }
       this.clearValidate(this.$refs.questionForm)
@@ -689,28 +668,28 @@ export default {
     },
 
     async handleAsqQuestionSave() {
-      const valid = await this.questionFormValidate()
+      let valid = await this.questionFormValidate()
       if (!valid) return
       const asqQuestion = this.asqQuestion
+
       if (asqQuestion.type != 'short_answer') {
-        const valid = await this.optionFormValidate()
+        valid = await this.optionFormValidate()
         if (!valid) return
+        if (asqQuestion.type == 'multi_choice') {
+          valid = await this.otherFormValidate()
+          if (!valid) return
+          if (asqQuestion.multiMax == '不限') {
+            asqQuestion.multiMax = asqQuestion.asqQuestionOptions.length
+          }
+        }
       } else {
         delete asqQuestion.asqQuestionOptions
-        this.hasOtherOptions = false
       }
 
-      // 没有添加更多选项
-      if (!this.hasOtherOptions) {
+      if (asqQuestion.type != 'multi_choice') {
         delete asqQuestion.multiMin
         delete asqQuestion.multiMax
-      } else {
-        const valid = await this.otherFormValidate()
-        if (!valid) return
-        asqQuestion.multiMax = asqQuestion.multiMax + ''
-        asqQuestion.multiMin = asqQuestion.multiMin + ''
       }
-
       const asqQuestions = this.form.asqQuestions
       let target = asqQuestion.target
       if (target) {
@@ -778,6 +757,9 @@ export default {
 
 <style lang="scss">
 .edit-questionnaire {
+  .el-table__row {
+    cursor: move;
+  }
   .el-scrollbar__wrap {
     overflow-x: hidden;
   }
@@ -786,6 +768,7 @@ export default {
     line-height: 22px;
     margin-bottom: 8px;
   }
+
   .drawer-asqQuestion-type {
     .el-form-item__label {
       display: flex;

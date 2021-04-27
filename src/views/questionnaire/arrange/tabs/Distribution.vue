@@ -375,6 +375,7 @@ export default {
         width: 100%;
         height: 292px;
         box-sizing: border-box;
+        overflow: hidden;
         .chart {
           width: 100%;
           height: 292px;

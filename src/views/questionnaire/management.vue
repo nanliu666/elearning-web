@@ -18,7 +18,6 @@
             <div class="input-wrapper">
               <el-input
                 v-model="queryForm.asqName"
-                :disabled="loading"
                 clearable
                 size="medium"
                 placeholder="输入问卷名称搜索"
@@ -29,6 +28,7 @@
 
             <el-popover
               v-model="queryFormVisible"
+              :offset="900"
               placement="bottom-end"
               transition="false"
             >
@@ -190,26 +190,20 @@
           <el-table-column
             v-if="columns['问卷名称']"
             fixed="left"
-            align="center"
-            label="问卷名称"
+            align="left"
+            prop="asqName"
             :show-overflow-tooltip="true"
-            width="320"
+            label="问卷名称"
+            min-width="180"
           >
             <template slot-scope="scope">
-              <el-tooltip
-                class="item"
-                effect="dark"
-                :content="scope.row.asqName"
-                placement="top"
+              <div
+                class="column-title"
+                style="color: #01aafc; cursor: pointer;"
+                @click="toPreview(scope.row)"
               >
-                <div
-                  class="column-title"
-                  style="color: #01aafc; cursor: pointer;"
-                  @click="toPreview(scope.row)"
-                >
-                  {{ scope.row.asqName }}
-                </div>
-              </el-tooltip>
+                {{ scope.row.asqName }}
+              </div>
             </template>
           </el-table-column>
           <el-table-column
