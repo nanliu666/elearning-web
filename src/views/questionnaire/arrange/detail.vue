@@ -184,7 +184,6 @@ export default {
     if (toTab2) {
       this.activeComponent = 'Distribution'
     }
-    this.showCode = true
     this.id = id
     this.queryPlanDetail()
   },
@@ -202,12 +201,13 @@ export default {
       this.$message.success('已复制')
     },
     handleEdit() {
-      const id = this.data.id
+      const params = {}
+      Object.keys(this.data).forEach((key) => {
+        params[key] = this.data[key]
+      })
       this.$router.push({
         name: 'questionnaire-arrange',
-        params: {
-          id
-        }
+        params
       })
     },
     handleDelete() {
@@ -251,7 +251,8 @@ export default {
         .then(() => {
           this.$message.success('操作成功')
           this.data.status = status
-          this.$forceUpdate()
+          this.showCode = false
+          this.queryPlanDetail()
         })
         .finally(() => {
           this[loading] = false
@@ -287,6 +288,7 @@ export default {
     },
     queryPlanDetail() {
       queryPlanDetail({ id: this.id }).then((res) => {
+        this.showCode = true
         this.data = res
         this.$nextTick(() => {
           this.qrcode = new QRCode(this.$refs.code, {
@@ -390,6 +392,7 @@ export default {
     .pane-body {
       position: relative;
       .pane-body-list {
+        margin-right: 130px;
         .pane-body-item {
           display: flex;
           align-items: center;
@@ -398,6 +401,7 @@ export default {
             font-family: PingFangSC-Regular;
             font-size: 14px;
             color: rgba(0, 11, 21, 0.45);
+            flex: 0 0 70px;
           }
           .content {
             font-size: 14px;

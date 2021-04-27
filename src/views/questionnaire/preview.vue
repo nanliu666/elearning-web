@@ -38,25 +38,19 @@
                 :key="question.id"
                 class="question-item"
               >
-                <div class="question-type">
-                  {{ getTypeName(question) }}
-                  <span
-                    v-if="question.multiMin"
-                    class="question-limit"
-                  >
-                    【最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项】
-                  </span>
-                </div>
                 <div class="question-title">
-                  <span
-                    name="number"
-                    style="font-weight: bold;"
-                  >{{ index + 1 }}.</span>
                   <span
                     v-if="question.status == 1"
                     name="request"
                     style="display: inline-block; margin-right: 5px; color: red;"
-                  >*</span>{{ question.content }}
+                  >*</span><span style="margin-right: 5px;">{{ index + 1 }}.{{ question.content }}</span><span
+                    class="question-type"
+                  >【{{ getTypeName(question) }}】<span
+                    v-if="question.multiMin"
+                    class="question-limit"
+                    style="margin-left: 5px;"
+                  >最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项</span>
+                  </span>
                 </div>
                 <div class="question-content">
                   <el-input v-if="question.type == 'short_answer'"></el-input>
@@ -243,19 +237,20 @@ export default {
           .question-type {
             font-family: emoji;
             font-size: 14px;
-            color: #000b15;
+            color: rgba(0, 11, 21, 0.45);
             line-height: 24px;
             margin-bottom: 24px;
             font-weight: bold;
           }
           .question-limit {
             font-weight: 500;
-            color: rgba(0, 11, 21, 0.65);
+            color: rgba(0, 11, 21, 0.45);
           }
           .question-title {
             font-family: PingFangSC-Regular;
             font-size: 14px;
-            color: rgba(0, 11, 21, 0.65);
+            color: rgba(0, 11, 21, 0.85);
+            font-weight: bold;
             letter-spacing: 0;
             line-height: 22px;
             margin-bottom: 8px;

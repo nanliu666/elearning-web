@@ -244,6 +244,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column
+            :selectable="selectEnable"
             type="selection"
             width="55"
           >
@@ -269,6 +270,7 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
+                v-if="!hisPersonList.find((person) => person.userId === scope.row.userId)"
                 size="mini"
                 type="text"
                 @click="handleDeletePerson(scope.row)"
@@ -444,7 +446,8 @@ export default {
       publishLoading1: false,
       publishLoading0: false,
       subjectLoading: false,
-      noMoreSubject: false
+      noMoreSubject: false,
+      hisPersonList: []
     }
   },
   computed: {
@@ -477,6 +480,9 @@ export default {
   },
   created() {
     this.id = this.$route.params.id
+    if (this.$route.params.status == 2) {
+      this.step = '2'
+    }
     this.getCategoryData()
     this.initData()
   },
@@ -484,6 +490,14 @@ export default {
     this.$refs.form.resetFields()
   },
   methods: {
+    selectEnable(row) {
+      if (this.$route.params.status != 2) return true
+      if (this.hisPersonList.some((person) => person.userId === row.userId)) {
+        return false
+      } else {
+        return true // 不禁用
+      }
+    },
     toCategory() {
       const routeData = this.$router.resolve({
         path: '/questionnaire/catalog'
@@ -647,6 +661,7 @@ export default {
               userId: userId + ''
             }
           })
+          this.hisPersonList = JSON.parse(JSON.stringify(this.personList))
           delete res.users
           Object.assign(this.form, res)
         })
@@ -672,6 +687,7 @@ export default {
         })
     },
     handleStepChange(step) {
+      if (this.$route.params.status == 2) return
       if (this.step == 1) {
         this.$refs.form.validate((valid) => {
           if (valid) {
@@ -683,7 +699,11 @@ export default {
       this.step = step
     },
     handleSelectPerson(list) {
-      this.personList = list
+      if (this.$route.params.status == 2) {
+        this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
+      } else {
+        this.personList = list
+      }
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -693,7 +713,7 @@ export default {
       if (target) {
         message = '您确定要删除该人员吗？'
       } else {
-        message = '您确定要批量删除该人员吗？'
+        message = '您确定要批量删除所选人员吗？'
       }
       this.$confirm(message, '提醒', {
         confirmButtonText: '确定',

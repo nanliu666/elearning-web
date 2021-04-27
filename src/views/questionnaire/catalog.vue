@@ -129,7 +129,7 @@ const TABLE_CONFIG = {
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
   handlerColumn: {
-    minWidth: 100
+    minWidth: 160
   }
 }
 import {

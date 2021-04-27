@@ -27,7 +27,7 @@
       </div>
       <div class="data-item">
         <div class="name">
-          平均完成时间/分钟
+          平均提交时间/分钟
         </div>
         <div class="content">
           {{ count.avgTime }}
@@ -72,7 +72,7 @@
                     @getValue="(name) => (queryForm.dept = name)"
                   />
                 </el-form-item>
-                <el-form-item label="完成时间">
+                <el-form-item label="提交时间">
                   <el-date-picker
                     v-model="queryForm.subTime"
                     type="date"
@@ -82,7 +82,7 @@
                   </el-date-picker>
                 </el-form-item>
 
-                <el-form-item label="完成情况">
+                <el-form-item label="提交情况">
                   <el-select
                     v-model="queryForm.status"
                     clearable
@@ -193,7 +193,7 @@
             align="center"
             prop="state"
             :show-overflow-tooltip="true"
-            label="完成情况"
+            label="提交情况"
           >
             <template slot-scope="scope">
               {{ scope.row.status == 0 ? '未完成' : '已完成' }}
@@ -203,7 +203,7 @@
             align="center"
             prop="subTime"
             :show-overflow-tooltip="true"
-            label="完成时间"
+            label="提交时间"
           >
           </el-table-column>
           <el-table-column
@@ -214,6 +214,7 @@
               <el-button
                 type="text"
                 size="mini"
+                :disabled="scope.row.status == 0"
                 @click="showPreview(scope.row)"
               >
                 查看问卷
