@@ -131,6 +131,7 @@
             :props="seletorProps"
             :value="form.categoryId"
             @change="handleTreeSelectChange"
+            @getValue="(id) => (form.categoryId = id)"
           />
         </el-form-item>
 
@@ -479,8 +480,8 @@ export default {
     }
   },
   created() {
-    this.id = this.$route.params.id
-    if (this.$route.params.status == 2) {
+    this.id = this.$route.query.id
+    if (this.$route.query.status == 2) {
       this.step = '2'
     }
     this.getCategoryData()
@@ -491,7 +492,7 @@ export default {
   },
   methods: {
     deleteBtnVisible(row) {
-      const status = this.$route.params.status
+      const status = this.$route.query.status
       if (status == 2) {
         return !this.hisPersonList.find((person) => person.userId === row.userId)
       } else {
@@ -499,7 +500,7 @@ export default {
       }
     },
     selectEnable(row) {
-      if (this.$route.params.status != 2) return true
+      if (this.$route.query.status != 2) return true
       if (this.hisPersonList.some((person) => person.userId === row.userId)) {
         return false
       } else {
@@ -695,7 +696,7 @@ export default {
         })
     },
     handleStepChange(step) {
-      if (this.$route.params.status == 2) return
+      if (this.$route.query.status == 2) return
       if (this.step == 1) {
         this.$refs.form.validate((valid) => {
           if (valid) {
@@ -707,7 +708,7 @@ export default {
       this.step = step
     },
     handleSelectPerson(list) {
-      if (this.$route.params.status == 2) {
+      if (this.$route.query.status == 2) {
         this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
       } else {
         this.personList = list
