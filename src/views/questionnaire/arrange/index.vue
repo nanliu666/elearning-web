@@ -273,7 +273,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['问卷安排名称']"
-            align="center"
+            align="left"
             min-width="180"
             prop="planName"
             :show-overflow-tooltip="true"
@@ -720,15 +720,15 @@ export default {
       this.multipleSelection = val
     },
     handleEdit(edit) {
-      const params = {}
+      const query = {}
       if (!(edit instanceof MouseEvent)) {
         Object.keys(edit).forEach((key) => {
-          params[key] = edit[key]
+          query[key] = edit[key]
         })
       }
       this.$router.push({
-        name: 'questionnaire-arrange',
-        params
+        path: '/questionnaire-arrange',
+        query
       })
     },
     handleDelete(target) {

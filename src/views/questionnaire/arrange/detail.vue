@@ -201,13 +201,13 @@ export default {
       this.$message.success('已复制')
     },
     handleEdit() {
-      const params = {}
+      const query = {}
       Object.keys(this.data).forEach((key) => {
-        params[key] = this.data[key]
+        query[key] = this.data[key]
       })
       this.$router.push({
-        name: 'questionnaire-arrange',
-        params
+        path: '/questionnaire-arrange',
+        query
       })
     },
     handleDelete() {
