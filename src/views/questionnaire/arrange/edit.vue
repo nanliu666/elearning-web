@@ -242,10 +242,12 @@
           :data="currentPersonList"
           align="center"
           header-align="center"
+          row-key="userId"
           @selection-change="handleSelectionChange"
         >
           <el-table-column
             :selectable="selectEnable"
+            reserve-selection
             type="selection"
             width="55"
           >
