@@ -433,8 +433,6 @@ export default {
                 : []
             )
           })
-
-          console.log(this.questionResults)
         })
         .finally(() => (this.dialogLoading = false))
     },
@@ -567,8 +565,7 @@ export default {
           }
           .question-name {
             font-weight: bold;
-            flex-grow: 0;
-            flex-shrink: 1;
+            max-width: 500px;
           }
           .question-type {
             flex: 0 0 70px;

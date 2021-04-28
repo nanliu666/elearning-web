@@ -357,6 +357,8 @@ export default {
       align-items: center;
       margin-bottom: 20px;
       .pane-header-l {
+        flex: 1;
+        margin-right: 20px;
         display: flex;
         align-items: center;
         height: 22px;
@@ -368,6 +370,7 @@ export default {
         }
         .status {
           width: 52px;
+          flex: 0 0 52px;
           height: 20px;
           line-height: 20px;
           text-align: center;
@@ -387,6 +390,10 @@ export default {
             background-color: #e7fbff;
           }
         }
+      }
+      .pane-header-r {
+        flex: 0 0 255px;
+        widows: 255px;
       }
     }
     .pane-body {

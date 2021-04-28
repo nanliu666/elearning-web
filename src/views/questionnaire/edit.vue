@@ -305,6 +305,7 @@
                         <i class="icon-drag"></i>
                         <el-input
                           v-model="option.content"
+                          :disabled="option.disabled"
                           :placeholder="'选项' + (index + 1)"
                           class="option-input"
                         ></el-input>
@@ -512,7 +513,6 @@ export default {
             { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
           ]
         })
-        Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
         this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
         this.clearValidate(this.$refs.optionForm)
       },
@@ -542,9 +542,10 @@ export default {
     addOtherOptions() {
       const asqQuestionOptions = this.asqQuestion.asqQuestionOptions
       if (asqQuestionOptions.length >= 15) return
-      if (asqQuestionOptions.find((option) => option.content === '其他')) return
+      if (asqQuestionOptions.some((option) => option.disabled)) return
       asqQuestionOptions.push({
-        content: '其他'
+        content: '其他',
+        disabled: true
       })
     },
     handleCancel() {
@@ -586,7 +587,6 @@ export default {
     processQuestionData(data) {
       if (!data || !data.length) return
       const keys = ['content', 'type', 'asqQuestionOptions', 'status', 'multiMax', 'multiMin']
-      const optionKeys = ['content']
       data.forEach((item, index) => {
         Object.keys(item).forEach((key) => {
           if (!keys.includes(key)) {
@@ -598,11 +598,6 @@ export default {
           return
         }
         item.asqQuestionOptions.forEach((q, idx) => {
-          Object.keys(q).forEach((key) => {
-            if (!optionKeys.includes(key)) {
-              delete q[key]
-            }
-          })
           q.sort = idx + 1
         })
       })
@@ -639,10 +634,8 @@ export default {
       }
     },
     handleEdit(target) {
-      let asqQuestion = deepClone(ASQ_QUESTION)
-      asqQuestion = (target && Object.assign(asqQuestion, target)) || asqQuestion
-
-      this.asqQuestion = asqQuestion
+      target = target || ASQ_QUESTION
+      let asqQuestion = (this.asqQuestion = deepClone(target))
       while (asqQuestion.asqQuestionOptions.length < 2) {
         this.addQuestionOption()
       }
@@ -665,6 +658,7 @@ export default {
       this.asqQuestion.asqQuestionOptions.push({
         content: ''
       })
+      Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
     },
 
     async handleAsqQuestionSave() {
@@ -692,6 +686,7 @@ export default {
       }
       const asqQuestions = this.form.asqQuestions
       let target = asqQuestion.target
+      console.log(asqQuestion)
       if (target) {
         asqQuestions.splice(asqQuestions.indexOf(target), 1, asqQuestion)
         delete asqQuestion.target
@@ -740,6 +735,7 @@ export default {
         this.asqQuestion.asqQuestionOptions.indexOf(option),
         1
       )
+      Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
     },
     handleDelete(index) {
       this.form.asqQuestions.splice(index, 1)
