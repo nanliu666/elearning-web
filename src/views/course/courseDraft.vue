@@ -1018,8 +1018,8 @@ export default {
         data7 = this.arrClearBlank(data7, 'creatorId')
 
         if (this.status == 1) {
-          SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+          // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+          // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
         } else {
           SEARCH_POPOVER_POPOVER_OPTIONS[6].options = []
           SEARCH_POPOVER_POPOVER_OPTIONS[6].options.push(...data7)
@@ -1058,8 +1058,8 @@ export default {
 
       this.getInfo()
       this.getScreenInfo()
-      this.$refs.seachPopover.resetForm()
-
+      if (this.$refs.seachPopover) this.$refs.seachPopover.resetForm()
+      this.$refs.table.clearSelection()
       let unshiftData = {
         config: { placeholder: '请选择' },
         data: '',
@@ -1072,6 +1072,8 @@ export default {
           { value: '2', label: '全部' }
         ]
       }
+
+      // console.log(this.$refs.table.clearSelection());
 
       // 草稿没有状态
       if (this.status == 1) {

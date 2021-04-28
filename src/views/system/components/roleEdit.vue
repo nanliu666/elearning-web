@@ -298,8 +298,8 @@ export default {
     createFunc(callback) {
       const params = {
         ...this.form,
-        categoryId: this.categoryId,
-        orgIds: this.form.orgIds.toString()
+        categoryId: this.categoryId
+        // orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       createRole(params)
@@ -321,8 +321,8 @@ export default {
         ...this.form,
         positions,
         jobs: this.form.jobs,
-        categoryId: this.categoryId,
-        orgIds: this.form.orgIds.toString()
+        categoryId: this.categoryId
+        // orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       updateRole(params)
