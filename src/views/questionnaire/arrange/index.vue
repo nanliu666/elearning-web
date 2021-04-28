@@ -264,7 +264,7 @@
           <el-table-column
             v-if="columns['编号']"
             fixed="left"
-            align="center"
+            align="left"
             prop="planCode"
             label="编号"
             width="180"
@@ -292,7 +292,7 @@
 
           <el-table-column
             v-if="columns['状态']"
-            align="center"
+            align="left"
             prop="status"
             :show-overflow-tooltip="true"
             label="状态"
@@ -305,7 +305,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['所在分类']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="categoryFullName"
             label="所在分类"
@@ -313,7 +313,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['回收数量']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="backCount"
             label="回收数量"
@@ -321,7 +321,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['关联问卷']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="subjectName"
             label="关联问卷"
@@ -329,7 +329,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['发布时间']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="publishTime"
             label="发布时间"
@@ -337,7 +337,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['截止时间']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="endTime"
             label="截止时间"
@@ -345,7 +345,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['创建时间']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="createTime"
             label="创建时间"
@@ -354,7 +354,7 @@
 
           <el-table-column
             prop="operate"
-            align="center"
+            align="left"
             label="操作"
             fixed="right"
             width="180"
