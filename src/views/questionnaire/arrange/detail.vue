@@ -266,7 +266,7 @@ export default {
       }).catch(() => {})
     },
     toPreview() {
-      const id = this.data.subjectId
+      const id = this.data.subjectCpId
       this.$router.push({
         path: '/questionnaire/preview',
         query: {

@@ -208,7 +208,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['问卷分类']"
-            align="center"
+            align="left"
             prop="categoryName"
             :show-overflow-tooltip="true"
             label="问卷分类"
@@ -217,7 +217,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['问卷简介']"
-            align="center"
+            align="left"
             prop="remark"
             :show-overflow-tooltip="true"
             label="问卷简介"
@@ -231,7 +231,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['题目数量']"
-            align="center"
+            align="left"
             prop="questionNum"
             :show-overflow-tooltip="true"
             label="题目数量"
@@ -240,7 +240,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['创建时间']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="createTime"
             label="创建时间"
@@ -249,7 +249,7 @@
           </el-table-column>
           <el-table-column
             v-if="columns['创建人']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="name"
             label="创建人"
@@ -259,7 +259,7 @@
 
           <el-table-column
             prop="operate"
-            align="center"
+            align="left"
             label="操作"
             fixed="right"
             width="180"

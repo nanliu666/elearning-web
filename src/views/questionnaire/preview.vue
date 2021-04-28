@@ -39,21 +39,31 @@
                 class="question-item"
               >
                 <div class="question-title">
+                  <div class="question-index">
+                    <span
+                      v-if="question.status == 1"
+                      class="request"
+                    >*</span>
+
+                    <span class="text">{{ index + 1 }}.</span>
+                  </div>
+                  <div class="question-name">
+                    {{ question.content }}
+                  </div>
+                  <div class="question-type">
+                    【{{ getTypeName(question) }}】
+                  </div>
                   <span
-                    v-if="question.status == 1"
-                    name="request"
-                    style="display: inline-block; margin-right: 5px; color: red;"
-                  >*</span><span style="margin-right: 5px;">{{ index + 1 }}.{{ question.content }}</span><span
-                    class="question-type"
-                  >【{{ getTypeName(question) }}】<span
-                    v-if="question.multiMin"
+                    v-if="question.type == 'multi_choice'"
                     class="question-limit"
-                    style="margin-left: 5px;"
                   >最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项</span>
-                  </span>
                 </div>
+
                 <div class="question-content">
-                  <el-input v-if="question.type == 'short_answer'"></el-input>
+                  <el-input
+                    v-if="question.type == 'short_answer'"
+                    :value="questionResults[index]"
+                  ></el-input>
 
                   <el-radio-group v-if="question.type == 'single_choice'">
                     <el-radio
@@ -64,11 +74,16 @@
                   </el-radio-group>
 
                   <div v-if="question.type == 'multi_choice'">
-                    <el-checkbox
-                      v-for="(option, option_index) in question.asqQuestionOptions"
-                      :key="option_index"
-                      :label="option.content"
-                    />
+                    <el-checkbox-group
+                      v-model="questionResults[index]"
+                      disabled
+                    >
+                      <el-checkbox
+                        v-for="(option, option_index) in question.asqQuestionOptions"
+                        :key="option_index"
+                        :label="option.content"
+                      />
+                    </el-checkbox-group>
                   </div>
                 </div>
               </div>
@@ -112,13 +127,7 @@ export default {
           this.data = data
           if (!data.asqQuestions) return
           data.asqQuestions.forEach((question) => {
-            this.questionResults.push(
-              question.type == 'short_answer'
-                ? ''
-                : question.type == 'single_choice'
-                ? question.asqQuestionOptions[0].content
-                : [question.asqQuestionOptions[0].content]
-            )
+            this.questionResults.push(question.type == 'multi_choice' ? [] : '')
           })
         })
         .finally(() => {
@@ -150,6 +159,7 @@ export default {
 .preview {
   .question-content {
     margin-left: 12px;
+    width: 452px;
     .el-radio,
     .el-checkbox {
       display: block;
@@ -226,34 +236,57 @@ export default {
           color: rgba(0, 11, 21, 0.45);
           max-width: 800px;
           margin: 16px auto 0;
+          word-break: break-all;
         }
       }
       .preview-topic {
         margin-top: 40px;
         .question-item {
           font-size: 14px;
-          max-width: 452px;
           margin-bottom: 40px;
-          .question-type {
-            font-family: emoji;
-            font-size: 14px;
-            color: rgba(0, 11, 21, 0.45);
-            line-height: 24px;
-            margin-bottom: 24px;
-            font-weight: bold;
-          }
-          .question-limit {
-            font-weight: 500;
-            color: rgba(0, 11, 21, 0.45);
-          }
           .question-title {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: flex-start;
             font-family: PingFangSC-Regular;
             font-size: 14px;
             color: rgba(0, 11, 21, 0.85);
-            font-weight: bold;
             letter-spacing: 0;
             line-height: 22px;
             margin-bottom: 8px;
+            .question-index {
+              font-weight: bold;
+              flex-grow: 0;
+              flex-shrink: 1;
+              display: flex;
+              align-items: center;
+              margin-right: 5px;
+              .request {
+                margin-right: 5px;
+                color: red;
+              }
+              .text {
+                color: #000;
+              }
+            }
+            .question-name {
+              font-weight: bold;
+              flex-grow: 0;
+              flex-shrink: 1;
+            }
+            .question-type {
+              flex: 0 0 70px;
+              width: 70px;
+              font-family: emoji;
+              color: rgba(0, 11, 21, 0.45);
+              font-weight: bold;
+            }
+            .question-limit {
+              font-family: emoji;
+              flex-shrink: 0;
+              color: rgba(0, 11, 21, 0.45);
+            }
           }
         }
       }
