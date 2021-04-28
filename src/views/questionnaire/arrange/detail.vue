@@ -391,10 +391,6 @@ export default {
           }
         }
       }
-      .pane-header-r {
-        flex: 0 0 255px;
-        widows: 255px;
-      }
     }
     .pane-body {
       position: relative;

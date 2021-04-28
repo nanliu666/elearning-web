@@ -54,7 +54,7 @@
             >
               上一步
             </el-button>
-            <el-button
+            <!-- <el-button
               v-show="step == 2"
               type="default"
               size="medium"
@@ -62,7 +62,7 @@
               @click="publish(1)"
             >
               存草稿
-            </el-button>
+            </el-button> -->
             <el-button
               v-show="step == 2"
               type="primary"

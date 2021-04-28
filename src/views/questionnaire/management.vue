@@ -258,7 +258,6 @@
           </el-table-column>
 
           <el-table-column
-            prop="operate"
             align="left"
             label="操作"
             fixed="right"
