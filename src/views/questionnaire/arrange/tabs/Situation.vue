@@ -41,7 +41,6 @@
             <div class="input-wrapper">
               <el-input
                 v-model="queryForm.userName"
-                :disabled="loading"
                 clearable
                 size="medium"
                 placeholder="输入学员姓名搜索"
@@ -51,6 +50,7 @@
 
             <el-popover
               v-model="queryFormVisible"
+              :offset="200"
               placement="bottom"
               transition="false"
             >
@@ -89,11 +89,11 @@
                     placeholder="请选择"
                   >
                     <el-option
-                      label="已完成"
+                      label="已提交"
                       :value="1"
                     ></el-option>
                     <el-option
-                      label="未完成"
+                      label="未提交"
                       :value="0"
                     ></el-option>
                   </el-select>
@@ -196,7 +196,7 @@
             label="提交情况"
           >
             <template slot-scope="scope">
-              {{ scope.row.status == 0 ? '未完成' : '已完成' }}
+              {{ scope.row.status == 0 ? '未提交' : '已提交' }}
             </template>
           </el-table-column>
           <el-table-column
@@ -260,29 +260,37 @@
                 :key="question.questionId"
                 class="question-item"
               >
-                <div class="question-type">
-                  {{ getTypeName(question) }}
-                </div>
                 <div class="question-title">
+                  <div class="question-index">
+                    <span
+                      v-if="question.status == 1"
+                      class="request"
+                    >*</span>
+
+                    <span class="text">{{ index + 1 }}.</span>
+                  </div>
+                  <div class="question-name">
+                    {{ question.content }}
+                  </div>
+                  <div class="question-type">
+                    【{{ getTypeName(question) }}】
+                  </div>
                   <span
-                    name="number"
-                    style="font-weight: bold;"
-                  >{{ index + 1 }}.</span>
-                  <span
-                    v-if="question.status == 1"
-                    name="request"
-                    style="display: inline-block; margin-right: 5px; color: red;"
-                  >*</span>{{ question.content }}
+                    v-if="question.type == 'multi_choice'"
+                    class="question-limit"
+                  >最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项</span>
                 </div>
+
                 <div class="question-content">
                   <el-input
                     v-if="question.type == 'short_answer'"
-                    v-model="questionResults[index]"
+                    :value="questionResults[index]"
                   ></el-input>
 
                   <el-radio-group
                     v-if="question.type == 'single_choice'"
                     v-model="questionResults[index]"
+                    disabled
                   >
                     <el-radio
                       v-for="(option, option_index) in question.optionCpList"
@@ -291,16 +299,18 @@
                     ></el-radio>
                   </el-radio-group>
 
-                  <el-checkbox-group
-                    v-if="question.type == 'multi_choice'"
-                    v-model="questionResults[index]"
-                  >
-                    <el-checkbox
-                      v-for="(option, option_index) in question.optionCpList"
-                      :key="option_index"
-                      :label="option.content"
-                    />
-                  </el-checkbox-group>
+                  <div v-if="question.type == 'multi_choice'">
+                    <el-checkbox-group
+                      v-model="questionResults[index]"
+                      disabled
+                    >
+                      <el-checkbox
+                        v-for="(option, option_index) in question.optionCpList"
+                        :key="option_index"
+                        :label="option.content"
+                      />
+                    </el-checkbox-group>
+                  </div>
                 </div>
               </div>
             </div>
@@ -411,14 +421,20 @@ export default {
           this.questionData = res
           if (!res.questionCpList) return
           res.questionCpList.forEach((question) => {
+            const { optionCpList = [], answerUser = '', type } = question
+
             this.questionResults.push(
-              question.type == 'short_answer'
-                ? ''
-                : question.type == 'single_choice'
-                ? question.optionCpList[0].content
-                : [question.optionCpList[0].content]
+              type != 'multi_choice'
+                ? answerUser
+                : answerUser
+                ? optionCpList
+                    .filter((option) => answerUser.split(',').includes(option.questionId))
+                    .map((option) => option.content)
+                : []
             )
           })
+
+          console.log(this.questionResults)
         })
         .finally(() => (this.dialogLoading = false))
     },
@@ -507,6 +523,7 @@ export default {
     }
     .question-content {
       margin-left: 12px;
+      width: 452px;
       .el-radio,
       .el-checkbox {
         display: block;
@@ -521,23 +538,50 @@ export default {
       margin-top: 40px;
       .question-item {
         font-size: 14px;
-        max-width: 452px;
         margin-bottom: 40px;
-        .question-type {
-          font-family: emoji;
-          font-size: 14px;
-          color: #000b15;
-          line-height: 24px;
-          margin-bottom: 24px;
-          font-weight: bold;
-        }
         .question-title {
+          display: flex;
+          width: 100%;
+          align-items: center;
+          justify-content: flex-start;
           font-family: PingFangSC-Regular;
           font-size: 14px;
-          color: rgba(0, 11, 21, 0.65);
+          color: rgba(0, 11, 21, 0.85);
           letter-spacing: 0;
           line-height: 22px;
           margin-bottom: 8px;
+          .question-index {
+            font-weight: bold;
+            flex-grow: 0;
+            flex-shrink: 1;
+            display: flex;
+            align-items: center;
+            margin-right: 5px;
+            .request {
+              margin-right: 5px;
+              color: red;
+            }
+            .text {
+              color: #000;
+            }
+          }
+          .question-name {
+            font-weight: bold;
+            flex-grow: 0;
+            flex-shrink: 1;
+          }
+          .question-type {
+            flex: 0 0 70px;
+            width: 70px;
+            font-family: emoji;
+            color: rgba(0, 11, 21, 0.45);
+            font-weight: bold;
+          }
+          .question-limit {
+            font-family: emoji;
+            flex-shrink: 0;
+            color: rgba(0, 11, 21, 0.45);
+          }
         }
       }
     }
