@@ -134,6 +134,7 @@ export default {
         remark: '',
         name: '',
         sex: '',
+        idNo: '',
         phonenum: '',
         email: '',
         roleIds: [],
@@ -202,9 +203,18 @@ export default {
           ]
         },
         {
+          itemType: 'input',
+          prop: 'idNo',
+          label: '身份证号',
+          rules: [
+            { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '您的身份证格式不正确' }
+          ]
+        },
+        {
           itemType: 'select',
           prop: 'roleIds',
           label: '角色',
+          offset: 4,
           multiple: true,
           props: {
             label: 'roleName',
@@ -214,7 +224,6 @@ export default {
         },
         {
           prop: 'birthDate',
-          offset: 4,
           itemType: 'datePicker',
           label: '出生日期',
           pickerOptions: {

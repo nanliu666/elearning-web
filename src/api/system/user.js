@@ -300,3 +300,12 @@ export const getTrainGetCatalogs = (params) => get('/api/manage/v1/train/getCata
  * @desc 获取所有的培训分类
  */
 export const getAllCatalog = (params) => get('/api/manage/v1/train/queryAllCatalog', params)
+/**
+ * @desc 批量离职
+ */
+export const bulkDepartures = (params) => post('/api/user/v1/user/status/reset', params)
+/**
+ * @desc 批量修改部门
+ */
+export const updateUserIdBatchOrg = (params) =>
+  post('/api/user/v1/user/updateUserIdBatchOrg', params)
