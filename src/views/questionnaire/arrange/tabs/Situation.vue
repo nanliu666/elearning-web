@@ -19,7 +19,7 @@
       </div>
       <div class="data-item">
         <div class="name">
-          回收率/人
+          回收率/%
         </div>
         <div class="content">
           {{ count.backRate }}

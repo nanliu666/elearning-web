@@ -268,6 +268,11 @@
             prop="department"
             label="所属组织"
           >
+          <template slot-scope="scope">
+            <div>
+              {{scope.row.department || '--'}}
+            </div>
+          </template>
           </el-table-column>
 
           <el-table-column label="操作">
