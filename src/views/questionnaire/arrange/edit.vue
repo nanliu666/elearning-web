@@ -310,15 +310,16 @@
         slot="title"
         class="dialog-title"
       >
-        问卷链接和二维码
+        问卷链接
+        <!-- 问卷链接和二维码 -->
       </div>
       <div class="dialog-content">
-        <div class="code-wrapper">
+        <!-- <div class="code-wrapper">
           <div
             ref="code"
             class="code"
           ></div>
-        </div>
+        </div> -->
 
         <div class="content-r">
           <div class="url">
@@ -336,14 +337,14 @@
               </el-button>
             </el-input>
           </div>
-          <el-button
+          <!-- <el-button
             class="downlod-btn"
             size="medium"
             type="default"
             @click="handleCodeDownload"
           >
             下载二维码
-          </el-button>
+          </el-button> -->
         </div>
       </div>
       <span
@@ -471,13 +472,14 @@ export default {
   watch: {
     dialogVisible(val) {
       if (val) {
-        this.$nextTick(() => {
-          const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
-            width: CODE_WIDTH,
-            height: CODE_HEIGHT
-          }))
-          qrcode.makeCode(this.href)
-        })
+        // 生成二维码
+        // this.$nextTick(() => {
+        //   const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
+        //     width: CODE_WIDTH,
+        //     height: CODE_HEIGHT
+        //   }))
+        //   qrcode.makeCode(this.href)
+        // })
       }
     }
   },
@@ -646,7 +648,7 @@ export default {
       api($data)
         .then((res) => {
           if (!this.id) {
-            this.href = window.location.origin + '/#/questionnaire/arrange?id=' + res
+            this.href = window.location.origin + '/#/questionnaire/preview?id=' + res
             saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
               this.dialogVisible = true
             })

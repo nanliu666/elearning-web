@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { editView } from '@/api/questionnaire'
+import { editView, editView2  } from '@/api/questionnaire'
 export default {
   name: 'Preview',
   data() {
@@ -121,7 +121,20 @@ export default {
   methods: {
     getData() {
       this.loading = true
-      editView({ id: this.$route.query.id })
+      let params, api
+      const { id, subjectCpId } = this.$route.query
+      if (subjectCpId) {
+        params = {
+          subjectCpId
+        }
+        api = editView2
+      } else {
+        params = {
+          id
+        }
+        api = editView
+      }
+      api(params)
         .then((res) => {
           const [data = {}] = res
           this.data = data
