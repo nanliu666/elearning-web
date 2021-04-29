@@ -353,8 +353,8 @@ export default {
       }
     }
     .intro-right {
-      flex: 0 0 188px;
-      width: 188px;
+      flex: 0 0 222px;
+      width: 222px;
     }
   }
 

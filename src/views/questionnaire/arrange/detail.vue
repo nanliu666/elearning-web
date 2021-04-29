@@ -96,7 +96,7 @@
             </div>
           </div>
         </div>
-        <div class="pane-code">
+        <!-- <div class="pane-code">
           <div
             v-if="showCode"
             ref="code"
@@ -111,7 +111,7 @@
               复制链接
             </el-button>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -266,11 +266,11 @@ export default {
       }).catch(() => {})
     },
     toPreview() {
-      const id = this.data.subjectCpId
+      const { subjectCpId } = this.data
       this.$router.push({
         path: '/questionnaire/preview',
         query: {
-          id
+          subjectCpId
         }
       })
     },
@@ -290,13 +290,13 @@ export default {
       queryPlanDetail({ id: this.id }).then((res) => {
         this.showCode = true
         this.data = res
-        this.$nextTick(() => {
-          this.qrcode = new QRCode(this.$refs.code, {
-            width: CODE_WIDTH,
-            height: CODE_HEIGHT
-          })
-          this.qrcode.makeCode(this.data.asqUrl)
-        })
+        // this.$nextTick(() => {
+        //   this.qrcode = new QRCode(this.$refs.code, {
+        //     width: CODE_WIDTH,
+        //     height: CODE_HEIGHT
+        //   })
+        //   this.qrcode.makeCode(this.data.asqUrl)
+        // })
       })
     }
   }

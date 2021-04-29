@@ -160,6 +160,14 @@ export const editView = (params) => {
   })
 }
 
+export const editView2 = (params) => {
+  return request({
+    url: '/api/margin/v1/asq/plan/detail/subject',
+    method: 'get',
+    params
+  })
+}
+
 export const count = (params) => {
   return request({
     url: '/api/margin/v1/asq/plan/detail/count',
