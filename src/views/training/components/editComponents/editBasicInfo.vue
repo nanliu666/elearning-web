@@ -357,7 +357,7 @@ export default {
           positionList.true.map(async (item) => {
             return (async () => {
               await getPositionUserList({
-                orgId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.positionId
+                parentId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.positionId
               })
             })()
           })
