@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { editView, editView2  } from '@/api/questionnaire'
+import { editView, editView2 } from '@/api/questionnaire'
 export default {
   name: 'Preview',
   data() {

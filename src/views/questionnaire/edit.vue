@@ -136,7 +136,7 @@
             <template slot-scope="scope">
               <el-button
                 size="mini"
-                @click="handleEdit(scope.row)"
+                @click="handleEdit(scope.row, scope.$index)"
               >
                 编辑
               </el-button>
@@ -549,7 +549,7 @@ export default {
       })
     },
     handleCancel() {
-      this.$message.info('创建问卷取消')
+      this.$message.info(this.$route.query.id ? '编辑问卷已取消' : '创建问卷取消')
       this.$router.back()
     },
     async handleSubmit() {
@@ -633,14 +633,11 @@ export default {
           return ''
       }
     },
-    handleEdit(target) {
+    handleEdit(target, index) {
       target = target || ASQ_QUESTION
-      let asqQuestion = (this.asqQuestion = deepClone(target))
-      while (asqQuestion.asqQuestionOptions.length < 2) {
-        this.addQuestionOption()
-      }
+      this.asqQuestion = deepClone(target)
       if (target) {
-        this.asqQuestion.target = target
+        this.asqQuestion._index = index
       }
       this.handleDrawerVisible(true)
     },
@@ -685,11 +682,10 @@ export default {
         delete asqQuestion.multiMax
       }
       const asqQuestions = this.form.asqQuestions
-      let target = asqQuestion.target
-      console.log(asqQuestion)
-      if (target) {
-        asqQuestions.splice(asqQuestions.indexOf(target), 1, asqQuestion)
-        delete asqQuestion.target
+      let questionIdx = asqQuestion._index
+      if (typeof questionIdx == 'number') {
+        delete asqQuestion._index
+        asqQuestions.splice(questionIdx, 1, asqQuestion)
       } else {
         asqQuestions.push(asqQuestion)
       }
