@@ -424,6 +424,7 @@ export default {
       return result
     },
     showPreview(item) {
+      this.questionResults = []
       this.dialogVisible = true
       this.dialogLoading = true
       viewAnswer({ subjectCpId: item.subjectCpId })
