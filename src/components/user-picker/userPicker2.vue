@@ -431,6 +431,7 @@ export default {
       const diffIndex = _.findIndex(this.checkedUsers, (item) => {
         return item === _.get(diffName, '[0].name', '')
       })
+
       if (diffIndex !== -1) {
         this.checkedUsers.splice(diffIndex, 1)
         this.checkAll = false
@@ -749,6 +750,7 @@ export default {
             this.usersNameList = []
             this.outerParams.loaded = true
           }
+          console.log(this.selected)
           this.outerParams.pageNo = pageNo + 1
           this.isClear = totalPage < pageNo + 1
         })
