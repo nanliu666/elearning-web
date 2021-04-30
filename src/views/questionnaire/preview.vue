@@ -48,11 +48,9 @@
                     <span class="text">{{ index + 1 }}.</span>
                   </div>
                   <div class="question-name">
-                    {{ question.content }}
+                    {{ question.content }}<span class="question-type">【{{ getTypeName(question) }}】</span>
                   </div>
-                  <div class="question-type">
-                    【{{ getTypeName(question) }}】
-                  </div>
+
                   <span
                     v-if="question.type == 'multi_choice'"
                     class="question-limit"
@@ -288,7 +286,6 @@ export default {
               max-width: 500px;
             }
             .question-type {
-              flex: 0 0 70px;
               width: 70px;
               font-family: emoji;
               color: rgba(0, 11, 21, 0.45);
