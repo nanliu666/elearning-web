@@ -652,16 +652,18 @@ export default {
       })
       this['publishLoading' + type] = true
       api($data)
-        .then((res) => {
-          if (!this.id) {
-            this.href = window.location.origin + '/#/questionnaire/preview?id=' + res
-            saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
-              this.dialogVisible = true
-            })
-          } else {
+        .then(() => {
             this.$message.success('操作成功')
             this.$router.back()
-          }
+          // if (!this.id) {
+          //   this.href = window.location.origin + '/#/questionnaire/preview?id=' + res
+          //   saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
+          //     this.dialogVisible = true
+          //   })
+          // } else {
+          //   this.$message.success('操作成功')
+          //   this.$router.back()
+          // }
         })
         .finally(() => {
           this['publishLoading' + type] = false

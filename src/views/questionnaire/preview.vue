@@ -48,7 +48,8 @@
                     <span class="text">{{ index + 1 }}.</span>
                   </div>
                   <div class="question-name">
-                    {{ question.content }}<span class="question-type">【{{ getTypeName(question) }}】</span>
+                    {{ question.content
+                    }}<span class="question-type">【{{ getTypeName(question) }}】</span>
                   </div>
 
                   <span
@@ -283,7 +284,7 @@ export default {
             }
             .question-name {
               font-weight: bold;
-              max-width: 500px;
+              max-width: 800px;
             }
             .question-type {
               width: 70px;

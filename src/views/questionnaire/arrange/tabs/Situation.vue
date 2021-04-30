@@ -279,11 +279,10 @@
                     <span class="text">{{ index + 1 }}.</span>
                   </div>
                   <div class="question-name">
-                    {{ question.content }}<span class="question-type">
-                    【{{ getTypeName(question) }}】
-                  </span>
+                    {{ question.content
+                    }}<span class="question-type"> 【{{ getTypeName(question) }}】 </span>
                   </div>
-  
+
                   <span
                     v-if="question.type == 'multi_choice'"
                     class="question-limit"
@@ -435,7 +434,11 @@ export default {
             this.questionResults.push(
               type == 'short_answer'
                 ? answerUser
-                : type == 'single_choice' ? optionCpList.filter(option => option.questionOptionId == answerUser).map(option => option.content).join('')
+                : type == 'single_choice'
+                ? optionCpList
+                    .filter((option) => option.questionOptionId == answerUser)
+                    .map((option) => option.content)
+                    .join('')
                 : optionCpList
                     .filter((option) => answerUser.split(',').includes(option.questionOptionId))
                     .map((option) => option.content)
@@ -528,7 +531,7 @@ export default {
       }
     }
     .question-content {
-      margin-left: 12px;
+      margin-left: 25px;
       width: 452px;
       .el-radio,
       .el-checkbox {
@@ -573,7 +576,6 @@ export default {
           }
           .question-name {
             font-weight: bold;
-            max-width: 500px;
           }
           .question-type {
             width: 70px;
