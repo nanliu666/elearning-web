@@ -49,6 +49,7 @@
                 v-show="!orgSearch"
                 :load="lazyLoadOrgTree"
                 :props="treeProps"
+                :default-checked-keys="defaultOrgLists"
                 lazy
                 node-key="path"
                 show-checkbox
@@ -119,6 +120,7 @@
                 v-show="!postionSearch"
                 :load="lazyLoadPositionTree"
                 :props="positionTreeProps"
+                :default-checked-keys="defaultPositionLists"
                 lazy
                 node-key="path"
                 show-checkbox
@@ -365,6 +367,34 @@ export default {
   },
 
   computed: {
+    // 按类型分组
+    groupValue() {
+      return _.groupBy(this.value, 'type')
+    },
+    // 获取外部人员的默认值以及全选半选的切换状态，获取组织tree的默认值
+    defaultOrgLists() {
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      this.checkedUsers = _.map(_.get(this.groupValue, 'User'), 'name')
+      if (
+        _.size(this.checkedUsers) === _.size(this.usersNameList) &&
+        _.size(this.usersNameList) !== 0
+      ) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.checkAll = true
+      }
+      if (
+        _.size(this.checkedUsers) !== 0 &&
+        _.size(this.checkedUsers) !== _.size(this.usersNameList)
+      ) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.isIndeterminate = true
+      }
+      return _.map(_.get(this.groupValue, 'Org'), 'path')
+    },
+    // 获取岗位树的默认值
+    defaultPositionLists() {
+      return _.map(_.get(this.groupValue, 'Position'), 'path')
+    },
     // 树形组件的props属性
     treeProps() {
       return {
