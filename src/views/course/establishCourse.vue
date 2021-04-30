@@ -167,7 +167,10 @@
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
-          <span v-if="false"> 积分 </span>
+          <span><span
+            style="color: #f56c6c;
+    margin-right: 5px; display: inline-block; width: 3px; text-align: left;"
+          >*</span>选修类型</span>
         </div>
         <el-row>
           <el-col :span="11">
@@ -186,7 +189,7 @@
           </el-col>
           <el-col :span="2">
           </el-col>
-          <el-col
+          <!-- <el-col
             v-if="false"
             :span="11"
           >
@@ -201,6 +204,28 @@
                 :precision="1"
                 @change="handleChange"
               ></el-input-number>
+            </el-form-item>
+          </el-col> -->
+
+          <el-col :span="11">
+            <el-form-item prop="electiveType">
+              <el-select
+                v-model="ruleForm.electiveType"
+                placeholder="请选择选修类型"
+              >
+                <el-option
+                  label="开放选修"
+                  :value="1"
+                ></el-option>
+                <el-option
+                  label="通过审批"
+                  :value="2"
+                ></el-option>
+                <el-option
+                  label="禁止选修"
+                  :value="3"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -230,30 +255,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="2">
-          </el-col>
-          <el-col :span="11">
-            <el-form-item
-              label="选修类型"
-              prop="electiveType"
-            >
-              <el-select
-                v-model="ruleForm.electiveType"
-                placeholder="请选择选修类型"
-              >
-                <el-option
-                  label="开放选修"
-                  :value="1"
-                ></el-option>
-                <el-option
-                  label="通过审批"
-                  :value="2"
-                ></el-option>
-                <el-option
-                  label="禁止选修"
-                  :value="3"
-                ></el-option>
-              </el-select>
-            </el-form-item>
           </el-col>
         </el-row>
 
