@@ -188,6 +188,11 @@
             :show-overflow-tooltip="true"
             label="所属部门"
           >
+            <template slot-scope="scope">
+              <div>
+                {{scope.row.dept || '--'}}
+              </div>
+            </template>
           </el-table-column>
           <el-table-column
             align="center"
@@ -201,10 +206,14 @@
           </el-table-column>
           <el-table-column
             align="center"
-            prop="subTime"
             :show-overflow-tooltip="true"
             label="提交时间"
           >
+            <template slot-scope="scope">
+              <div>
+                {{scope.row.subTime || '--'}}
+              </div>
+            </template>
           </el-table-column>
           <el-table-column
             align="center"
