@@ -190,7 +190,7 @@
           >
             <template slot-scope="scope">
               <div>
-                {{scope.row.dept || '--'}}
+                {{ scope.row.dept || '--' }}
               </div>
             </template>
           </el-table-column>
@@ -211,7 +211,7 @@
           >
             <template slot-scope="scope">
               <div>
-                {{scope.row.subTime || '--'}}
+                {{ scope.row.subTime || '--' }}
               </div>
             </template>
           </el-table-column>
@@ -279,11 +279,11 @@
                     <span class="text">{{ index + 1 }}.</span>
                   </div>
                   <div class="question-name">
-                    {{ question.content }}
-                  </div>
-                  <div class="question-type">
+                    {{ question.content }}<span class="question-type">
                     【{{ getTypeName(question) }}】
+                  </span>
                   </div>
+  
                   <span
                     v-if="question.type == 'multi_choice'"
                     class="question-limit"
@@ -433,13 +433,12 @@ export default {
             const { optionCpList = [], answerUser = '', type } = question
 
             this.questionResults.push(
-              type != 'multi_choice'
+              type == 'short_answer'
                 ? answerUser
-                : answerUser
-                ? optionCpList
-                    .filter((option) => answerUser.split(',').includes(option.questionId))
+                : type == 'single_choice' ? optionCpList.filter(option => option.questionOptionId == answerUser).map(option => option.content).join('')
+                : optionCpList
+                    .filter((option) => answerUser.split(',').includes(option.questionOptionId))
                     .map((option) => option.content)
-                : []
             )
           })
         })
@@ -577,7 +576,6 @@ export default {
             max-width: 500px;
           }
           .question-type {
-            flex: 0 0 70px;
             width: 70px;
             font-family: emoji;
             color: rgba(0, 11, 21, 0.45);

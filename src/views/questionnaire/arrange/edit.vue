@@ -142,9 +142,9 @@
           style="margin-right: 160px;"
         >
           <el-select
-            :disabled="!!(form.id)"
             v-model="form.subjectId"
             v-el-select-loadmore="loadmoreSubject"
+            :disabled="!!form.id"
             placeholder="请选择"
             style="width: 100%;"
             @change="handleSubjectChange"
