@@ -878,7 +878,7 @@ export default {
         isRecommend: 0, //是否推荐
         passCondition: [], //通过条件
         period: '', //时长
-        credit: '', //积分
+        credit: 0, //积分
         // 所在分类现在没有
         type: '', //课程类型
         name: '', //课程名称
@@ -1619,15 +1619,19 @@ export default {
     },
     DataUpload(file) {
       if (this.isFileSize(file)) return false
-      const regx = /^.*\.(txt|doc|docx|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      const regx = /^.*\.(doc|docx|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      const regxtxt = /.*\.(txt)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
-
+      if (regxtxt.test(file.name)) {
+        this.$message.error('不支持上传txt类型课件!')
+        return false
+      }
       if (!isLt10M) {
         this.$message.error('上传资料大小不能超过 2GB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传资料只支持txt,doc,docx,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
+        this.$message.error('上传资料只支持doc,docx,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
         return false
       }
       return true
@@ -1666,10 +1670,15 @@ export default {
     // 课件校验
     CoursewareUpload(file) {
       if (this.isFileSize(file)) return false
-      const regx = /^.*\.(txt|doc|docx|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png)$/
+      const regx = /^.*\.(doc|docx|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png)$/
       const regxImg = /^.*\.(jpg|jpeg|png|bmp)$/
+      const regxtxt = /.*\.(txt)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
       const isLtImg = file.size / 1024 / 1024 < 10
+      if (regxtxt.test(file.name)) {
+        this.$message.error('不支持上传txt类型课件!')
+        return false
+      }
       if (!isLt10M) {
         this.$message.error('上传课件大小不能超过 2GB!')
         return false
