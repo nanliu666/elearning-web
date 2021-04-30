@@ -218,7 +218,7 @@ export default {
       })
         .then(() => {
           this.btn3Loading = true
-          deleteQuestionnaire({ ids: [this.data.id] })
+          deleteQuestionnaire({ ids: this.data.id })
             .then(() => {
               this.$message.success('操作成功')
               this.$router.back()
