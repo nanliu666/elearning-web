@@ -14,6 +14,7 @@
       <template #examList>
         <SelectUser
           v-model="formData.examList"
+          select-type="Org,OuterUser,Position,Group"
           title="考生安排"
         ></SelectUser>
       </template>
