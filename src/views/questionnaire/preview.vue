@@ -61,6 +61,7 @@
                 <div class="question-content">
                   <el-input
                     v-if="question.type == 'short_answer'"
+                    style="width: 452px;"
                     :value="questionResults[index]"
                   ></el-input>
 
@@ -68,6 +69,7 @@
                     <el-radio
                       v-for="(option, option_index) in question.asqQuestionOptions"
                       :key="option_index"
+                      style="white-space: break-spaces;"
                       :label="option.content"
                     ></el-radio>
                   </el-radio-group>
@@ -171,7 +173,6 @@ export default {
 .preview {
   .question-content {
     margin-left: 12px;
-    width: 452px;
     .el-radio,
     .el-checkbox {
       display: block;
