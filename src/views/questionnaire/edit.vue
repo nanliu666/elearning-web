@@ -280,7 +280,7 @@
                   <template slot>
                     <div>
                       <span>1.最多添加15个选项（包含“其他”选项)</span><br /><br />
-                      <span>2.每项最多150个字</span>
+                      <span>2.每项最多64个字</span>
                     </div>
                   </template>
                 </el-popover>
@@ -307,6 +307,7 @@
                           v-model="option.content"
                           :disabled="option.disabled"
                           :placeholder="'选项' + (index + 1)"
+                          :maxlength="64"
                           class="option-input"
                         ></el-input>
 

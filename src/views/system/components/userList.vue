@@ -256,7 +256,7 @@ const COLUMNS = [
     label: '性别',
     prop: 'sex',
     align: 'center',
-    width: 60,
+    width: 120,
     formatter(record) {
       return { 1: '男', 0: '女' }[record.sex] || ''
     }
@@ -264,7 +264,8 @@ const COLUMNS = [
   {
     label: '部门',
     align: 'left',
-    prop: 'orgName'
+    prop: 'orgName',
+    width: 230
   },
   {
     label: '电话',
@@ -462,6 +463,15 @@ export default {
           END_USER,
           DELETE_USER
         ])
+      },
+      deep: true
+    },
+    columnsVisible: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.crud.doLayout()
+          this.$refs.crud.$forceUpdate()
+        })
       },
       deep: true
     },
