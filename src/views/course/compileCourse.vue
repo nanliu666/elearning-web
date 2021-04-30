@@ -167,7 +167,7 @@
         <!-- 第三行 -->
         <div class="num_title">
           <span>学时(小时)</span>
-          <span> 积分 </span>
+          <span v-if="false"> 积分 </span>
         </div>
         <el-row>
           <el-col :span="11">
@@ -184,7 +184,10 @@
           </el-col>
           <el-col :span="2">
           </el-col>
-          <el-col :span="11">
+          <el-col
+            v-if="false"
+            :span="11"
+          >
             <el-form-item prop="credit">
               <el-input-number
                 v-model="ruleForm.credit"
