@@ -555,7 +555,7 @@ export default {
     async handleSubmit() {
       const valid = await this.formValidate()
       if (!valid) {
-        this.$message.error('创建失败，请输入必填项')
+        this.$message.error(`${this.form.id ? '编辑失败' : '创建失败'}，请输入必填项`)
         return
       }
 
