@@ -265,9 +265,9 @@ export default {
     modifyUserStatus(userId, status) {
       let msg = ''
       if (status === '2') {
-        msg = '您确定要冻结该用户吗？\n冻结后，该用户将不能登录系统'
+        msg = '您确定要将该用户设置为“离职”状态吗？\n离职后，该用户将不能登录系统'
       } else {
-        msg = '您确定要解冻该用户吗？'
+        msg = '您确定要将该用户设置为“在职”状态吗？'
       }
       this.$confirm(msg, {
         confirmButtonText: '确定',
