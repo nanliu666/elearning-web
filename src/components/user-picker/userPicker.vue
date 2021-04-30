@@ -30,6 +30,11 @@
               label="岗位"
               name="Position"
             />
+            <el-tab-pane
+              v-if="selectTypes.includes('Group')"
+              label="分组"
+              name="Group"
+            />
           </el-tabs>
           <div
             v-if="selectTypes.includes('Org')"
@@ -131,6 +136,46 @@
               />
             </div>
           </div>
+          <!-- 分组 -->
+          <div
+            v-show="activeTab === 'Group'"
+            v-if="selectTypes.includes('Group')"
+            class="outer-user"
+          >
+            <el-input
+              v-model.trim="outerParams.search"
+              placeholder="搜索分组"
+            />
+            <div v-if="!_.isEmpty(groupList)">
+              <el-checkbox
+                v-model="checkAll"
+                class="total-check"
+                :indeterminate="isIndeterminate"
+                @change="handleCheckAllChange"
+              >
+                全选
+              </el-checkbox>
+              <el-checkbox-group
+                v-model="checkedUsersGroup"
+                class="check-ul"
+                @change="handleCheckedUserChange"
+              >
+                <el-checkbox
+                  v-for="item in groupList"
+                  :key="item.id"
+                  class="check-li"
+                  :label="item"
+                  @change="handleSelectGroup(item)"
+                >
+                  {{ item.name }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
+            <com-empty
+              v-if="_.isEmpty(groupList)"
+              height="31vh"
+            />
+          </div>
         </div>
       </div>
       <div class="right">
@@ -186,7 +231,7 @@
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getOuterUser, getPostionUserChild } from '@/api/system/user'
+import { getOrgUserChild, getOuterUser, getPostionUserChild, getGroup } from '@/api/system/user'
 import ComEmpty from '@/components/common-empty/empty'
 import _ from 'lodash'
 const SEARCH_DELAY = 200
@@ -195,7 +240,7 @@ const NODE_TYPE = {
   Org: 'Org',
   User: 'User'
 }
-const SELECT_TYPE = ['Org', 'OuterUser', 'Position']
+const SELECT_TYPE = ['Org', 'OuterUser', 'Position', 'Group']
 
 const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
   search = _.trim(search)
@@ -289,6 +334,11 @@ export default {
   data() {
     const activeTab = this.selectType.split(',')[0] || 'Org'
     return {
+      checkAllGroup: false,
+      checkedUsersGroup: [], //分组人员
+      groupList: [], //分组
+      isIndeterminateGroup: false,
+
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
       checkedUsers: [],
@@ -396,6 +446,7 @@ export default {
     }
   },
   mounted() {
+    this.loadGroup() //查询分组
     if (_.includes(this.selectType, 'OuterUser')) {
       this.loadOuterUser()
     }
@@ -406,6 +457,41 @@ export default {
     window.removeEventListener('scroll', this.listenerScroll)
   },
   methods: {
+    //分组接口
+    async loadGroup() {
+      this.loading = true
+      getGroup()
+        .then((res) => {
+          this.groupList = res || []
+          // const { totalPage } = res
+          // if (_.size(res.data) > 0) {
+          //   const data = _.map(res.data, (item) =>
+          //     _.assign(item, {
+          //       path: item.userId,
+          //       bizId: item.userId,
+          //       bizName: item.name,
+          //       type: NODE_TYPE.User
+          //     })
+          //   )
+          //   if (isRefresh) {
+          //     this.outerData = data
+          //   } else {
+          //     this.outerData = _.concat(this.outerData, data)
+          //   }
+          //   this.usersNameList = _.map(this.outerData, 'name')
+          // } else {
+          //   this.usersNameList = []
+          //   this.outerParams.loaded = true
+          // }
+          // this.outerParams.pageNo = pageNo + 1
+          // this.isClear = totalPage < pageNo + 1
+          this.loading = false
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+
     listenerScroll() {
       window.addEventListener('scroll', this.debounceOuterScrollHandler, true)
     },
@@ -533,6 +619,16 @@ export default {
         this.selected = _.filter(this.selected, (item, i) => i != index)
       } else {
         this.selected.push(user)
+      }
+    },
+
+    //选择分组
+    handleSelectGroup(group) {
+      const index = _.findIndex(this.selected, { bizId: group.bizId })
+      if (index > -1) {
+        this.selected = _.filter(this.selected, (item, i) => i != index)
+      } else {
+        this.selected.push(group)
       }
     },
 
