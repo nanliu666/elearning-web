@@ -68,7 +68,7 @@
     </div>
 
     <user-picker
-      select-type="Org,OuterUser"
+      select-type="Org,OuterUser,Position,Group"
       :value="userList"
       :visible.sync="userPicking"
       @input="handleSelect"

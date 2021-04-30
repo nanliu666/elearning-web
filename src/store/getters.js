@@ -34,6 +34,7 @@ const getters = {
   trainTimeInVuex: (state) => state.train.trainTimeInVuex,
   paperTimeInVuex: (state) => state.train.paperTimeInVuex,
   processData: (state) => state.process.processData,
-  orgIds: (state) => state.user.orgIds
+  orgIds: (state) => state.user.orgIds,
+  diyInfor: (state) => state.user.diyInfor
 }
 export default getters

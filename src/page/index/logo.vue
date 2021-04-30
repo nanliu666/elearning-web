@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     logoImg() {
-      let logoBaseInfor = getStore({ name: 'diyInfor' })
+      let logoBaseInfor = this.diyInfor || getStore({ name: 'diyInfor' })
       let logoImg = logoBaseInfor.logo && logoBaseInfor.logo.BackgroundUrl
       return logoImg
     },
@@ -49,7 +49,7 @@ export default {
     //   let userInfo = getStore({ name: 'userInfo' })
     //   return userInfo.org_id
     // },
-    ...mapGetters(['website', 'keyCollapse', 'tenantContent', 'orgIds'])
+    ...mapGetters(['website', 'keyCollapse', 'tenantContent', 'orgIds', 'diyInfor'])
   },
   watch: {
     orgIds(val) {
