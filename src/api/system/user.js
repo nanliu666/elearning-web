@@ -309,3 +309,8 @@ export const bulkDepartures = (params) => post('/api/user/v1/user/status/reset',
  */
 export const updateUserIdBatchOrg = (params) =>
   post('/api/user/v1/user/updateUserIdBatchOrg', params)
+
+/**
+ * @desc 分组列表
+ */
+export const getGroup = (params) => get('/api/user/v1/usergroup/list', params)

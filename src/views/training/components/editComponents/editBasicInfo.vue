@@ -26,7 +26,7 @@
         <template #trainObjectsList>
           <SelectUser
             v-model="formData.trainObjectsList"
-            select-type="Org,OuterUser,Position"
+            select-type="Org,OuterUser,Position,Group"
           ></SelectUser>
         </template>
       </common-form>
