@@ -553,7 +553,7 @@ export default {
         .question-title {
           display: flex;
           width: 100%;
-          align-items: center;
+          align-items: start;
           justify-content: flex-start;
           font-family: PingFangSC-Regular;
           font-size: 14px;
