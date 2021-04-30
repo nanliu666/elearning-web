@@ -154,6 +154,7 @@ export default {
     },
     handleCheckChange(data) {
       let flag = false
+      this.selectListIds = []
       this.selectList.forEach((item, index) => {
         if (item.id === data.id) {
           flag = true
@@ -343,21 +344,30 @@ export default {
           node.id = node.userId
         })
       }
+
       tree.orgs = [...tree.orgs, ...tree.users]
 
       const loop = (treeData) => {
         if (treeData.length > 0) {
           treeData.forEach((item) => {
+            if (!item.children) {
+              item.children = []
+            }
             if (item.id === this.activeNodeId && this.filterText === '') {
               item.children = [...tree.orgs]
             } else if (this.filterText !== '') {
-              this.orgTree = _.cloneDeep(tree.orgs)
+              if (tree.orgs.length > 0) {
+                this.orgTree = _.cloneDeep(tree.orgs)
+              }
+              // this.orgTree = _.cloneDeep(tree.orgs)
             } else if (item.children && item.children.length > 0) {
               loop(item.children)
             }
           })
         } else {
-          this.orgTree = _.cloneDeep(tree.orgs)
+          if (tree.orgs.length > 0) {
+            this.orgTree = _.cloneDeep(tree.orgs)
+          }
         }
       }
       loop(this.orgTree)
