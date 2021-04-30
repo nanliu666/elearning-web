@@ -21,6 +21,7 @@
         <template #introduction>
           <div class="container__editor">
             <tinymce v-model="formData.introduction" />
+                <div style="float: right; color: #ccc">{{getIntroCount(formData.introduction) + ' 字'}}</div>
           </div>
         </template>
         <template #trainObjectsList>
@@ -324,6 +325,9 @@ export default {
     this.getCatalogs()
   },
   methods: {
+    getIntroCount(rowText) {
+      return rowText.replace(/[<(.+)\/?>|&nbsp;|']/g, '').trim().length
+    },
     // 拉取公司的直属员工，在map中遍历await
     async handlerData(data) {
       // 非人员且部门下员工不为0

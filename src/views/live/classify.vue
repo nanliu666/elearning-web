@@ -32,7 +32,7 @@
                   @submit="handleSearch"
                 />
                 <div
-                  v-p="SORT_LIVE_CLASSIFY"
+                  v-if="false"
                   class="search-sort-box"
                   @click="toSort"
                 >
