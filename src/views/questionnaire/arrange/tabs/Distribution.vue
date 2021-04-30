@@ -34,7 +34,7 @@
             {{ item.question }}
           </div>
           <div class="statistics">
-            填写率{{ item.fillingRate }}&nbsp;&nbsp;&nbsp;&nbsp;{{ item.fillingNum }}人填写
+            填写率{{ item.fillingRate }}%&nbsp;&nbsp;&nbsp;&nbsp;{{ item.fillingNum }}人填写
           </div>
         </div>
 

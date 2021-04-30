@@ -653,8 +653,8 @@ export default {
       this['publishLoading' + type] = true
       api($data)
         .then(() => {
-            this.$message.success('操作成功')
-            this.$router.back()
+          this.$message.success('操作成功')
+          this.$router.back()
           // if (!this.id) {
           //   this.href = window.location.origin + '/#/questionnaire/preview?id=' + res
           //   saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {

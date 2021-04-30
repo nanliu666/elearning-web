@@ -258,8 +258,8 @@ export default {
           margin-bottom: 40px;
           .question-title {
             display: flex;
+            align-items: start;
             width: 100%;
-            align-items: center;
             justify-content: flex-start;
             font-family: PingFangSC-Regular;
             font-size: 14px;
@@ -284,7 +284,7 @@ export default {
             }
             .question-name {
               font-weight: bold;
-              max-width: 800px;
+              max-width: 1200px;
             }
             .question-type {
               width: 70px;
