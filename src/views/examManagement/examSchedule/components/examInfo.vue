@@ -353,7 +353,7 @@ const EventColumns = [
     prop: 'testPaper',
     label: '考试用卷'
   },
-  { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人' },
+  { itemType: 'slot', span: 11, offset: 2, required: false, prop: 'reviewer', label: '评卷人3333' },
   { itemType: 'switch', span: 11, required: false, prop: 'certificate', label: '是否发放证书' },
   {
     prop: 'basicInfoTitle',

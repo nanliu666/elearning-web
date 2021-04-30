@@ -25,6 +25,7 @@
           :load="loadNode"
           class="tree"
           :default-expanded-keys="expandedKeysData"
+          :current-node-key="currentKey"
           @node-click="treeClickNode"
         >
           <span
@@ -196,6 +197,7 @@ export default {
   },
   data() {
     return {
+      currentKey: 99999,
       // 侧栏数据
       filterText: '',
       data: [],
@@ -231,11 +233,18 @@ export default {
   },
   created() {
     this.islistTeacherCategory()
+    this.defaultSelect()
   },
   activated() {
     this.islistTeacherCategory()
   },
   methods: {
+    // 默认选中
+    defaultSelect() {
+      this.$nextTick(() => {
+        this.$refs['tree'].setCurrentKey(99999)
+      })
+    },
     // tree
     filterNode(value, data) {
       if (!value) return true
@@ -269,11 +278,13 @@ export default {
     },
     //   tree节点点击 返回ID拿右侧list
     treeClickNode(data) {
-      this.clickId = data.id
+      let myId = data.id
+      if (myId === 99999) myId = ''
+      this.clickId = myId
       // if (data.num === 1) {
       // }
       //   拿右侧list
-      this.$emit('treeClick', data.id)
+      this.$emit('treeClick', myId)
     },
     // 新增分组/分类&编辑
     isaddCatalog(node) {
@@ -568,6 +579,7 @@ export default {
         })
 
         this.clickId = this.data[0].id
+        this.data[0].id = 99999
       })
     },
     // 删除分组/分类

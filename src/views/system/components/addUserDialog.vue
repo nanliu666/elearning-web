@@ -1,79 +1,41 @@
 <template>
   <el-dialog
-    title="添加用户"
+    v-if="visible"
+    :modal-append-to-body="false"
+    :title="row.name ? '编辑用户' : '添加用户'"
     :visible="visible"
     width="800px"
     append-to-body
     :before-close="close"
-    @open="dialogOpen"
   >
-    <div class="content-wr">
-      <div class="left">
-        <el-input
-          v-model="filterText"
-          placeholder="成员名称"
-          @input="searchLoadData"
-        />
-        <el-tabs
-          v-model="activeName"
-          @tab-click="handleClick"
-        >
-          <el-tab-pane
-            label="组织架构"
-            name="org"
-          >
-            <el-tree
-              ref="tree"
-              :key="updateInfo"
-              :data="orgTree"
-              show-checkbox
-              default-expand-all
-              node-key="id"
-              :props="defaultProps"
-              :default-checked-keys="selectListIds"
-              @check="handleCheckChange"
-              @node-click="nodeClick"
-            />
-          </el-tab-pane>
-          <el-tab-pane
-            label="业务部门"
-            name="biz"
-          >
-            <el-tree
-              ref="bizTree"
-              :key="bizUpdateInfo"
-              :data="bizTree"
-              show-checkbox
-              default-expand-all
-              node-key="id"
-              :props="defaultProps"
-              :default-checked-keys="selectListIds"
-              @check="handleCheckChange"
-              @node-click="nodeClick"
-            />
-          </el-tab-pane>
-        </el-tabs>
-      </div>
-      <div class="right">
-        <div>
-          <span class="title">已添加成员</span>
-          <span style="float:right;">
-            <el-button
-              type="text"
-              @click="handleUnselectAll()"
-            >清除</el-button>
-          </span>
-        </div>
-        <el-tag
-          v-for="item in selectList"
-          :key="item.id"
-          size="small"
-          closable
-          @close="handleUnselect(item)"
-        >
-          {{ item.name }}
-        </el-tag>
-      </div>
+    <div>
+      <common-form
+        ref="userFormRef"
+        :model="formData"
+        :columns="columns"
+      >
+        <template #roleUser>
+          <lazy-select
+            v-model="formData.userId"
+            :disabled="row.name ? true : false"
+            :first-option="defaultUser"
+            :searchable="true"
+            :load="loadUser"
+            :option-props="{
+              label: 'name',
+              value: 'userId',
+              key: 'userId'
+            }"
+            :multiple="false"
+          />
+        </template>
+        <template slot="range">
+          <OrgTree
+            :id-list="formData.orgIdList"
+            @selectedValue="getOrgList"
+          ></OrgTree>
+        </template>
+      </common-form>
     </div>
     <span
       slot="footer"
@@ -95,348 +57,128 @@
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getBizUserChild } from '@/api/system/user'
-import { addUser } from '@/api/system/role'
-
+// import commonForm from '@/components/common-form/commonForm.vue'
+// import { getOrgUserChild, getBizUserChild } from '@/api/system/user'
+// import { addUser } from '@/api/system/role'
+import { getAllUserList, getMgmtOrgIds, addEditUser } from '@/api/system/user'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 export default {
+  // components: { commonForm },
   name: 'AddUserDialog',
+  components: {
+    LazySelect: () => import('@/components/lazy-select/lazySelect'),
+    OrgTree
+  },
   props: {
     visible: {
       type: Boolean,
       default: false
     },
-    roleId: {
-      type: String,
+    row: {
+      type: Object,
       default: () => {
-        return ''
+        return {}
       }
     }
   },
   data() {
+    const BASE_COLUMNS = [
+      { itemType: 'slot', span: 24, required: false, prop: 'roleUser', label: '创建人' },
+      {
+        prop: 'range',
+        label: '管理范围',
+        itemType: 'slot',
+        span: 24
+      }
+    ]
     return {
-      loading: false,
-      activeName: 'org',
+      defaultUser: [], // 默认选择的用户
       submitting: false,
-      filterText: '',
-      props: {
-        disabled: (data) => data.type !== 'user' && data.users.length === 0,
-        label: (item) => item.orgName || item.name,
-        children: 'children'
-      },
-      defaultProps: {
-        label: (item) => item.name,
-        children: 'children'
-      },
-      selectList: [],
-      selectListIds: [],
-      oldSelectList: [],
-      orgTree: [],
-      tagId: null,
-      treeIds: {
-        orgIds: [],
-        bizIds: []
-      },
-      bizTree: [],
-      activeNodeId: 0,
-      updateInfo: 0,
-      bizUpdateInfo: 0
+      columns: BASE_COLUMNS,
+      form: { orgIds: [] },
+      formData: {
+        userId: '',
+        orgIdList: []
+      }
+    }
+  },
+  watch: {
+    row: function() {
+      this.$nextTick(() => {
+        this.getData()
+      })
+    },
+    'formData.userId': function() {
+      this.$nextTick(() => {
+        if (this.row.name) return
+        this.getOrgIds()
+      })
     }
   },
   methods: {
-    handleClick(tab) {
-      this.activeName = tab.name
-      this.handleTab()
+    // 添加用户
+    // 1先选创建人
+    // 2拿创建人id跟 roleId type=0 去查询管理范围 // /api/user/v1/user/getMgmtOrgIds
+    async getOrgIds() {
+      let params = {
+        type: 0,
+        roleId: this.$route.query.roleId,
+        userId: this.formData.userId
+      }
+      let res = await getMgmtOrgIds(params)
+      if (res) res = res.split(',')
+      this.formData.orgIdList = res || []
     },
-    handleTab() {
-      switch (this.activeName) {
-        case 'org':
-          if (this.filterText) {
-            this.filterText = ''
-            this.bizTree = []
-            this.getOrgUserTree()
-          } else {
-            if (!this.orgTree.length) this.getOrgUserTree()
-          }
-          break
-        case 'biz':
-          if (this.filterText) {
-            this.filterText = ''
-            this.orgTree = []
-            this.getBizUserChild()
-          } else {
-            if (!this.bizTree.length) this.getBizUserChild()
-          }
-          break
+
+    // 编辑回显
+    getData() {
+      this.formData.userId = this.row.name || '' //显示名字
+      this.formData._userId = this.row.userId || '' //真实ID
+      // this.formData.userId = this.row.userId || ''
+      // this.formData.name = this.row.name || ''
+      if (this.row.orgIds) {
+        this.formData.orgIdList = this.row.orgIds.split(',')
+      } else {
+        this.formData.orgIdList = []
       }
     },
-    handleCheckChange(data) {
-      let flag = false
-      this.selectList.forEach((item, index) => {
-        if (item.id === data.id) {
-          flag = true
-          this.selectList.splice(index, 1)
-        }
+
+    loadUser(params) {
+      // 获取用户列表
+      return getAllUserList(params)
+    },
+    getOrgList(val) {
+      // 获取组织id
+      this.form.orgIds = val.map((item) => item.id)
+    },
+    init() {},
+    handleSubmit() {
+      let params = {
+        orgIds: this.form.orgIds.join(','),
+        roleId: this.$route.query.roleId,
+        userId: this.formData.userId
+      }
+
+      if (this.row.name) {
+        params.userId = this.formData._userId
+      }
+      addEditUser(params).then(() => {
+        this.$message({
+          message: '操作成功',
+          type: 'success'
+        })
+        this.close()
       })
-      if (!flag) {
-        this.selectList.push(data)
-      }
-      this.selectList.forEach((item) => {
-        this.selectListIds.push(item.id)
-      })
     },
-    nodeClick(data) {
-      this.activeNodeId = data.id
-      switch (this.activeName) {
-        case 'org':
-          if (!this.treeIds.orgIds.includes(data.id)) {
-            this.treeIds.orgIds.push(data.id)
-            this.getOrgUserTree(data.id)
-          }
-          break
-        case 'biz':
-          if (!this.treeIds.bizIds.includes(data.id)) {
-            this.treeIds.bizIds.push(data.id)
-            this.getBizUserChild(data.id)
-          }
-          break
-      }
-    },
-    handleUnselect(item) {
-      this.selectList = this.selectList.filter((i) => i.id != item.id)
-      this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.id))
-    },
-    handleUnselectAll() {
-      this.selectList = []
-      this.$refs.tree.setCheckedKeys([])
-    },
+
     close() {
       this.clear()
       this.$emit('update:visible', false)
     },
     clear() {
-      this.tagId = null
-      this.selectList = []
-      this.oldSelectList = []
-      this.selectListIds = []
-      this.$refs.tree.setCheckedKeys([])
-
-      this.$refs.bizTree.setCheckedKeys([])
-      this.activeName = 'org'
-      this.orgTree = []
-      this.bizTree = []
-      this.treeIds = {
-        orgIds: [],
-        bizIds: []
-      }
-    },
-    init(data) {
-      this.tagId = data.tagId
-      const list = data.userList.map((user) => ({ ...user, id: user.userId }))
-      this.selectList = list.slice()
-      this.oldSelectList = list.slice()
-      this.selectList.forEach((item) => {
-        this.selectListIds.push(item.id)
-      })
-
-      this.$emit('update:visible', true)
-      this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.id))
-      })
-    },
-    searchLoadData: _.debounce(function() {
-      switch (this.activeName) {
-        case 'org':
-          if (!this.filterText) this.activeNodeId = 0
-          this.orgTree = []
-          this.treeIds.orgIds = []
-          this.getOrgUserTree(this.activeNodeId, true)
-          break
-        case 'biz':
-          if (!this.filterText) this.activeNodeId = 0
-          this.bizTree = []
-          this.treeIds.bizIds = []
-          this.getBizUserChild(this.activeNodeId, true)
-          break
-      }
-    }, 500),
-    getOrgUserTree(parentId = 0, search) {
-      let params = {
-        parentId
-      }
-      if (search && this.filterText) {
-        params.search = this.filterText
-        delete params.parentId
-      }
-      this.loading = true
-      getOrgUserChild(params)
-        .then((res) => {
-          this.resolveTree(res)
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-    getBizUserChild(parentId = 0, search) {
-      let params = {
-        parentId
-      }
-      if (search && this.filterText) {
-        params.search = this.filterText
-        delete params.parentId
-      }
-      this.loading = true
-      getBizUserChild(params)
-        .then((res) => {
-          this.resolveBizTree(res)
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-
-    /**
-     * 比较新旧list，新增,减少的数据分别添加标识
-     * @param {Object} newIdList
-     * @param {Object} oldIdList
-     */
-    diff(newIdList, oldIdList) {
-      // 要添加的
-      const addIdList = this._.difference(newIdList, oldIdList)
-      // 要删除的
-      const removeIdList = this._.difference(oldIdList, newIdList)
-
-      const result = addIdList
-        .map((id) => ({
-          userId: id,
-          operatorType: 'Add'
-        }))
-        .concat(
-          removeIdList.map((id) => ({
-            userId: id,
-            operatorType: 'Del'
-          }))
-        )
-
-      return result
-    },
-    handleSubmit() {
-      let userIdArr = this.selectList.map((item) => {
-        return item.userId
-      })
-      let params = {
-        roleId: this.roleId || this.$route.query.roleId,
-        userId: userIdArr.join(',')
-      }
-      if (_.isEmpty(userIdArr)) {
-        this.$message.error('请添加用户')
-      } else {
-        this.submitting = true
-        addUser(params)
-          .then(() => {
-            this.$message({
-              type: 'success',
-              message: '操作成功!'
-            })
-            this.close()
-            this.$emit('after-submit')
-          })
-          .finally(() => {
-            this.submitting = false
-          })
-      }
-    },
-    resolveTree(tree) {
-      if (tree.orgs.length > 0) {
-        tree.orgs.forEach((node) => {
-          if (['Enterprise', 'Company', 'Department', 'Group'].includes(node.type))
-            node.disabled = true
-        })
-      }
-      if (tree.users.length > 0) {
-        tree.users.forEach((node) => {
-          node.id = node.userId
-        })
-      }
-      tree.orgs = [...tree.orgs, ...tree.users]
-
-      const loop = (treeData) => {
-        if (treeData.length > 0) {
-          treeData.forEach((item) => {
-            if (item.id === this.activeNodeId && this.filterText === '') {
-              item.children = [...tree.orgs]
-            } else if (this.filterText !== '') {
-              this.orgTree = _.cloneDeep(tree.orgs)
-            } else if (item.children && item.children.length > 0) {
-              loop(item.children)
-            }
-          })
-        } else {
-          this.orgTree = _.cloneDeep(tree.orgs)
-        }
-      }
-      loop(this.orgTree)
-      this.updateInfo += 1
-    },
-    resolveBizTree(tree) {
-      if (tree.orgs.length > 0) {
-        tree.orgs.forEach((node) => {
-          if (
-            ['ProductLine', 'Enterprise', 'Department', 'Product', 'PDU', 'BusinessGroup'].includes(
-              node.type
-            )
-          )
-            node.disabled = true
-        })
-      }
-      if (tree.users.length > 0) {
-        tree.users.forEach((node) => {
-          node.id = node.userId
-        })
-      }
-      tree.orgs = [...tree.orgs, ...tree.users]
-
-      const loop = (treeData) => {
-        if (treeData.length > 0) {
-          treeData.forEach((item) => {
-            if (item.id === this.activeNodeId && this.filterText === '') {
-              item.children = [...tree.orgs]
-            } else if (this.filterText !== '') {
-              this.bizTree = _.cloneDeep(tree.orgs)
-            } else if (item.children && item.children.length > 0) {
-              loop(item.children)
-            }
-          })
-        } else {
-          this.bizTree = _.cloneDeep(tree.orgs)
-        }
-      }
-      loop(this.bizTree)
-      this.bizUpdateInfo += 1
-    },
-    dialogOpen() {
-      this.handleTab()
+      this.$emit('after-submit', '123')
     }
   }
 }
 </script>
-<style lang="scss">
-.content-wr {
-  display: flex;
-  .left {
-    width: 60%;
-    padding-right: 20px;
-  }
-  .right {
-    border-left: 1px solid #f2f2f2;
-    width: 40%;
-    padding-left: 20px;
-    .title {
-      line-height: 40px;
-    }
-    .el-tag {
-      margin-right: 12px;
-      margin-bottom: 8px;
-    }
-  }
-}
-</style>
+<style lang="scss"></style>

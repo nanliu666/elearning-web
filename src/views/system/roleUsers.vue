@@ -64,15 +64,14 @@
             <template
               slot="handler"
               slot-scope="scope"
-              style="width: 80px"
             >
-              <!-- <el-button
+              <el-button
                 type="text"
                 size="medium"
                 @click.stop="handleEdit(scope.row, scope.index)"
               >
                 编辑
-              </el-button> -->
+              </el-button>
               <el-button
                 v-p="DELETE_ROLE_USER"
                 type="text"
@@ -87,6 +86,7 @@
       </div>
     </div>
     <addUserDialog
+      :row="row"
       :visible.sync="editVisible"
       @after-submit="handleAfterSubmit"
     />
@@ -128,7 +128,7 @@ export default {
         rowKey: 'userId',
         enableMultiSelect: true,
         handlerColumn: {
-          width: 80
+          width: 180
         }
       },
       columns: [
@@ -208,7 +208,6 @@ export default {
       this.params.search = this.form.name
       getUserList(this.params).then((res) => {
         this.data = res.data
-        console.log(this.data)
         this.page.total = res.totalNum
         this.loading = false
       })
@@ -245,7 +244,9 @@ export default {
     closeBatch() {
       this.isBatch = false
     },
+    // 添加用户
     handlerAdd() {
+      this.row = {}
       this.editVisible = true
     },
     close() {
@@ -260,11 +261,10 @@ export default {
       this.page.currentPage = val
       this.getData()
     },
+    // 编辑用户
     handleEdit(row) {
       this.row = JSON.parse(JSON.stringify(row))
-      this.isEdit = true
-      this.title = '编辑岗位'
-      this.stationDialog = true
+      this.editVisible = true
     },
     handleExport() {
       this.$confirm('是否导出数据?', '提示', {

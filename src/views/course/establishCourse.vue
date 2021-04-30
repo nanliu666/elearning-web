@@ -377,7 +377,7 @@
                 <el-table-column
                   prop="name"
                   label="章节名称"
-                  width="380"
+                  width="330"
                 >
                   <template slot-scope="scope">
                     <el-input
@@ -486,7 +486,7 @@
             <el-table-column
               prop="name"
               label="章节名称"
-              width="380"
+              width="330"
             >
               <template slot-scope="scope">
                 <el-input
@@ -1592,46 +1592,20 @@ export default {
         })
     },
     // 清空数据
-    isdeleteData() {
-      // this.ruleForm = {
-      //   imageUrl: [], //图片
-      //   url: '',
-      //   localName: '',
-      //   catalogId: '',
-      //   electiveType: '',
-      //   thinkContent: ' ', //课前思考内容
-      //   introduction: ' ', //课程介绍
-      //   // tagIds: [], //标签
-      //   isRecommend: false, //是否推荐
-      //   passCondition: [], //通过条件
-      //   period: undefined, //时长
-      //   credit: undefined, //积分
-      //   // 所在分类现在没有
-      //   type: '', //课程类型
-      //   name: '', //课程名称
-      //   teacherId: '', //讲师id
-      //   // 表格
-      //   contents: [
-      //     // {
-      //     //   url: '',
-      //     //   localName: '', //章节类型为文章时，表示标题；章节内容为课件时，表示文件名
-      //     //   sort: '', //序号
-      //     //   type: '', //章节类型
-      //     //   name: '', // 章节名称
-      //     //   content: '', //文章内容
-      //     //   upLoad: [], //[url,localName],  //所有上传的文件
-      //     //   saveOrcompile: 0 // 1保存&0编辑
-      //     // }
-      //   ]
-      // }
-      // this.$refs.ruleForm.clearValidate()
-      // this.$refs.apprSubmit.handleClose()
-      // this.headIndex = 1
-      // this.parentOrgIdLabel = ''
-      // this.$refs.ruleForm.resetFields()
+    isdeleteData() {},
+    // 是否空文件
+    isFileSize(file) {
+      if (file.size === 0) {
+        this.$message({
+          message: '请不要上传空文件哦！',
+          type: 'warning'
+        })
+        return true
+      }
     },
     // 作业上传校验
     taskUpload(file) {
+      if (this.isFileSize(file)) return false
       const isLt10M = file.size / 1024 / 1024 < 20
       if (!isLt10M) {
         this.$message.error('上传资料大小不能超过 20MB!')
@@ -1640,7 +1614,8 @@ export default {
       return true
     },
     DataUpload(file) {
-      const regx = /^.*\.(txt|doc|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
+      if (this.isFileSize(file)) return false
+      const regx = /^.*\.(txt|doc|docx|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
 
       if (!isLt10M) {
@@ -1648,13 +1623,14 @@ export default {
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传资料只支持txt,doc,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
+        this.$message.error('上传资料只支持txt,doc,docx,wps,rtf,rar,zip,xls,xlsx,ppt,pptx,pdf文件')
         return false
       }
       return true
     },
     // 视频校验
     VideoUpload(file) {
+      if (this.isFileSize(file)) return false
       const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
 
@@ -1668,10 +1644,25 @@ export default {
       }
       return true
     },
+    beforeAvatarUpload(file) {
+      if (this.isFileSize(file)) return false
+      const regx = /^.*\.(jpg|jpeg|png|bmp|JPG)$/
+      const isLt10M = file.size / 1024 / 1024 < 10
+      if (!isLt10M) {
+        this.$message.error('上传图片大小不能超过 10MB!')
+        return false
+      }
+      if (!regx.test(file.name)) {
+        this.$message.error('上传图片只支持jpg,jpeg,bmp,png文件')
+        return false
+      }
+      return true
+    },
 
     // 课件校验
     CoursewareUpload(file) {
-      const regx = /^.*\.(txt|doc|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png)$/
+      if (this.isFileSize(file)) return false
+      const regx = /^.*\.(txt|doc|docx|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png)$/
       const regxImg = /^.*\.(jpg|jpeg|png|bmp)$/
       const isLt10M = file.size / 1024 / 1024 < 2048
       const isLtImg = file.size / 1024 / 1024 < 10
@@ -1749,26 +1740,6 @@ export default {
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
     },
-    // 图片
-    // handleAvatarSuccess(res, file) {
-    //   this.ruleForm.imageUrl = URL.createObjectURL(file.raw)
-    //   // this.ruleForm.imageUrl
-    //   // res, file
-    // },
-    beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpeg|png|bmp|JPG)$/
-      const isLt10M = file.size / 1024 / 1024 < 10
-      if (!isLt10M) {
-        this.$message.error('上传图片大小不能超过 10MB!')
-        return false
-      }
-      if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg,jpeg,bmp,png文件')
-        return false
-      }
-      return true
-    },
-
     // 计数器
     handleChange() {
       // (value 这有个(value)
@@ -1796,14 +1767,22 @@ export default {
 /deep/.tox-tinymce {
   height: 480px !important;
 }
+::-webkit-scrollbar {
+  display: none;
+}
 .establishCourse {
   color: #666666;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
   overflow-y: scroll;
   overflow-x: hidden;
+  /*隐藏滚动条，当IE下溢出，仍然可以滚动*/
+  -ms-overflow-style: none;
+  /*火狐下隐藏滚动条*/
+  overflow: -moz-scrollbars-none;
+
   .head {
     display: flex;
     justify-content: center;

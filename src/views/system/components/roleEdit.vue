@@ -10,7 +10,7 @@
     @opened="onOpened"
   >
     <div v-loading="loading">
-      <commonForm
+      <common-form
         ref="form"
         :model="form"
         :columns="columns"
@@ -34,13 +34,44 @@
           >
           </el-input>
         </template>
-        <template slot="range">
+        <template slot="orgType">
+          <el-radio-group
+            v-model="form.orgType"
+            :disabled="form.roleId ? true : false"
+          >
+            <el-radio
+              :disabled="radioDisabled('Enterprise')"
+              label="Enterprise"
+            >
+              企业
+            </el-radio>
+            <el-radio
+              :disabled="radioDisabled('Company')"
+              label="Company"
+            >
+              公司
+            </el-radio>
+            <el-radio
+              :disabled="radioDisabled('Department')"
+              label="Department"
+            >
+              部门
+            </el-radio>
+            <el-radio
+              :disabled="radioDisabled('Group')"
+              label="Group"
+            >
+              小组
+            </el-radio>
+          </el-radio-group>
+        </template>
+        <!-- <template slot="range">
           <OrgTree
             :id-list="form.orgIdList"
             @selectedValue="getOrgList"
           ></OrgTree>
-        </template>
-      </commonForm>
+        </template> -->
+      </common-form>
       <div
         slot="footer"
         class="dialog-footer"
@@ -74,12 +105,13 @@
 <script>
 import treeSelect from '@/components/treeSelect/treeSelect'
 import { createRole, updateRole } from '../../../api/system/role'
-import OrgTree from '@/components/UserOrg-Tree/OrgTree'
+// import OrgTree from '@/components/UserOrg-Tree/OrgTree'
+import { queryMaxOrgType } from '@/api/system/role'
 
 export default {
   name: 'RoleEdit',
   components: {
-    OrgTree,
+    // OrgTree,
     treeSelect
   },
   props: {
@@ -162,13 +194,22 @@ export default {
         span: 24
       },
       {
-        prop: 'range',
-        label: '管理范围',
         itemType: 'slot',
-        span: 24
+        prop: 'orgType',
+        label: '角色级别',
+        span: 24,
+        required: true
+        // disabled: true,
+        // options: [
+        //   { label: '企业', value: 'Enterprise' },
+        //   { label: '公司', value: 'Company' },
+        //   { label: '部门', value: 'Department' },
+        //   { label: '小组', value: 'Group' }
+        // ]
       }
     ]
     return {
+      MaxOrgType: [],
       jobColumn: JOBS_COLUMN,
       columns: BASE_COLUMNS,
       loading: false,
@@ -178,7 +219,8 @@ export default {
         orgIds: [],
         roleId: '',
         roleName: '',
-        remark: ''
+        remark: '',
+        orgType: ''
       },
       jobDicData: []
     }
@@ -186,13 +228,20 @@ export default {
   watch: {
     row: {
       handler: function(newVal) {
-        let { roleId, roleName, remark, orgIds } = { ...newVal }
-        this.form = {
-          roleId,
-          roleName,
-          remark,
-          orgIdList: orgIds.split(',')
-        }
+        this.$nextTick(() => {
+          if (!newVal.roleName) {
+            return
+          }
+
+          let { roleId, roleName, remark, orgType } = { ...newVal }
+          this.form = {
+            roleId,
+            roleName,
+            remark,
+            orgType
+            // orgIdList: orgIds.split(',')
+          }
+        })
       },
       immediate: true,
       deep: true
@@ -204,7 +253,20 @@ export default {
     }
   },
   mounted() {},
+  created() {
+    this.getQueryMaxOrgType()
+  },
   methods: {
+    radioDisabled(label) {
+      let swData = true
+      this.MaxOrgType.forEach((item) => {
+        if (label == item) swData = false
+      })
+      return swData
+    },
+    async getQueryMaxOrgType() {
+      this.MaxOrgType = await queryMaxOrgType()
+    },
     getOrgList(val) {
       this.form.orgIds = val.map((item) => item.id)
     },
@@ -228,6 +290,7 @@ export default {
       this.$refs.form.validate((vaild) => {
         if (vaild) {
           this.form.roleId ? this.updateFunc() : this.createFunc(callback)
+          this.$refs['form'].resetFields()
         }
       })
     },
@@ -235,8 +298,8 @@ export default {
     createFunc(callback) {
       const params = {
         ...this.form,
-        categoryId: this.categoryId,
-        orgIds: this.form.orgIds.toString()
+        categoryId: this.categoryId
+        // orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       createRole(params)
@@ -258,8 +321,8 @@ export default {
         ...this.form,
         positions,
         jobs: this.form.jobs,
-        categoryId: this.categoryId,
-        orgIds: this.form.orgIds.toString()
+        categoryId: this.categoryId
+        // orgIds: this.form.orgIds.toString()
       }
       this.loading = true
       updateRole(params)

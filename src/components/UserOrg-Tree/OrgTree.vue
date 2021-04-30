@@ -72,16 +72,23 @@ export default {
     },
     selected() {
       this.handleSubmit()
+    },
+    idList() {
+      this.createdSetCheckedKeys()
     }
   },
   created() {
-    this.loadOrgData().then(() => {
-      const list = this.idList
-      this.$refs.tree.setCheckedKeys(list)
-      this.updateSelected(this.orgData)
-    })
+    this.createdSetCheckedKeys()
   },
   methods: {
+    createdSetCheckedKeys() {
+      this.loadOrgData().then(() => {
+        let list = this.idList
+        this.$refs.tree.setCheckedKeys(list)
+        this.selected = []
+        this.updateSelected(this.orgData)
+      })
+    },
     updateSelected(list = []) {
       list.forEach((item) => {
         const { id, children = [] } = item
