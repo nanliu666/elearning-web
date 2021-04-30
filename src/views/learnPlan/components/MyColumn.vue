@@ -120,7 +120,7 @@
               href="#/learnPlan/CoursePlanList"
               @click="adddata"
             >
-              <i class="el-icon-plus btn_icon"></i> 创建分组</a>
+              <i class="el-icon-plus btn_icon"></i> 创建分类</a>
             <!-- <span class="btn2">创建分类</span> -->
           </div>
         </div>
