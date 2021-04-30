@@ -373,22 +373,6 @@ export default {
     },
     // 获取外部人员的默认值以及全选半选的切换状态，获取组织tree的默认值
     defaultOrgLists() {
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      this.checkedUsers = _.map(_.get(this.groupValue, 'User'), 'name')
-      if (
-        _.size(this.checkedUsers) === _.size(this.usersNameList) &&
-        _.size(this.usersNameList) !== 0
-      ) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.checkAll = true
-      }
-      if (
-        _.size(this.checkedUsers) !== 0 &&
-        _.size(this.checkedUsers) !== _.size(this.usersNameList)
-      ) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.isIndeterminate = true
-      }
       return _.map(_.get(this.groupValue, 'Org'), 'path')
     },
     // 获取岗位树的默认值
@@ -425,20 +409,14 @@ export default {
   },
 
   watch: {
-    value(val) {
-      this.selected = val.slice()
-      const temp = _.map(this.checkedUsers, (item) => {
-        return { name: item }
-      })
-      const diffName = _.differenceBy(temp, val, 'name')
-      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
-        return item === _.get(diffName, '[0].name', '')
-      })
-      if (diffIndex !== -1) {
-        this.checkedUsers.splice(diffIndex, 1)
-        this.checkAll = false
-        this.isIndeterminate = true
-      }
+    value: {
+      handler(val) {
+        this.selected = val.slice()
+        this.handleCheckStatus(val)
+        this.initCheckUser()
+      },
+      deep: true,
+      immediate: true
     },
     selected(val) {
       const { orgTree, orgTreeSearch } = this.$refs
@@ -487,6 +465,35 @@ export default {
     window.removeEventListener('scroll', this.listenerScroll)
   },
   methods: {
+    initCheckUser() {
+      if (
+        _.size(this.checkedUsers) === _.size(this.usersNameList) &&
+        _.size(this.usersNameList) !== 0
+      ) {
+        this.checkAll = true
+      }
+      if (
+        _.size(this.checkedUsers) !== 0 &&
+        _.size(this.checkedUsers) !== _.size(this.usersNameList)
+      ) {
+        this.isIndeterminate = true
+      }
+    },
+    handleCheckStatus(val) {
+      this.checkedUsers = _.map(_.get(this.groupValue, 'User'), 'name')
+      const temp = _.map(this.checkedUsers, (item) => {
+        return { name: item }
+      })
+      const diffName = _.differenceBy(temp, val, 'name')
+      const diffIndex = _.findIndex(this.checkedUsers, (item) => {
+        return item === _.get(diffName, '[0].name', '')
+      })
+      if (diffIndex !== -1) {
+        this.checkedUsers.splice(diffIndex, 1)
+        this.checkAll = false
+        this.isIndeterminate = true
+      }
+    },
     //分组接口
     async loadGroup() {
       this.loading = true
