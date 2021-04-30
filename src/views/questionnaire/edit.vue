@@ -5,7 +5,7 @@
       @click="$router.back()"
     >
       <i class="el-icon-arrow-left"> </i>
-      <span class="title">{{form.id ? '编辑问卷' : '创建问卷'}}</span>
+      <span class="title">{{ form.id ? '编辑问卷' : '创建问卷' }}</span>
     </div>
 
     <div class="body">
@@ -29,15 +29,17 @@
             label="问卷名称"
             prop="asqName"
             class="half-form-item"
-            style="margin-right: 10%;"
+            style="margin-right: 50px;"
           >
             <el-input
               v-model="form.asqName"
+              clearable
               placeholder="请输入"
+              :maxlength="32"
             ></el-input>
           </el-form-item>
           <el-form-item
-            label="问卷类别"
+            label="所在分类"
             prop="categoryId"
             class="half-form-item"
           >
@@ -46,7 +48,7 @@
               class="selector"
               :value="form.categoryId"
               :options="treeData"
-              placeholder="请选择类别"
+              placeholder="请选择所在分类"
               :props="seletorProps"
               @getValue="(id) => (form.categoryId = id)"
             />
@@ -58,8 +60,11 @@
           >
             <el-input
               v-model="form.remark"
+              :autosize="{ minRows: 6 }"
               type="textarea"
               placeholder="请输入"
+              :maxlength="500"
+              show-word-limit
             ></el-input>
           </el-form-item>
         </el-form>
@@ -68,7 +73,7 @@
       <div class="asqQuestion-table">
         <div class="block-header">
           <div class="title">
-            问卷题目 <span style="font-size: 14px;">(数量：{{form.asqQuestions.length}}个)</span>
+            问卷题目 <span style="font-size: 14px;">(数量：{{ form.asqQuestions.length }}个)</span>
           </div>
           <el-button
             class="button"
@@ -81,9 +86,11 @@
         </div>
         <el-table
           :data="form.asqQuestions"
+          class=""
           align="center"
           header-align="center"
           height="462px"
+          row-key="content"
         >
           <el-table-column
             type="index"
@@ -96,12 +103,13 @@
             prop="content"
             label="题干"
             align="center"
-            width="220"
+            min-width="220"
             show-overflow-tooltip
           ></el-table-column>
           <el-table-column
-          align="center"
+            align="center"
             label="题目类型"
+            min-width="220"
           >
             <template slot-scope="scope">
               <div>
@@ -116,15 +124,19 @@
           >
             <template slot-scope="scope">
               <div>
-                {{scope.row.status == 0 ? '否' : '是'}}
+                {{ scope.row.status == 0 ? '否' : '是' }}
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column
+            label="操作"
+            align="center"
+            width="180"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
-                @click="handleEdit(scope.row)"
+                @click="handleEdit(scope.row, scope.$index)"
               >
                 编辑
               </el-button>
@@ -146,14 +158,17 @@
         justify="center"
       >
         <el-button
-        @click="handleSubmit"
-        :loading="submitLoading"
+          :loading="submitLoading"
           type="primary"
           size="medium"
+          @click="handleSubmit"
         >
           完成
         </el-button>
-        <el-button size="medium" @click="$router.back()">
+        <el-button
+          size="medium"
+          @click="handleCancel"
+        >
           取消
         </el-button>
       </el-row>
@@ -166,185 +181,225 @@
       ></div>
     </transition>
     <transition name="draw">
-      <div class="asqQuestion-drawer-wrapper" v-show="drawerVisible">
-            <div
-        
-        class="asqQuestion-drawer"
+      <div
+        v-show="drawerVisible"
+        ref="draw-wrapper"
+        class="asqQuestion-drawer-wrapper"
       >
-        <div class="drawer-header">
-          <div class="drawer-title">
-            添加题目
-          </div>
-          <i
-            class="el-icon-close drawer-close-btn"
-            @click="drawerVisible = false"
-          ></i>
-        </div>
-
-        <el-form
-          label-position="top"
-          label-width="80px"
-          ref="questionForm"
-          :model="asqQuestion"
-          :rules="questionRules"
+        <div
+          ref="asqQuestion-drawer"
+          class="asqQuestion-drawer"
         >
-          <el-form-item
-            label="题干"
-            prop="content"
-          >
-            <el-input
-              v-model="asqQuestion.content"
-              type="textarea"
-              placeholder="请输入"
-              maxlength="200"
-              show-word-limit
-            ></el-input>
-          </el-form-item>
-          <el-form-item
-            prop="type"
-            class="drawer-asqQuestion-type"
-          >
-            <template slot="label">
-              <div class="drawer-asqQuestion-type-label">
-                <div>题目类型</div>
-                <el-checkbox v-model="asqQuestion.status" :true-label="1" :false-label="0">必填</el-checkbox>
-              </div>
-            </template>
-            <el-select
-              v-model="asqQuestion.type"
-              style="width: 100%"
-              placeholder="请选择"
-            >
-              <el-option
-                v-for="item in [
-                  { label: '简答题', value: 'short_answer' },
-                  { label: '单选题', value: 'single_choice' },
-                  { label: '多选题', value: 'multi_choice' }
-                ]"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <div class="option-container" v-if="asqQuestion.type && asqQuestion.type !== 'short_answer'">
-          <div class="option-title">
-            <span style="color: red; margin-right: 5px;">*</span>
-            <span style="font-size:14px;color:rgba(0,11,21,0.65); margin-right: 5px;">选项</span>
-            <el-popover
-              transition="none"
-              trigger="click"
-            >
-              <i
-                slot="reference"
-                class="el-icon-question"
-                style="cursor: pointer;"
-              ></i>
-              <template slot>
-                <div>
-                  <span>1.最多添加15个选项（包含“其他”选项)</span><br /><br />
-                  <span>2.每项最多150个字</span>
-                </div>
-              </template>
-            </el-popover>
-          </div>
-            <div class="option-list">
-              <el-form :rules="optionRules" ref="optionForm" :model="optionForm">
-              <draggable
-                v-model="asqQuestion.asqQuestionOptions"
-                :animation="200"
-              >
-                <transition-group>
-                  <el-form-item class="option-item" v-for="(option, index) in asqQuestion.asqQuestionOptions"
-                  :prop="'content' + index"
-                    :key="index">
-                      <i class="icon-drag"></i>
-                      <el-input
-                        v-model="option.content"
-                        placeholder="请输入内容"
-                        class="option-input"
-                      ></el-input>
-
-                    <div class="option-delete-btn">
-                      <i
-                        v-if="asqQuestion.asqQuestionOptions.length > 2"
-                        class="el-icon-close"
-                        @click="deleteOption(option)"
-                      ></i>
-                    
-                    </div>
-
-                    </el-form-item>
-                </transition-group>
-              </draggable>
-
-              </el-form>
+          <div class="drawer-header">
+            <div class="drawer-title">
+              添加题目
             </div>
-          <div
-            class="add-option-btn"
-            @click="addQuestionOption"
-            :class="{'disabled': asqQuestion.asqQuestionOptions.length >= 15}"
-          >
-            <i class="el-icon-plus"></i>
-            <span class="add-option-text">添加选项</span>
+            <i
+              class="el-icon-close drawer-close-btn"
+              @click="drawerVisible = false"
+            ></i>
           </div>
 
-          <el-button
-            type="text"
-            class="other-option-btn"
-            @click="hasOtherOptions = !hasOtherOptions"
-             v-if="asqQuestion.type && asqQuestion.type !== 'short_answer'"
+          <div
+            ref="drawer-body"
+            class="drawer-body"
           >
-            添加其他选项
-          </el-button>
-
-          <div class="other-option-container" v-if="hasOtherOptions">
-            <el-form :rules="questionRules" ref="otherForm" :model="asqQuestion" style="display: flex;">
-              <el-form-item class="other-option-item" label="最少可选" prop="multiMin" >
-                  <el-select
-                    v-model="asqQuestion.multiMin"
-                    class="selector"
-                    placeholder="请选择"
-                    clearable
-                  >
-                    <el-option
-                      v-for="item in otherMinOptions"
-                      :key="item"
-                      :label="item"
-                      :value="item"
-                    >
-                    </el-option>
-                  </el-select>
-                  项
+            <el-form
+              ref="questionForm"
+              label-position="top"
+              label-width="80px"
+              :model="asqQuestion"
+              :rules="questionRules"
+            >
+              <el-form-item
+                label="题干"
+                prop="content"
+              >
+                <el-input
+                  v-model="asqQuestion.content"
+                  type="textarea"
+                  placeholder="请输入"
+                  :autosize="{ minRows: 3 }"
+                  :maxlength="200"
+                  show-word-limit
+                ></el-input>
               </el-form-item>
-
-              <el-form-item class="other-option-item" label="最多可选" prop="multiMax">
+              <el-form-item
+                prop="type"
+                class="drawer-asqQuestion-type"
+              >
+                <template slot="label">
+                  <div class="drawer-asqQuestion-type-label">
+                    <div>题目类型</div>
+                    <el-checkbox
+                      v-model="asqQuestion.status"
+                      :true-label="1"
+                      :false-label="0"
+                    >
+                      必填
+                    </el-checkbox>
+                  </div>
+                </template>
                 <el-select
-                  v-model="asqQuestion.multiMax"
-                  class="selector"
+                  v-model="asqQuestion.type"
+                  style="width: 100%"
                   placeholder="请选择"
-                  clearable
                 >
                   <el-option
-                    v-for="item in otherMaxOptions"
-                    :key="item"
-                    :label="item"
-                    :value="item"
+                    v-for="item in [
+                      { label: '简答题', value: 'short_answer' },
+                      { label: '单选题', value: 'single_choice' },
+                      { label: '多选题', value: 'multi_choice' }
+                    ]"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
                   >
                   </el-option>
                 </el-select>
-                项            
               </el-form-item>
-
             </el-form>
+            <div
+              v-if="asqQuestion.type && asqQuestion.type !== 'short_answer'"
+              class="option-container"
+            >
+              <div class="option-title">
+                <span style="color: red; margin-right: 5px;">*</span>
+                <span
+                  style="font-size:14px;color:rgba(0,11,21,0.65); margin-right: 5px;"
+                >选项</span>
+                <el-popover
+                  transition="none"
+                  trigger="click"
+                >
+                  <i
+                    slot="reference"
+                    class="el-icon-question"
+                    style="cursor: pointer;"
+                  ></i>
+                  <template slot>
+                    <div>
+                      <span>1.最多添加15个选项（包含“其他”选项)</span><br /><br />
+                      <span>2.每项最多150个字</span>
+                    </div>
+                  </template>
+                </el-popover>
+              </div>
+              <div class="option-list">
+                <el-form
+                  ref="optionForm"
+                  :rules="optionRules"
+                  :model="optionForm"
+                >
+                  <draggable
+                    v-model="asqQuestion.asqQuestionOptions"
+                    :animation="200"
+                  >
+                    <transition-group>
+                      <el-form-item
+                        v-for="(option, index) in asqQuestion.asqQuestionOptions"
+                        :key="index"
+                        class="option-item"
+                        :prop="'content' + index"
+                      >
+                        <i class="icon-drag"></i>
+                        <el-input
+                          v-model="option.content"
+                          :disabled="option.disabled"
+                          :placeholder="'选项' + (index + 1)"
+                          class="option-input"
+                        ></el-input>
+
+                        <div class="option-delete-btn">
+                          <i
+                            v-if="asqQuestion.asqQuestionOptions.length > 2"
+                            class="el-icon-close"
+                            @click="deleteOption(option)"
+                          ></i>
+                        </div>
+                      </el-form-item>
+                    </transition-group>
+                  </draggable>
+                </el-form>
+              </div>
+              <div
+                class="add-option-btn"
+                :class="{ disabled: asqQuestion.asqQuestionOptions.length >= 15 }"
+                @click="addQuestionOption"
+              >
+                <i class="el-icon-plus"></i>
+                <span class="add-option-text">新建选项</span>
+              </div>
+
+              <el-button
+                v-if="asqQuestion.type && asqQuestion.type !== 'short_answer'"
+                type="text"
+                class="other-option-btn"
+                @click="addOtherOptions"
+              >
+                添加“其他”选项
+              </el-button>
+
+              <div
+                v-if="asqQuestion.type == 'multi_choice'"
+                class="other-option-container"
+              >
+                <el-form
+                  ref="otherForm"
+                  :rules="questionRules"
+                  :model="asqQuestion"
+                  style="display: flex;"
+                >
+                  <el-form-item
+                    class="other-option-item"
+                    label="最少可选"
+                    prop="multiMin"
+                  >
+                    <el-select
+                      v-model="asqQuestion.multiMin"
+                      class="selector"
+                      placeholder="请选择"
+                      clearable
+                    >
+                      <el-option
+                        v-for="item in otherMinOptions"
+                        :key="item"
+                        :label="item"
+                        :value="item"
+                      >
+                      </el-option>
+                    </el-select>
+                    项
+                  </el-form-item>
+
+                  <el-form-item
+                    class="other-option-item"
+                    label="最多可选"
+                    prop="multiMax"
+                  >
+                    <el-select
+                      v-model="asqQuestion.multiMax"
+                      class="selector"
+                      placeholder="请选择"
+                      clearable
+                    >
+                      <el-option
+                        v-for="item in otherMaxOptions"
+                        :key="item"
+                        :label="item"
+                        :value="item"
+                      >
+                      </el-option>
+                    </el-select>
+                    项
+                  </el-form-item>
+                </el-form>
+              </div>
+            </div>
           </div>
         </div>
 
-      </div>
-
-       <div class="drawer-footer">
+        <div class="drawer-footer">
           <el-row
             type="flex"
             justify="center"
@@ -362,7 +417,6 @@
           </el-row>
         </div>
       </div>
-
     </transition>
   </div>
 </template>
@@ -372,20 +426,21 @@ import TreeSelector from '@/components/tree-selector'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 import draggable from 'vuedraggable'
 import { questionnaireAdd, questionnaireEdit, editView } from '@/api/questionnaire'
+import Sortable from 'sortablejs'
 function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
-const OTHER_OPTIONS = ['不限', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+const OTHER_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
 const ASQ_QUESTION = {
-        content: '',
-        type: '',
-        sort: '',
-        status: 0,
-        multiMin: '',
-        multiMax: '',
-        asqQuestionOptions: [{ content: '' }, { content: '' }]
-      }
+  content: '',
+  type: 'single_choice',
+  sort: '',
+  status: 1,
+  multiMin: '2',
+  multiMax: '不限',
+  asqQuestionOptions: [{ content: '' }, { content: '' }]
+}
 export default {
   name: 'EditQuestionnaire',
   components: {
@@ -397,7 +452,6 @@ export default {
       otherMinValue: '',
       otherMaxValue: '',
       drawerVisible: false,
-      hasOtherOptions: false,
       form: {
         asqName: '',
         categoryId: '',
@@ -418,7 +472,7 @@ export default {
         content: [{ required: true, message: '请输入题干', trigger: 'blur' }],
         type: [{ required: true, message: '请选择题目类型', trigger: 'change' }],
         multiMin: [{ required: true, message: '请选择最少可选', trigger: 'change' }],
-        multiMax: [{ required: true, message: '请选择最多可选', trigger: 'change' }],
+        multiMax: [{ required: true, message: '请选择最多可选', trigger: 'change' }]
       },
       optionForm: {},
       optionRules: {},
@@ -426,50 +480,139 @@ export default {
       submitLoading: false
     }
   },
-  created() {
+  computed: {
+    otherMinOptions() {
+      const maxValue = this.asqQuestion.multiMax
+      let endIndex = this.asqQuestion.asqQuestionOptions.length - 1
+      if (maxValue && maxValue !== '不限') {
+        endIndex = OTHER_OPTIONS.indexOf(maxValue) + 1
+      }
+      return OTHER_OPTIONS.slice(0, endIndex)
+    },
+    otherMaxOptions() {
+      const minValue = this.asqQuestion.multiMin
+      let startIndex = 0
+      if (minValue) {
+        startIndex = OTHER_OPTIONS.indexOf(minValue)
+      }
+      return ['不限'].concat(
+        OTHER_OPTIONS.slice(startIndex, this.asqQuestion.asqQuestionOptions.length - 1)
+      )
+    }
+  },
+  watch: {
+    'asqQuestion.asqQuestionOptions': {
+      handler(val) {
+        if (!val) return
+        const form = (this.optionForm = {})
+        const rules = (this.optionRules = {})
+        val.forEach((opt, i) => {
+          form['content' + i] = opt.content
+          rules['content' + i] = [
+            { required: true, message: '请输入内容', trigger: 'blur' },
+            { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }
+          ]
+        })
+        this.$refs['asqQuestion-drawer'].scrollTop = this.$refs['asqQuestion-drawer'].scrollHeight
+        this.clearValidate(this.$refs.optionForm)
+      },
+      deep: true
+    }
+  },
+  activated() {
+    this.clearValidate()
+    this.$nextTick(() => {
+      this.rowDrop()
+      this.$refs.form.resetFields()
+    })
     this.initData()
   },
-  mounted() {
-      this.$refs.form.resetFields()
-  },
   methods: {
+    //行拖拽
+    rowDrop() {
+      const tbody = document.querySelector('.el-table__body-wrapper tbody')
+      const _this = this
+      Sortable.create(tbody, {
+        onEnd({ newIndex, oldIndex }) {
+          const currRow = _this.form.asqQuestions.splice(oldIndex, 1)[0]
+          _this.form.asqQuestions.splice(newIndex, 0, currRow)
+        }
+      })
+    },
+    addOtherOptions() {
+      const asqQuestionOptions = this.asqQuestion.asqQuestionOptions
+      if (asqQuestionOptions.length >= 15) return
+      if (asqQuestionOptions.some((option) => option.disabled)) return
+      asqQuestionOptions.push({
+        content: '其他',
+        disabled: true
+      })
+    },
+    handleCancel() {
+      this.$message.info(this.$route.query.id ? '编辑问卷已取消' : '创建问卷取消')
+      this.$router.back()
+    },
     async handleSubmit() {
       const valid = await this.formValidate()
-      if (!valid) return
-      
+      if (!valid) {
+        this.$message.error(`${this.form.id ? '编辑失败' : '创建失败'}，请输入必填项`)
+        return
+      }
+
+      if (!this.form.asqQuestions.length) {
+        this.$message.error('创建失败，至少添加一条题目')
+        return
+      }
       this.processQuestionData(this.form.asqQuestions)
-
-      const request = this.form.id ? questionnaireEdit : questionnaireAdd
-
+      let request
+      let typeMsg
+      if (this.form.id) {
+        request = questionnaireEdit
+        typeMsg = '编辑'
+      } else {
+        request = questionnaireAdd
+        typeMsg = '新增'
+      }
       this.submitLoading = true
-      request(this.form).then(() => {
-        this.$message.success('操作成功');
-        this.$router.back()
-      }).finally(() => this.submitLoading = false)
+      request(this.form)
+        .then(() => {
+          this.$message.success(`${typeMsg}成功`)
+          this.$router.back()
+        })
+        .catch((e) => {
+          this.$message.error(`${typeMsg}失败，${e}`)
+        })
+        .finally(() => (this.submitLoading = false))
     },
     processQuestionData(data) {
       if (!data || !data.length) return
-      const keys = ['content', 'type', 'asqQuestionOptions']
+      const keys = ['content', 'type', 'asqQuestionOptions', 'status', 'multiMax', 'multiMin']
       data.forEach((item, index) => {
-        Object.keys(item).forEach(key => {
+        Object.keys(item).forEach((key) => {
           if (!keys.includes(key)) {
             delete item[key]
           }
         })
-        item.sort = index
+        item.sort = index + 1
         if (!item.asqQuestionOptions) {
           return
         }
         item.asqQuestionOptions.forEach((q, idx) => {
-          q.sort = idx
+          q.sort = idx + 1
         })
       })
     },
     initData() {
       const id = this.$route.query.id
+      this.form = {
+        asqName: '',
+        categoryId: '',
+        remark: '',
+        asqQuestions: []
+      }
       if (id) {
         this.form.id = id
-        editView({ id }).then(res => {
+        editView({ id }).then((res) => {
           const [form = {}] = res
           this.form = form
         })
@@ -490,89 +633,69 @@ export default {
           return ''
       }
     },
-    handleEdit(target) {
-      let asqQuestion = deepClone(ASQ_QUESTION)
-      asqQuestion = (target && Object.assign(asqQuestion, target)) || asqQuestion
-
-
-      this.asqQuestion = asqQuestion
-      while (asqQuestion.asqQuestionOptions.length < 2) {
-        this.addQuestionOption()
-      }
+    handleEdit(target, index) {
+      target = target || ASQ_QUESTION
+      this.asqQuestion = deepClone(target)
       if (target) {
-        this.asqQuestion.target = target
+        this.asqQuestion._index = index
       }
-      const { multiMin, multiMax } = this.asqQuestion
-      if (multiMin && multiMax) {
-        this.hasOtherOptions = true
-      }
-      
       this.handleDrawerVisible(true)
     },
     handleDrawerVisible(visible) {
       if (!visible) {
-        this.hasOtherOptions = false
         this.asqQuestion = {}
       }
-      this.$nextTick(() => {
-        this.$refs.questionForm.clearValidate()
-      })
+      this.clearValidate(this.$refs.questionForm)
       this.drawerVisible = visible
     },
     addQuestionOption() {
       if (this.asqQuestion.asqQuestionOptions.length >= 15) {
-        this.$message.warning('最多添加15条')
         return
       }
       this.asqQuestion.asqQuestionOptions.push({
         content: ''
       })
-      if (!this.$refs.optionForm) return 
-      this.$nextTick(() => {
-        this.$refs.optionForm.clearValidate()
-      })
+      Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
     },
-    
+
     async handleAsqQuestionSave() {
-      const valid = await this.questionFormValidate()
+      let valid = await this.questionFormValidate()
       if (!valid) return
       const asqQuestion = this.asqQuestion
+
       if (asqQuestion.type != 'short_answer') {
-        const valid = await this.optionFormValidate()
+        valid = await this.optionFormValidate()
         if (!valid) return
+        if (asqQuestion.type == 'multi_choice') {
+          valid = await this.otherFormValidate()
+          if (!valid) return
+          if (asqQuestion.multiMax == '不限') {
+            asqQuestion.multiMax = asqQuestion.asqQuestionOptions.length
+          }
+        }
       } else {
         delete asqQuestion.asqQuestionOptions
-        this.hasOtherOptions = false
       }
 
-      // 没有添加更多选项
-      if (!this.hasOtherOptions) {
+      if (asqQuestion.type != 'multi_choice') {
         delete asqQuestion.multiMin
         delete asqQuestion.multiMax
-      } else {
-        const valid = await this.otherFormValidate()
-        if (!valid) return
-        asqQuestion.multiMax = asqQuestion.multiMax + ''
-        asqQuestion.multiMin = asqQuestion.multiMin + ''
       }
-
       const asqQuestions = this.form.asqQuestions
-      let target = asqQuestion.target
-      if (target) {
-        asqQuestions.splice(asqQuestions.indexOf(target), 1, asqQuestion)
-        delete asqQuestion.target
+      let questionIdx = asqQuestion._index
+      if (typeof questionIdx == 'number') {
+        delete asqQuestion._index
+        asqQuestions.splice(questionIdx, 1, asqQuestion)
       } else {
         asqQuestions.push(asqQuestion)
       }
-      
+
       this.handleDrawerVisible(false)
     },
     formValidate() {
       return new Promise((resolve) => {
         this.$refs['form'].validate((valid) => {
-          if (valid) {
-            resolve('valid')
-          }
+          resolve(valid)
         })
       })
     },
@@ -604,46 +727,32 @@ export default {
       })
     },
     deleteOption(option) {
-      this.asqQuestion.asqQuestionOptions.splice(this.asqQuestion.asqQuestionOptions.indexOf(option), 1)
+      this.asqQuestion.asqQuestionOptions.splice(
+        this.asqQuestion.asqQuestionOptions.indexOf(option),
+        1
+      )
+      Object.assign(this.asqQuestion, { multiMin: 2, multiMax: '不限' })
     },
     handleDelete(index) {
       this.form.asqQuestions.splice(index, 1)
+      this.$message.success('已删除')
     },
-  },
-  watch: {
-    'asqQuestion.asqQuestionOptions': {
-      handler(val) {
-        if (!val) return
-        const form = this.optionForm = {}
-        const rules = this.optionRules = {}
-        val.forEach((opt, i) => {
-          form['content' + i] = opt.content
-          rules['content' + i] = [{ required: true, message: '请输入内容', trigger: 'blur' },  { min: 1, max: 150, message: '长度在 1 到 150 个字符', trigger: 'blur' }]
-        })
-      },
-      deep: true
+    clearValidate(formDom) {
+      this.$nextTick(() => {
+        formDom = formDom || this.$refs.form
+        formDom.clearValidate()
+      })
     }
-  },
-  computed: {
-    otherMinOptions() {
-      let maxValue = this.asqQuestion.multiMax
-      if (!maxValue) return OTHER_OPTIONS.slice(1)
-      maxValue = maxValue + ''
-      return OTHER_OPTIONS.slice(1, OTHER_OPTIONS.indexOf(maxValue) + 1)
-    },
-    otherMaxOptions() {
-      let minValue = this.asqQuestion.multiMin
-      if (!minValue) return OTHER_OPTIONS
-      minValue = minValue + ''
-      return ['不限'].concat(OTHER_OPTIONS.slice(OTHER_OPTIONS.indexOf(minValue)))
-    },
   }
 }
 </script>
 
 <style lang="scss">
 .edit-questionnaire {
-  .el-scrollbar__wrap{
+  .el-table__row {
+    cursor: move;
+  }
+  .el-scrollbar__wrap {
     overflow-x: hidden;
   }
   .el-form--label-top .el-form-item__label {
@@ -651,6 +760,7 @@ export default {
     line-height: 22px;
     margin-bottom: 8px;
   }
+
   .drawer-asqQuestion-type {
     .el-form-item__label {
       display: flex;
@@ -728,7 +838,7 @@ export default {
     }
     .half-form-item {
       display: inline-block;
-      width: 45%;
+      width: 520px;
     }
   }
   .drawer-cover {
@@ -750,14 +860,14 @@ export default {
     background-color: #fff;
   }
   .drawer-footer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 90px;
-      width: 100%;
-      border-top: 1px solid #ebeced;
-      box-sizing: border-box;
-    }
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 90px;
+    width: 100%;
+    border-top: 1px solid #ebeced;
+    box-sizing: border-box;
+  }
   .asqQuestion-drawer {
     width: 100%;
     height: calc(100% - 90px);
@@ -821,7 +931,8 @@ export default {
         color: #01aafc;
         border-radius: 3px;
         &.disabled {
-          cursor: disabled;
+          cursor: not-allowed;
+          color: #ddd;
         }
         .el-icon-plus {
           font-size: 16px;
@@ -859,7 +970,6 @@ export default {
         }
       }
     }
-
   }
 
   .draw-enter-active,

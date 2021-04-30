@@ -24,7 +24,10 @@
           </div>
         </template>
         <template #trainObjectsList>
-          <SelectUser v-model="formData.trainObjectsList"></SelectUser>
+          <SelectUser
+            v-model="formData.trainObjectsList"
+            select-type="Org,OuterUser,Position,Group"
+          ></SelectUser>
         </template>
       </common-form>
     </section>
@@ -36,7 +39,7 @@ import lazySelect from '@/components/lazy-select/lazySelect'
 import { getWorkList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
-import { getUserList } from '@/api/examManage/schedule'
+import { getUserList, getPositionUserList } from '@/api/examManage/schedule'
 const personOptionProps = {
   label: 'name',
   value: 'workNo',
@@ -323,17 +326,21 @@ export default {
   methods: {
     // 拉取公司的直属员工，在map中遍历await
     async handlerData(data) {
+      // 非人员且部门下员工不为0
       let examList = _.groupBy(data, (item) => {
-        // 非人员且部门下员工不为0
         return item.type === 'Org'
+      })
+      // 岗位员工不为0
+      const positionList = _.groupBy(data, (item) => {
+        return item.type === 'Position'
       })
       let personList = _.filter(data, (item) => {
         return item.type === 'User'
       })
       // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
+      let orgResult = []
       if (examList.true) {
-        let result = []
-        result = await Promise.all(
+        orgResult = await Promise.all(
           examList.true.map(async (item) => {
             return (async () => {
               return await getUserList({
@@ -342,13 +349,27 @@ export default {
             })()
           })
         )
-        if (_.size(personList)) {
-          data = [...examList.false, ..._.flattenDeep(result)]
-        } else {
-          data = _.flattenDeep(result)
-        }
       }
-      this.userList = data
+      // 岗位人数校验
+      let positionResult = []
+      if (positionList.true) {
+        positionResult = await Promise.all(
+          positionList.true.map(async (item) => {
+            return (async () => {
+              await getPositionUserList({
+                parentId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.positionId
+              })
+            })()
+          })
+        )
+      }
+      const positionLength = _.sum(positionResult)
+      if (_.size(personList)) {
+        data = [...examList.false, ..._.flattenDeep(orgResult)]
+      } else {
+        data = [..._.flattenDeep(orgResult)]
+      }
+      this.userList = _.isEmpty(positionResult) ? data : data + positionLength
       this.$refs.form && this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动

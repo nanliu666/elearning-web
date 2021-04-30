@@ -9,7 +9,7 @@
           size="medium"
           @click="releaseBanner"
         >
-          新建Banner
+          创建Banner
         </el-button>
       </div>
     </page-header>
@@ -95,7 +95,7 @@ export default {
   },
   async mounted() {
     await this.loadTree()
-    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
+    this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
   },
   methods: {
     //   预览效果

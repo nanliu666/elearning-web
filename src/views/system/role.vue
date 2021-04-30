@@ -9,7 +9,7 @@
         :disabled="!options.currentId"
         @click="onHandleEdit('add')"
       >
-        新建角色
+        创建角色
       </el-button>
     </page-header>
     <basic-container block>

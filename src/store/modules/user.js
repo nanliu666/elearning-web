@@ -1,4 +1,4 @@
-import { setToken, setRefreshToken, removeToken, removeRefreshToken } from '@/util/auth'
+import { setToken, removeToken, removeRefreshToken } from '@/util/auth'
 import { Message } from 'element-ui'
 import { setStore, getStore } from '@/util/store'
 import { filterTree, sortTree } from '@/util/util'
@@ -9,12 +9,14 @@ import {
   refreshToken,
   getUserPrivilege,
   userDetailByToken,
-  getOrgIds
+  getOrgIds,
+  getDiyInfor
 } from '@/api/user'
 import md5 from 'js-md5'
 
 const user = {
   state: {
+    diyInfor: {}, // 用户的logo banner 首页布局等信息
     orgIds: '',
     tenantId: getStore({ name: 'tenantId' }) || '',
     tenantContent: getStore({ name: 'tenantContent' }) || '',
@@ -32,6 +34,13 @@ const user = {
   actions: {
     set_info: ({ commit }, info) => {
       commit('SET_INFO', info)
+    },
+    // 获取用户的logo banner 首页布局等信息
+    getDiyInforAc({ commit }, params) {
+      return getDiyInfor(params).then((res) => {
+        commit('SET_DIY_INFOR', res)
+        setStore({ name: 'diyInfor', content: res })
+      })
     },
     // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
     getOrgIdsAc({ commit }, telNub) {
@@ -205,6 +214,9 @@ const user = {
     }
   },
   mutations: {
+    SET_DIY_INFOR: (state, diyInfor) => {
+      state.diyInfor = diyInfor
+    },
     SET_ORG_IDS: (state, orgIds) => {
       state.orgIds = orgIds
     },
@@ -218,7 +230,6 @@ const user = {
       setStore({ name: 'token', content: state.token })
     },
     SET_REFRESH_TOKEN: (state, refreshToken) => {
-      setRefreshToken(refreshToken)
       state.refreshToken = refreshToken
       setStore({ name: 'refreshToken', content: state.refreshToken })
     },

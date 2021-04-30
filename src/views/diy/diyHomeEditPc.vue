@@ -141,7 +141,7 @@
         <span>左侧栏目：</span>
         <ul>
           <li
-            v-for="item in baseContetArrL"
+            v-for="item in DIY_LEFT_CONFIG"
             :key="item.id"
             @click="addTempFn(item, 'left')"
           >
@@ -153,7 +153,7 @@
         <span>右侧栏目：</span>
         <ul>
           <li
-            v-for="item in baseContetArrR"
+            v-for="item in DIY_RIGHT_CONFIG"
             :key="item.id"
             @click="addTempFn(item, 'right')"
           >
@@ -168,6 +168,7 @@
 import draggable from 'vuedraggable'
 import { postSaveTemp, putReleaseTemp, putUpdataTemp, getDetailTemp } from '@/api/diy/diy'
 import { DIY_EDIT_RELEASE_PC, DIY_EDIT_SAVE_PC } from '@/const/privileges'
+import { DIY_RIGHT_CONFIG, DIY_LEFT_CONFIG } from '@/const/diyHome'
 export default {
   name: 'DiyHomePc',
   components: {
@@ -179,9 +180,6 @@ export default {
       activeClassKey: '',
       tempId: '', // 模板id
       moduleType: '', // 模块类型，判断是左边还是右边或者是头部banner
-      // diyInfor: {
-      //   name: ''
-      // },
       formData: {
         orgId: '',
         name: '',
@@ -195,19 +193,6 @@ export default {
       formRules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }]
       },
-      baseContetArrL: [
-        { id: 'diyPcL1', name: '我的任务' },
-        { id: 'diyPcL2', name: '最新直播' },
-        { id: 'diyPcL3', name: '热门课程' },
-        { id: 'diyPcL4', name: '培训中心' },
-        { id: 'diyPcL5', name: '新闻中心' }
-      ],
-      baseContetArrR: [
-        { id: 'diyPcR1', name: '个人信息' },
-        { id: 'diyPcR2', name: '学习中的课程' },
-        { id: 'diyPcR3', name: '月度积分排行榜' },
-        { id: 'diyPcR4', name: '月度学时排行榜' }
-      ],
       contetArrL: [
         // { id: 'diyPcL1', name: '我的任务' },
         // { id: 'diyPcL2', name: '最新直播' },
@@ -224,6 +209,8 @@ export default {
     }
   },
   computed: {
+    DIY_LEFT_CONFIG: () => DIY_LEFT_CONFIG,
+    DIY_RIGHT_CONFIG: () => DIY_RIGHT_CONFIG,
     DIY_EDIT_RELEASE_PC: () => DIY_EDIT_RELEASE_PC,
     DIY_EDIT_SAVE_PC: () => DIY_EDIT_SAVE_PC
   },

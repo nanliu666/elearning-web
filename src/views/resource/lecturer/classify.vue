@@ -1,14 +1,14 @@
 <template>
   <div>
-    <page-header title="分类管理">
+    <page-header title="讲师分类">
       <el-button
         slot="rightMenu"
-        v-p="ADD_CLASSROOM_CLASSIFY"
+        v-p="ADD_LECTURER_CLASSIFY"
         type="primary"
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        创建分类
+        新建分类
       </el-button>
     </page-header>
     <basic-container block>
@@ -34,13 +34,10 @@
             </div>
           </div>
         </template>
-        <template #status="{ row }">
-          {{ row.status == 0 ? '已停用' : '已启用' }}
-        </template>
-        <template #handler="{ row }">
+        <template #handler="{row}">
           <div class="menuClass">
             <el-button
-              v-p="STOP_CLASSROOM_CLASSIFY"
+              v-p="STOP_LECTURER_CLASSIFY"
               type="text"
               :disabled="getButtonDisabled(row)"
               @click="handleStatus(row)"
@@ -48,14 +45,14 @@
               {{ row.status == 0 ? '启用' : '停用' }}
             </el-button>
             <el-button
-              v-p="EDIT_CLASSROOM_CLASSIFY"
+              v-p="EDIT_LECTURER_CLASSIFY"
               type="text"
               @click="handleOrgEdit(row)"
             >
               编辑
             </el-button>
             <el-dropdown
-              v-if="$p([DELETE_CLASSROOM_CLASSIFY, ADD_NEW_GROUNP_CLASSROOM_CLASSIFY])"
+              v-if="$p([DELETE_LECTURER_CLASSIFY, ADD_LECTURER_GROUNP_CLASSIFY])"
               @command="handleCommand($event, row)"
             >
               <el-button
@@ -66,13 +63,13 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  v-p="ADD_NEW_GROUNP_CLASSROOM_CLASSIFY"
+                  v-p="ADD_LECTURER_GROUNP_CLASSIFY"
                   command="addChild"
                 >
-                  创建子分类
+                  新建子分类
                 </el-dropdown-item>
                 <el-dropdown-item
-                  v-p="DELETE_CLASSROOM_CLASSIFY"
+                  v-p="DELETE_LECTURER_CLASSIFY"
                   command="delete"
                 >
                   删除
@@ -93,7 +90,12 @@
 </template>
 
 <script>
-import { getCategoryTree, deleteCategory, updateCategoryStatus, getCreatorList } from '@/api/live'
+import {
+  getCreatorList,
+  queryTeacherCataList,
+  updateStatus,
+  deleteTeacherCatalog
+} from '@/api/lecturer/lecturer'
 import SearchPopover from '@/components/searchPopOver/index'
 import CatalogEdit from './components/catalogEdit'
 const TABLE_COLUMNS = [
@@ -106,7 +108,7 @@ const TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'status',
-    slot: true,
+    formatter: (row) => (row.status == 0 ? '已停用' : '已启用'),
     minWidth: 120
   },
   {
@@ -129,19 +131,19 @@ const TABLE_CONFIG = {
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
   handlerColumn: {
-    minWidth: 160
+    minWidth: 100
   }
 }
 import {
-  ADD_CLASSROOM_CLASSIFY,
-  STOP_CLASSROOM_CLASSIFY,
-  EDIT_CLASSROOM_CLASSIFY,
-  DELETE_CLASSROOM_CLASSIFY,
-  ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
+  ADD_LECTURER_CLASSIFY,
+  STOP_LECTURER_CLASSIFY,
+  EDIT_LECTURER_CLASSIFY,
+  DELETE_LECTURER_CLASSIFY,
+  ADD_LECTURER_GROUNP_CLASSIFY
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
-  name: 'ClassroomClassify',
+  name: 'LectureClassify',
   components: { SearchPopover, CatalogEdit },
   data() {
     return {
@@ -158,7 +160,7 @@ export default {
             label: '',
             data: '',
             options: [],
-            config: { placeholder: '输入目录名称搜索', 'suffix-icon': 'el-icon-search' }
+            config: { placeholder: '请输入分类名称搜索', 'suffix-icon': 'el-icon-search' }
           }
         ],
         popoverOptions: [
@@ -186,7 +188,7 @@ export default {
             loadMoreFun(item) {
               if (item.loading || item.noMore) return
               item.loading = true
-              getCreatorList({ source: 'questionnaire' }).then((res) => {
+              getCreatorList({ source: 'teacher' }).then((res) => {
                 if (res.length > 0) {
                   item.options.push(...res)
                   item.pageNo += 1
@@ -203,16 +205,16 @@ export default {
       data: [],
       createOrgDailog: false,
       searchParams: {
-        source: 'questionnaire'
+        source: 'teacher'
       }
     }
   },
   computed: {
-    ADD_CLASSROOM_CLASSIFY: () => ADD_CLASSROOM_CLASSIFY,
-    STOP_CLASSROOM_CLASSIFY: () => STOP_CLASSROOM_CLASSIFY,
-    EDIT_CLASSROOM_CLASSIFY: () => EDIT_CLASSROOM_CLASSIFY,
-    DELETE_CLASSROOM_CLASSIFY: () => DELETE_CLASSROOM_CLASSIFY,
-    ADD_NEW_GROUNP_CLASSROOM_CLASSIFY: () => ADD_NEW_GROUNP_CLASSROOM_CLASSIFY,
+    ADD_LECTURER_CLASSIFY: () => ADD_LECTURER_CLASSIFY,
+    STOP_LECTURER_CLASSIFY: () => STOP_LECTURER_CLASSIFY,
+    EDIT_LECTURER_CLASSIFY: () => EDIT_LECTURER_CLASSIFY,
+    DELETE_LECTURER_CLASSIFY: () => DELETE_LECTURER_CLASSIFY,
+    ADD_LECTURER_GROUNP_CLASSIFY: () => ADD_LECTURER_GROUNP_CLASSIFY,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -220,17 +222,17 @@ export default {
     privileges: {
       handler() {
         this.tableConfig.showHandler = this.$p([
-          STOP_CLASSROOM_CLASSIFY,
-          EDIT_CLASSROOM_CLASSIFY,
-          DELETE_CLASSROOM_CLASSIFY,
-          ADD_NEW_GROUNP_CLASSROOM_CLASSIFY
+          STOP_LECTURER_CLASSIFY,
+          EDIT_LECTURER_CLASSIFY,
+          DELETE_LECTURER_CLASSIFY,
+          ADD_LECTURER_GROUNP_CLASSIFY
         ])
       },
       deep: true
     }
   },
   activated() {
-    getCreatorList({ source: 'questionnaire' }).then((res) => {
+    getCreatorList({ source: 'teacher' }).then((res) => {
       this.searchConfig.popoverOptions[1].options.push(...res)
     })
     this.loadTableData()
@@ -263,7 +265,7 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      deleteCategory({ id }).then(() => {
+      deleteTeacherCatalog({ id }).then(() => {
         this.loadTableData()
         this.$refs.table.clearSelection()
         this.$message({
@@ -292,7 +294,7 @@ export default {
       if (this.tableLoading) return
       try {
         this.tableLoading = true
-        getCategoryTree(this.searchParams).then((res) => {
+        queryTeacherCataList(this.searchParams).then((res) => {
           const loop = (tree) => {
             _.each(tree, (item) => {
               item.hasChildren = false
@@ -334,7 +336,7 @@ export default {
       // 停启用当前分类是否存在子分类
       const hasChildren = !_.isEmpty(row.children)
       const statusText = row.status == 0 ? '启用' : '停用'
-      const stopContent = `您确定要停用该分类吗吗？停用后，该分类${
+      const stopContent = `您确定要停用该分类吗？停用后，该分类${
         hasChildren ? '及其子分类' : ''
       }将暂停使用。`
       const startContent = `您确定要启用该分类${hasChildren ? '及其子分类' : ''}吗？`
@@ -345,7 +347,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        updateCategoryStatus(params).then(() => {
+        updateStatus(params).then(() => {
           this.loadTableData()
           this.$message({
             type: 'success',

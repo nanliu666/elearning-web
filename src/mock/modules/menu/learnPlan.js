@@ -56,7 +56,7 @@ export default {
           menuType: 'Button',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
-          menuName: '新建分组',
+          menuName: '创建分组',
           path: '/learnPlan/CoursePlanList/addGroup'
         },
         {

@@ -1,6 +1,15 @@
 import request from '@/router/axios'
 import website from '@/config/website'
 
+// 获取用户的logo banner 首页布局等信息
+export const getDiyInfor = (params) => {
+  return request({
+    url: '/api/manage/v1/cms/plan/my',
+    method: 'get',
+    params: params
+  })
+  //return get('/api/manage/v1/cms/plan/my', params)
+}
 // 获取用户的组织id（包括当前和当前以上的）
 export const getOrgIds = (params) => {
   return request({
@@ -8,7 +17,6 @@ export const getOrgIds = (params) => {
     method: 'get',
     params: params
   })
-  // return get('/api/manage/v1/web/index/queryOrgIds', params)
 }
 
 export const loginByUsername = (tenantId, username, password, type, key, code, account) =>

@@ -4,7 +4,7 @@
       class="addLecturer_head"
       @click="toLecturer"
     >
-      <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '添加讲师' }}
+      <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '创建讲师' }}
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
@@ -521,7 +521,7 @@ export default {
       })
     },
 
-    // 查询添加讲师的数据
+    // 查询创建讲师的数据
     isqueryTeacherlist() {
       let params = {
         pageNo: 1,
@@ -550,7 +550,7 @@ export default {
       this.$router.push({ path: '/resource/lecturer/lecturer' })
     },
 
-    // 添加讲师
+    // 创建讲师
     isAddTeacher() {
       this.ruleForm.categoryId = this.ruleForm.categoryId
         ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]

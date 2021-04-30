@@ -61,7 +61,7 @@ export const update = (params) => put('/api/manage/v1/teacher/update', params)
  * */
 export const move = (params) => post('/api/manage/v1/teacher/catalog/move', params)
 /**
- *  移动
+ *  编辑讲师分类
  * @param {Object} courseId - 参数
  * */
 export const editTeacherCatalog = (params) =>
@@ -70,3 +70,16 @@ export const editTeacherCatalog = (params) =>
  *  查询讲师授课情况
  * */
 export const getCourseList = (params) => post('/api/manage/v1/teacher/courseList', params)
+/**
+ *  讲师分类管理列表
+ * */
+export const queryTeacherCataList = (params) =>
+  post('/api/manage/v1/teacher/queryTeacherCataList', params)
+/**
+ *  讲师分类创建人
+ * */
+export const getCreatorList = (params) => get('/api/manage/v1/teacher/getCreatorList', params)
+/**
+ *  讲师分类停用启用
+ * */
+export const updateStatus = (params) => post('/api/manage/v1/teacher/catalog/updateStatus', params)

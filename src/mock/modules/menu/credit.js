@@ -54,7 +54,7 @@ export default {
         },
         {
           menuType: 'Button',
-          menuName: '新建规则',
+          menuName: '创建规则',
           isOwn: 1,
           isEnabled: 1, // 是否显示在菜单栏 0：否，1：是
           path: '/creditManagement/creditRule/add'

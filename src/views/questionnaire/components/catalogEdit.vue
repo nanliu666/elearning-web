@@ -57,19 +57,6 @@
           </div>
         </el-col>
       </el-form-item>
-      <!-- 可见范围 -->
-      <el-form-item
-        v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
-        label="可见范围"
-      >
-        <div>
-          <OrgTree
-            :id-list="form.orgIdList"
-            @selectedValue="getOrgList"
-          ></OrgTree>
-        </div>
-        <!-- {{ userList }} -->
-      </el-form-item>
     </el-form>
     <span
       v-if="type === 'create'"
@@ -105,13 +92,9 @@
 </template>
 
 <script>
-import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 export default {
   name: 'CatalogEdit',
-  components: {
-    OrgTree
-  },
   props: {
     visible: {
       type: Boolean,
@@ -187,8 +170,8 @@ export default {
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
-            addCategory(this.form)
-              .then((res) => {
+            addCategory(_.assign(this.form, { addFlag: '1' }))
+              .then(() => {
                 this.$message.success('创建成功')
                 this.loading = false
                 this.$emit('changevisible', false)
@@ -206,7 +189,7 @@ export default {
               })
           } else {
             this.loading = true
-            editCategory(_.assign(this.form, { source: 'questionnaire' }))
+            editCategory(_.assign(this.form, { source: 'questionnaire', addFlag: '1' }))
               .then(() => {
                 this.$message.success('修改成功')
                 this.$emit('refresh')
@@ -223,7 +206,7 @@ export default {
         }
       })
     },
-    // 新建分类
+    // 创建分类
     create() {
       this.type = 'create'
       _.assign(this.$data, this.$options.data())

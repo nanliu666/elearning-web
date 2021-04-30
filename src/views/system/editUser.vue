@@ -1,7 +1,7 @@
 <template>
   <div style="height">
     <page-header
-      :title="`${id ? '编辑' : '添加'}用户`"
+      :title="`${id ? '编辑' : '创建'}用户`"
       show-back
       :back="goBack"
     />
@@ -134,6 +134,7 @@ export default {
         remark: '',
         name: '',
         sex: '',
+        idNo: '',
         phonenum: '',
         email: '',
         roleIds: [],
@@ -202,9 +203,18 @@ export default {
           ]
         },
         {
+          itemType: 'input',
+          prop: 'idNo',
+          label: '身份证号',
+          rules: [
+            { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '您的身份证格式不正确' }
+          ]
+        },
+        {
           itemType: 'select',
           prop: 'roleIds',
           label: '角色',
+          offset: 4,
           multiple: true,
           props: {
             label: 'roleName',
@@ -214,7 +224,6 @@ export default {
         },
         {
           prop: 'birthDate',
-          offset: 4,
           itemType: 'datePicker',
           label: '出生日期',
           pickerOptions: {
@@ -364,10 +373,12 @@ export default {
       let leaders = _.filter(selectedOrg.leaders, 'userId')
       if (leaders.length > 0) {
         this.form.leaderId = _.head(leaders).userId
-        this.columns.find((item) => item.prop === 'leaderId').firstOption = {
-          userId: _.head(leaders).userId + '',
-          name: _.head(leaders).userName
-        }
+        this.columns.find((item) => item.prop === 'leaderId').firstOption = [
+          {
+            userId: _.head(leaders).userId + '',
+            name: _.head(leaders).userName
+          }
+        ]
       }
     }
   },

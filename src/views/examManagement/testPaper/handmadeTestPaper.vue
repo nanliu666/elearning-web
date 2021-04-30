@@ -4,7 +4,7 @@
     class="HandmadeTestPaper"
   >
     <page-header
-      :title="_.get(form, 'id', null) && !copy ? '编辑手工试卷' : '新建手工试卷'"
+      :title="_.get(form, 'id', null) && !copy ? '编辑手工试卷' : '创建手工试卷'"
       show-back
     />
     <basic-container

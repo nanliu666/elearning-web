@@ -1,13 +1,13 @@
 <template>
   <el-select
     ref="selector"
-    :value="valueTitle"
+    v-model="valueId"
     :clearable="clearable"
     :placeholder="placeholder"
     @clear="clearHandle"
   >
     <el-option
-      :value="valueTitle"
+      :value="valueId"
       :label="valueTitle"
     >
       <el-tree
@@ -48,9 +48,7 @@ export default {
     /* 初始值 */
     value: {
       type: String,
-      default: () => {
-        return null
-      }
+      default: ''
     },
     /* 可清空选项 */
     clearable: {
@@ -79,16 +77,14 @@ export default {
     }
   },
   watch: {
-    value() {
-      this.valueId = this.value
-      if (!this.options.length) return
+    value(val) {
+      this.valueId = val
       this.$nextTick(() => {
         this.initHandle()
       })
     },
     options: {
       handler() {
-        this.valueId = this.value
         this.$nextTick(() => {
           this.initHandle()
         })
@@ -100,16 +96,20 @@ export default {
     // 初始化值
     initHandle() {
       if (this.valueId) {
-        this.valueTitle = this.$refs.selectTree.getNode(this.valueId).data[this.props.label] // 初始化显示
+        const node = this.$refs.selectTree.getNode(this.valueId)
+        if (!node) return
+        this.valueTitle = node.data[this.props.label] // 初始化显示
         this.$refs.selectTree.setCurrentKey(this.valueId) // 设置默认选中
         this.defaultExpandedKey = [this.valueId] // 设置默认展开
+        this.$nextTick(() => {
+          let scrollWrap = document.querySelectorAll('.el-scrollbar .el-select-dropdown__wrap')[0]
+          let scrollBar = document.querySelectorAll('.el-scrollbar .el-scrollbar__bar')
+          scrollWrap.style.cssText = 'margin: 0px; max-height: none; overflow: hidden;'
+          scrollBar.forEach((ele) => (ele.style.width = 0))
+        })
+      } else {
+        this.valueTitle = ''
       }
-      this.$nextTick(() => {
-        let scrollWrap = document.querySelectorAll('.el-scrollbar .el-select-dropdown__wrap')[0]
-        let scrollBar = document.querySelectorAll('.el-scrollbar .el-scrollbar__bar')
-        scrollWrap.style.cssText = 'margin: 0px; max-height: none; overflow: hidden;'
-        scrollBar.forEach((ele) => (ele.style.width = 0))
-      })
     },
     // 切换选项
     handleNodeClick(node) {

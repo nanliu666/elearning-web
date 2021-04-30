@@ -26,7 +26,14 @@ export const getOrgUserTree = () => {
  * @returns {{orgs: Array<any>; users: Array<any>}}
  */
 export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
-
+/**
+ * 获取子组织岗位和直属员工接口
+ * @param {object} params 参数
+ * @param {string} params.parentId 父组织ID，顶级父节点为"0"
+ * @param {string} [params.search] 工号或姓名，支持模糊查询
+ * @returns {{orgs: Array<any>; users: Array<any>}}
+ */
+export const getPostionUserChild = (params) => get('/manage/v1/position/user/child', params)
 /**
  * 获取子业务部门和直属员工接口
  * @param {object} params 参数
@@ -323,3 +330,15 @@ export const getMgmtOrgIds = (params) => get('/api/user/v1/user/getMgmtOrgIds', 
  * @param {String} params.userId
  */
 export const addEditUser = (params) => post('/api/sys/v1/role/user', params)
+
+export const bulkDepartures = (params) => post('/api/user/v1/user/status/reset', params)
+/**
+ * @desc 批量修改部门
+ */
+export const updateUserIdBatchOrg = (params) =>
+  post('/api/user/v1/user/updateUserIdBatchOrg', params)
+
+/**
+ * @desc 分组列表
+ */
+export const getGroup = (params) => get('/api/user/v1/usergroup/list', params)

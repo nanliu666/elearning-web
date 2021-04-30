@@ -25,6 +25,30 @@
         >
           批量重置密码
         </el-button>
+        <el-button
+          v-p="BATCH_EXPORT"
+          type="text"
+          style="margin-bottom: 0"
+          @click="batchExport(selection)"
+        >
+          批量导出
+        </el-button>
+        <el-button
+          v-p="BULK_DEPARTURES"
+          type="text"
+          style="margin-bottom: 0"
+          @click="bulkDepartures(selection)"
+        >
+          批量离职
+        </el-button>
+        <el-button
+          v-p="BATCH_DEPARTMENT"
+          type="text"
+          style="margin-bottom: 0"
+          @click="batchDepartment(selection)"
+        >
+          批量修改部门
+        </el-button>
       </template>
       <template slot="topMenu">
         <div class="operations">
@@ -150,6 +174,32 @@
       :user="editingUser"
       @after-submit="handleAfterSubmit"
     />
+    <!-- 添加部门 -->
+    <el-dialog
+      title="批量修改部门"
+      :visible.sync="batchVisible"
+      width="30%"
+    >
+      <common-form
+        ref="form"
+        :model="form"
+        :columns="formColumns"
+      ></common-form>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          size="medium"
+          @click="batchClose"
+        >取 消</el-button>
+        <el-button
+          type="primary"
+          size="medium"
+          @click="batchDetermine"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
   </basic-container>
 </template>
 
@@ -159,11 +209,23 @@ import {
   modifyUserStatus,
   resetPwd,
   delUser,
-  getOuterUserList
+  getOuterUserList,
+  bulkDepartures,
+  updateUserIdBatchOrg
 } from '@/api/system/user'
 import { getRoleList, getPositionAll } from '@/api/system/role'
+import { getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
-import { SETTING_USER, RESET_USER, EDIT_USER, END_USER, DELETE_USER } from '@/const/privileges'
+import {
+  SETTING_USER,
+  RESET_USER,
+  EDIT_USER,
+  END_USER,
+  DELETE_USER,
+  BATCH_EXPORT,
+  BULK_DEPARTURES,
+  BATCH_DEPARTMENT
+} from '@/const/privileges'
 const COLUMNS = [
   {
     label: '姓名',
@@ -176,16 +238,16 @@ const COLUMNS = [
     align: 'center',
     prop: 'workNo'
   },
-  //状态，1-正常，2-禁用
+  //状态，1-在职，2-离职
   {
-    label: '状态',
+    label: '在职状态',
     prop: 'userStatus',
     align: 'center',
     formatter(record) {
       return (
         {
-          1: '正常',
-          2: '冻结'
+          1: '在职',
+          2: '离职'
         }[record.userStatus] || ''
       )
     }
@@ -255,6 +317,7 @@ export default {
   },
   data() {
     return {
+      batchVisible: false,
       query: {},
       loading: false,
       page: {
@@ -277,12 +340,12 @@ export default {
           {
             type: 'select',
             field: 'userStatus',
-            label: '状态',
+            label: '在职状态',
             data: '',
             options: [
               { value: '', label: '全部' },
-              { value: '1', label: '正常' },
-              { value: '2', label: '冻结' }
+              { value: '1', label: '在职' },
+              { value: '2', label: '离职' }
             ]
           },
           {
@@ -341,7 +404,40 @@ export default {
       }),
       data: [],
       editVisible: false,
-      editingUser: {}
+      editingUser: {},
+      formColumns: [
+        {
+          prop: 'orgId',
+          itemType: 'treeSelect',
+          label: '所在部门',
+          span: 24,
+          required: true,
+          props: {
+            selectParams: {
+              placeholder: '请选择所在部门',
+              multiple: false
+            },
+            treeParams: {
+              data: [],
+              'check-strictly': true,
+              'default-expand-all': false,
+              'expand-on-click-node': false,
+              clickParent: true,
+              filterable: false,
+              props: {
+                children: 'children',
+                label: 'orgName',
+                disabled: 'disabled',
+                value: 'orgId'
+              }
+            }
+          }
+        }
+      ],
+      form: {
+        orgId: ''
+      },
+      orgData: []
     }
   },
   computed: {
@@ -350,6 +446,9 @@ export default {
     EDIT_USER: () => EDIT_USER,
     END_USER: () => END_USER,
     DELETE_USER: () => DELETE_USER,
+    BATCH_EXPORT: () => BATCH_EXPORT,
+    BULK_DEPARTURES: () => BULK_DEPARTURES,
+    BATCH_DEPARTMENT: () => BATCH_DEPARTMENT,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -376,6 +475,7 @@ export default {
     }
   },
   created() {
+    this.loadOrgData()
     this.loadData()
     this.loadRoleData()
     getPositionAll().then((res) => {
@@ -387,6 +487,11 @@ export default {
     this.loadData()
   },
   methods: {
+    loadOrgData() {
+      getOrgTree({ parentOrgId: '0' }).then((res) => {
+        this.formColumns.find((item) => item.prop === 'orgId').props.treeParams.data = res
+      })
+    },
     searchLoadData: _.debounce(function() {
       this.loadData()
     }, 500),
@@ -525,6 +630,94 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    // 批量导出
+    batchExport(selection) {
+      selection.forEach((v) => {
+        v.userStatus = { 1: '在职', 2: '离职' }[v.userStatus]
+        v.roles = v.roles.map((role) => role.roleName).join(';')
+      })
+      import('@/vendor/Export2Excel').then((excel) => {
+        const tHeader = this.columns.map((v) => v.label)
+        const filterVal = this.columns.map((v) => v.prop)
+        const data = this.formatJson(filterVal, selection)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: '用户列表'
+        })
+        this.loadData()
+        this.$refs.crud.clearSelection()
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) => filterVal.map((j) => v[j]))
+    },
+    // 批量离职
+    bulkDepartures(selection) {
+      this.$confirm('确定要把选中的用户设置成离职状态吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        let userStr = selection.map((v) => v.userId)
+        let params = {
+          userId: userStr.join(','),
+          userStatus: '2'
+        }
+        bulkDepartures(params)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+            this.loadData()
+            this.$refs.crud.clearSelection()
+          })
+          .catch(() => {
+            this.$message({
+              type: 'error',
+              message: '保存失败,请联系管理员!'
+            })
+          })
+      })
+    },
+    // 批量修改部门
+    batchDepartment(selection) {
+      this.batchVisible = true
+      this.orgData = selection
+    },
+    // 批量修改部门-确定按钮
+    batchDetermine() {
+      console.log(this.orgData)
+      this.$refs.form.validate().then(async (valid) => {
+        if (!valid) return
+        let userStr = this.orgData.map((v) => v.userId)
+        let params = {
+          userId: userStr.join(','),
+          id: this.form.orgId
+        }
+        await updateUserIdBatchOrg(params)
+          .then(() => {
+            this.batchClose()
+            this.$message({
+              type: 'success',
+              message: '批量修改部门成功!'
+            })
+            this.loadData()
+            this.$refs.crud.clearSelection()
+          })
+          .catch(() => {
+            this.$message({
+              type: 'error',
+              message: '保存失败,请联系管理员!'
+            })
+          })
+      })
+    },
+    batchClose() {
+      this.batchVisible = false
+      this.$refs.form.resetFields()
     }
   }
 }

@@ -8,71 +8,82 @@
       <span class="title">预览问卷</span>
     </div>
 
-    <div class="paper-container">
-      <div class="paper-side">
+    <div class="preview-container">
+      <div class="preview-side">
         <div class="side-item active">
           电脑预览
         </div>
-        <div class="side-item">
+        <!-- <div class="side-item">
           手机预览
-        </div>
+        </div> -->
       </div>
-      <div class="paper-wrapper">
+      <div
+        v-loading="loading"
+        class="preview-wrapper"
+      >
         <el-scrollbar>
           <div>
-            <div class="paper-header-area">
-              <div class="paper-title">
-                大学生就业意向调查
+            <div class="preview-header-area">
+              <div class="preview-title">
+                {{ data.asqName }}
               </div>
-              <div class="paper-intro">
-                为了给您提供更好的服务，希望您能抽出几分钟时间，将您的感受和建议告诉我们，我们非常重视每位用户的宝贵意见，期待您的参与！现在我们就马上开始吧！
+              <div class="preview-intro">
+                {{ data.remark }}
               </div>
             </div>
 
-            <div class="paper-topic">
+            <div class="preview-topic">
               <div
-                v-for="(item, index) in data"
-                :key="item.id"
-                class="topic-item"
+                v-for="(question, index) in data.asqQuestions"
+                :key="question.id"
+                class="question-item"
               >
-                <div class="topic-type">
-                  {{ getTypeName(item, index) }}
+                <div class="question-title">
+                  <div class="question-index">
+                    <span
+                      v-if="question.status == 1"
+                      class="request"
+                    >*</span>
+
+                    <span class="text">{{ index + 1 }}.</span>
+                  </div>
+                  <div class="question-name">
+                    {{ question.content
+                    }}<span class="question-type">【{{ getTypeName(question) }}】</span>
+                  </div>
+
+                  <span
+                    v-if="question.type == 'multi_choice'"
+                    class="question-limit"
+                  >最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项</span>
                 </div>
-                <div class="topic-title">
-                  {{ index + 1 }}.<span
-                    v-if="item.require"
-                    style="display: inline-block; margin-right: 5px; color: red;"
-                  >*</span>{{ item.title }}
-                </div>
-                <div class="topic-content">
+
+                <div class="question-content">
                   <el-input
-                    v-if="item.type == '1'"
-                    v-model="item._input"
+                    v-if="question.type == 'short_answer'"
+                    :value="questionResults[index]"
                   ></el-input>
 
-                  <el-radio-group
-                    v-else-if="item.type == '2'"
-                    v-model="item._radio"
-                  >
+                  <el-radio-group v-if="question.type == 'single_choice'">
                     <el-radio
-                      v-for="(topic, index) in item.content"
-                      :key="index"
-                      :label="topic"
+                      v-for="(option, option_index) in question.asqQuestionOptions"
+                      :key="option_index"
+                      :label="option.content"
                     ></el-radio>
                   </el-radio-group>
 
-                  <el-checkbox-group
-                    v-if="item.type == '3'"
-                    v-model="item._checkbox"
-                  >
-                    <el-checkbox
-                      v-for="(topic, index) in item.content"
-                      :key="index"
-                      :label="topic"
+                  <div v-if="question.type == 'multi_choice'">
+                    <el-checkbox-group
+                      v-model="questionResults[index]"
+                      disabled
                     >
-                      {{ topic }}
-                    </el-checkbox>
-                  </el-checkbox-group>
+                      <el-checkbox
+                        v-for="(option, option_index) in question.asqQuestionOptions"
+                        :key="option_index"
+                        :label="option.content"
+                      />
+                    </el-checkbox-group>
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,52 +95,68 @@
 </template>
 
 <script>
+import { editView, editView2 } from '@/api/questionnaire'
 export default {
   name: 'Preview',
   data() {
     return {
-      data: []
+      data: {},
+      questionResults: [],
+      loading: false
     }
   },
-  created() {
+  watch: {
+    'data.asqQuestions': {
+      handler() {
+        this.$forceUpdate()
+      },
+      deep: true
+    }
+  },
+  activated() {
+    this.questionResults = []
     this.getData()
   },
   methods: {
     getData() {
-      this.data = [
-        {
-          require: true,
-          type: '1',
-          title: '你的专业是',
-          content: ''
-        },
-        {
-          require: false,
-          type: '2',
-          title: '你的性别',
-          content: ['男', '女'],
-          _radio: '男'
-        },
-        {
-          require: false,
-          type: '3',
-          title: '你的兴趣',
-          content: ['乒乓球', '羽毛球', '网游', '爬山', '足球'],
-          _checkbox: ['乒乓球']
+      this.loading = true
+      let params, api
+      const { id, subjectCpId } = this.$route.query
+      if (subjectCpId) {
+        params = {
+          subjectCpId
         }
-      ]
+        api = editView2
+      } else {
+        params = {
+          id
+        }
+        api = editView
+      }
+      api(params)
+        .then((res) => {
+          const [data = {}] = res
+          this.data = data
+          if (!data.asqQuestions) return
+          data.asqQuestions.forEach((question) => {
+            this.questionResults.push(question.type == 'multi_choice' ? [] : '')
+          })
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
-    getTypeName(item, index) {
-      let result = index + 1
+    getTypeName(item) {
+      let result = ''
       switch (item.type) {
-        case '1':
-          result += '、简答题'
+        case 'short_answer':
+          result += '简答题'
           break
-        case '2':
-          result += '、单选题'
+        case 'single_choice':
+          result += '单选题'
           break
-        case '3':
-          result += '、多选题'
+        case 'multi_choice':
+          result += '多选题'
           break
         default:
           break
@@ -142,8 +169,9 @@ export default {
 
 <style lang="scss">
 .preview {
-  .topic-content {
+  .question-content {
     margin-left: 12px;
+    width: 452px;
     .el-radio,
     .el-checkbox {
       display: block;
@@ -176,14 +204,14 @@ export default {
       margin-left: 8px;
     }
   }
-  .paper-container {
+  .preview-container {
     display: flex;
     height: 100%;
     background: #ffffff;
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
     box-sizing: border-box;
     margin-bottom: 20px;
-    .paper-side {
+    .preview-side {
       width: 160px;
       border-right: 1px solid #ebeced;
       height: 100%;
@@ -203,45 +231,72 @@ export default {
         }
       }
     }
-    .paper-wrapper {
+    .preview-wrapper {
       flex: 1;
       margin: 40px;
       overflow-y: auto;
-      .paper-header-area {
+      .preview-header-area {
         width: 100%;
         text-align: center;
-        .paper-title {
+        .preview-title {
           font-size: 18px;
           color: rgba(0, 11, 21, 0.85);
           font-weight: bold;
         }
-        .paper-intro {
+        .preview-intro {
           font-size: 12px;
           color: rgba(0, 11, 21, 0.45);
           max-width: 800px;
           margin: 16px auto 0;
+          word-break: break-all;
         }
       }
-      .paper-topic {
-        .topic-item {
+      .preview-topic {
+        margin-top: 40px;
+        .question-item {
           font-size: 14px;
-          max-width: 452px;
-          margin-top: 40px;
-          .topic-type {
-            font-family: emoji;
-            font-size: 14px;
-            color: #000b15;
-            line-height: 24px;
-            margin-bottom: 24px;
-            font-weight: bold;
-          }
-          .topic-title {
+          margin-bottom: 40px;
+          .question-title {
+            display: flex;
+            align-items: start;
+            width: 100%;
+            justify-content: flex-start;
             font-family: PingFangSC-Regular;
             font-size: 14px;
-            color: rgba(0, 11, 21, 0.65);
+            color: rgba(0, 11, 21, 0.85);
             letter-spacing: 0;
             line-height: 22px;
             margin-bottom: 8px;
+            .question-index {
+              font-weight: bold;
+              flex-grow: 0;
+              flex-shrink: 1;
+              display: flex;
+              align-items: center;
+              margin-right: 5px;
+              .request {
+                margin-right: 5px;
+                color: red;
+              }
+              .text {
+                color: #000;
+              }
+            }
+            .question-name {
+              font-weight: bold;
+              max-width: 1200px;
+            }
+            .question-type {
+              width: 70px;
+              font-family: emoji;
+              color: rgba(0, 11, 21, 0.45);
+              font-weight: bold;
+            }
+            .question-limit {
+              font-family: emoji;
+              flex-shrink: 0;
+              color: rgba(0, 11, 21, 0.45);
+            }
           }
         }
       }

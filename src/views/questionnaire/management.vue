@@ -18,20 +18,23 @@
             <div class="input-wrapper">
               <el-input
                 v-model="queryForm.asqName"
-                :disabled="loading"
                 clearable
                 size="medium"
                 placeholder="输入问卷名称搜索"
                 suffix-icon="el-icon-search"
+                :maxlength="32"
               ></el-input>
             </div>
 
             <el-popover
               v-model="queryFormVisible"
-              placement="bottom"
+              :offset="900"
+              placement="bottom-end"
               transition="false"
             >
               <el-form
+                ref="queryForm"
+                :rules="queryFormRules"
                 label-position="left"
                 :inline="true"
                 :model="queryForm"
@@ -43,53 +46,64 @@
                   <tree-selector
                     class="selector"
                     :options="treeData"
-                    placeholder="请选择组织"
+                    placeholder="请选择"
                     :props="seletorProps"
+                    :value="queryForm.categoryId"
                     @getValue="(id) => (queryForm.categoryId = id)"
                   />
                 </el-form-item>
                 <el-form-item label="创建人">
-                  <el-select v-model="queryForm.creatorId" placeholder="请选择创建人" clearable>
+                  <el-select
+                    v-model="queryForm.creatorId"
+                    placeholder="请选择"
+                    clearable
+                  >
                     <el-option
                       v-for="item in creatorList"
                       :key="item.creatorId"
                       :label="item.name"
-                      :value="item.creatorId">
+                      :value="item.creatorId"
+                    >
                     </el-option>
                   </el-select>
-
-
                 </el-form-item>
 
                 <el-form-item label="题目数量">
-                  <el-input-number
-                    v-model="queryForm.minNum"
-                    controls-position="right"
-                    clearable
-                    placeholder="最小值"
-                    width="110"
-                  />
-                  ~
-                  <el-input-number
-                    v-model="queryForm.maxNum"
-                    controls-position="right"
-                    clearable
-                    placeholder="最大值"
-                    width="110"
-                  />
+                  <el-form-item
+                    prop="minNum"
+                    style="margin-right: 0"
+                  >
+                    <el-input
+                      v-model.number="queryForm.minNum"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
+                      clearable
+                      placeholder="最小值"
+                      width="110"
+                    />
+                  </el-form-item>
+                  <span style="display: inline-block; margin: 0 5px;">~</span>
+                  <el-form-item prop="maxNum">
+                    <el-input
+                      v-model.number="queryForm.maxNum"
+                      oninput="this.value = this.value.replace(/[^\d.]/g,'');"
+                      clearable
+                      placeholder="最大值"
+                      width="110"
+                    />
+                  </el-form-item>
                 </el-form-item>
                 <div style="text-align: right; margin-right: 75px">
                   <el-button
                     type="primary"
                     size="medium"
                     :disabled="loading"
-                    @click.native="resetPageAndGetList"
+                    @click.native="handleSearch"
                   >
                     搜索
                   </el-button>
                   <el-button
                     size="medium"
-                    @click="queryForm = { ...initForm, name: queryForm.asqName }"
+                    @click.native="resetQueryForm"
                   >
                     重置
                   </el-button>
@@ -140,8 +154,8 @@
       </div>
 
       <div class="table-container">
-        <!-- <div style="margin-bottom: 8px; height:21px;">
-        <div v-if="multipleSelection.length">
+        <div style="margin-bottom: 8px; height:21px;">
+          <!-- <div v-if="multipleSelection.length">
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
             <span
               style="
@@ -155,15 +169,15 @@
             <el-button
               type="text"
               style="padding: 0"
-              @click="() => handleDelete"
+              @click="() => handleDelete()"
             >
               批量删除
             </el-button>
+        </div> -->
         </div>
 
-        </div> -->
-
         <el-table
+          ref="table"
           v-loading="loading"
           :data="data"
           height="60vh"
@@ -176,66 +190,78 @@
           <el-table-column
             v-if="columns['问卷名称']"
             fixed="left"
-            align="center"
-            label="问卷名称"
+            align="left"
+            prop="asqName"
             :show-overflow-tooltip="true"
-            width="180"
+            label="问卷名称"
+            min-width="180"
           >
             <template slot-scope="scope">
-              <el-button
-                type="text"
+              <div
+                class="column-title"
+                style="color: #01aafc; cursor: pointer;"
                 @click="toPreview(scope.row)"
               >
                 {{ scope.row.asqName }}
-              </el-button>
+              </div>
             </template>
           </el-table-column>
           <el-table-column
             v-if="columns['问卷分类']"
-            align="center"
+            align="left"
             prop="categoryName"
             :show-overflow-tooltip="true"
             label="问卷分类"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
             v-if="columns['问卷简介']"
-            align="center"
+            align="left"
             prop="remark"
             :show-overflow-tooltip="true"
             label="问卷简介"
+            min-width="180"
           >
+            <template slot-scope="scope">
+              <div class="column-title">
+                {{ scope.row.remark || '--' }}
+              </div>
+            </template>
           </el-table-column>
           <el-table-column
             v-if="columns['题目数量']"
-            align="center"
+            align="left"
             prop="questionNum"
             :show-overflow-tooltip="true"
             label="题目数量"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
             v-if="columns['创建时间']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="createTime"
             label="创建时间"
+            min-width="180"
           >
           </el-table-column>
           <el-table-column
             v-if="columns['创建人']"
-            align="center"
+            align="left"
             :show-overflow-tooltip="true"
             prop="name"
             label="创建人"
+            min-width="180"
           >
           </el-table-column>
 
           <el-table-column
-            prop="operate"
-            align="center"
+            align="left"
             label="操作"
             fixed="right"
+            width="180"
           >
             <template slot-scope="scope">
               <el-button
@@ -279,7 +305,12 @@
 
 <script>
 import Pagination from '@/components/common-pagination'
-import { questionnaireList, listCreatorId, questionnaireDelete, questionnaireCopy } from '@/api/questionnaire'
+import {
+  questionnaireList,
+  listCreatorId,
+  questionnaireDelete,
+  questionnaireCopy
+} from '@/api/questionnaire'
 import TreeSelector from '@/components/tree-selector'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 
@@ -290,6 +321,24 @@ export default {
     TreeSelector
   },
   data() {
+    var minNumValidate = (_, value, callback) => {
+      const maxNum = this.queryForm.maxNum
+      if (maxNum != '' && value >= maxNum) {
+        callback(new Error('最小值不得大于或等于最大值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+        callback()
+      }
+    }
+    var maxNumValidate = (_, value, callback) => {
+      const minNum = this.queryForm.minNum
+      if (minNum != '' && minNum >= value) {
+        callback(new Error('最大值不得小于或等于最小值'))
+      } else {
+        this.$refs.queryForm.clearValidate()
+        callback()
+      }
+    }
     return {
       queryFormVisible: false,
       columns: {
@@ -323,6 +372,10 @@ export default {
         categoryId: '',
         asqName: ''
       },
+      queryFormRules: {
+        minNum: [{ type: 'number', validator: minNumValidate, trigger: 'blur' }],
+        maxNum: [{ type: 'number', validator: maxNumValidate, trigger: 'blur' }]
+      },
       loading: false,
       data: [],
       treeData: [],
@@ -331,26 +384,36 @@ export default {
       total: 0
     }
   },
+  computed: {},
+  watch: {
+    columns: {
+      handler() {
+        this.$nextTick(() => {
+          this.$refs.table.doLayout()
+          this.$refs.table.$forceUpdate()
+        })
+      },
+      deep: true
+    },
+    'queryForm.asqName': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000)
+  },
   activated() {
     this.getData()
   },
-  computed: {
-    minInit() {
-      const maxNum = this.queryForm.maxNum
-      if (typeof maxNum === 'number') {
-        return maxNum
-      }
-      return 0
-    },
-    maxInit() {
-      const minNum = this.queryForm.minNum
-      if (typeof minNum === 'number') {
-        return minNum + 1
-      }
-      return 0
-    },
-  },
   methods: {
+    handleSearch() {
+      this.$refs.queryForm.validate((valid) => {
+        if (valid) {
+          this.resetPageAndGetList()
+        }
+      })
+    },
+    resetQueryForm() {
+      this.queryForm = { ...this.initForm, asqName: this.queryForm.asqName }
+      this.$refs.queryForm.clearValidate()
+    },
     resetPageAndGetList() {
       this.queryForm.currentPage = 1
       this.queryForm.size = 10
@@ -377,21 +440,22 @@ export default {
     },
     handleDelete(target) {
       const message = target ? '您确定删除选中的问卷吗？' : '您确定要批量删除选中的问卷吗？'
-      this.$confirm(message, {
+      this.$confirm(message, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          if (!Array.isArray(target)) target = [target]
+          target = (target && [target]) || this.multipleSelection
           const ids = target.map((item) => item.id)
           const formData = new FormData()
-          formData.append('id', ids.join(''))
+          formData.append('id', ids.join(','))
           questionnaireDelete(formData).then(() => {
             this.$message.success(`已成功删除${ids.length}条问卷`)
             this.getList()
           })
-        }).catch(() => {})
+        })
+        .catch(() => {})
     },
     handleCopy(target) {
       questionnaireCopy({ id: target.id }).then(() => {
@@ -403,20 +467,22 @@ export default {
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
         this.treeData = res
       })
-      listCreatorId({ id: '' }).then(res => {
+      listCreatorId({ id: '' }).then((res) => {
         this.creatorList = res
       })
     },
     getList() {
       if (this.loading) return
       this.loading = true
-      questionnaireList(this.queryForm).then(res => {
-        const { list, totalNum } = res
-        this.data = list
-        this.total = totalNum
-      }).finally(() => {
-        this.loading = false
-      })
+      questionnaireList(this.queryForm)
+        .then((res) => {
+          const { list, totalNum } = res
+          this.data = list
+          this.total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     resetFormAndGetList() {
       this.queryForm = { ...this.initForm }
@@ -427,16 +493,31 @@ export default {
       this.queryForm.size = limit
       this.getList()
     }
-  },
-  watch: {
-    'queryForm.asqName': _.debounce(function() {
-      this.getList()
-    }, 1000)
   }
 }
 </script>
 <style lang="scss">
 .management {
+  .column-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .el-table th.gutter {
+    display: table-cell !important;
+  }
+
+  .el-table colgroup.gutter {
+    display: table-cell !important;
+  }
+
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
   .el-form-item {
     margin-right: 20px;
   }

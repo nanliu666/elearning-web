@@ -3,6 +3,7 @@
     <page-header
       title="查看用户"
       show-back
+      :back="goBack"
     >
       <template slot="rightMenu">
         <el-button
@@ -17,7 +18,7 @@
     </page-header>
     <div class="category">
       <div>
-        <div style="margin-top: 20px">
+        <div>
           <common-table
             ref="table"
             style="width: 100%"
@@ -33,7 +34,7 @@
               <div class="flex-flow flex justify-content align-items">
                 <div>
                   <el-input
-                    v-model="form.name"
+                    v-model="groupName"
                     placeholder="输入工号或者姓名搜索"
                     clearable
                     style="width: 200px; margin-right: 12px"
@@ -56,22 +57,21 @@
                 v-p="DELETE_ROLE_USER"
                 class="all"
               >
-                <span
-                  @click="handlerDeleteAll(selection)"
-                ><i class="el-icon-delete" /> 批量删除</span>
+                <span @click="handleDelete(selection)"><i class="el-icon-delete" /> 批量删除</span>
               </span>
             </template>
             <template
               slot="handler"
               slot-scope="scope"
+              style="width: 80px"
             >
-              <el-button
+              <!-- <el-button
                 type="text"
                 size="medium"
                 @click.stop="handleEdit(scope.row, scope.index)"
               >
                 编辑
-              </el-button>
+              </el-button> -->
               <el-button
                 v-p="DELETE_ROLE_USER"
                 type="text"
@@ -85,8 +85,7 @@
         </div>
       </div>
     </div>
-    <addUserDialog
-      :row="row"
+    <addUserDialogGroup
       :visible.sync="editVisible"
       @after-submit="handleAfterSubmit"
     />
@@ -96,21 +95,19 @@
 <script>
 // import { deleteV1Job } from '@/api/organize/position'
 import { getToken } from '@/util/auth'
-import addUserDialog from './components/addUserDialog'
+import addUserDialogGroup from './components/addUserDialogGroup'
 // import { getV1Position, deleteV1Position } from '@/api/organize/position'
-import { getUserList, deleteUser } from '@/api/system/role'
+import { getGroupUser, delGroupUser } from '@/api/system/role'
 import { ADD_ROLE_USER, DELETE_ROLE_USER } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'RoleUsers',
   components: {
-    addUserDialog
+    addUserDialogGroup
   },
   data() {
     return {
-      form: {
-        name: ''
-      },
+      groupName: '',
       selectionList: [],
       loading: false,
       isEdit: false,
@@ -128,7 +125,7 @@ export default {
         rowKey: 'userId',
         enableMultiSelect: true,
         handlerColumn: {
-          width: 180
+          width: 80
         }
       },
       columns: [
@@ -185,68 +182,63 @@ export default {
       deep: true
     }
   },
-  created() {
-    this.getData()
-  },
   activated() {
     this.getData()
   },
   methods: {
-    handlerDeleteAll(list) {
-      let row = { userId: [] }
-      let userIdArr = list.map((item) => {
-        return item.userId
-      })
-      row.userId = userIdArr.join(',')
-      this.handleDelete(row)
+    goBack() {
+      this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+      this.$router.back(-1)
     },
     getData() {
+      const params = {
+        pageNo: this.page.currentPage,
+        pageSize: this.page.size,
+        groupId: this.$route.query.groupId,
+        userName: this.groupName,
+        workNo: ''
+      }
       this.loading = true
-      this.params.pageNo = this.page.currentPage
-      this.params.pageSize = this.page.size
-      this.params.roleId = this.$route.query.roleId
-      this.params.search = this.form.name
-      getUserList(this.params).then((res) => {
+      getGroupUser(params).then((res) => {
         this.data = res.data
         this.page.total = res.totalNum
         this.loading = false
       })
     },
+    //刷新
     handleAfterSubmit() {
       this.page.currentPage = 1
       this.getData()
     },
-    handleDelete(row) {
+    //删除
+    handleDelete(rows) {
       this.$confirm('您确定要删除该用户吗?', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let params = {
-          userId: row.userId,
-          roleId: this.$route.query.roleId
-        }
-        deleteUser(params).then(() => {
-          this.getData()
+        const ids = rows.length > 0 ? rows.map((row) => row.id) : [rows.id]
+        delGroupUser(ids).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
+          this.handleAfterSubmit()
           this.$refs.table.clearSelection()
         })
       })
     },
+    //搜索
     search: _.debounce(function() {
       this.page.currentPage = 1
       this.getData()
     }, 500),
+
     getJobData() {},
     closeBatch() {
       this.isBatch = false
     },
-    // 添加用户
     handlerAdd() {
-      this.row = {}
       this.editVisible = true
     },
     close() {
@@ -261,10 +253,11 @@ export default {
       this.page.currentPage = val
       this.getData()
     },
-    // 编辑用户
     handleEdit(row) {
       this.row = JSON.parse(JSON.stringify(row))
-      this.editVisible = true
+      this.isEdit = true
+      this.title = '编辑岗位'
+      this.stationDialog = true
     },
     handleExport() {
       this.$confirm('是否导出数据?', '提示', {
@@ -306,7 +299,7 @@ export default {
 
 <style lang="scss" scoped>
 .category {
-  margin-top: 16px;
+  // margin-top: 16px;
   background: #ffffff;
   box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.05);
   border-radius: 4px;

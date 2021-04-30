@@ -14,14 +14,14 @@
           <span class="title">{{ data.planName }}</span>
           <span
             class="status"
-            :class="{ 'doing': data.status == 2, 'will': data.status == 1, 'done': data.status == 3 }"
+            :class="{ doing: data.status == 2, will: data.status == 1, done: data.status == 3 }"
           >{{ getStatusName(data.status) }}</span>
         </div>
         <div class="pane-header-r">
           <el-button
             type="primary"
             :loading="btn1Loading"
-            :disabled="data.status == 3"
+            :disabled="shouldbeDisabled"
             size="mini"
             @click="handleStatusChange(data.status == 2 ? 1 : 2)"
           >
@@ -31,7 +31,7 @@
             type="default"
             :loading="btn2Loading"
             size="mini"
-            :disabled="data.status === 3"
+            :disabled="data.status !== 2 || data.option == 0"
             @click="handleStatusChange(3)"
           >
             结束
@@ -46,6 +46,7 @@
           <el-button
             type="default"
             size="mini"
+            :loading="btn3Loading"
             @click="handleDelete"
           >
             删除
@@ -79,8 +80,8 @@
               {{ data.subjectName
               }}<el-button
                 type="text"
-                style="margin-left: 12px"
-                @click="viewPaper"
+                style="margin-left: 12px; margin-top: 2px;"
+                @click="toPreview"
               >
                 查看关联问卷
               </el-button>
@@ -95,18 +96,22 @@
             </div>
           </div>
         </div>
-        <div class="pane-code">
-          <div class="code-img" ref="code"></div>
+        <!-- <div class="pane-code">
+          <div
+            v-if="showCode"
+            ref="code"
+            class="code-img"
+          ></div>
           <div class="code-text">
             扫码查看<el-button
-            @click="handleCopy"
               type="text"
               style="margin-left: 5px"
+              @click="handleCopy"
             >
               复制链接
             </el-button>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -130,9 +135,8 @@
 </template>
 
 <script>
-// :id="$route.query.id"
 import { Situation, Distribution } from './tabs'
-import { queryPlanDetail, end, suspend, start } from '@/api/questionnaire'
+import { queryPlanDetail, end, suspend, start, deleteQuestionnaire } from '@/api/questionnaire'
 import QRCode from 'qrcodejs2'
 const CODE_HEIGHT = 112
 const CODE_WIDTH = 112
@@ -158,7 +162,21 @@ export default {
       data: {},
       btn1Loading: false,
       btn2Loading: false,
-      id: ''
+      btn3Loading: false,
+      id: '',
+      qrcode: '',
+      showCode: false
+    }
+  },
+  computed: {
+    shouldbeDisabled() {
+      const { option } = this.data
+      if (option == 0) return true
+      if (this.data.status == 1) {
+        return option != 1
+      } else {
+        return option != 2
+      }
     }
   },
   activated() {
@@ -166,9 +184,11 @@ export default {
     if (toTab2) {
       this.activeComponent = 'Distribution'
     }
-    this.id = '1381777442804695041'
-    // this.id = id
-    this.getData()
+    this.id = id
+    this.queryPlanDetail()
+  },
+  deactivated() {
+    this.showCode = false
   },
   methods: {
     handleCopy() {
@@ -181,11 +201,32 @@ export default {
       this.$message.success('已复制')
     },
     handleEdit() {
+      const query = {}
+      Object.keys(this.data).forEach((key) => {
+        query[key] = this.data[key]
+      })
       this.$router.push({
-        path: '/questionnaire/eidt'
+        path: '/questionnaire-arrange',
+        query
       })
     },
-    handleDelete() {},
+    handleDelete() {
+      this.$confirm('您确定删除选中的问卷安排吗？', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.btn3Loading = true
+          deleteQuestionnaire({ ids: this.data.id })
+            .then(() => {
+              this.$message.success('操作成功')
+              this.$router.back()
+            })
+            .finally(() => (this.btn3Loading = false))
+        })
+        .catch(() => {})
+    },
     async handleStatusChange(status) {
       if (status === 3) {
         const result = await this.confirmFinish()
@@ -210,7 +251,8 @@ export default {
         .then(() => {
           this.$message.success('操作成功')
           this.data.status = status
-          this.$forceUpdate()
+          this.showCode = false
+          this.queryPlanDetail()
         })
         .finally(() => {
           this[loading] = false
@@ -223,14 +265,12 @@ export default {
         type: 'warning'
       }).catch(() => {})
     },
-    getData() {
-      this.queryPlanDetail()
-    },
-    viewPaper() {
+    toPreview() {
+      const { subjectCpId } = this.data
       this.$router.push({
         path: '/questionnaire/preview',
-        params: {
-          id: this.data.subjectId
+        query: {
+          subjectCpId
         }
       })
     },
@@ -248,14 +288,15 @@ export default {
     },
     queryPlanDetail() {
       queryPlanDetail({ id: this.id }).then((res) => {
+        this.showCode = true
         this.data = res
-        this.$nextTick(() => {
-          const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
-            width: CODE_WIDTH,
-            height: CODE_HEIGHT
-          }))
-          qrcode.makeCode(this.data.asqUrl)
-        })
+        // this.$nextTick(() => {
+        //   this.qrcode = new QRCode(this.$refs.code, {
+        //     width: CODE_WIDTH,
+        //     height: CODE_HEIGHT
+        //   })
+        //   this.qrcode.makeCode(this.data.asqUrl)
+        // })
       })
     }
   }
@@ -316,6 +357,8 @@ export default {
       align-items: center;
       margin-bottom: 20px;
       .pane-header-l {
+        flex: 1;
+        margin-right: 20px;
         display: flex;
         align-items: center;
         height: 22px;
@@ -327,6 +370,7 @@ export default {
         }
         .status {
           width: 52px;
+          flex: 0 0 52px;
           height: 20px;
           line-height: 20px;
           text-align: center;
@@ -351,6 +395,7 @@ export default {
     .pane-body {
       position: relative;
       .pane-body-list {
+        margin-right: 130px;
         .pane-body-item {
           display: flex;
           align-items: center;
@@ -359,6 +404,7 @@ export default {
             font-family: PingFangSC-Regular;
             font-size: 14px;
             color: rgba(0, 11, 21, 0.45);
+            flex: 0 0 70px;
           }
           .content {
             font-size: 14px;

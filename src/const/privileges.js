@@ -85,6 +85,12 @@ export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
 export const VIEW_CREDIT = '/creditManagement/credit/view' // 查看详情
 // 积分明细的查看详情的鉴权
 export const DELETE_CREDIT_DETAIL = '/creditManagement/creditDetails/delete' // 删除
+// 讲师分类的鉴权
+export const ADD_LECTURER_CLASSIFY = '/lecturer/classify/add' // 添加分类
+export const STOP_LECTURER_CLASSIFY = '/lecturer/classify/stop' // 启用/停用
+export const EDIT_LECTURER_CLASSIFY = '/lecturer/classify/edit' // 编辑
+export const DELETE_LECTURER_CLASSIFY = '/lecturer/classify/delete' // 删除
+export const ADD_LECTURER_GROUNP_CLASSIFY = '/lecturer/classify/addNewGroup' // 新建子分类
 // 讲师管理的鉴权
 export const ADD_LECTURER = '/lecturer/lecturer/add' // 添加讲师
 export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
@@ -118,6 +124,9 @@ export const RESET_USER = '/system/user/resetPassword' // 密码重置
 export const EDIT_USER = '/system/user/edit' // 编辑
 export const END_USER = '/system/user/end' // 冻结
 export const DELETE_USER = '/system/user/delete' // 删除
+export const BATCH_EXPORT = '/system/user/export' // 批量导出
+export const BULK_DEPARTURES = '/system/user/departures' // 批量离职
+export const BATCH_DEPARTMENT = '/system/user/department' // 批量修改部门
 // 菜单管理的鉴权
 export const STOP_MENU = '/system/menu/stop' // 启用/停用
 // 新闻管理的鉴权

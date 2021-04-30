@@ -1,6 +1,6 @@
 <template>
   <div class="diyHomeMobile">
-    <page-header title="首页定制">
+    <page-header title="首页定制(移动)">
       <el-button
         slot="rightMenu"
         v-p="DIY_HOME_ADD_MOBILE"
@@ -8,7 +8,7 @@
         size="medium"
         @click="addNewPlan"
       >
-        新建方案
+        创建方案
       </el-button>
     </page-header>
     <el-row
@@ -80,10 +80,10 @@ export default {
   },
   async mounted() {
     await this.loadTree()
-    this.$refs.orgTree.setCurrentKey(this.activeOrg.orgId)
+    this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
   },
   methods: {
-    //  新建方案
+    //  创建方案
     addNewPlan() {
       this.$router.push({
         path: '/diy/diyHomeEditMobile',

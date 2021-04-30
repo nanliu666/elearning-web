@@ -21,9 +21,7 @@
             type="flex"
             justify="center"
           >
-            <el-col
-              style="text-align: center;"
-            >
+            <el-col style="text-align: center;">
               <el-button
                 icon="el-icon-edit-outline"
                 type="text"
@@ -34,9 +32,7 @@
                 基本信息
               </el-button>
             </el-col>
-            <el-col
-              style="text-align: center;"
-            >
+            <el-col style="text-align: center;">
               <el-button
                 icon="el-icon-setting"
                 type="text"
@@ -58,12 +54,21 @@
             >
               上一步
             </el-button>
+            <!-- <el-button
+              v-show="step == 2"
+              type="default"
+              size="medium"
+              :loading="publishLoading1"
+              @click="publish(1)"
+            >
+              存草稿
+            </el-button> -->
             <el-button
               v-show="step == 2"
               type="primary"
               size="medium"
-              :loading="publishLoading"
-              @click="publish"
+              :loading="publishLoading0"
+              @click="publish(0)"
             >
               发布
             </el-button>
@@ -93,7 +98,7 @@
           label="问卷安排名称"
           prop="planName"
           class="half-form-item"
-          style="margin-right: 10%;"
+          style="margin-right: 160px;"
         >
           <el-input
             v-model="form.planName"
@@ -102,10 +107,22 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="所在分类"
           prop="categoryId"
-          class="half-form-item"
+          class="half-form-item category-form-item"
         >
+          <div
+            slot="label"
+            class="category-header"
+          >
+            <span class="label-name">所在分类</span>
+
+            <el-button
+              type="text"
+              @click.native="toCategory"
+            >
+              分类管理
+            </el-button>
+          </div>
           <tree-selector
             style="width: 100%;"
             class="selector"
@@ -114,36 +131,7 @@
             :props="seletorProps"
             :value="form.categoryId"
             @change="handleTreeSelectChange"
-          />
-        </el-form-item>
-
-        <el-form-item
-          label="发布时间"
-          prop="publishTime"
-          class="half-form-item"
-          style="margin-right: 10%;"
-        >
-          <el-date-picker
-            v-model="form.publishTime"
-            style="width: 100%;"
-            value-format="yyyy-MM-dd"
-            :picker-options="pickerOptionsStart"
-            placeholder="发布时间"
-            @change="publishTimeChange"
-          />
-        </el-form-item>
-        <el-form-item
-          label="截止时间"
-          prop="endTime"
-          class="half-form-item"
-        >
-          <el-date-picker
-            v-model="form.endTime"
-            style="width: 100%;"
-            value-format="yyyy-MM-dd"
-            :picker-options="pickerOptionsEnd"
-            placeholder="截止时间"
-            @change="endTimeChange"
+            @getValue="(id) => (form.categoryId = id)"
           />
         </el-form-item>
 
@@ -151,14 +139,14 @@
           label="关联问卷"
           prop="subjectId"
           class="half-form-item"
-          style="margin-right: 10%;"
+          style="margin-right: 160px;"
         >
           <el-select
             v-model="form.subjectId"
             v-el-select-loadmore="loadmoreSubject"
+            :disabled="!!form.id"
             placeholder="请选择"
             style="width: 100%;"
-            :loading="subjectLoading"
             @change="handleSubjectChange"
           >
             <el-option
@@ -168,6 +156,18 @@
               :value="item.id"
             >
             </el-option>
+            <div
+              v-if="subjectLoading"
+              style="color: #9c9c9c; line-height: 34px;text-align: center;"
+            >
+              加载中...
+            </div>
+            <div
+              v-if="noMoreSubject && !subjectLoading"
+              style="color: #9c9c9c;line-height: 34px;text-align: center;"
+            >
+              没有更多了
+            </div>
           </el-select>
         </el-form-item>
         <el-form-item
@@ -177,11 +177,28 @@
         >
           <el-input-number
             v-model="form.asqScore"
+            :precision="1"
+            :step="0.5"
             :min="0"
             type="number"
             controls-position="right"
             style="width: 100%;"
             placeholder="请输入"
+          />
+        </el-form-item>
+        <el-form-item
+          class="half-form-item"
+          label="发布时间"
+          prop="publishTime"
+        >
+          <el-date-picker
+            v-model="dateValue"
+            style="width: 100%;"
+            type="datetimerange"
+            format="yyyy-MM-dd HH:mm"
+            value-format="yyyy-MM-dd HH:mm"
+            start-placeholder="开始日期"
+            end-placeholder="截止日期"
           />
         </el-form-item>
       </el-form>
@@ -226,9 +243,12 @@
           :data="currentPersonList"
           align="center"
           header-align="center"
+          row-key="userId"
           @selection-change="handleSelectionChange"
         >
           <el-table-column
+            :selectable="selectEnable"
+            reserve-selection
             type="selection"
             width="55"
           >
@@ -249,11 +269,17 @@
             prop="department"
             label="所属组织"
           >
+            <template slot-scope="scope">
+              <div>
+                {{ scope.row.department || '--' }}
+              </div>
+            </template>
           </el-table-column>
 
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
+                v-if="deleteBtnVisible(scope.row)"
                 size="mini"
                 type="text"
                 @click="handleDeletePerson(scope.row)"
@@ -290,15 +316,16 @@
         slot="title"
         class="dialog-title"
       >
-        问卷链接和二维码
+        问卷链接
+        <!-- 问卷链接和二维码 -->
       </div>
       <div class="dialog-content">
-        <div class="code-wrapper">
+        <!-- <div class="code-wrapper">
           <div
             ref="code"
             class="code"
           ></div>
-        </div>
+        </div> -->
 
         <div class="content-r">
           <div class="url">
@@ -310,19 +337,20 @@
               <el-button
                 slot="append"
                 type="primary"
+                @click="handleCopy"
               >
                 复制
               </el-button>
             </el-input>
           </div>
-          <el-button
+          <!-- <el-button
             class="downlod-btn"
             size="medium"
             type="default"
             @click="handleCodeDownload"
           >
             下载二维码
-          </el-button>
+          </el-button> -->
         </div>
       </div>
       <span
@@ -358,7 +386,7 @@ export default {
       bind(el, binding) {
         // 获取element-ui定义好的scroll盒子
         const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
-        SELECTWRAP_DOM.addEventListener('scroll', function() {
+        SELECTWRAP_DOM.addEventListener('scroll', () => {
           /**
            * scrollHeight 获取元素内容高度(只读)
            * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
@@ -366,7 +394,8 @@ export default {
            * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
            * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
            */
-          const condition = this.scrollHeight - this.scrollTop <= this.clientHeight
+          const condition =
+            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
           if (condition) {
             binding.value()
           }
@@ -387,7 +416,7 @@ export default {
       pickerOptionsStart: {},
       pickerOptionsEnd: {},
       getSubjectParams: {
-        pageSize: 10,
+        pageSize: 600,
         pageNo: 1
       },
       seletorProps: {
@@ -409,7 +438,7 @@ export default {
           { required: true, message: '请输入问卷名称', trigger: 'blur' },
           { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
         ],
-        publishTime: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
+        publishTime: [{ required: true, message: '请选择发布时间', trigger: 'change' }],
         endTime: [{ required: true, message: '请选择截止时间', trigger: 'change' }],
         categoryId: [{ required: true, message: '请选择所在分类', trigger: 'change' }],
         subjectId: [{ required: true, message: '请选择关联问卷', trigger: 'change' }]
@@ -424,36 +453,85 @@ export default {
       userPickerVisible: false,
       href: '',
       dialogVisible: false,
-      publishLoading: false,
-      subjectLoading: false
+      publishLoading1: false,
+      publishLoading0: false,
+      subjectLoading: false,
+      noMoreSubject: false,
+      hisPersonList: []
     }
   },
   computed: {
     currentPersonList() {
       const { pageSize: size, pageNo: no } = this.page
       return this.personList.slice(size * (no - 1), size * no)
+    },
+    dateValue: {
+      get: function() {
+        const { publishTime, endTime } = this.form
+        return [publishTime, endTime]
+      },
+      set: function([publishTime, endTime]) {
+        Object.assign(this.form, { publishTime, endTime })
+      }
     }
   },
   watch: {
     dialogVisible(val) {
       if (val) {
-        this.$nextTick(() => {
-          const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
-            width: CODE_WIDTH,
-            height: CODE_HEIGHT
-          }))
-          qrcode.makeCode(this.href)
-        })
+        // 生成二维码
+        // this.$nextTick(() => {
+        //   const qrcode = (this.qrcode = new QRCode(this.$refs.code, {
+        //     width: CODE_WIDTH,
+        //     height: CODE_HEIGHT
+        //   }))
+        //   qrcode.makeCode(this.href)
+        // })
       }
     }
   },
   created() {
-    this.id = this.$route.params.id
+    this.id = this.$route.query.id
+    if (this.$route.query.status == 2) {
+      this.step = '2'
+    }
     this.getCategoryData()
     this.initData()
   },
-  destroyed() {},
+  mounted() {
+    this.$refs.form.resetFields()
+  },
   methods: {
+    deleteBtnVisible(row) {
+      const status = this.$route.query.status
+      if (status == 2) {
+        return !this.hisPersonList.find((person) => person.userId === row.userId)
+      } else {
+        return true
+      }
+    },
+    selectEnable(row) {
+      if (this.$route.query.status != 2) return true
+      if (this.hisPersonList.some((person) => person.userId === row.userId)) {
+        return false
+      } else {
+        return true // 不禁用
+      }
+    },
+    toCategory() {
+      const routeData = this.$router.resolve({
+        path: '/questionnaire/catalog'
+      })
+      window.open(routeData.href, '_blank')
+    },
+    handleCopy() {
+      const input = document.createElement('input')
+      document.body.appendChild(input)
+      input.value = this.href
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      this.$message.success('已复制')
+    },
     confirm() {
       this.$router.back()
     },
@@ -466,8 +544,17 @@ export default {
       this.pickerOptionsEnd = Object.assign({}, this.pickerOptionsEnd, {
         disabledDate: (time) => {
           if (this.form.publishTime) {
-            const publishTime = new Date(this.form.publishTime)
-            return time.getTime() < publishTime.getTime()
+            let date = this.form.publishTime + ''
+            date = date.split(' ')
+            let [year, month, day] = date[0].split('-')
+            year = +year
+            month = month - 1
+            day = +day
+            let [hour, minute] = date[1].split(':')
+            hour = +hour
+            minute = +minute
+            let publishTime = new Date(year, month, day, hour, minute)
+            return time.getTime() < publishTime.getTime() && time.getDate() != publishTime.getDate()
           }
         }
       })
@@ -477,8 +564,17 @@ export default {
       this.pickerOptionsStart = Object.assign({}, this.pickerOptionsStart, {
         disabledDate: (time) => {
           if (this.form.endTime) {
-            const endTime = new Date(this.form.endTime)
-            return time.getTime() > endTime.getTime()
+            let date = this.form.endTime + ''
+            date = date.split(' ')
+            let [year, month, day] = date[0].split('-')
+            year = +year
+            month = month - 1
+            day = +day
+            let [hour, minute] = date[1].split(':')
+            hour = +hour
+            minute = +minute
+            let endTime = new Date(year, month, day, hour, minute)
+            return time.getTime() < endTime.getTime() && time.getDate() != endTime.getDate()
           }
         }
       })
@@ -514,16 +610,23 @@ export default {
       )
       saveLink.dispatchEvent(event)
     },
-    publish() {
+    publish(type) {
+      if (!this.personList.length) {
+        this.$message.error('至少添加一个人员')
+        return
+      }
       let api
       let tenantId = 'learn'
       try {
         tenantId = JSON.parse(localStorage.getItem('elearning-tenantId'))
         tenantId = tenantId.content
-      } catch (e) {}
+      } catch (e) {
+        tenantId = 'learn'
+      }
       const date = new Date()
       const $data = {
         tenantId,
+        // eslint-disable-next-line no-useless-escape
         planCode: date.toISOString().replace(/\-|T|\:|\.|Z/g, '')
       }
       if (this.id) {
@@ -532,11 +635,12 @@ export default {
       } else {
         api = save
         $data.asqUrl = ''
+        $data.type = type
       }
 
       Object.assign($data, this.form)
-      $data.publishTime = $data.publishTime + ' 00:00:00'
-      $data.endTime = $data.endTime + ' 00:00:00'
+      $data.publishTime = $data.publishTime + ':00'
+      $data.endTime = $data.endTime + ':00'
       $data.users = this.personList.map((person) => {
         const { userId, name, phonenum, department = '' } = person
         return {
@@ -546,20 +650,23 @@ export default {
           userDeptStr: department
         }
       })
-      this.publishLoading = true
+      this['publishLoading' + type] = true
       api($data)
-        .then((res) => {
-          if (!this.id) {
-            this.href = window.location.origin + '/questionnaire/arrange?id=' + res
-            saveAsqUrl({ id: res.id, asqUrl: this.href })
-            this.dialogVisible = true
-          } else {
-            this.$message.success('操作成功')
-            this.$router.back()
-          }
+        .then(() => {
+          this.$message.success('操作成功')
+          this.$router.back()
+          // if (!this.id) {
+          //   this.href = window.location.origin + '/#/questionnaire/preview?id=' + res
+          //   saveAsqUrl({ id: res, asqUrl: this.href }).then(() => {
+          //     this.dialogVisible = true
+          //   })
+          // } else {
+          //   this.$message.success('操作成功')
+          //   this.$router.back()
+          // }
         })
         .finally(() => {
-          this.publishLoading = false
+          this['publishLoading' + type] = false
         })
     },
     initData() {
@@ -567,13 +674,15 @@ export default {
         saveQuery({ id: this.id }).then((res) => {
           const { users = [] } = res
           this.personList = users.map((user) => {
-            const { userName, userPhone, userDeptStr } = user
+            const { userName, userPhone, userDeptStr, userId } = user
             return {
               name: userName,
               phonenum: userPhone,
-              department: userDeptStr
+              department: userDeptStr,
+              userId: userId + ''
             }
           })
+          this.hisPersonList = JSON.parse(JSON.stringify(this.personList))
           delete res.users
           Object.assign(this.form, res)
         })
@@ -581,7 +690,8 @@ export default {
       this.querySubject()
     },
     loadmoreSubject() {
-      this.getSubjectParams.pageSize++
+      if (this.subjectLoading || this.noMoreSubject) return
+      this.getSubjectParams.pageNo++
       this.querySubject()
     },
     querySubject() {
@@ -589,13 +699,16 @@ export default {
       querySubject(this.getSubjectParams)
         .then((res) => {
           const { data = [] } = res
-          this.subjectOptions = data
+          this.noMoreSubject = !data.length
+          this.subjectOptions = this.subjectOptions.concat(data)
+          this.$forceUpdate()
         })
         .finally(() => {
           this.subjectLoading = false
         })
     },
     handleStepChange(step) {
+      if (this.$route.query.status == 2) return
       if (this.step == 1) {
         this.$refs.form.validate((valid) => {
           if (valid) {
@@ -607,21 +720,39 @@ export default {
       this.step = step
     },
     handleSelectPerson(list) {
-      this.personList = list
+      if (this.$route.query.status == 2) {
+        this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
+      } else {
+        this.personList = list
+      }
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
     handleDeletePerson(target) {
-      const list = this.personList
+      let message = ''
       if (target) {
-        list.splice(
-          list.findIndex((person) => person.id === target.id),
-          1
-        )
-        return
+        message = '您确定要删除该人员吗？'
+      } else {
+        message = '您确定要批量删除所选人员吗？'
       }
-      this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+      this.$confirm(message, '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          const list = this.personList
+          if (target) {
+            list.splice(
+              list.findIndex((person) => person.id === target.id),
+              1
+            )
+            return
+          }
+          this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+        })
+        .catch(() => {})
     },
     getCategoryData() {
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
@@ -633,10 +764,29 @@ export default {
 </script>
 <style lang="scss">
 .questionnaire-arrange {
+  .options-loading-tips {
+    color: #9c9c9c;
+    line-height: 34px;
+    text-align: center;
+  }
   .el-form--label-top .el-form-item__label {
     padding: 0;
     line-height: 22px;
     margin-bottom: 8px;
+  }
+  .category-form-item {
+    .el-form-item__label {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      .category-header {
+        height: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
   }
   .el-dialog__footer {
     text-align: center;
@@ -663,13 +813,14 @@ export default {
   .body {
     flex: 1;
     background-color: #fff;
-    margin: 15px 300px 25px;
+    margin: 15px auto 25px;
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
     border-radius: 4px;
     padding: 35px 120px;
+    width: 1300px;
     .half-form-item {
       display: inline-block;
-      width: 45%;
+      width: 450px;
     }
 
     .person-table {

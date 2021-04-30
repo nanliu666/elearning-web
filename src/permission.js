@@ -5,7 +5,7 @@
 import router from './router/router'
 import store from './store'
 import { validatenull } from '@/util/validate'
-import { getToken } from '@/util/auth'
+import { getToken, removeToken, removeRefreshToken } from '@/util/auth'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 NProgress.configure({ showSpinner: false })
@@ -107,11 +107,14 @@ router.afterEach(() => {
   router.$avueRouter.setTitle(title)
 })
 function isToken(tid, next) {
+  removeToken()
+  removeRefreshToken()
   // 如果url带token，做token登录处理
   store.dispatch('tokeLogin', tid).then((res) => {
     if (res.account) {
       next({ path: '/' })
-      store.dispatch('getOrgIdsAc', res.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
+      store.dispatch('getDiyInforAc', { device: '1' }) // 用户的logo banner 首页布局等信息，存放在localstore，vuex
+      //store.dispatch('getOrgIdsAc', res.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
     }
   })
 }

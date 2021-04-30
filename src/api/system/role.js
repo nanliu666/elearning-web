@@ -404,9 +404,78 @@ export const getOrgMember = (params) => {
 }
 
 //角色级别范围查询
-export const queryMaxOrgType = (params) => {
+export const queryMaxOrgType = (data) => {
   return request({
     url: '/blade-system/v1/role/queryMaxOrgType',
+    method: 'post',
+    data
+  })
+}
+//查询分组列表
+export const groupList = (params) => {
+  return request({
+    url: '/user/v1/usergroup/listPage',
+    method: 'get',
+    params: {
+      ...params
+    }
+  })
+}
+
+// 添加分组
+export const addGroup = (params) => {
+  return request({
+    url: '/user/v1/usergroup/save',
+    method: 'post',
+    params: {
+      ...params
+    }
+  })
+}
+
+// 删除分组
+export const sysDelGroup = (params) => {
+  return request({
+    url: '/user/v1/usergroup/delete',
+    method: 'delete',
+    params: params
+  })
+}
+
+// 编辑分组
+export const sysEditGroup = (params) => {
+  return request({
+    url: '/user/v1/usergroup/update',
+    method: 'put',
+    params: {
+      ...params
+    }
+  })
+}
+
+//查看分组下的用户
+export const getGroupUser = (params) => {
+  return request({
+    url: '/user/v1/usergrouprel/userList',
+    method: 'get',
+    params: {
+      ...params
+    }
+  })
+}
+// 删除分组下的用户
+export const delGroupUser = (params) => {
+  return request({
+    url: '/user/v1/usergrouprel/delete',
+    method: 'delete',
+    params: params
+  })
+}
+
+// 添加分组下的用户
+export const addGroupUser = (params) => {
+  return request({
+    url: '/user/v1/usergrouprel/save',
     method: 'post',
     params: {
       ...params

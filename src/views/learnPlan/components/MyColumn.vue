@@ -120,8 +120,8 @@
               href="#/learnPlan/CoursePlanList"
               @click="adddata"
             >
-              <i class="el-icon-plus btn_icon"></i> 新建分类</a>
-            <!-- <span class="btn2">新建分类</span> -->
+              <i class="el-icon-plus btn_icon"></i> 创建分组</a>
+            <!-- <span class="btn2">创建分类</span> -->
           </div>
         </div>
       </div>
@@ -146,7 +146,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="上级分类组"
+          label="上级分类"
           label-width="120px"
         >
           <el-select

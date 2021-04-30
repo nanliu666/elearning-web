@@ -15,7 +15,7 @@
           size="medium"
           @click="jumpEdit"
         >
-          新建课程安排
+          创建课程安排
         </el-button>
       </template>
     </page-header>
@@ -628,7 +628,7 @@ export default {
       this.loadDraftData()
     },
     handlePublishedPageSizeChange(param) {
-      this.published.queryInfo.pageSize = param
+      this.published.page.pageSize = param
       this.loadPublishedData()
     },
     handleDraftPageSizeChange(param) {
@@ -671,8 +671,8 @@ export default {
       try {
         let { totalNum, data } = await getlearnPlanList({
           ...draft.queryInfo,
-          pageNo: draft.page.currentPage,
-          pageSize: draft.page.size
+          pageNo: draft.queryInfo.pageNo,
+          pageSize: draft.queryInfo.pageSize
         })
         draft.tableData = data.map((item) => {
           if (!item.courseList || !item.courseList.length) {
@@ -698,7 +698,7 @@ export default {
         let { totalNum, data } = await getlearnPlanList({
           ...published.queryInfo,
           pageNo: published.page.currentPage,
-          pageSize: published.page.size
+          pageSize: published.page.pageSize
         })
         published.tableData = data
         published.tableData = data.map((item) => {

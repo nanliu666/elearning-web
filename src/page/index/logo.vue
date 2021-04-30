@@ -5,7 +5,7 @@
   >
     <!-- <img :src="JSON.parse(tenantContent).logo || logo" /> -->
     <!-- <img src="../../assets/images/logo_white.png" /> -->
-    <img
+    <!-- <img
       v-if="envVar === 'zehui' && isOrgIdE"
       src="../../assets/images/logoEWhite.png"
     />
@@ -20,7 +20,8 @@
     <img
       v-else
       src="../../assets/images/logo_white_yb.png"
-    />
+    /> -->
+    <img :src="logoImg" />
   </div>
 </template>
 
@@ -35,6 +36,11 @@ export default {
     }
   },
   computed: {
+    logoImg() {
+      let logoBaseInfor = getStore({ name: 'diyInfor' })
+      let logoImg = logoBaseInfor.logo && logoBaseInfor.logo.BackgroundUrl
+      return logoImg
+    },
     envVar() {
       let envC = process.env
       return envC.VUE_APP_ENV
