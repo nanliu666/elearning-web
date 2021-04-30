@@ -212,7 +212,8 @@ export default {
     },
     //删除
     handleDelete(rows) {
-      this.$confirm('您确定要删除该用户吗?', {
+      const content = rows.length > 0 ? '你确定将选择数据删除吗？' : '您确定要删除该用户吗？'
+      this.$confirm(content, {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

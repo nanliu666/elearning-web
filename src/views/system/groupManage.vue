@@ -221,7 +221,8 @@ export default {
     },
     // 删除分组
     handleDel(rows) {
-      this.$confirm('您确定要删除当前分组?', '提示', {
+      const content = rows.length > 0 ? '你确定将选择数据删除吗？' : '您确定要删除当前分组？'
+      this.$confirm(content, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

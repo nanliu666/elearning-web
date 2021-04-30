@@ -148,26 +148,26 @@
             />
             <div v-if="!_.isEmpty(groupList)">
               <el-checkbox
-                v-model="checkAll"
+                v-model="checkAllGroup"
                 class="total-check"
-                :indeterminate="isIndeterminate"
-                @change="handleCheckAllChange"
+                :indeterminate="isIndeterminateGroup"
+                @change="handleCheckAllGroupChange"
               >
                 全选
               </el-checkbox>
               <el-checkbox-group
                 v-model="checkedUsersGroup"
                 class="check-ul"
-                @change="handleCheckedUserChange"
+                @change="handleCheckedGroupChange"
               >
                 <el-checkbox
-                  v-for="item in groupList"
+                  v-for="(item, index) in groupList"
                   :key="item.id"
                   class="check-li"
                   :label="item"
-                  @change="handleSelectGroup(item)"
+                  @change="handleSelectGroup(groupData[index])"
                 >
-                  {{ item.name }}
+                  {{ item }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
@@ -325,6 +325,11 @@ export default {
         return '请选择'
       }
     },
+    //显示类型
+    tabType: {
+      type: String,
+      default: 'Org'
+    },
     // 选择类型，用逗号分隔，可选项包括 Org(组织机构),OuterUser(外部联系人)
     selectType: {
       type: String,
@@ -338,6 +343,7 @@ export default {
       checkedUsersGroup: [], //分组人员
       groupList: [], //分组
       isIndeterminateGroup: false,
+      groupData: [],
 
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
@@ -409,6 +415,19 @@ export default {
         this.checkAll = false
         this.isIndeterminate = true
       }
+
+      const temp_group = _.map(this.checkedUsersGroup, (item) => {
+        return { name: item }
+      })
+      const diffName_group = _.differenceBy(temp_group, val, 'name')
+      const diffIndex_group = _.findIndex(this.checkedUsersGroup, (item) => {
+        return item === _.get(diffName_group, '[0].name', '')
+      })
+      if (diffIndex_group !== -1) {
+        this.checkedUsersGroup.splice(diffIndex_group, 1)
+        this.checkAllGroup = false
+        this.isIndeterminateGroup = true
+      }
     },
     selected(val) {
       const { orgTree, orgTreeSearch } = this.$refs
@@ -462,7 +481,12 @@ export default {
       this.loading = true
       getGroup()
         .then((res) => {
-          this.groupList = res || []
+          (res || []).forEach((item) => {
+            item.bizId = item.id
+            item.bizName = item.name
+          })
+          this.groupData = JSON.parse(JSON.stringify(res || []))
+          this.groupList = _.map(this.groupData, 'name')
           // const { totalPage } = res
           // if (_.size(res.data) > 0) {
           //   const data = _.map(res.data, (item) =>
@@ -522,12 +546,53 @@ export default {
         }
       }
     },
+
+    // 切换全选与全删
+    handleCheckAllGroupChange(val) {
+      this.checkedUsersGroup = val ? _.cloneDeep(this.groupList) : []
+      this.isIndeterminateGroup = false
+      // 全删除需要过滤组织选的人,组织
+      // this.checkAllGroup=_.isEmpty(this.checkedUsersGroup)
+      if (_.isEmpty(this.checkedUsersGroup)) {
+        _.pullAllBy(this.selected, this.groupData, 'bizId')
+      } else {
+        // 半选换全选需要把未选上的加入
+        if (_.size(this.checkedUsersGroup) === _.size(this.groupList)) {
+          this.selected = _.uniqBy([..._.cloneDeep(this.groupData), ...this.selected], 'bizId')
+        } else {
+          // 全选需要去重
+          _.each(this.groupData, (item) => {
+            this.handleSelectGroup(item)
+          })
+          this.selected = _.uniqBy(this.selected, 'bizId')
+        }
+      }
+    },
+
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
       let checkedCount = value.length
       this.checkAll = checkedCount === this.usersNameList.length
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length
     },
+
+    // 当前是否切换为半选状态
+    handleCheckedGroupChange(value) {
+      let checkedCount = value.length
+      this.checkAllGroup = checkedCount === this.groupList.length
+      this.isIndeterminateGroup = checkedCount > 0 && checkedCount < this.groupList.length
+    },
+
+    //选择分组
+    handleSelectGroup(group) {
+      const index = _.findIndex(this.selected, { bizId: group.bizId })
+      if (index > -1) {
+        this.selected = _.filter(this.selected, (item, i) => i != index)
+      } else {
+        this.selected.push(group)
+      }
+    },
+
     /**
      * 处理选中单个项
      * @param {object} node 树形组件的node结节
@@ -577,6 +642,14 @@ export default {
       if (outerIndex !== -1) {
         this.checkedUsers.splice(outerIndex, 1)
       }
+
+      const outerIndex_group = _.findIndex(this.checkedUsersGroup, (userItem) => {
+        return item.name === userItem
+      })
+      if (outerIndex_group !== -1) {
+        this.checkedUsersGroup.splice(outerIndex, 1)
+      }
+
       const { bizId } = item
       if (_.find(this.selected, { bizId })) {
         this.selected = _.reject(this.selected, { bizId })
@@ -619,16 +692,6 @@ export default {
         this.selected = _.filter(this.selected, (item, i) => i != index)
       } else {
         this.selected.push(user)
-      }
-    },
-
-    //选择分组
-    handleSelectGroup(group) {
-      const index = _.findIndex(this.selected, { bizId: group.bizId })
-      if (index > -1) {
-        this.selected = _.filter(this.selected, (item, i) => i != index)
-      } else {
-        this.selected.push(group)
       }
     },
 
