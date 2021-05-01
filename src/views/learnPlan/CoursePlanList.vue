@@ -740,7 +740,7 @@ export default {
         }
         .divider {
           position: absolute;
-          left: 316px;
+          left: 290px;
           top: 0;
           height: 100%;
           width: 1px;
