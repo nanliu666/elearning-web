@@ -5,35 +5,41 @@
     width="800px"
     append-to-body
     :before-close="close"
-    @open="dialogOpen"
   >
     <div class="content-wr">
       <div class="left">
         <el-input
-          v-model="filterText"
+          v-model="orgSearch"
           placeholder="成员名称"
           @input="searchLoadData"
         />
-        <el-tabs
-          v-model="activeName"
-          @tab-click="handleClick"
-        >
+        <el-tabs v-model="activeTab">
           <el-tab-pane
             label="组织架构"
             name="org"
           >
-            <el-tree
-              ref="tree"
-              :key="updateInfo"
-              :data="orgTree"
-              show-checkbox
-              default-expand-all
-              node-key="id"
-              :props="defaultProps"
-              :default-checked-keys="selectListIds"
-              @check="handleCheckChange"
-              @node-click="nodeClick"
-            />
+            <div class="tree__container">
+              <el-tree
+                v-if="!orgSearch"
+                ref="orgTree"
+                show-checkbox
+                :load="lazyLoadOrgTree"
+                node-key="path"
+                lazy
+                :props="treeProps"
+                @check="handleCheckChange"
+              />
+              <el-tree
+                v-show="orgSearch"
+                ref="orgTreeSearch"
+                :data="orgSearchData"
+                :props="treeProps"
+                lazy
+                node-key="path"
+                show-checkbox
+                @check="handleCheckChange"
+              />
+            </div>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -78,11 +84,52 @@
   </el-dialog>
 </template>
 <script>
-import { getOrgUserChild, getBizUserChild } from '@/api/system/user'
+import { getOrgUserChild } from '@/api/system/user'
 import { addGroupUser } from '@/api/system/role'
-
+const NODE_TYPE = {
+  All: 'All',
+  Org: 'Org',
+  User: 'User'
+}
+const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
+  search = _.trim(search)
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getOrgUserChild(_.pick({ parentId, search }, search ? 'search' : 'parentId'))
+  // 在这里处理两个数组为树形组件需要的结构
+  const { orgs, users } = data
+  const ORG_PROPS = { type: NODE_TYPE.Org }
+  const USER_PROPS = { isLeaf: true, type: NODE_TYPE.User }
+  const target = _.concat(
+    _.map(orgs, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.id}`,
+          bizId: item.id,
+          bizName: item.name,
+          disabled: ['Enterprise', 'Company', 'Department', 'Group'].includes(item.type)
+        },
+        item,
+        ORG_PROPS
+      )
+    ),
+    _.map(users, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.userId}`,
+          bizId: item.userId,
+          bizName: item.name,
+          orgName,
+          orgId: parentId
+        },
+        item,
+        USER_PROPS
+      )
+    )
+  )
+  return target
+}
 export default {
-  name: 'AddUserDialog',
+  name: 'AddUserDialogGrounp',
   props: {
     visible: {
       type: Boolean,
@@ -97,220 +144,94 @@ export default {
   },
   data() {
     return {
+      orgSearchData: [],
+      activeTab: 'org',
       loading: false,
-      activeName: 'org',
       submitting: false,
-      filterText: '',
-      props: {
-        disabled: (data) => data.type !== 'user' && data.users.length === 0,
-        label: (item) => item.orgName || item.name,
+      orgSearch: '',
+      selectList: []
+    }
+  },
+  computed: {
+    // 当前哪个树用于清除选中状态
+    refTree() {
+      return !this.orgSearch ? 'orgTree' : 'orgTreeSearch'
+    },
+    // 树形组件的props属性
+    treeProps() {
+      return {
+        disabled: 'disabled',
+        label: 'bizName',
+        isLeaf: 'isLeaf',
         children: 'children'
-      },
-      defaultProps: {
-        label: (item) => item.name,
-        children: 'children'
-      },
-      selectList: [],
-      selectListIds: [],
-      oldSelectList: [],
-      orgTree: [],
-      tagId: null,
-      treeIds: {
-        orgIds: [],
-        bizIds: []
-      },
-      bizTree: [],
-      activeNodeId: 0,
-      updateInfo: 0,
-      bizUpdateInfo: 0
+      }
     }
   },
   methods: {
-    handleClick(tab) {
-      this.activeName = tab.name
-      this.handleTab()
-    },
-    handleTab() {
-      switch (this.activeName) {
-        case 'org':
-          if (this.filterText) {
-            this.filterText = ''
-            this.bizTree = []
-            this.getOrgUserTree()
-          } else {
-            if (!this.orgTree.length) this.getOrgUserTree()
-          }
-          break
-        case 'biz':
-          if (this.filterText) {
-            this.filterText = ''
-            this.orgTree = []
-            this.getBizUserChild()
-          } else {
-            if (!this.bizTree.length) this.getBizUserChild()
-          }
-          break
-      }
-    },
-    handleCheckChange(data) {
-      let flag = false
-      this.selectListIds = []
-      this.selectList.forEach((item, index) => {
-        if (item.id === data.id) {
-          flag = true
-          this.selectList.splice(index, 1)
-        }
+    /**
+     * 点击check盒子切换右侧选中效果
+     */
+    handleCheckChange(node) {
+      const index = _.findIndex(this.selectList, (item) => {
+        return item.bizId === node.bizId
       })
-      if (!flag) {
-        this.selectList.push(data)
-      }
-      this.selectList.forEach((item) => {
-        this.selectListIds.push(item.id)
-      })
-    },
-    nodeClick(data) {
-      this.activeNodeId = data.id
-      switch (this.activeName) {
-        case 'org':
-          if (!this.treeIds.orgIds.includes(data.id)) {
-            this.treeIds.orgIds.push(data.id)
-            this.getOrgUserTree(data.id)
-          }
-          break
-        case 'biz':
-          if (!this.treeIds.bizIds.includes(data.id)) {
-            this.treeIds.bizIds.push(data.id)
-            this.getBizUserChild(data.id)
-          }
-          break
+      if (index === -1) {
+        this.selectList.push(node)
+      } else {
+        // 连续选中同一个目标则uncheck该选项
+        this.selectList.splice(index, 1)
       }
     },
+    /**
+     * 清除选中
+     */
     handleUnselect(item) {
-      this.selectList = this.selectList.filter((i) => i.id != item.id)
-      this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.id))
+      this.selectList = this.selectList.filter((i) => i.bizId != item.bizId)
+      this.$refs[this.refTree].setCheckedKeys(this.selectList.map((i) => i.bizId))
     },
     handleUnselectAll() {
       this.selectList = []
-      this.$refs.tree.setCheckedKeys([])
+      this.$refs[this.refTree].setCheckedKeys([])
     },
     close() {
       this.clear()
       this.$emit('update:visible', false)
     },
     clear() {
-      this.tagId = null
       this.selectList = []
-      this.oldSelectList = []
-      this.selectListIds = []
-      this.$refs.tree.setCheckedKeys([])
-
-      // this.$refs.bizTree.setCheckedKeys([])
-      this.activeName = 'org'
-      this.orgTree = []
-      this.bizTree = []
-      this.treeIds = {
-        orgIds: [],
-        bizIds: []
-      }
+      this.$refs[this.refTree].setCheckedKeys([])
     },
-    init(data) {
-      this.tagId = data.tagId
-      const list = data.userList.map((user) => ({ ...user, id: user.userId }))
-      this.selectList = list.slice()
-      this.oldSelectList = list.slice()
-      this.selectList.forEach((item) => {
-        this.selectListIds.push(item.id)
-      })
-
-      this.$emit('update:visible', true)
-      this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(this.selectList.map((i) => i.id))
-      })
-    },
-    searchLoadData: _.debounce(function() {
-      switch (this.activeName) {
-        case 'org':
-          if (!this.filterText) this.activeNodeId = 0
-          this.orgTree = []
-          this.treeIds.orgIds = []
-          this.getOrgUserTree(this.activeNodeId, true)
-          break
-        case 'biz':
-          if (!this.filterText) this.activeNodeId = 0
-          this.bizTree = []
-          this.treeIds.bizIds = []
-          this.getBizUserChild(this.activeNodeId, true)
-          break
-      }
-    }, 500),
-    getOrgUserTree(parentId = 0, search) {
-      let params = {
-        parentId
-      }
-      if (search && this.filterText) {
-        params.search = this.filterText
-        delete params.parentId
-      }
-      this.loading = true
-      getOrgUserChild(params)
-        .then((res) => {
-          this.resolveTree(res)
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-    getBizUserChild(parentId = 0, search) {
-      let params = {
-        parentId
-      }
-      if (search && this.filterText) {
-        params.search = this.filterText
-        delete params.parentId
-      }
-      this.loading = true
-      getBizUserChild(params)
-        .then((res) => {
-          this.resolveBizTree(res)
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-
     /**
-     * 比较新旧list，新增,减少的数据分别添加标识
-     * @param {Object} newIdList
-     * @param {Object} oldIdList
+     * 搜索
      */
-    diff(newIdList, oldIdList) {
-      // 要添加的
-      const addIdList = this._.difference(newIdList, oldIdList)
-      // 要删除的
-      const removeIdList = this._.difference(oldIdList, newIdList)
-
-      const result = addIdList
-        .map((id) => ({
-          userId: id,
-          operatorType: 'Add'
-        }))
-        .concat(
-          removeIdList.map((id) => ({
-            userId: id,
-            operatorType: 'Del'
-          }))
-        )
-
-      return result
+    searchLoadData: _.debounce(function(search) {
+      if (!search) return
+      this.loading = true
+      loadOrgTree({ search })
+        .then((res) => {
+          this.orgSearchData = _.map(res, (item) => _.assign(item))
+        })
+        .finally(() => (this.loading = false))
+    }, 500),
+    async lazyLoadOrgTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.bizId : '0'
+      let orgName = {}
+      if (node) {
+        orgName = node.data && node.data.type === 'Org' ? node.data.bizName : ''
+      }
+      if (parentId === '0') this.loading = true
+      const target = await loadOrgTree({
+        parentId,
+        orgName
+      })
+      this.loading = false
+      resolve(target)
     },
     handleSubmit() {
       let userIdArr = this.selectList.map((item) => {
         return item.userId
       })
       let params = {
-        // roleId: this.roleId || this.$route.query.roleId,
-        // userId: userIdArr.join(',')
-
         groupId: this.roleId || this.$route.query.groupId,
         userIds: userIdArr
       }
@@ -331,86 +252,6 @@ export default {
             this.submitting = false
           })
       }
-    },
-    resolveTree(tree) {
-      if (tree.orgs.length > 0) {
-        tree.orgs.forEach((node) => {
-          if (['Enterprise', 'Company', 'Department', 'Group'].includes(node.type))
-            node.disabled = true
-        })
-      }
-      if (tree.users.length > 0) {
-        tree.users.forEach((node) => {
-          node.id = node.userId
-        })
-      }
-
-      tree.orgs = [...tree.orgs, ...tree.users]
-
-      const loop = (treeData) => {
-        if (treeData.length > 0) {
-          treeData.forEach((item) => {
-            if (!item.children) {
-              item.children = []
-            }
-            if (item.id === this.activeNodeId && this.filterText === '') {
-              item.children = [...tree.orgs]
-            } else if (this.filterText !== '') {
-              if (tree.orgs.length > 0) {
-                this.orgTree = _.cloneDeep(tree.orgs)
-              }
-              // this.orgTree = _.cloneDeep(tree.orgs)
-            } else if (item.children && item.children.length > 0) {
-              loop(item.children)
-            }
-          })
-        } else {
-          if (tree.orgs.length > 0) {
-            this.orgTree = _.cloneDeep(tree.orgs)
-          }
-        }
-      }
-      loop(this.orgTree)
-      this.updateInfo += 1
-    },
-    resolveBizTree(tree) {
-      if (tree.orgs.length > 0) {
-        tree.orgs.forEach((node) => {
-          if (
-            ['ProductLine', 'Enterprise', 'Department', 'Product', 'PDU', 'BusinessGroup'].includes(
-              node.type
-            )
-          )
-            node.disabled = true
-        })
-      }
-      if (tree.users.length > 0) {
-        tree.users.forEach((node) => {
-          node.id = node.userId
-        })
-      }
-      tree.orgs = [...tree.orgs, ...tree.users]
-
-      const loop = (treeData) => {
-        if (treeData.length > 0) {
-          treeData.forEach((item) => {
-            if (item.id === this.activeNodeId && this.filterText === '') {
-              item.children = [...tree.orgs]
-            } else if (this.filterText !== '') {
-              this.bizTree = _.cloneDeep(tree.orgs)
-            } else if (item.children && item.children.length > 0) {
-              loop(item.children)
-            }
-          })
-        } else {
-          this.bizTree = _.cloneDeep(tree.orgs)
-        }
-      }
-      loop(this.bizTree)
-      this.bizUpdateInfo += 1
-    },
-    dialogOpen() {
-      this.handleTab()
     }
   }
 }
@@ -418,9 +259,15 @@ export default {
 <style lang="scss">
 .content-wr {
   display: flex;
+  height: 50vh;
+  overflow: hidden;
   .left {
     width: 60%;
     padding-right: 20px;
+    .tree__container {
+      height: 40vh;
+      overflow: auto;
+    }
   }
   .right {
     border-left: 1px solid #f2f2f2;

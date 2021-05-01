@@ -48,7 +48,7 @@
         <el-col :span="7">
           <el-row style="text-align: right">
             <el-button
-              v-show="step == '2'"
+              v-show="step == 2"
               size="medium"
               @click="handleStepChange(1)"
             >
@@ -301,6 +301,7 @@
     <user-picker
       :value="personList"
       :visible.sync="userPickerVisible"
+      select-type="Org,OuterUser"
       @input="handleSelectPerson"
     />
 
@@ -372,9 +373,13 @@ import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
+// eslint-disable-next-line no-unused-vars
 import { save, update, saveQuery, querySubject, saveAsqUrl } from '@/api/questionnaire'
+// eslint-disable-next-line no-unused-vars
 import QRCode from 'qrcodejs2'
+// eslint-disable-next-line no-unused-vars
 const CODE_HEIGHT = 86
+// eslint-disable-next-line no-unused-vars
 const CODE_WIDTH = 86
 const CODE_NAME = '问卷二维码'
 
@@ -410,7 +415,7 @@ export default {
   },
   data() {
     return {
-      step: '1',
+      step: 1,
       selectorData: [],
       subjectOptions: [],
       pickerOptionsStart: {},
@@ -492,7 +497,7 @@ export default {
   created() {
     this.id = this.$route.query.id
     if (this.$route.query.status == 2) {
-      this.step = '2'
+      this.step = 2
     }
     this.getCategoryData()
     this.initData()
