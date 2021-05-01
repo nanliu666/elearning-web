@@ -647,9 +647,22 @@ export default {
         v.userStatus = { 1: '在职', 2: '离职' }[v.userStatus]
         v.roles = v.roles.map((role) => role.roleName).join(';')
       })
+      let addColumns = ['直属领导', '岗位', '出生日期', '职级', '职务', '职称', '入职日期', '备注']
+      let addValues = [
+        'leaderName',
+        'positionName',
+        'birthDate',
+        'postLevel',
+        'post',
+        'positionTitle',
+        'entryDate',
+        'userRemark'
+      ]
       import('@/vendor/Export2Excel').then((excel) => {
         const tHeader = this.columns.map((v) => v.label)
+        tHeader.push(...addColumns)
         const filterVal = this.columns.map((v) => v.prop)
+        filterVal.push(...addValues)
         const data = this.formatJson(filterVal, selection)
         excel.export_json_to_excel({
           header: tHeader,

@@ -216,7 +216,7 @@ export default {
       roleVisible: true,
       form: {
         orgIdList: [],
-        orgIds: [],
+        // orgIds: [],
         roleId: '',
         roleName: '',
         remark: '',
