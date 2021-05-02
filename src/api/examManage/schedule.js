@@ -42,7 +42,7 @@ export const getUserList = (params) => get('/user/v1/user/basis', params)
 /**
  * 获取当前分组下的所有人
  */
-export const getUsergroupList = (params) => get('/user/v1/usergroup/list', params)
+export const getUsergroupList = (params) => get('/manage/v1/usergroup/queryUserList', params)
 /**
  * 获取当前岗位下的所有人
  */
