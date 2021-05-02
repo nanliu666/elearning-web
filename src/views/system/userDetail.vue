@@ -124,6 +124,7 @@
           >
             <common-image-view
               :url="item.url"
+              :image-index="index"
               :file-name="item.name"
               :preview-src-list="previewSrcList"
               @downloadFile="downloadFile"
