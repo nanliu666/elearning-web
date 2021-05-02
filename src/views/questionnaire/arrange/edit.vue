@@ -260,18 +260,18 @@
           </el-table-column>
 
           <el-table-column
-            prop="phonenum"
+            prop="phoneNum"
             label="手机号码"
           >
           </el-table-column>
 
           <el-table-column
-            prop="department"
+            prop="orgName"
             label="所属组织"
           >
             <template slot-scope="scope">
               <div>
-                {{ scope.row.department || '--' }}
+                {{ scope.row.orgName || '--' }}
               </div>
             </template>
           </el-table-column>
@@ -369,6 +369,7 @@
 </template>
 
 <script>
+import { orgOrPositionToPerson } from '@/util/middleWare'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
 import UserPicker from '@/components/user-picker/userPicker2'
@@ -647,12 +648,12 @@ export default {
       $data.publishTime = $data.publishTime + ':00'
       $data.endTime = $data.endTime + ':00'
       $data.users = this.personList.map((person) => {
-        const { userId, name, phonenum, department = '' } = person
+        const { userId, name, phoneNum, orgName = '' } = person
         return {
           userId,
           userName: name,
-          userPhone: phonenum,
-          userDeptStr: department
+          userPhone: phoneNum,
+          userDeptStr: orgName
         }
       })
       this['publishLoading' + type] = true
@@ -682,8 +683,8 @@ export default {
             const { userName, userPhone, userDeptStr, userId } = user
             return {
               name: userName,
-              phonenum: userPhone,
-              department: userDeptStr,
+              phoneNum: userPhone,
+              orgName: userDeptStr,
               userId: userId + ''
             }
           })
@@ -728,7 +729,9 @@ export default {
       if (this.$route.query.status == 2) {
         this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
       } else {
-        this.personList = list
+        orgOrPositionToPerson(_.cloneDeep(list)).then((res) => {
+          this.personList = res
+        })
       }
     },
     handleSelectionChange(val) {
