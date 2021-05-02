@@ -148,7 +148,7 @@
               v-model.trim="outerParams.search"
               placeholder="搜索分组"
             />
-            <div v-if="!_.isEmpty(groupList)">
+            <div v-if="!_.isEmpty(groupData)">
               <el-checkbox
                 v-model="checkAllGroup"
                 class="total-check"
@@ -163,18 +163,18 @@
                 @change="handleCheckedGroupChange"
               >
                 <el-checkbox
-                  v-for="(item, index) in groupList"
+                  v-for="(item, index) in groupData"
                   :key="item.id"
                   class="check-li"
                   :label="item"
                   @change="handleSelectGroup(groupData[index])"
                 >
-                  {{ item }}
+                  {{ item.name }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
             <com-empty
-              v-if="_.isEmpty(groupList)"
+              v-if="_.isEmpty(groupData)"
               height="31vh"
             />
           </div>
@@ -343,7 +343,6 @@ export default {
     return {
       checkAllGroup: false,
       checkedUsersGroup: [], //分组人员
-      groupList: [], //分组
       isIndeterminateGroup: false,
       groupData: [],
 
@@ -412,9 +411,23 @@ export default {
         this.$emit('update:visible', val)
       }
     }
+    // // 选中的对象数组
+    // checkedObj() {
+    //   const target =  this.groupData.filter((option) =>
+    //     this.checkedUsersGroup.some((checked) => checked === option.id)
+    //   )
+    //   return target
+    // }
   },
 
   watch: {
+    // checkedObj: {
+    //   handler() {
+    //     // console.log(val)
+    //   },
+    //   deep: true,
+    //   immediate: true
+    // },
     value: {
       handler(val) {
         this.selected = val.slice()
@@ -500,11 +513,11 @@ export default {
         this.isIndeterminate = true
       }
       const temp_group = _.map(this.checkedUsersGroup, (item) => {
-        return { name: item }
+        return { name: item.id }
       })
-      const diffName_group = _.differenceBy(temp_group, val, 'name')
+      const diffName_group = _.differenceBy(temp_group, val, 'id')
       const diffIndex_group = _.findIndex(this.checkedUsersGroup, (item) => {
-        return item === _.get(diffName_group, '[0].name', '')
+        return item.id === _.get(diffName_group, '[0].id', '')
       })
       if (diffIndex_group !== -1) {
         this.checkedUsersGroup.splice(diffIndex_group, 1)
@@ -521,30 +534,7 @@ export default {
             item.bizId = item.id
             item.bizName = item.name
           })
-          this.groupData = JSON.parse(JSON.stringify(res || []))
-          this.groupList = _.map(this.groupData, 'name')
-          // const { totalPage } = res
-          // if (_.size(res.data) > 0) {
-          //   const data = _.map(res.data, (item) =>
-          //     _.assign(item, {
-          //       path: item.userId,
-          //       bizId: item.userId,
-          //       bizName: item.name,
-          //       type: NODE_TYPE.User
-          //     })
-          //   )
-          //   if (isRefresh) {
-          //     this.outerData = data
-          //   } else {
-          //     this.outerData = _.concat(this.outerData, data)
-          //   }
-          //   this.usersNameList = _.map(this.outerData, 'name')
-          // } else {
-          //   this.usersNameList = []
-          //   this.outerParams.loaded = true
-          // }
-          // this.outerParams.pageNo = pageNo + 1
-          // this.isClear = totalPage < pageNo + 1
+          this.groupData = _.cloneDeep(res)
           this.loading = false
         })
         .finally(() => {
@@ -583,17 +573,16 @@ export default {
       }
     },
 
-    // 切换全选与全删
+    // 切换分组的全选与全删
     handleCheckAllGroupChange(val) {
-      this.checkedUsersGroup = val ? _.cloneDeep(this.groupList) : []
+      this.checkedUsersGroup = val ? this.groupData : []
       this.isIndeterminateGroup = false
       // 全删除需要过滤组织选的人,组织
-      // this.checkAllGroup=_.isEmpty(this.checkedUsersGroup)
       if (_.isEmpty(this.checkedUsersGroup)) {
         _.pullAllBy(this.selected, this.groupData, 'bizId')
       } else {
         // 半选换全选需要把未选上的加入
-        if (_.size(this.checkedUsersGroup) === _.size(this.groupList)) {
+        if (_.size(this.checkedUsersGroup) === _.size(this.groupData)) {
           this.selected = _.uniqBy([..._.cloneDeep(this.groupData), ...this.selected], 'bizId')
         } else {
           // 全选需要去重
@@ -615,8 +604,8 @@ export default {
     // 当前是否切换为半选状态
     handleCheckedGroupChange(value) {
       let checkedCount = value.length
-      this.checkAllGroup = checkedCount === this.groupList.length
-      this.isIndeterminateGroup = checkedCount > 0 && checkedCount < this.groupList.length
+      this.checkAllGroup = checkedCount === this.groupData.length
+      this.isIndeterminateGroup = checkedCount > 0 && checkedCount < this.groupData.length
     },
 
     //选择分组
