@@ -467,6 +467,7 @@
               <el-button
                 type="primary"
                 size="medium"
+                :disabled="ruleForm.contents.length >= chapterLimit"
                 @click="addArticleBtn"
               >
                 添加章节
@@ -834,6 +835,7 @@ export default {
       checkboxVal: [],
       // 添加文章
       dialogVisible: false,
+      chapterLimit: 60, //章节数量限制
       addArticle: {
         localName: '',
         content: ''
@@ -1713,6 +1715,13 @@ export default {
         fileData: {}
       }
       this.ruleForm.contents.push(item)
+      // 章节数量限制
+      if (this.ruleForm.contents.length >= this.chapterLimit) {
+        this.$message({
+          message: `章节数量限制，最多添加${this.chapterLimit}条！`,
+          type: 'warning'
+        })
+      }
     },
     setCheckboxVal() {
       // this.ruleForm.passCondition = this.checkboxVal
