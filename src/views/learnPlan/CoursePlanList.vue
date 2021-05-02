@@ -113,12 +113,12 @@
             slot="coursePlanName"
             slot-scope="{ row }"
           >
-            <el-button
-              type="text"
+            <span
+              style="cursor: pointer; color: rgb(83, 170, 252);"
               @click="jumpDetail(row)"
             >
               {{ row.coursePlanName }}
-            </el-button>
+            </span>
           </template>
 
           <template
@@ -747,7 +747,7 @@ export default {
         }
         .divider {
           position: absolute;
-          left: 316px;
+          left: 290px;
           top: 0;
           height: 100%;
           width: 1px;

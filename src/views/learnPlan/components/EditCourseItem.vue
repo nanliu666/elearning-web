@@ -10,7 +10,7 @@
         <el-tooltip
           class="item"
           effect="dark"
-          content="修改通过条件唯一替代本次培训"
+          content="修改通过条件仅应用于本次培训"
           placement="top-start"
         >
           <i class="el-icon-question" />

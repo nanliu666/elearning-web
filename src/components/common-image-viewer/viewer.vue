@@ -20,7 +20,7 @@
         v-if="isDownload"
         @click.stop="downloadFile($props)"
       ><i class="el-icon-download"></i></span>
-      <span @click.stop="handlePreviewImage([url])"><i class="el-icon-view" /></span>
+      <span @click.stop="handlePreviewImage([url], imageIndex)"><i class="el-icon-view" /></span>
       <span
         v-if="isDelete"
         @click.stop="deleteFile([url])"
@@ -68,6 +68,11 @@ export default {
     url: {
       type: String,
       default: ''
+    },
+    // 当前展示图片的索引
+    imageIndex: {
+      type: Number,
+      default: 0
     }
   },
 

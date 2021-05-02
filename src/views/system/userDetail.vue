@@ -124,6 +124,7 @@
           >
             <common-image-view
               :url="item.url"
+              :image-index="index"
               :file-name="item.name"
               :preview-src-list="previewSrcList"
               @downloadFile="downloadFile"
@@ -183,15 +184,15 @@ export default {
         },
         {
           label: '职级',
-          prop: 'job'
+          prop: 'postLevel'
         },
         {
           label: '职务',
-          prop: 'job1'
+          prop: 'post'
         },
         {
           label: '职称',
-          prop: 'job2'
+          prop: 'positionTitle'
         },
         {
           label: '入职日期',
@@ -203,7 +204,7 @@ export default {
         // },
         {
           label: '备注',
-          prop: 'remark'
+          prop: 'userRemark'
         }
       ]
     }
