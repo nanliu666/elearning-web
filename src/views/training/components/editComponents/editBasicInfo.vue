@@ -21,7 +21,9 @@
         <template #introduction>
           <div class="container__editor">
             <tinymce v-model="formData.introduction" />
-                <div style="float: right; color: #ccc">{{getIntroCount(formData.introduction) + ' 字'}}</div>
+            <div style="float: right; color: #ccc">
+              {{ getIntroCount(formData.introduction) + ' 字' }}
+            </div>
           </div>
         </template>
         <template #trainObjectsList>
@@ -40,7 +42,7 @@ import lazySelect from '@/components/lazy-select/lazySelect'
 import { getWorkList, getAllCatalog } from '@/api/system/user'
 import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 import { mapGetters } from 'vuex'
-import { getUserList, getPositionUserList } from '@/api/examManage/schedule'
+import { orgOrPositionToPerson } from '@/util/middleWare'
 const personOptionProps = {
   label: 'name',
   value: 'workNo',
@@ -288,7 +290,10 @@ export default {
     'formData.trainObjectsList': {
       handler(data) {
         if (!_.isEmpty(data)) {
-          this.handlerData(_.cloneDeep(data))
+          orgOrPositionToPerson(_.cloneDeep(data)).then((res) => {
+            this.userList = res
+            this.$refs.form && this.$refs.form.validateField('trainObjectsList')
+          })
         }
       },
       deep: true,
@@ -326,55 +331,8 @@ export default {
   },
   methods: {
     getIntroCount(rowText) {
+      // eslint-disable-next-line no-useless-escape
       return rowText.replace(/[<(.+)\/?>|&nbsp;|']/g, '').trim().length
-    },
-    // 拉取公司的直属员工，在map中遍历await
-    async handlerData(data) {
-      // 非人员且部门下员工不为0
-      let examList = _.groupBy(data, (item) => {
-        return item.type === 'Org'
-      })
-      // 岗位员工不为0
-      const positionList = _.groupBy(data, (item) => {
-        return item.type === 'Position'
-      })
-      let personList = _.filter(data, (item) => {
-        return item.type === 'User'
-      })
-      // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
-      let orgResult = []
-      if (examList.true) {
-        orgResult = await Promise.all(
-          examList.true.map(async (item) => {
-            return (async () => {
-              return await getUserList({
-                orgId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.id
-              })
-            })()
-          })
-        )
-      }
-      // 岗位人数校验
-      let positionResult = []
-      if (positionList.true) {
-        positionResult = await Promise.all(
-          positionList.true.map(async (item) => {
-            return (async () => {
-              await getPositionUserList({
-                parentId: _.get(item, 'bizId') ? _.get(item, 'bizId') : item.positionId
-              })
-            })()
-          })
-        )
-      }
-      const positionLength = _.sum(positionResult)
-      if (_.size(personList)) {
-        data = [...examList.false, ..._.flattenDeep(orgResult)]
-      } else {
-        data = [..._.flattenDeep(orgResult)]
-      }
-      this.userList = _.isEmpty(positionResult) ? data : data + positionLength
-      this.$refs.form && this.$refs.form.validateField('trainObjectsList')
     },
     // 计划人数的变动
     validatePeople(rule, value, callback) {
@@ -402,6 +360,7 @@ export default {
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
+      console.log('触发僬侥', this.userList)
       if (this.formData.people !== '') {
         const moreThan = _.size(this.userList) - this.formData.people
         this.$nextTick(() => {

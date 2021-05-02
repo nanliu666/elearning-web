@@ -79,8 +79,7 @@
 <script>
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
-import { getUserList } from '@/api/examManage/schedule'
-
+import { orgOrPositionToPerson } from '@/util/middleWare'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -171,38 +170,8 @@ export default {
       this.userPicking = true
     },
     async handleSelect(userList) {
-      const target = await this.handlerData(userList)
-      this.$emit('update:user-list', target)
-    },
-    // 拉取公司的所有员工，在map中遍历await
-    async handlerData(data) {
-      return new Promise((resolve) => {
-        setTimeout(async () => {
-          let examList = _.groupBy(data, (item) => {
-            // 非人员且部门下员工不为0
-            return item.type === 'Org'
-          })
-          let personList = _.filter(data, (item) => {
-            return item.type === 'User'
-          })
-          // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
-          if (examList.true) {
-            let result = []
-            result = await Promise.all(
-              examList.true.map(async (item) => {
-                return (async () => {
-                  return await getUserList({ orgId: item.id })
-                })()
-              })
-            )
-            if (_.size(personList)) {
-              data = [...examList.false, ..._.flattenDeep(result)]
-            } else {
-              data = _.flattenDeep(result)
-            }
-          }
-          resolve(data) // 必须要有resolve, await才能生效
-        })
+      orgOrPositionToPerson(_.cloneDeep(userList)).then((res) => {
+        this.$emit('update:user-list', res)
       })
     },
     handleDelete(row) {
