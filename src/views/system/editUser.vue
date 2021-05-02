@@ -516,7 +516,7 @@ export default {
       }
       try {
         await func(params)
-        this.$message.success('创建成功')
+        this.$message.success('保存成功')
         this.loading = false
         Object.assign(this.$data.form, this.$options.data().form)
       } catch (error) {
