@@ -225,6 +225,12 @@
             </div>
           </template>
           <template
+            slot="coursePlanName"
+            slot-scope="{ row }"
+          >
+            {{ row.coursePlanName ? row.coursePlanName : '--' }}
+          </template>
+          <template
             slot="multiSelectMenu"
             slot-scope="{ selection }"
           >
@@ -646,6 +652,7 @@ export default {
     handleDraftSearch(searchParams) {
       this.draft.queryInfo = _.assign(this.draft.queryInfo, searchParams)
       this.draft.page.currentPage = 1
+      this.draft.queryInfo.pageNo = 1
       this.loadDraftData()
     },
     // 跳去详情

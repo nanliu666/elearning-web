@@ -22,19 +22,19 @@
       :data="currentList"
     >
       <template
-        slot="department"
+        slot="orgName"
         slot-scope="{ row }"
       >
         <div>
-          {{ row.department || '-' }}
+          {{ row.orgName || '-' }}
         </div>
       </template>
       <template
-        slot="phonenum"
+        slot="phoneNum"
         slot-scope="{ row }"
       >
         <div>
-          {{ row.phonenum || '-' }}
+          {{ row.phoneNum || '-' }}
         </div>
       </template>
       <template #multiSelectMenu="{ selection }">
@@ -79,8 +79,7 @@
 <script>
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
-
-import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
+import { orgOrPositionToPerson } from '@/util/middleWare'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -95,14 +94,14 @@ const TABLE_COLUMNS = [
   },
   {
     label: '所在部门',
-    prop: 'department',
+    prop: 'orgName',
     minWidth: 100,
     slot: true
   },
   {
     label: '手机号码',
     slot: true,
-    prop: 'phonenum',
+    prop: 'phoneNum',
     minWidth: 100
   },
   {
@@ -170,31 +169,9 @@ export default {
     handleAddUser() {
       this.userPicking = true
     },
-    handleSelect(userList) {
-      this.$emit('update:user-list', userList)
-    },
-    // 拉取公司的直属员工
-    async getOrgUsers(orgId) {
-      return new Promise((resolve) => {
-        getUserByOrgId({ orgId }).then((res) => {
-          const users = _.map(res, (item) =>
-            _.assign(
-              {
-                bizId: item.userId,
-                bizName: item.name,
-                orgName: item.orgName,
-                department: item.orgName,
-                departmentId: item.orgId,
-                phonenum: item.phoneNum,
-                studyPlanId: this.planId,
-                type: 'User',
-                isLeaf: true
-              },
-              item
-            )
-          )
-          resolve(users)
-        })
+    async handleSelect(userList) {
+      orgOrPositionToPerson(_.cloneDeep(userList)).then((res) => {
+        this.$emit('update:user-list', res)
       })
     },
     handleDelete(row) {

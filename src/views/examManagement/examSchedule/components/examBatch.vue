@@ -83,12 +83,12 @@
 </template>
 
 <script>
-import { getUserList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import BatchEdit from './batchEdit'
 import ComEmpty from '@/components/common-empty/empty'
 import { getBatchexaminee } from '@/api/examManage/schedule'
 import { mapGetters } from 'vuex'
+import { orgOrPositionToPerson } from '@/util/middleWare'
 export default {
   name: 'ExamBatch',
   components: {
@@ -151,37 +151,6 @@ export default {
       })
       return data
     },
-    // 拉取公司的直属员工，在map中遍历await
-    async handlerData(data) {
-      return new Promise((resolve) => {
-        setTimeout(async () => {
-          let examList = _.groupBy(data.examList, (item) => {
-            // 非人员且部门下员工不为0
-            return item.type === 'Org'
-          })
-          let personList = _.filter(data.examList, (item) => {
-            return item.type === 'User'
-          })
-          // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
-          if (examList.true) {
-            let result = []
-            result = await Promise.all(
-              examList.true.map(async (item) => {
-                return (async () => {
-                  return await getUserList({ orgId: item.id })
-                })()
-              })
-            )
-            if (_.size(personList)) {
-              data.examList = [...examList.false, ..._.flattenDeep(result)]
-            } else {
-              data.examList = _.flattenDeep(result)
-            }
-          }
-          resolve(data) // 必须要有resolve, await才能生效
-        })
-      })
-    },
     // 检测是否有重叠
     checkOverlap(data) {
       let temp = _.filter(this.batchList, (item) => {
@@ -202,9 +171,11 @@ export default {
       })
       // 存在时间重叠，则不进行下一步
       if (!this.checkOverlap(data)) return
-      await this.handlerData(data)
-      this.batchList.push(data)
-      this.sortExamTime()
+      orgOrPositionToPerson(_.cloneDeep(_.get(data, 'examList', []))).then((res) => {
+        _.set(data, 'examList', res)
+        this.batchList.push(data)
+        this.sortExamTime()
+      })
     },
     // 排序
     sortExamTime() {
