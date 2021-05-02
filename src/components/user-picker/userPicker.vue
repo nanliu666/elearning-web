@@ -76,7 +76,7 @@
               v-model.trim="outerParams.search"
               placeholder="搜索姓名或手机号码"
             />
-            <div v-if="!_.isEmpty(usersNameList)">
+            <div v-if="!_.isEmpty(outerData)">
               <el-checkbox
                 v-model="checkAll"
                 class="total-check"
@@ -91,19 +91,18 @@
                 @change="handleCheckedUserChange"
               >
                 <el-checkbox
-                  v-for="(item, index) in usersNameList"
+                  v-for="item in outerData"
                   :key="item.bizId"
                   class="check-li"
                   :label="item"
-                  @change="handleSelectUser(outerData[index])"
+                  @change="handleSelectUser(item)"
                 >
-                  {{ outerData[index].bizName
-                  }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                  {{ item.bizName }}{{ item.phonenum ? `(${item.phonenum})` : '' }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
             <com-empty
-              v-if="_.isEmpty(usersNameList)"
+              v-if="_.isEmpty(outerData)"
               height="31vh"
             />
           </div>
@@ -345,11 +344,9 @@ export default {
       checkedUsersGroup: [], //分组人员
       isIndeterminateGroup: false,
       groupData: [],
-
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
       checkedUsers: [],
-      usersNameList: [],
       isIndeterminate: false,
       activeTab,
       loading: false,
@@ -411,23 +408,9 @@ export default {
         this.$emit('update:visible', val)
       }
     }
-    // // 选中的对象数组
-    // checkedObj() {
-    //   const target =  this.groupData.filter((option) =>
-    //     this.checkedUsersGroup.some((checked) => checked === option.id)
-    //   )
-    //   return target
-    // }
   },
 
   watch: {
-    // checkedObj: {
-    //   handler() {
-    //     // console.log(val)
-    //   },
-    //   deep: true,
-    //   immediate: true
-    // },
     value: {
       handler(val) {
         this.selected = val.slice()
@@ -485,16 +468,10 @@ export default {
   },
   methods: {
     initCheckUser() {
-      if (
-        _.size(this.checkedUsers) === _.size(this.usersNameList) &&
-        _.size(this.usersNameList) !== 0
-      ) {
+      if (_.size(this.checkedUsers) === _.size(this.outerData) && _.size(this.outerData) !== 0) {
         this.checkAll = true
       }
-      if (
-        _.size(this.checkedUsers) !== 0 &&
-        _.size(this.checkedUsers) !== _.size(this.usersNameList)
-      ) {
+      if (_.size(this.checkedUsers) !== 0 && _.size(this.checkedUsers) !== _.size(this.outerData)) {
         this.isIndeterminate = true
       }
     },
@@ -554,14 +531,14 @@ export default {
     },
     // 切换全选与全删
     handleCheckAllChange(val) {
-      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : []
+      this.checkedUsers = val ? this.outerData : []
       this.isIndeterminate = false
       // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
         _.pullAllBy(this.selected, this.outerData, 'bizId')
       } else {
         // 半选换全选需要把未选上的加入
-        if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
+        if (_.size(this.checkedUsers) === _.size(this.outerData)) {
           this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'bizId')
         } else {
           // 全选需要去重
@@ -597,8 +574,8 @@ export default {
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
       let checkedCount = value.length
-      this.checkAll = checkedCount === this.usersNameList.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length
+      this.checkAll = checkedCount === this.outerData.length
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
     },
 
     // 当前是否切换为半选状态
@@ -748,9 +725,8 @@ export default {
             } else {
               this.outerData = _.concat(this.outerData, data)
             }
-            this.usersNameList = _.map(this.outerData, 'name')
           } else {
-            this.usersNameList = []
+            this.outerData = []
             this.outerParams.loaded = true
           }
           this.outerParams.pageNo = pageNo + 1
