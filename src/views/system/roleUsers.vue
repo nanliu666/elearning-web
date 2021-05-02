@@ -148,7 +148,7 @@ export default {
           label: '状态',
           prop: 'userStatus',
           formatter(row) {
-            let arr = { 1: '正常', 2: '禁用' }
+            let arr = { 1: '在职', 2: '离职' }
             return arr[row.userStatus]
           }
         },
