@@ -22,19 +22,19 @@
       :data="currentList"
     >
       <template
-        slot="department"
+        slot="orgName"
         slot-scope="{ row }"
       >
         <div>
-          {{ row.department || '-' }}
+          {{ row.orgName || '-' }}
         </div>
       </template>
       <template
-        slot="phonenum"
+        slot="phoneNum"
         slot-scope="{ row }"
       >
         <div>
-          {{ row.phonenum || '-' }}
+          {{ row.phoneNum || '-' }}
         </div>
       </template>
       <template #multiSelectMenu="{ selection }">
@@ -79,8 +79,8 @@
 <script>
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
+import { getUserList } from '@/api/examManage/schedule'
 
-import { getUserList as getUserByOrgId } from '@/api/examManage/schedule'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -95,14 +95,14 @@ const TABLE_COLUMNS = [
   },
   {
     label: '所在部门',
-    prop: 'department',
+    prop: 'orgName',
     minWidth: 100,
     slot: true
   },
   {
     label: '手机号码',
     slot: true,
-    prop: 'phonenum',
+    prop: 'phoneNum',
     minWidth: 100
   },
   {
@@ -170,30 +170,38 @@ export default {
     handleAddUser() {
       this.userPicking = true
     },
-    handleSelect(userList) {
-      this.$emit('update:user-list', userList)
+    async handleSelect(userList) {
+      const target = await this.handlerData(userList)
+      this.$emit('update:user-list', target)
     },
-    // 拉取公司的直属员工
-    async getOrgUsers(orgId) {
+    // 拉取公司的所有员工，在map中遍历await
+    async handlerData(data) {
       return new Promise((resolve) => {
-        getUserByOrgId({ orgId }).then((res) => {
-          const users = _.map(res, (item) =>
-            _.assign(
-              {
-                bizId: item.userId,
-                bizName: item.name,
-                orgName: item.orgName,
-                department: item.orgName,
-                departmentId: item.orgId,
-                phonenum: item.phoneNum,
-                studyPlanId: this.planId,
-                type: 'User',
-                isLeaf: true
-              },
-              item
+        setTimeout(async () => {
+          let examList = _.groupBy(data, (item) => {
+            // 非人员且部门下员工不为0
+            return item.type === 'Org'
+          })
+          let personList = _.filter(data, (item) => {
+            return item.type === 'User'
+          })
+          // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
+          if (examList.true) {
+            let result = []
+            result = await Promise.all(
+              examList.true.map(async (item) => {
+                return (async () => {
+                  return await getUserList({ orgId: item.id })
+                })()
+              })
             )
-          )
-          resolve(users)
+            if (_.size(personList)) {
+              data = [...examList.false, ..._.flattenDeep(result)]
+            } else {
+              data = _.flattenDeep(result)
+            }
+          }
+          resolve(data) // 必须要有resolve, await才能生效
         })
       })
     },
