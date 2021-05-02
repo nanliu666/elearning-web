@@ -113,12 +113,12 @@
             slot="coursePlanName"
             slot-scope="{ row }"
           >
-            <el-button
-              type="text"
+            <span
+              style="cursor: pointer; color: rgb(83, 170, 252);"
               @click="jumpDetail(row)"
             >
               {{ row.coursePlanName }}
-            </el-button>
+            </span>
           </template>
 
           <template

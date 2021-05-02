@@ -1,6 +1,6 @@
 <template>
   <div>
-    <common-table
+    <!-- <common-table
       ref="table"
       :columns="columnsVisible | columnsFilter"
       :config="tableConfig"
@@ -8,6 +8,15 @@
       :loading="tableLoading"
       :page-config="tablePageConfig"
       :page="page"
+      @current-page-change="handleCurrentPageChange"
+      @page-size-change="handlePageSizeChange"
+    > -->
+    <common-table
+      ref="table"
+      :columns="columnsVisible | columnsFilter"
+      :config="tableConfig"
+      :data="tableData"
+      :loading="tableLoading"
       @current-page-change="handleCurrentPageChange"
       @page-size-change="handlePageSizeChange"
     >
