@@ -509,7 +509,7 @@ export default {
         .then((res) => {
           (res || []).forEach((item) => {
             item.bizId = item.id
-            item.bizName = item.name
+            ;(item.bizName = item.name), (item.type = 'Group')
           })
           this.groupData = _.cloneDeep(res)
           this.loading = false
