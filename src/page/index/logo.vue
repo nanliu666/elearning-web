@@ -37,7 +37,9 @@ export default {
   },
   computed: {
     logoImg() {
-      let logoBaseInfor = this.diyInfor || getStore({ name: 'diyInfor' })
+      let logoBaseInfor =
+        (this.diyInfor && this.diyInfor.length > 0 && this.diyInfor) ||
+        getStore({ name: 'diyInfor' })
       let logoImg = logoBaseInfor.logo && logoBaseInfor.logo.BackgroundUrl
       return logoImg
     },

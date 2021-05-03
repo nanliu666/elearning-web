@@ -143,7 +143,7 @@ const COLUMNS = [
     align: 'center'
   },
   {
-    prop: 'create_time',
+    prop: 'update_time',
     label: '更新时间',
     align: 'center'
   }
