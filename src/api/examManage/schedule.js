@@ -42,11 +42,13 @@ export const getUserList = (params) => get('/user/v1/user/basis', params)
 /**
  * 获取当前分组下的所有人
  */
-export const getUsergroupList = (params) => get('/manage/v1/usergroup/queryUserList', params)
+// export const getUsergroupList = (params) => get('/manage/v1/usergroup/queryUserList', params)
+export const getUsergroupList = (params) => get('/api/user/v1/usergroup/queryUserList', params)
 /**
  * 获取当前岗位下的所有人
  */
-export const getPositionUserList = (params) => get('/manage/v1/user/info/position', params)
+// export const getPositionUserList = (params) => get('/manage/v1/user/info/position', params)
+export const getPositionUserList = (params) => get('/manage/v1/positions/user/child', params)
 /**
  * 获取考试安排列表
  */
