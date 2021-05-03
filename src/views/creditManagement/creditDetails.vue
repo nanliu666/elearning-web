@@ -138,7 +138,7 @@ const TABLE_COLUMNS = [
     minWidth: 120
   },
   {
-    prop: 'create_time',
+    prop: 'update_time',
     label: '更新时间',
     minWidth: 180
   }

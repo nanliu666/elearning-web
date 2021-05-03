@@ -8,6 +8,10 @@ export const orgOrPositionToPerson = async (data) => {
   let examList = _.groupBy(data, (item) => {
     return item.type === 'Org'
   })
+  // 外包人员
+  let outUserList = _.groupBy(data, (item) => {
+    return item.type === 'User'
+  })
   // 岗位员工不为0
   const positionList = _.groupBy(data, (item) => {
     return item.type === 'Position'
@@ -25,12 +29,14 @@ export const orgOrPositionToPerson = async (data) => {
     })
   }
   // 岗位人数校验
-  let positionResult = []
+  let positionResult1 = [],
+    positionResult = []
   if (positionList.true) {
     const positionIdList = _.join(_.map(positionList.true, 'bizId'), ',')
-    positionResult = await getPositionUserList({
+    positionResult1 = await getPositionUserList({
       parentId: positionIdList
     })
+    positionResult = positionResult1.users
   }
   // 分组
   let groupResult = []
@@ -42,7 +48,7 @@ export const orgOrPositionToPerson = async (data) => {
   }
   const target = _.uniqBy(
     [
-      ..._.get(examList, 'false', []),
+      ..._.get(outUserList, 'true', []),
       ..._.flattenDeep(orgResult),
       ..._.flattenDeep(positionResult),
       ..._.flattenDeep(groupResult)

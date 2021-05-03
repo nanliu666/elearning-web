@@ -320,11 +320,11 @@ export default {
       // 新增模板时保存
       this.$refs['diyFormRef'].validate((valid) => {
         if (valid) {
-          this.loading = true
           if (this.tempId && this.tempId.length > 0) {
             this.updataTempFn()
             return
           }
+          this.loading = true
           let sendData = {}
           sendData = _.clone(this.formData)
           let items = {}
@@ -358,8 +358,8 @@ export default {
     },
     releaseFn() {
       // 发布
-      this.loading = true
       if (this.tempId && this.tempId.length > 0) {
+        this.loading = true
         let sendData = {}
         sendData.id = this.tempId
         putReleaseTemp(sendData).then(() => {
