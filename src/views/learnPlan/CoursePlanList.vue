@@ -48,13 +48,14 @@
             @node-click="nodeClick"
             @refreshTree="getCategoryData"
           ></leftColumn> -->
-
-        <my-column
-          :column-interface="columnInterface"
-          @treeClick="treeClick"
-        ></my-column>
+        <div style="border-right: 1px solid #ccc;overflow-y: auto;">
+          <my-column
+            :column-interface="columnInterface"
+            @treeClick="treeClick"
+          ></my-column>
+        </div>
         <!-- </div> -->
-        <div class="divider"></div>
+        <!-- <div class="divider"></div> -->
         <common-table
           ref="table"
           class="commonTable"
