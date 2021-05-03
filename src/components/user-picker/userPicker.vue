@@ -76,7 +76,7 @@
               v-model.trim="outerParams.search"
               placeholder="搜索姓名或手机号码"
             />
-            <div v-if="!_.isEmpty(usersNameList)">
+            <div v-if="!_.isEmpty(outerData)">
               <el-checkbox
                 v-model="checkAll"
                 class="total-check"
@@ -91,19 +91,18 @@
                 @change="handleCheckedUserChange"
               >
                 <el-checkbox
-                  v-for="(item, index) in usersNameList"
+                  v-for="item in outerData"
                   :key="item.bizId"
                   class="check-li"
                   :label="item"
-                  @change="handleSelectUser(outerData[index])"
+                  @change="handleSelectUser(item)"
                 >
-                  {{ outerData[index].bizName
-                  }}{{ outerData[index].phonenum ? `(${outerData[index].phonenum})` : '' }}
+                  {{ item.bizName }}{{ item.phonenum ? `(${item.phonenum})` : '' }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
             <com-empty
-              v-if="_.isEmpty(usersNameList)"
+              v-if="_.isEmpty(outerData)"
               height="31vh"
             />
           </div>
@@ -148,7 +147,7 @@
               v-model.trim="outerParams.search"
               placeholder="搜索分组"
             />
-            <div v-if="!_.isEmpty(groupList)">
+            <div v-if="!_.isEmpty(groupData)">
               <el-checkbox
                 v-model="checkAllGroup"
                 class="total-check"
@@ -163,18 +162,18 @@
                 @change="handleCheckedGroupChange"
               >
                 <el-checkbox
-                  v-for="(item, index) in groupList"
+                  v-for="(item, index) in groupData"
                   :key="item.id"
                   class="check-li"
                   :label="item"
                   @change="handleSelectGroup(groupData[index])"
                 >
-                  {{ item }}
+                  {{ item.name }}
                 </el-checkbox>
               </el-checkbox-group>
             </div>
             <com-empty
-              v-if="_.isEmpty(groupList)"
+              v-if="_.isEmpty(groupData)"
               height="31vh"
             />
           </div>
@@ -343,14 +342,11 @@ export default {
     return {
       checkAllGroup: false,
       checkedUsersGroup: [], //分组人员
-      groupList: [], //分组
       isIndeterminateGroup: false,
       groupData: [],
-
       isClear: false, // 当前外部人员是否加载完毕
       checkAll: false,
       checkedUsers: [],
-      usersNameList: [],
       isIndeterminate: false,
       activeTab,
       loading: false,
@@ -472,16 +468,10 @@ export default {
   },
   methods: {
     initCheckUser() {
-      if (
-        _.size(this.checkedUsers) === _.size(this.usersNameList) &&
-        _.size(this.usersNameList) !== 0
-      ) {
+      if (_.size(this.checkedUsers) === _.size(this.outerData) && _.size(this.outerData) !== 0) {
         this.checkAll = true
       }
-      if (
-        _.size(this.checkedUsers) !== 0 &&
-        _.size(this.checkedUsers) !== _.size(this.usersNameList)
-      ) {
+      if (_.size(this.checkedUsers) !== 0 && _.size(this.checkedUsers) !== _.size(this.outerData)) {
         this.isIndeterminate = true
       }
     },
@@ -500,11 +490,11 @@ export default {
         this.isIndeterminate = true
       }
       const temp_group = _.map(this.checkedUsersGroup, (item) => {
-        return { name: item }
+        return { name: item.id }
       })
-      const diffName_group = _.differenceBy(temp_group, val, 'name')
+      const diffName_group = _.differenceBy(temp_group, val, 'id')
       const diffIndex_group = _.findIndex(this.checkedUsersGroup, (item) => {
-        return item === _.get(diffName_group, '[0].name', '')
+        return item.id === _.get(diffName_group, '[0].id', '')
       })
       if (diffIndex_group !== -1) {
         this.checkedUsersGroup.splice(diffIndex_group, 1)
@@ -519,32 +509,9 @@ export default {
         .then((res) => {
           (res || []).forEach((item) => {
             item.bizId = item.id
-            item.bizName = item.name
+            ;(item.bizName = item.name), (item.type = 'Group')
           })
-          this.groupData = JSON.parse(JSON.stringify(res || []))
-          this.groupList = _.map(this.groupData, 'name')
-          // const { totalPage } = res
-          // if (_.size(res.data) > 0) {
-          //   const data = _.map(res.data, (item) =>
-          //     _.assign(item, {
-          //       path: item.userId,
-          //       bizId: item.userId,
-          //       bizName: item.name,
-          //       type: NODE_TYPE.User
-          //     })
-          //   )
-          //   if (isRefresh) {
-          //     this.outerData = data
-          //   } else {
-          //     this.outerData = _.concat(this.outerData, data)
-          //   }
-          //   this.usersNameList = _.map(this.outerData, 'name')
-          // } else {
-          //   this.usersNameList = []
-          //   this.outerParams.loaded = true
-          // }
-          // this.outerParams.pageNo = pageNo + 1
-          // this.isClear = totalPage < pageNo + 1
+          this.groupData = _.cloneDeep(res)
           this.loading = false
         })
         .finally(() => {
@@ -564,14 +531,14 @@ export default {
     },
     // 切换全选与全删
     handleCheckAllChange(val) {
-      this.checkedUsers = val ? _.cloneDeep(this.usersNameList) : []
+      this.checkedUsers = val ? this.outerData : []
       this.isIndeterminate = false
       // 全删除需要过滤组织选的人,组织
       if (_.isEmpty(this.checkedUsers)) {
         _.pullAllBy(this.selected, this.outerData, 'bizId')
       } else {
         // 半选换全选需要把未选上的加入
-        if (_.size(this.checkedUsers) === _.size(this.usersNameList)) {
+        if (_.size(this.checkedUsers) === _.size(this.outerData)) {
           this.selected = _.uniqBy([..._.cloneDeep(this.outerData), ...this.selected], 'bizId')
         } else {
           // 全选需要去重
@@ -583,17 +550,16 @@ export default {
       }
     },
 
-    // 切换全选与全删
+    // 切换分组的全选与全删
     handleCheckAllGroupChange(val) {
-      this.checkedUsersGroup = val ? _.cloneDeep(this.groupList) : []
+      this.checkedUsersGroup = val ? this.groupData : []
       this.isIndeterminateGroup = false
       // 全删除需要过滤组织选的人,组织
-      // this.checkAllGroup=_.isEmpty(this.checkedUsersGroup)
       if (_.isEmpty(this.checkedUsersGroup)) {
         _.pullAllBy(this.selected, this.groupData, 'bizId')
       } else {
         // 半选换全选需要把未选上的加入
-        if (_.size(this.checkedUsersGroup) === _.size(this.groupList)) {
+        if (_.size(this.checkedUsersGroup) === _.size(this.groupData)) {
           this.selected = _.uniqBy([..._.cloneDeep(this.groupData), ...this.selected], 'bizId')
         } else {
           // 全选需要去重
@@ -608,15 +574,15 @@ export default {
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
       let checkedCount = value.length
-      this.checkAll = checkedCount === this.usersNameList.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.usersNameList.length
+      this.checkAll = checkedCount === this.outerData.length
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
     },
 
     // 当前是否切换为半选状态
     handleCheckedGroupChange(value) {
       let checkedCount = value.length
-      this.checkAllGroup = checkedCount === this.groupList.length
-      this.isIndeterminateGroup = checkedCount > 0 && checkedCount < this.groupList.length
+      this.checkAllGroup = checkedCount === this.groupData.length
+      this.isIndeterminateGroup = checkedCount > 0 && checkedCount < this.groupData.length
     },
 
     //选择分组
@@ -759,9 +725,8 @@ export default {
             } else {
               this.outerData = _.concat(this.outerData, data)
             }
-            this.usersNameList = _.map(this.outerData, 'name')
           } else {
-            this.usersNameList = []
+            this.outerData = []
             this.outerParams.loaded = true
           }
           this.outerParams.pageNo = pageNo + 1

@@ -40,6 +40,10 @@ export const delExamArrange = (params) => del('/manage/v1/exam/arrange', params)
  */
 export const getUserList = (params) => get('/user/v1/user/basis', params)
 /**
+ * 获取当前分组下的所有人
+ */
+export const getUsergroupList = (params) => get('/manage/v1/usergroup/queryUserList', params)
+/**
  * 获取当前岗位下的所有人
  */
 export const getPositionUserList = (params) => get('/manage/v1/user/info/position', params)

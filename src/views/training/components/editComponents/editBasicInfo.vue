@@ -360,7 +360,6 @@ export default {
     },
     // 超计划人数的检验
     validateTrain(rule, value, callback) {
-      console.log('触发僬侥', this.userList)
       if (this.formData.people !== '') {
         const moreThan = _.size(this.userList) - this.formData.people
         this.$nextTick(() => {
