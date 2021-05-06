@@ -340,20 +340,22 @@ export default {
         this.$refs.form.clearValidate()
         callback()
       } else {
-        const numberValue = Number(value)
-        if (_.isNaN(numberValue)) {
-          return callback(new Error('计划人数必须填数字'))
+        const valueList = _.split(value, '.')
+        if ((_.size(valueList) > 1, _.get(valueList, '[1]'))) {
+          return callback(new Error('计划人数不能为小数'))
         } else {
-          if (!_.isInteger(numberValue)) {
-            return callback(new Error('计划人数不能为小数'))
-          }
-          if (value > 100000) {
-            return callback(new Error('计划人数最大限制输入值 100000'))
-          } else if (value <= 100000 && value > 0) {
-            this.$refs.form.validateField('trainObjectsList')
-            callback()
+          const numberValue = Number(value)
+          if (_.isNaN(numberValue)) {
+            return callback(new Error('计划人数必须填数字'))
           } else {
-            return callback(new Error('计划人数必须为正整数'))
+            if (value > 100000) {
+              return callback(new Error('计划人数最大限制输入值 100000'))
+            } else if (value <= 100000 && value > 0) {
+              this.$refs.form.validateField('trainObjectsList')
+              callback()
+            } else {
+              return callback(new Error('计划人数必须为正整数'))
+            }
           }
         }
       }
