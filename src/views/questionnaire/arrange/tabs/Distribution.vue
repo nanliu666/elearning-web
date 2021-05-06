@@ -41,25 +41,28 @@
         <div class="topic-table">
           <el-table
             header-align="center"
-            align="center"
+            align="left"
             :data="item.items"
           >
             <el-table-column
               prop="content"
               label="选项"
-              align="center"
+              align="left"
+              min-width="320"
+              show-overflow-tooltip
             >
             </el-table-column>
             <el-table-column
               prop="writeNum"
               label="填写人数"
-              align="center"
+              align="left"
+              min-width="120"
             >
             </el-table-column>
             <el-table-column
               prop="writeRate"
               label="占比率"
-              align="center"
+              align="left"
             >
               <template slot-scope="scope">
                 <el-progress
