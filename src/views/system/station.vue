@@ -20,9 +20,6 @@
         :columns="columnsVisible | columnsFilter"
         :data="tableData"
         :loading="tableLoading"
-        :page="page"
-        @current-page-change="currentChange"
-        @page-size-change="sizeChange"
       >
         <template
           slot="multiSelectMenu"
@@ -181,7 +178,7 @@ import {
   DELETE_STATION
 } from '@/const/privileges'
 import { dateFormat } from '@/util/date'
-import { getStationParent, getStationChild, queryStation } from '@/api/system/station'
+import { queryStation, getStationChild } from '@/api/system/station'
 export default {
   name: 'Jobs',
   components: {
@@ -198,11 +195,6 @@ export default {
       // 默认选中所有列
       columns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      page: {
-        currentPage: 1,
-        size: 10,
-        total: 0
-      },
       tableData: [],
       tableColumns: TABLE_COLUMNS,
       tableLoading: false,
@@ -243,25 +235,6 @@ export default {
     this.loadData()
   },
   methods: {
-    //  处理页码改变
-    currentChange(currentPage) {
-      this.page.currentPage = currentPage
-      let name = this.searchPopoverConfig.requireOptions[0].data
-      if (name) {
-        this.handleSearch({ name: name })
-      } else {
-        this.loadData()
-      }
-    },
-    sizeChange(pageSize) {
-      this.page.size = pageSize
-      let name = this.searchPopoverConfig.requireOptions[0].data
-      if (name) {
-        this.handleSearch({ name: name })
-      } else {
-        this.loadData()
-      }
-    },
     // 查看用户
     handleViewUser(row) {
       this.$router.push({ path: '/system/stationDetail', query: { id: row.id } })
@@ -276,31 +249,16 @@ export default {
       this.rowData = row
       this.$refs.stationForm.openDialog({ create: '创建下级岗位', edit: '编辑岗位' }[type], type)
     },
-    // 输入框搜索
-    async handleSearch(params) {
-      params.pageNo = 1
-      params.pageSize = this.page.size
-      if (!params.name) {
-        this.loadData()
-        return
-      }
-      await queryStation(params).then((res) => {
-        this.tableData = res.data
-        this.page.total = res.totalNum
-      })
-    },
+    handleSearch: _.debounce(function(params) {
+      this.loadData(params)
+    }, 500),
     // 加载数据
-    async loadData() {
-      let params = {
-        pageNo: this.page.currentPage,
-        pageSize: this.page.size
-      }
+    async loadData(value) {
       this.tableLoading = true
       this.tableData = []
-      await getStationParent(params)
+      await queryStation({ name: (value && value.name) || '' })
         .then((res) => {
-          this.tableData = res.data
-          this.page.total = res.totalNum
+          this.tableData = res
         })
         .finally(() => {
           this.tableLoading = false
