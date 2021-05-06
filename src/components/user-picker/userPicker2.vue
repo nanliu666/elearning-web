@@ -200,15 +200,15 @@
           >
             <div class="flex flex-justify-between flex-items">
               <!-- 用户图标 -->
-              <!-- <i
+              <i
                 v-if="item.type == 'Org'"
                 class="iconfont icon-usercircle2 imgss"
               />
               <i
                 v-else
                 class="iconfont  icon-approval-checkin-bicolor imgs"
-              /> -->
-              <i class="iconfont icon-approval-checkin-bicolor select-type-icon"></i>
+              />
+              <!-- <i class="iconfont icon-approval-checkin-bicolor select-type-icon"></i> -->
               <span>{{ item.bizName + (item.phonenum ? '(' + item.phonenum + ')' : '') }}</span>
             </div>
             <div>
