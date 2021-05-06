@@ -149,7 +149,8 @@ const TABLE_COLUMNS = [
   },
   {
     label: '包含课程',
-    prop: 'courses'
+    prop: 'courses',
+    formatter: (row) => row.courses || '--'
   },
   {
     label: '创建人',
@@ -315,6 +316,7 @@ export default {
       this.loadTableData()
     },
     handleSearch(searchParams) {
+      this.page.currentPage = 1
       this.loadTableData(searchParams)
     },
     // 加载函数

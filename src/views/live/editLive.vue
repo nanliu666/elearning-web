@@ -1182,7 +1182,7 @@ export default {
         ],
         introduction: [
           { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
-          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: 'blur' }
+          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: ['blur', 'change'] }
         ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
@@ -1219,7 +1219,7 @@ export default {
           label: '正常'
         },
         {
-          value: 2,
+          value: 0,
           label: '禁用'
         }
       ],
@@ -1517,6 +1517,7 @@ export default {
         }
         return false
       }
+      console.log(this.basicForm.introduction)
       let resLength = 0,
         resArr = [...base, ...spationArr]
       this.$refs[formName].validateField(resArr, (errmsg) => {
@@ -1525,16 +1526,16 @@ export default {
           if (resLength === resArr.length) {
             this.headIndex += 1
           }
-        } else {
-          if (errmsg == this.basicFormRules.introduction[1].message) {
-            this.$message({
-              message: '直播介绍最多不能超过5000字',
-              type: 'error'
-            })
-          }
-          console.log(errmsg)
-          return false
         }
+        // else {
+        //   if (errmsg == this.basicFormRules.introduction[1].message) {
+        //     this.$message({
+        //       message: '直播介绍最多不能超过5000字',
+        //       type: 'error'
+        //     })
+        //   }
+        //   return false
+        // }
       })
     },
     valChange(type) {
