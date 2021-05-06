@@ -26,7 +26,7 @@
         slot-scope="{ row }"
       >
         <div>
-          {{ row.orgName || '-' }}
+          {{ row.orgName || row.department || '-' }}
         </div>
       </template>
       <template
@@ -34,7 +34,7 @@
         slot-scope="{ row }"
       >
         <div>
-          {{ row.phoneNum || '-' }}
+          {{ row.phoneNum || row.phonenum || '-' }}
         </div>
       </template>
       <template #multiSelectMenu="{ selection }">
@@ -77,9 +77,9 @@
 </template>
 
 <script>
-import UserPicker from '@/components/user-picker/userPicker'
+import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
-import { orgOrPositionToPerson } from '@/util/middleWare'
+// import { orgOrPositionToPerson } from '@/util/middleWare'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -170,9 +170,15 @@ export default {
       this.userPicking = true
     },
     async handleSelect(userList) {
-      orgOrPositionToPerson(_.cloneDeep(userList)).then((res) => {
-        this.$emit('update:user-list', res)
-      })
+      this.$emit('update:user-list', userList)
+      //   if (this.$route.query.status == 2) {
+      //   this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
+      // } else {
+      //   this.personList = list
+      // }
+      // orgOrPositionToPerson(_.cloneDeep(userList)).then((res) => {
+      //   this.$emit('update:user-list', res)
+      // })
     },
     handleDelete(row) {
       this.$confirm('你确定要删除该人员?', '提示', {
