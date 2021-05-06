@@ -58,6 +58,7 @@
             </span>
             <span>
               <!-- 编辑&删除 -->
+
               <el-dropdown
                 v-show="data.label !== '未分类'"
                 trigger="hover"
@@ -325,6 +326,14 @@ export default {
         })
         // 做一个判断一级否有重名的
         if (node.btnshow) {
+          if (params.name == '未分类') {
+            this.$message({
+              message: '该名称已存在，请重新编辑',
+              type: 'warning'
+            })
+            ifReturn = true
+            return
+          }
           this.data.map((item) => {
             if (item.label == params.name) {
               this.$message({
@@ -381,6 +390,14 @@ export default {
         if (params.name.trim() == '') {
           this.$message({
             message: '名称不能为空',
+            type: 'warning'
+          })
+          return
+        }
+        // 判断一级是不是有未分类
+        if (params.name == '未分类') {
+          this.$message({
+            message: '该名称已存在，请重新编辑',
             type: 'warning'
           })
           return
