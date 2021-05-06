@@ -5,25 +5,25 @@ import { getUserList, getPositionUserList, getUsergroupList } from '@/api/examMa
  */
 export const orgOrPositionToPerson = async (data) => {
   // 非人员且部门下员工不为0
-  let examList = _.groupBy(data, (item) => {
+  let examList = _.filter(data, (item) => {
     return item.type === 'Org'
   })
-  // 外包人员
-  let outUserList = _.groupBy(data, (item) => {
+  // 外部人员
+  let outUserList = _.filter(data, (item) => {
     return item.type === 'User'
   })
   // 岗位员工不为0
-  const positionList = _.groupBy(data, (item) => {
+  const positionList = _.filter(data, (item) => {
     return item.type === 'Position'
   })
   // 分组员工不为0
-  const groupList = _.groupBy(data, (item) => {
+  const groupList = _.filter(data, (item) => {
     return item.type === 'Group'
   })
   // 如果是部门/公司（org）需要把当前部门的直属人员拉回来处理
   let orgResult = []
-  if (examList.true) {
-    const orgIdList = _.join(_.map(examList.true, 'id'), ',')
+  if (!_.isEmpty(examList)) {
+    const orgIdList = _.join(_.map(examList, 'id'), ',')
     orgResult = await getUserList({
       orgId: orgIdList
     })
@@ -31,8 +31,8 @@ export const orgOrPositionToPerson = async (data) => {
   // 岗位人数校验
   let positionResult1 = [],
     positionResult = []
-  if (positionList.true) {
-    const positionIdList = _.join(_.map(positionList.true, 'bizId'), ',')
+  if (!_.isEmpty(positionList)) {
+    const positionIdList = _.join(_.map(positionList, 'bizId'), ',')
     positionResult1 = await getPositionUserList({
       parentId: positionIdList
     })
@@ -40,15 +40,15 @@ export const orgOrPositionToPerson = async (data) => {
   }
   // 分组
   let groupResult = []
-  if (groupList.true) {
-    const groupIdList = _.join(_.map(groupList.true, 'bizId'), ',')
+  if (!_.isEmpty(groupList)) {
+    const groupIdList = _.join(_.map(groupList, 'bizId'), ',')
     groupResult = await getUsergroupList({
       ids: groupIdList
     })
   }
   const target = _.uniqBy(
     [
-      ..._.get(outUserList, 'true', []),
+      ...outUserList,
       ..._.flattenDeep(orgResult),
       ..._.flattenDeep(positionResult),
       ..._.flattenDeep(groupResult)
