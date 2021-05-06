@@ -266,18 +266,18 @@ export default {
         attachment: []
       },
       columns: [
-        // {
-        //   itemType: 'select',
-        //   label: '发布栏目',
-        //   prop: 'publishColumn',
-        //   required: true,
-        //   options: [],
-        //   props: {
-        //     label: 'dictValue',
-        //     value: 'id'
-        //   },
-        //   span: 24
-        // },
+        {
+          itemType: 'select',
+          label: '发布栏目',
+          prop: 'publishColumn',
+          required: true,
+          options: [],
+          props: {
+            label: 'dictValue',
+            value: 'id'
+          },
+          span: 24
+        },
         {
           itemType: 'slot',
           label: '发布范围',
@@ -378,7 +378,11 @@ export default {
   },
   mounted() {
     this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
-      this.columns.find((item) => item.prop === 'publishColumn').options = res
+      this.columns.find((item) => item.prop === 'publishColumn').options = _.filter(res, function(
+        o
+      ) {
+        return o.dictValue == '新闻中心'
+      })
     })
   },
 
