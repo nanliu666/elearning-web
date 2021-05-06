@@ -322,7 +322,7 @@ export default {
       return params
     },
     exit() {
-      this.$confirm('离开此页面您得修改将会丢失, 是否继续?', '提示', {
+      this.$confirm('离开此页面您的修改将会丢失, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
