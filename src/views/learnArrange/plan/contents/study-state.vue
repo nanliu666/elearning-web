@@ -299,6 +299,7 @@ export default {
     searchValWatcher: _.debounce(function() {
       if (this.tableLoading) return
       this.tableLoading = true
+      this.filterForm.pageNo = 1
       this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
     }, 1000)
   },
