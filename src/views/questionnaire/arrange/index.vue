@@ -3,6 +3,7 @@
     <page-header title="问卷安排">
       <el-button
         slot="rightMenu"
+        v-p="ADD_ARRANGE"
         type="primary"
         size="medium"
         @click="handleEdit"
@@ -241,6 +242,7 @@
             "
           ></span>
           <el-button
+            v-p="DELETE_ARRANGE"
             type="text"
             style="padding: 0"
             :loading="multipleDelLoading"
@@ -361,6 +363,7 @@
           >
             <template slot-scope="scope">
               <el-button
+                v-p="EDIT_ARRANGE"
                 type="text"
                 size="small"
                 @click="handleEdit(scope.row)"
@@ -368,6 +371,7 @@
                 编辑
               </el-button>
               <el-button
+                v-p="DELETE_ARRANGE"
                 type="text"
                 size="small"
                 :loading="scope.row.deleteLoading"
@@ -389,24 +393,30 @@
 
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
+                    v-p="START_ARRANGE"
                     :disabled="shouldbeDisabled(scope.row)"
-                    @click.native="
-                      handleStatusChange(
-                        scope.row.id,
-                        scope.row.status == 2 ? 1 : 2,
-                        scope.row.planName
-                      )
-                    "
+                    @click.native="handleStatusChange(scope.row.id, 2, scope.row.planName)"
                   >
-                    {{ scope.row.status == 1 ? '开始' : '暂停' }}
+                    开始
                   </el-dropdown-item>
                   <el-dropdown-item
+                    v-p="PAUSE_ARRANGE"
+                    :disabled="shouldbeDisabled(scope.row)"
+                    @click.native="handleStatusChange(scope.row.id, 1, scope.row.planName)"
+                  >
+                    暂停
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-p="END_ARRANGE"
                     :disabled="scope.row.status !== 2 || scope.row.option == 0"
                     @click.native="handleStatusChange(scope.row.id, 3)"
                   >
                     结束
                   </el-dropdown-item>
-                  <el-dropdown-item @click.native="toDetail(scope.row, true)">
+                  <el-dropdown-item
+                    v-p="DISTRIBUTION_ARRANGE"
+                    @click.native="toDetail(scope.row, true)"
+                  >
                     选项分布
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -440,6 +450,15 @@ import {
 } from '@/api/questionnaire'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
+import {
+  ADD_ARRANGE,
+  EDIT_ARRANGE,
+  DELETE_ARRANGE,
+  START_ARRANGE,
+  END_ARRANGE,
+  DISTRIBUTION_ARRANGE,
+  PAUSE_ARRANGE
+} from '@/const/questionnaire/arrange'
 
 export default {
   name: 'Management',
@@ -563,7 +582,14 @@ export default {
       set: function([publishTime, endTime]) {
         Object.assign(this.queryForm, { publishTime, endTime })
       }
-    }
+    },
+    ADD_ARRANGE: () => ADD_ARRANGE,
+    EDIT_ARRANGE: () => EDIT_ARRANGE,
+    DELETE_ARRANGE: () => DELETE_ARRANGE,
+    START_ARRANGE: () => START_ARRANGE,
+    END_ARRANGE: () => END_ARRANGE,
+    DISTRIBUTION_ARRANGE: () => DISTRIBUTION_ARRANGE,
+    PAUSE_ARRANGE: () => PAUSE_ARRANGE
   },
   watch: {
     columns: {
