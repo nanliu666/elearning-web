@@ -296,6 +296,24 @@ export default {
       console.log(res)
     })
   },
+  created() {
+    // 加载数据
+    this.loadTableData()
+    // 获取所有直播创建人列表
+    getCreateUserId({
+      source: 'live'
+    }).then((res) => {
+      this.createUserList = res
+      this.searchConfig.popoverOptions[1].options = res
+    })
+    //   获取直播分类
+    getcategoryTree({
+      source: 'live'
+    }).then((res) => {
+      this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      console.log(res)
+    })
+  },
   methods: {
     /**
      * @author guanfenda
