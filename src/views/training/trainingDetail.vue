@@ -586,11 +586,11 @@
               >
                 撤回证书
               </el-button>
+              <!-- :disabled="scope.row.certificate != 2" -->
               <el-button
                 v-else
                 type="text"
                 size="medium"
-                :disabled="scope.row.certificate != 2"
                 @click.stop="isgrantCertificate(scope.row)"
               >
                 发放证书
