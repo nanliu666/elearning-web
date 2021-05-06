@@ -266,18 +266,18 @@ export default {
         attachment: []
       },
       columns: [
-        {
-          itemType: 'select',
-          label: '发布栏目',
-          prop: 'publishColumn',
-          required: true,
-          options: [],
-          props: {
-            label: 'dictValue',
-            value: 'id'
-          },
-          span: 24
-        },
+        // {
+        //   itemType: 'select',
+        //   label: '发布栏目',
+        //   prop: 'publishColumn',
+        //   required: true,
+        //   options: [],
+        //   props: {
+        //     label: 'dictValue',
+        //     value: 'id'
+        //   },
+        //   span: 24
+        // },
         {
           itemType: 'slot',
           label: '发布范围',
