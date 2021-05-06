@@ -13,7 +13,7 @@ export const queryStudyInfo = (params) => {
 
 export const queryCourseWork = (params) => {
   return request({
-    url: '/api/manage/v1/train/course/work',
+    url: '/api/manage/v1/train/course/workFront',
     method: 'get',
     params
   })
@@ -45,7 +45,7 @@ export const queryStudyList = (params) => {
 
 export const queryStudyPlanWork = (params) => {
   return request({
-    url: '/api/blade-manage/v1/study/plan/course/work',
+    url: '/api/blade-manage/v1/study/plan/course/workFront',
     method: 'get',
     params
   })

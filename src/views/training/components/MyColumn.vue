@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;">
     <div class="issue_l">
       <div class="issue_l_tree">
         <el-input

@@ -225,7 +225,7 @@ export default {
         emulateJSON: true
       }
       this.data.course.forEach((c) => {
-        c.trainAttachmentVOS.forEach((item) => {
+        c.forEach((item) => {
           let { fileName: name, filePath: path } = item
           if (!path || !name) return
           if (path.indexOf('http') !== 0) {
@@ -250,7 +250,6 @@ export default {
         // 下载
         let token = getStore({ name: 'token' })
         let x = new XMLHttpRequest()
-
         x.open('GET', url, true)
         x.setRequestHeader('accessToken', `bearer  ${token}`)
         x.responseType = 'blob'
