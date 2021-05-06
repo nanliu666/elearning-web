@@ -200,7 +200,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.isOnlineCourse === 'yes' ? '已通过' : '未通过' }}
+              {{ scope.row.isOnlineCourse === 'Yes' ? '已通过' : '未通过' }}
             </div>
           </template>
         </el-table-column>
@@ -212,7 +212,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.isFinish === 'yes' ? '已通过' : '未通过' }}
+              {{ scope.row.isFinish === 'Yes' ? '已通过' : '未通过' }}
             </div>
           </template>
         </el-table-column>

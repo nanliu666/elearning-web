@@ -89,7 +89,7 @@
           </div>
           <div class="pane-body-item">
             <div class="name">
-              问卷学分：
+              问卷积分：
             </div>
             <div class="content">
               {{ data.asqScore }}分
