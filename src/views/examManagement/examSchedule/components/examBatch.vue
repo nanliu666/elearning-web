@@ -28,9 +28,11 @@
           v-for="(item, index) in batchList"
           :key="index"
           class="batch-li"
-          @click="collapseExpand(index)"
         >
-          <header class="li-header">
+          <header
+            class="li-header"
+            @click="collapseExpand(index)"
+          >
             <div>
               <i
                 :class="[currentExpand !== index ? 'el-icon-arrow-down' : 'el-icon-arrow-up']"
@@ -251,7 +253,7 @@ export default {
           cursor: pointer;
         }
         .students-li {
-          height: 40px;
+          min-height: 40px;
           display: flex;
           justify-content: space-between;
           align-items: center;
