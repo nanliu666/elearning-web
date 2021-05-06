@@ -287,15 +287,18 @@ export default {
       if (!search) return
       this.loading = true
       //如果查询范围内的  添加parentId
-      let params = this.isRange
-        ? {
-            search,
-            isRange: this.isRange,
-            parentId: 1
-          }
-        : {
-            search
-          }
+      // let params = this.isRange
+      //   ? {
+      //       search,
+      //       isRange: this.isRange,
+      //       parentId: 1
+      //     }
+      //   : {
+      //       search
+      //     }
+      let params = {
+        search
+      }
       loadOrgTree(params)
         .then((res) => {
           this.orgSearchData = _.map(this.thruHandler(res), (item) =>
