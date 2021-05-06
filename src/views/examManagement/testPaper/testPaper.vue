@@ -172,7 +172,7 @@ const TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'status',
-    minWidth: 150,
+    width: 90,
     formatter: (row) => {
       return (
         {
@@ -186,7 +186,6 @@ const TABLE_COLUMNS = [
     label: '试卷分类',
     prop: 'categoryName',
     slot: true,
-    align: 'center',
     minWidth: 120
   },
   {
@@ -204,7 +203,7 @@ const TABLE_COLUMNS = [
     label: '过期时间',
     slot: true,
     prop: 'expiredTime',
-    minWidth: 320
+    minWidth: 170
   }
 ]
 const TABLE_CONFIG = {

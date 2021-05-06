@@ -245,22 +245,22 @@ export default {
             options: [],
             config: { optionLabel: 'name', optionValue: 'userId' },
             loading: false,
-            noMore: false,
-            pageNo: 2,
-            loadMoreFun(item) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getCreatUsers().then((res) => {
-                if (res.length > 0) {
-                  item.options.push(...res)
-                  item.pageNo += 1
-                  item.loading = false
-                } else {
-                  item.noMore = true
-                  item.loading = false
-                }
-              })
-            }
+            noMore: false
+            // pageNo: 2,
+            // loadMoreFun(item) {
+            //   if (item.loading || item.noMore) return
+            //   item.loading = true
+            //   getCreatUsers().then((res) => {
+            //     if (res.length > 0) {
+            //       item.options.push(...res)
+            //       item.pageNo += 1
+            //       item.loading = false
+            //     } else {
+            //       item.noMore = true
+            //       item.loading = false
+            //     }
+            //   })
+            // }
           }
         ]
       },
