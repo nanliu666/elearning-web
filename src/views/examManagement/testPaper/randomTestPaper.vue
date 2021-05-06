@@ -669,7 +669,10 @@ export default {
           return Number(prev) + Number(cur)
         }, 0))
       this.form.totalScore = totalScoreTemp.toFixed(1)
-      if (this.form.totalScore) {
+      if (!this.form.planScore) {
+        this.surplusScore = 0
+      }
+      if (this.form.totalScore && this.form.planScore) {
         let score = this.form.planScore - this.form.totalScore
         this.surplusScore = Math.round(score).toString()
       }
