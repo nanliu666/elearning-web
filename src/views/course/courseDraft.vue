@@ -1018,8 +1018,8 @@ export default {
         data7 = this.arrClearBlank(data7, 'creatorId')
 
         if (this.status == 1) {
-          // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-          // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+          SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
+          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
         } else {
           SEARCH_POPOVER_POPOVER_OPTIONS[6].options = []
           SEARCH_POPOVER_POPOVER_OPTIONS[6].options.push(...data7)

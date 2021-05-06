@@ -467,7 +467,6 @@
               <el-button
                 type="primary"
                 size="medium"
-                :disabled="ruleForm.contents.length >= chapterLimit"
                 @click="addArticleBtn"
               >
                 添加章节
@@ -777,9 +776,17 @@
             width="50%"
             :modal-append-to-body="false"
           >
-            <div class="reflection_content">
+            <!-- <div class="reflection_content">
               <tinymce v-model="ruleForm.thinkContent" />
-            </div>
+            </div> -->
+            <el-form
+              :model="ruleForm"
+              :rules="rules"
+            >
+              <el-form-item prop="thinkContent">
+                <tinymce v-model="ruleForm.thinkContent" />
+              </el-form-item>
+            </el-form>
             <span
               slot="footer"
               class="dialog-footer"
@@ -835,7 +842,6 @@ export default {
       checkboxVal: [],
       // 添加文章
       dialogVisible: false,
-      chapterLimit: 60, //章节数量限制
       addArticle: {
         localName: '',
         content: ''
@@ -916,7 +922,8 @@ export default {
           { max: 5000, message: '课程介绍最多不超过5000字', trigger: ['blur', 'change'] }
         ],
         thinkContent: [
-          { required: true, message: '请书写课前思考内容', trigger: ['blur', 'change'] }
+          { required: true, message: '请书写课前思考内容', trigger: ['blur', 'change'] },
+          { max: 5000, message: '课前思考内容最多不超过5000字', trigger: ['blur', 'change'] }
         ]
       },
       rulesDialog: {
@@ -1715,13 +1722,6 @@ export default {
         fileData: {}
       }
       this.ruleForm.contents.push(item)
-      // 章节数量限制
-      if (this.ruleForm.contents.length >= this.chapterLimit) {
-        this.$message({
-          message: `章节数量限制，最多添加${this.chapterLimit}条！`,
-          type: 'warning'
-        })
-      }
     },
     setCheckboxVal() {
       // this.ruleForm.passCondition = this.checkboxVal
