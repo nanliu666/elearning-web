@@ -34,7 +34,7 @@ export const orgOrPositionToPerson = async (data) => {
   if (!_.isEmpty(positionList)) {
     const positionIdList = _.join(_.map(positionList, 'bizId'), ',')
     positionResult1 = await getPositionUserList({
-      parentId: positionIdList
+      parentIds: positionIdList
     })
     positionResult = positionResult1.users
   }

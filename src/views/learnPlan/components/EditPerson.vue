@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import UserPicker from '@/components/user-picker/userPicker2'
+import UserPicker from '@/components/user-picker/userPicker'
 import Pagination from '@/components/common-pagination'
 import { orgOrPositionToPerson } from '@/util/middleWare'
 // 表格属性

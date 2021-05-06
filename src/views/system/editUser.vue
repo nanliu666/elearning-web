@@ -92,7 +92,6 @@ import { checkUserInfo, createUser, createNewWorkNo, editUser } from '@/api/pers
 import { getStaffBasicInfo } from '@/api/personalInfo'
 import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getUserWorkList, getOrgTree } from '@/api/org/org'
-import { findTreeNodes } from '@/util/util'
 import { mapGetters } from 'vuex'
 import commonUpload from '@/components/common-upload/commonUpload'
 export default {
@@ -269,7 +268,6 @@ export default {
             value: 'userId'
           },
           searchable: true,
-          // firstOption: null,
           prop: 'leaderId',
           label: '直接领导'
         },
@@ -367,23 +365,13 @@ export default {
         'attachments',
         val.map((item) => ({ url: item.url, name: item.localName }))
       )
-    },
-    'form.orgId'(val) {
-      let selectedOrg = findTreeNodes(this.orgTreeData, (item) => item.orgId === val)[0]
-      let leaders = _.filter(selectedOrg.leaders, 'userId')
-      if (leaders.length > 0) {
-        this.form.leaderId = _.head(leaders).userId
-        this.columns.find((item) => item.prop === 'leaderId').firstOption = [
-          {
-            userId: _.head(leaders).userId + '',
-            name: _.head(leaders).userName
-          }
-        ]
-      }
     }
+    // 'form.orgId'(val) {}
   },
 
   activated() {
+    this.loadOrgData()
+    this.loadRoleData()
     this.loadUserData()
     this.resetForm()
     getPositionAll().then((res) => {
@@ -391,11 +379,6 @@ export default {
       _.set(positionConfig, 'props.treeParams.data', res)
     })
   },
-  created() {
-    this.loadOrgData()
-    this.loadRoleData()
-  },
-
   methods: {
     _nodeClickFun(val) {
       this.form.position = val.name
@@ -425,15 +408,18 @@ export default {
           this.$set(
             this.columns.find((item) => item.prop === 'leaderId'),
             'firstOption',
-            {
-              userId: res.leaderId + '',
-              name: res.leaderName
-            }
+            [
+              {
+                userId: res.leaderId + '',
+                name: res.leaderName
+              }
+            ]
           )
         }
         this.form = {
           roleIds: _.map(res.roles, 'roleId'),
           leaderId: res.leaderId + '',
+          remark: res.userRemark,
           ...res
         }
         delete this.form.roles
