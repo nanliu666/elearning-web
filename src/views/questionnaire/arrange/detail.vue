@@ -137,9 +137,6 @@
 <script>
 import { Situation, Distribution } from './tabs'
 import { queryPlanDetail, end, suspend, start, deleteQuestionnaire } from '@/api/questionnaire'
-import QRCode from 'qrcodejs2'
-const CODE_HEIGHT = 112
-const CODE_WIDTH = 112
 
 export default {
   components: {

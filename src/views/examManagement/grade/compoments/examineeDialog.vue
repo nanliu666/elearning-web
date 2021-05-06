@@ -180,11 +180,11 @@ export default {
           value: 'value'
         },
         options: [
-          { label: '已发布', value: '5' },
-          { label: '已提交', value: '4' },
+          { label: '已发布', value: '1' },
+          { label: '已提交', value: '2' },
           { label: '已阅卷', value: '3' },
-          { label: '考试中', value: '2' },
-          { label: '阅卷中', value: '1' }
+          { label: '考试中', value: '4' },
+          { label: '阅卷中', value: '5' }
         ]
       }
     ]

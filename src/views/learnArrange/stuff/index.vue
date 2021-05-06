@@ -38,7 +38,10 @@
                 : '--')
           }}</span>
         </div>
-        <div class="intro-item" v-if="!data.type">
+        <div
+          v-if="!data.type"
+          class="intro-item"
+        >
           培训上报材料：
           <span class="text">{{ data.isSubmit === 'Yes' ? '已提交' : '未提交' }}</span>
         </div>

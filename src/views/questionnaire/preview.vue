@@ -58,10 +58,12 @@
                   >最少可选{{ question.multiMin }}项，最多可选{{ question.multiMax }}项</span>
                 </div>
 
-                <div class="question-content" style="width: 452px;">
+                <div
+                  class="question-content"
+                  style="width: 452px;"
+                >
                   <el-input
                     v-if="question.type == 'short_answer'"
-                    
                     :value="questionResults[index]"
                   ></el-input>
 

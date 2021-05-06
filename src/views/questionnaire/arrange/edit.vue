@@ -372,10 +372,7 @@ import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
-import { save, update, saveQuery, querySubject, saveAsqUrl } from '@/api/questionnaire'
-import QRCode from 'qrcodejs2'
-const CODE_HEIGHT = 86
-const CODE_WIDTH = 86
+import { save, update, saveQuery, querySubject } from '@/api/questionnaire'
 const CODE_NAME = '问卷二维码'
 
 export default {

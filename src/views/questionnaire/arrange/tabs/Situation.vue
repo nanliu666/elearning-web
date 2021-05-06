@@ -166,7 +166,6 @@
           /> -->
           <el-table-column
             fixed="left"
-            
             label="姓名"
             :show-overflow-tooltip="true"
             width="180"
@@ -176,14 +175,12 @@
             </template>
           </el-table-column>
           <el-table-column
-            
             prop="userPhone"
             :show-overflow-tooltip="true"
             label="手机号"
           >
           </el-table-column>
           <el-table-column
-            
             prop="dept"
             :show-overflow-tooltip="true"
             label="所属部门"
@@ -195,7 +192,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            
             prop="state"
             :show-overflow-tooltip="true"
             label="提交情况"
@@ -205,7 +201,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            
             :show-overflow-tooltip="true"
             label="提交时间"
           >
@@ -215,10 +210,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            
-            label="操作"
-          >
+          <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
                 type="text"
