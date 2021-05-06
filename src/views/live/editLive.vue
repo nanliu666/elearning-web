@@ -1442,6 +1442,10 @@ export default {
       return this.basicForm.introduction.length
     }
   },
+  beforeRouteLeave(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   methods: {
     // 数据处理中间函数
     thruHandler(arr) {
