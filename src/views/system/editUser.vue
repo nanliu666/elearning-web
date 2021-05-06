@@ -409,6 +409,7 @@ export default {
       }
     },
     resetForm() {
+      this.uploadFileList = []
       this.$refs['form'].resetFields()
     },
     loadUserData() {
