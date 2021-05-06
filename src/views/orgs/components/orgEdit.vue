@@ -160,6 +160,7 @@
         @click="handleClose"
       >取消</el-button>
       <el-button
+        :loading="isLoding"
         type="primary"
         size="medium"
         @click="submit"
@@ -185,6 +186,7 @@ export default {
   },
   data() {
     return {
+      isLoding: false,
       isrules: false,
       type: 'create',
       form: {
@@ -333,7 +335,9 @@ export default {
           let form = _.cloneDeep(this.form)
           form.leaders = _.map(form.leaders, (item) => ({ userId: item }))
           if (this.type !== 'edit') {
+            this.isLoding = true
             createOrg(form).then(() => {
+              this.isLoding = false
               this.$message.success('创建成功')
               this.$emit('refresh')
               this.$emit('changevisible', false)
@@ -348,7 +352,9 @@ export default {
       })
     },
     editFun(form) {
+      this.isLoding = true
       editOrg(form).then(() => {
+        this.isLoding = false
         this.$message.success('修改成功')
         this.$emit('refresh')
         this.$emit('changevisible', false)

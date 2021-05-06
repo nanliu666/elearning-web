@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;">
     <div class="issue_l">
       <div class="issue_l_tree">
         <el-input
@@ -629,7 +629,13 @@ export default {
     // padding: 0 25px;
     width: 100%;
     height: 100%;
-    padding-bottom: 200px;
+    // padding-bottom: 200px;
+    &::after {
+      display: block;
+      height: 200px;
+      content: '';
+      visibility: hidden;
+    }
     overflow: auto;
     // &::-webkit-scrollbar {
     //   display: none;

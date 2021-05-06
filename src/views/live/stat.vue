@@ -29,7 +29,7 @@
                 "
               ></el-input> -->
               <el-input
-                v-model="filterForm[currentTable].name"
+                v-model="searchValWatcher"
                 clearable
                 size="medium"
                 :placeholder="
@@ -388,7 +388,7 @@ export default {
       },
       filterForm: {
         live: {
-          name: '',
+          titleOrNo: '',
           categoryId: '',
           creatorId: '',
           isUsed: '',
@@ -415,8 +415,17 @@ export default {
     }
   },
   computed: {
-    searchValWatcher() {
-      return this.filterForm[this.currentTable].name
+    searchValWatcher: {
+      get: function() {
+        return this.filterForm[this.currentTable][
+          this.currentTable === 'live' ? 'titleOrNo' : 'name'
+        ]
+      },
+      set: function(value) {
+        this.filterForm[this.currentTable][
+          this.currentTable === 'live' ? 'titleOrNo' : 'name'
+        ] = value
+      }
     }
   },
   watch: {

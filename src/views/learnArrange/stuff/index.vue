@@ -177,8 +177,9 @@ export default {
         params.courseId = courseId
       }
 
-      api(params).then((res = []) => {
-        res.forEach((item) => {
+      api(params).then((res = {}) => {
+        const { vos = [] } = res
+        vos.forEach((item) => {
           if (!item.find((r) => r.fileCategory === 'user')) {
             const { id, bizId, courseId } = item[0]
             item.push({
@@ -200,7 +201,7 @@ export default {
             })
           }
         })
-        this.tabData.course = res
+        this.tabData.course = vos
       })
       this.$forceUpdate()
     },

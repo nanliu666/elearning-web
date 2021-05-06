@@ -549,6 +549,9 @@
                   v-model.trim="basicForm.introduction"
                   :init="{ height: 100 }"
                 />
+                <div class="limitWords">
+                  {{ limitWords }}字
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -1182,7 +1185,7 @@ export default {
         ],
         introduction: [
           { required: true, message: '请输入直播介绍', trigger: ['blur', 'change'] },
-          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: 'blur' }
+          { max: 5000, message: '直播介绍最多不能超过5000字', trigger: ['blur', 'change'] }
         ],
         imageUrl: [
           { type: 'array', required: true, message: '请选择课程封面', trigger: ['blur', 'change'] }
@@ -1219,7 +1222,7 @@ export default {
           label: '正常'
         },
         {
-          value: 2,
+          value: 0,
           label: '禁用'
         }
       ],
@@ -1434,6 +1437,15 @@ export default {
       })
     })
   },
+  computed: {
+    limitWords() {
+      return this.basicForm.introduction.length
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   methods: {
     // 数据处理中间函数
     thruHandler(arr) {
@@ -1517,6 +1529,7 @@ export default {
         }
         return false
       }
+      console.log(this.basicForm.introduction)
       let resLength = 0,
         resArr = [...base, ...spationArr]
       this.$refs[formName].validateField(resArr, (errmsg) => {
@@ -1532,7 +1545,6 @@ export default {
               type: 'error'
             })
           }
-          console.log(errmsg)
           return false
         }
       })
@@ -2450,6 +2462,14 @@ export default {
         width: 20vw;
       }
     }
+  }
+  /deep/ .tox .tox-statusbar__text-container {
+    display: none;
+  }
+  .limitWords {
+    position: relative;
+    float: right;
+    margin: -29px 20px 0 0;
   }
 }
 

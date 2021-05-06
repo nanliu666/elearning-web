@@ -112,12 +112,12 @@
             v-show="!isShowinput"
             class="btn_bottom"
           >
-            <a
+            <!-- <a
               class="btn1"
               href="#/training/trainingArrange"
               @click="adddata"
             >
-              <i class="el-icon-plus btn_icon"></i> 创建分类</a>
+              <i class="el-icon-plus btn_icon"></i> 创建分类</a> -->
             <!-- <span class="btn2">创建分类</span> -->
           </div>
         </div>

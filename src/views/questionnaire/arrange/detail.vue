@@ -19,6 +19,7 @@
         </div>
         <div class="pane-header-r">
           <el-button
+            v-p="data.status == 1 ? START_ARRANGE : PAUSE_ARRANGE"
             type="primary"
             :loading="btn1Loading"
             :disabled="shouldbeDisabled"
@@ -28,6 +29,7 @@
             {{ data.status == 2 ? '暂停' : '开始' }}
           </el-button>
           <el-button
+            v-p="END_ARRANGE"
             type="default"
             :loading="btn2Loading"
             size="mini"
@@ -37,6 +39,7 @@
             结束
           </el-button>
           <el-button
+            v-p="EDIT_ARRANGE"
             type="default"
             size="mini"
             @click="handleEdit"
@@ -44,6 +47,7 @@
             编辑
           </el-button>
           <el-button
+            v-p="DELETE_ARRANGE"
             type="default"
             size="mini"
             :loading="btn3Loading"
@@ -79,6 +83,7 @@
             <div class="content">
               {{ data.subjectName
               }}<el-button
+                v-p="PREVIEW_ARRANGE"
                 type="text"
                 style="margin-left: 12px; margin-top: 2px;"
                 @click="toPreview"
@@ -137,6 +142,17 @@
 <script>
 import { Situation, Distribution } from './tabs'
 import { queryPlanDetail, end, suspend, start, deleteQuestionnaire } from '@/api/questionnaire'
+// import QRCode from 'qrcodejs2'
+// const CODE_HEIGHT = 112
+// const CODE_WIDTH = 112
+import {
+  EDIT_ARRANGE,
+  DELETE_ARRANGE,
+  START_ARRANGE,
+  END_ARRANGE,
+  PAUSE_ARRANGE,
+  PREVIEW_ARRANGE
+} from '@/const/questionnaire/arrange'
 
 export default {
   components: {
@@ -174,7 +190,13 @@ export default {
       } else {
         return option != 2
       }
-    }
+    },
+    EDIT_ARRANGE: () => EDIT_ARRANGE,
+    DELETE_ARRANGE: () => DELETE_ARRANGE,
+    START_ARRANGE: () => START_ARRANGE,
+    END_ARRANGE: () => END_ARRANGE,
+    PAUSE_ARRANGE: () => PAUSE_ARRANGE,
+    PREVIEW_ARRANGE: () => PREVIEW_ARRANGE
   },
   activated() {
     const { id, toTab2 } = this.$route.query

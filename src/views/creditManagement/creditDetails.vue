@@ -15,6 +15,8 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
+        @current-page-change="currentChange"
+        @page-size-change="sizeChange"
       >
         <template #topMenu>
           <div class="transitionBox">
@@ -345,13 +347,28 @@ export default {
         this.tableLoading = false
       }
     },
+    // 切换展示条数
+    sizeChange(pageSize) {
+      this.page.size = pageSize
+      this.loadTableData()
+    },
+    // 翻页
+    currentChange(currentPage) {
+      this.page.currentPage = currentPage
+      this.loadTableData()
+    },
     // 搜索
     /**
      * @author guanfenda
      *@desc 搜索
      * */
     handleSearch(params) {
-      this.searchParams = params
+      let currentParam = {
+        likeQuery: params.search
+        // userId:params.search
+      }
+      // this.searchParams = params
+      this.searchParams = { ...currentParam }
       this.page.currentPage = 1
       this.loadTableData()
     }

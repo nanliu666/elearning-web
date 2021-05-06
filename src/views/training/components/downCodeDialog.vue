@@ -91,7 +91,6 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
-import { backBaseUrl } from '@/config/env'
 const CODE_HEIGHT = 100
 const CODE_WIDTH = 100
 const FOLDER_NAME = '签到二维码'
@@ -131,16 +130,7 @@ export default {
         width: CODE_WIDTH,
         height: CODE_HEIGHT
       })
-      let url = backBaseUrl
-      let baseURL = (url += '/mobile/#/pages/signin/index')
-
-      let p = ''
-      Object.keys(params).forEach((key) => {
-        p += '&' + key + '=' + params[key]
-      })
-
-      baseURL += '?' + p.slice(1)
-      qrcode.makeCode(baseURL)
+      qrcode.makeCode(JSON.stringify(params))
       var canvas = qrcode._el.children[0]
       var data = canvas.toDataURL().replace('image/png', 'image/octet-stream;') //获取二维码值，并修改响应头部。
       var saveLink = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
@@ -175,6 +165,7 @@ export default {
       })
       var zip = new JsZip()
       var promises = []
+      let todoNames = []
       this.data.forEach((item) => {
         let { todoName, offlineTodoId } = item
         if (!todoName.trim().length) todoName = '签到二维码'
@@ -186,16 +177,19 @@ export default {
         qrcode.makeCode(JSON.stringify(params))
         var canvas = qrcode._el.children[0]
         var imgFolder = zip.folder(FOLDER_NAME)
+
+        let repetCount = todoNames.filter((name) => name === todoName).length
+        todoNames.push(todoName)
         promises.push(
           new Promise((resolve) => {
             canvas.toBlob(function(blob) {
-              imgFolder.file(todoName + '.png', blob)
+              imgFolder.file((repetCount ? todoName + repetCount : todoName) + '.png', blob)
               resolve()
             })
           })
         )
       })
-
+      todoNames = []
       Promise.all(promises).then(() => {
         zip.generateAsync({ type: 'blob' }).then(function(content) {
           saveAs(content, `${FOLDER_NAME}.zip`)

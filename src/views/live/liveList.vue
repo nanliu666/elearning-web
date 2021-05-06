@@ -149,7 +149,8 @@ const TABLE_COLUMNS = [
   },
   {
     label: '包含课程',
-    prop: 'courses'
+    prop: 'courses',
+    formatter: (row) => row.courses || '--'
   },
   {
     label: '创建人',
@@ -295,6 +296,24 @@ export default {
       console.log(res)
     })
   },
+  created() {
+    // 加载数据
+    this.loadTableData()
+    // 获取所有直播创建人列表
+    getCreateUserId({
+      source: 'live'
+    }).then((res) => {
+      this.createUserList = res
+      this.searchConfig.popoverOptions[1].options = res
+    })
+    //   获取直播分类
+    getcategoryTree({
+      source: 'live'
+    }).then((res) => {
+      this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      console.log(res)
+    })
+  },
   methods: {
     /**
      * @author guanfenda
@@ -315,6 +334,7 @@ export default {
       this.loadTableData()
     },
     handleSearch(searchParams) {
+      this.page.currentPage = 1
       this.loadTableData(searchParams)
     },
     // 加载函数

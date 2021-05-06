@@ -43,7 +43,7 @@
               class="details-li"
             >
               <span class="li-label">是否允许下载：</span>
-              <span class="li-value">{{ konwledgeDetail.allowDownload === 1 ? '是' : '否' }}</span>
+              <span class="li-value">{{ konwledgeDetail.allowDownload === 0 ? '是' : '否' }}</span>
             </li>
             <li
               v-if="konwledgeDetail.uploadType === 1"
