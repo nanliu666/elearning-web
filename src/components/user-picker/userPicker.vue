@@ -67,6 +67,7 @@
               />
             </div>
           </div>
+          <!--外部联系人-->
           <div
             v-show="activeTab === 'OuterUser'"
             v-if="selectTypes.includes('OuterUser')"
@@ -106,6 +107,7 @@
               height="31vh"
             />
           </div>
+          <!--岗位-->
           <div
             v-if="selectTypes.includes('Position')"
             v-show="activeTab === 'Position'"
@@ -278,7 +280,7 @@ const loadPostionTree = async ({ parentId, parentPath, search }) => {
   search = _.trim(search)
   // 只能传入一个参数 当传入search的时候不使用parentId
   const data = await getPostionUserChild(
-    _.pick({ parentId, search }, search ? 'search' : 'parentId')
+    _.pick({ parentIds: parentId, search }, search ? 'search' : 'parentIds')
   )
   // 在这里处理两个数组为树形组件需要的结构
   const { positions } = data
@@ -573,6 +575,7 @@ export default {
 
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
+      console.log(value)
       let checkedCount = value.length
       this.checkAll = checkedCount === this.outerData.length
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
