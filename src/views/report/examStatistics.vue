@@ -1,44 +1,8 @@
 <template>
   <div class="fill">
-    <page-header title="考试安排">
-      <el-dropdown
-        slot="rightMenu"
-        v-p="ADD_EXAM"
-        @command="createExam"
-      >
-        <el-button
-          type="primary"
-          size="medium"
-        >
-          创建考试
-          <i class="el-icon-arrow-down el-icon--right" />
-        </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="general">
-            普通考试
-          </el-dropdown-item>
-          <el-dropdown-item command="offline">
-            线下考试
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-    </page-header>
+    <page-header title="考试统计" />
 
     <basic-container block>
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu"
-        :active-text-color="activeColor"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="0">
-          已发布
-        </el-menu-item>
-        <el-menu-item index="1">
-          草稿箱
-        </el-menu-item>
-      </el-menu>
       <common-table
         ref="table"
         :columns="columnsVisible | columnsFilter"
@@ -111,57 +75,6 @@
         <template #examType="{row}">
           {{ row.examType | typeFilterer }}
         </template>
-        <template
-          slot="multiSelectMenu"
-          slot-scope="{ selection }"
-        >
-          <el-button
-            v-p="DELETE_EXAM"
-            type="text"
-            icon="el-icon-delete"
-            @click="deleteSelected(selection)"
-          >
-            批量删除
-          </el-button>
-        </template>
-        <template #handler="{row}">
-          <div class="menuClass">
-            <el-button
-              v-p="EDIT_EXAM"
-              type="text"
-              @click="handleEdit(row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              v-p="DELETE_EXAM"
-              type="text"
-              :disabled="row.status === '2'"
-              @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
-            <el-dropdown
-              v-if="activeIndex === '0' && $p([COPY_EXAM])"
-              @command="handleCommand(row)"
-            >
-              <el-button
-                type="text"
-                style="margin-left: 10px"
-              >
-                <i class="el-icon-arrow-down el-icon-more" />
-              </el-button>
-              <el-dropdown-menu
-                slot="dropdown"
-                v-p="COPY_EXAM"
-              >
-                <el-dropdown-item command="copy">
-                  复制
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
-        </template>
       </common-table>
     </basic-container>
   </div>
@@ -169,12 +82,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import {
-  getArrangeList,
-  delExamArrange,
-  getExamList,
-  getCreatUsers
-} from '@/api/examManage/schedule'
+import { getArrangeList, getExamList, getCreatUsers } from '@/api/examManage/schedule'
 import { getCategoryList } from '@/api/examManage/category'
 const STATUS_CONFIG = {
   label: '状态',
@@ -187,7 +95,7 @@ let TABLE_COLUMNS = [
     label: '考试名称',
     prop: 'examName',
     slot: true,
-    minWidth: 200
+    minWidth: 150
   },
   {
     label: '考试分类',
@@ -217,68 +125,68 @@ let TABLE_COLUMNS = [
     prop: 'createUser',
     minWidth: 120
   },
-  // {
-  //   label: '参考人数',
-  //   prop: 'takeExamUsers',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '参考人次',
-  //   prop: 'takeExamTimes',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '通过人数',
-  //   prop: 'usersOfPass',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '未通过人数',
-  //   prop: 'usersOfNotPass',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '通过率',
-  //   prop: 'passRate',
-  //   formatter: (row) => `${row.passRate}%`,
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '正确率',
-  //   prop: 'rightRate',
-  //   formatter: (row) => `${row.rightRate}%`,
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '平均分',
-  //   prop: 'avgScore',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '最高分',
-  //   prop: 'maxScore',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '最低分',
-  //   prop: 'minScore',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '试题数量',
-  //   prop: 'quesNum',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '客观题数量',
-  //   prop: 'objectiveQuesNum',
-  //   minWidth: 120
-  // },
-  // {
-  //   label: '主观题数量',
-  //   prop: 'subjectiveQuesNum',
-  //   minWidth: 120
-  // },
+  {
+    label: '参考人数',
+    prop: 'takeExamUsers',
+    minWidth: 120
+  },
+  {
+    label: '参考人次',
+    prop: 'takeExamTimes',
+    minWidth: 120
+  },
+  {
+    label: '通过人数',
+    prop: 'usersOfPass',
+    minWidth: 120
+  },
+  {
+    label: '未通过人数',
+    prop: 'usersOfNotPass',
+    minWidth: 120
+  },
+  {
+    label: '通过率',
+    prop: 'passRate',
+    formatter: (row) => `${row.passRate}%`,
+    minWidth: 120
+  },
+  {
+    label: '正确率',
+    prop: 'rightRate',
+    formatter: (row) => `${row.rightRate}%`,
+    minWidth: 120
+  },
+  {
+    label: '平均分',
+    prop: 'avgScore',
+    minWidth: 120
+  },
+  {
+    label: '最高分',
+    prop: 'maxScore',
+    minWidth: 120
+  },
+  {
+    label: '最低分',
+    prop: 'minScore',
+    minWidth: 120
+  },
+  {
+    label: '试题数量',
+    prop: 'quesNum',
+    minWidth: 120
+  },
+  {
+    label: '客观题数量',
+    prop: 'objectiveQuesNum',
+    minWidth: 120
+  },
+  {
+    label: '主观题数量',
+    prop: 'subjectiveQuesNum',
+    minWidth: 120
+  },
   {
     label: '有效时间',
     prop: 'effectiveTime',
@@ -287,7 +195,6 @@ let TABLE_COLUMNS = [
 ]
 const TABLE_CONFIG = {
   rowKey: 'id',
-  showHandler: true,
   showIndexColumn: false,
   enablePagination: true,
   enableMultiSelect: true,
@@ -475,13 +382,13 @@ export default {
     privileges: {
       handler() {
         this.tableConfig.showHandler = this.$p([EDIT_EXAM, DELETE_EXAM, COPY_EXAM])
+        console.log('this.tableConfig.showHandler--', this.tableConfig.showHandler)
       },
       deep: true
     }
   },
   activated() {
     this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
-    this.handleSelect(this.activeIndex)
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
@@ -556,23 +463,9 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
+      console.log('this.tableColumns---', this.tableColumns)
       this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
         return v != 'testPaper' && v != 'createUser'
-      })
-    },
-    // 切换nav
-    handleSelect(key) {
-      this.$refs.table.clearSelection()
-      window.location.href = `#/examManagement/examSchedule/list?activeIndex=${key}`
-      this.activeIndex = key
-      this.handleSearch({ type: Number(key) })
-      this.setConfig()
-    },
-    // 多种操作
-    handleCommand(row) {
-      this.$router.push({
-        path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'copy', examPattern: row.examPattern }
       })
     },
     // 创建考试
@@ -581,62 +474,6 @@ export default {
         path: '/examManagement/examSchedule/edit',
         query: { examPattern: $event }
       })
-    },
-    // 具体的删除函数
-    deleteFun(id) {
-      delExamArrange({ ids: id }).then(() => {
-        this.$refs.table.clearSelection()
-        this.loadTableData()
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
-      })
-    },
-    // 单个删除
-    handleDelete(row) {
-      this.$confirm('您确定要删除选中的考试吗？', '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.deleteFun(row.id)
-      })
-    },
-    // 批量删除
-    deleteSelected(selected) {
-      const groupList = _.groupBy(selected, (item) => item.status === '2')
-      const underway = _.get(groupList, 'true', [])
-      const others = _.get(groupList, 'false', [])
-      // 全部选了进行中
-      if (_.isEmpty(others)) {
-        this.$message.error('您所选中的考试都是进行的，无法进行删除操作！')
-      } else {
-        let tips = ''
-        // 全选非进行中
-        if (_.isEmpty(underway)) {
-          tips = '您确定要删除您所选中的考试吗？'
-        } else {
-          // 进行中与其他状态都有
-          tips = `您所选的共有${_.size(
-            underway
-          )}条进行中的考试不能被删除，您希望继续删除其他考试吗？`
-        }
-        this.$confirm(tips, '提醒', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.deleteBatch(others)
-        })
-      }
-    },
-    deleteBatch(others) {
-      let selectedIds = []
-      _.each(others, (item) => {
-        selectedIds.push(item.id)
-      })
-      this.deleteFun(selectedIds.join(','))
     },
     // 加载函数
     async loadTableData() {
@@ -649,6 +486,7 @@ export default {
         let { totalNum, data } = await getArrangeList(this.queryInfo)
         this.tableLoading = false
         this.tableData = data
+        console.log('this.tableData---', this.tableData)
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
@@ -664,15 +502,6 @@ export default {
       this.queryInfo.pageNo = 1
       this.page.currentPage = 1
       this.loadTableData()
-    },
-    /**
-     * 编辑
-     */
-    handleEdit(row) {
-      this.$router.push({
-        path: '/examManagement/examSchedule/edit',
-        query: { id: row.id, type: 'edit' }
-      })
     },
     // 递归获取所有的停启用的id集合
     getDeepIds(row) {
