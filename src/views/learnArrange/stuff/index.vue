@@ -24,7 +24,7 @@
           <span class="text">{{ data.deptName }}</span>
         </div>
         <div class="intro-item">
-          培训名称：
+          线上必修安排名称：
           <span class="text">{{ data.trainName || data.studyName }}</span>
         </div>
       </div>
@@ -38,7 +38,10 @@
                 : '--')
           }}</span>
         </div>
-        <div class="intro-item">
+        <div
+          v-if="!data.type"
+          class="intro-item"
+        >
           培训上报材料：
           <span class="text">{{ data.isSubmit === 'Yes' ? '已提交' : '未提交' }}</span>
         </div>

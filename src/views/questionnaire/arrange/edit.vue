@@ -48,7 +48,7 @@
         <el-col :span="7">
           <el-row style="text-align: right">
             <el-button
-              v-show="step == 2"
+              v-show="step == '2'"
               size="medium"
               @click="handleStepChange(1)"
             >
@@ -260,18 +260,18 @@
           </el-table-column>
 
           <el-table-column
-            prop="phoneNum"
+            prop="phonenum"
             label="手机号码"
           >
           </el-table-column>
 
           <el-table-column
-            prop="orgName"
+            prop="department"
             label="所属组织"
           >
             <template slot-scope="scope">
               <div>
-                {{ scope.row.orgName || '--' }}
+                {{ scope.row.department || '--' }}
               </div>
             </template>
           </el-table-column>
@@ -301,7 +301,6 @@
     <user-picker
       :value="personList"
       :visible.sync="userPickerVisible"
-      select-type="Org,OuterUser"
       @input="handleSelectPerson"
     />
 
@@ -369,19 +368,11 @@
 </template>
 
 <script>
-import { orgOrPositionToPerson } from '@/util/middleWare'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
 import UserPicker from '@/components/user-picker/userPicker2'
 import Pagination from '@/components/common-pagination'
-// eslint-disable-next-line no-unused-vars
-import { save, update, saveQuery, querySubject, saveAsqUrl } from '@/api/questionnaire'
-// eslint-disable-next-line no-unused-vars
-import QRCode from 'qrcodejs2'
-// eslint-disable-next-line no-unused-vars
-const CODE_HEIGHT = 86
-// eslint-disable-next-line no-unused-vars
-const CODE_WIDTH = 86
+import { save, update, saveQuery, querySubject } from '@/api/questionnaire'
 const CODE_NAME = '问卷二维码'
 
 export default {
@@ -416,7 +407,7 @@ export default {
   },
   data() {
     return {
-      step: 1,
+      step: '1',
       selectorData: [],
       subjectOptions: [],
       pickerOptionsStart: {},
@@ -498,7 +489,7 @@ export default {
   created() {
     this.id = this.$route.query.id
     if (this.$route.query.status == 2) {
-      this.step = 2
+      this.step = '2'
     }
     this.getCategoryData()
     this.initData()
@@ -648,12 +639,12 @@ export default {
       $data.publishTime = $data.publishTime + ':00'
       $data.endTime = $data.endTime + ':00'
       $data.users = this.personList.map((person) => {
-        const { userId, name, phoneNum, orgName = '' } = person
+        const { userId, name, phonenum, department = '' } = person
         return {
           userId,
           userName: name,
-          userPhone: phoneNum,
-          userDeptStr: orgName
+          userPhone: phonenum,
+          userDeptStr: department
         }
       })
       this['publishLoading' + type] = true
@@ -683,8 +674,8 @@ export default {
             const { userName, userPhone, userDeptStr, userId } = user
             return {
               name: userName,
-              phoneNum: userPhone,
-              orgName: userDeptStr,
+              phonenum: userPhone,
+              department: userDeptStr,
               userId: userId + ''
             }
           })
@@ -729,9 +720,7 @@ export default {
       if (this.$route.query.status == 2) {
         this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
       } else {
-        orgOrPositionToPerson(_.cloneDeep(list)).then((res) => {
-          this.personList = res
-        })
+        this.personList = list
       }
     },
     handleSelectionChange(val) {
