@@ -450,13 +450,13 @@ export default {
     },
     getUpDisabled(row) {
       let index = _.findIndex(this.tableData, (item) => {
-        return item.key === row.key
+        return item.id === row.id
       })
       return index === 0
     },
     getDowmDisabled(row) {
       let index = _.findIndex(this.tableData, (item) => {
-        return item.key === row.key
+        return item.id === row.id
       })
       return _.size(this.tableData) === index + 1
     },
@@ -466,7 +466,7 @@ export default {
      * */
     handleDown(row) {
       let index = _.findIndex(this.tableData, (item) => {
-        return item.key === row.key
+        return item.id === row.id
       })
       if (index !== this.tableData.length - 1) {
         this.tableData[index] = this.tableData.splice(index + 1, 1, this.tableData[index])[0]
@@ -478,7 +478,7 @@ export default {
      * */
     handleUp(row) {
       let index = _.findIndex(this.tableData, (item) => {
-        return item.key === row.key
+        return item.id === row.id
       })
       if (index !== 0) {
         this.tableData[index] = this.tableData.splice(index - 1, 1, this.tableData[index])[0]

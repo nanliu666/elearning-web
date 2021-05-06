@@ -249,8 +249,12 @@ export default {
     this.copy = this.$route.query.copy
     this.testPaper = [_.cloneDeep(this.themeBlockData)]
     this.getTestPaperCategory()
+    // 编辑
     if (_.get(this, '$route.query.id', null)) {
       this.getData()
+    } else {
+      // 新增
+      this.columns.find((it) => it.prop === 'name').disabled = false
     }
   },
   methods: {
@@ -271,7 +275,6 @@ export default {
      * @desc 获取试卷详情
      * */
     getData() {
-      this.columns.find((it) => it.prop === 'name').disabled = false
       if (!this.$route.query.id) return
       let params = {
         id: this.$route.query.id
@@ -413,7 +416,10 @@ export default {
           return Number(prev) + Number(cur)
         }, 0))
       this.form.totalScore = totalScoreTemp.toFixed(1)
-      if (this.form.totalScore) {
+      if (!this.form.planScore) {
+        this.surplusScore = 0
+      }
+      if (this.form.totalScore && this.form.planScore) {
         let score = this.form.planScore - this.form.totalScore
         this.surplusScore = Math.round(score).toString()
       }

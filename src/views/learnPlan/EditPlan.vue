@@ -287,7 +287,11 @@ export default {
       // 获取学习计划详情
       planDetail({ id: this.id })
         .then((res) => {
-          res.timeRange = [res.startTime, res.endTime]
+          if (res.startTime && res.endTime) {
+            res.timeRange = [res.startTime, res.endTime]
+          } else {
+            res.timeRange = []
+          }
           this.formData = res
           this.$refs.editCourse.setCourseList(res.courseList)
         })
