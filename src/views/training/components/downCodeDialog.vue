@@ -135,7 +135,8 @@ export default {
           offlineTodoId
         }
       })
-      qrcode.makeCode('abc' + href)
+      console.log(href)
+      qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
       var canvas = qrcode._el.children[0]
       // const context = canvas.getContext('2d')
       // const { width, height } = canvas
@@ -187,7 +188,7 @@ export default {
           }
         })
         qrcode.clear()
-        qrcode.makeCode('abc' + href)
+        qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
         var canvas = qrcode._el.children[0]
         var imgFolder = zip.folder(FOLDER_NAME)
 
