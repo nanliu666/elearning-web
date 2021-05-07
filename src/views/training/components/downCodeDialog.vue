@@ -91,6 +91,7 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
+import { backBaseUrl } from '@/config/env'
 const CODE_HEIGHT = 300
 const CODE_WIDTH = 300
 const FOLDER_NAME = '签到二维码'
@@ -136,7 +137,8 @@ export default {
         }
       })
       console.log(href)
-      qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
+      // let baseURL = (url += '/mobile/#/pages/signin/index')
+      qrcode.makeCode(`${backBaseUrl}/mobile/` + href)
       var canvas = qrcode._el.children[0]
       // const context = canvas.getContext('2d')
       // const { width, height } = canvas
@@ -188,7 +190,7 @@ export default {
           }
         })
         qrcode.clear()
-        qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
+        qrcode.makeCode(`${backBaseUrl}/mobile/` + href)
         var canvas = qrcode._el.children[0]
         var imgFolder = zip.folder(FOLDER_NAME)
 
