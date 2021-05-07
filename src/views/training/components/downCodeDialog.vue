@@ -91,8 +91,8 @@ import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
 import { getQrcode } from '@/api/learnArrange'
-const CODE_HEIGHT = 100
-const CODE_WIDTH = 100
+const CODE_HEIGHT = 300
+const CODE_WIDTH = 300
 const FOLDER_NAME = '签到二维码'
 export default {
   props: {
@@ -122,9 +122,11 @@ export default {
       let { todoName, offlineTodoId } = row
       if (!todoName.trim().length) todoName = '签到二维码'
       const codeContainer = document.createElement('div')
+      codeContainer.style.backgroundColor = '#ffffff'
       var qrcode = new QRCode(codeContainer, {
         width: CODE_WIDTH,
-        height: CODE_HEIGHT
+        height: CODE_HEIGHT,
+        colorLight: '#ffffff'
       })
       const { href } = this.$router.resolve({
         path: '/pages/signin/index',
@@ -133,8 +135,12 @@ export default {
           offlineTodoId
         }
       })
-      qrcode.makeCode(window.location.origin + '/' + href)
+      console.log(href)
+      qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
       var canvas = qrcode._el.children[0]
+      // const context = canvas.getContext('2d')
+      // const { width, height } = canvas
+      // fillCanvasBackground(context, width, height)
       var data = canvas.toDataURL().replace('image/png', 'image/octet-stream;') //获取二维码值，并修改响应头部。
       var saveLink = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
       saveLink.href = data
@@ -162,9 +168,11 @@ export default {
     batchDownload() {
       this.downloadLoading = true
       const codeContainer = document.createElement('div')
+      codeContainer.style.backgroundColor = '#ffffff'
       var qrcode = new QRCode(codeContainer, {
         width: CODE_WIDTH,
-        height: CODE_HEIGHT
+        height: CODE_HEIGHT,
+        colorLight: '#ffffff'
       })
       var zip = new JsZip()
       var promises = []
@@ -180,7 +188,7 @@ export default {
           }
         })
         qrcode.clear()
-        qrcode.makeCode(window.location.origin + '/' + href)
+        qrcode.makeCode('http://admin.zexueyuan.com.cn/mobile/' + href)
         var canvas = qrcode._el.children[0]
         var imgFolder = zip.folder(FOLDER_NAME)
 
