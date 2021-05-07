@@ -1201,7 +1201,7 @@ $color_icon: #A0A8AE
     .draft_issue {
       padding-top: 25px;
       display: flex;
-      height: 700px;
+      height: 653px;
       .issue_l {
         position: relative;
         width: 20%;

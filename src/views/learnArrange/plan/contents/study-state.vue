@@ -206,13 +206,13 @@
         </el-table-column>
         <el-table-column
           align="center"
-          prop="isFinish"
+          prop="isExaimPass"
           header-align="center"
           label="考试情况"
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.isFinish === 'Yes' ? '已通过' : '未通过' }}
+              {{ scope.row.isExaimPass === 'Yes' ? '已通过' : '未通过' }}
             </div>
           </template>
         </el-table-column>
@@ -299,6 +299,7 @@ export default {
     searchValWatcher: _.debounce(function() {
       if (this.tableLoading) return
       this.tableLoading = true
+      this.filterForm.pageNo = 1
       this.parentVm.queryStudyList(this.filterForm).finally(() => (this.tableLoading = false))
     }, 1000)
   },

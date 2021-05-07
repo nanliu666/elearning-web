@@ -3,6 +3,7 @@
     <page-header title="问卷管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_QUESTION"
         type="primary"
         size="medium"
         @click="handleEdit"
@@ -265,6 +266,7 @@
           >
             <template slot-scope="scope">
               <el-button
+                v-p="EDIT_QUESTION"
                 type="text"
                 size="small"
                 @click="handleEdit(scope.row)"
@@ -272,6 +274,7 @@
                 编辑
               </el-button>
               <el-button
+                v-p="DELETE_QUESTION"
                 type="text"
                 size="small"
                 @click="handleDelete(scope.row)"
@@ -279,6 +282,7 @@
                 删除
               </el-button>
               <el-button
+                v-p="COPY_QUESTION"
                 type="text"
                 size="small"
                 :loading="scope.row.copyLoading"
@@ -313,6 +317,12 @@ import {
 } from '@/api/questionnaire'
 import TreeSelector from '@/components/tree-selector'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
+import {
+  ADD_QUESTION,
+  EDIT_QUESTION,
+  DELETE_QUESTION,
+  COPY_QUESTION
+} from '@/const/questionnaire/question'
 
 export default {
   name: 'Management',
@@ -384,7 +394,12 @@ export default {
       total: 0
     }
   },
-  computed: {},
+  computed: {
+    ADD_QUESTION: () => ADD_QUESTION,
+    EDIT_QUESTION: () => EDIT_QUESTION,
+    DELETE_QUESTION: () => DELETE_QUESTION,
+    COPY_QUESTION: () => COPY_QUESTION
+  },
   watch: {
     columns: {
       handler() {

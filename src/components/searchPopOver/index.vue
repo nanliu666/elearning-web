@@ -131,7 +131,7 @@
           v-model="popoverShow"
           placement="bottom"
           trigger="click"
-          popper-class="popover-class"
+          :popper-class="popoverClass"
         >
           <div>
             <el-form
@@ -306,6 +306,11 @@ export default {
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
+    // TODO待优化：为解决预订教室弹窗的popover样式，暂时只想到这个解决方案
+    isCustomPopoverClass: {
+      type: Boolean,
+      default: false
+    },
     // 筛选弹窗外部
     requireOptions: {
       type: Array,
@@ -325,6 +330,11 @@ export default {
     return {
       tags: [],
       popoverShow: false
+    }
+  },
+  computed: {
+    popoverClass() {
+      return this.isCustomPopoverClass ? 'cusrtom__class' : 'popover-class'
     }
   },
   watch: {
@@ -460,6 +470,10 @@ export default {
 </script>
 
 <style lang="scss">
+.cusrtom__class {
+  left: 40% !important;
+  right: 0;
+}
 .popover-class {
   left: calc(16.5vw + 32px) !important;
   right: 32px;

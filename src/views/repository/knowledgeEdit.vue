@@ -322,7 +322,7 @@ export default {
     // 最大字数限制
     checkTinyMax(rule, value, callback) {
       const pureValue = deleteHTMLTag(value)
-      if (_.size(pureValue) < 2000) {
+      if (_.size(pureValue) < 2001) {
         callback()
       } else {
         callback(new Error('最大输入2000字符，已超字数限制！'))

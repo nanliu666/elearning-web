@@ -378,7 +378,11 @@ export default {
   },
   mounted() {
     this.$store.dispatch('CommonDict', 'NewsNotice').then((res) => {
-      this.columns.find((item) => item.prop === 'publishColumn').options = res
+      this.columns.find((item) => item.prop === 'publishColumn').options = _.filter(res, function(
+        o
+      ) {
+        return o.dictValue == '新闻中心'
+      })
     })
   },
 

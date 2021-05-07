@@ -549,6 +549,9 @@
                   v-model.trim="basicForm.introduction"
                   :init="{ height: 100 }"
                 />
+                <div class="limitWords">
+                  {{ limitWords }}字
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -1434,6 +1437,15 @@ export default {
       })
     })
   },
+  computed: {
+    limitWords() {
+      return this.basicForm.introduction.length
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   methods: {
     // 数据处理中间函数
     thruHandler(arr) {
@@ -1526,16 +1538,15 @@ export default {
           if (resLength === resArr.length) {
             this.headIndex += 1
           }
+        } else {
+          if (errmsg == this.basicFormRules.introduction[1].message) {
+            this.$message({
+              message: '直播介绍最多不能超过5000字',
+              type: 'error'
+            })
+          }
+          return false
         }
-        // else {
-        //   if (errmsg == this.basicFormRules.introduction[1].message) {
-        //     this.$message({
-        //       message: '直播介绍最多不能超过5000字',
-        //       type: 'error'
-        //     })
-        //   }
-        //   return false
-        // }
       })
     },
     valChange(type) {
@@ -2451,6 +2462,14 @@ export default {
         width: 20vw;
       }
     }
+  }
+  /deep/ .tox .tox-statusbar__text-container {
+    display: none;
+  }
+  .limitWords {
+    position: relative;
+    float: right;
+    margin: -29px 20px 0 0;
   }
 }
 
