@@ -24,6 +24,7 @@
               ref="searchPopover"
               :require-options="searchConfig.requireOptions"
               :popover-options="searchConfig.popoverOptions"
+              :is-custom-popover-class="true"
               @submit="handleSearch"
             />
             <div class="operations__right">
@@ -210,6 +211,7 @@ export default {
     // 搜索
     handleSearch(params) {
       this.queryInfo.pageNo = 1
+      this.queryInfo.currentPage = 1
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },
@@ -260,7 +262,6 @@ export default {
   }
 }
 </script>
-
 <style lang="scss" scoped>
 $red: #f97272;
 $green: #c1e9c8;
