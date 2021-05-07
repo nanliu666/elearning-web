@@ -382,12 +382,14 @@ export default {
     privileges: {
       handler() {
         this.tableConfig.showHandler = this.$p([EDIT_EXAM, DELETE_EXAM, COPY_EXAM])
-        console.log('this.tableConfig.showHandler--', this.tableConfig.showHandler)
       },
       deep: true
     }
   },
-  activated() {
+  // activated() {
+  //   console.log('activated---')
+  // },
+  created() {
     this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
@@ -463,7 +465,6 @@ export default {
         }
       }
       this.tableColumns = TABLE_COLUMNS
-      console.log('this.tableColumns---', this.tableColumns)
       this.columnsVisible = _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
         return v != 'testPaper' && v != 'createUser'
       })
@@ -486,7 +487,6 @@ export default {
         let { totalNum, data } = await getArrangeList(this.queryInfo)
         this.tableLoading = false
         this.tableData = data
-        console.log('this.tableData---', this.tableData)
         this.page.total = totalNum
       } catch (error) {
         this.tableLoading = false
