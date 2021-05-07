@@ -480,8 +480,11 @@ export default {
     }
   },
   activated() {
-    this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
     this.handleSelect(this.activeIndex)
+  },
+  created() {
+    this.activeIndex = _.get(this.$route.query, 'activeIndex', '0')
+    // this.handleSelect(this.activeIndex)
     let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
       return item.field === 'creatorId'
     })[0]
