@@ -181,8 +181,16 @@
                   :key="index"
                   @click="jumpToLearn(item)"
                 >
-                  <div>
-                    <i>{{ index + 1 }}</i> <span>{{ item.name }}</span>
+                  <div class="tooltip_">
+                    <i>{{ index + 1 }}</i>
+
+                    <span>
+                      <text-over-tooltip
+                        ref-name="testName1"
+                        class-name="fs20"
+                        :content="item.name"
+                      ></text-over-tooltip>
+                    </span>
                   </div>
                   <!-- <div class="btn">
                     查看内容
@@ -349,6 +357,7 @@
 </template>
 
 <script>
+import TextOverTooltip from '../course/components/TextOverTooltip'
 import { mapGetters } from 'vuex'
 import steps from './components/steps'
 import {
@@ -380,7 +389,8 @@ const { CANCEL, EMPTY, PASS, REJECT } = APPROVE_STATUS_TYPE
 export default {
   name: 'Apprv2Detail',
   components: {
-    steps
+    steps,
+    TextOverTooltip
   },
   data() {
     return {
@@ -1210,6 +1220,17 @@ export default {
         }
       }
     }
+  }
+}
+.tooltip_ {
+  width: 100%;
+  display: flex;
+  span {
+    width: 95%;
+    text-align: left;
+  }
+  i {
+    width: 20px;
   }
 }
 </style>
