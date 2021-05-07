@@ -130,6 +130,7 @@ export default {
           itemType: 'input',
           span: 24,
           required: true,
+          maxLength: 20,
           prop: 'examName',
           label: '考试名称'
         },
@@ -278,6 +279,6 @@ export default {
 <style scoped lang="scss">
 .basecSetting {
   overflow: scroll;
-  height: 100%;
+  height: 75vh;
 }
 </style>
