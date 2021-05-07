@@ -639,7 +639,7 @@ export default {
   position: relative;
   width: 100%;
   border-right: 1px solid #ccc;
-  height: 680px;
+  height: 630px;
   .issue_l_tree {
     padding: 20px;
     // padding: 0 25px;
@@ -763,17 +763,23 @@ export default {
   margin-top: 5px;
   display: flex;
   line-height: 35px;
+  display: flex;
   .isShowinput_input {
-    width: 65%;
+    flex: 1;
   }
 
   .isShowinput_yes {
     color: #2092fb;
-    padding: 0 12px;
+
+    margin-left: 10px;
+    width: 40px;
+    font-size: 14px;
     cursor: pointer;
   }
   .isShowinput_no {
     cursor: pointer;
+    width: 40px;
+    font-size: 14px;
   }
   /deep/ input {
     height: 25px;
