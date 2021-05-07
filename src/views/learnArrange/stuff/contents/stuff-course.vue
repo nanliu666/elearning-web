@@ -224,22 +224,19 @@ export default {
         responseType: 'blob',
         emulateJSON: true
       }
-      this.data.course.forEach((c) => {
-        c.forEach((item) => {
-          let { fileName: name, filePath: path } = item
-          if (!path || !name) return
-          if (path.indexOf('http') !== 0) {
-            path = 'https://' + path
-          }
-          params.filePath.push(path)
-          params.fileName.push(name)
-        })
+      table.forEach((item) => {
+        let { fileName: name, filePath: path } = item
+        if (!path || !name) return
+        if (path.indexOf('http') !== 0) {
+          path = 'https://' + path
+        }
+        params.filePath.push(path)
+        params.fileName.push(name)
       })
       params.filePath = params.filePath.join(',')
       params.fileName = params.fileName.join(',')
 
-      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
-      &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+      let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}&responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
       this.repDownload(url).then(() => {
         table.loading = false
         this.$forceUpdate()
@@ -258,7 +255,7 @@ export default {
           let url = window.URL.createObjectURL(x.response)
           let a = document.createElement('a')
           a.href = url
-          a.download = '' //可以填写默认的下载名称
+          a.download = '打包下载文件.zip' //可以填写默认的下载名称
           a.click()
           resolve()
         }

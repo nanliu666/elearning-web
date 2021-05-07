@@ -121,16 +121,19 @@ export default {
     downCodeImg(row) {
       let { todoName, offlineTodoId } = row
       if (!todoName.trim().length) todoName = '签到二维码'
-      const params = {
-        trainId: this.trainId,
-        offlineTodoId
-      }
       const codeContainer = document.createElement('div')
       var qrcode = new QRCode(codeContainer, {
         width: CODE_WIDTH,
         height: CODE_HEIGHT
       })
-      qrcode.makeCode(JSON.stringify(params))
+      const { href } = this.$router.resolve({
+        path: '/pages/signin/index',
+        query: {
+          trainId: this.trainId,
+          offlineTodoId
+        }
+      })
+      qrcode.makeCode(window.location.origin + '/' + href)
       var canvas = qrcode._el.children[0]
       var data = canvas.toDataURL().replace('image/png', 'image/octet-stream;') //获取二维码值，并修改响应头部。
       var saveLink = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
@@ -169,12 +172,15 @@ export default {
       this.data.forEach((item) => {
         let { todoName, offlineTodoId } = item
         if (!todoName.trim().length) todoName = '签到二维码'
-        const params = {
-          trainId: this.trainId,
-          offlineTodoId
-        }
+        const { href } = this.$router.resolve({
+          path: '/pages/signin/index',
+          query: {
+            trainId: this.trainId,
+            offlineTodoId
+          }
+        })
         qrcode.clear()
-        qrcode.makeCode(JSON.stringify(params))
+        qrcode.makeCode(window.location.origin + '/' + href)
         var canvas = qrcode._el.children[0]
         var imgFolder = zip.folder(FOLDER_NAME)
 
