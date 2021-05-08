@@ -202,7 +202,7 @@ export default {
       tableConfig: {
         showHandler: true,
         defaultExpandAll: false,
-        enableMultiSelect: true,
+        enableMultiSelect: false,
         enablePagination: true,
         showIndexColumn: false,
         rowKey: 'id',
