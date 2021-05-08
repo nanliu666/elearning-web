@@ -19,7 +19,10 @@
     >
       <!-- 左侧组织架构 -->
       <el-col class="fill sidebar">
-        <basic-container block>
+        <basic-container
+          block
+          style="overflow: auto"
+        >
           <el-input
             v-model="treeSearch"
             clearable
@@ -149,6 +152,9 @@ export default {
   }
   .fill /deep/.el-tree-node__content {
     line-height: 36px;
+  }
+  .basic-container--block /deep/ .el-card {
+    margin-bottom: 0;
   }
 }
 </style>
