@@ -344,6 +344,14 @@ export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
+  beforeRouteEnter(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
+  },
   data() {
     return {
       parentOrgIdLabel: '',
