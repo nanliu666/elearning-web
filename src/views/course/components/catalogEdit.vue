@@ -57,7 +57,7 @@
           </div>
         </el-col>
       </el-form-item>
-      <el-form-item>
+      <!-- <el-form-item>
         <template slot="label">
           <div>
             是否公开
@@ -85,7 +85,7 @@
             :value="1"
           ></el-option>
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
 
       <!-- 可见范围 -->
       <el-form-item

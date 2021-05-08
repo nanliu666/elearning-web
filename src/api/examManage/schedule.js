@@ -54,6 +54,10 @@ export const getPositionUserList = (params) => get('/manage/v1/positions/user/ch
  */
 export const getArrangeList = (params) => get('/manage/v1/exam/arrange/list', params)
 /**
+ * 获取考试统计列表
+ */
+export const getExamStatisticsList = (params) => get('/manage/v1/exam/arrange/list/report', params)
+/**
  * 获取详情页-考生概况
  */
 export const getBatchList = (params) => get('/manage/v1/examinee/batch', params)
