@@ -348,6 +348,11 @@ export default {
     // 批量操作
     async multipleDeleteClick(selected) {
       if (!selected.length) return
+      const list = JSON.parse(JSON.stringify(selected))
+      list.forEach((item) => {
+        item.progress += '%'
+        item.jobPercent += '%'
+      })
       this.exportLoading = true
       import('@/vendor/Export2Excel').then((excel) => {
         const tHeader = [
@@ -370,7 +375,7 @@ export default {
           'startTime',
           'endTime'
         ]
-        const data = this.formatJson(filterVal, selected)
+        const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel({
           header: tHeader,
           data,
