@@ -82,7 +82,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getArrangeList, getExamList, getCreatUsers } from '@/api/examManage/schedule'
+import { getExamStatisticsList, getExamList, getCreatUsers } from '@/api/examManage/schedule'
 import { getCategoryList } from '@/api/examManage/category'
 const STATUS_CONFIG = {
   label: '状态',
@@ -484,7 +484,7 @@ export default {
       try {
         this.tableData = []
         this.tableLoading = true
-        let { totalNum, data } = await getArrangeList(this.queryInfo)
+        let { totalNum, data } = await getExamStatisticsList(this.queryInfo)
         this.tableLoading = false
         this.tableData = data
         this.page.total = totalNum
