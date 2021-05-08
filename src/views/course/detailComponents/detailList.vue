@@ -73,7 +73,8 @@
           <el-button
             type="text"
             size="medium"
-            icon="el-icon-delete"
+            icon="el-icon-upload2"
+            :loading="exportLoading"
             @click="multipleDeleteClick(selection)"
           >
             批量导出
@@ -104,9 +105,11 @@
 </template>
 
 <script>
-import { getStudyList, exportStudyList } from '@/api/course/course'
+import { getStudyList } from '@/api/course/course'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
+import { parseTime } from '@/util/util'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -167,7 +170,7 @@ const TABLE_CONFIG = {
   handlerColumn: {
     minWidth: 150
   },
-  rowKey: 'id',
+  rowKey: 'stuId',
   treeProps: { hasChildren: 'hasChildren', children: 'children' }
 }
 const TABLE_PAGE_CONFIG = {}
@@ -285,6 +288,7 @@ export default {
   },
   data() {
     return {
+      exportLoading: false,
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
       formData: {
@@ -343,19 +347,56 @@ export default {
 
     // 批量操作
     async multipleDeleteClick(selected) {
-      let selectedIds = []
-      _.each(selected, (item) => {
-        selectedIds.push(item.courseId)
+      if (!selected.length) return
+      const list = JSON.parse(JSON.stringify(selected))
+      list.forEach((item) => {
+        item.progress += '%'
+        item.jobPercent += '%'
       })
-      console.log(selected)
-      // await deleteKnowledgeList({ id: selectedIds.join(',') })
-      let res = await exportStudyList({ courseId: this.$route.query.id })
-      console.log(res)
-      this.$message.success('操作成功')
-      this.$refs.table.clearSelection()
-      this.loadTableData()
+      this.exportLoading = true
+      import('@/vendor/Export2Excel').then((excel) => {
+        const tHeader = [
+          '姓名',
+          '手机号',
+          '所属部门',
+          '学习进度',
+          '作业提交率',
+          '用户岗位',
+          '学习开始时间',
+          '学习结束时间'
+        ]
+        const filterVal = [
+          'name',
+          'phonenum',
+          'deptName',
+          'progress',
+          'jobPercent',
+          'position',
+          'startTime',
+          'endTime'
+        ]
+        const data = this.formatJson(filterVal, list)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: '学习情况',
+          autoWidth: true,
+          bookType: 'xlsx'
+        })
+        this.exportLoading = false
+      })
     },
-
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) =>
+        filterVal.map((j) => {
+          if (j === 'startDate' || j == 'leaveDate') {
+            return parseTime(v[j])
+          } else {
+            return v[j]
+          }
+        })
+      )
+    },
     /**
      * 处理页码改变
      */
