@@ -231,7 +231,7 @@ export default {
                   } else if (value <= 100000 && value >= 0) {
                     callback()
                   } else {
-                    return callback(new Error('面积必须为正整数'))
+                    return callback(new Error('面积必须为正数'))
                   }
                 }
               },
