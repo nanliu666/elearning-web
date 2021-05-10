@@ -113,6 +113,7 @@ export default {
           callback(new Error('该手机号已存在'))
         })
     }
+
     var checkEmail = (rule, value, callback) => {
       if (this.id) {
         callback()
@@ -236,7 +237,15 @@ export default {
           prop: 'password',
           itemType: 'input',
           label: '密码',
-          offset: 4
+          offset: 4,
+          rules: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            {
+              pattern: /^[\w*_]{6,20}$/,
+              message: '只能输入6-20个字母、数字、下划线 、*',
+              trigger: 'blur'
+            }
+          ]
         },
         { itemType: 'slotout', span: 24, prop: 'title2' },
         {
