@@ -135,6 +135,7 @@ export default {
         sex: '',
         idNo: '',
         phonenum: '',
+        password: '',
         email: '',
         roleIds: [],
         orgId: '',
@@ -231,7 +232,12 @@ export default {
             }
           }
         },
-
+        {
+          prop: 'password',
+          itemType: 'input',
+          label: '密码',
+          offset: 4
+        },
         { itemType: 'slotout', span: 24, prop: 'title2' },
         {
           prop: 'orgId',
@@ -368,12 +374,15 @@ export default {
     }
     // 'form.orgId'(val) {}
   },
-
   activated() {
     this.loadOrgData()
     this.loadRoleData()
     this.loadUserData()
     this.resetForm()
+    if (!this.id) {
+      //如果是创建  设置密码默认值
+      this.form.password = 'xcmg123456'
+    }
     getPositionAll().then((res) => {
       const positionConfig = _.find(this.columns, { prop: 'positionId' })
       _.set(positionConfig, 'props.treeParams.data', res)
@@ -399,6 +408,7 @@ export default {
       if (!this.id) {
         return
       }
+
       getStaffBasicInfo({ userId: this.id }).then((res) => {
         this.uploadFileList = _.map(res.attachments, (item) => ({
           url: item.url,
@@ -420,6 +430,7 @@ export default {
           roleIds: _.map(res.roles, 'roleId'),
           leaderId: res.leaderId + '',
           remark: res.userRemark,
+          password: '**********', //如果是编辑用户信息    设置默认密码
           ...res
         }
         delete this.form.roles
@@ -492,6 +503,13 @@ export default {
       }
 
       const params = { ...this.form, entryUser: this.userId }
+      if (this.id) {
+        //如果是编辑   设置密码不可见
+        if (params.password === '**********') {
+          //如果 修改了密码    就传参     如果没有修改  删除属性
+          delete params.password
+        }
+      }
       this.loading = true
       let func
       if (this.id) {
