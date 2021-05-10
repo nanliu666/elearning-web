@@ -33,7 +33,7 @@ export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
  * @param {string} [params.search] 工号或姓名，支持模糊查询
  * @returns {{orgs: Array<any>; users: Array<any>}}
  */
-export const getPostionUserChild = (params) => get('/manage/v1/position/user/child', params)
+export const getPostionUserChild = (params) => get('/manage/v1/positions/user/child', params)
 /**
  * 获取子业务部门和直属员工接口
  * @param {object} params 参数

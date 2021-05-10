@@ -96,7 +96,7 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '系统规则来源',
+    label: '规则来源',
     prop: 'sys_rule_source',
     minWidth: 150
   },
