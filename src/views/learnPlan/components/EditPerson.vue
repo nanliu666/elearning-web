@@ -140,6 +140,10 @@ export default {
     selectedList: {
       type: Array,
       default: () => []
+    },
+    institution: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -187,6 +191,7 @@ export default {
             }
           })
         })
+        this.$emit('update:institution', this.groupP)
         this.$emit('update:user-list', user.concat(res))
       })
     },

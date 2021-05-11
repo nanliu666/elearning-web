@@ -92,6 +92,7 @@
           v-show="activeStep === 2"
           ref="editPerson"
           :plan-id="id"
+          :institution.sync="formData.groupPos"
           :user-list.sync="formData.participantsList"
         />
       </el-col>
@@ -121,7 +122,8 @@ const defaultFormData = {
   startTime: '',
   participantsList: [],
   courseList: [],
-  timeRange: [] // 时间范围
+  timeRange: [], // 时间范围
+  groupPos: [] //机构
 }
 export default {
   name: 'EditPlan',
@@ -238,10 +240,10 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
-      const participantsList = data.participantsList || []
+      const groupPos = data.groupPos || []
       const positions = []
       const groupIds = []
-      participantsList.forEach((item) => {
+      groupPos.forEach((item) => {
         if (item.type == 'Position') {
           positions.push(item.id)
         }
