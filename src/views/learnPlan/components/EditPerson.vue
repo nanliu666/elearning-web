@@ -69,7 +69,7 @@
 
     <user-picker
       select-type="Org,OuterUser,Position,Group"
-      :value="userList"
+      :value="groupP"
       :visible.sync="userPicking"
       @input="handleSelect"
     />
@@ -168,15 +168,12 @@ export default {
   methods: {
     pagination() {},
     handleAddUser() {
-      // if(this.groupP.length>0){
-      //   this.$emit('update:user-list', this.userList.concat(this.groupP))
-      // }
       this.userPicking = true
     },
     async handleSelect(userList) {
       const user = userList.filter((val) => val.type != 'Group' && val.type != 'Position')
       const groupP = userList.filter((val) => val.type == 'Group' || val.type == 'Position')
-      this.groupP = groupP
+      this.groupP = groupP.concat(user)
       //   if (this.$route.query.status == 2) {
       //   this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
       // } else {
@@ -190,7 +187,7 @@ export default {
             }
           })
         })
-        this.$emit('update:user-list', user.concat(res).concat(this.groupP))
+        this.$emit('update:user-list', user.concat(res))
       })
     },
     handleDelete(row) {
