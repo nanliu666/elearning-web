@@ -403,13 +403,10 @@ export default {
     submit() {
       this.selectList.forEach((select) => {
         delete select.parent
-        if (select.department == 'no') {
-          delete select.department
-        }
+        // if (select.department == 'no') {
+        //   delete select.department
+        // }
       })
-
-      // this.$emit('input', _.uniqBy(this.selected, 'bizId'))
-
       this.$emit('input', this.selectList)
       this.dialogVisible = false
     },
@@ -689,6 +686,7 @@ export default {
       })
     },
     groupRightToLeft(del) {
+      console.log(del)
       if (del.isGroup) {
         this.groupcheckedOuter = this.groupcheckedOuter.filter((item) => item != del.userId)
         this.groupCheckChange()

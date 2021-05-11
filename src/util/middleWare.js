@@ -37,6 +37,9 @@ export const orgOrPositionToPerson = async (data) => {
       parentIds: positionIdList
     })
     positionResult = positionResult1.users
+    positionResult.forEach((val) => {
+      val.myType = 'Position'
+    })
   }
   // 分组
   let groupResult = []
@@ -44,6 +47,9 @@ export const orgOrPositionToPerson = async (data) => {
     const groupIdList = _.join(_.map(groupList, 'bizId'), ',')
     groupResult = await getUsergroupList({
       ids: groupIdList
+    })
+    groupResult.forEach((val) => {
+      val.myType = 'Group'
     })
   }
   const target = _.uniqBy(
