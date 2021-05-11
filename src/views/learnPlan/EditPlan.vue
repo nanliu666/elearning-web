@@ -238,7 +238,19 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
-
+      const participantsList = data.participantsList || []
+      const positions = []
+      const groupIds = []
+      participantsList.forEach((item) => {
+        if (item.type == 'Position') {
+          positions.push(item.id)
+        }
+        if (item.type == 'Group') {
+          groupIds.push(item.id)
+        }
+      })
+      data.positions = positions
+      data.groupIds = groupIds
       data.startTime = _.get(data, 'timeRange[0]')
       data.endTime = _.get(data, 'timeRange[1]')
       data.type = type

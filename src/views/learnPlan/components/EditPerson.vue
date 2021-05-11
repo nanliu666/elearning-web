@@ -79,7 +79,7 @@
 <script>
 import UserPicker from '@/components/user-picker/userPicker3'
 import Pagination from '@/components/common-pagination'
-// import { orgOrPositionToPerson } from '@/util/middleWare'
+import { orgOrPositionToPerson } from '@/util/middleWare'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -144,6 +144,7 @@ export default {
   },
   data() {
     return {
+      groupP: [],
       userPicking: false,
       // 默认选中所有列
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
@@ -167,18 +168,30 @@ export default {
   methods: {
     pagination() {},
     handleAddUser() {
+      // if(this.groupP.length>0){
+      //   this.$emit('update:user-list', this.userList.concat(this.groupP))
+      // }
       this.userPicking = true
     },
     async handleSelect(userList) {
-      this.$emit('update:user-list', userList)
+      const user = userList.filter((val) => val.type != 'Group' && val.type != 'Position')
+      const groupP = userList.filter((val) => val.type == 'Group' || val.type == 'Position')
+      this.groupP = groupP
       //   if (this.$route.query.status == 2) {
       //   this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
       // } else {
       //   this.personList = list
       // }
-      // orgOrPositionToPerson(_.cloneDeep(userList)).then((res) => {
-      //   this.$emit('update:user-list', res)
-      // })
+      orgOrPositionToPerson(_.cloneDeep(groupP)).then((res) => {
+        res.forEach((item) => {
+          user.forEach((val, index) => {
+            if (val.userId == item.userId) {
+              user.splice(index, 1)
+            }
+          })
+        })
+        this.$emit('update:user-list', user.concat(res).concat(this.groupP))
+      })
     },
     handleDelete(row) {
       this.$confirm('你确定要删除该人员?', '提示', {
