@@ -29,6 +29,15 @@
       >
         创建用户
       </el-button>
+      <el-button
+        slot="rightMenu"
+        v-p="IMPORT_USER"
+        type="primary"
+        size="medium"
+        @click="importUser"
+      >
+        导入用户
+      </el-button>
     </page-header>
     <el-row
       style="height: calc(100% - 92px)"
@@ -82,7 +91,7 @@
 <script>
 import { getOrganization, getOuterUser } from '@/api/system/user'
 import { mapGetters } from 'vuex'
-import { ADD_USER } from '@/const/privileges'
+import { ADD_USER, IMPORT_USER } from '@/const/privileges'
 export default {
   name: 'User',
   components: {
@@ -110,6 +119,7 @@ export default {
   },
   computed: {
     ADD_USER: () => ADD_USER,
+    IMPORT_USER: () => IMPORT_USER,
     ...mapGetters(['userInfo'])
   },
   watch: {
@@ -132,6 +142,9 @@ export default {
       if (command === 'add') {
         this.$router.push('/system/editUser')
       }
+    },
+    importUser() {
+      this.$router.push('/system/importUser')
     },
     loadData() {
       this.loadOuterUserCount()

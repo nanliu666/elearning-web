@@ -118,6 +118,7 @@ export const EDIT_ORGDETAIL = '/orgs/orgDetail/edit' // 编辑
 export const DELETE_ORGDELETE = '/orgs/orgDetail/delete' // 删除
 // 用户管理的鉴权
 export const ADD_USER = '/system/user/add' // 新建用户
+export const IMPORT_USER = '/system/user/import' // 导入用户
 export const SETTING_USER = '/system/user/setting' // 角色设置
 export const RESET_USER = '/system/user/resetPassword' // 密码重置
 export const EDIT_USER = '/system/user/edit' // 编辑
@@ -126,6 +127,7 @@ export const DELETE_USER = '/system/user/delete' // 删除
 export const BATCH_EXPORT = '/system/user/export' // 批量导出
 export const BULK_DEPARTURES = '/system/user/departures' // 批量离职
 export const BATCH_DEPARTMENT = '/system/user/department' // 批量修改部门
+
 // 菜单管理的鉴权
 export const STOP_MENU = '/system/menu/stop' // 启用/停用
 // 新闻管理的鉴权

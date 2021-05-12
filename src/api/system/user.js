@@ -342,3 +342,13 @@ export const updateUserIdBatchOrg = (params) =>
  * @desc 分组列表
  */
 export const getGroup = (params) => get('/api/user/v1/usergroup/list', params)
+
+/**
+ * @desc 导入用户
+ */
+export const importUser = (params) => post('/api/user/v1/user/import', params)
+/**
+ * @desc 导入用户错误报告
+ */
+export const importUserErrorFile = (params) =>
+  get('/api/user/v1/user/exportErrFile', params, { responseType: 'blob' })
