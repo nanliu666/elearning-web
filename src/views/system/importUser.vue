@@ -34,7 +34,7 @@
             2.上传填好的表格
           </p>
           <p>
-            <span class="tips">支持文件类型：xls。 </span>
+            <span class="tips">支持文件类型：xls，xlsx。 </span>
             <br />
             <span class="tips"> 一次至多导入500条信息，超出信息将不予以导入。</span>
           </p>
@@ -187,9 +187,9 @@ export default {
       this.$message.warning('只能选择一个文件')
     },
     beforeUpload(file) {
-      const regx = /^.*\.(xls|xlsx|csv)$/
+      const regx = /^.*\.(xls|xlsx)$/
       if (!regx.test(file.name)) {
-        this.$message.error('上传资料只支持xls，xlsx，csv文件')
+        this.$message.error('上传资料只支持xls，xlsx文件')
         return false
       }
       // const isXLS = file.type === 'application/vnd.ms-excel'
