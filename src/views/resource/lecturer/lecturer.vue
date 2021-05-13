@@ -8,7 +8,7 @@
         size="medium"
         @click="toAddLecturer"
       >
-        添加讲师
+        创建讲师
       </el-button>
     </page-header>
     <basic-container block>
