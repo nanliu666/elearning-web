@@ -9,11 +9,7 @@
     :before-close="close"
   >
     <div>
-      <common-form
-        ref="userFormRef"
-        :model="formData"
-        :columns="columns"
-      >
+      <common-form ref="userFormRef" :model="formData" :columns="columns">
         <template #roleUser>
           <lazy-select
             v-model="formData.userId"
@@ -30,27 +26,13 @@
           />
         </template>
         <template slot="range">
-          <OrgTree
-            :id-list="formData.orgIdList"
-            @selectedValue="getOrgList"
-          ></OrgTree>
+          <OrgTree :id-list="formData.orgIdList" @selectedValue="getOrgList"></OrgTree>
         </template>
       </common-form>
     </div>
-    <span
-      slot="footer"
-      class="dialog-footer"
-    >
-      <el-button
-        size="medium"
-        @click="close"
-      >取 消</el-button>
-      <el-button
-        :loading="submitting"
-        size="medium"
-        type="primary"
-        @click="handleSubmit"
-      >
+    <span slot="footer" class="dialog-footer">
+      <el-button size="medium" @click="close">取 消</el-button>
+      <el-button :loading="submitting" size="medium" type="primary" @click="handleSubmit">
         确 定
       </el-button>
     </span>
@@ -83,7 +65,7 @@ export default {
   },
   data() {
     const BASE_COLUMNS = [
-      { itemType: 'slot', span: 24, required: false, prop: 'roleUser', label: '创建人' },
+      { itemType: 'slot', span: 24, required: false, prop: 'roleUser', label: '用户' },
       {
         prop: 'range',
         label: '管理范围',
@@ -162,13 +144,21 @@ export default {
       if (this.row.name) {
         params.userId = this.formData._userId
       }
-      addEditUser(params).then(() => {
+
+      if (params.userId == '') {
         this.$message({
-          message: '操作成功',
-          type: 'success'
+          message: '请选择用户',
+          type: 'warning'
         })
-        this.close()
-      })
+      } else {
+        addEditUser(params).then(() => {
+          this.$message({
+            message: '操作成功',
+            type: 'success'
+          })
+          this.close()
+        })
+      }
     },
 
     close() {

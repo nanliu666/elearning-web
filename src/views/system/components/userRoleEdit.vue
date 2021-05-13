@@ -321,8 +321,10 @@ export default {
 
     .left {
       width: 60%;
-      padding: 8px;
+      padding: 10px;
       padding-right: 20px;
+      height: 500px;
+      overflow: auto;
       .title {
         line-height: 30px;
       }
