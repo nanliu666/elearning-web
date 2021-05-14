@@ -19,7 +19,7 @@
           <a
             target="_blank"
             download="用户导入模板.xsl"
-            :href="'https://file.zexueyuan.com.cn/35142e7408da4bab9c00ae690c153cee.xlsx'"
+            :href="'https://file.zexueyuan.com.cn/67c278b5c7d8400f80b680dadf21ef23.xlsx'"
           >
             <el-button
               size="medium"
