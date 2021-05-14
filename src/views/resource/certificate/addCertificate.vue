@@ -39,7 +39,7 @@
                 </common-upload>
                 <div class="common-upload-bg-title">
                   <div>建议背景图片色彩单调简约，画面中心留白居多；</div>
-                  <div>支持PNG、JPG格式，建议尺寸1169*826px，大小不超过1M</div>
+                  <div>支持PNG、JPG格式，建议尺寸1169*826px，大小不超过5M</div>
                 </div>
               </template>
               <!-- logo -->
@@ -67,7 +67,7 @@
                 </common-upload>
                 <div class="common-upload-bg-title">
                   <div>建议透明背景的机构logo；</div>
-                  <div>支持PNG、JPG格式，建议尺寸240*120px，大小不超过1M</div>
+                  <div>支持PNG、JPG格式，建议尺寸240*120px，大小不超过5M</div>
                 </div>
               </template>
             </common-form>
@@ -272,10 +272,10 @@ export default {
 
     beforeResumeUpload(file) {
       const regx = /^.*\.(PNG|JPG|png|jpg)$/
-      const isLt2M = file.size / 1024 / 1024 < 1
+      const isLt5M = file.size / 1024 / 1024 < 5
 
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 1MB!')
+      if (!isLt5M) {
+        this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {

@@ -8,7 +8,7 @@
         size="medium"
         @click="$refs.orgEdit.create()"
       >
-        新建分类
+        创建分类
       </el-button>
     </page-header>
     <basic-container block>
