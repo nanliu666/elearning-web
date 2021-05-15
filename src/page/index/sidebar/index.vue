@@ -38,6 +38,7 @@ import { mapGetters } from 'vuex'
 import logo from '../logo'
 import sidebarItem from './sidebarItem'
 import { validatenull } from '@/util/validate'
+
 export default {
   name: 'Sidebar',
   components: { sidebarItem, logo },
@@ -48,10 +49,19 @@ export default {
   computed: {
     ...mapGetters(['website', 'menu', 'tag', 'keyCollapse', 'screen'])
   },
+  watch: {
+    menu: {
+      handler(val) {
+        if (val.length <= 0) {
+          this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId).then(() => {})
+        }
+      },
+      deep: true
+    }
+  },
   created() {
     // this.index.openMenu(this.menuId)
   },
-
   mounted() {},
   methods: {
     validatenull(...args) {
