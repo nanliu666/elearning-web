@@ -49,16 +49,6 @@ export default {
   computed: {
     ...mapGetters(['website', 'menu', 'tag', 'keyCollapse', 'screen'])
   },
-  watch: {
-    menu: {
-      handler(val) {
-        if (val.length <= 0) {
-          this.$store.dispatch('GetUserPrivilege', this.$store.getters.userId).then(() => {})
-        }
-      },
-      deep: true
-    }
-  },
   created() {
     // this.index.openMenu(this.menuId)
   },
