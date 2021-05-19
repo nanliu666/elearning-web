@@ -127,7 +127,7 @@ export const DELETE_USER = '/system/user/delete' // 删除
 export const BATCH_EXPORT = '/system/user/export' // 批量导出
 export const BULK_DEPARTURES = '/system/user/departures' // 批量离职
 export const BATCH_DEPARTMENT = '/system/user/department' // 批量修改部门
-export const BATCH_DELETE_USER = '/system/user/department' // 批量删除用户
+export const BATCH_DELETE_USER = '/system/user/batchDelete' // 批量删除用户
 
 // 菜单管理的鉴权
 export const STOP_MENU = '/system/menu/stop' // 启用/停用
