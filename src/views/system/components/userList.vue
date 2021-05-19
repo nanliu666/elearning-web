@@ -628,7 +628,7 @@ export default {
             type: 'success',
             message: '操作成功!'
           })
-          this.this.loadOrgData()
+          this.loadOrgData()
           this.loadData()
         })
     },
