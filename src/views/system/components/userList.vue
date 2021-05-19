@@ -628,8 +628,7 @@ export default {
             type: 'success',
             message: '操作成功!'
           })
-          this.loadOrgData()
-          this.loadData()
+          this.$emit('orgUserListUpdate', true)
         })
     },
     loadData() {
@@ -734,8 +733,7 @@ export default {
               type: 'success',
               message: '刪除成功!'
             })
-            this.loadOrgData()
-            this.loadData()
+            this.$emit('orgUserListUpdate', true)
             this.$refs.crud.clearSelection()
           })
           .catch(() => {

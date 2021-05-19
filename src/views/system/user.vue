@@ -82,6 +82,7 @@
           :active-org="activeOrg"
           style="padding-right: 0"
           @refresh="loadData"
+          @orgUserListUpdate="updateOrgUserList"
         />
       </el-col>
     </el-row>
@@ -130,7 +131,20 @@ export default {
   mounted() {
     this.loadData()
   },
+  beforeRouteEnter(to, from, next) {
+    if (from.path === '/system/importUser') {
+      next((vm) => {
+        vm.loadData()
+      })
+    } else {
+      next()
+    }
+  },
   methods: {
+    //如果列表删除了数据   更新父组件组织数据
+    updateOrgUserList() {
+      this.loadData()
+    },
     filterNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1
