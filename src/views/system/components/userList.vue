@@ -49,6 +49,14 @@
         >
           批量修改部门
         </el-button>
+        <el-button
+          v-p="BATCH_DELETE_USER"
+          type="text"
+          style="margin-bottom: 0"
+          @click="batchDelete(selection)"
+        >
+          批量删除
+        </el-button>
       </template>
       <template slot="topMenu">
         <div class="operations">
@@ -211,7 +219,8 @@ import {
   delUser,
   getOuterUserList,
   bulkDepartures,
-  updateUserIdBatchOrg
+  updateUserIdBatchOrg,
+  batchDeleteUserByIds
 } from '@/api/system/user'
 import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getOrgTree } from '@/api/org/org'
@@ -224,7 +233,8 @@ import {
   DELETE_USER,
   BATCH_EXPORT,
   BULK_DEPARTURES,
-  BATCH_DEPARTMENT
+  BATCH_DEPARTMENT,
+  BATCH_DELETE_USER
 } from '@/const/privileges'
 const COLUMNS = [
   {
@@ -450,6 +460,7 @@ export default {
     BATCH_EXPORT: () => BATCH_EXPORT,
     BULK_DEPARTURES: () => BULK_DEPARTURES,
     BATCH_DEPARTMENT: () => BATCH_DEPARTMENT,
+    BATCH_DELETE_USER: () => BATCH_DELETE_USER,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -617,6 +628,7 @@ export default {
             type: 'success',
             message: '操作成功!'
           })
+          this.this.loadOrgData()
           this.loadData()
         })
     },
@@ -701,6 +713,35 @@ export default {
             this.$message({
               type: 'error',
               message: '保存失败,请联系管理员!'
+            })
+          })
+      })
+    },
+    //批量删除用户
+    batchDelete(selection) {
+      this.$confirm('确定要把选中的用户批量删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        let userStr = selection.map((v) => v.userId)
+        let params = {
+          userIds: userStr.join(',')
+        }
+        batchDeleteUserByIds(params)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '刪除成功!'
+            })
+            this.loadOrgData()
+            this.loadData()
+            this.$refs.crud.clearSelection()
+          })
+          .catch(() => {
+            this.$message({
+              type: 'error',
+              message: '刪除失败,请联系管理员!'
             })
           })
       })

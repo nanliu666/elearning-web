@@ -352,3 +352,9 @@ export const importUser = (params) => post('/api/user/v1/user/import', params)
  */
 export const importUserErrorFile = (params) =>
   get('/api/user/v1/user/exportErrFile', params, { responseType: 'blob' })
+
+/**
+ * @desc 批量删除用户
+ * @param {strign} 用户ID
+ */
+export const batchDeleteUserByIds = (params) => del('/user/v1/user/deleteByIds', params)

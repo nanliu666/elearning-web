@@ -114,7 +114,9 @@ function isToken(tid, next) {
     if (res.account) {
       next({ path: '/' })
       store.dispatch('getDiyInforAc', { device: '1' }) // 用户的logo banner 首页布局等信息，存放在localstore，vuex
-      store.dispatch('GetUserPrivilege', res.user_id).then(() => {}) //更新用户菜单
+      store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
+        router.$avueRouter.formatRoutes(menu, true)
+      }) //更新用户菜单
       //store.dispatch('getOrgIdsAc', res.account) // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
     }
   })
