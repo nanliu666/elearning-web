@@ -441,7 +441,7 @@ export default {
 
   .scroll-item {
     min-width: 50%;
-    overflow: hidden;
+
     overflow-y: auto;
 
     &.scroll-tree {
@@ -456,5 +456,8 @@ export default {
   .border__right {
     border-right: 1px solid #f2f2f2;
   }
+}
+/deep/.el-scrollbar__wrap {
+  overflow: auto;
 }
 </style>
