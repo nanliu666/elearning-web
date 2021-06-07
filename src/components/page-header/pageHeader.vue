@@ -7,7 +7,11 @@
         style="margin-right:12px;cursor: pointer;"
         @click="goBack"
       />
-      <slot name="title">
+      <span v-if="title"> {{ title }} </span>
+      <slot
+        v-else
+        name="title"
+      >
         <span>{{ title }}</span>
       </slot>
     </span>
