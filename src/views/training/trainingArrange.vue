@@ -5,23 +5,14 @@
         培训项目安排
       </div>
       <div>
-        <el-dropdown>
-          <el-button
-            v-p="ADD_TRAIN"
-            type="primary"
-            size="medium"
-          >
-            创建培训<i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item @click.native="goAdd('inside')">
-              内训
-            </el-dropdown-item>
-            <el-dropdown-item @click.native="goAdd('outer')">
-              外训
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+        <el-button
+          v-p="ADD_TRAIN"
+          type="primary"
+          size="medium"
+          @click.native="goAdd('inside')"
+        >
+          创建培训
+        </el-button>
       </div>
     </div>
 

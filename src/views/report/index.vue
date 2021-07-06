@@ -23,11 +23,11 @@
             v-model="filterDate"
             class="date-picker"
             value-format="yyyy-MM-dd"
+            format="yyyy-MM-dd"
             type="daterange"
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            @change="dateChange"
           >
           </el-date-picker>
         </div>
@@ -346,22 +346,29 @@ export default {
   watch: {
     chartsType() {
       this.getAnalysis()
+    },
+    filterDate(date) {
+      date = date || []
+      let [startTime = '', endTime = ''] = date
+      if (typeof startTime === 'object') {
+        startTime = startTime.toISOString().split('T')[0]
+        endTime = endTime.toISOString().split('T')[0]
+      }
+      Object.assign(this.query, { startTime, endTime })
+      this.getData()
     }
   },
   created() {
+    const date = new Date()
+    this.filterDate = [new Date(date.setDate(date.getDate() - 7)), new Date()]
     this.getOrgTree()
-    this.getData()
+    this.getDataWithoutDate()
   },
   methods: {
     selectorChange(id) {
       this.query.orgId = id
       this.getData()
-    },
-    dateChange(date) {
-      date = date || []
-      const [startTime = '', endTime = ''] = date
-      Object.assign(this.query, { startTime, endTime })
-      this.getData()
+      this.getDataWithoutDate()
     },
     getOrgTree() {
       getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
@@ -369,16 +376,6 @@ export default {
       })
     },
     getData() {
-      systemDashboard(this.query).then((res = {}) => {
-        Object.keys(res).forEach((key) => {
-          this.system.ORG.data[key].content = res[key]
-        })
-      })
-      systemMember(this.query).then((res = {}) => {
-        Object.keys(res).forEach((key) => {
-          this.system.member.data[key].content = res[key]
-        })
-      })
       systemLogin(this.query).then((res = {}) => {
         Object.keys(res).forEach((key) => {
           this.system.login.data[key].content = res[key]
@@ -414,6 +411,21 @@ export default {
       })
       this.getAnalysis()
     },
+    getDataWithoutDate() {
+      const params = { ...this.query }
+      delete params.startTime
+      delete params.endTime
+      systemDashboard(params).then((res = {}) => {
+        Object.keys(res).forEach((key) => {
+          this.system.ORG.data[key].content = res[key]
+        })
+      })
+      systemMember(params).then((res = {}) => {
+        Object.keys(res).forEach((key) => {
+          this.system.member.data[key].content = res[key]
+        })
+      })
+    },
     getAnalysis() {
       if (this.$refs.charts) {
         this.$nextTick(() => {
@@ -422,7 +434,6 @@ export default {
       }
       analysis({ type: this.chartsType, ...this.query })
         .then((res = {}) => {
-          const {} = res
           this.chartsData = res
         })
         .finally(() => {

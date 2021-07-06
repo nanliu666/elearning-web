@@ -279,6 +279,7 @@
         v-model="personList"
         :visible.sync="personPickerVisible"
         :options="personPickerOptions"
+        :reserve="false"
       />
       <common-picker
         v-model="orgList"
@@ -309,8 +310,8 @@
 import Pagination from '@/components/common-pagination'
 import CommonPicker from '@/components/common-picker'
 import { userImportCheck, getOrgChild } from '@/api/train/train'
-import { getPostionUserChild2, getGroup } from '@/api/system/user'
-import { getUsergroupList, getPositionUserList1 } from '@/api/examManage/schedule'
+import { getPostionUserChild2, getGroup, getOrgUserChild, getOuterUser } from '@/api/system/user'
+import { getUsergroupList, getPositionUserList1, getUserList } from '@/api/examManage/schedule'
 
 import XLSX from 'xlsx'
 
@@ -366,6 +367,109 @@ export default {
       orgPickerVisible: false,
       searchName: '',
       personPickerOptions: [
+        {
+          name: '组织机构',
+          request: getOrgUserChild,
+          response: {
+            props: {
+              data: ['orgs', 'users'],
+              total: 'totalNum'
+            },
+            processData(item) {
+              item.userId = item.userId || item.id
+              return item
+            }
+          },
+          type: 'tree',
+          placeholder: '搜索组织部门或成员姓名',
+          checkRequest: {
+            condition: function($data) {
+              return $data.id
+            },
+            handler: function($data, resolve) {
+              getUserList({ orgId: $data.id }).then((res = []) => {
+                res = res.map((item) => {
+                  item.orgId = [...new Set([item.orgId, $data.id])].filter((item) => !!item)
+                  if (item.positionId) {
+                    item.positionId = [item.positionId]
+                  }
+                  return item
+                })
+                resolve(res)
+              })
+            }
+          },
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
+            },
+            'check-strictly': false,
+            nodeKey: 'userId'
+          },
+          query: {
+            search: {
+              key: 'search',
+              value: ''
+            },
+            id: {
+              key: 'parentId',
+              from: 'id',
+              value: '0',
+              initialValue: '0'
+            }
+          },
+          props: {
+            value: 'userId',
+            select: [
+              'userId',
+              'name',
+              'orgName',
+              'positionName',
+              'workNo',
+              'phoneNum',
+              'orgId',
+              'positionId'
+            ]
+          }
+        },
+        {
+          name: '外部人员',
+          request: getOuterUser,
+          type: 'table',
+          placeholder: '搜索成员姓名',
+          response: {
+            props: {
+              data: 'data',
+              total: 'totalNum'
+            }
+          },
+          props: {
+            value: 'userId',
+            select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phonenum']
+          },
+          label: function(data) {
+            const { name, phonenum } = data
+            if (phonenum) {
+              return name + '(' + phonenum + ')'
+            }
+            return name
+          },
+          query: {
+            search: {
+              key: 'search',
+              value: ''
+            },
+            page: {
+              key: 'pageNo',
+              value: 1
+            },
+            pageSize: {
+              key: 'pageSize',
+              value: 50
+            }
+          }
+        },
         {
           name: '岗位',
           response: {
@@ -617,6 +721,10 @@ export default {
       },
       set: function(value) {
         this.model.participantsList = value
+        this.$nextTick(() => {
+          this.multipleSelection = []
+          this.$refs.personTable.clearSelection()
+        })
       }
     },
     orgList: {
@@ -739,14 +847,14 @@ export default {
         personList = this.searchName ? this.curPersonList : this.personList
       }
       personList = personList.filter((person) => {
-        const OrgExist =
-          this.curOrgList.findIndex((o) => {
-            return o.id == person.orgId
-          }) > -1
-        const posExist =
-          this.curPositionList.findIndex((p) => {
-            return p.positionName === person.positionName
-          }) > -1
+        const OrgExist = this.curOrgList.some((o) => {
+          return Array.isArray(person.orgId) ? person.orgId.includes(o.id) : o.id === person.orgId
+        })
+        const posExist = this.curPositionList.some((pos) => {
+          return Array.isArray(person.positionId)
+            ? person.positionId.includes(pos.positionId)
+            : pos.positionId === person.positionId
+        })
         return !OrgExist && !posExist
       })
       return personList.length

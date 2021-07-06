@@ -314,10 +314,10 @@
 import Pagination from '@/components/common-pagination'
 import CommonPicker from '@/components/common-picker'
 import { userImportCheck, getOrgChild } from '@/api/train/train'
-import {getPostionUserChild2, getGroup, getOrgUserChild, getOuterUser} from '@/api/system/user'
+import { getPostionUserChild2, getGroup, getOrgUserChild, getOuterUser } from '@/api/system/user'
 
 import XLSX from 'xlsx'
-import {getUsergroupList, getPositionUserList1, getUserList} from '@/api/examManage/schedule'
+import { getUsergroupList, getPositionUserList1, getUserList } from '@/api/examManage/schedule'
 
 const requiredTHeader = [
   { name: '账号', key: 'phonenum' },
@@ -487,32 +487,25 @@ export default {
             },
             handler: function($data, resolve) {
               getPositionUserList1({ parentId: $data.positionId }).then((res = {}) => {
-                let data = []
                 if (Array.isArray(res)) {
-                  data = res
+                  resolve(res)
                 } else {
+                  let data = []
                   Object.keys(res).forEach((key) => {
                     data = data.concat(res[key])
                   })
+                  resolve(data)
                 }
-                data = data.map((item) => {
-                  item.positionId = [...new Set([item.positionId, $data.positionId])].filter(
-                    (item) => !!item
-                  )
-                  item.orgId = [item.orgId]
-                  return item
-                })
-                resolve(data)
               })
             }
           },
           treeOption: {
             props: {
               label: function(node) {
-                if (node.userId) {
-                  return node.name
+                if (node.positionId) {
+                  return node.positionName
                 }
-                return node.positionName
+                return node.name
               },
               children: 'children',
               selectLabel: 'name'
@@ -533,16 +526,7 @@ export default {
           },
           props: {
             value: 'userId',
-            select: [
-              'userId',
-              'name',
-              'orgName',
-              'positionName',
-              'workNo',
-              'phoneNum',
-              'orgId',
-              'positionId'
-            ]
+            select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phoneNum', 'orgId']
           }
         },
         {
@@ -766,6 +750,10 @@ export default {
         } else {
           this.form.personnelObjects.userObjects = value
         }
+        this.$nextTick(() => {
+          this.multipleSelection = []
+          this.$refs.personTable.clearSelection()
+        })
       }
     },
     orgList: {
