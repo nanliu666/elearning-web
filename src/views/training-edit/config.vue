@@ -190,6 +190,36 @@
       ></el-input>
     </el-form-item>
 
+    <el-form-item
+      v-if="type === 'inside'"
+      label="主办单位"
+      prop="sponsor"
+      class="half-form-item margin-right-120"
+    >
+      <el-input
+        v-model="form.sponsor"
+        :readonly="isUnderwayEdit"
+        :maxlength="32"
+        placeholder="请输入"
+        clearable=""
+      ></el-input>
+    </el-form-item>
+
+    <el-form-item
+      v-if="type === 'inside'"
+      label="承办单位"
+      prop="organizer"
+      class="half-form-item"
+    >
+      <el-input
+        v-model="form.organizer"
+        :readonly="isUnderwayEdit"
+        :maxlength="32"
+        placeholder="请输入"
+        clearable=""
+      ></el-input>
+    </el-form-item>
+
     <div class="form-area-title">
       详细信息
     </div>
@@ -555,7 +585,7 @@ export default {
           }
         ],
         introduction: [{ trigger: 'blur', message: '请输入培训内容', required: true }],
-        organizer: [{ trigger: 'blur', message: '请输入培训机构', required: true }],
+        sponsor: [{ trigger: 'blur', message: '请输入主办单位', required: true }],
         categoryId: [{ trigger: 'change', message: '请选择分类', required: true }],
         trainTime: [{ trigger: 'change', message: '请选择培训时间', required: true }],
         trainWay: [{ trigger: 'change', message: '请选择培训形式', required: true }],

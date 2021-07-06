@@ -94,7 +94,10 @@
         <div class="area-header">
           已选 {{ selectList.length }} 项
         </div>
-        <div class="area-body">
+        <div
+          v-loading="selectLoading"
+          class="area-body"
+        >
           <div
             v-if="selectList.length"
             class="selected-list-wrapper"
@@ -372,7 +375,8 @@ export default {
       tabOptions: [],
       selectList: [],
       defaultExpandedKeys: ['selected'],
-      unMatchList: []
+      unMatchList: [],
+      selectLoading: false
     }
   },
   computed: {
@@ -505,7 +509,9 @@ export default {
           const promise = new Promise((resolve) => {
             handler($data, resolve)
           })
+          this.selectLoading = true
           let data = await promise
+          this.selectLoading = false
           data.forEach((item) => {
             item.$parentId = $data[nodeKey]
             this.updateSelectList(item, isRemove, tab)
@@ -561,8 +567,7 @@ export default {
           id.value = id.initialValue
         }
       }
-
-      if (!resolve) {
+      if (!node || (node && Array.isArray(node.data))) {
         tab.$loading = true
       }
       this.handleRequest(tab)

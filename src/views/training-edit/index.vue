@@ -148,6 +148,7 @@ import {
 } from '@/api/train/train'
 import { save } from '@/api/questionnaire'
 const ORIGIN_FORM = {
+  sponsor: '',
   trainCurrentStatus: '',
   headTeacherName: '',
   evaluateCondition: '1',
