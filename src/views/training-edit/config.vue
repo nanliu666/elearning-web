@@ -180,6 +180,7 @@
       label="手机号码"
       prop="contactPhone"
       class="half-form-item"
+      :class="{ 'margin-right-120': form.trainWay !== '1' }"
     >
       <el-input
         v-model="form.contactPhone"
@@ -194,7 +195,8 @@
       v-if="type === 'inside'"
       label="主办单位"
       prop="sponsor"
-      class="half-form-item margin-right-120"
+      class="half-form-item"
+      :class="{ 'margin-right-120': form.trainWay === '1' }"
     >
       <el-input
         v-model="form.sponsor"
