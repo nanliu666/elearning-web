@@ -244,6 +244,7 @@ export default {
       queryInfo: {
         categoryId: '', // 分类ID
         creatorId: '', //创建人id
+        type:1,
         pageNo: 1,
         pageSize: 10
       }

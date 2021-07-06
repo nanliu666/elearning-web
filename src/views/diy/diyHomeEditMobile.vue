@@ -173,7 +173,9 @@ export default {
         { id: 'diyMb3', name: '热门课程' },
         { id: 'diyMb4', name: '培训中心' },
         { id: 'diyMb5', name: '月度排行榜' },
-        { id: 'diyMb6', name: '新闻资讯' }
+        { id: 'diyMb6', name: '新闻资讯' },
+        { id: 'diyMb7', name: '讲师风采' },
+        { id: 'diyMb8', name: '制度清单' }
       ],
       contetArr: [
         // { id: 'diyPcL1', name: '我的任务' },

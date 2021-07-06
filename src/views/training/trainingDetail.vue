@@ -12,11 +12,11 @@
         <div class="title_box_headline_l">
           {{ showTrainDetail.trainName }}
           <span
-            v-if="!$route.query.status"
+            v-if="showTrainDetail.type == 1"
             style="background-color: #fffce6; color: #fcba00"
           >草稿</span>
           <span v-else>
-            <span v-if="showTrainDetail.status === 3">已结束</span>
+            <span v-if="showTrainDetail.status === 3">已结办</span>
             <span v-if="showTrainDetail.status === 1">未开始</span>
             <span v-if="showTrainDetail.status === 2">进行中</span>
           </span>
@@ -32,7 +32,9 @@
           </el-button>
           <el-button
             size="mini"
-            :disabled="showTrainDetail.status == 3 || !$route.query.status"
+            :disabled="
+              showTrainDetail.status == 3 || !$route.query.status || showTrainDetail.type == 1
+            "
             @click="isstopSchedule"
           >
             结办
@@ -57,8 +59,22 @@
         </div>
       </div>
       <!-- showTrainDetail -->
-      <div class="title_box_rows">
+      <div
+        v-if="showTrainDetail.trainScope == 'inside'"
+        class="title_box_rows"
+      >
         <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '类别:' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              内训
+            </div>
+          </el-col>
+
           <el-col :span="2">
             <div class="col_title">
               {{ '分类:' }}
@@ -69,6 +85,8 @@
               {{ showTrainDetail.categoryName }}
             </div>
           </el-col>
+        </el-row>
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '培训时间:' }}
@@ -79,19 +97,20 @@
               {{ showTrainDetail.trainBeginTime + '~' + showTrainDetail.trainEndTime }}
             </div>
           </el-col>
-        </el-row>
 
-        <el-row>
           <el-col :span="2">
             <div class="col_title">
-              {{ '计划人数:' }}
+              {{ '知识体系:' }}
             </div>
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ !showTrainDetail.people ? '不限制' : showTrainDetail.people }}
+              {{ showTrainDetail.knowledgeSystemName }}
             </div>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
               {{ '培训方式：' }}
@@ -100,38 +119,40 @@
           <el-col :span="5">
             <!-- trainWay:'',	//培训方式（1：面授；2：混合；3：在线）	integer(int32) -->
             <div class="col_content">
-              <span v-if="showTrainDetail.trainWay == 2">面授</span>
-              <span v-if="showTrainDetail.trainWay == 3">混合</span>
-              <span v-if="showTrainDetail.trainWay == 1">在线</span>
+              <span v-if="showTrainDetail.trainWay === 2">面授培训</span>
+              <span v-if="showTrainDetail.trainWay === 3">混合培训</span>
+              <span v-if="showTrainDetail.trainWay === 1">在线培训</span>
             </div>
           </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="2">
+          <el-col
+            v-if="showTrainDetail.trainWay != 1"
+            :span="2"
+          >
             <div class="col_title">
               {{ '培训地点：' }}
             </div>
           </el-col>
-          <el-col :span="5">
+          <el-col
+            v-if="showTrainDetail.trainWay != 1"
+            :span="5"
+          >
             <div class="col_content">
               {{ showTrainDetail.address || '--' }}
-            </div>
-          </el-col>
-
-          <el-col :span="2">
-            <div class="col_title">
-              {{ '联系人：' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.contactName || '--' }}
             </div>
           </el-col>
         </el-row>
 
         <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '项目经理：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.headTeacherName || '--' }}
+            </div>
+          </el-col>
           <el-col :span="2">
             <div class="col_title">
               {{ '联系电话：' }}
@@ -142,15 +163,27 @@
               {{ showTrainDetail.contactPhone }}
             </div>
           </el-col>
-
+        </el-row>
+        <el-row>
           <el-col :span="2">
             <div class="col_title">
-              {{ '主办单位：' }}
+              {{ '通过条件：' }}
             </div>
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.sponsor }}
+              {{ showTrainDetail.evaluateCondition == 1 ? '项目经理评定' : '系统自动评定' }}
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '计入积分：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.scoreGet }}
             </div>
           </el-col>
         </el-row>
@@ -158,23 +191,23 @@
         <el-row>
           <el-col :span="2">
             <div class="col_title">
-              {{ '承办单位：  ' }}
+              {{ '发放证书：' }}
             </div>
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.organizer || '--' }}
+              {{ showTrainDetail.certificateName || '--' }}
             </div>
           </el-col>
 
           <el-col :span="2">
             <div class="col_title">
-              {{ '班主任： ' }}
+              {{ '费用预算： ' }}
             </div>
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.headTeacher }}
+              {{ '￥' + showTrainDetail.costBudget }}
             </div>
           </el-col>
         </el-row>
@@ -182,45 +215,188 @@
         <el-row>
           <el-col :span="2">
             <div class="col_title">
-              {{ '助教：    ' }}
+              {{ '创建人：' }}
             </div>
           </el-col>
           <el-col :span="5">
             <div class="col_content">
-              {{ showTrainDetail.teachAssistant }}
+              {{ showTrainDetail.creatorName }}
+            </div>
+          </el-col>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '创建时间：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.createTime }}
             </div>
           </el-col>
         </el-row>
       </div>
-    </div>
 
-    <div class="introduce">
-      <div class="introduce_title">
-        <div class="introduce_title_l">
-          培训介绍
-        </div>
-        <div class="introduce_title_r">
-          <span
-            v-show="isShowIntroduce"
-            style="cursor: pointer"
-            @click="isShowIntroduce = false"
-          >
-            <i class="el-icon-arrow-up"></i>&nbsp;收起</span>
-          <span
-            v-show="!isShowIntroduce"
-            style="cursor: pointer"
-            @click="isShowIntroduce = true"
-          >
-            <i class="el-icon-arrow-down"></i>&nbsp;展开</span>
-        </div>
-      </div>
       <div
-        v-show="isShowIntroduce"
-        class="introduce_content"
+        v-else
+        class="title_box_rows"
       >
-        <div class="introduce_content_t">
-          <div v-html="showTrainDetail.introduction"></div>
-        </div>
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '类别:' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              外训
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '分类:' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.categoryName }}
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '培训时间:' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.trainBeginTime + '~' + showTrainDetail.trainEndTime }}
+            </div>
+          </el-col>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '知识体系:' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.knowledgeSystemName }}
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '培训类型' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ getTrainType(showTrainDetail.trainType) }}
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '培训方式：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              <span v-if="showTrainDetail.trainWay == 11">非脱产培训</span>
+              <span v-if="showTrainDetail.trainWay == 12">脱产培训</span>
+              <span v-if="showTrainDetail.trainWay == 13">业余培训</span>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '培训机构：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.organizer }}
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '培训地点：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.address || '--' }}
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '项目经理：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.headTeacherName }}
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '联系电话：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.contactPhone }}
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '费用预算：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              ￥{{ showTrainDetail.costBudget }}
+            </div>
+          </el-col>
+
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '创建人：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.creatorName }}
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '创建时间：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.createTime }}
+            </div>
+          </el-col>
+        </el-row>
       </div>
     </div>
 
@@ -244,16 +420,23 @@
           @click="status = 3"
         >签到情况</span>
         <span
+          v-if="showTrainDetail.trainScope == 'inside'"
           :class="{ select: status === 4 }"
           style="cursor: pointer"
           @click="status = 4"
         >培训安排</span>
         <span
-          v-if="$route.query.status"
+          v-if="$route.query.status && showTrainDetail.trainScope == 'inside'"
           :class="{ select: status === 5 }"
           style="cursor: pointer"
           @click="status = 5"
-        >评估结果</span>
+        >评分</span>
+
+        <span
+          :class="{ select: status === 6 }"
+          style="cursor: pointer"
+          @click="status = 6"
+        >培训内容</span>
       </div>
 
       <div
@@ -261,7 +444,7 @@
         class="register-container"
       >
         <div class="register-data">
-          <div v-if="multipleSelection.length">
+          <div v-if="multipleSelection.length && showTrainDetail.trainScope === 'inside'">
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
             <span
               style="
@@ -289,9 +472,25 @@
             </el-button>
           </div>
           <div v-else>
-            <span>计划人数：</span>{{ !plannedPopulation ? '无限制' : plannedPopulation + '人' }}
+            <span>计划人数：</span>{{
+              !plannedPopulation || plannedPopulation == 0 ? '无限制' : plannedPopulation + '人'
+            }}
+
+            <span
+              v-if="
+                showTrainDetail.costBudget &&
+                  showTrainDetail.costBudget != 0 &&
+                  plannedPopulation &&
+                  plannedPopulation != 0
+              "
+              style="margin: 0 5px;"
+            >
+              人均费用：{{ (showTrainDetail.costBudget / plannedPopulation).toFixed(1) }}元
+            </span>
+
             <span>已参加：{{ participated }}人</span>
-            <span v-if="!!plannedPopulation"> 剩余名额：{{ remainingPlaces }}人</span>
+            <span v-if="!plannedPopulation && plannedPopulation != 0">
+              剩余名额：{{ remainingPlaces }}人</span>
           </div>
         </div>
 
@@ -305,6 +504,7 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column
+            v-if="showTrainDetail.trainScope === 'inside'"
             type="selection"
             width="55"
           >
@@ -330,6 +530,28 @@
           </el-table-column>
 
           <el-table-column
+            v-if="showTrainDetail.trainScope == 'outer'"
+            align="center"
+            label="是否指定学员"
+          >
+            <template slot-scope="scope">
+              {{ scope.row.appointTrainee ? '是' : '否' }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-if="showTrainDetail.trainScope == 'outer'"
+            label="审批状态"
+          >
+            <template slot-scope="scope">
+              <span v-if="scope.row.apprStatus == 'Approve'">审批中</span>
+              <span v-else-if="scope.row.apprStatus == 'Pass'">已通过</span>
+              <span v-else-if="scope.row.apprStatus == 'Reject'">已拒绝</span>
+              <span v-else-if="scope.row.apprStatus == 'Cancel'">已撤回</span>
+              <span v-else>--</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-if="showTrainDetail.trainScope == 'inside'"
             label="操作"
             align="center"
           >
@@ -369,6 +591,7 @@
       <!-- 学习情况 -->
       <div
         v-show="status === 2"
+        v-if="showTrainDetail.trainScope == 'inside'"
         class="general"
       >
         <!-- 表格内容 -->
@@ -549,9 +772,10 @@
               slot="examStatus"
               slot-scope="{ row }"
             >
+              <span v-if="row.examStatus == 1">未开始</span>
               <span v-if="row.examStatus == 2">已通过</span>
               <span v-if="row.examStatus == 3">未通过</span>
-              <span v-if="row.examStatus == 1">未开始</span>
+              <!--              <span v-if="row.examStatus == 1">未开始</span>-->
             </template>
             <!-- 评估情况 // （1：已评估；2：未评估；3：未开始）-->
             <template
@@ -561,6 +785,20 @@
               <span v-if="row.evaluate == 1">已评估</span>
               <span v-if="row.evaluate == 2">未评估</span>
               <span v-if="row.evaluate == 3">未开始</span>
+            </template>
+            <!-- 项目成绩 -->
+            <template
+              slot="score"
+              slot-scope="{ row }"
+            >
+              <span>{{ row.score }}</span>
+            </template>
+
+            <template
+              slot="appointTrainee"
+              slot-scope="{ row }"
+            >
+              <span>{{ row.appointTrainee ? '是' : '否' }}</span>
             </template>
 
             <!-- 操作 -->
@@ -578,176 +816,361 @@
               </el-button>
 
               <el-button
-                v-if="scope.row.certificate == 1"
-                :disabled="scope.row.certificate != 1"
+                v-if="showTrainDetail.evaluateCondition == 1"
                 type="text"
                 size="medium"
-                @click.stop="isrevokeCertificate(scope.row)"
+                @click="editEvaluateCondition(scope.row)"
               >
-                撤回证书
+                {{ scope.row.updateAssessment == 1 ? '修改评定' : '培训评定' }}
               </el-button>
-              <!-- :disabled="scope.row.certificate != 2" -->
+              <el-row v-else>
+                <el-button
+                  v-if="scope.row.certificate == 1"
+                  :disabled="scope.row.certificate != 1"
+                  type="text"
+                  size="medium"
+                  @click.stop="isrevokeCertificate(scope.row)"
+                >
+                  撤回证书
+                </el-button>
+                <!-- :disabled="scope.row.certificate != 2" -->
+                <el-button
+                  v-else
+                  type="text"
+                  size="medium"
+                  @click.stop="isgrantCertificate(scope.row)"
+                >
+                  发放证书
+                </el-button>
+              </el-row>
+            </template>
+            <template
+              v-else
+              slot="handler"
+              slot-scope="scope"
+            >
               <el-button
-                v-else
                 type="text"
                 size="medium"
-                @click.stop="isgrantCertificate(scope.row)"
+                @click.stop="toStuffDetail(scope.row)"
               >
-                发放证书
+                查看上报材料
               </el-button>
             </template>
           </common-table>
         </basic-container>
       </div>
 
+      <div
+        v-show="status === 2"
+        v-if="showTrainDetail.trainScope == 'outer'"
+      >
+        <div
+          class="table-wrapper"
+          style="padding: 0 30px;
+          padding-bottom: 15px;
+          margin-top: 15px;"
+        >
+          <div class="filter-wrapper">
+            <div class="input-wrapper">
+              <el-input
+                v-model="filterForm.stuName"
+                clearable
+                size="medium"
+                placeholder="输入学员姓名搜索"
+              ></el-input>
+            </div>
+
+            <el-popover
+              v-model="filterFormVisible"
+              placement="bottom"
+              width="725"
+              transition="false"
+            >
+              <el-form
+                label-position="left"
+                :inline="true"
+                :model="filterForm"
+                class="filter-form"
+                label-width="100px"
+                style="padding: 24px"
+              >
+                <el-form-item label="所属部门">
+                  <el-cascader
+                    v-model="filterForm.deptName"
+                    style="width: 202px"
+                    placeholder="请选择所属部门"
+                    :options="orgData"
+                    :props="{ checkStrictly: true, label: 'orgName', value: 'code' }"
+                    :show-all-levels="false"
+                    clearable
+                    :change-on-select="changeOnSelect"
+                    @change="(value) => (filterForm.deptCode = value[value.length - 1])"
+                  ></el-cascader>
+                </el-form-item>
+
+                <el-form-item label="是否指定学员">
+                  <el-select
+                    v-model="filterForm.appointTrainee"
+                    clearable
+                    placeholder="请选择"
+                  >
+                    <el-option
+                      label="否"
+                      :value="0"
+                    ></el-option>
+                    <el-option
+                      label="是"
+                      :value="1"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+
+                <div style="text-align: right; margin-right: 75px">
+                  <el-button
+                    type="primary"
+                    size="medium"
+                    :disabled="status2FilterLoading"
+                    @click.native="resetPageAndGetList"
+                  >
+                    搜索
+                  </el-button>
+                  <el-button
+                    size="medium"
+                    @click="
+                      filterForm = {
+                        ...initFilterForm,
+                        stuName: filterForm.stuName
+                      }
+                    "
+                  >
+                    重置
+                  </el-button>
+                </div>
+              </el-form>
+
+              <el-button
+                slot="reference"
+                size="medium"
+                icon="icon-basics-filter-outlined"
+                :disabled="status2FilterLoading"
+              >
+                筛选
+              </el-button>
+            </el-popover>
+          </div>
+          <el-table :data="tableData">
+            <el-table-column
+              label="姓名"
+              prop="stuName"
+            ></el-table-column>
+            <el-table-column
+              label="手机号"
+              prop="phone"
+            ></el-table-column>
+            <el-table-column
+              label="所属部门"
+              prop="deptName"
+            ></el-table-column>
+            <el-table-column
+              label="是否指定学员"
+              prop="appointTrainee"
+            >
+              <template slot-scope="scope">
+                {{ scope.row.appointTrainee == 0 ? '否' : '是' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button
+                  size="medium"
+                  type="text"
+                  @click="toStuffDetail(scope.row)"
+                >
+                  查看上报材料
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <div
+            class="page-container"
+            style="margin-right: 45px"
+          >
+            <pagination
+              :total="filterFormTotal"
+              :page="filterForm.pageNo"
+              :limit="filterForm.pageSize"
+              @pagination="filterFormPagination"
+            ></pagination>
+          </div>
+        </div>
+      </div>
       <!-- 培训安排 -->
       <div
         v-show="status === 4"
         class="arrange"
       >
-        <p class="offline_title">
-          线下日程
-        </p>
-        <el-collapse
-          v-if="isOfflineTodo.length"
-          v-model="activeNames"
-          @change="handleChange"
-        >
-          <el-collapse-item
-            v-for="(todo, index) in isOfflineTodo"
-            :key="index"
-            :name="index + 1"
+        <div v-if="isOfflineTodo.length">
+          <p class="offline_title">
+            线下日程
+            <span
+              v-if="isOfflineTodo.length"
+              style="font-size: 12px;"
+            >共{{
+              isOfflineTodo.reduce((total, todo) => {
+                return (total += todo.data.length)
+              }, 0)
+            }}项 共{{ offlineTodoTime }}课时</span>
+          </p>
+          <el-collapse
+            v-model="activeNames"
+            @change="handleChange"
           >
-            <template slot="title">
-              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天
-              {{ todo.date }}
-            </template>
-
-            <div
-              v-for="(item, i) in todo.data"
-              :key="i"
-              class="arrange_schedule_i"
+            <el-collapse-item
+              v-for="(todo, index) in isOfflineTodo"
+              :key="index"
+              :name="index + 1"
             >
-              <span>{{ item.todoTime }}</span>
+              <template slot="title">
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 第{{ index + 1 }}天
+                {{ todo.date }}
+              </template>
 
-              <span v-if="item.type === 1">【面授课程】 {{ item.courseName }}</span>
-              <span v-else>【活动】 {{ item.theme }}</span>
-              <span>
-                <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
-                {{ item.lecturerName }}</span>
+              <div
+                v-for="(item, i) in todo.data"
+                :key="i"
+                class="arrange_schedule_i"
+              >
+                <span>{{ item.todoTime }}</span>
 
-              <span> 地点： {{ item.address }}</span>
+                <span v-if="item.type === 1">【面授课程】 {{ item.courseName }}</span>
+                <span v-else>【活动】 {{ item.theme }}</span>
+                <span>
+                  <span v-if="item.type === 1">讲师：</span><span v-else>主持人：</span>
+                  {{ item.lecturerName }}</span>
 
-              <!-- 状态（1：已结束；2：进行中；3：未开始） -->
-              <span v-if="$route.query.status">
-                状态：<span v-if="item.status === 1">未开始</span>
-                <span v-if="item.status === 2">进行中</span><span v-if="item.status === 3">已结束</span></span>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
+                <span> 地点： {{ item.address }}</span>
 
-        <div v-else>
-          暂无培训安排信息
+                <!-- 状态（1：已结束；2：进行中；3：未开始） -->
+                <span v-if="$route.query.status">
+                  状态：<span v-if="item.status === 1">未开始</span>
+                  <span v-if="item.status === 2">进行中</span><span v-if="item.status === 3">已结束</span></span>
+
+                <span style="width: 180px;">参培率： {{ item.participateRate }}</span>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
         </div>
 
-        <p class="course_title offline_title">
-          在线课程
-        </p>
-        <el-table
-          :data="showOnlineCourse"
-          style="width: 100%"
-        >
-          <el-table-column
-            prop="classTime"
-            label="上课日期"
-            width="180"
+        <div v-if="showOnlineCourse.length">
+          <p class="course_title offline_title">
+            在线课程
+            <span
+              v-if="showOnlineCourse.length"
+              style="font-size: 12px;"
+            >共{{ showOnlineCourse.length }}项 共{{ onlineTodoTime }}课时</span>
+          </p>
+          <el-table
+            :data="showOnlineCourse"
+            style="width: 100%"
           >
-          </el-table-column>
-          <el-table-column
-            prop="courseName"
-            show-overflow-tooltip
-            label="关联课程"
-            width="180"
+            <el-table-column
+              prop="classTime"
+              label="上课日期"
+              width="180"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="courseName"
+              show-overflow-tooltip
+              label="关联课程"
+              width="180"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="lecturerName"
+              label="讲师"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="studyType"
+              label="修读类型"
+            >
+              <template slot-scope="{ row }">
+                <span v-if="row.studyType === 1">选修</span>
+                <span v-else> 必修 </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-if="$route.query.status"
+              prop="status"
+              label="状态"
+            >
+              <template slot-scope="{ row }">
+                <!-- status	状态（1：未开始；2：进行中；3：已结束） -->
+                <span v-if="row.status === 1">未开始</span>
+                <span v-if="row.status === 2">进行中</span>
+                <span v-if="row.status === 3">已结束</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <div v-if="showExamList.length">
+          <p class="course_title offline_title">
+            考试安排
+            <span style="font-size: 12px;">共{{ showExamList.length }}项</span>
+          </p>
+          <el-table
+            :data="showExamList"
+            style="width: 100%"
           >
-          </el-table-column>
-          <el-table-column
-            prop="lecturerName"
-            label="讲师"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="studyType"
-            label="修读类型"
-          >
-            <template slot-scope="{ row }">
-              <span v-if="row.studyType === 1">选修</span>
-              <span v-else> 必修 </span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            v-if="$route.query.status"
-            prop="status"
-            label="状态"
-          >
-            <template slot-scope="{ row }">
-              <!-- status	状态（1：未开始；2：进行中；3：已结束） -->
-              <span v-if="row.status === 1">未开始</span>
-              <span v-if="row.status === 2">进行中</span>
-              <span v-if="row.status === 3">已结束</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <p class="course_title offline_title">
-          考试安排
-        </p>
-        <el-table
-          :data="showExamList"
-          style="width: 100%"
-        >
-          <el-table-column
-            prop="examTime"
-            label="考试日期"
-            show-overflow-tooltip
-            width="250"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="examName"
-            label="关联考试"
-            width="210"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="period"
-            label="考试时间(分钟)"
-            width="200"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="status"
-            label="状态"
-          >
-            <template slot-scope="{ row }">
-              <!-- status	状态（1：已结束；2：进行中；3：未开始） -->
-              <span v-if="row.status === 1">未开始</span>
-              <span v-if="row.status === 2">进行中</span>
-              <span v-if="row.status === 3">已结束</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            v-if="$route.query.status"
-            label="操作"
-          >
-            <template slot-scope="{ row }">
-              <el-button
-                type="text"
-                @click="toexamDetail(row)"
-              >
-                考试详情
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+            <el-table-column
+              prop="examTime"
+              label="考试日期"
+              show-overflow-tooltip
+              width="250"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="examName"
+              label="关联考试"
+              width="210"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="period"
+              label="考试时间(分钟)"
+              width="200"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="status"
+              label="状态"
+            >
+              <template slot-scope="{ row }">
+                <!-- status	状态（1：已结束；2：进行中；3：未开始） -->
+                <span v-if="row.status === 1">未开始</span>
+                <span v-if="row.status === 2">进行中</span>
+                <span v-if="row.status === 3">已结束</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-if="$route.query.status"
+              label="操作"
+            >
+              <template slot-scope="{ row }">
+                <el-button
+                  type="text"
+                  @click="toexamDetail(row)"
+                >
+                  考试详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </div>
 
       <!-- 签到情况 -->
@@ -769,7 +1192,7 @@
             class="signin-btn"
             size="medium"
             type="primary"
-            @click="downcodeDlgVisible = true"
+            @click="codeDialogVisible = true"
           >
             签到二维码
           </el-button>
@@ -925,6 +1348,16 @@
           </div>
         </div>
       </div>
+
+      <!-- 培训内容 -->
+      <div
+        v-show="status === 6 && $route.query.status"
+        class="introduce_content"
+      >
+        <div class="introduce_content_t">
+          <div v-html="showTrainDetail.introduction"></div>
+        </div>
+      </div>
     </div>
 
     <el-dialog
@@ -958,8 +1391,14 @@
     </el-dialog>
 
     <down-code-dialog
-      :dialog-visibe.sync="downcodeDlgVisible"
+      :visible.sync="codeDialogVisible"
       :train-id="showTrainDetail.trainId"
+    />
+
+    <evaluate-dialog
+      :visible.sync="evaluateDialogVisible"
+      :params="evaluateDialogParams"
+      @updateEvaluate="isStudentList"
     />
   </div>
 </template>
@@ -976,8 +1415,10 @@ import {
 } from '@/api/training/training'
 import Pagination from '@/components/common-pagination'
 import DownCodeDialog from './components/downCodeDialog'
+import EvaluateDialog from './components/evaluate-dialog'
 import {
   studentList,
+  outerStudentList,
   getOnlineCourse,
   getTrainDetail,
   getTrainEvaluate,
@@ -985,7 +1426,8 @@ import {
   revokeCertificate,
   examList,
   stopSchedule,
-  querySignList
+  querySignList,
+  outerTrainApplyList
 } from '@/api/training/training'
 import { getOrgTreeSimple } from '@/api/org/org'
 
@@ -1043,16 +1485,21 @@ const TABLE_COLUMNS = [
     prop: 'examStatus',
     slot: true
   },
+  // {
+  //   label: '结业状态',
+  //   prop: 'endStatus',
+  //   formatter: (row) => {
+  //     const END_STATUS = {
+  //       0: '未结业',
+  //       1: '已结业'
+  //     }
+  //     return END_STATUS[row.endStatus]
+  //   }
+  // },
   {
-    label: '结业状态',
-    prop: 'endStatus',
-    formatter: (row) => {
-      const END_STATUS = {
-        0: '未结业',
-        1: '已结业'
-      }
-      return END_STATUS[row.endStatus]
-    }
+    label: '项目成绩',
+    prop: 'score',
+    slot: true
   },
   // （1：已评估；2：未评估；3：未开始）
   {
@@ -1071,27 +1518,42 @@ const TABLE_COLUMNS2 = [
     label: '手机号码',
     prop: 'phone'
   },
-
   {
     label: '所属部门',
-    prop: 'deptName'
-    // slot: true,
+    prop: 'deptName',
+    slot: true
   },
   {
-    label: '结业状态',
-    prop: 'endStatus',
+    label: '是否指定学员',
+    prop: 'appointTrainee',
+    slot: true
+  }
+]
+const OUTER_TABLE_COLUMNS = [
+  {
+    label: '姓名',
+    prop: 'stuName',
+    slot: true
+  },
+  {
+    label: '手机号码',
+    prop: 'phone'
+  },
+  {
+    label: '所属部门',
+    prop: 'deptName',
+    slot: true
+  },
+  {
+    label: '是否指定学员',
+    prop: 'appointTrainee',
     formatter: (row) => {
       const END_STATUS = {
-        0: '未结业',
-        1: '已结业'
+        0: '否',
+        1: '是'
       }
-      return END_STATUS[row.endStatus]
+      return END_STATUS[row.status]
     }
-  },
-  {
-    label: '评估情况',
-    prop: 'evaluate',
-    slot: true
   }
 ]
 const TABLE_CONFIG = {
@@ -1117,11 +1579,11 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
     type: 'input'
   }
 ]
-const SEARCH_POPOVER_POPOVER_OPTIONS = [
+let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     // config: { placeholder: 'deptId' },
     data: '',
-    field: 'deptCode',
+    field: 'code',
     label: '所属部门',
     type: 'treeSelect',
     config: {
@@ -1163,9 +1625,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '考试情况',
     type: 'select',
     options: [
-      { value: 1, label: '已通过' },
-      { value: 2, label: '未通过' },
-      { value: 3, label: '未开始' }
+      { value: 2, label: '已通过' },
+      { value: 3, label: '未通过' }
+      // { value: 1, label: '未开始' }
     ]
   },
   {
@@ -1191,6 +1653,18 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: 2, label: '未完成' },
       { value: 3, label: '已完成' }
     ]
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
+    field: 'certificate',
+    label: '证书状态',
+    type: 'select',
+    options: [
+      { value: 1, label: '已获得' },
+      { value: 2, label: '未获得' },
+      { value: 3, label: '未开始' }
+    ]
   }
 ]
 const SEARCH_POPOVER_CONFIG = {
@@ -1207,7 +1681,8 @@ export default {
   components: {
     SeachPopover: () => import('@/components/searchPopOver'),
     Pagination,
-    DownCodeDialog
+    DownCodeDialog,
+    EvaluateDialog
   },
   filters: {
     // 过滤不可见的列
@@ -1216,8 +1691,33 @@ export default {
   },
   data() {
     return {
+      queryInfo: {},
+      evaluateDialogParams: {},
+      evaluateDialogVisible: false,
+      changeOnSelect: {
+        default: false
+      },
+      status2FilterLoading: false,
+      filterFormVisible: false,
+      filterFormTotal: 0,
+      filterForm: {
+        deptName: '',
+        appointTrainee: '',
+        stuName: '',
+        pageNo: 1,
+        pageSize: 10
+      },
+      initFilterForm: {
+        deptName: '',
+        appointTrainee: '',
+        stuName: '',
+        pageNo: 1,
+        pageSize: 10
+      },
+      orgData: [],
+      outerTableColumn: OUTER_TABLE_COLUMNS,
       registerLoading: false,
-      downcodeDlgVisible: false,
+      codeDialogVisible: false,
       getSigninForm: {
         pageNo: 1,
         pageSize: 10,
@@ -1235,7 +1735,6 @@ export default {
         label: signinRef[key],
         prop: key
       })),
-      codeDialogVisibe: false,
       approveDlgVisible: false,
       approveText: '',
       registerData: [], // 报名情况数据
@@ -1243,7 +1742,7 @@ export default {
       issueStatus: this.$route.query.status,
       showExamList: [],
       showTrainEvaluate: {},
-      isOfflineTodo: '',
+      isOfflineTodo: [],
       // 查询培训线上课程  在线课程
       showOnlineCourse: [],
       showTrainDetail: {
@@ -1252,7 +1751,7 @@ export default {
         organizer: '', //承办单位	string
         people: '', //'计划人数'	integer(int32)
         sponsor: '', //主办单位	string
-        status: '', //培训状态（0：已办结；1：未开始；2：进行中）	integer(int32)
+        status: '', //培训状态（0：已结办；1：未开始；2：进行中）	integer(int32)
         trainName: '', //'培训名称'	string
         trainNo: '', //培训编号	string
         trainTime: '', //培训时间	string
@@ -1293,10 +1792,42 @@ export default {
       plannedPopulation: 0,
       participated: 0,
       remainingPlaces: 0,
-      multipleSelection: []
+      multipleSelection: [],
+      optionsOuter: []
+    }
+  },
+  computed: {
+    offlineTodoTime() {
+      const list = this.isOfflineTodo
+      let hours = 0
+      list.forEach((item) => {
+        item.data.forEach((a) => {
+          let [start, end] = a.todoTime.split('~')
+          start = start.split(':').slice(0, 2)
+          end = end.split(':').slice(0, 2)
+          start = start[0] * 3600000 + start[1] * 60000
+          end = end[0] * 3600000 + end[1] * 60000
+          let hour = (end - start) / 3600000
+          hour = hour.toFixed(1)
+          hours += Number(hour)
+        })
+      })
+      return hours
+    },
+    onlineTodoTime() {
+      const list = this.showOnlineCourse
+      let second = 0
+      list.forEach((item) => {
+        second += item.period
+      })
+      const hour = second / 60 / 60
+      return hour.toFixed(1)
     }
   },
   watch: {
+    'filterForm.stuName': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000),
     'getSigninForm.name': {
       handler() {
         this.getSigninData()
@@ -1320,6 +1851,7 @@ export default {
     // this.getInfo()
     this.loadOrgData()
     await this.isGetTrainDetail()
+
     // 获取报名情况数据
     this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId
     this.getRegisterData()
@@ -1332,7 +1864,7 @@ export default {
     this.isGetOnlineCourse()
     // this.isGetCatalogs()
     this.isGetOfflineTodo()
-
+    // trainScope == 'inside'
     this.tableConfig.showHandler = true
     this.tableColumns = TABLE_COLUMNS
     if (!this.$route.query.status) {
@@ -1342,24 +1874,71 @@ export default {
     if (!this.showTrainDetail.isArranged && this.$route.query.status) {
       this.columnsVisible = _.map(TABLE_COLUMNS2, ({ prop }) => prop)
       this.tableColumns = TABLE_COLUMNS2
-      this.tableConfig.showHandler = false
+      this.tableConfig.showHandler = true
     }
+
+    // if(this.showTrainDetail.trainScope == 'inside') { this.tableConfig.showHandler = true }
+
     this.$forceUpdate()
   },
+  // beforeRouteLeave(to, from, next) {
+  //   to.meta.$keepAlive = false // 禁用页面缓存
+  //   next()
+  // },
   methods: {
+    editEvaluateCondition(data) {
+      this.evaluateDialogParams = {
+        userId: data.stuId,
+        trainId: this.showTrainDetail.trainId
+      }
+      this.evaluateDialogVisible = true
+    },
+    filterFormPagination({ page, limit }) {
+      this.filterForm.pageNo = page
+      this.filterForm.pageSize = limit
+      this.isStudentList()
+    },
+    resetPageAndGetList() {
+      this.filterForm.pageSize = 10
+      this.filterForm.pageNo = 1
+      this.isStudentList()
+    },
+    getTrainType(type) {
+      if (this.showTrainDetail.trainScope == 'outer') {
+        switch (type) {
+          case 'POST_CERT':
+            return '岗位取证'
+          case 'EDU_SELF':
+            return '学历教育（委派）'
+          case 'EDU_APPOINT':
+            return '学历教育（委派）'
+          case 'SPECIAL':
+            return '专题研修'
+        }
+      } else {
+        switch (type) {
+          case '01':
+            return '通用力培训'
+          case '02':
+            return '专业力培训'
+          case '03':
+            return '领导力培训'
+        }
+      }
+    },
     loadOrgData() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then(
-        (res) =>
-          (this.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(
-            [
-              {
-                orgName: '全部',
-                orgId: ''
-              }
-            ],
-            res
-          ))
-      )
+      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+        this.orgData = res
+        this.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(
+          [
+            {
+              orgName: '全部',
+              orgId: ''
+            }
+          ],
+          res
+        )
+      })
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -1376,6 +1955,8 @@ export default {
             return '已签到'
           case '3':
             return '未开始'
+          case '4':
+            return '请假'
           default:
             return '--'
         }
@@ -1420,7 +2001,8 @@ export default {
       })
     },
     queryJoin() {
-      queryJoin(this.getRegisterForm).then((res) => {
+      const api = this.showTrainDetail.trainScope == 'inside' ? queryJoin : outerTrainApplyList
+      api(this.getRegisterForm).then((res) => {
         const { data, totalNum } = res
         this.registerData = data
         this.registerTotal = totalNum
@@ -1446,9 +2028,10 @@ export default {
     },
     toStuffDetail(row) {
       var data = { ...row }
-      const { trainName, trainId } = this.showTrainDetail
+      const { trainName, trainId, trainScope } = this.showTrainDetail
       data.trainName = trainName
       data.trainId = trainId
+      data.type = trainScope
       const query = {}
       Object.keys(data).forEach((key) => {
         query[key] = data[key]
@@ -1506,7 +2089,11 @@ export default {
       // this.$router.push({ path: '/training/trainingEdit?id=' + this.$route.query.id })
       this.$router.push({
         path: '/training/edit',
-        query: { id: this.showTrainDetail.trainId, type: 'next' }
+        query: {
+          id: this.showTrainDetail.trainId,
+          isNext: true,
+          type: this.showTrainDetail.trainScope
+        }
       })
     },
     // 结办
@@ -1627,25 +2214,38 @@ export default {
     // 学员培训列表
     isStudentList(courseName) {
       // console.log('id', this.$route.query.id)
-      let page = {
-        pageNo: '',
-        pageSize: '',
-        totalNum: ''
+
+      let params = {}
+      if (this.showTrainDetail.trainScope == 'inside') {
+        let page = {
+          pageNo: '',
+          pageSize: '',
+          totalNum: ''
+        }
+        page.pageNo = this.page.currentPage
+        page.pageSize = this.page.size
+        params = { ...this.queryInfo, ...page, ...courseName }
+        params.status = this.status
+      } else {
+        params = JSON.parse(JSON.stringify(this.filterForm))
+        delete params.deptName
       }
-      page.pageNo = this.page.currentPage
-      page.pageSize = this.page.size
-      let params = { ...page, ...courseName }
-      params.status = this.status
       // params.trainId = 1
       params.trainId = this.showTrainDetail.trainId
-      studentList(params).then((res) => {
+
+      const api = this.showTrainDetail.trainScope == 'inside' ? studentList : outerStudentList
+      api(params).then((res) => {
         this.tableData = res.data.map((item) => {
           if (!item.deptName) {
             item.deptName = '--'
           }
           return item
         })
-        this.page.total = res.totalNum
+        if (this.showTrainDetail.trainScope == 'inside') {
+          this.page.total = res.totalNum
+        } else {
+          this.filterFormTotal = res.totalNum
+        }
         // SEARCH_POPOVER_POPOVER_OPTIONS[0].options = [];
         // this.tableData.forEach((item) => {
         //   // console.log(item.id,item.deptName);
@@ -1663,7 +2263,9 @@ export default {
       getTrainEvaluate(params).then((res) => {
         for (let key in res) {
           if (key != 'teachersEvaluate') {
-            this.showTrainEvaluate[key] = res[key].toFixed(1)
+            if (res[key]) {
+              this.showTrainEvaluate[key] = res[key].toFixed(1)
+            }
           } else {
             this.showTrainEvaluate[key] = res[key]
           }
@@ -1678,12 +2280,6 @@ export default {
     // 编辑&删除&移动
     handleCommand(e) {
       if (e === 'edit') {
-        if (this.showTrainDetail.status === 2 && this.$route.query.status) {
-          this.$alert('培训正在进行中，不能编辑这条培训记录', {
-            confirmButtonText: '确定'
-          })
-          return
-        }
         if (this.showTrainDetail.status === 3 && this.$route.query.status) {
           this.$alert('培训已结束，不能编辑这条培训记录', {
             confirmButtonText: '确定'
@@ -1694,11 +2290,11 @@ export default {
         // 编辑
         this.$router.push({
           path: '/training/edit',
-          query: { id: this.showTrainDetail.id }
+          query: { id: this.showTrainDetail.id, type: this.showTrainDetail.trainScope }
         })
       }
       if (e === 'del') {
-        if (this.showTrainDetail.status === 2) {
+        if (this.showTrainDetail.status === 2 && this.showTrainDetail.type != 1) {
           this.$alert('培训正在进行中，不能删除这条培训记录', {
             confirmButtonText: '确定'
           })
@@ -1746,6 +2342,8 @@ export default {
 
     handleSearch(searchParams) {
       // this.loadTableData(_.pickBy(searchParams))
+
+      this.queryInfo = _.assign(this.queryInfo, searchParams)
       this.page.currentPage = 1
       this.isStudentList(searchParams)
     },
@@ -1812,7 +2410,51 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.trainingDetail {
+  .introduce_content_t {
+    .introduce_content img {
+      width: 100%;
+    }
+  }
+  .el-card {
+    border: none;
+  }
+  .filter-wrapper .input-wrapper {
+    .el-input__inner {
+      height: 34px;
+      line-height: 34px;
+    }
+  }
+  .filter-wrapper .input-wrapper {
+    .el-input__inner {
+      height: 34px;
+      line-height: 34px;
+    }
+  }
+  .icon-basics-filter-outlined {
+    font-size: 14px;
+  }
 
+  .filter-form {
+    .el-form-item__label {
+      text-align: center;
+    }
+  }
+  .filter-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    .input-wrapper {
+      width: 202px;
+      margin-right: 10px;
+    }
+    .filter-btn {
+      width: 85px;
+    }
+  }
+}
+</style>
 <style lang="scss" scoped>
 .col_content {
   font-family: PingFangSC-Regular;
@@ -1822,6 +2464,15 @@ export default {
 }
 .trainingDetail {
   color: #333333;
+  .introduce_content {
+    word-break: break-all;
+    padding: 15px 40px;
+  }
+  .introduce_content_img {
+    img {
+      width: 100%;
+    }
+  }
   .trainingDetail_title {
     height: 60px;
     line-height: 60px;
@@ -1906,17 +2557,6 @@ export default {
         i {
           font-weight: 900;
         }
-      }
-    }
-    .introduce_content {
-      margin: 0 80px;
-    }
-    .introduce_content_t {
-      margin: 15px 0;
-    }
-    .introduce_content_img {
-      img {
-        width: 100%;
       }
     }
   }
@@ -2162,9 +2802,9 @@ export default {
           }
         }
       }
-      .course_title {
-        margin-top: 45px;
-      }
+      //.course_title {
+      //  margin-top: 45px;
+      //}
     }
     .result {
       padding: 25px 35px;

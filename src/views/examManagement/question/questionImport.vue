@@ -9,8 +9,9 @@
         v-if="step === '0'"
         class="import-step"
       >
-        <div class="section">
-          <p class="title">
+        <div class="section tip">
+          <div class="left ">
+            <p class="title">
             1.下载导入模板
           </p>
           <p class="tips">
@@ -19,7 +20,7 @@
           <a
             target="_blank"
             download="题库导入模板.xsl"
-            :href="'https://oa-file-dev.bestgrand.com.cn/5e40b6f6de9541a682924c7ba980941e.xls'"
+            :href="'https://file-test.zexueyuan.com.cn/fe942c7cee4a4f5baff6a7f94182be6d.xls'"
           >
             <el-button
               size="medium"
@@ -28,7 +29,46 @@
               style="margin-right: 10px"
             ></i>下载导入模板</el-button>
           </a>
+          </div>
+          <div class="right item">
+              <div style="text-align:center">注意事项</div>
+              <div>
+                <span>填空题:</span> 题目中三个英文状态下的下划线（shift+英文下三个下划线）为一个空格，多个以英文逗号分隔，例如：中国四大名著：___,___,___,___。多个答案以英文|分隔，例如：西游记|水浒传|红楼梦|三国演义。填空题正确答案可为空，因填空题需要人工评分允许不填，不填则评卷人无参考答案。
+              </div>
+              <div>
+                <span>多选题:</span>
+                多个答案以英文逗号分隔，例如：考试积分,培训积分。不能填写字母A,B代替答案。
+              </div>
+              <div>
+                <span>简单题:</span>
+                简答题的答案（分析）写到“试题分析”栏，正确答案栏为空，试题分析可不填，不填则评卷人无参考答案。
+              </div>
+              <div>
+                <span>判断题:</span>
+                可选答案和正确答案用字为：对或错，例如答案为：对，可参考上方示例。
+              </div>
+              <div>
+                <span>单选题:</span>
+                至少要选择一个答案，例如答案为选项A:三国演义，在正确答案处填写：三国演义，不能填写字母A代替答案。多选题同理。
+              </div>
+              <div>
+                <span> 题型分类:</span>
+                多层级分类以英文逗号分隔，例如：消防安全,人力资源部,HR招聘 。另注意：在批量导入前先在培训系统建好该试题分类和层级关系，否则自动导入未分类里。
+              </div>
+              <div>
+                <span>必填项注意:</span>
+                试题类型、试题内容为所有题型必填，选项（单选、多选、判断题必填，其他类型选填）、正确答案（单选、多选、判断题必填，其他类型选填，填空题答案可为空，因为需要人工评卷，有则评卷人可参考）。其他项为选填。
+              </div>
+              <div>
+                <span>试题分数:</span>
+                试题分数选填，试题不录入分数，在组卷时需要人工设置每题分数。
+              </div>
+              <div>
+                每个试题类型样式可参考导入模板的示例。
+              </div>
+          </div>
         </div>
+
         <div class="section">
           <p class="title">
             2.上传填好的表格
@@ -139,6 +179,7 @@
 </template>
 
 <script>
+import { exportToExcel } from '@/util/util'
 import { QUESTION_IMPORT_URL } from './config'
 import { uploadQuestionFile, exportErrorReport } from '@/api/examManage/question'
 const TABLE_CONFIG = {}
@@ -226,18 +267,7 @@ export default {
     },
     downloadFile() {
       exportErrorReport().then((res) => {
-        const { data, headers } = res
-        const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
-        const blob = new Blob([data], { type: headers['content-type'] })
-        let dom = document.createElement('a')
-        let url = window.URL.createObjectURL(blob)
-        dom.href = url
-        dom.download = decodeURI(fileName)
-        dom.style.display = 'none'
-        document.body.appendChild(dom)
-        dom.click()
-        dom.parentNode.removeChild(dom)
-        window.URL.revokeObjectURL(url)
+        exportToExcel(res)
       })
     },
     handleSubmit() {
@@ -280,6 +310,25 @@ export default {
       }
       .tips {
         color: rgba(#000b15, 0.45);
+      }
+    }
+    .tip{
+      display: flex;
+      .item{
+        flex: 1;
+        color: red;
+        div{
+          line-height: 20px; 
+          margin: 10px 0;
+          span{
+            color: #000;
+            font-size: 14px;
+            margin-right:10px;
+          }
+        }
+      }
+      .left{
+        width: 300px;
       }
     }
     .footer {

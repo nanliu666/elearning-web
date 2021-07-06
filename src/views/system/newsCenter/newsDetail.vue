@@ -154,6 +154,7 @@ $color_info: #757c85
 .enclosure
   color: #757c85
   font-size: 14px
+  word-break: break-all
 .link
 
   color: #757c85

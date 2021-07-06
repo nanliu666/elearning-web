@@ -6,17 +6,16 @@
       class="header-area row-bg"
       justify="space-between"
     >
-      <el-col>
+      <el-col :span="4">
         <span class="title">统计报表</span>
       </el-col>
-
-      <el-col>
+      <el-col :span="20">
         <div class="filter-wrapper">
           <tree-selector
             class="selector"
             :options="treeOptions"
             placeholder="请选择组织"
-            :props="seletorProps"
+            :props="selectorProps"
             @getValue="selectorChange"
           />
 
@@ -330,7 +329,7 @@ export default {
         }
       },
       treeOptions: [],
-      seletorProps: {
+      selectorProps: {
         value: 'orgId',
         label: 'orgName',
         children: 'children'
@@ -417,13 +416,22 @@ export default {
     },
     getAnalysis() {
       if (this.$refs.charts) {
-        this.$refs.charts.setLoadingVisbile(true)
+        this.$nextTick(() => {
+          this.$refs.charts.setLoadingVisible(true)
+        })
       }
       analysis({ type: this.chartsType, ...this.query })
         .then((res = {}) => {
+          const {} = res
           this.chartsData = res
         })
-        .finally(() => this.$refs.charts.setLoadingVisbile(false))
+        .finally(() => {
+          if (this.$refs.charts) {
+            this.$nextTick(() => {
+              this.$refs.charts.setLoadingVisible(false)
+            })
+          }
+        })
     }
   }
 }
@@ -443,12 +451,20 @@ export default {
 <style lang="scss" scoped>
 .report {
   padding: 24px 16px;
+  ::v-deep i.el-input__icon.el-range__icon.el-icon-date {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
   .header-area {
     height: 84px;
     background: #fff;
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
     padding: 0 24px;
     border-radius: 4px;
+    /deep/.el-col {
+      margin: 0;
+    }
     .title {
       font-size: 22px;
       color: rgba(0, 11, 21, 0.85);
@@ -456,6 +472,7 @@ export default {
     .filter-wrapper {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       .selector {
         width: 355px;
         margin-right: 16px;
@@ -498,6 +515,10 @@ export default {
         width: 300px;
         float: right;
         margin-right: 60px;
+        /deep/.el-input__inner {
+          height: 36px;
+          line-height: 36px;
+        }
       }
     }
   }

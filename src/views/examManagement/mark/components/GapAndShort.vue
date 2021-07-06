@@ -171,7 +171,7 @@ export default {
     // 获取正确答案
     getCorrect() {
       // TODO: 填空题的标准答案获取
-      return _.get(this.data, 'answerQuestion', '未设置标椎答案')
+      return _.unescape(_.get(this.data, 'answerQuestion', '未设置标椎答案'))
     },
     // 获取考生答案
     getAnswerValue() {

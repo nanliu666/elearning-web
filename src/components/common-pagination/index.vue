@@ -110,6 +110,9 @@ export default {
 
 <style lang="scss">
 .pagination-container {
+  .el-select {
+    width: auto !important;
+  }
   .el-pager li {
     border-radius: 4px;
     color: rgba(0, 11, 21, 0.85);

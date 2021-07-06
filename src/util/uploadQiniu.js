@@ -16,10 +16,12 @@ export async function uploadQiniu(file, hooks) {
   const fileName = uuidv4().replace(/-/g, '') + suffix
   let observable
   let subscription
+  let chunks
   const config = {
     useCdnDomain: true
   }
   try {
+    chunks = qiniu.getHeadersForChunkUpload(uploadToken)
     // 获取token
     const { uploadToken, domain } = await getQiniuToken()
     observable = qiniu.upload(file, fileName, uploadToken, config, {
@@ -34,9 +36,26 @@ export async function uploadQiniu(file, hooks) {
   } catch (error) {
     hooks.error('token获取失败')
   }
+
   return {
     hooks,
     observable,
-    subscription
+    subscription,
+    chunks
   }
 }
+// 断点续传
+// void (async function continuationQiniu() {
+//   // const suffix = file.name.substr(file.name.lastIndexOf('.'))
+//   // const fileName = uuidv4().replace(/-/g, '') + suffix
+//   const { uploadToken, domain } = await getQiniuToken()
+//   console.log(uploadToken, domain)
+//   const params = {
+//     bucketName: 'zexueyuan-test',
+//     objName: 'testName',
+//     host: 'up-z2.qiniup.com',
+//     token: uploadToken
+//   }
+//   const res = await getQiniuUploadId(params)
+//   console.log(res)
+// })()

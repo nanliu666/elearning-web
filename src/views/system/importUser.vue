@@ -34,7 +34,7 @@
             2.上传填好的表格
           </p>
           <p>
-            <span class="tips">支持文件类型：xls，xlsx。 </span>
+            <span class="tips">支持文件类型：xls,xlsx。 </span>
             <br />
             <span class="tips"> 一次至多导入500条信息，超出信息将不予以导入。</span>
           </p>
@@ -139,6 +139,7 @@
 </template>
 
 <script>
+import { exportToExcel } from '@/util/util'
 import { QUESTION_IMPORT_URL } from './config'
 import { importUser, importUserErrorFile } from '@/api/system/user'
 const TABLE_CONFIG = {}
@@ -230,18 +231,7 @@ export default {
       importUserErrorFile({
         cacheKey: this.importRes.cacheKey
       }).then((res) => {
-        const { data, headers } = res
-        const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
-        const blob = new Blob([data], { type: headers['content-type'] })
-        let dom = document.createElement('a')
-        let url = window.URL.createObjectURL(blob)
-        dom.href = url
-        dom.download = decodeURI(fileName)
-        dom.style.display = 'none'
-        document.body.appendChild(dom)
-        dom.click()
-        dom.parentNode.removeChild(dom)
-        window.URL.revokeObjectURL(url)
+        exportToExcel(res)
       })
     },
     handleSubmit() {

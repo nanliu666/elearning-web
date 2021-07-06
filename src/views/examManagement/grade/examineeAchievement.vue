@@ -3,13 +3,40 @@
     <page-header
       title="查看考生成绩"
       show-back
-    />
-
+    >
+      <template
+        v-if="!isOnline"
+        slot="rightMenu"
+      >
+        <div class="handle__button">
+          <el-button
+            style="margin-right: 20px"
+            size="medium"
+            @click="downloadModel"
+          >
+            下载导入模板
+          </el-button>
+          <el-upload
+            accept=".xls,.xlsx"
+            action=""
+            :http-request="exportScore"
+            :show-file-list="false"
+            :auto-upload="true"
+          >
+            <el-button
+              size="medium"
+              type="primary"
+            >
+              导入成绩
+            </el-button>
+          </el-upload>
+        </div>
+      </template>
+    </page-header>
     <basic-container block>
       <common-table
-        id="demo"
         ref="table"
-        :columns="columnsVisible | columnsFilter"
+        :columns="tableColumns | columnsFilter(columnsVisible)"
         :config="tableConfig"
         :page="page"
         :data="tableData"
@@ -25,8 +52,25 @@
                   ref="searchPopover"
                   :require-options="searchConfig.requireOptions"
                   :popover-options="searchConfig.popoverOptions"
+                  :has-slot-right="searchConfig.hasSlotRight"
                   @submit="handleSearch"
-                />
+                >
+                  <template>
+                    <div style="display: inline-block;margin-left: 20px">
+                      <span>考试通过条件：</span>
+                      <span>{{
+                        `${passType == 1 ? `${passScope}分` : `${passPercentage}分`}以上`
+                      }}</span>
+                    </div>
+                    <div
+                      v-if="!isOnline"
+                      style="display: inline-block;margin-left: 20px"
+                    >
+                      <span>试卷总分：</span>
+                      <span>{{ `${totalScope ? `${totalScope}分` : '改卷未设置总分'}` }}</span>
+                    </div>
+                  </template>
+                </search-popover>
                 <div
                   class="refresh-container"
                   @click="loadTableData"
@@ -89,6 +133,7 @@
         v-if="visible"
         :visible.sync="visible"
         :row="row"
+        :is-online="isOnline"
         @loadData="loadTableData"
       ></examineeDialog>
     </basic-container>
@@ -96,23 +141,79 @@
 </template>
 
 <script>
-import { getExamineeAchievement } from '@/api/examManagement/achievement'
+import { exportToExcel } from '@/util/util'
+import {
+  getExamineeAchievement,
+  getPaperinfo,
+  getOfflineExamineeAchievement,
+  exportModel,
+  importOffline
+} from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
 import examineeDialog from './compoments/examineeDialog'
 import moment from 'moment'
-const TABLE_COLUMNS = [
+// 离线配置
+const OFFLINE_COLUMNS = [
+  {
+    label: '姓名',
+    prop: 'userName',
+    fixed: true,
+    minWidth: 150
+  },
+  {
+    label: '手机号码',
+    prop: 'phoneNumber',
+    minWidth: 120
+  },
+  {
+    label: '所在部门',
+    prop: 'orgName',
+    minWidth: 150,
+    formatter: (row) => (row.orgName ? row.orgName : '无部门')
+  },
+  {
+    label: '成绩',
+    slot: true,
+    prop: 'score',
+    minWidth: 120
+  },
+  {
+    label: '是否通过',
+    prop: 'isPass',
+    minWidth: 120,
+    formatter: (row) => {
+      return (
+        {
+          '1': '是',
+          '0': '否'
+        }[row.isPass] || ''
+      )
+    }
+  }
+]
+// 由于后端要求前端更换，所以搞出一个总的配置表，用于列的显示
+const TATOL_COLUMNS = [
+  {
+    label: '姓名',
+    prop: 'userName',
+    fixed: true,
+    minWidth: 150
+  },
+  {
+    label: '手机号码',
+    prop: 'phoneNumber',
+    minWidth: 120
+  },
   {
     label: '姓名',
     prop: 'name',
-    slot: true,
     fixed: true,
     minWidth: 150
   },
   {
     label: '手机号码',
     prop: 'phoneNum',
-    slot: true,
     minWidth: 120
   },
   {
@@ -140,12 +241,6 @@ const TABLE_COLUMNS = [
     label: '成绩',
     slot: true,
     prop: 'score',
-    minWidth: 120
-  },
-  {
-    label: '试卷总分',
-    slot: true,
-    prop: 'totalScore',
     minWidth: 120
   },
   {
@@ -178,6 +273,76 @@ const TABLE_COLUMNS = [
     }
   }
 ]
+// 在线配置
+const ONLINE_COLUMNS = [
+  {
+    label: '姓名',
+    prop: 'name',
+    fixed: true,
+    minWidth: 150
+  },
+  {
+    label: '手机号码',
+    prop: 'phoneNum',
+    minWidth: 120
+  },
+  {
+    label: '所在部门',
+    prop: 'orgName',
+    minWidth: 150,
+    formatter: (row) => (row.orgName ? row.orgName : '无部门')
+  },
+  {
+    label: '考试时间',
+    prop: 'examTime',
+    minWidth: 350
+  },
+  {
+    label: '答卷时间（分钟）',
+    prop: 'answerTime',
+    minWidth: 150,
+    formatter: (row) => {
+      const timeList = _.split(row.examTime, '~')
+      const timeDiff = Math.ceil(moment(timeList[1]).diff(moment(timeList[0]), 'seconds') / 60)
+      return timeDiff
+    }
+  },
+  {
+    label: '成绩',
+    slot: true,
+    prop: 'score',
+    minWidth: 120
+  },
+  {
+    label: '是否通过',
+    prop: 'isPass',
+    minWidth: 120,
+    formatter: (row) => {
+      return (
+        {
+          '1': '是',
+          '0': '否'
+        }[row.isPass] || ''
+      )
+    }
+  },
+  {
+    label: '状态',
+    prop: 'status',
+    minWidth: 120,
+    formatter: (row) => {
+      return (
+        {
+          '1': '已发布',
+          '2': '考试中',
+          '3': '已提交',
+          '4': '阅卷中',
+          '5': '已阅卷'
+        }[row.status] || ''
+      )
+    }
+  }
+]
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
@@ -189,24 +354,104 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
-// 1-已发布 2-已提交 3-已阅卷 4-考试中 5-阅卷中
+// 答卷状态: 1-已发布 2-考试中 3-已提交 4-阅卷中 5-已阅卷
 const status = [
   { label: '已发布', value: '1' },
-  { label: '已提交', value: '2' },
-  { label: '已阅卷', value: '3' },
-  { label: '考试中', value: '4' },
-  { label: '阅卷中', value: '5' }
+  { label: '考试中', value: '2' },
+  { label: '已提交', value: '3' },
+  { label: '阅卷中', value: '4' },
+  { label: '已阅卷', value: '5' }
 ]
+const SEARCH_CONFIG = {
+  requireOptions: [
+    {
+      type: 'input',
+      field: 'search',
+      label: '',
+      data: '',
+      options: [],
+      config: { placeholder: '输入考生姓名或手机搜索', 'suffix-icon': 'el-icon-search' }
+    }
+  ],
+  popoverOptions: [
+    {
+      type: 'treeSelect',
+      // data多选是数组单选是字符串
+      data: [],
+      label: '所在部门',
+      field: 'orgId',
+      arrField: 'orgId',
+      config: {
+        multiple: true,
+        selectParams: {
+          placeholder: '请输入内容',
+          multiple: true
+        },
+        treeParams: {
+          data: [],
+          'check-strictly': true,
+          'default-expand-all': false,
+          'expand-on-click-node': false,
+          clickParent: true,
+          filterable: false,
+          props: {
+            children: 'children',
+            label: 'orgName',
+            disabled: 'disabled',
+            value: 'orgId'
+          }
+        }
+      }
+    },
+    {
+      type: 'numInterval',
+      field: 'minAchievement,maxAchievement',
+      data: {},
+      label: '成绩',
+      options: [],
+      config: { optionLabel: 'name', optionValue: 'userId' },
+      loading: false,
+      noMore: false
+    },
+    {
+      type: 'select',
+      field: 'status',
+      label: '答卷状态',
+      data: '',
+      options: status
+    },
+    {
+      type: 'select',
+      field: 'isPass',
+      label: '是否通过',
+      data: '',
+      options: [
+        { value: '1', label: '是' },
+        { value: '0', label: '否' }
+      ]
+    }
+  ],
+  hasSlotRight: true
+}
 export default {
   name: 'ExamineeAchievement',
   components: { SearchPopover, examineeDialog },
   filters: {
     // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+    columnsFilter: (columns, visibleColProps) =>
+      _.filter(columns, ({ prop }) => _.includes(visibleColProps, prop))
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
   },
   data() {
     return {
+      uploadList: [],
+      passType: 1,
+      passScope: 60,
+      passPercentage: 80,
+      totalScope: 100,
       row: {},
       visible: false,
       page: {
@@ -217,90 +462,70 @@ export default {
       tableLoading: false,
       tableData: [],
       tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+      tableColumns: TATOL_COLUMNS,
+      columnsVisible: _.map(TATOL_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
-      searchConfig: {
-        requireOptions: [
-          {
-            type: 'input',
-            field: 'search',
-            label: '',
-            data: '',
-            options: [],
-            config: { placeholder: '输入考生姓名或手机搜索', 'suffix-icon': 'el-icon-search' }
-          }
-        ],
-        popoverOptions: [
-          {
-            type: 'treeSelect',
-            // data多选是数组单选是字符串
-            data: [],
-            label: '所在部门',
-            field: 'orgName',
-            arrField: 'orgId',
-            config: {
-              multiple: true,
-              selectParams: {
-                placeholder: '请输入内容',
-                multiple: true
-              },
-              treeParams: {
-                data: [],
-                'check-strictly': true,
-                'default-expand-all': false,
-                'expand-on-click-node': false,
-                clickParent: true,
-                filterable: false,
-                props: {
-                  children: 'children',
-                  label: 'orgName',
-                  disabled: 'disabled',
-                  value: 'orgId'
-                }
-              }
-            }
-          },
-          {
-            type: 'numInterval',
-            field: 'minAchievement,maxAchievement',
-            data: {},
-            label: '成绩',
-            options: [],
-            config: { optionLabel: 'name', optionValue: 'userId' },
-            loading: false,
-            noMore: false
-          },
-          {
-            type: 'select',
-            field: 'status',
-            label: '答卷状态',
-            data: '',
-
-            options: status
-          },
-          {
-            type: 'select',
-            field: 'isPass',
-            label: '是否通过',
-            data: '',
-            options: [
-              { value: '1', label: '是' },
-              { value: '0', label: '否' }
-            ]
-          }
-        ]
-      },
+      searchConfig: SEARCH_CONFIG,
       data: [],
       createOrgDailog: false,
       searchParams: {}
     }
   },
+  computed: {
+    // general在线模式，offline线下模式
+    isOnline() {
+      return _.get(this.$route, 'query.examPattern') === 'general'
+    }
+  },
+  watch: {
+    isOnline: {
+      handler(val) {
+        // 在线配置
+        if (val) {
+          this.tableColumns = ONLINE_COLUMNS
+        } else {
+          this.tableColumns = OFFLINE_COLUMNS
+          const statusFieldIndex = _.findIndex(this.searchConfig.popoverOptions, {
+            field: 'status'
+          })
+          this.searchConfig.popoverOptions.splice(statusFieldIndex, 1)
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   activated() {
     this.loadTableData()
     this.getOrgTree()
+    getPaperinfo({ examId: this.$route.query.id }).then((res) => {
+      const { passPercentage, passScope, passType, totalScope } = res
+      this.passType = passType
+      this.passScope = passScope
+      this.passPercentage = passPercentage
+      this.totalScope = totalScope
+    })
   },
   methods: {
+    downloadModel() {
+      exportModel({ examId: this.$route.query.id }).then((res) => {
+        exportToExcel(res)
+      })
+    },
+    exportScore(file) {
+      this.tableLoading = true
+      let formdata = new FormData()
+      formdata.append('file', file.file)
+      formdata.append('examId', this.$route.query.id)
+      importOffline(formdata)
+        .then(() => {
+          this.tableLoading = false
+          this.loadTableData()
+        })
+        .finally(() => {
+          this.tableLoading = false
+        })
+    },
     /**
      * 获取用人部门
      */
@@ -329,11 +554,17 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        getExamineeAchievement(
-          _.assign(params, this.page, { pageNo: this.page.currentPage, id: this.$route.query.id })
+        const loadFun = this.isOnline ? getExamineeAchievement : getOfflineExamineeAchievement
+        loadFun(
+          _.assign(params, {
+            pageNo: this.page.currentPage,
+            pageSize: this.page.pageSize,
+            id: this.$route.query.id
+          })
         ).then((res) => {
-          this.tableData = res.data
-          this.page.total = res.totalNum
+          const { data, totalNum } = res
+          this.tableData = data
+          this.page.total = totalNum
           this.tableLoading = false
         })
       } catch (error) {
@@ -344,7 +575,10 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      this.searchParams = params
+      const orgNameIds = _.join(params.orgId, ',')
+      let tempParams = _.cloneDeep(params)
+      tempParams.orgId = orgNameIds
+      this.searchParams = tempParams
       this.page.currentPage = 1
       this.loadTableData()
     }
@@ -356,6 +590,9 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
+}
+.handle__button {
+  display: flex;
 }
 
 .originColumn {

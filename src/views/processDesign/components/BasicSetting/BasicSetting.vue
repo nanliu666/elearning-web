@@ -8,6 +8,7 @@
       <template slot="processVisible">
         <user-picker
           v-model="conf.processVisible"
+          :use-type="'process'"
           title="适用范围"
         />
       </template>
@@ -44,6 +45,48 @@
           </el-tooltip>
         </el-checkbox>
       </template>
+      <template slot="processMap">
+        <div class="processMapTip">
+          <div class="processMapTip2">
+            <el-tooltip placement="top">
+              <div slot="content">
+                设置该流程适用的预算范围，若人员提交的申请预算在该范围内，则适用该流程
+              </div>
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </div>
+        </div>
+        <div class="budgetCla">
+          <el-input-number
+            v-model="conf.processMap.min"
+            prefix-icon="iconfont iconrmb money"
+            :min="0"
+            :precision="2"
+            :max="100000000000"
+          ></el-input-number>
+          <!-- <el-input
+            v-model="conf.processMap.min"
+            prefix-icon="iconfont iconrmb money"
+            placeholder=""
+          ></el-input> -->
+          <div class="budContnet">
+            <span v-if="conf.categoryId == 2">≤人均预算＜</span>
+            <span v-if="conf.categoryId == 10">≤费用预算＜</span>
+          </div>
+          <el-input-number
+            v-model="conf.processMap.max"
+            prefix-icon="iconfont iconrmb money"
+            :min="0"
+            :precision="2"
+            :max="100000000000"
+          ></el-input-number>
+          <!-- <el-input
+            v-model="conf.processMap.max"
+            prefix-icon="iconfont iconrmb money"
+            placeholder=""
+          ></el-input> -->
+        </div>
+      </template>
     </commonForm>
   </div>
 </template>
@@ -64,6 +107,26 @@ export default {
       columns
     }
   },
+  watch: {
+    'conf.categoryId'(val) {
+      // 适用预算范围显示和隐藏
+      var processMap = this.columns.find((item) => item.prop === 'processMap')
+      if (val == '2' || val == '10') {
+        processMap.isHidden = false
+      } else {
+        processMap.isHidden = true
+      }
+    }
+  },
+  destroyed() {
+    // 重置是否显示：适用预算范围
+    let processMap = this.columns.find((item) => item.prop === 'processMap')
+    if (processMap) {
+      processMap.isHidden = true
+      this.conf.processMap.min = 0
+      this.conf.processMap.max = 0
+    }
+  },
   mounted() {},
   methods: {
     // 给父级页面提供得获取本页数据得方法
@@ -73,6 +136,18 @@ export default {
           .validate()
           .then((valid) => {
             if (!valid) {
+              reject({ target: this.tabName })
+              return
+            }
+            if (
+              (this.conf.categoryId == '2' || this.conf.categoryId == '10') &&
+              (typeof this.conf.processMap.max == 'undefined' ||
+                typeof this.conf.processMap.min == 'undefined')
+            ) {
+              this.$message({
+                message: '请填写：适用预算范围',
+                type: 'warning'
+              })
               reject({ target: this.tabName })
               return
             }
@@ -98,5 +173,42 @@ export default {
   /deep/.el-form--label-top .el-form-item__label {
     padding-bottom: 0;
   }
+}
+.processMapTip {
+  position: absolute;
+}
+.processMapTip2 {
+  position: relative;
+  top: -28px;
+  left: 100px;
+}
+.processMapTip2 i {
+  color: #606266;
+}
+.budgetCla {
+  display: flex;
+  height: 42px;
+}
+.budgetCla /deep/.el-input-number__decrease,
+.budgetCla /deep/ .el-input-number__increase {
+  height: 32px;
+}
+.budgetCla .budContnet {
+  padding: 0 20px;
+}
+.budgetCla /deep/.el-input-number .el-input::before {
+  content: '\e653';
+  position: absolute;
+  left: 40px;
+  font-size: 18px;
+  font-family: 'iconfont' !important;
+}
+.budgetCla /deep/.el-input-number--medium .el-input__inner {
+  padding-left: 58px;
+  padding-right: 58px;
+}
+.setting-container /deep/ .money {
+  font-size: 18px;
+  color: #666;
 }
 </style>

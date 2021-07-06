@@ -31,9 +31,7 @@ import { getStore } from '@/util/store'
 export default {
   name: 'Logo',
   data() {
-    return {
-      isOrgIdE: false
-    }
+    return {}
   },
   computed: {
     logoImg() {
@@ -47,16 +45,14 @@ export default {
       let envC = process.env
       return envC.VUE_APP_ENV
     },
+    isOrgIdE() {
+      return _.includes(this.orgIdsD, '5263')
+    },
     // orgId() {
     //   let userInfo = getStore({ name: 'userInfo' })
     //   return userInfo.org_id
     // },
     ...mapGetters(['website', 'keyCollapse', 'tenantContent', 'orgIds', 'diyInfor'])
-  },
-  watch: {
-    orgIds(val) {
-      this.isOrgIdE = val.indexOf('5263') !== -1 ? true : false
-    }
   },
   created() {
     this.isOrgIdEFn()
@@ -67,7 +63,6 @@ export default {
       // 获取用户的组织id（包括当前和当前以上的），存放在localstore，vuex
       let orgIdsVuex = this.orgIds
       this.orgIdsD = orgIdsVuex || getStore({ name: 'orgIds' })
-      this.isOrgIdE = this.orgIdsD.indexOf('5263') !== -1 ? true : false
     },
     goWork() {
       this.$router.replace({ path: '/wel' })
@@ -90,11 +85,14 @@ export default {
 .avue-logo {
   cursor: pointer;
   font-size: 20px;
-
+  text-align: center;
+  padding: 20px 0 !important;
   img {
     // display: block;
-    max-width: 100%;
+    // max-width: 100%;
     // max-height: 50px;
+    height: 40px;
+    width: 180px;
   }
 }
 </style>

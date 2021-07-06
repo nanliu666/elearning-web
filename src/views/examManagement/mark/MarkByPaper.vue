@@ -87,7 +87,7 @@
             <span>
               <span class="label">标准答案：</span>
               <span class="value is-correct">{{
-                _.get(qustionList, '[0].answerQuestion', '未设置标椎答案')
+                _.unescape(_.get(qustionList, '[0].answerQuestion', '未设置标椎答案'))
               }}</span>
             </span>
           </div>
@@ -229,7 +229,7 @@ const SOURCE = [
   }
 ]
 import {
-  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MAP_TOTAL,
   QUESTION_TYPE_BLANK,
   QUESTION_TYPE_SHOER,
   QUESTION_TYPE_GROUP
@@ -254,7 +254,7 @@ export default {
   },
   filters: {
     typeFilter(data) {
-      return QUESTION_TYPE_MAP[data]
+      return QUESTION_TYPE_MAP_TOTAL[data]
     },
     number2zhcn(index) {
       return nzhcn.encodeS(index)
@@ -288,7 +288,6 @@ export default {
   computed: {
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {

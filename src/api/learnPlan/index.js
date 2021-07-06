@@ -28,7 +28,7 @@ export const getAllCatalog = (params) =>
  * 新增分组分类
  * @param {Object} params - 参数
  * */
-export const addCatalog = (params) => post('/api/manage/v1/study/plan/catalog/addCatalog', params)
+// export const addCatalog = (params) => post('/api/manage/v1/study/plan/catalog/addCatalog', params)
 
 /**
  * 删除分组分类
@@ -128,3 +128,42 @@ export const getCourseList = (params) => get('/api/manage/v1/course/getCourseLis
  * */
 export const getCourseExam = (params) =>
   get('/api/manage/v1/study/plan/queryCourseRelatedExam', params)
+
+/**
+ * 修改分类状态
+ * @param {Object} params - 参数
+ * */
+export const updateCategoryStatus = (data) =>
+  post('/api/blade-manage/v1/study/plan/catalog/updateCategoryStatus', data)
+
+/**
+ * 分类新增
+ * @param {Object} params - 参数
+ * */
+export const addCatalog = (data) => post('/api/blade-manage/v1/study/plan/catalog/addCatalog', data)
+/**
+ * 分类编辑
+ * @param {Object} params - 参数
+ * */
+export const editCategory = (data) =>
+  post('/api/blade-manage/v1/study/plan/catalog/editCategory', data)
+/**
+ * 分类删除
+ * @param {Object} params - 参数
+ * */
+export const deleteCategory = (params) =>
+  get('/api/blade-manage/v1/study/plan/catalog/deleteCategory', params)
+/**
+ * 查询树状分类
+ * @param {Object} params - 参数
+ * */
+export const getCategoryTree = (params) =>
+  get('/api/blade-manage/v1/study/plan/catalog/getCategoryTree', params)
+
+export const participantOrgs = (params) => get('/api/manage/v1/study/plan/participantOrgs', params)
+
+export const participantPositions = (params) =>
+  get('/api/manage/v1/study/plan/participantPositions', params)
+
+export const participantUsers = (params) =>
+  get('/api/manage/v1/study/plan/participantUsers', params)

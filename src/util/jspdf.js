@@ -35,6 +35,11 @@ PDF.install = function(Vue, rootOptions = {}) {
         canvas1 = document.createElement('canvas'),
         height
       pdf.setDisplayMode('fullwidth', 'continuous', 'FullScreen')
+      function savePdf() {
+        pdf.save(`${name}.pdf`, { returnPromise: true }).then(() => {
+          loadingInstance && loadingInstance.close()
+        })
+      }
       function createImpl(canvas) {
         // console.log(leftHeight, a4HeightRef)
         if (leftHeight > 0) {
@@ -92,8 +97,7 @@ PDF.install = function(Vue, rootOptions = {}) {
           if (leftHeight > 0) {
             setTimeout(createImpl, 500, canvas)
           } else {
-            pdf.save(name + '.pdf')
-            loadingInstance && loadingInstance.close()
+            savePdf()
           }
         }
       }
@@ -101,7 +105,7 @@ PDF.install = function(Vue, rootOptions = {}) {
       //当内容未超过pdf一页显示的范围，无需分页
       if (leftHeight < a4HeightRef) {
         pdf.addImage(pageData, 'JPEG', 0, 0, a4Width, (a4Width / canvas.width) * leftHeight)
-        pdf.save(name + '.pdf')
+        savePdf()
       } else {
         try {
           pdf.deletePage(0)

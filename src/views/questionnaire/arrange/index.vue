@@ -89,7 +89,7 @@
                 >
                   <el-select
                     v-model="queryForm.subjectName"
-                    v-el-select-loadmore="loadmoreSubject"
+                    v-el-select-loadmore="loadMoreSubject"
                     style="width: 457px;"
                     clearable
                     filterable
@@ -365,7 +365,7 @@
               <el-button
                 v-p="EDIT_ARRANGE"
                 type="text"
-                size="small"
+                size="medium"
                 @click="handleEdit(scope.row)"
               >
                 编辑
@@ -373,7 +373,7 @@
               <el-button
                 v-p="DELETE_ARRANGE"
                 type="text"
-                size="small"
+                size="medium"
                 :loading="scope.row.deleteLoading"
                 @click="handleDelete(scope.row)"
               >
@@ -386,7 +386,7 @@
               >
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                 >
                   更多<i class="el-icon-arrow-more"></i>
                 </el-button>
@@ -394,14 +394,14 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
                     v-p="START_ARRANGE"
-                    :disabled="shouldbeDisabled(scope.row)"
+                    :disabled="shouldDisabled(scope.row) || scope.row.status != 1"
                     @click.native="handleStatusChange(scope.row.id, 2, scope.row.planName)"
                   >
                     开始
                   </el-dropdown-item>
                   <el-dropdown-item
                     v-p="PAUSE_ARRANGE"
-                    :disabled="shouldbeDisabled(scope.row)"
+                    :disabled="shouldDisabled(scope.row) || scope.row.status != 2"
                     @click.native="handleStatusChange(scope.row.id, 1, scope.row.planName)"
                   >
                     暂停
@@ -609,7 +609,7 @@ export default {
     this.getData()
   },
   methods: {
-    loadmoreSubject() {
+    loadMoreSubject() {
       if (this.subjectLoading) return
       this.subjectQuery.currentPage++
       this.remoteMethod(true)
@@ -649,7 +649,7 @@ export default {
         }
       })
     },
-    shouldbeDisabled(item) {
+    shouldDisabled(item) {
       const { option } = item
       if (option == 0) return true
       if (item.status == 1) {
@@ -758,7 +758,7 @@ export default {
       })
     },
     handleDelete(target) {
-      if (target.status == 2) {
+      if (target.status === 2) {
         this.$alert('你选择的问卷安排正在进行中，不能进行删除操作！', '提醒', {
           confirmButtonText: '确认',
           type: 'warning'
@@ -773,7 +773,6 @@ export default {
       })
         .then(() => {
           let ids = target ? [target] : this.multipleSelection
-
           ids = ids.map((item) => item.id).join('')
           if (target) {
             target.deleteLoading = true
@@ -782,6 +781,7 @@ export default {
           }
           deleteQuestionnaire({ ids })
             .then(() => {
+              this.getList()
               this.$message.success('删除成功')
             })
             .finally(() => {
@@ -796,7 +796,6 @@ export default {
     },
     getData() {
       this.getList()
-
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
         this.selectorData = res
       })

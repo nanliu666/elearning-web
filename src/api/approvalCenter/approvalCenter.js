@@ -54,4 +54,4 @@ export const fulllist = (params) => get('/api/appr/v2/appr/approve/fulllist', pa
  * 课程审核列表-撤回
  * @param {String} params.processInstanceId
  * */
-export const cancel = (params) => get('/api/appr/v2/appr/approve/course/cancel', params)
+export const cancel = (params) => post('/api/appr/v2/appr/apply/cancel', params)

@@ -1,6 +1,27 @@
 <template>
   <div class="question-list  fill">
     <page-header title="积分台账">
+      <el-dropdown
+        slot="rightMenu"
+        v-p="ADD_CREDIT_DETAIL"
+        @command="createCredit"
+      >
+        <el-button
+          type="primary"
+          size="medium"
+        >
+          添加积分
+          <i class="el-icon-arrow-down el-icon--right" />
+        </el-button>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="once">
+            单次添加
+          </el-dropdown-item>
+          <el-dropdown-item command="batch">
+            批量导入
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </page-header>
     <el-row
       style="height: calc(100% - 92px);"
@@ -29,7 +50,7 @@
             @node-click="nodeClick"
           >
             <span
-              slot-scope="{ node, data }"
+              slot-scope="{ data }"
               class="custom-tree-node"
             >
               <span>{{ data.orgName }}{{ '  ' }} ({{
@@ -96,12 +117,15 @@
         </basic-container>
       </el-col>
     </el-row>
+    <add-credit-dialog
+      :visible.sync="dialogVisible"
+      @updateTable="loadData"
+    />
   </div>
 </template>
 
 <script>
 import { getListScoreDetails } from '@/api/credit/credit'
-import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 import { getOrganization } from '@/api/system/user'
 const COLUMNS = [
@@ -148,15 +172,17 @@ const COLUMNS = [
     align: 'center'
   }
 ]
-import { VIEW_CREDIT } from '@/const/privileges'
+import { VIEW_CREDIT, ADD_CREDIT_DETAIL } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'Credit',
   components: {
+    AddCreditDialog: () => import('./components/addCreditDialog.vue'),
     SearchPopover: () => import('@/components/searchPopOver/index')
   },
   data() {
     return {
+      dialogVisible: false,
       outerUserCount: 0,
       loading: false,
       treeData: [], // 组织架构数据
@@ -218,9 +244,8 @@ export default {
   },
   computed: {
     columns: () => COLUMNS,
-    QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     VIEW_CREDIT: () => VIEW_CREDIT,
+    ADD_CREDIT_DETAIL: () => ADD_CREDIT_DETAIL,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -232,7 +257,6 @@ export default {
       deep: true
     },
     treeSearch(val) {
-      console.log('val:', val)
       this.$refs.categoryTree.filter(val)
     }
   },
@@ -245,6 +269,22 @@ export default {
     this.getOuterNum()
   },
   methods: {
+    createCredit($event) {
+      switch ($event) {
+        case 'once':
+          this.onceFun()
+          break
+        default:
+          this.batchFun()
+          break
+      }
+    },
+    onceFun() {
+      this.dialogVisible = true
+    },
+    batchFun() {
+      this.$router.push({ path: '/creditManagement/creditImport' })
+    },
     loadTree(parentOrgId = '0') {
       this.treeLoading = true
       getOrganization({ parentOrgId })
@@ -296,8 +336,9 @@ export default {
     handleSubmitSearch(params) {
       this.page.currentPage = 1
       let currentParam = {
-        likeQuery: params.search
-        // userId:params.search
+        likeQuery: params.search,
+        startTime: params.startTime,
+        endTime: params.endTime
       }
 
       this.query = { ...currentParam }

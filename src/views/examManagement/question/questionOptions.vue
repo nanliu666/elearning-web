@@ -26,16 +26,28 @@
           maxlength="150"
           placeholder="请输入选项内容"
         ></el-input>
-        <i
-          v-if="value.length > 2"
-          class="iconimage_icon_deletetheselectedentry1 iconfont"
-          @click="handleRemoveOption(option)"
-        ></i>
-        <i
-          v-if="index === value.length - 1 && value.length < 10"
-          class="iconimage_icon_Addoptions1 iconfont"
-          @click="handleAddOption"
-        ></i>
+        <span>
+          <i
+            v-if="value.length > 2"
+            class="iconimage_icon_deletetheselectedentry1 iconfont"
+            @click="handleRemoveOption(option)"
+          />
+          <i
+            v-else
+            class="iconimage_icon_deletetheselectedentry1 iconfont disabled"
+          />
+        </span>
+        <span>
+          <i
+            v-if="index === value.length - 1 && value.length < 10"
+            class="iconimage_icon_Addoptions1 iconfont"
+            @click="handleAddOption"
+          ></i>
+          <i
+            v-else
+            class="iconimage_icon_Addoptions1 iconfont disabled"
+          />
+        </span>
       </div>
       <div class="upload__wrapper">
         <common-upload
@@ -47,10 +59,10 @@
         >
           <template #default>
             <el-button
+              v-if="_.size(option.fileList) === 0"
               size="medium"
               type="text"
               class="upload__btn"
-              :style="`${_.size(option.fileList) !== 0 ? 'color:#C0C4CC;' : ''}`"
               @click="handleClick($event, option)"
             >
               添加图片
@@ -124,6 +136,17 @@ export default {
       viewingUrl: ''
     }
   },
+  watch: {
+    // 当数据变化立即触发校验
+    value: {
+      handler() {
+        if (this.validateEvent) {
+          this.dispatch('ElFormItem', 'el.form.change', this.value)
+        }
+      },
+      deep: true
+    }
+  },
   methods: {
     onUploadExceed() {
       this.$message.warning('选项图片只能上传一张')
@@ -136,6 +159,7 @@ export default {
     handleUpload(val, item) {
       item.fileList = val
       item.url = _.head(val).url
+      this.$forceUpdate()
     },
     beforeUpload(file, option) {
       const regx = /^.*\.(png|jpg|jpeg)$/
@@ -157,6 +181,7 @@ export default {
     handleRemoveAttachment(option) {
       option.fileList = []
       option.url = ''
+      this.$forceUpdate()
     },
     handlePreviewImage(option) {
       this.viewing = true
@@ -168,18 +193,12 @@ export default {
           item.isCorrect = 0
         }
       })
-      if (this.validateEvent) {
-        this.dispatch('ElFormItem', 'el.form.change', this.value)
-      }
     },
     handleRemoveOption(option) {
       this.$emit(
         'input',
         _.filter(this.value, (item) => item.key !== option.key)
       )
-      if (this.validateEvent) {
-        this.dispatch('ElFormItem', 'el.form.change', this.value)
-      }
     },
     handleAddOption() {
       this.value.push({
@@ -210,6 +229,10 @@ export default {
         color: #8c9195;
         font-size: 20px;
         cursor: pointer;
+      }
+      .disabled {
+        cursor: default;
+        color: #dbdbdb;
       }
     }
     .el-radio {

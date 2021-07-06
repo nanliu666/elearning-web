@@ -106,6 +106,11 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
+    label: '所属组织',
+    prop: 'orgScopeName',
+    minWidth: 150
+  },
+  {
     label: '状态',
     prop: 'status',
     formatter: (row) => (row.status == 0 ? '已停用' : '已启用'),
@@ -233,7 +238,7 @@ export default {
   },
   activated() {
     getCreatorList({ source: 'teacher' }).then((res) => {
-      this.searchConfig.popoverOptions[1].options.push(...res)
+      this.searchConfig.popoverOptions[1].options = [...res]
     })
     this.loadTableData()
   },

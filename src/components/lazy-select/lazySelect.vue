@@ -85,6 +85,10 @@ export default {
       type: Function,
       default: () => {}
     },
+    payloadParams: {
+      type: Object,
+      default: () => {}
+    },
     placeholder: {
       type: String,
       default: '请选择'
@@ -113,6 +117,14 @@ export default {
       noMore: false,
       pageNo: 1,
       search: ''
+    }
+  },
+  watch: {
+    payloadParams: {
+      handler() {
+        this.loadOptionData(true)
+      },
+      deep: true
     }
   },
   created() {
@@ -147,8 +159,9 @@ export default {
         this.pageNo = 1
       }
       this.loading = true
-
-      this.load({ pageNo: this.pageNo, pageSize: this.pageSize, search: this.search })
+      const basicParams = { pageNo: this.pageNo, pageSize: this.pageSize, search: this.search }
+      const params = _.assign(basicParams, this.payloadParams)
+      this.load(params)
         .then((res) => {
           this.pageNo += 1
           if (!_.isEmpty(firstOption)) {

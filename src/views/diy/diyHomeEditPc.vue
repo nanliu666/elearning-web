@@ -84,6 +84,7 @@
                 @click="checkFn($event, item, 'left')"
               >
                 <img
+                  style="width: 896px"
                   :src="`/img/${item.id}.jpg`"
                   alt=""
                 />
@@ -108,6 +109,7 @@
                 @click="checkFn($event, item, 'right')"
               >
                 <img
+                  style="width: 288px"
                   :src="`/img/${item.id}.jpg`"
                   alt=""
                 />

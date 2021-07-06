@@ -82,7 +82,6 @@
           :active-org="activeOrg"
           style="padding-right: 0"
           @refresh="loadData"
-          @orgUserListUpdate="updateOrgUserList"
         />
       </el-col>
     </el-row>
@@ -92,7 +91,7 @@
 <script>
 import { getOrganization, getOuterUser } from '@/api/system/user'
 import { mapGetters } from 'vuex'
-import { ADD_USER, IMPORT_USER } from '@/const/privileges'
+import { ADD_USER,IMPORT_USER } from '@/const/privileges'
 export default {
   name: 'User',
   components: {
@@ -131,20 +130,7 @@ export default {
   mounted() {
     this.loadData()
   },
-  beforeRouteEnter(to, from, next) {
-    if (from.path === '/system/importUser') {
-      next((vm) => {
-        vm.loadData()
-      })
-    } else {
-      next()
-    }
-  },
   methods: {
-    //如果列表删除了数据   更新父组件组织数据
-    updateOrgUserList() {
-      this.loadData()
-    },
     filterNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1
@@ -157,7 +143,7 @@ export default {
         this.$router.push('/system/editUser')
       }
     },
-    importUser() {
+    importUser(){
       this.$router.push('/system/importUser')
     },
     loadData() {

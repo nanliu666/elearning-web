@@ -15,6 +15,7 @@
           :key="index"
           class="step"
           :class="[activeStep === index ? 'active' : '']"
+          @click="changeStep(index)"
         >
           <span class="step-index">
             <i
@@ -87,13 +88,13 @@
           ref="editCourse"
           :plan-time-range="formData.timeRange"
           :plan-id="id"
+          :model="formData"
         />
         <EditPerson
           v-show="activeStep === 2"
           ref="editPerson"
           :plan-id="id"
-          :institution.sync="formData.groupPos"
-          :user-list.sync="formData.participantsList"
+          :model="formData"
         />
       </el-col>
     </el-row>
@@ -104,7 +105,14 @@
 import EditBasicInfo from './components/EditBasicInfo' // 基本信息
 import EditCourse from './components/EditCourse' // 添加课程
 import EditPerson from './components/EditPerson' // 人员信息
-import { addPlan, updatePlan, planDetail } from '@/api/learnPlan'
+import {
+  addPlan,
+  updatePlan,
+  planDetail,
+  participantOrgs,
+  participantPositions,
+  participantUsers
+} from '@/api/learnPlan'
 import { mapGetters } from 'vuex'
 import moment from 'moment'
 const REFS_LIST = ['editBasicInfo', 'editCourse', 'editPerson']
@@ -123,7 +131,16 @@ const defaultFormData = {
   participantsList: [],
   courseList: [],
   timeRange: [], // 时间范围
-  groupPos: [] //机构
+  groupPos: [], //机构
+  groupIds: [],
+  positionIds: [],
+  orgIds: [],
+  projectManagerId: '',
+  knowledgeSystemId: '',
+  score: '',
+  coverUrl: '',
+  // eslint-disable-next-line no-dupe-keys
+  groupIds: []
 }
 export default {
   name: 'EditPlan',
@@ -132,6 +149,7 @@ export default {
     EditCourse,
     EditPerson
   },
+
   data() {
     return {
       loading: false,
@@ -202,6 +220,7 @@ export default {
     },
     setupDefaultFields() {
       this.formData = _.cloneDeep(defaultFormData)
+
       this.formData.creatorName = this.userInfo.nick_name
       this.formData.coursePlanNo =
         moment().format('YYYYMMDDHHmmss') + this.userInfo.user_id.slice(0, 2)
@@ -220,6 +239,30 @@ export default {
     },
     handlePreviousStep() {
       this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
+    },
+    async changeStep(i) {
+      if (i > this.activeStep) {
+        let num = 0
+        while (num < i) {
+          await this.$refs[REFS_LIST[num]]
+            .getData()
+            .then(() => {
+              this.activeStep = num + 1
+              num++
+            })
+            .catch(() => {
+              if (num === 0) {
+                this.$message.error('请先完善基本信息')
+              }
+              if (num === 1) {
+                this.$message.error('请先完善课程信息')
+              }
+              num = 5 //跳出循环
+            })
+        }
+      } else {
+        this.activeStep = i
+      }
     },
     handleNextStep() {
       if (this.activeStep !== 2) {
@@ -240,19 +283,23 @@ export default {
     // 0-发布，1-草稿箱
     async handleSubmit(type) {
       let data = JSON.parse(JSON.stringify(this.formData))
-      const groupPos = data.groupPos || []
-      const positions = []
-      const groupIds = []
-      groupPos.forEach((item) => {
-        if (item.type == 'Position') {
-          positions.push(item.id)
-        }
-        if (item.type == 'Group') {
-          groupIds.push(item.id)
+      const participantsList = data.participantsList
+      data.positionIds = data.positionIds.map((item) => item.positionId)
+      data.orgIds = data.orgIds.map((item) => item.id)
+
+      const studyPlanId = this.id
+      data.participantsList = participantsList.map((item) => {
+        return {
+          department: item.orgName,
+          departmentId: item.orgId[0],
+          name: item.bizName,
+          phonenum: item.phoneNum,
+          workNo: item.workNo,
+          id: item.bizId,
+          studyPlanId,
+          userId: item.bizId
         }
       })
-      data.positions = positions
-      data.groupIds = groupIds
       data.startTime = _.get(data, 'timeRange[0]')
       data.endTime = _.get(data, 'timeRange[1]')
       data.type = type
@@ -263,15 +310,9 @@ export default {
           s.publishTime = +s.publishTime
         })
       })
-      data.participantsList.map((item) => {
-        item.department = item.orgName || item.department
-        item.phonenum = item.phoneNum || item.phonenum
-        delete item.orgName
-        delete item.phoneNum
-        return item
-      })
       let func
       if (this.id) {
+        data.createTime = moment().format('yyyy-MM-DD HH:mm:ss')
         func = updatePlan
       } else {
         data.creatorId = this.userInfo.user_id
@@ -306,13 +347,84 @@ export default {
           } else {
             res.timeRange = []
           }
-          this.formData = res
-          this.$refs.editCourse.setCourseList(res.courseList)
+          //如果课程有时间，回显时间
+
+          if (res.courseList.length > 0) {
+            _.forEach(res.courseList, (x) => {
+              if (x.startTime && x.endTime) {
+                x.timeRange = [x.startTime, x.endTime]
+              } else {
+                x.timeRange = []
+              }
+
+              if (x.timeList.length > 0) {
+                _.forEach(x.timeList, (y) => {
+                  if (y.startTime && y.endTime) {
+                    y.list = [y.startTime, y.endTime]
+                  } else {
+                    y.list = []
+                  }
+                })
+              }
+            })
+          }
+          this.getPersonData().then((data) => {
+            let [orgIds = [], positionIds = [], participantsList = []] = data
+            orgIds = orgIds.map((item) => {
+              const { orgId, orgName, userNum } = item
+              return {
+                name: orgName,
+                id: orgId,
+                workNum: userNum
+              }
+            })
+            positionIds = positionIds.map((item) => {
+              const { positionId, positionName, userNum } = item
+              return {
+                positionName,
+                positionId,
+                workNum: userNum
+              }
+            })
+            participantsList = participantsList.map((item) => {
+              const { department, name, phonenum, userId, workNo } = item
+              return {
+                bizName: name,
+                bizId: userId,
+                phoneNum: phonenum,
+                positionName: department,
+                workNo
+              }
+            })
+            this.formData = Object.assign(res, { orgIds, positionIds, participantsList })
+            this.$forceUpdate()
+            this.headTeacherOptions = [
+              {
+                userId: res.projectManagerId,
+                name: this.userInfo.nick_name
+              }
+            ]
+          })
         })
         .catch()
         .finally(() => {
           this.loading = false
         })
+    },
+    getPersonData() {
+      return Promise.all([
+        participantOrgs({ studyPlanId: this.id }).then((data) => {
+          return Promise.resolve(data)
+        }),
+        participantPositions({ studyPlanId: this.id }).then((data) => {
+          return Promise.resolve(data)
+        }),
+        participantUsers({ studyPlanId: this.id }).then((data) => {
+          return Promise.resolve(data)
+        })
+      ]).then((data) => {
+        return Promise.resolve(data)
+      })
     }
   }
 }

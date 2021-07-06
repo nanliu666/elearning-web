@@ -20,6 +20,16 @@
           <!-- <el-dropdown-item>Excel导入</el-dropdown-item> -->
         </el-dropdown-menu>
       </el-dropdown>
+      <el-button
+        slot="rightMenu"
+        v-p="IMPORT_ORGS"
+        style="margin-left:10px;"
+        type="primary"
+        size="medium"
+        @click="importUser"
+      >
+        导入组织
+      </el-button>
     </page-header>
 
     <basic-container block>
@@ -55,8 +65,8 @@
                 class="refresh-container btn"
                 @click="toSort"
               >
-                <i class="el-icon-sort" />
-                <span>调整排序</span>
+                <!-- <i class="el-icon-sort" />
+                <span>调整排序</span> -->
               </div>
               <el-popover
                 placement="bottom"
@@ -200,7 +210,7 @@ const TABLE_CONFIG = {
     fixed: false
   }
 }
-import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG } from '@/const/privileges'
+import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG, IMPORT_ORGS } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'OrgManagement',
@@ -271,8 +281,8 @@ export default {
             label: '组织类型',
             data: '',
             options: [
-              { value: 'Enterprise', label: '企业' },
-              { value: 'Company', label: '公司' },
+              { value: 'Enterprise', label: '公司' },
+              { value: 'Company', label: '单位' },
               { value: 'Department', label: '部门' },
               { value: 'Group', label: '小组' }
             ]
@@ -319,11 +329,12 @@ export default {
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'change' }]
       },
       createOrgDailog: false,
-      orgTypeObj: { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' },
+      orgTypeObj: { Enterprise: '公司', Company: '单位', Department: '部门', Group: '小组' },
       searchParams: { parentOrgId: 0 }
     }
   },
   computed: {
+    IMPORT_ORGS: () => IMPORT_ORGS,
     ADD_ORG: () => ADD_ORG,
     ADD_ORG_CHILD: () => ADD_ORG_CHILD,
     EDIT_ORG: () => EDIT_ORG,
@@ -353,6 +364,10 @@ export default {
     this.loadTableData()
   },
   methods: {
+    importUser() {
+      this.$router.push('/orgs/importOrg')
+    },
+
     refresh() {
       this.loadTableData()
     },

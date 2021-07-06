@@ -68,26 +68,36 @@
             </div>
           </div>
         </template>
-        <template #status="{row}">
-          {{ row.status === '0' ? '已上架' : '已下架' }}
+        <template #approveStatus="{row}">
+          {{
+            row.approveStatus === 0
+              ? '审批中'
+              : row.approveStatus === 1
+                ? row.status === '0'
+                  ? '已发布'
+                  : '已停用'
+                : row.approveStatus === 2
+                  ? '已拒绝'
+                  : '已撤销'
+          }}
         </template>
+
         <template #uploadType="{row}">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
         </template>
-        <!-- <template #tags="{row}">
-          <div v-if="_.size(row.tags) > 0">
-            <el-tag
-              v-for="(item, index) in row.tags"
-              :key="index"
-              style="margin-right: 10px"
-            >
-              {{ _.get(item, 'name', '') }}
-            </el-tag>
-          </div>
-          <div v-else>
-            {{ '' }}
-          </div>
-        </template> -->
+
+        <template #type="{row}">
+          {{ row.type === 1 ? '视频' : row.type === 2 ? '文档' : '资料下载' }}
+        </template>
+        <template #knowledgeSystemId="{row}">
+          {{
+            row.knowledgeSystemId === '0'
+              ? '大数据'
+              : row.knowledgeSystemId === '1'
+                ? '沟通技巧'
+                : '--'
+          }}
+        </template>
         <template
           slot="multiSelectMenu"
           slot-scope="{ selection }"
@@ -120,51 +130,40 @@
         <template #handler="{row}">
           <div class="handle__button">
             <el-button
+              v-if="row.approveStatus === 1"
+              v-p="PUTAWAY_REP"
+              type="text"
+              class="top__button"
+              :disabled="disabled(0, row.approveStatus)"
+              @click="handleStatus(row)"
+            >
+              {{ row.status == 0 ? '停用' : '发布' }}
+            </el-button>
+            <el-button
+              v-else
               v-p="TOP_REP"
               type="text"
               class="top__button"
-              @click="handleTop(row)"
+              :disabled="disabled(0, row.approveStatus)"
             >
-              {{ row.topTime ? '已置顶' : '置顶' }}
+              停用
             </el-button>
             <el-button
-              v-p="PUTAWAY_REP"
+              v-p="EDIT_REP"
               type="text"
-              @click="handleStatus(row)"
+              :disabled="disabled(1, row.approveStatus)"
+              @click="editFun(row)"
             >
-              {{ row.status === '0' ? '下架' : '上架' }}
+              编辑
             </el-button>
-            <el-dropdown
-              v-if="$p([EDIT_REP, DELETE_REP, MOVE_REP])"
-              @command="handleCommand($event, row)"
+            <el-button
+              v-p="DELETE_REP"
+              type="text"
+              :disabled="disabled(3, row.approveStatus)"
+              @click="delFun(row)"
             >
-              <el-button
-                type="text"
-                style="margin-left: 10px"
-              >
-                <i class="el-icon-arrow-down el-icon-more" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  v-p="EDIT_REP"
-                  command="editKnow"
-                >
-                  编辑
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="DELETE_REP"
-                  command="deleteKnow"
-                >
-                  删除
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-p="MOVE_REP"
-                  command="moveKnow"
-                >
-                  移动
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+              删除
+            </el-button>
           </div>
         </template>
       </common-table>
@@ -214,48 +213,73 @@ import {
   moveKnowledge
 } from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
-
+// const approveStatus = ['审核中', '审批通过', '已拒绝', '已撤回']
 // 表格属性
 const TABLE_COLUMNS = [
   { type: 'index', label: '序号' },
   {
-    label: '资源名称',
-    minWidth: 150,
+    label: '知识名称',
+    width: 200,
     slot: true,
     prop: 'resName'
   },
   {
     label: '状态',
     slot: true,
-    prop: 'status',
-    maxWidth: 100
+    prop: 'approveStatus'
   },
   {
     label: '所在分类',
     prop: 'catalogName',
-    minWidth: 100
+    width: 150
   },
   {
     label: '上传模式',
     slot: true,
     prop: 'uploadType',
-    minWidth: 100
+    width: 100
   },
-  // {
-  //   label: '标签',
-  //   slot: true,
-  //   prop: 'tags',
-  //   minWidth: 150
-  // },
+  {
+    label: '知识类型',
+    slot: true,
+    prop: 'type',
+    width: 100
+  },
+  {
+    label: '提供人',
+    slot: true,
+    prop: 'providerName',
+    width: 150
+  },
+  {
+    label: '提供人部门',
+    slot: true,
+    prop: 'providerOrgName',
+    width: 150
+  },
+  {
+    label: '提供人岗位',
+    slot: true,
+    prop: 'providerPosition',
+    width: 150
+  },
+  {
+    label: '知识体系',
+    slot: true,
+    prop: 'knowledgeSystemId',
+    width: 150
+  },
   {
     label: '创建人',
+    slot: true,
     prop: 'creatorName',
-    minWidth: 100
+    width: 100
   },
   {
     label: '更新时间',
+    slot: true,
     prop: 'updateTime',
-    minWidth: 100
+    width: 150
   }
 ]
 const TABLE_CONFIG = {
@@ -266,15 +290,18 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
   handlerColumn: {
-    fixed: false
-  }
+    label: '操作',
+    width: 150,
+    fixed: 'right'
+  },
+  highlightSelect: true
 }
 const TABLE_PAGE_CONFIG = {}
 
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入资源名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入知识名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
     field: 'resName',
     label: '',
@@ -284,13 +311,16 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'select',
-    field: 'status',
+    field: 'approveStatus',
     label: '状态',
     data: '',
     options: [
       { value: '', label: '全部' },
-      { value: 0, label: '上架' },
-      { value: 1, label: '下架' }
+      { value: 0, label: '审批中' },
+      { value: '1-0', label: '已发布' }, //需要传两个状态，做拆分
+      { value: '1-1', label: '已停用' },
+      { value: 2, label: '已拒绝' },
+      { value: 3, label: '已撤销' }
     ]
   },
   {
@@ -328,6 +358,57 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: '', label: '全部' },
       { value: 0, label: '本地文件' },
       { value: 1, label: '链接文件' }
+    ]
+  },
+
+  {
+    type: 'treeSelect',
+    field: 'orgId',
+    label: '部门',
+    data: '',
+    config: {
+      selectParams: {
+        placeholder: '请输入内容',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'orgName',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
+  },
+
+  {
+    type: 'select',
+    field: 'knowledgeSystemId',
+    label: '知识体系',
+    data: '',
+    options: [
+      { value: '', label: '全部' },
+      { value: 0, label: '大数据' },
+      { value: 1, label: '沟通技巧' }
+    ]
+  },
+  {
+    type: 'select',
+    field: 'type',
+    label: '知识类型',
+    data: '',
+    options: [
+      { value: '', label: '全部' },
+      { value: 1, label: '视频' },
+      { value: 2, label: '文档' },
+      { value: 3, label: '资料下载' }
     ]
   }
   // {
@@ -382,6 +463,7 @@ import {
   VIEW_REP
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -394,16 +476,21 @@ export default {
   },
   data() {
     return {
+      treeOptions: [],
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
       },
       dialogTableVisible: false,
+
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
-        return v != 'creatorName' && v != 'updateTime'
-      }),
+      // columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+      //   return v != 'creatorName' && v != 'updateTime'
+      // }),
+
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
+
       page: {
         currentPage: 1,
         size: 10,
@@ -435,7 +522,44 @@ export default {
     DELETE_REP: () => DELETE_REP,
     VIEW_REP: () => VIEW_REP,
     MOVE_REP: () => MOVE_REP,
-    ...mapGetters(['privileges'])
+    ...mapGetters(['privileges']),
+    disabled() {
+      return (type, status) => {
+        let boolean = false
+
+        switch (+status) {
+          case 0:
+            boolean = true
+            break
+          case 1:
+            boolean = false
+            break
+          case 2:
+            if (type == 3) {
+              boolean = false
+            } else {
+              boolean = true
+            }
+
+            break
+          case 3:
+            if (type == 3) {
+              boolean = false
+            } else {
+              boolean = true
+            }
+
+            break
+          case 4:
+            boolean = false
+            break
+          case 5:
+            boolean = false
+            break
+        }
+        return boolean
+      }
+    }
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
@@ -455,8 +579,22 @@ export default {
   activated() {
     this.initSearchData()
     this.refreshTableData()
+    this.getOrgTree()
   },
   methods: {
+    //获取树
+    getOrgTree() {
+      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+        this.treeOptions = res
+        let orgId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'orgId' })
+        orgId.config.treeParams.data = res
+      })
+    },
+
+    selectorChange(id) {
+      this.query.orgId = id
+      this.loadTableData()
+    },
     getCategoryList() {
       return getKnowledgeCatalogList().then((res) => {
         return _.concat(
@@ -521,7 +659,7 @@ export default {
     },
     // 上架与下架
     handleStatus(rowData) {
-      const statusTips = rowData.status === '0' ? '下架' : '上架'
+      const statusTips = rowData.status === '1' ? '发布' : '停用'
       this.$confirm(`是否${statusTips}当前资源`, '提示', {
         confirmButtonText: statusTips,
         cancelButtonText: '取消',
@@ -605,6 +743,12 @@ export default {
      * 搜索
      */
     handleSearch(searchParams) {
+      searchParams.status = ''
+      if (String(searchParams.approveStatus).indexOf('-') > -1) {
+        const statusArr = searchParams.approveStatus.split('-')
+        searchParams.approveStatus = statusArr[0]
+        searchParams.status = statusArr[1]
+      }
       this.queryInfo = _.assign(this.queryInfo, searchParams)
       this.queryInfo.pageNo = 1
       this.page.currentPage = 1
@@ -629,7 +773,20 @@ export default {
       this.tableLoading = true
       try {
         let { totalNum, data } = await getKnowledgeManageList(this.queryInfo)
-        this.tableData = data
+        // this.tableData = data
+        this.tableData = data.map((item) => {
+          if (!item.providerName) {
+            item.providerName = '--'
+          }
+          if (!item.providerOrgName) {
+            item.providerOrgName = '--'
+          }
+          if (!item.providerPosition) {
+            item.providerPosition = '--'
+          }
+          return item
+        })
+
         this.page.total = totalNum
       } catch (error) {
         // window.console.log(error)

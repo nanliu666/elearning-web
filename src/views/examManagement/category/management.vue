@@ -13,7 +13,7 @@
           题库分类
         </el-menu-item>
         <el-menu-item index="1">
-          试卷/考试分类
+          试卷/考试分类/闯关竞赛分类
         </el-menu-item>
       </el-menu>
       <common-table
@@ -66,6 +66,13 @@
               @click="handleStatus(row)"
             >
               {{ row.status === 1 ? '停用' : '启用' }}
+            </el-button>
+            <el-button
+              v-p="AUTH_EXAM_CATALOG"
+              type="text"
+              @click="handleAuth(row)"
+            >
+              权限配置
             </el-button>
             <el-dropdown
               v-if="$p([EDIT_EXAM_CATALOG, DELETE_EXAM_CATALOG, ADD_GROUNP_EXAM_CATALOG])"
@@ -123,6 +130,11 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
+    label: '所属组织',
+    prop: 'orgScopeName',
+    minWidth: 150
+  },
+  {
     label: '状态',
     prop: 'status',
     slot: true,
@@ -169,6 +181,7 @@ import styles from '@/styles/variables.scss'
 import {
   ADD_EXAM_CATALOG,
   STOP_EXAM_CATALOG,
+  AUTH_EXAM_CATALOG,
   EDIT_EXAM_CATALOG,
   DELETE_EXAM_CATALOG,
   ADD_GROUNP_EXAM_CATALOG
@@ -200,6 +213,7 @@ export default {
   computed: {
     ADD_EXAM_CATALOG: () => ADD_EXAM_CATALOG,
     STOP_EXAM_CATALOG: () => STOP_EXAM_CATALOG,
+    AUTH_EXAM_CATALOG: () => AUTH_EXAM_CATALOG,
     EDIT_EXAM_CATALOG: () => EDIT_EXAM_CATALOG,
     DELETE_EXAM_CATALOG: () => DELETE_EXAM_CATALOG,
     ADD_GROUNP_EXAM_CATALOG: () => ADD_GROUNP_EXAM_CATALOG,
@@ -211,6 +225,7 @@ export default {
       handler() {
         this.tableConfig.showHandler = this.$p([
           STOP_EXAM_CATALOG,
+          AUTH_EXAM_CATALOG,
           EDIT_EXAM_CATALOG,
           DELETE_EXAM_CATALOG,
           ADD_GROUNP_EXAM_CATALOG
@@ -232,6 +247,10 @@ export default {
       this.searchParams.type = key
       this.$refs.table.clearSelection()
       this.loadTableData()
+    },
+    // 权限配置窗口
+    handleAuth() {
+      this.$message.warning('正在开发中...')
     },
     // 多种操作
     async handleCommand($event, row) {

@@ -4,7 +4,7 @@
     class="NewsEdit wrapper"
   >
     <page-header
-      title="创建公告"
+      :title="_.get(this.$route, 'query.id') ? '编辑公告' : '创建公告'"
       :back="() => handleBack()"
       show-back
     />
@@ -21,7 +21,7 @@
             :model="formData"
             :config="{
               labelPosition: 'left',
-              labelWidth: '95px'
+              labelWidth: '120px'
             }"
           >
             <template #attachment>
@@ -29,16 +29,21 @@
                 v-model="formData.attachment"
                 multiple
                 :before-upload="beforeUpload"
+                :limit="5"
+                :disabled="formData.attachment.length >= 5 ? true : false"
+                @on-masterFileMax="attachmentLimitCallback"
               >
                 <template>
-                  <el-button
-                    size="medium"
-                    icon="el-icon-upload"
-                  >
-                    点击上传
-                  </el-button>
-                  <div class="upload__tip">
-                    单个文件大小＜5MB，最多5个文件
+                  <div style="text-align:left">
+                    <el-button
+                      size="medium"
+                      icon="el-icon-upload"
+                    >
+                      点击上传
+                    </el-button>
+                    <div class="upload__tip">
+                      单个文件大小＜5MB，最多5个文件
+                    </div>
                   </div>
                   <div>
                     <ul class="upload__files">
@@ -123,11 +128,11 @@
             }"
           >
             <template slot="isVisibles">
-              <SelectUser
+              <TrainingSelectUser
                 v-model="formData.visibles"
-                class="select"
                 title="发布范围"
-              ></SelectUser>
+                select-type="Org,OuterUser,Position"
+              />
             </template>
           </common-form>
         </div>
@@ -163,16 +168,17 @@ import Vue from 'vue'
 import { postV1News, postNewsPublish, getNewsDetail, putV1News } from '@/api/newsCenter/newCenter'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
-import SelectUser from '@/components/trainingSelectUser/trainingSelectUser'
 
 // 接口需要的参数
 const API_PARAMS = [
   'id',
   'title',
+  'outsideLink',
   'attachment',
   'content',
   'picUrl',
   'publishColumn',
+  'publishScope',
   'visibles',
   'brief',
   'userId'
@@ -194,7 +200,7 @@ export default {
   name: 'NewsEdit',
   components: {
     CommonUpload,
-    SelectUser
+    TrainingSelectUser: () => import('@/components/trainingSelectUser/trainingSelectUser')
   },
   filters: {
     filterSize(data) {
@@ -221,10 +227,20 @@ export default {
         span: 24
       },
       {
+        itemType: 'input',
+        label: '外部新闻地址',
+        maxlength: 255,
+        prop: 'outsideLink',
+        required: this.isInside(),
+        isHidden: !this.isInside(),
+        span: 24
+      },
+      {
         itemType: 'slot',
         label: '附件',
         prop: 'attachment',
         required: false,
+        isHidden: this.isInside(),
         span: 24
       },
       {
@@ -241,10 +257,11 @@ export default {
       {
         itemType: 'slot',
         label: '正文',
+        isHidden: this.isInside(),
         prop: 'content',
         rules: [
           {
-            required: true,
+            required: !this.isInside(),
             message: '请填写正文',
             trigger: 'blur'
           }
@@ -257,7 +274,6 @@ export default {
       isOrg: true,
       all: true,
       emptyText: '所有人',
-
       formColumns: FORM_COLUMNS,
       loading: false,
       formData: {
@@ -299,6 +315,9 @@ export default {
   },
 
   computed: {
+    // newsType(){ // inside 内部新闻；link 外部链接新闻
+    //   return this.$route.query.type
+    // },
     // 根据 formData.content生成brief
     brief() {
       const { content } = this.formData
@@ -318,10 +337,11 @@ export default {
       if (formData.visibles.length === 0) {
         formData.visibles = [{ type: 'All' }]
       } else {
-        let vues = ['bizId', 'bizName', 'type']
+        let vues = ['bizId', 'type']
         let visibles = []
-        formData.visibles = formData.visibles.filter((it) => {
-          let newIt = _.pick(it, vues)
+        // 可见范围类型，All-全员可见，Org-组织架构，User-具体用户, Position-岗位
+        _.each(formData.visibles, (item) => {
+          let newIt = _.pick(item, vues)
           visibles.push(newIt)
         })
         formData.visibles = visibles
@@ -387,6 +407,17 @@ export default {
   },
 
   methods: {
+    //限制附件上传数量callback
+    attachmentLimitCallback() {
+      this.$message({
+        type: 'info',
+        message: '最多上传5个附件'
+      })
+    },
+    isInside() {
+      // 判断是否是内部新闻
+      return this.$route.query.type !== 'inside'
+    },
     handleRemoveAttachment(index) {
       this.formData.attachment.splice(index, 1)
     },
@@ -411,11 +442,9 @@ export default {
             })
             try {
               this.submitting = true
-              // 需要先存为草稿再发布新闻
               _.isNull(this.id)
                 ? await this.postNews(_.pickBy(this._formData), { status: 'Published' })
                 : await this.updateNews(_.assign(this._formData, { status: 'Published' }))
-              // await this.publishNews(params)
               this.$message.success('发布成功')
               this.hasEdit = false
               this.handleBack()
@@ -521,6 +550,12 @@ export default {
       for (let key in data) {
         this.$set(this.formData, key, data[key])
       }
+      this.uploader.fileList = [
+        {
+          fileUrl: data.picUrl
+        }
+      ]
+      this.formData.visibles = data.publishScope
       this.formData.content = _.unescape(this.formData.content) // 反转义获取 dom
       this.loading = false
       // 修改了formData 重置标记
@@ -587,7 +622,7 @@ export default {
       // }
     },
 
-    // 存储草稿
+    // 存储草稿与保存
     async postNews(params, { status = 'Draft' }) {
       params = {
         ...params,
@@ -677,7 +712,7 @@ $color_font_uploader: #A0A8AE
   /deep/.el-select
     max-width: 228px
 .flexrow
-  width: 300px
+  min-width: 300px
   margin-left: 15px
   border-left: 1px solid $color_border
   padding-left: 10px

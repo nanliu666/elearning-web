@@ -8,16 +8,47 @@ export const getAchievement = (params) => get('/manage/v1/achievement/manage', p
 
 /***
  * @author guanfenda
- * @desc 获取考生成绩列表
- * @params params .examName 试卷名称 .paperType试卷类型 .peopleNumber参加人数 .paperMaker 出卷人
+ * @desc 获取线上考生成绩列表
  * */
 export const getExamineeAchievement = (params) => get('/manage/v1/examniee/achievement', params)
+/***
+ * @desc 导入线下成绩
+ * */
+export const importOffline = (params) =>
+  post('/manage/v1/examniee/offlineAchievement/import', params, {
+    headers: { 'content-Type': 'multipart/form-data' }
+  })
+
+/***
+ * @desc 导出考试成员(下载导入模板)
+ * */
+export const exportModel = (params) =>
+  get('/manage/v1/examniee/offlineAchievement/export', params, { responseType: 'blob' })
+
+/***
+ * @desc 获取线下考生成绩列表
+ * */
+export const getOfflineExamineeAchievement = (params) =>
+  get('/manage/v1/examniee/offlineAchievement/list', params)
+
+/***
+ * @desc 成绩管理在线考试-通过条件分数
+ * */
+export const getPaperinfo = (params) => get('/manage/v1/examniee/exam/paper/info', params)
+
 /***
  * @author guanfenda
  * @desc 修改考生成绩
  * @params params
  * */
 export const getExamineeAchievementEdit = (params) => put('/manage/v1/examniee/achievement', params)
+/***
+ * @desc 修改考生线下成绩
+ * @params params
+ * */
+export const updateOfflineGrade = (params) =>
+  post('/manage/v1/examniee/offlineAchievement/update', params)
+
 /***
  * @author guanfenda
  * @desc 查看试卷列表

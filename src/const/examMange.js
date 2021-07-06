@@ -27,6 +27,10 @@ export const QUESTION_TYPE_BLANK = 'blank'
  * 试题组
  */
 export const QUESTION_TYPE_GROUP = 'question_group'
+/**
+ * 不定项选择
+ */
+export const QUESTION_TYPE_RANDOM = 'not_sure_choice'
 
 /**
  * 试题类型字典
@@ -34,12 +38,35 @@ export const QUESTION_TYPE_GROUP = 'question_group'
 export const QUESTION_TYPE_MAP = {
   single_choice: '单选题',
   multi_choice: '多选题',
+  // not_sure_choice: '不定项题',
   judgment: '判断题',
   short_answer: '简答题',
   blank: '填空题',
   question_group: '试题组(阅读题)'
 }
 
+/**
+ * 所有的试题类型字典
+ */
+export const QUESTION_TYPE_MAP_TOTAL = {
+  single_choice: '单选题',
+  multi_choice: '多选题',
+  not_sure_choice: '不定项题',
+  judgment: '判断题',
+  short_answer: '简答题',
+  blank: '填空题',
+  question_group: '试题组(阅读题)'
+}
+// 所有的试题，包括不定项
+export const QUESTION_TATOL_ARR = [
+  { value: 'single_choice', label: '单选题' },
+  { value: 'multi_choice', label: '多选题' },
+  { value: 'not_sure_choice', label: '不定项题' },
+  { value: 'judgment', label: '判断题' },
+  { value: 'short_answer', label: '简答题' },
+  { value: 'blank', label: '填空题' }
+  // { value: 'question_group', label: '试题组(阅读题)' } // 此版本先关闭试题组
+]
 /**
  * 试题状态字典
  */

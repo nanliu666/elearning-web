@@ -35,7 +35,7 @@
               >
                 <i
                   slot="reference"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                   class="el-icon-setting"
                 />
                 <!-- 设置表格列可见性 -->
@@ -56,14 +56,10 @@
             </div>
           </div>
         </template>
-        <template #progress="{row}">
+        <template #progress="{ row }">
           <el-progress :percentage="row.progress || 0"></el-progress>
         </template>
-
-        <template #jobPercent="{row}">
-          {{ row.jobTimes || 0 }}次/{{ row.jobPercent || 0 }}%
-        </template>
-        <template #uploadType="{row}">
+        <template #uploadType="{ row }">
           {{ row.uploadType === 0 ? '本地文件' : '链接文件' }}
         </template>
         <template
@@ -73,31 +69,22 @@
           <el-button
             type="text"
             size="medium"
-            icon="el-icon-upload2"
-            :loading="exportLoading"
+            icon="el-icon-delete"
             @click="multipleDeleteClick(selection)"
           >
             批量导出
           </el-button>
         </template>
-        <template
-          slot="name"
-          slot-scope="{ row }"
-        >
-          <div
-            class="ellipsis title"
-            @click="jumpDetail(row)"
-          >
-            {{ row.name }}
-          </div>
-        </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <el-button
             type="text"
             @click="jumpDetail(row)"
           >
-            查看上报材料
+            查看附件材料
           </el-button>
+        </template>
+        <template #jobTimes="{ row }">
+          {{ row.jobTimes }}/{{ row.totalJob }}次
         </template>
       </common-table>
     </basic-container>
@@ -105,11 +92,9 @@
 </template>
 
 <script>
-import { getStudyList } from '@/api/course/course'
+import { getStudyList, exportStudyList } from '@/api/course/course'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getOrgTreeSimple } from '@/api/org/org'
-import { parseTime } from '@/util/util'
-
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -135,32 +120,34 @@ const TABLE_COLUMNS = [
     prop: 'progress',
     minWidth: 100
   },
-  // {
-  //   label: '课程通过状态',
-  //   prop: 'creatorName',
-  //   minWidth: 100
-  // },
   {
-    label: '作业提交率',
-    prop: 'jobPercent',
-    slot: true,
-    minWidth: 100
-  },
-  {
-    label: '用户岗位',
+    label: '课程通过状态',
+    prop: 'isPassCourse',
     minWidth: 100,
-    prop: 'position'
+    formatter: (row) =>
+      row.isPassCourse === 0 ? '未通过' : row.isPassCourse === 1 ? '已通过' : '--'
   },
   {
-    label: '学习开始时间',
-    minWidth: 150,
-    prop: 'startTime'
-  },
-  {
-    label: '学习结束时间',
-    minWidth: 150,
-    prop: 'endTime'
+    label: '作业提交次数',
+    prop: 'jobTimes',
+    slot: true,
+    minWidth: 110
   }
+  // {
+  //   label: '用户岗位',
+  //   minWidth: 100,
+  //   prop: 'position'
+  // },
+  // {
+  //   label: '学习开始时间',
+  //   minWidth: 150,
+  //   prop: 'startTime'
+  // },
+  // {
+  //   label: '学习结束时间',
+  //   minWidth: 150,
+  //   prop: 'endTime'
+  // }
 ]
 const TABLE_CONFIG = {
   enablePagination: true,
@@ -189,7 +176,7 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'treeSelect',
     field: 'orgId',
-    label: '组织名称',
+    label: '所属部门',
     data: '',
     config: {
       selectParams: {
@@ -225,23 +212,23 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     type: 'select',
     field: 'jobSubmitRate',
-    label: '作业提交率',
+    label: '作业提交情况',
     data: '',
     options: [
       { value: 0, label: '未完成' },
       { value: 100, label: '全部提交' }
     ]
+  },
+  {
+    type: 'select',
+    field: 'isPassCourse',
+    label: '课程通过状态',
+    data: '',
+    options: [
+      { value: 1, label: '已通过' },
+      { value: 0, label: '未通过' }
+    ]
   }
-  // {
-  //   type: 'select',
-  //   field: 'status2',
-  //   label: '课程通过状态',
-  //   data: '',
-  //   options: [
-  //     { value: 0, label: '已通过' },
-  //     { value: 1, label: '未通过' }
-  //   ]
-  // }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -288,7 +275,6 @@ export default {
   },
   data() {
     return {
-      exportLoading: false,
       moveKnowledgeRow: {},
       formColumns: FORM_COLUMNS,
       formData: {
@@ -324,6 +310,7 @@ export default {
   activated() {
     this.refreshTableData()
     this.loadOrgData()
+    this.$refs.searchPopover.resetForm()
   },
   created() {
     this.refreshTableData()
@@ -347,56 +334,17 @@ export default {
 
     // 批量操作
     async multipleDeleteClick(selected) {
-      if (!selected.length) return
-      const list = JSON.parse(JSON.stringify(selected))
-      list.forEach((item) => {
-        item.progress += '%'
-        item.jobPercent += '%'
+      let selectedIds = []
+      _.each(selected, (item) => {
+        selectedIds.push(item.courseId)
       })
-      this.exportLoading = true
-      import('@/vendor/Export2Excel').then((excel) => {
-        const tHeader = [
-          '姓名',
-          '手机号',
-          '所属部门',
-          '学习进度',
-          '作业提交率',
-          '用户岗位',
-          '学习开始时间',
-          '学习结束时间'
-        ]
-        const filterVal = [
-          'name',
-          'phonenum',
-          'deptName',
-          'progress',
-          'jobPercent',
-          'position',
-          'startTime',
-          'endTime'
-        ]
-        const data = this.formatJson(filterVal, list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: '学习情况',
-          autoWidth: true,
-          bookType: 'xlsx'
-        })
-        this.exportLoading = false
-      })
+      let res = await exportStudyList({ courseId: this.$route.query.id })
+      console.log(res)
+      this.$message.success('操作成功')
+      this.$refs.table.clearSelection()
+      this.loadTableData()
     },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map((v) =>
-        filterVal.map((j) => {
-          if (j === 'startDate' || j == 'leaveDate') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        })
-      )
-    },
+
     /**
      * 处理页码改变
      */
@@ -425,6 +373,16 @@ export default {
       this.$router.push({
         path: '/course/materials',
         query: { row: JSON.stringify(row), courseId: this.$route.query.id }
+      })
+    },
+    // 去用户详情
+    toUserInfo(row) {
+      console.log(row)
+      this.$router.push({
+        path: '/system/userDetail',
+        query: {
+          userId: row.stuId
+        }
       })
     },
     // 刷新列表数据
@@ -496,8 +454,8 @@ export default {
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
 .status-span
-    padding: 4px;
-    border-radius: 2px;
+  padding: 4px
+  border-radius: 2px
 .basic-container--block
   height: calc(100% - 92px)
   min-height: calc(100% - 92px)

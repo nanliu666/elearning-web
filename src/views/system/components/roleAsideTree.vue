@@ -177,7 +177,7 @@ export default {
 }
 
 .scroll-item {
-  height: 500px;
+  height: 600px;
   overflow: hidden;
   overflow-y: auto;
 }

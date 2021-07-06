@@ -5,138 +5,29 @@
         培训项目安排
       </div>
       <div>
-        <el-button
-          v-p="ADD_TRAIN"
-          type="primary"
-          size="medium"
-          @click="goAdd"
-        >
-          &nbsp; 创建培训 &nbsp;
-        </el-button>
+        <el-dropdown>
+          <el-button
+            v-p="ADD_TRAIN"
+            type="primary"
+            size="medium"
+          >
+            创建培训<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item @click.native="goAdd('inside')">
+              内训
+            </el-dropdown-item>
+            <el-dropdown-item @click.native="goAdd('outer')">
+              外训
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </div>
     </div>
 
     <div class="box_content">
-      <div class="content_nav">
-        <span
-          :class="{ select: status === 0 }"
-          @click="showSelect(0)"
-        >已发布</span>
-        <span
-          :class="{ select: status === 1 }"
-          @click="showSelect(1)"
-        >草稿</span>
-      </div>
-
       <!-- 内容 -->
       <div class="draft_issue">
-        <div
-          v-show="status === 0"
-          class="issue_l"
-        >
-          <my-column
-            :column-interface="columnInterface"
-            @treeClick="treeClick"
-          ></my-column>
-
-          <!-- <div class="issue_l_tree">
-            <el-input
-              v-model="filterText"
-              placeholder="分类名称"
-              suffix-icon="el-icon-search"
-            >
-            </el-input>
-            <div class="ungrouped">
-              未分类
-            </div>
-
-            <el-tree
-              ref="tree"
-              :data="data"
-              node-key="id"
-              default-expand-all
-              :expand-on-click-node="false"
-              :filter-node-method="filterNode"
-              @node-click="treeClickNode"
-            >
-              <span
-                slot-scope="{ node, data }"
-                class="custom-tree-node"
-              >
-                <span v-show="!isEdit || data.id !== isEditId">{{ node.label }}</span>
-                <span
-                  v-show="isEdit && data.id === isEditId"
-                  class="tree_input"
-                >
-                  <el-input
-                    v-model="inputGroupingSon"
-                    placeholder="请输入内容"
-                    maxlength="20"
-                  ></el-input>
-                  <el-button
-                    type="text"
-                    @click="addGroupingSon"
-                  >确认</el-button>&nbsp;
-                  <span @click="isEdit = false"> 取消</span>
-                </span>
-                <span>
-                  <el-dropdown
-                    trigger="hover"
-                    style="color: #a0a8ae;"
-                    @command="handleCommandSide($event, data)"
-                  >
-                    <span class="el-dropdown-link">
-                      <i class="el-icon-more" />
-                    </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item
-                        v-show="data.btnshow"
-                        command="add"
-                      >
-                        新增分类
-                      </el-dropdown-item>
-                      <el-dropdown-item
-                        v-show="!data.btnshow"
-                        command="move"
-                      >
-                        移动
-                      </el-dropdown-item>
-                      <el-dropdown-item command="edit">
-                        编辑
-                      </el-dropdown-item>
-                      <el-dropdown-item command="del">
-                        删除
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </span>
-              </span>
-            </el-tree>
-
-            <div
-              v-show="isShowinput"
-              class="isShowinput"
-            >
-              <el-input
-                v-model="inputGrouping"
-                placeholder="请输入内容"
-                maxlength="20"
-              ></el-input>
-              <span
-                class="isShowinput_yes"
-                @click="addGrouping"
-              >确认</span>
-              <span @click="isShowinput = false"> 取消</span>
-            </div>
-          </div>
-          <div class="btn_bottom">
-            <span
-              class="btn1"
-              @click="adddata"
-            >新建分组</span>
-          </div> -->
-        </div>
-
         <!-- 移动选择框 -->
         <!-- <el-dialog
           title="移动"
@@ -315,7 +206,8 @@
                 slot="status"
                 slot-scope="{ row }"
               >
-                <span v-if="row.status === 3">已结束</span>
+                <span v-if="row.status === 4">草稿</span>
+                <span v-if="row.status === 3">已结办</span>
                 <span v-if="row.status === 1">未开始</span>
                 <span v-if="row.status === 2">进行中</span>
               </template>
@@ -367,7 +259,7 @@
                     v-p="NEXT_TRAIN"
                     type="text"
                     size="medium"
-                    @click.stop="handleConfig(scope.row.id)"
+                    @click.stop="handleConfig(scope.row)"
                   >
                     开办下一期
                   </el-button>
@@ -377,7 +269,7 @@
                       v-if="scope.row.status !== 0"
                       type="text"
                       size="medium"
-                      :disabled="scope.row.status == 3"
+                      :disabled="scope.row.status === 3 || scope.row.status === 4"
                       @click="isstopSchedule(scope.row.id)"
                     >
                       结办
@@ -396,7 +288,9 @@
                       <el-dropdown-item
                         v-p="EDIT_TRAIN"
                         command="edit"
-                        :disabled="scope.row.status != 1"
+                        :disabled="
+                          scope.row.status != 1 && scope.row.status != 2 && scope.row.status != 4
+                        "
                       >
                         编辑
                       </el-dropdown-item>
@@ -446,6 +340,9 @@ import {
   NEXT_TRAIN,
   VIEW_TRAIN
 } from '@/const/privileges'
+import { getCategoryTree } from '@/api/train/train'
+import { getCreatorList } from '@/api/live'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -461,6 +358,23 @@ const TABLE_COLUMNS = [
     prop: 'trainNo'
   },
   {
+    label: '类别',
+    minWidth: 200,
+    prop: 'trainScope',
+    formatter: (row) => {
+      const END_STATUS = {
+        inside: '内训',
+        outer: '外训'
+      }
+      return END_STATUS[row.trainScope]
+    }
+  },
+  {
+    label: '分类',
+    minWidth: 200,
+    prop: 'categoryName'
+  },
+  {
     label: '状态',
     prop: 'status',
     minWidth: 80,
@@ -473,48 +387,34 @@ const TABLE_COLUMNS = [
     slot: true
   },
   {
-    label: '计划人数',
-    prop: 'people',
-    minWidth: 80,
-    slot: true
-  },
-  {
-    label: '培训方式',
-    prop: 'trainWay',
-    slot: true,
-    minWidth: 80
-  },
-  {
-    label: '主办单位',
-    prop: 'sponsor',
-    minWidth: 130
-  },
-  {
-    label: '承办单位',
-    prop: 'organizer',
-    minWidth: 130
-  },
-  {
-    label: '培训人数',
-    prop: 'participated',
-    minWidth: 130
-  },
-  {
-    label: '培训天数',
-    prop: 'trainDays',
-    minWidth: 130
+    label: '知识体系',
+    prop: 'knowledgeSystemName',
+    minWidth: 180,
+    formatter: (row) => {
+      return row.knowledgeSystemName || '--'
+    }
   },
   {
     label: '评分',
     prop: 'composite',
     minWidth: 130
+  },
+  {
+    label: '创建人',
+    prop: 'creatorName',
+    minWidth: 130,
+    formatter: (row) => {
+      return row.creatorName || '--'
+    }
+  },
+  {
+    label: '创建时间',
+    prop: 'createTime',
+    minWidth: 130,
+    formatter: (row) => {
+      return row.createTime || '--'
+    }
   }
-  // {
-  //   label: '标签',
-  //   prop: 'trainTagList',
-  //   slot: true,
-  //   minWidth: 200
-  // }
 ]
 const TABLE_CONFIG = {
   handlerColumn: {
@@ -547,22 +447,85 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
+    field: 'trainScope',
+    label: '类别',
+    type: 'select',
+    options: [
+      { value: 'inside', label: '内训' },
+      { value: 'outer', label: '外训' }
+    ]
+  },
+  {
+    type: 'treeSelect',
+    field: 'categoryId',
+    label: '所在分类',
+    data: '',
+    config: {
+      selectParams: {
+        placeholder: '请选择',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
+  },
+  {
+    config: { placeholder: '请选择' },
+    data: '',
     field: 'status',
     label: '状态',
     type: 'select',
     options: [
-      { value: 3, label: '已办结' },
+      { value: 3, label: '已结办' },
       { value: 1, label: '未开始' },
       { value: 2, label: '进行中' },
+      { value: 4, label: '草稿' },
       { value: '', label: '全部' }
     ]
   },
   {
-    type: 'numInterval',
-    field: 'peopleMin,peopleMax',
-    data: { min: '', max: '' },
-    label: '计划人数',
-    required: false
+    type: 'treeSelect',
+    field: 'knowledgeSystemId',
+    label: '知识体系',
+    data: '',
+    config: {
+      selectParams: {
+        placeholder: '请选择',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          value: 'id',
+          label: 'name',
+          children: 'children'
+        }
+      }
+    }
+  },
+  {
+    config: { placeholder: '请输入' },
+    data: '',
+    field: 'address',
+    label: '培训地点',
+    type: 'input'
   },
   {
     config: { placeholder: '请选择' },
@@ -571,25 +534,13 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '培训方式',
     type: 'select',
     options: [
-      { value: 2, label: '面授' },
-      { value: 3, label: '混合' },
-      { value: 1, label: '在线' },
-      { value: '', label: '全部' }
+      { value: 1, label: '在线培训' },
+      { value: 2, label: '面授培训' },
+      { value: 3, label: '混合培训' },
+      { value: '11', label: '非脱产培训' },
+      { value: '12', label: '脱产培训' },
+      { value: '13', label: '业余培训' }
     ]
-  },
-  {
-    config: { placeholder: '请输入' },
-    data: '',
-    field: 'sponsor',
-    label: '主办单位',
-    type: 'input'
-  },
-  {
-    config: { placeholder: '请输入' },
-    data: '',
-    field: 'address',
-    label: '培训地点',
-    type: 'input'
   }
 ]
 const SEARCH_POPOVER_CONFIG = {
@@ -604,6 +555,7 @@ export default {
     SeachPopover: () => import('@/components/searchPopOver'),
     // 草稿
     draftComponents: () => import('./draftComponents'),
+    // eslint-disable-next-line vue/no-unused-components
     MyColumn: () => import('./components/MyColumn')
   },
   filters: {
@@ -705,13 +657,31 @@ export default {
   },
   created() {
     this.refreshTableData()
-    this.isgetCatalogs()
+    this.getCategoryData()
+    this.getKnowledgeData()
+    //
   },
   activated() {
     this.refreshTableData()
-    this.isgetCatalogs()
+    this.getCategoryData()
+    this.getKnowledgeData()
+    //
   },
   methods: {
+    getKnowledgeData() {
+      let knowledgeSystemId = _.find(this.searchPopoverConfig.popoverOptions, {
+        field: 'knowledgeSystemId'
+      })
+      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+        _.set(knowledgeSystemId, 'config.treeParams.data', res)
+      })
+    },
+    getCategoryData() {
+      let categoryIdType = _.find(this.searchPopoverConfig.popoverOptions, { field: 'categoryId' })
+      getCategoryTree({ parentOrgId: 0 }).then((res) => {
+        _.set(categoryIdType, 'config.treeParams.data', res)
+      })
+    },
     treeClick(val) {
       (this.page.pageNo = 1),
         (this.page.pageSize = 10),
@@ -720,13 +690,20 @@ export default {
       this.isgetScheduleList()
     },
     // 去开办下一期
-    handleConfig(id) {
-      this.$router.push({ path: '/training/edit', query: { id: id, type: 'next' } })
+    handleConfig(row) {
+      const { id, trainScope } = row
+      this.$router.push({
+        path: '/training/edit',
+        query: { id: id, type: trainScope, isNext: true }
+      })
     },
     // 去创建培训
     toCreateTraining() {},
-    goAdd() {
-      this.$router.push({ path: '/training/edit' })
+    goAdd(type) {
+      const query = {
+        type
+      }
+      this.$router.push({ path: '/training/edit', query })
     },
     // 去培训详情
     toTrainingDetail(row) {
@@ -753,12 +730,11 @@ export default {
     // 查询培训安排
     isgetScheduleList(param) {
       let params = {
-        categoryId: '', //分类id
-        type: '' //0.已发布、1.草稿
+        categoryId: '' //分类id
       }
-      params.type = this.status
       params.categoryId = this.idSchedule
       params = { ...params, ...this.page, ...param, ...this.searchParams }
+      delete params.type
       getScheduleList(params).then((res) => {
         // console.log(res);
         this.tableData = res.data.map((item) => {
@@ -782,7 +758,6 @@ export default {
           message: '操作成功',
           type: 'success'
         })
-        this.isgetCatalogs()
       })
     },
 
@@ -793,7 +768,6 @@ export default {
           message: '操作成功',
           type: 'success'
         })
-        this.isgetCatalogs()
       })
     },
 
@@ -812,7 +786,6 @@ export default {
           message: '操作成功',
           type: 'success'
         })
-        this.isgetCatalogs()
       })
     },
 
@@ -866,7 +839,6 @@ export default {
         this.isAddCatalog(this.addId, this.inputGroupingSon)
         this.isEdit = false
         this.inputGroupingSon = ''
-        this.isgetCatalogs()
       }
     },
 
@@ -883,7 +855,6 @@ export default {
         this.isAddCatalog('', this.inputGrouping)
         this.isShowinput = false
         this.inputGrouping = ''
-        this.isgetCatalogs()
       }
     },
 
@@ -979,7 +950,7 @@ export default {
     handleCommand(e, row) {
       if (e === 'edit') {
         // 编辑
-        this.$router.push({ path: '/training/edit', query: { id: row.id } })
+        this.$router.push({ path: '/training/edit', query: { id: row.id, type: row.trainScope } })
       }
       if (e === 'del') {
         // 删除
@@ -996,7 +967,6 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
-              this.isgetCatalogs()
             })
           })
           .catch(() => {
@@ -1027,6 +997,7 @@ export default {
       }
       this.page.pageNo = 1
       this.searchParams = searchParams
+
       this.isgetScheduleList()
     },
     handleRemoveItems(selection) {
@@ -1042,6 +1013,9 @@ export default {
           }
         )
           .then(() => {
+            if (selection.every((s) => s.status == 2)) {
+              this.$message.info('已取消删除')
+            }
             this.handleRemoveItems(selection.filter((item) => item.status != 2))
           })
           .catch((e) => console.log(e))
@@ -1062,7 +1036,7 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
-            this.isgetCatalogs()
+
             this.isgetScheduleList()
             this.$refs.table.clearSelection()
           })
@@ -1095,11 +1069,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-/deep/.el-input
-  width: 100%
-/deep/.el-select
-  width: 100%
-/deep/.el-input
+
 
 .operations__btns
     color: #acb3b8
@@ -1199,8 +1169,6 @@ $color_icon: #A0A8AE
       }
     }
     .draft_issue {
-      padding-top: 25px;
-      display: flex;
       height: 653px;
       .issue_l {
         position: relative;
@@ -1241,7 +1209,6 @@ $color_icon: #A0A8AE
         }
       }
       .issue_r {
-        width: 80%;
         // padding: 0 40px;
       }
       .istrainingArrange {

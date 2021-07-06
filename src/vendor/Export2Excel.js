@@ -124,7 +124,7 @@ export function export_table_to_excel(id) {
 
   /* original data */
   var data = oo[0]
-  var ws_name = 'SheetJS'
+  var ws_name = 'Sheet'
 
   var wb = new Workbook(),
     ws = sheet_from_array_of_arrays(data)
@@ -158,7 +158,8 @@ export function export_json_to_excel({
   filename,
   merges = [],
   autoWidth = true,
-  bookType = 'xlsx'
+  bookType = 'xlsx',
+  ws_name = 'Sheet'
 } = {}) {
   /* original data */
   filename = filename || 'excel-list'
@@ -169,7 +170,6 @@ export function export_json_to_excel({
     data.unshift(multiHeader[i])
   }
 
-  var ws_name = 'SheetJS'
   var wb = new Workbook(),
     ws = sheet_from_array_of_arrays(data)
 
@@ -221,6 +221,82 @@ export function export_json_to_excel({
     bookType: bookType,
     bookSST: false,
     type: 'binary'
+  })
+  saveAs(
+    new Blob([s2ab(wbout)], {
+      type: 'application/octet-stream'
+    }),
+    `${filename}.${bookType}`
+  )
+}
+
+export function export_json_to_excel2({
+  filename = 'excel-list',
+  SheetNames = [],
+  autoWidth = true,
+  cellStyles = false,
+  bookSST = false,
+  Sheets = {},
+  bookType = 'xlsx'
+}) {
+  var wb = new Workbook()
+
+  SheetNames.forEach((name) => {
+    const sheet = Sheets[name]
+
+    const header = Object.keys[sheet[0]]
+    const data = sheet.map((s) => {
+      return Object.values(s)
+    })
+
+    data = [...data]
+    data.unshift(header)
+
+    ws = sheet_from_array_of_arrays(data)
+
+    if (autoWidth) {
+      /*设置worksheet每列的最大宽度*/
+      const colWidth = data.map((row) =>
+        row.map((val) => {
+          /*先判断是否为null/undefined*/
+          if (val == null) {
+            return {
+              wch: 10
+            }
+          } else if (val.toString().charCodeAt(0) > 255) {
+            /*再判断是否为中文*/
+            return {
+              wch: val.toString().length * 2
+            }
+          } else {
+            return {
+              wch: val.toString().length
+            }
+          }
+        })
+      )
+      /*以第一行为初始值*/
+      let result = colWidth[0]
+      for (let i = 1; i < colWidth.length; i++) {
+        for (let j = 0; j < colWidth[i].length; j++) {
+          if (result[j]['wch'] < colWidth[i][j]['wch']) {
+            result[j]['wch'] = colWidth[i][j]['wch']
+          }
+        }
+      }
+      ws['!cols'] = result
+    }
+
+    /* add worksheet to workbook */
+    wb.SheetNames.push(name)
+    wb.Sheets[name] = ws
+  })
+
+  var wbout = XLSX.write(wb, {
+    bookType: bookType,
+    bookSST,
+    type: 'binary',
+    cellStyles
   })
   saveAs(
     new Blob([s2ab(wbout)], {

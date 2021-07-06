@@ -17,6 +17,17 @@
           :model="form"
           :columns="columns"
         >
+          <div slot="parentId">
+            <el-form-item label="上级岗位">
+              <postion-page
+                ref="myPos"
+                title="上级岗位"
+                :position-breadcrumb="positionBreadcrumb"
+                :pos-name="rowData"
+                @getPosData="getPosData"
+              />
+            </el-form-item>
+          </div>
         </common-form>
       </el-col>
     </el-row>
@@ -52,14 +63,25 @@
 </template>
 
 <script>
-import { getStationTree, addStation, editStation, deleteStation } from '@/api/system/station'
+// getStationTree,
+import { addStation, editStation, deleteStation } from '@/api/system/station'
+import PostionPage from '@/components/el-postion-page'
 export default {
   name: 'JobsForm',
+  components: {
+    PostionPage
+  },
   props: {
     rowData: {
       type: Object,
       default: () => {
         return {}
+      }
+    },
+    positionBreadcrumb: {
+      type: Array,
+      default: () => {
+        return []
       }
     }
   },
@@ -74,35 +96,43 @@ export default {
           label: '岗位名称',
           itemType: 'input',
           required: true,
+          rules: [
+            { required: true, message: '请输入岗位名称', trigger: 'blur' },
+            // 只允许汉字、中英文和下划线
+            { pattern: /^[\u4E00-\u9FA5a-zA-Z0-9_]+$/, message: '不允许输入空格等特殊符号' }
+          ],
           span: 24,
           maxlength: 10,
           placeholder: ' 请输入名称，建议不超过10个字'
         },
         {
+          // prop: 'parentId',
+          // itemType: 'treeSelect',
+          // label: '上级岗位',
+          // span: 24,
+          // props: {
+          //   selectParams: {
+          //     placeholder: '请选择',
+          //     multiple: false
+          //   },
+          //   treeParams: {
+          //     data: [],
+          //     'check-strictly': true,
+          //     'default-expand-all': false,
+          //     'expand-on-click-node': false,
+          //     clickParent: true,
+          //     filterable: false,
+          //     props: {
+          //       children: 'children',
+          //       label: 'name',
+          //       disabled: 'disabled',
+          //       value: 'id'
+          //     }
+          //   }
+          // }
           prop: 'parentId',
-          itemType: 'treeSelect',
-          label: '上级岗位',
           span: 24,
-          props: {
-            selectParams: {
-              placeholder: '请选择',
-              multiple: false
-            },
-            treeParams: {
-              data: [],
-              'check-strictly': true,
-              'default-expand-all': false,
-              'expand-on-click-node': false,
-              clickParent: true,
-              filterable: false,
-              props: {
-                children: 'children',
-                label: 'name',
-                disabled: 'disabled',
-                value: 'id'
-              }
-            }
-          }
+          itemType: 'slot'
         },
         {
           prop: 'remark',
@@ -133,9 +163,12 @@ export default {
     }
   },
   mounted() {
-    this.loadOrgData()
+    // this.loadOrgData()
   },
   methods: {
+    getPosData(val) {
+      this.form.parentId = val.value
+    },
     // 关闭模态框
     handleClose() {
       this.visible = false
@@ -152,24 +185,31 @@ export default {
         if (v.prop == 'parentId') this.$set(v, 'disabled', type == 'create')
       })
       this.visible = true
+      this.$nextTick(() => {
+        if (this.type == 'edit') {
+          this.$refs.myPos.editPosition()
+        } else {
+          this.$refs.myPos.pName = ''
+        }
+      })
     },
     // 初始化数据
-    async loadOrgData() {
-      await getStationTree().then((res) => {
-        // 递归循环删除层级数5层以下的节点
-        const loop = (tree) => {
-          _.each(tree, (item) => {
-            if (item.fullName.split('|').length > 3 && item.children) {
-              delete item.children
-            }
-            loop(item.children)
-          })
-        }
-        loop(res)
-        this.treeData = res
-      })
-      this.columns.find((item) => item.prop === 'parentId').props.treeParams.data = this.treeData
-    },
+    // async loadOrgData() {
+    //   await getStationTree().then((res) => {
+    //     // 递归循环删除层级数5层以下的节点
+    //     const loop = (tree) => {
+    //       _.each(tree, (item) => {
+    //         if (item.fullName.split('|').length > 3 && item.children) {
+    //           delete item.children
+    //         }
+    //         loop(item.children)
+    //       })
+    //     }
+    //     loop(res)
+    //     this.treeData = res
+    //   })
+    //   this.columns.find((item) => item.prop === 'parentId').props.treeParams.data = this.treeData
+    // },
     // 保存并继续添加
     onContinue() {
       this.$refs.form.validate().then(async (valid) => {
@@ -195,7 +235,7 @@ export default {
         params.sort = 1
         await addStation(params)
           .then(() => {
-            this.loadOrgData()
+            // this.loadOrgData()
             this.$nextTick(() => {
               this.form = {}
             })
@@ -239,7 +279,7 @@ export default {
           await editStation(params)
             .then(() => {
               this.handleClose()
-              this.loadOrgData()
+              // this.loadOrgData()
               this.$emit('initData', this.rowData.parentId)
               this.$message({
                 type: 'success',
@@ -254,7 +294,7 @@ export default {
         await addStation(params)
           .then(() => {
             this.handleClose()
-            this.loadOrgData()
+            // this.loadOrgData()
             this.$emit('initData', this.rowData.parentId)
             this.$message({
               type: 'success',
@@ -285,7 +325,7 @@ export default {
         } else {
           await deleteStation(params).then(() => {
             this.$emit('initData')
-            this.loadOrgData()
+            // this.loadOrgData()
             this.$message({
               type: 'success',
               message: '已成功删除该岗位!'
@@ -312,7 +352,9 @@ export default {
       if (type == 'edit') {
         let faltTree = this.findPnodeId(this.treeData)
         faltTree.map((v) => {
-          if (parentId == v.parentId) this.form.parentId = v.parentId == '0' ? null : v.parentId
+          if (parentId == v.parentId) {
+            this.form.parentId = v.parentId == '0' ? null : v.parentId
+          }
         })
       }
     },

@@ -24,7 +24,7 @@
                 ref="orgTree"
                 show-checkbox
                 :load="lazyLoadOrgTree"
-                node-key="path"
+                node-key="userId"
                 lazy
                 :props="treeProps"
                 @check="handleCheckChange"
@@ -35,7 +35,7 @@
                 :data="orgSearchData"
                 :props="treeProps"
                 lazy
-                node-key="path"
+                node-key="userId"
                 show-checkbox
                 @check="handleCheckChange"
               />

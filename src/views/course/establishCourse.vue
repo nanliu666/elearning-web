@@ -1,12 +1,14 @@
 <template>
-  <div class="establishCourse">
+  <div
+    v-loading="isLoading"
+    class="establishCourse"
+  >
     <!-- 头部 -->
     <div class="head">
       <i
         class="el-icon-arrow-left icon"
         @click="tocourseDraft"
       ></i>
-
       <div class="schedule">
         <div
           :class="{ sign: headIndex === 1 }"
@@ -112,12 +114,17 @@
               label="讲师"
               prop="teacherId"
             >
-              <lazy-select
+              <el-select
                 v-model="ruleForm.teacherId"
-                :remote-method="listTeacher"
-                :query-props="{ search: 'likeQuery', page: 'currentPage', size: 'size' }"
-                :props="{ value: 'idStr', label: 'name' }"
-              />
+                filterable
+              >
+                <el-option
+                  v-for="(item, index) in TeacherData"
+                  :key="index"
+                  :value="item.idStr"
+                  :label="item.name"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="2">
@@ -132,15 +139,15 @@
                 placeholder="请选择"
               >
                 <el-option
-                  label="在线课程"
+                  label="在线"
                   :value="1"
                 ></el-option>
                 <el-option
-                  label="面授课程"
+                  label="面授"
                   :value="2"
                 ></el-option>
                 <el-option
-                  label="直播课程"
+                  label="直播"
                   :value="3"
                 ></el-option>
               </el-select>
@@ -194,10 +201,10 @@
                   label="开放选修"
                   :value="1"
                 ></el-option>
-                <el-option
+                <!-- <el-option
                   label="通过审批"
                   :value="2"
-                ></el-option>
+                ></el-option> -->
                 <el-option
                   label="禁止选修"
                   :value="3"
@@ -218,7 +225,6 @@
                 :max="100"
                 :step="0.5"
                 :precision="1"
-                @change="handleChange"
               ></el-input-number>
             </el-form-item>
           </el-col>
@@ -233,7 +239,7 @@
                 :min="0"
                 :max="100"
                 :step="1"
-                @change="handleChange"
+                step-strictly
               ></el-input-number>
             </el-form-item>
           </el-col>
@@ -269,6 +275,9 @@
                 <el-radio :label="2">
                   单位级
                 </el-radio>
+                <el-radio :label="3">
+                  部门级
+                </el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -292,12 +301,15 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="课程开发人">
-              <el-select v-model="ruleForm.developer">
+              <el-select
+                v-model="ruleForm.developer"
+                filterable
+              >
                 <el-option
                   v-for="item in developerData"
-                  :key="item.creatorId"
-                  :label="item.creatorName"
-                  :value="item.creatorId"
+                  :key="item.userId"
+                  :label="item.name"
+                  :value="item.userId"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -399,6 +411,7 @@
             </span>
             <div class="up_head_title_btn">
               <el-button
+                :disabled="ruleForm.contents.length >= 100"
                 size="medium"
                 @click="addTask"
               >
@@ -418,11 +431,15 @@
                 @on-masterFileMax="masterFileMax"
                 @input="upLoadSuc"
               >
-                <el-button size="medium">
+                <el-button
+                  :disabled="ruleForm.contents.length >= 100"
+                  size="medium"
+                >
                   批量上传课件
                 </el-button>
               </common-upload>
               <el-button
+                :disabled="ruleForm.contents.length >= 100"
                 type="primary"
                 size="medium"
                 @click="addChapter"
@@ -489,6 +506,7 @@
                     </el-option>
                   </el-select>
                 </div>
+
                 <div v-else>
                   <el-button
                     size="medium"
@@ -507,9 +525,7 @@
             >
               <template slot-scope="scope">
                 <div v-if="scope.row.type !== 1">
-                  <span v-if="scope.row.fileData.status === 'pending'">
-                    等待上传...
-                  </span>
+                  <span v-if="scope.row.fileData.status === 'pending'"> 等待上传... </span>
                   <el-progress
                     v-else-if="scope.row.fileData.status == 'progress'"
                     :percentage="scope.row.fileData.percent"
@@ -539,7 +555,7 @@
                       {{
                         tableColumnsText(
                           scope.row.type,
-                          !!(scope.row.upLoad && scope.row.upLoad[0] && scope.row.upLoad[0].url)
+                          scope.row.upLoad && scope.row.upLoad[0] && scope.row.upLoad[0].content
                         )
                       }}
                     </el-button>
@@ -568,7 +584,7 @@
             >
               <template slot-scope="scope">
                 <el-button
-                  v-if="scope.row.fileData.status === 'progress'"
+                  v-if="isQiNiu && scope.row.fileData.status === 'progress'"
                   type="text"
                   size="medium"
                   @click="controlUpload(scope.$index)"
@@ -620,6 +636,7 @@
     <appr-submit
       ref="apprSubmit"
       @submit="handleSubmit"
+      @apprCancel="apprCancel"
     />
     <el-dialog
       title="添加文章"
@@ -628,14 +645,14 @@
       :modal-append-to-body="false"
       :show-close="false"
     >
-      <div class="dialog_input">
-        <el-form
-          ref="ruleFormDialog"
-          :model="addArticle"
-          :rules="rulesDialog"
-          label-width="60px"
-          class="demo-ruleForm"
-        >
+      <el-form
+        ref="ruleFormDialog"
+        :model="addArticle"
+        :rules="rulesDialog"
+        label-width="60px"
+        class="demo-ruleForm"
+      >
+        <div class="dialog_input">
           <el-form-item
             label="标题"
             prop="localName"
@@ -644,21 +661,25 @@
               v-model="addArticle.localName"
               placeholder="请输入标题"
               maxlength="32"
-              style="width: 480px; margin-left: -15px"
+              style="width: 480px"
             ></el-input>
           </el-form-item>
-        </el-form>
-      </div>
-      <div class="dialog_tinymce">
-        <span>内容</span>
-        <div>
-          <tinymce
-            id="tinymceId"
-            v-model="addArticle.content"
-          />
         </div>
-      </div>
-
+        <div class="dialog_tinymce">
+          <el-form-item
+            label="内容"
+            prop="content"
+          >
+            <div>
+              <tinymce
+                id="tinymceId"
+                v-model="addArticle.content"
+                :init="{ selector: '#textarea1', placeholder: '在这里输入文字' }"
+              ></tinymce>
+            </div>
+          </el-form-item>
+        </div>
+      </el-form>
       <span
         slot="footer"
         class="dialog-footer"
@@ -685,6 +706,7 @@
           :src="previewVideo"
           autoplay
           controls
+          controlsList="nodownload"
         ></video>
         <p
           v-if="previewHtml"
@@ -693,7 +715,7 @@
         <img
           v-if="previewImg"
           :src="previewImg"
-          style="width:100%;height:100%;"
+          style="width: 100%"
         />
         <iframe
           v-if="perviewSrc"
@@ -708,46 +730,38 @@
 </template>
 
 <script>
+import { isQiNiu } from '@/config/env'
+import { getReviewUrl } from '@/util/util'
 import { categoryMap } from '@/const/approve'
-import axios from 'axios'
-import {
-  getCourseInfoUserList,
-  getCourse,
-  addCourse,
-  listTeacher,
-  editCourseInfo,
-  id
-} from '@/api/course/course'
-import lazySelect from '@/components/el-lazy-select'
-
+import { getCourse, addCourse, listTeacher, editCourseInfo, id } from '@/api/course/course'
+import { queryTeacherlist } from '@/api/lecturer/lecturer'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 export default {
   name: 'EstablishCourse',
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload'),
-    ApprSubmit,
-    lazySelect
+    ApprSubmit
   },
   data() {
     return {
+      isQiNiu,
       fileList: [],
       previewImg: '', // 图片预览路径
       previewHtml: '', // 富文本预览
       previewVideo: '', // 视频预览路径
       perviewSrc: '', // 文档预览路径
       word: /\.(txt|doc|wps|rtf|docx)$/, // 文档格式
-      vedio: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/, // 视频格式
-      image: /\.(jpg|jpeg|png|GIF)$/, // 图片
+      video: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/, // 视频格式
+      image: /\.(jpg|jpeg|png|gif|bmp)$/, // 图片
       toForm: false,
       toCourse: false,
       tipsVisible: false,
       courseNo: null,
-      ruleFormClone: null,
       chapterType: 1,
       parentOrgIdLabel: '',
       disabledBtn: false,
-      TeacherData: '',
+      TeacherData: [],
       catalogIdoptions: [],
       checkboxVal: [],
       developerData: [],
@@ -786,6 +800,7 @@ export default {
           value: 2
         }
       ],
+      isLoading: false,
       // 填写课程信息
       AddArticleBtntableIndex: '',
       ruleForm: {
@@ -806,7 +821,7 @@ export default {
         isRecommend: '',
         introduction: '',
         contents: [],
-        url: ''
+        url: null
       },
       rules: {
         courseNo: [
@@ -840,7 +855,11 @@ export default {
         ]
       },
       rulesDialog: {
-        localName: [{ required: true, message: '请输入标题', trigger: ['blur'] }]
+        localName: [{ required: true, message: '请输入标题', trigger: ['blur'] }],
+        content: [
+          { required: true, message: '请输入文章内容', trigger: ['blur', 'change'] },
+          { max: 5000, message: '课程介绍最多不超过5000字', trigger: ['blur', 'change'] }
+        ]
       },
       uploadRef: [
         {
@@ -906,20 +925,18 @@ export default {
       },
       immediate: false,
       deep: true
-    },
-    'ruleForm.passCondition': {
-      handler() {
-        this.$nextTick(() => {
-          if (this.ruleForm.passCondition.length) {
-            this.$refs.ruleForm.validateField('passCondition', () => {})
-          }
-        })
-      },
-      immediate: false,
-      deep: true
     }
   },
   created() {
+    if (this.$route.query.id) this.isLoading = true
+    else {
+      listTeacher({
+        pageSize: 9999999,
+        pageNo: 1
+      }).then((res) => {
+        this.TeacherData = res
+      })
+    }
     this.uploadRef.forEach((ref) => {
       ref.beforeUpload = this[ref.beforeUpload]
     }),
@@ -936,6 +953,15 @@ export default {
     })
   },
   activated() {
+    if (this.$route.query.id) this.isLoading = true
+    else {
+      listTeacher({
+        pageSize: 9999999,
+        pageNo: 1
+      }).then((res) => {
+        this.TeacherData = res
+      })
+    }
     // 检测断线重连
     window.addEventListener('online', () => {
       this.ruleForm.contents.map((c) => {
@@ -958,7 +984,7 @@ export default {
     document.body.removeEventListener('click', this.bodyClick)
   },
   beforeRouteLeave(to, from, next) {
-    to.meta.$keepAlive = false // 禁用页面缓存
+    from.meta.$keepAlive = false // 禁用页面缓存
     next()
   },
   destroyed() {
@@ -977,12 +1003,17 @@ export default {
     upLoadImg(file) {
       this.img = file[0].localName
       this.ruleForm.url = file[0].url
+      this.$refs.ruleForm.validateField('url')
     },
     // 下拉框数据获取
     getSelectData() {
       // 课程开发人
-      getCourseInfoUserList().then((res) => {
-        this.developerData = res
+      queryTeacherlist({
+        pageNo: 1,
+        pageSize: 9999,
+        search: ''
+      }).then((res) => {
+        this.developerData = res.data
       })
     },
     beforeTaskUpload() {},
@@ -997,6 +1028,7 @@ export default {
         content: '', //文章内容
         upLoad: [], //[url,localName],  //所有上传的文件
         fileData: {},
+        isLoading: false,
         task: true
       }
       this.ruleForm.contents.push(item)
@@ -1034,12 +1066,9 @@ export default {
     onUploadProgress(fileData, content, contentIdx) {
       const contents = this.ruleForm.contents
       let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
-      const name =
-        (content && content.name) ||
-        fileData.name.replace(
-          /\.(txt|doc|wps|rtf|docx|xls|xlsx|ppt|pdf|pptx|avi|wmv|mp4|3gp|rm|rmvb|mov|avi|wmv|mp4|3gp|rm|rmvb|mov)$/,
-          ''
-        )
+      const suffixIndex = fileData.name.lastIndexOf('.')
+      let fileName = fileData.name.slice(0, suffixIndex)
+      fileName = fileName.length > 60 ? fileName.substr(0, 60) : fileName
       if (index < 0) {
         fileData.status = 'progress'
         fileData.paused = false
@@ -1047,7 +1076,7 @@ export default {
           taskBtn: content ? content.taskBtn : '',
           saveOrcompile: 1,
           type: content ? content.type : 3,
-          name,
+          name: fileName,
           upLoad: [
             {
               localName: fileData.name
@@ -1063,31 +1092,27 @@ export default {
         const c = contents[index]
         c.upLoad = [{ localName: fileData.name }]
         c.fileData = fileData
-        c.name = name
+        c.name = fileName
         contents.splice(index, 1, c)
       }
     },
     // 批量上传进度回调
     onAllUploadProgress(fileData, content, contentIdx) {
-      let type = 3
+      let type = 2
       const contents = this.ruleForm.contents
-      const name = fileData.name.replace(
-        /\.(txt|doc|wps|rtf|docx|xls|xlsx|ppt|pdf|pptx|avi|wmv|mp4|3gp|rm|rmvb|mov|avi|wmv|mp4|3gp|rm|rmvb|mov)$/,
-        ''
-      )
+      const suffixIndex = fileData.name.lastIndexOf('.')
+      var judgeName = fileData.name.substr(suffixIndex).toLocaleLowerCase()
+      var fileName = fileData.name.substr(0, suffixIndex)
+      fileName = fileName.length > 60 ? fileName.slice(0, 60) : fileName
       let index = contents.findIndex((c) => c.fileData.uid === fileData.uid)
       if (index < 0) {
-        if (this.word.test(fileData.name)) {
-          type = 2
-        } else if (this.vedio.test(fileData.name)) {
-          type = 5
-        }
+        if (this.video.test(judgeName)) type = 5
         fileData.status = 'progress'
         fileData.paused = false
         const c = {
           taskBtn: content ? content.taskBtn : '',
           saveOrcompile: 1,
-          name,
+          name: fileName,
           type,
           upLoad: [
             {
@@ -1099,25 +1124,21 @@ export default {
         const spliceIdx = content ? contentIdx : contents.length
         contents.splice(spliceIdx, 1, c)
       } else if (fileData.paused === undefined) {
-        if (this.word.test(fileData.name)) {
-          type = 2
-        } else if (this.vedio.test(fileData.name)) {
-          type = 5
-        }
+        if (this.video.test(judgeName)) type = 5
         fileData.status = 'progress'
         fileData.paused = false
         const c = contents[index]
         c.upLoad = [{ localName: fileData.name }]
         c.fileData = fileData
         c.type = type
-        c.name = name
+        c.name = fileName
         contents.splice(index, 1, c)
       }
     },
     onUploadComplete(file, url) {
       const contents = this.ruleForm.contents
       const content = contents.find((c) => c.fileData.uid === file.file.uid)
-      content.upLoad[0].url = url
+      content.upLoad[0].content = url
       content.upLoad[0].fileSize = (file.file.size / 1024).toFixed(1) //大小单位KB
       content.fileData.status = 'complete'
       this.continueUploading(file)
@@ -1189,26 +1210,19 @@ export default {
       else if (this.chapterType === 4) return this.DataUpload(file)
       else if (this.chapterType === 2) return this.fileUpload(file)
     },
-    listTeacher(params) {
-      return listTeacher(params)
-    },
     // 编辑页面的数据前
     // 编辑页面的数据后
     async getInfo() {
-      this.TeacherData = await listTeacher()
       let id = this.$route.query.id
       if (!id) return
+      this.TeacherData = await listTeacher({
+        pageSize: 9999999,
+        pageNo: 1
+      })
       getCourse({ courseId: id }).then((res) => {
-        const {
-          localName,
-          url,
-          introduction,
-          // thinkContent,
-          passCondition = '',
-          contents,
-          catalogId
-        } = res
-        res.passCondition = passCondition.split(',')
+        this.isLoading = false
+        const { localName, url, introduction, passCondition = '', contents, catalogId } = res
+        res.passCondition = passCondition === '' ? [] : passCondition.split(',')
         res.contents = contents.map((c) => {
           const item = {}
           const { localName = '', content = '', name = '' } = c
@@ -1228,6 +1242,8 @@ export default {
         if (introduction) {
           res.introduction = _.unescape(introduction)
         }
+        res.type = res.type ? res.type : ''
+        res.electiveType = res.electiveType ? res.electiveType : ''
         this.ruleForm = res
         // 文章富文本回显
         res.contents.map((item, index) => {
@@ -1240,7 +1256,7 @@ export default {
         for (const key of this.TeacherData) {
           if (key.idStr == this.ruleForm.teacherId) {
             ini = 1
-            return
+            break
           }
         }
         if (ini === 0) {
@@ -1273,12 +1289,8 @@ export default {
     //添加章节内容
     operation(data, index) {
       if (data.type === 1) {
-        this.addArticle.localName = data.upLoad[data.upLoad.length - 1]
-          ? data.upLoad[data.upLoad.length - 1].localName
-          : ''
-        this.addArticle.content = data.upLoad[data.upLoad.length - 1]
-          ? _.unescape(data.upLoad[data.upLoad.length - 1].content)
-          : ''
+        this.addArticle.localName = data.upLoad[0] ? data.upLoad[0].localName : ''
+        this.addArticle.content = data.upLoad[0] ? _.unescape(data.upLoad[0].content) : ''
         this.AddArticleBtntableIndex = index
         this.dialogVisible = true
       }
@@ -1291,7 +1303,7 @@ export default {
             localName: this.addArticle.localName,
             content: _.escape(this.addArticle.content)
           }
-          this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad.push(i)
+          this.ruleForm.contents[this.AddArticleBtntableIndex].upLoad = [i]
           this.addArticle.localName = ''
           this.addArticle.content = ''
           this.dialogVisible = false
@@ -1317,7 +1329,7 @@ export default {
         contents.pending = true
         return
       }
-
+      this.isLoading = true
       delete contents.addStatus
       delete contents.pending
       let params = {}
@@ -1369,6 +1381,7 @@ export default {
             message: '所在分类一定要填哦',
             type: 'warning'
           })
+          this.isLoading = false
           this.toForm = true
           setTimeout(() => {
             this.tipsVisible = true
@@ -1385,6 +1398,7 @@ export default {
             this.isdeleteData()
             this.$router.push({ path: '/course/courseDraft?status=' + status })
             this.disabledBtn = false
+            this.isLoading = false
           })
         } else {
           addCourse(params).then(() => {
@@ -1395,6 +1409,7 @@ export default {
             this.isdeleteData()
             this.$router.push({ path: '/course/courseDraft?status=' + status })
             this.disabledBtn = false
+            this.isLoading = false
           })
         }
       }
@@ -1408,7 +1423,11 @@ export default {
               }
             })
             if (upIndexArr.length) {
-              this.$message.error(`第${upIndexArr}条章节内容或有遗漏，请重新编辑或者删除该章节内容`)
+              setTimeout(() => {
+                this.$message.error(
+                  `第${upIndexArr}条章节内容或有遗漏，请重新编辑或者删除该章节内容`
+                )
+              }, 200)
               this.toCourse = true
               setTimeout(() => {
                 this.tipsVisible = true
@@ -1421,6 +1440,7 @@ export default {
             })
             setTimeout(() => {
               this.tipsVisible = true
+              this.isLoading = false
             }, 200)
             this.toForm = true
           } else {
@@ -1436,6 +1456,7 @@ export default {
               this.toCourse = true
               setTimeout(() => {
                 this.tipsVisible = true
+                this.isLoading = false
               }, 200)
               return
             }
@@ -1452,6 +1473,7 @@ export default {
                   if (process) {
                     // 状态设置为审批中
                     this.submitApprApply(params.id ? params.id : id)
+                    this.isLoading = false
                   } else {
                     //发布成功清除数据
                     this.isdeleteData()
@@ -1460,6 +1482,7 @@ export default {
                       type: 'success'
                     })
                     this.$router.back()
+                    this.isLoading = false
                   }
                 })
               } else {
@@ -1476,6 +1499,7 @@ export default {
                       type: 'success'
                     })
                     this.$router.back()
+                    this.isLoading = false
                   }
                 })
               }
@@ -1487,6 +1511,10 @@ export default {
     // 审批发起组件的弹窗确认回调
     handleSubmit() {
       this.isAddCourse(1)
+    },
+    // 审批组件取消事件
+    apprCancel() {
+      this.isLoading = false
     },
     // 提交课程审批
     submitApprApply(courseId) {
@@ -1513,6 +1541,9 @@ export default {
           this.$router.push({ path: '/course/courseDraft?status=' + status })
           //发布成功清除数据
           this.isdeleteData()
+        })
+        .finally(() => {
+          this.isLoading = false
         })
     },
     // 清空数据
@@ -1551,9 +1582,12 @@ export default {
     // 文件校验
     DataUpload(file) {
       if (this.isFileSize(file)) return false
-      if (this.vedio.test(file.name) && file.size / 1024 / 1023 / 1024 > 2) {
-        this.$message.error('视频文件大小不能超过2GB')
-        return false
+      const fileName = file.name.toLocaleLowerCase()
+      if (this.video.test(fileName)) {
+        if (file.size / 1024 / 1024 / 1024 > 2) {
+          this.$message.error('视频文件大小不能超过2GB')
+          return false
+        }
       } else if (file.size / 1024 / 1024 > 5) {
         this.$message.error('文件大小不能超过5M')
         return false
@@ -1562,11 +1596,12 @@ export default {
     // 视频校验
     VideoUpload(file) {
       if (this.isFileSize(file)) return false
+      const fileName = file.name.toLocaleLowerCase()
       if (file.size / 1024 / 1024 / 1024 > 2) {
         this.$message.error('上传视频大小不能超过 2GB!')
         return false
       }
-      if (!this.vedio.test(file.name)) {
+      if (!this.video.test(fileName)) {
         this.$message.error('上传视频仅支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
         return false
       }
@@ -1574,12 +1609,14 @@ export default {
     // 图片校验
     beforeAvatarUpload(file) {
       if (this.isFileSize(file)) return false
-      if (!this.image.test(file.name)) {
-        this.$message.error('只能上传图片类型文件!')
+      const fileName = file.name.toLocaleLowerCase()
+      const imgae = /\.(jpg|jpeg|png|bmp)$/
+      if (!imgae.test(fileName)) {
+        this.$message.error('只能上传jpg、jpeg、bmp、png文件')
         return false
       }
-      if (file.size / 1024 / 1024 > 5) {
-        this.$message.error('上传图片大小不能超过5M!')
+      if (file.size / 1024 / 1024 > 10) {
+        this.$message.error('上传图片大小不能超过10M!')
         return false
       }
       return true
@@ -1587,7 +1624,8 @@ export default {
     // 批量校验
     CoursewareUpload(file) {
       if (this.isFileSize(file)) return false
-      if (this.vedio.test(file.name)) {
+      const fileName = file.name.toLocaleLowerCase()
+      if (this.video.test(fileName)) {
         if (file.size / 1024 / 1024 / 1024 > 2) {
           setTimeout(() => {
             this.$message({
@@ -1597,7 +1635,7 @@ export default {
           }, 200)
           return false
         }
-      } else if (this.word.test(file.name) || /\.(ppt|pdf)$/.test(file.name)) {
+      } else if (this.word.test(fileName) || /\.(ppt|pdf)$/.test(fileName)) {
         if (file.size / 1024 / 1024 > 5) {
           setTimeout(() => {
             this.$message({
@@ -1619,16 +1657,13 @@ export default {
     },
     // 上传文件数量超出
     masterFileMax() {
-      this.$message.error('上传文件数不能超过20')
+      this.$message.error('上传文件数不能超过20个')
     },
     // 文档上传校验
     fileUpload(file) {
+      const fileName = file.name.toLocaleLowerCase()
       if (this.isFileSize(file)) return false
-      if (
-        this.word.test(file.name) ||
-        this.image.test(file.name) ||
-        /\.(ppt|pdf)$/.test(file.name)
-      ) {
+      if (this.word.test(fileName) || this.image.test(fileName) || /\.(ppt|pdf)$/.test(fileName)) {
         if (file.size / 1024 / 1024 > 5) {
           this.$message.error('上传文档大小不能超过5M')
           return false
@@ -1653,9 +1688,6 @@ export default {
         fileData: {}
       }
       this.ruleForm.contents.push(item)
-    },
-    setCheckboxVal() {
-      // this.ruleForm.passCondition = this.checkboxVal
     },
     // 删除
     delContent(c, i) {
@@ -1692,10 +1724,6 @@ export default {
     downward(scope) {
       this.swapArray(this.ruleForm.contents, scope, scope + 1)
     },
-    // 计数器
-    handleChange() {
-      // (value 这有个(value)
-    },
     // 表单
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
@@ -1715,71 +1743,71 @@ export default {
       this.ruleForm.contents[data.$index].upLoad = []
     },
     //上传成功后调用预览(前台预览需求)
-    upLoadSuc(flie) {
+    async upLoadSuc(flie) {
       this.fileList = []
+      const name = flie[0].localName.toLocaleLowerCase()
+      const url = flie[0].fileUrl
       let type = null
-      const word = /\.(txt|doc|wps|rtf|docx|jpg|jpeg|png|bmp|JPG|GIF)$/
-      if (word.test(flie[0].localName)) {
+      const word = /\.(txt|doc|wps|rtf|docx|)$/
+      if (word.test(name)) {
         type = 0
-      } else if (/ppt$/.test(flie[0].localName)) {
-        type = 69
-      } else if (/pdf$/.test(flie[0].localName)) {
-        type = 14
+      } else if (/ppt$/.test(name)) {
+        type = 0
+      } else if (/pdf$/.test(name)) {
+        type = 20
+      } else {
+        return
       }
-      axios({
-        method: 'post',
-        url:
-          'http://139.9.41.27:9090/fcscloud/composite/httpfile' +
-          `?convertType=${type}&fileUrl=${flie[0].fileUrl}`,
-        withCredentials: false,
-        validateStatus: function(status) {
-          return status >= 200 && status <= 500
-        }
+      await getReviewUrl({
+        isDownloa: 0,
+        isShowTitle: 0,
+        isPrint: 0,
+        isCopy: 1,
+        htmlName: name,
+        convertType: type,
+        fileUrl: url
       })
     },
-    // 预览dialog
-    preview(data) {
+    // 预览dialogfile
+    async preview(flie) {
       // 预览
-      const name = data.upLoad[0].localName
+      const name = flie.upLoad[0].localName.toLocaleLowerCase()
+      const url = flie.upLoad[0].content
       if (this.word.test(name)) {
         this.type = 0
-      } else if (this.vedio.test(name)) {
-        this.previewVideo = data.upLoad[0].url
+      } else if (this.video.test(name)) {
+        this.previewVideo = url
         this.showDialog = true
         return
       } else if (this.image.test(name)) {
-        this.previewImg = data.upLoad[0].url
+        this.previewImg = url
         this.showDialog = true
         return
       } else if (/ppt$/.test(name)) {
-        this.type = 69
+        this.type = 0
       } else if (/pdf$/.test(name)) {
-        this.type = 14
-      } else if (data.upLoad[0].content) {
-        this.previewHtml = _.unescape(data.upLoad[0].content)
+        this.type = 20
+      } else if (url && flie.type === 1) {
+        this.previewHtml = `<h2>${
+          flie.upLoad[0].localName
+        }</h2><p style="padding-left:20px;">${_.unescape(url)}</p>`
         this.showDialog = true
         return
       } else {
         this.$message.warning('该文件类型暂不支持预览')
         return
       }
-      axios({
-        method: 'post',
-        url:
-          'http://139.9.41.27:9090/fcscloud/composite/httpfile' +
-          `?convertType=${this.type}&fileUrl=${data.upLoad[0].url}`,
-        withCredentials: false,
-        validateStatus: function(status) {
-          return status >= 200 && status <= 500
-        }
-      }).then((res) => {
-        if (res.data.errorcode === 0) {
-          this.perviewSrc = res.data.data.viewUrl
-          this.showDialog = true
-        } else {
-          this.$message.warning(res.data.message)
-        }
+      let { data } = await getReviewUrl({
+        isDownloa: 0,
+        isShowTitle: 0,
+        isPrint: 0,
+        isCopy: 1,
+        htmlName: flie.upLoad[0].localName,
+        convertType: this.type,
+        fileUrl: url
       })
+      this.perviewSrc = data.data.viewUrl
+      this.showDialog = true
     },
     close() {
       this.previewVideo = ''
@@ -1791,7 +1819,6 @@ export default {
   }
 }
 </script>
-
 <style lang="scss" scoped>
 /deep/.cell:empty::before {
   content: '--';
@@ -2003,6 +2030,7 @@ export default {
 .preview {
   ::v-deep .el-dialog__body {
     height: 80vh;
+    overflow-y: auto;
   }
 }
 .yen {
@@ -2025,9 +2053,10 @@ export default {
   right: -8px;
   top: 49px;
   background-color: #fff;
-  width: 350px;
+  width: 385px;
   padding: 15px;
   border: 1px solid #ccc;
+  z-index: 999;
   h3,
   p {
     margin: 0;
@@ -2036,7 +2065,10 @@ export default {
   .tipText {
     display: flex;
     font-size: 14px;
-    margin-top: 5px;
+    margin-top: 15px;
+    background-color: #f2f2f2;
+    line-height: 38px;
+    padding-right: 15px;
     span:first-child {
       color: #000;
     }

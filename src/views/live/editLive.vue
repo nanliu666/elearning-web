@@ -10,18 +10,21 @@
         <div
           :class="{ sign: headIndex === 1 }"
           class="schedule1"
+          @click="changeTable(1)"
         >
           <i class="el-icon-video-camera"></i> 直播信息
         </div>
         <div
           :class="{ sign: headIndex === 2 }"
           class="schedule2"
+           @click="changeTable(2)"
         >
           <i class="el-icon-document-copy"></i> 关联讲师及课程
         </div>
         <div
           :class="{ sign: headIndex === 3 }"
           class="schedule3"
+           @click="changeTable(3)"
         >
           <i class="el-icon-document-remove"></i> 观看条件
         </div>
@@ -43,6 +46,14 @@
           @click="liveNextTable(headIndex)"
         >
           下一步
+        </el-button>
+         <el-button
+          size="mini"
+          class="backward"
+          type="default"
+          @click="submit_live_data(2)"
+        >
+          存草稿
         </el-button>
         <el-button
           v-show="headIndex === 3"
@@ -182,46 +193,51 @@
                   placement="left"
                 >
                   <el-row :gutter="20">
-                    <el-col :span="5">
-                      <div
-                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
-                        @click="toggle_scene = 'ppt'"
-                      >
-                        <img
-                          v-show="toggle_scene == 'ppt'"
-                          src="../../assets/images/live/live_act_screen.png"
-                        />
-                        <img
-                          v-show="toggle_scene == 'topclass'"
-                          src="../../assets/images/live/live_screen.png"
-                        />
-                        <p>云课堂</p>
-                        <p>(三分屏)</p>
-                      </div>
-                    </el-col>
-                    <el-col :span="5">
-                      <div
-                        :style="{ pointerEvents: isEdit ? 'none' : '' }"
-                        @click="toggle_scene = 'topclass'"
-                      >
-                        <img
-                          v-show="toggle_scene == 'topclass'"
-                          src="../../assets/images/live/live_act_vedio.png"
-                        />
-                        <img
-                          v-show="toggle_scene == 'ppt'"
-                          src="../../assets/images/live/live_vedio.png"
-                        />
-                        <p>直播助手</p>
-                        <p>(纯视频)</p>
-                      </div>
-                    </el-col>
+                     <el-tooltip class="item" effect="dark" content="适用于：PPT+视频教学，多人音视频互动（选择后不可更改）" placement="top">
+                       <el-col :span="5">
+                        <div
+                          :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                          @click="toggle_scene = 'ppt'"
+                        >
+                          <img
+                            v-show="toggle_scene == 'ppt'"
+                            src="../../assets/images/live/live_act_screen.png"
+                          />
+                          <img
+                            v-show="toggle_scene == 'topclass'"
+                            src="../../assets/images/live/live_screen.png"
+                          />
+                          <p>云课堂</p>
+                          <p>(三分屏)</p>
+                        </div>
+                      </el-col>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="适用于：活动拍摄，屏幕共享直播（选择后不可更改）" placement="top">
+                      <el-col :span="5">
+                        <div
+                          :style="{ pointerEvents: isEdit ? 'none' : '' }"
+                          @click="toggle_scene = 'topclass'"
+                        >
+                          <img
+                            v-show="toggle_scene == 'topclass'"
+                            src="../../assets/images/live/live_act_vedio.png"
+                          />
+                          <img
+                            v-show="toggle_scene == 'ppt'"
+                            src="../../assets/images/live/live_vedio.png"
+                          />
+                          <p>直播助手</p>
+                          <p>(纯视频)</p>
+                        </div>
+                      </el-col>
+                    </el-tooltip >
                   </el-row>
                 </el-tooltip>
                 <el-row
                   v-else
                   :gutter="20"
                 >
+                <el-tooltip class="item" effect="dark" content="适用于：PPT+视频教学，多人音视频互动（选择后不可更改）" placement="top">
                   <el-col :span="5">
                     <div
                       :style="{ pointerEvents: isEdit ? 'none' : '' }"
@@ -239,6 +255,8 @@
                       <p>(三分屏)</p>
                     </div>
                   </el-col>
+                  </el-tooltip >
+                  <el-tooltip class="item" effect="dark" content="适用于：活动拍摄，屏幕共享直播（选择后不可更改）" placement="top">
                   <el-col :span="5">
                     <div
                       :style="{ pointerEvents: isEdit ? 'none' : '' }"
@@ -256,6 +274,7 @@
                       <p>(纯视频)</p>
                     </div>
                   </el-col>
+                  </el-tooltip >
                 </el-row>
               </el-form-item>
             </el-col>
@@ -605,12 +624,12 @@
                 placeholder="请选择"
                 @focus="get_teacherType(scope.row.type)"
                 @change="
-                  add_teacherList(scope.row.nameList_value, teachingTeacherList, scope.$index)
+                  add_teacherList(scope.row.nameList_value, scope.row.type,scope.$index)
                 "
               >
                 <el-option
-                  v-for="item in teachingTeacherList"
-                  :key="item.id"
+                  v-for="(item,i) in getList(scope.row.type)"
+                  :key="i"
                   :label="item.name"
                   :value="item.id"
                   :disabled="item.disabled"
@@ -618,7 +637,7 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column
+          <!-- <el-table-column
             prop="name"
             label="头衔"
           >
@@ -629,7 +648,7 @@
                 placeholder="请输入"
               ></el-input>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column width="100px"></el-table-column>
           <el-table-column label="角色">
             <template slot-scope="scope">
@@ -709,6 +728,43 @@
             </template>
           </el-table-column>
         </el-table>
+        <section class="section__class">
+          <div class="header">
+            <span class="header--title">考试安排</span>
+            <el-button
+              size="mini"
+              @click="handleEditExamine(null)"
+            >
+              添加考试
+            </el-button>
+          </div>
+          <common-table
+            :config="examine.config"
+            :columns="examine.columns"
+            :data="examine.data"
+          >
+            <template #examTime="{row}">
+              {{ row.examTime[0] }} 至 {{ row.examTime[1] }}
+            </template>
+            <template #reckonTimeValue="{row}">
+              {{ !row.reckonTime ? '不计时' : row.reckonTimeValue }}
+            </template>
+            <template #handler="{row}">
+              <el-button
+                type="text"
+                @click="handleEditExamine(row)"
+              >
+                修改
+              </el-button>
+              <el-button
+                type="text"
+                @click="handleDeleteExamine(row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </common-table>
+        </section>
       </div>
       <div
         v-show="headIndex === 3"
@@ -720,7 +776,7 @@
           :rules="rules"
         >
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="关联方式">
                 <div style="clear: both">
                   <el-radio
@@ -761,11 +817,121 @@
               >
                 学员登录平即可观看，链接分享给其他人员需要使用验证码。
               </p>
+              <div v-show="radio_connectionMode == 'all'">
+                <div>
+                  <span style="margin-right: 20px">是否需要审批</span>
+                  <el-switch v-model="isApprove" />
+                </div>
+                <div
+                  v-if="isApprove"
+                  style="margin-top: 20px"
+                >
+                  <div style="margin-bottom: 10px">
+                    报名截止日期
+                  </div>
+                  <el-date-picker
+                    v-model="signupDeadline"
+                    type="date"
+                    placeholder="选择日期"
+                  >
+                  </el-date-picker>
+                </div>
+                <div>
+                  <span style="margin-right: 20px">是否需要登记</span>
+                  <el-switch v-model="isRegister" />
+                </div>
+                <div
+                  v-if="isRegister"
+                  style="margin-top: 20px"
+                >
+                  <el-col :span="24">
+                    <el-form-item :label="'登记观看'">
+                      <!-- <el-button
+                        v-if="table_registerNum.length"
+                        type="text"
+                        @click="delRegisterNum()"
+                      >
+                        批量删除
+                      </el-button> -->
+
+                      <el-button
+                        type="text"
+                        style="float: right"
+                        @click="addRegisterNum(1)"
+                      >
+                        添加信息
+                      </el-button>
+                      <el-table
+                        ref="table_relatedStudents"
+                        :data="table_registerNum"
+                        stripe
+                        style="width: 100%"
+                        @selection-change="registerNumSelectionChange"
+                      >
+                        >
+                        <!-- <el-table-column
+                          type="selection"
+                          width="55"
+                        ></el-table-column> -->
+                        <el-table-column
+                          prop="type"
+                          label="信息类型"
+                        >
+                          <template slot-scope="scope">
+                            <el-select v-model="scope.row.type" placeholder="请选择">
+                              <el-option
+                                v-for="item in registerTypeArr"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                              </el-option>
+                            </el-select>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="name"
+                          label="信息标题"
+                        >
+                          <template slot-scope="scope">
+                            <el-input v-model="scope.row.name" placeholder="请输入内容"></el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          class="placeholder"
+                          prop="department"
+                          label="信息描述"
+                        >
+                          <template slot-scope="scope">
+                            <el-input v-model="scope.row.placeholder" placeholder="请输入内容"></el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          label="操作"
+                          fixed="right"
+                          width="100px"
+                          align="center"
+                        >
+                          <template slot-scope="scope">
+                            <el-button
+                              type="text"
+                              size="small"
+                              @click="delRegisterNum(scope.$index + 1,1)"
+                            >
+                              删除
+                            </el-button>
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </el-form-item>
+                  </el-col>
+                </div>
+              </div>
             </el-col>
           </el-row>
           <el-row
+            :gutter="20"
             v-show="radio_connectionMode == 'code'"
-            class="block_label"
+            class=""
           >
             <!-- <el-col :span="12">
               <el-form-item
@@ -778,7 +944,7 @@
                 ></el-input>
               </el-form-item>
             </el-col> -->
-            <el-col :span="12">
+            <el-col :span="10">
               <el-form-item
                 label="验证码"
                 prop="code"
@@ -788,6 +954,119 @@
                   maxlength="32"
                 ></el-input>
               </el-form-item>
+            </el-col>
+            <el-col :span="10">
+              <el-form-item
+                label="提示文案"
+                prop="tips"
+              >
+                <el-input
+                  v-model.trim="formLiveTypeForm.tips"
+                  maxlength="20"
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="10">
+              <el-form-item
+                label="欢迎标题"
+                prop="title"
+              >
+                <el-input
+                  v-model.trim="formLiveTypeForm.title"
+                  maxlength="32"
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <div>
+                  <span style="margin-right: 20px">是否需要登记</span>
+                  <el-switch v-model="isRegisterCode" />
+                </div>
+                <div
+                  v-if="isRegisterCode"
+                  style="margin-top: 20px"
+                >
+                  <el-col :span="24">
+                    <el-form-item :label="'登记观看'">
+                      <!-- <el-button
+                        v-if="table_registerNum.length"
+                        type="text"
+                        @click="delRegisterNum()"
+                      >
+                        批量删除
+                      </el-button> -->
+
+                      <el-button
+                        type="text"
+                        style="float: right"
+                        @click="addRegisterNum(2)"
+                      >
+                        添加信息
+                      </el-button>
+                      <el-table
+                        ref="table_relatedStudents"
+                        :data="table_registerNumCode"
+                        stripe
+                        style="width: 100%"
+                        @selection-change="registerNumSelectionChange"
+                      >
+                        >
+                        <!-- <el-table-column
+                          type="selection"
+                          width="55"
+                        ></el-table-column> -->
+                        <el-table-column
+                          prop="type"
+                          label="信息类型"
+                        >
+                          <template slot-scope="scope">
+                            <el-select v-model="scope.row.type" placeholder="请选择">
+                              <el-option
+                                v-for="item in registerTypeArr"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                              </el-option>
+                            </el-select>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="name"
+                          label="信息标题"
+                        >
+                          <template slot-scope="scope">
+                            <el-input v-model="scope.row.name" placeholder="请输入内容"></el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          class="placeholder"
+                          prop="department"
+                          label="信息描述"
+                        >
+                          <template slot-scope="scope">
+                            <el-input v-model="scope.row.placeholder" placeholder="请输入内容"></el-input>
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          label="操作"
+                          fixed="right"
+                          width="100px"
+                          align="center"
+                        >
+                          <template slot-scope="scope">
+                            <el-button
+                              type="text"
+                              size="small"
+                              @click="delRegisterNum(scope.$index + 1,2)"
+                            >
+                              删除
+                            </el-button>
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </el-form-item>
+                  </el-col>
+                </div>
             </el-col>
             <!-- <el-col :span="12">
               <el-form-item
@@ -801,7 +1080,7 @@
               </el-form-item>
             </el-col> -->
 
-            <el-col :span="24">
+            <!-- <el-col :span="24">
               <el-form-item
                 label="公众号二维码"
                 class="live_upload_img"
@@ -831,7 +1110,8 @@
                   />
                 </common-upload>
               </el-form-item>
-            </el-col>
+            </el-col> -->
+            
           </el-row>
 
           <el-row v-show="radio_connectionMode == 'direct'">
@@ -1104,12 +1384,20 @@
           </el-button>
         </div>
       </el-dialog>
+      <edit-examine-drawer
+        ref="examineRef"
+        :visible.sync="examine.drawerVisible"
+        :examine="examine.editingRecord"
+        entry-c-name="直播"
+        @submit="examineSubmit"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import {
+  postAddLiveDraft,
   postAddLive,
   postEditLive,
   // getStudentList,
@@ -1123,17 +1411,40 @@ import {
   getLiveDetails,
   getStudentByLiveId
 } from '@/api/live/editLive'
+import EditExamineDrawer from '@/views/training/components/drawerComponents/editExamineDrawer'
+import moment from 'moment'
 const NODE_TYPE = {
   All: 'All',
   Org: 'Org',
   User: 'User'
 }
+const TestColumns = [
+  { prop: 'examTime', label: '考试时间', slot: true, minWidth: 220 },
+  { prop: 'examName', label: '考试名称', minWidth: 100 },
+  { prop: 'reckonTimeValue', minWidth: 120, slot: true, label: '考试时间(分钟)' }
+]
+const TestConfig = {
+  showHandler: true,
+  handlerColumn: { label: '操作', width: 100 }
+}
 export default {
   components: {
-    commonUpload: () => import('@/components/common-upload/commonUpload')
+    commonUpload: () => import('@/components/common-upload/commonUpload'),
+    EditExamineDrawer
   },
   data() {
     return {
+      signupDeadline: '',
+      isApprove: false,
+      isRegister: false,
+      isRegisterCode:false,
+      examine: {
+        config: TestConfig,
+        columns: TestColumns,
+        drawerVisible: false,
+        editingRecord: {},
+        data: []
+      },
       multipleSelection: [],
       oldOrgUserData: [],
       totalNum: 0,
@@ -1224,6 +1535,10 @@ export default {
         {
           value: 0,
           label: '禁用'
+        },
+         {
+          value: 2,
+          label: '草稿'
         }
       ],
       // select_linkNumber_value: '', // 当前选择的数量
@@ -1283,6 +1598,27 @@ export default {
           label: '按月循环'
         }
       ],
+      table_registerNumCode:[], //登记观看人数
+      table_registerNum:[], //登记观看人数
+      registerNumSelection:[], //批量选择的等级观看人数
+      registerTypeArr:[
+        {
+          value: 'name',
+          label: '用户名称'
+        },
+        {
+          value: 'mobile',
+          label: '手机号码'
+        },
+        {
+          value: 'text',
+          label: '文本'
+        },
+         {
+          value: 'number',
+          label: '数字'
+        }
+      ],
 
       /** tabs 2 的提交数据 */
       table_teacherSet: [
@@ -1301,7 +1637,8 @@ export default {
       },
       // 要搜索的讲师类型
       index_teacherType: 1,
-      teachingTeacherList: [],
+      teachingTeacherList: [],//嘉宾助教列表
+      teacherlist: [],//讲师列表
       table_relatedCourses: [], // 关联课程表格数据
       dialog_relatedCourses_form: false,
       dialog_relatedCourses_type: {
@@ -1351,6 +1688,11 @@ export default {
       },
       treeLoading: false,
       isEdit: false
+    }
+  },
+  computed: {
+    limitWords() {
+      return this.basicForm.introduction.length
     }
   },
   watch: {
@@ -1411,6 +1753,8 @@ export default {
       this.getStudentInfoList()
       this.isEdit = true
     }
+    //修改tab  标题
+    this.$store.commit('SET_TAG_LABEL', `${this.$route.query.id?'编辑直播':'创建直播'}`)
     //   获取直播分类
     getcategoryTree({
       source: 'live'
@@ -1437,16 +1781,64 @@ export default {
       })
     })
   },
-  computed: {
-    limitWords() {
-      return this.basicForm.introduction.length
-    }
-  },
+
   beforeRouteLeave(to, from, next) {
-    to.meta.$keepAlive = false // 禁用页面缓存
+    from.meta.$keepAlive = false // 禁用页面缓存
     next()
   },
   methods: {
+    //批量选择登记观看信息callback
+    registerNumSelectionChange(arr){
+      this.registerNumSelection = arr
+    },
+    //添加登记观看信息
+    addRegisterNum(type){
+      let k = type==1?'table_registerNum':'table_registerNumCode'
+      if(this[k].length>=5){
+        this.$message({
+          type:'info',
+          message:'最多添加5条'
+        })
+        return
+      }
+      this[k].push({
+        type:'',
+        name:'',
+        placeholder:''
+      })
+    },
+    //删除登记观看信息
+    delRegisterNum(index,type){
+      if(index){
+        let k = type==1?'table_registerNum':'table_registerNumCode'
+        this[k].splice(index-1,1)
+      }
+    },
+    getList(type){
+      return type===1?this.teacherlist:this.teachingTeacherList
+    },
+    // 删除考试安排
+    handleDeleteExamine(row) {
+      let index = _.findIndex(this.examine.data, (item) => item.id === row.id)
+      this.examine.data.splice(index, 1)
+      this.$message.success('删除成功！')
+    },
+    // 新增与编辑考试
+    handleEditExamine(row) {
+      this.examine.editingRecord = row
+      this.examine.drawerVisible = true
+    },
+    // 考试安排提交后
+    examineSubmit(data, type) {
+      if (type == 'add') {
+        this.examine.data.push(data)
+      } else {
+        let index = _.findIndex(this.examine.data, (item) => {
+          return item.id === data.id
+        })
+        this.$set(this.examine.data, index, data)
+      }
+    },
     // 数据处理中间函数
     thruHandler(arr) {
       // disabled: ({ type }) => !(this.org || _.eq(type, PROCESS_TYPE.User)),
@@ -1486,7 +1878,24 @@ export default {
         this.totalPage = res.totalPage
       })
     },
-
+    async changeTable(index){
+      if(index>this.headIndex){
+        let num = 1;
+        while(num<index){
+          await this.liveNextTable(num)
+          console.log(num,this.headIndex,index)
+          if(num<this.headIndex){
+            num++
+          }else{
+            num = 5
+          }
+        }
+        
+      }else{
+        this.headIndex = index
+      }
+      
+    },
     //直播信息填写 下一步校验
     liveNextTable(type) {
       let base = [
@@ -1520,8 +1929,11 @@ export default {
           this.table_teacherSet.filter((x) => x.nameList_value).length ===
           this.table_teacherSet.length
         ) {
-          this.headIndex += 1
+          if(this.headIndex<3){
+            this.headIndex += 1
+          }
         } else {
+          this.headIndex = 2
           this.$message({
             message: '请完善讲师设置',
             type: 'error'
@@ -1529,7 +1941,6 @@ export default {
         }
         return false
       }
-      console.log(this.basicForm.introduction)
       let resLength = 0,
         resArr = [...base, ...spationArr]
       this.$refs[formName].validateField(resArr, (errmsg) => {
@@ -1545,6 +1956,7 @@ export default {
               type: 'error'
             })
           }
+
           return false
         }
       })
@@ -1785,7 +2197,6 @@ export default {
     // 关联学员表格批量删除
     delete_batchTableStudent() {
       let self = this
-      console.log(self.$refs.table_relatedStudents.selection)
       this.$confirm('您确定要批量删除所选人员吗？', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -1916,14 +2327,31 @@ export default {
       }
       this.dialog_relatedCourses_form = false
     },
+    concatPerson(){  //由于没有查全部的人员，导致显示嘉宾助教显示id,,所以将已经选择过得嘉宾助教添加到获取的助教嘉宾列表
+      return this.table_teacherSet.reduce((pre,cur)=>{
+        let x = this.teachingTeacherList.filter(y=>y.id===cur.nameList_value);
+        if(x){
+          pre.push(x)
+        }
+        return pre
+      },[])
+    },
     get_teacherType(type) {
       this.index_teacherType = type
       if (type == 1 && this.teachingTeacherList != []) {
-        getQueryTeacher().then((res) => {
-          this.teachingTeacherList = res
+        getQueryTeacher({
+          pageSize:10,
+          pageNo:1
+        }).then((res) => {
+          this.teacherlist = res
         })
       } else if (type != 1 && this.teachingTeacherList != []) {
-        getQueryAssistant().then((res) => {
+        getQueryAssistant({
+          pageSize:10,
+          pageNo:1
+        }).then((res) => {
+          //将已经选择的人员添加进去  并去重
+          res = _.uniqBy([...res,...this.concatPerson()].flat(Infinity),'id')
           //已经选择过的  不能被选择
           this.table_teacherSet.forEach((item) => {
             if (item.nameList_value) {
@@ -1940,7 +2368,8 @@ export default {
       }
     },
     // 将讲师设置中所选的教师添加到教师列表供关联课程使用
-    add_teacherList(val, list, index) {
+    add_teacherList(val, type, index) {
+      let list = type==1?this.teacherlist:this.teachingTeacherList
       var data = list.find((item) => {
         return item.id == val
       })
@@ -1957,7 +2386,8 @@ export default {
           getQueryTeacher({
             name: query
           }).then((res) => {
-            this.teachingTeacherList = res
+            this.teacherlist = res
+           
           })
           break
         case 2:
@@ -1965,6 +2395,7 @@ export default {
             name: query
           }).then((res) => {
             //  this.teachingTeacherList = res
+            res = _.uniqBy([...res,...this.concatPerson()].flat(Infinity),'id')
             //已经选择过的  输入置灰
             this.table_teacherSet.forEach((item) => {
               if (item.nameList_value) {
@@ -1983,6 +2414,7 @@ export default {
           getQueryAssistant({
             name: query
           }).then((res) => {
+            res = _.uniqBy([...res,...this.concatPerson()].flat(Infinity),'id')
             // this.teachingTeacherList = res
             //已经选择过的  输入置灰
             this.table_teacherSet.forEach((item) => {
@@ -2003,7 +2435,6 @@ export default {
     handleClick() {},
 
     delete_dialog_selectStudent(arr, index, id) {
-      console.log(arr, index, id)
       this.$refs.otherUserTree.setChecked(id, false)
       arr.splice(index, 1)
     },
@@ -2086,7 +2517,6 @@ export default {
             id: data.userId
           })
         } else {
-          console.log(222)
           getUsersByOrgId({ orgId: data.id }).then((res) => {
             res.forEach((resitem) => {
               var index = this.dialogSelectStudent.findIndex((item) => item.id == resitem.id)
@@ -2123,9 +2553,30 @@ export default {
       this.basicForm.liveClassification_value = data.idStr
       //  this.$refs.ref_liveClassification.blur()
     },
+    //直播存草稿时，liveBatch  如果为空 传入空数组，不然接口报错
+    dealLiveBatchParams(data){
+      let {liveBatch} = data
+      let str = liveBatch.reduce((pre,cur)=>{
+        pre += `${cur.startTime}${cur.endTime}`
+        return pre
+      },'')
+      if(!str){
+        data.liveBatch = []
+      }
+      return data
+    },
+    //处理是否需要登记观看信息数据
+    dealRegisterNum(data=[]){
+      if(data.length<=0) return []
+      return data.reduce((pre,cur)=>{
+        cur.options = ''
+        pre.push(cur)
+        return pre
+      },[])
+    },
     // 提交直播信息
 
-    submit_live_data() {
+    submit_live_data(type) {
       let otherData = []
       let slef = this
 
@@ -2150,12 +2601,17 @@ export default {
         categoryId: this.basicForm.liveClassification_value, // 所属分类
         channelName: this.basicForm.title, // 直播标题
         linkMicLimit: this.basicForm.select_linkNumber_value, //  最大连麦数量
-        isUsed: this.basicForm.select_liveStatus_value, // 直播状态
+        isUsed: type?type:this.basicForm.select_liveStatus_value, // 直播状态
         remark: _.escape(this.basicForm.introduction), // 直播介绍
         scene: this.toggle_scene, // 直播场景
         lecturerId: this.table_teacherSet[0].nameList_value, //  主讲师设置
         otherTeachers: otherData,
-        coverImageUrl: this.basicForm.imageUrl[this.basicForm.imageUrl.length - 1].url // 直播封面图
+        coverImageUrl: this.basicForm.imageUrl.length>0?this.basicForm.imageUrl[this.basicForm.imageUrl.length - 1].url:'', // 直播封面图
+        liveExamList: this.examine.data,
+        isApprove: this.isApprove,
+        signupDeadline: this.signupDeadline
+          ? moment(this.signupDeadline).format('YYYY-MM-DD HH:mm:ss')
+          : ''
       }
 
       // 提交关联课程数据
@@ -2201,6 +2657,16 @@ export default {
       switch (this.radio_connectionMode) {
         case 'all':
           data.authType = ''
+           //处理登记信息
+           if(this.isRegister && this.table_registerNum.length<=0){
+             this.$message({
+               type:'info',
+               message:'请填写登记观看信息'
+             })
+             return
+           }
+           data.isCollectUser = this.isRegister?'Y':'N'
+           data.infoFieldREQS = this.dealRegisterNum(this.table_registerNum)
           break
         case 'direct':
           data.authType = this.radio_connectionMode
@@ -2224,24 +2690,51 @@ export default {
             notice: this.formLiveTypeForm.tips,
             QRCodeUrl: this.formLiveTypeForm.imgUrl[this.formLiveTypeForm.imgUrl.length - 1].url
           }
+          //处理登记信息
+          if(this.isRegister && this.table_registerNum.length<=0){
+             this.$message({
+               type:'info',
+               message:'请填写登记观看信息'
+             })
+             return
+           }
+           data.isCollectUser = this.isRegisterCode?'Y':'N'
+           data.infoFieldREQS = this.dealRegisterNum(this.table_registerNumCode)
           break
       }
-
+      console.log(data)
+      
       if (this.radio_connectionMode === 'code') {
         //校验第三步是否填写
         this.$refs['formLiveTypeForm'].validate((valid) => {
           if (valid) {
             if (this.$route.query.id) {
               data.liveId = this.$route.query.id
-              postEditLive(data).then(() => {
-                this.initData()
-                this.$router.push({ path: '/live/liveList' })
-              })
+              if(type){
+                data = this.dealLiveBatchParams(data)
+                postAddLiveDraft(data).then(() => {
+                  this.initData()
+                  this.$router.push({ path: '/live/liveList' })
+                })
+              }else{
+                postEditLive(data).then(() => {
+                  this.initData()
+                  this.$router.push({ path: '/live/liveList' })
+                })
+              }
             } else {
-              postAddLive(data).then(() => {
-                this.initData()
-                this.$router.push({ path: '/live/liveList' })
-              })
+              if(type){
+                data = this.dealLiveBatchParams(data)
+                postAddLiveDraft(data).then(() => {
+                  this.initData()
+                  this.$router.push({ path: '/live/liveList' })
+                })
+              }else{
+                postAddLive(data).then(() => {
+                  this.initData()
+                  this.$router.push({ path: '/live/liveList' })
+                })
+              }
             }
           } else {
             return false
@@ -2250,15 +2743,33 @@ export default {
       } else {
         if (this.$route.query.id) {
           data.liveId = this.$route.query.id
-          postEditLive(data).then(() => {
-            this.initData()
-            this.$router.push({ path: '/live/liveList' })
-          })
+          if(type){
+            data = this.dealLiveBatchParams(data)
+            postAddLiveDraft(data).then(() => {
+              this.initData()
+              this.$router.push({ path: '/live/liveList' })
+            })
+          }else{
+            postEditLive(data).then(() => {
+              this.initData()
+              this.$router.push({ path: '/live/liveList' })
+            })
+          }
+          
         } else {
-          postAddLive(data).then(() => {
-            this.initData()
-            this.$router.push({ path: '/live/liveList' })
-          })
+          if(type){
+            data = this.dealLiveBatchParams(data)
+            postAddLiveDraft(data).then(() => {
+              this.initData()
+              this.$router.push({ path: '/live/liveList' })
+            })
+          }else{
+             postAddLive(data).then(() => {
+              this.initData()
+              this.$router.push({ path: '/live/liveList' })
+            })
+          }
+         
         }
       }
     },
@@ -2269,21 +2780,27 @@ export default {
       getLiveDetails({
         liveId: id
       }).then((res) => {
-        (this.basicForm.title = res.channelName),
-          (this.liveClassification_option.label = res.categoryName)
+        this.liveClassification_option.label = res.categoryName
+        this.basicForm.title = res.channelName
         this.liveClassification_option.value = res.categoryId
         this.basicForm.liveClassification_value = res.categoryId
         this.basicForm.select_liveStatus_value = res.isUsed
         this.basicForm.select_linkNumber_value = res.linkMicLimit
         this.toggle_scene = res.scene
+        this.examine.data = res.examList
+        this.isApprove = res.isApprove
+        this.signupDeadline = res.signupDeadline
         let imgArr = []
-        imgArr.push({
+        if(res.coverImageUrl){
+          imgArr.push({
           url: res.coverImageUrl
         })
+        }
+        
         this.basicForm.imageUrl = imgArr
         this.basicForm.introduction = _.unescape(res.remark)
         this.basicForm.select_mode_value = res.batchDeclare
-        this.teachingTeacherList = [
+        this.teacherlist = [
           {
             name: res.lecturerName,
             id: res.lecturerId
@@ -2296,9 +2813,12 @@ export default {
         })
 
         this.table_teacherSet[0].nameList_value = res.lecturerId
-        getQueryAssistant().then((res) => {
-          this.teachingTeacherList = res
-        })
+        // getQueryAssistant({
+        //   pageSize:10,
+        //   pageNo:1
+        // }).then((res) => {
+        //   this.teachingTeacherList = res
+        // })
         let self = this
         res.otherTeachers.forEach(function(item) {
           let teacherVaue = {}
@@ -2315,6 +2835,10 @@ export default {
             ;(teacherVaue.num = '助教' + (arr_zj.length + 1)), (teacherVaue.type = 3)
           }
           self.table_teacherSet.push(teacherVaue)
+          self.teachingTeacherList.push({
+            name: item.nickName,
+            id: item.userId
+          })
         })
 
         this.table_relatedCourses = res.courses
@@ -2322,8 +2846,8 @@ export default {
         // 直播设置
         switch (this.basicForm.select_mode_value) {
           case 'single':
-            this.basicForm.start_time = res.liveBatch[0].startTime
-            this.basicForm.end_time = res.liveBatch[0].endTime
+            this.basicForm.start_time = res.liveBatch.length>0?res.liveBatch[0].startTime:''
+            this.basicForm.end_time = res.liveBatch.length>0?res.liveBatch[0].endTime:''
             break
           case 'plural':
             this.basicForm.table_liveTime = []
@@ -2360,16 +2884,27 @@ export default {
         switch (res.authType) {
           case '':
             this.radio_connectionMode = 'all'
+            //如果存在登记观看  显示
+            if(res.infoFeilds){
+              this.isRegister = res.isCollectUser==='Y'?true:false
+              this.table_registerNum = this.isRegister?JSON.parse(res.infoFeilds):[]
+            }
             break
           case 'direct':
             this.radio_connectionMode = 'direct'
             break
           case 'code':
             this.radio_connectionMode = 'code'
-            this.formLiveTypeForm.title = res.codeLinkInfo.welcomeTitle
+            this.formLiveTypeForm.title = res.codeLinkInfo.welcomeTitle 
             this.formLiveTypeForm.code = res.codeLinkInfo.captcha
             this.formLiveTypeForm.tips = res.codeLinkInfo.notice
             // this.formLiveTypeForm.imgUrl[0].url = res.codeLinkInfo.QRCodeUrl
+
+            //如果存在登记观看  显示
+            if(res.infoFeilds){
+              this.isRegisterCode = res.isCollectUser==='Y'?true:false
+              this.table_registerNumCode = this.isRegisterCode?JSON.parse(res.infoFeilds):[]
+            }
             break
         }
       })
@@ -2404,6 +2939,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.section__class {
+  margin-top: 50px;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+}
 .edit_live {
   color: #666666;
   width: 100%;
@@ -2513,7 +3059,7 @@ export default {
 }
 .forwardBackward {
   padding-right: 15px;
-  width: 180px;
+  // width: 180px;
   text-align: right;
 }
 

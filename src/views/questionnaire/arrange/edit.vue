@@ -16,7 +16,7 @@
             返回
           </el-button>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="5">
           <el-row
             type="flex"
             justify="center"
@@ -128,7 +128,7 @@
             class="selector"
             :options="selectorData"
             placeholder="请选择所在分类"
-            :props="seletorProps"
+            :props="selectorProps"
             :value="form.categoryId"
             @change="handleTreeSelectChange"
             @getValue="(id) => (form.categoryId = id)"
@@ -141,34 +141,17 @@
           class="half-form-item"
           style="margin-right: 160px;"
         >
-          <el-select
+          <lazy-select
             v-model="form.subjectId"
-            v-el-select-loadmore="loadmoreSubject"
+            :remote-method="loadMoreSubject"
             :disabled="!!form.id"
-            placeholder="请选择"
-            style="width: 100%;"
-            @change="handleSubjectChange"
-          >
-            <el-option
-              v-for="item in subjectOptions"
-              :key="item.id"
-              :label="item.asqName"
-              :value="item.id"
-            >
-            </el-option>
-            <div
-              v-if="subjectLoading"
-              style="color: #9c9c9c; line-height: 34px;text-align: center;"
-            >
-              加载中...
-            </div>
-            <div
-              v-if="noMoreSubject && !subjectLoading"
-              style="color: #9c9c9c;line-height: 34px;text-align: center;"
-            >
-              没有更多了
-            </div>
-          </el-select>
+            :props="{
+              value: 'id',
+              label: 'asqName'
+            }"
+            :filterable="false"
+            @getSelected="(data) => (form.subjectName = data.asqName)"
+          />
         </el-form-item>
         <el-form-item
           label="问卷积分"
@@ -253,25 +236,25 @@
             width="55"
           >
           </el-table-column>
-          <el-table-column
-            prop="name"
-            label="姓名"
-          >
+          <el-table-column label="姓名">
+            <template slot-scope="scope">
+              {{ scope.row.bizName.replace(/\(.+\)/g, '') }}
+            </template>
           </el-table-column>
 
           <el-table-column
-            prop="phonenum"
+            prop="phoneNum"
             label="手机号码"
           >
           </el-table-column>
 
           <el-table-column
-            prop="department"
+            prop="orgName"
             label="所属组织"
           >
             <template slot-scope="scope">
               <div>
-                {{ scope.row.department || '--' }}
+                {{ scope.row.orgName || '--' }}
               </div>
             </template>
           </el-table-column>
@@ -297,11 +280,9 @@
         ></pagination>
       </div>
     </div>
-
-    <user-picker
-      :value="personList"
+    <common-picker
+      v-model="personList"
       :visible.sync="userPickerVisible"
-      @input="handleSelectPerson"
     />
 
     <el-dialog
@@ -370,53 +351,27 @@
 <script>
 import { queryCategoryOrgList } from '@/api/resource/classroom'
 import TreeSelector from '@/components/tree-selector'
-import UserPicker from '@/components/user-picker/userPicker2'
+import CommonPicker from '@/components/common-picker'
+import lazySelect from '@/components/el-lazy-select'
 import Pagination from '@/components/common-pagination'
 import { save, update, saveQuery, querySubject } from '@/api/questionnaire'
 const CODE_NAME = '问卷二维码'
 
 export default {
   name: 'QuestionnaireArrange',
-
-  directives: {
-    'el-select-loadmore': {
-      bind(el, binding) {
-        // 获取element-ui定义好的scroll盒子
-        const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
-        SELECTWRAP_DOM.addEventListener('scroll', () => {
-          /**
-           * scrollHeight 获取元素内容高度(只读)
-           * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
-           * clientHeight 读取元素的可见高度(只读)
-           * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
-           * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
-           */
-          const condition =
-            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
-          if (condition) {
-            binding.value()
-          }
-        })
-      }
-    }
-  },
   components: {
     TreeSelector,
-    UserPicker,
-    Pagination
+    CommonPicker,
+    Pagination,
+    lazySelect
   },
   data() {
     return {
       step: '1',
       selectorData: [],
-      subjectOptions: [],
       pickerOptionsStart: {},
       pickerOptionsEnd: {},
-      getSubjectParams: {
-        pageSize: 600,
-        pageNo: 1
-      },
-      seletorProps: {
+      selectorProps: {
         value: 'id',
         label: 'name',
         children: 'children'
@@ -453,7 +408,6 @@ export default {
       publishLoading1: false,
       publishLoading0: false,
       subjectLoading: false,
-      noMoreSubject: false,
       hisPersonList: []
     }
   },
@@ -531,10 +485,6 @@ export default {
     },
     confirm() {
       this.$router.back()
-    },
-    handleSubjectChange(val) {
-      const subject = this.subjectOptions.find((s) => s.id == val)
-      this.form.subjectName = subject.asqName
     },
     publishTimeChange() {
       // 限制开始时间
@@ -639,12 +589,12 @@ export default {
       $data.publishTime = $data.publishTime + ':00'
       $data.endTime = $data.endTime + ':00'
       $data.users = this.personList.map((person) => {
-        const { userId, name, phonenum, department = '' } = person
+        const { bizId: userId, bizName: userName, phoneNum, orgId: userDeptStr } = person
         return {
           userId,
-          userName: name,
-          userPhone: phonenum,
-          userDeptStr: department
+          userName,
+          userPhone: phoneNum,
+          userDeptStr: userDeptStr
         }
       })
       this['publishLoading' + type] = true
@@ -673,36 +623,19 @@ export default {
           this.personList = users.map((user) => {
             const { userName, userPhone, userDeptStr, userId } = user
             return {
-              name: userName,
-              phonenum: userPhone,
-              department: userDeptStr,
-              userId: userId + ''
+              bizName: userName,
+              phoneNum: userPhone,
+              orgName: userDeptStr,
+              bizId: userId + ''
             }
           })
-          this.hisPersonList = JSON.parse(JSON.stringify(this.personList))
           delete res.users
           Object.assign(this.form, res)
         })
       }
-      this.querySubject()
     },
-    loadmoreSubject() {
-      if (this.subjectLoading || this.noMoreSubject) return
-      this.getSubjectParams.pageNo++
-      this.querySubject()
-    },
-    querySubject() {
-      this.subjectLoading = true
-      querySubject(this.getSubjectParams)
-        .then((res) => {
-          const { data = [] } = res
-          this.noMoreSubject = !data.length
-          this.subjectOptions = this.subjectOptions.concat(data)
-          this.$forceUpdate()
-        })
-        .finally(() => {
-          this.subjectLoading = false
-        })
+    loadMoreSubject(params) {
+      return querySubject(params)
     },
     handleStepChange(step) {
       if (this.$route.query.status == 2) return
@@ -715,13 +648,6 @@ export default {
         return
       }
       this.step = step
-    },
-    handleSelectPerson(list) {
-      if (this.$route.query.status == 2) {
-        this.personList = _.uniqBy(list.concat(this.hisPersonList), 'userId')
-      } else {
-        this.personList = list
-      }
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -748,6 +674,7 @@ export default {
             return
           }
           this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
+          this.multipleSelection = []
         })
         .catch(() => {})
     },

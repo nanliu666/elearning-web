@@ -2,35 +2,41 @@
   <el-dialog
     close-on-click-modal
     :modal-append-to-body="false"
-    :visible.sync="dialogVisibe"
+    :visible.sync="dialogVisible"
     :show-close="false"
     title="签到二维码下载"
     class="down-code-dialog"
-    @close="onClose"
   >
     <div
       slot="title"
       class="dialog-header"
     >
-      <el-row
-        type="flex"
-        justify="space-between"
-      >
-        <el-col :span="6">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span>
           签到二维码下载
-        </el-col>
-        <el-col :span="2">
+        </span>
+        <span>
           <el-button
             type="text"
             size="medium"
-            :disabled="downloadLoading || !data.length"
-            :loading="downloadLoading"
-            @click="batchDownload"
+            :disabled="!data.length"
+            :loading="codeDownloadLoading"
+            @click="batchDownload('code')"
           >
-            打包下载
+            打包下载二维码
           </el-button>
-        </el-col>
-      </el-row>
+
+          <el-button
+            type="text"
+            size="medium"
+            :disabled="!data.length"
+            :loading="excelDownloadLoading"
+            @click="batchDownload('excel')"
+          >
+            打包下载签到表
+          </el-button>
+        </span>
+      </div>
     </div>
 
     <el-table :data="data">
@@ -57,7 +63,7 @@
         label="状态"
       >
         <template slot-scope="scope">
-          {{ scope.row.status == 1 ? '未开始' : scope.row.status == 2 ? '进行中' : '已结束' }}
+          {{ scope.row.status == 1 ? '未开始' : scope.row.status == 2 ? '进行中' : '已结办' }}
         </template>
       </el-table-column>
       <el-table-column
@@ -72,13 +78,21 @@
         prop="date"
         align="center"
         label="操作"
+        width="180"
       >
         <template slot-scope="scope">
           <el-button
             type="text"
-            @click="downCodeImg(scope.row)"
+            @click="downloadCode(scope.row)"
           >
             下载二维码
+          </el-button>
+          <el-button
+            type="text"
+            :loading="scope.row.btn2Loading"
+            @click="downloadExcel(scope.row)"
+          >
+            下载签到表
           </el-button>
         </template>
       </el-table-column>
@@ -90,14 +104,15 @@
 import JsZip from 'jszip'
 import { saveAs } from 'file-saver'
 import QRCode from 'qrcodejs2'
-import { getQrcode } from '@/api/learnArrange'
+import { getQrcode, offlineSignExcel } from '@/api/learnArrange'
 import { backBaseUrl } from '@/config/env'
 const CODE_HEIGHT = 300
 const CODE_WIDTH = 300
 const FOLDER_NAME = '签到二维码'
+const SIGN_FOLDER_NAME = '所有签到表'
 export default {
   props: {
-    dialogVisibe: {
+    visible: {
       type: Boolean,
       default: false
     },
@@ -108,9 +123,20 @@ export default {
   },
   data() {
     return {
-      downloadLoading: false,
+      codeDownloadLoading: false,
+      excelDownloadLoading: false,
       data: [],
       total: 0
+    }
+  },
+  computed: {
+    dialogVisible: {
+      get() {
+        return this.visible
+      },
+      set(val) {
+        this.$emit('update:visible', val)
+      }
     }
   },
   watch: {
@@ -119,7 +145,7 @@ export default {
     }
   },
   methods: {
-    downCodeImg(row) {
+    downloadCode(row) {
       let { todoName, offlineTodoId } = row
       if (!todoName.trim().length) todoName = '签到二维码'
       const codeContainer = document.createElement('div')
@@ -136,7 +162,6 @@ export default {
           offlineTodoId
         }
       })
-      console.log(href)
       // let baseURL = (url += '/mobile/#/pages/signin/index')
       qrcode.makeCode(`${backBaseUrl}/mobile/` + href)
       var canvas = qrcode._el.children[0]
@@ -167,8 +192,40 @@ export default {
       )
       saveLink.dispatchEvent(event)
     },
-    batchDownload() {
-      this.downloadLoading = true
+    downloadExcel(row) {
+      row.btn2Loading = true
+      const { offlineTodoId } = row
+      offlineSignExcel({ offlineTodoId, trainId: this.trainId })
+        .then((res = {}) => {
+          const { userInfo = [], todoName } = res
+          if (!userInfo.length) {
+            this.$message.error('没有学员信息')
+            return
+          }
+          this.beforeExportExcel(
+            todoName,
+            userInfo.map((user) => {
+              const { userName, orgName, phonenum } = user
+              return {
+                userName,
+                phonenum,
+                orgName,
+                status: '',
+                signTime: ''
+              }
+            })
+          )
+        })
+        .finally(() => {
+          row.btn2Loading = false
+        })
+    },
+    batchDownload(type) {
+      if (type == 'excel') {
+        this.handleDownLoadExcelZip()
+        return
+      }
+      this.codeDownloadLoading = true
       const codeContainer = document.createElement('div')
       codeContainer.style.backgroundColor = '#ffffff'
       var qrcode = new QRCode(codeContainer, {
@@ -210,16 +267,97 @@ export default {
         zip.generateAsync({ type: 'blob' }).then(function(content) {
           saveAs(content, `${FOLDER_NAME}.zip`)
         })
-        this.downloadLoading = false
+        this.codeDownloadLoading = false
       })
+    },
+    handleDownLoadExcelZip() {
+      this.excelDownloadLoading = true
+      const promises = []
+      this.data.forEach((item) => {
+        // 多次请求后端接口 如果只有一次请求，那不用promise.all
+        promises.push(
+          offlineSignExcel({ offlineTodoId: item.offlineTodoId, trainId: this.trainId })
+        )
+      })
+      var zip = new JsZip()
+      const folder = zip.folder(SIGN_FOLDER_NAME)
+      Promise.all(promises)
+        .then((data) => {
+          if (data.every((item) => !item.userInfo.length)) {
+            this.$message.error('没有学员信息')
+            return Promise.reject()
+          }
+          data.forEach((item, index) => {
+            const { userInfo = [], todoName } = item
+            let table =
+              '<table id="tableExcel" width="100%" border="1" cellspacing="0" cellpadding="0"><tr style="text-align: center;"><td>学员姓名</td><td>手机号码</td><td>所属部门</td><td>签到情况</td><td>签到时间</td></tr>'
+            userInfo.forEach((user) => {
+              const { userName, phonenum, orgName } = user
+
+              table += `<tr style="text-align: center;">
+                <td>${userName}</td>
+                <td>${phonenum}</td>
+                <td>${orgName}</td>
+                <td></td>
+                <td></td>
+              </tr>`
+            })
+            table += '</table>'
+            let tableHtml = '<html><head><meta charset="UTF-8"></head><body>'
+            tableHtml += table
+            tableHtml += '</body></html>'
+            const excelBlob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' })
+            const fileName = todoName || '签到表' + index + 1
+            folder.file(fileName + '.xlsx', excelBlob)
+          })
+        })
+        .then(() => {
+          zip.generateAsync({ type: 'blob' }).then(function(content) {
+            saveAs(content, `${SIGN_FOLDER_NAME}.zip`)
+          })
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.excelDownloadLoading = false
+        })
     },
     getData() {
       getQrcode({ trainId: this.trainId }).then((res) => {
         this.data = res
       })
     },
-    onClose() {
-      this.$emit('update:dialogVisibe', false)
+    handleExportExcel({
+      header = {},
+      data = [],
+      filename = '签到表',
+      autoWidth = true,
+      bookType = 'xlsx'
+    }) {
+      if (!filename) {
+        filename = '签到表'
+      }
+      return import('@/vendor/Export2Excel').then((excel) => {
+        excel.export_json_to_excel({
+          header,
+          data,
+          filename,
+          autoWidth,
+          bookType
+        })
+      })
+    },
+    beforeExportExcel(filename, data) {
+      const header = ['学员姓名', '手机号码', '所属部门', '签到情况', '签到时间']
+      const keys = ['userName', 'phonenum', 'orgName', 'status', 'signTime']
+      data = data.map((item) => {
+        const arr = []
+        for (let index = 0; index < keys.length; index++) {
+          const key = keys[index]
+          arr.push(item[key])
+        }
+        return arr
+      })
+      this.handleExportExcel({ header, data, filename })
     }
   }
 }

@@ -10,7 +10,7 @@
           : `编辑${currentType}分类`
     "
     :visible="visible"
-    width="550px"
+    :width="currentType == '题库' ? '550px' : '800px'"
     :modal-append-to-body="false"
     @close="handleClose"
   >
@@ -62,6 +62,19 @@
           </div>
         </el-col>
       </el-form-item>
+      <el-form-item
+        v-if="currentType !== '题库'"
+        v-show="!parentOrgIdLabel || parentOrgIdLabel === '无上级分类'"
+        label="可见范围"
+      >
+        <div>
+          <OrgTree
+            :id-list="form.orgIdList"
+            input-placeholder="搜索组织名称"
+            @selectedValue="getOrgList"
+          ></OrgTree>
+        </div>
+      </el-form-item>
     </el-form>
     <span
       v-if="type === 'create'"
@@ -99,15 +112,20 @@
 <script>
 const CLIENT_TYPE = ['题库', '试卷/考试']
 import { getCategoryList, putCategory, postCategory } from '@/api/examManage/category'
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { mapGetters } from 'vuex'
 export default {
   name: 'CatalogEdit',
+  components: {
+    OrgTree
+  },
   props: {
     visible: {
       type: Boolean,
       default: false
     }
   },
+
   data() {
     return {
       currentType: '',
@@ -120,6 +138,7 @@ export default {
       },
       form: {
         parentId: '',
+        orgIds: [],
         name: '',
         type: ''
       },
@@ -134,6 +153,10 @@ export default {
     ...mapGetters(['userId'])
   },
   methods: {
+    // 可见范围返回数据
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
+    },
     // 当主页面修改后，编辑页面的加载函数修改
     async loadOrgTree() {
       let paramsform = {
@@ -142,7 +165,13 @@ export default {
         type: this.$parent.searchParams.type
       }
       let res = await getCategoryList(paramsform)
-      this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      if (this.type === 'edit') {
+        this.orgTree = this.clearCurrentChildren(res)
+        this.parentOrgIdLabel =
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
+      } else {
+        this.orgTree = res
+      }
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -177,6 +206,9 @@ export default {
     submit() {
       if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        if (_.get(this.form, 'orgIds')) {
+          this.form.orgIds = this.form.orgIds.toString()
+        }
         if (valid) {
           if (this.type !== 'edit') {
             postCategory(
@@ -209,6 +241,7 @@ export default {
       this.type = 'create'
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
+      this.$set(this.form, 'orgIdList', [])
       this.orgTree[0] && this.handleOrgNodeClick()
       this.loadOrgTree()
     },

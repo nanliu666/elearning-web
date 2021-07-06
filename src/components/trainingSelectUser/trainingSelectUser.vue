@@ -30,6 +30,7 @@
         </el-tag>
       </template>
     </div>
+    <!-- 选人弹窗 -->
     <user-picker
       v-model="userList"
       :visible.sync="visible"
@@ -41,8 +42,9 @@
 </template>
 
 <script>
-import userPicker from '@/components/user-picker/userPicker'
 import elFormEmitter from '@/mixins/elFormEmitter'
+import { PERSON_OPTIONS } from '@/views/examManagement/examSchedule/components/batchComponents/personConfig'
+import userPicker from '@/components/user-picker/userPicker'
 
 export default {
   name: 'TrainingSelectUser',
@@ -52,6 +54,12 @@ export default {
   mixins: [elFormEmitter],
 
   props: {
+    useType: {
+      type: String,
+      default: () => {
+        return ''
+      }
+    },
     selectType: {
       type: String,
       default: () => {
@@ -78,6 +86,7 @@ export default {
     }
   },
   computed: {
+    PERSON_OPTIONS: () => PERSON_OPTIONS,
     trainObjectsList() {
       if (this.userList.length > 3) {
         let list = this.userList.slice(0, 3)

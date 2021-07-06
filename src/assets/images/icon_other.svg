@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="39px" height="48px" viewBox="0 0 39 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>other</title>
+    <g id="知识库" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="画板" transform="translate(-459.000000, -19.000000)">
+            <g id="other" transform="translate(459.000000, 19.000000)">
+                <path d="M0,3.82560002 L0,44.1744 C0,46.2744 1.69764704,48 3.76235292,48 L35.237647,48 C37.3023529,48 39,46.2744 39,44.1744 L39,15.2256 L25.0632353,0 L3.76005884,0 C1.69764704,0 0,1.72560004 0,3.82560002 Z" id="路径备份" fill="#E36F66" fill-rule="nonzero"></path>
+                <path d="M25.0632353,2.66453526e-14 L25.0632353,11.0955694 C25.0632353,12.2235694 25.4899786,15.2256 29.2795786,15.2256 L39,15.2256 L25.0632353,2.66453526e-14 Z" id="路径备份-2" fill="#F6D4D1" fill-rule="nonzero"></path>
+                <text font-family="PingFangSC-Semibold, PingFang SC" font-size="12" font-weight="500" fill="#FCF0F0">
+                    <tspan x="4.12" y="36">other</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

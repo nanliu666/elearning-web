@@ -67,7 +67,6 @@
               />
             </div>
           </div>
-          <!--外部联系人-->
           <div
             v-show="activeTab === 'OuterUser'"
             v-if="selectTypes.includes('OuterUser')"
@@ -107,7 +106,6 @@
               height="31vh"
             />
           </div>
-          <!--岗位-->
           <div
             v-if="selectTypes.includes('Position')"
             v-show="activeTab === 'Position'"
@@ -276,11 +274,11 @@ const loadOrgTree = async ({ parentId, parentPath, search, orgName }) => {
     )
   )
 }
-const loadPostionTree = async ({ parentId, parentPath, search }) => {
+const loadPostionTree = async ({ parentIds, parentPath, search }) => {
   search = _.trim(search)
   // 只能传入一个参数 当传入search的时候不使用parentId
   const data = await getPostionUserChild(
-    _.pick({ parentIds: parentId, search }, search ? 'search' : 'parentIds')
+    _.pick({ parentIds, search }, search ? 'search' : 'parentIds')
   )
   // 在这里处理两个数组为树形组件需要的结构
   const { positions } = data
@@ -509,7 +507,7 @@ export default {
       this.loading = true
       getGroup()
         .then((res) => {
-          (res || []).forEach((item) => {
+          _.each(res, (item) => {
             item.bizId = item.id
             ;(item.bizName = item.name), (item.type = 'Group')
           })
@@ -575,7 +573,6 @@ export default {
 
     // 当前是否切换为半选状态
     handleCheckedUserChange(value) {
-      console.log(value)
       let checkedCount = value.length
       this.checkAll = checkedCount === this.outerData.length
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.outerData.length
@@ -740,10 +737,10 @@ export default {
         })
     },
     lazyLoadPositionTree(node, resolve) {
-      const parentId = node.level > 0 ? node.data.positionId : '0'
-      if (parentId === '0') this.loading = true
+      const parentIds = node.level > 0 ? node.data.positionId : '0'
+      if (parentIds === '0') this.loading = true
       loadPostionTree({
-        parentId,
+        parentIds,
         parentPath: node.level > 0 ? node.data.path : '0'
       })
         .then((res) => resolve(this.thruHandler(res)))
@@ -791,6 +788,7 @@ export default {
   }
 }
 .content-wr {
+  height: auto;
   display: flex;
   border: 1px solid #efefef;
   .left {

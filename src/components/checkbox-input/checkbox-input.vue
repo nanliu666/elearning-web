@@ -50,11 +50,17 @@ export default {
     }
   },
   data() {
-    return {
-      checkValue: this.value
-    }
+    return {}
   },
   computed: {
+    checkValue: {
+      get() {
+        return this.value
+      },
+      set(value) {
+        this.$emit('input', value)
+      }
+    },
     innerValue: {
       get() {
         return this.defaultValue
@@ -62,11 +68,6 @@ export default {
       set(value) {
         this.$emit('update:defaultValue', value)
       }
-    }
-  },
-  watch: {
-    checkValue(val) {
-      this.$emit('input', val)
     }
   },
   methods: {}

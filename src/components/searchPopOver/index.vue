@@ -6,8 +6,8 @@
       @submit.native.prevent
     >
       <el-form-item
-        v-for="item in requireOptions"
-        :key="item.field"
+        v-for="(item, index) in requireOptions"
+        :key="`${item.field}${index}`"
         :label="item.label"
         :class="[item.type === 'treeSelect' ? 'treeSelect' : '', 'require-form-item']"
       >
@@ -29,18 +29,19 @@
           :placeholder="'请选择'"
           :multiple="item.config && item.config.multiple"
           :collapse-tags="item.config && item.config.multiple"
+          :filterable="item.config && item.config.filterable"
           @visible-change="item.firstLoad && item.firstLoad($event, item)"
           @change="change"
         >
           <template v-if="item.config && item.config.group">
             <el-option-group
-              v-for="group in item.options"
-              :key="group.label"
+              v-for="(group, i) in item.options"
+              :key="`${group.label}${i}`"
               :label="group.label"
             >
               <el-option
-                v-for="it in group.options"
-                :key="it.value"
+                v-for="(it, c) in group.options"
+                :key="`${it.value}${c}`"
                 :label="it[_.get(item, 'config.optionLabel', 'label')]"
                 :value="it[_.get(item, 'config.optionValue', 'value')]"
               />
@@ -48,8 +49,8 @@
           </template>
           <template v-else>
             <el-option
-              v-for="it in item.options"
-              :key="it[_.get(item, 'config.optionValue', 'value')]"
+              v-for="(it, x) in item.options"
+              :key="`${it[_.get(item, 'config.optionValue', 'value')]}${x}`"
               :label="it[_.get(item, 'config.optionLabel', 'label')]"
               :value="it[_.get(item, 'config.optionValue', 'value')]"
             />
@@ -84,6 +85,7 @@
           v-if="item.type === 'cascader'"
           v-model="item.data"
           :options="item.options"
+          :props="item.props"
         />
         <el-date-picker
           v-if="item.type === 'dataPicker'"
@@ -92,7 +94,11 @@
           :value-format="
             item.config && item.config['value-format'] ? item.config['value-format'] : 'yyyy-MM-dd'
           "
+          :range-separator="
+            item.config && item.config.rangeSeparator ? item.config.rangeSeparator : '-'
+          "
           :default-time="item.config && item.config['default-time']"
+          :picker-options="item.config ? item.config.disabledDate : {}"
           placeholder="结束时间"
           start-placeholder="开始时间"
           end-placeholder="结束时间"
@@ -113,6 +119,10 @@
           :select-params="item.config.selectParams"
           :tree-params="item.config.treeParams"
           @change="change"
+        />
+        <slot
+          v-if="item.type === 'slot'"
+          :name="item.field"
         />
         <!-- <tree-select
           v-if="item.type === 'treeSelect'"
@@ -144,8 +154,8 @@
                 :gutter="24"
               >
                 <el-col
-                  v-for="item in popoverOptions"
-                  :key="item.field"
+                  v-for="(item, j) in popoverOptions"
+                  :key="`${item.field}${j}`"
                   :span="8"
                 >
                   <el-form-item :label="item.label">
@@ -156,6 +166,7 @@
                       :placeholder="
                         (item.config && item.config.placeholder) || '请输入' + item.label
                       "
+                      :maxlength="item.config && item.config.maxlength"
                       :suffix-icon="item.config && item.config['suffix-icon']"
                       class="elInput"
                     />
@@ -167,17 +178,18 @@
                       :placeholder="'请选择'"
                       :multiple="item.config && item.config.multiple"
                       :collapse-tags="item.config && item.config.multiple"
+                      :filterable="item.config && item.config.filterable"
                       @visible-change="item.firstLoad && item.firstLoad($event, item)"
                     >
                       <template v-if="item.config && item.config.group">
                         <el-option-group
-                          v-for="group in item.options"
-                          :key="group.label"
+                          v-for="(group, k) in item.options"
+                          :key="`${group.label}${k}`"
                           :label="group.label"
                         >
                           <el-option
-                            v-for="it in group.options"
-                            :key="it.value"
+                            v-for="(it, z) in group.options"
+                            :key="`${it.value}${z}`"
                             :label="it[_.get(item, 'config.optionLabel', 'label')]"
                             :value="it[_.get(item, 'config.optionValue', 'value')]"
                           />
@@ -185,8 +197,8 @@
                       </template>
                       <template v-else>
                         <el-option
-                          v-for="it in item.options"
-                          :key="it[_.get(item, 'config.optionValue', 'value')]"
+                          v-for="(it, l) in item.options"
+                          :key="`${it[_.get(item, 'config.optionValue', 'value')]}${l}`"
                           :label="it[_.get(item, 'config.optionLabel', 'label')]"
                           :value="it[_.get(item, 'config.optionValue', 'value')]"
                         />
@@ -219,6 +231,7 @@
                       v-if="item.type === 'cascader'"
                       v-model="item.data"
                       :options="item.options"
+                      :props="item.props"
                     />
                     <el-date-picker
                       v-if="item.type === 'dataPicker'"
@@ -228,9 +241,13 @@
                           ? item.config['value-format']
                           : 'yyyy-MM-dd'
                       "
+                      :range-separator="
+                        item.config && item.config.rangeSeparator ? item.config.rangeSeparator : '-'
+                      "
                       :default-time="item.config && item.config['default-time']"
                       :type="item.config && item.config.type ? item.config.type : 'date'"
-                      placeholder="结束时间"
+                      :picker-options="item.config ? item.config.disabledDate : {}"
+                      :placeholder="item.config.placeholder ? item.config.placeholder : '结束时间'"
                       start-placeholder="开始时间"
                       end-placeholder="结束时间"
                       :unlink-panels="true"
@@ -259,6 +276,10 @@
                       :placeholder="item.placeholder"
                       :option-props="item.optionProps"
                       :searchable="item.searchable"
+                    />
+                    <slot
+                      v-if="item.type === 'slot'"
+                      :name="item.field"
                     />
                   </el-form-item>
                 </el-col>
@@ -289,6 +310,7 @@
             筛选
           </el-button>
         </el-popover>
+        <slot v-if="hasSlotRight" />
       </el-form-item>
     </el-form>
   </div>
@@ -297,7 +319,7 @@
 <script>
 import NumInterval from '../numInterval/numInterval'
 import ElTreeSelect from '../elTreeSelect/elTreeSelect'
-
+import _ from 'lodash'
 export default {
   name: 'SearchPopOver',
   components: {
@@ -308,6 +330,11 @@ export default {
   props: {
     // TODO待优化：为解决预订教室弹窗的popover样式，暂时只想到这个解决方案
     isCustomPopoverClass: {
+      type: Boolean,
+      default: false
+    },
+    // 定制筛选按钮右侧文字
+    hasSlotRight: {
       type: Boolean,
       default: false
     },

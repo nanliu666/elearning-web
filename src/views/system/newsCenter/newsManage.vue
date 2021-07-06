@@ -2,14 +2,31 @@
   <div class="NewsManage">
     <page-header title="新闻管理">
       <template #rightMenu>
-        <el-button
+        <el-dropdown>
+          <el-button
+            v-p="ADD_NEWS"
+            type="primary"
+            size="medium"
+          >
+            创建公告<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item @click.native="handlePublishBtnClick('inside')">
+              内部新闻
+            </el-dropdown-item>
+            <el-dropdown-item @click.native="handlePublishBtnClick('link')">
+              链接新闻
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        <!-- <el-button
           v-p="ADD_NEWS"
           type="primary"
           size="medium"
           @click="() => handlePublishBtnClick()"
         >
           创建公告
-        </el-button>
+        </el-button> -->
       </template>
     </page-header>
     <div class="tabsNav flex flex-flow flex-justify-between flexcenter">
@@ -146,9 +163,10 @@ export default {
         })
       }
     },
-    handlePublishBtnClick() {
+    handlePublishBtnClick(type) {
       this.$router.push({
-        path: '/system/newsCenter/newsEdit'
+        path: '/system/newsCenter/newsEdit',
+        query: { type: type }
       })
     }
   }

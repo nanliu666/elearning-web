@@ -22,7 +22,7 @@
             v-p="data.status == 1 ? START_ARRANGE : PAUSE_ARRANGE"
             type="primary"
             :loading="btn1Loading"
-            :disabled="shouldbeDisabled"
+            :disabled="shouldDisabled"
             size="mini"
             @click="handleStatusChange(data.status == 2 ? 1 : 2)"
           >
@@ -131,7 +131,7 @@
           <component
             :is="tab.component"
             :id="id"
-            :should-resize-chart="activeComponent == 'Distribution'"
+            :should-resize-chart="activeComponent === 'Distribution'"
           ></component>
         </el-tab-pane>
       </el-tabs>
@@ -182,7 +182,7 @@ export default {
     }
   },
   computed: {
-    shouldbeDisabled() {
+    shouldDisabled() {
       const { option } = this.data
       if (option == 0) return true
       if (this.data.status == 1) {

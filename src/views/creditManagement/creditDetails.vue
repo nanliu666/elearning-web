@@ -65,6 +65,9 @@
             </div>
           </div>
         </template>
+          <template #stu_name="{ row }">
+            {{row.stu_name || row.source_name}}
+          </template>
         <template #multiSelectMenu="{ selection }">
           <el-button
             type="text"
@@ -364,9 +367,12 @@ export default {
      * */
     handleSearch(params) {
       let currentParam = {
-        likeQuery: params.search
-        // userId:params.search
+        likeQuery: params.search,
+        startTime: params.startTime,
+        endTime: params.endTime,
+        sysRule:params.sysRule
       }
+      debugger
       // this.searchParams = params
       this.searchParams = { ...currentParam }
       this.page.currentPage = 1

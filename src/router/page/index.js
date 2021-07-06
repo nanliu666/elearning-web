@@ -72,6 +72,16 @@ export default [
     }
   },
   {
+    path: '/666',
+    component: () => import(/* webpackChunkName: "page" */ '@/components/error-page/666'),
+    name: '666',
+    meta: {
+      keepAlive: true,
+      isTab: false,
+      isAuth: false
+    }
+  },
+  {
     path: '/',
     name: '主页',
     redirect: '/wel'

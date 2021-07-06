@@ -159,6 +159,11 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
+    label: '所属组织',
+    prop: 'orgScopeName',
+    minWidth: 150
+  },
+  {
     label: '状态',
     prop: 'status',
     slot: true,
@@ -265,13 +270,15 @@ export default {
       deep: true
     }
   },
-  activated() {
-    getCatalog().then((res) => {
-      let data = this.flag(res)
-      data = this.arrayUnique(data, 'creatorId')
-      this.searchConfig.popoverOptions[1].options.push(...data)
+  created() {
+    this.$nextTick(() => {
+      getCatalog().then((res) => {
+        let data = this.flag(res)
+        data = this.arrayUnique(data, 'creatorId')
+        this.searchConfig.popoverOptions[1].options.push(...data)
+      })
+      this.loadTableData()
     })
-    this.loadTableData()
   },
   methods: {
     // 去重
@@ -323,29 +330,33 @@ export default {
     },
     // 具体的删除函数
     deleteFun(id) {
-      delCatalag({ id: id }).then(() => {
-        this.loadTableData()
-        this.$refs.table.clearSelection()
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+      delCatalag({ id: id })
+        .then(() => {
+          this.loadTableData()
+          this.$refs.table.clearSelection()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
         })
-      })
+        .catch(() => {})
     },
     // 单个删除
     handleDelete(row) {
-      let hasChildren = !_.isEmpty(row.children)
-      if (hasChildren) {
-        this.$message.error('很抱歉，您选中的分类下存在子分类，请先将子分类调整后再删除!')
-      } else {
-        this.$confirm('您确定要删除选中的分类吗？', '提醒', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.deleteFun(row.id)
+      this.$confirm('您确定要删除选中的分类吗？?', '提醒', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          let hasChildren = !_.isEmpty(row.children)
+          if (hasChildren) {
+            this.$message.error('很抱歉，您选中的分类下存在子分类，请先将子分类调整后再删除!')
+          } else {
+            this.deleteFun(row.id)
+          }
         })
-      }
+        .catch(() => {})
     },
     // 批量删除
     deleteSelected(selected) {

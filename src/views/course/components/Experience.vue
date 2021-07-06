@@ -54,15 +54,13 @@
         <template #header>
           <el-button
             type="text"
+            :disabled="tableData.length === 0"
             @click="handleUpload()"
           >
             打包下载
           </el-button>
         </template>
         <template slot-scope="scope">
-          <!-- <el-button type="text">
-              下载  {{scope.row.filePath}}
-            </el-button> -->
           <a
             style="color:#01aafc; cursor:pointer;"
             @click="downLoadInfo(scope.row)"

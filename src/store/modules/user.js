@@ -58,7 +58,7 @@ const user = {
             // commit('SET_REFRESH_TOKEN', res.refresh_token)
             commit('SET_TENANT_ID', res.tenant_id)
             commit('SET_USER_INFO', res)
-            commit('DEL_ALL_TAG')
+            // commit('DEL_ALL_TAG')
             commit('CLEAR_LOCK')
             resolve(res)
           })

@@ -13,7 +13,7 @@ export class Validate {
    */
   static validateLegalTime(callback, trainTime, date, title, entryCName = '培训') {
     if (_.isEmpty(trainTime)) {
-      callback(new Error('请先选择培训时间'))
+      callback(new Error(`请先选择${entryCName}时间`))
     } else {
       const isLegalTime = this.isLegalTimeFun(date, trainTime, title)
       const timeLegalTips = `${title}日期要在${entryCName}日期（${trainTime[0]}至${trainTime[1]}）之间`
