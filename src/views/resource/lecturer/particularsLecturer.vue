@@ -1,11 +1,8 @@
 <template>
-  <div class="compileLecturer">
-    <!-- <div
-      class="compileLecturerr_head"
-      @click="toLecturer"
-    >
-      <i class="el-icon-arrow-left"></i> 讲师详情
-    </div> -->
+  <div
+    v-if="teacherData"
+    class="compileLecturer"
+  >
     <page-header
       title="讲师详情"
       :back="() => toLecturer()"
@@ -15,124 +12,147 @@
     <div class="compileLecturerr_head_box">
       <div class="head_box_img">
         <img
-          :src="teacherData.photo"
+          :src="teacherImg"
           alt=""
         />
-        <div class="in_img_icon">
+        <div
+          v-if="teacherData.isRecommend === 1"
+          class="in_img_icon"
+        >
           推荐
         </div>
       </div>
       <div class="head_box_content">
         <el-row>
           <el-col
-            :span="5"
-            style="color:#333;font-size: 18px;"
+            :span="24"
+            style="color: #333; font-size: 18px"
           >
             {{ name ? name : '--' }}
-          </el-col>
-          <el-col :span="8">
             <span
               v-if="teacherData.status == 1"
+              style="margin-left: 10px"
               class="box_content_icon content_icon1"
             >正常</span>
             <span
               v-if="teacherData.status == 0"
-              class="box_content_icon content_icon1"
-            >停用</span>
-            <span
-              v-if="teacherData.isPopularTeacher == 1"
+              style="margin-left: 10px"
               class="box_content_icon content_icon2"
-            >热门</span>
-
-            <span
-              v-if="teacherData.isLatestTeacher == 1"
-              class="box_content_icon content_icon3"
-            >最新</span>
+            >冻结</span>
           </el-col>
         </el-row>
 
         <el-row>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            手机号码：
+            联系方式:
           </el-col>
           <el-col :span="7">
             {{ teacherData.phonenum ? teacherData.phonenum : '--' }}
           </el-col>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            电子邮箱：
+            讲师类型:
           </el-col>
           <el-col :span="7">
-            {{ teacherData.userEmail ? teacherData.phonenum : '--' }}
+            {{ teacherData.teacherType ? teacherType[+teacherData.teacherType] : '--' }}
           </el-col>
         </el-row>
         <el-row>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            性别：
+            性别:
           </el-col>
           <el-col :span="7">
             <span v-if="teacherData.sex === '1'">男</span>
-            <span v-if="teacherData.sex === '0'">女</span>
-            <span v-if="teacherData.sex === ''">--</span>
+            <span v-else-if="teacherData.sex === '0'">女</span>
+            <span v-else>--</span>
           </el-col>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            讲师类型：
+            专业分类:
           </el-col>
           <el-col :span="7">
-            <span v-if="teacherData.type == 1">内训</span>
-            <span v-if="teacherData.type == 2">外聘</span>
+            <span>{{
+              teacherData.professionalCata ? professionalCata[+teacherData.professionalCata] : '--'
+            }}</span>
           </el-col>
         </el-row>
         <el-row>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            讲师级别：
+            讲师等级:
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherLevel ? teacherData.teacherLevel : '--' }}
+            {{ teacherData.teacherLevel ? teacherLevel[+teacherData.teacherLevel] : '--' }}
           </el-col>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            讲师职称：
+            聘用类型:
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherTitle ? teacherData.teacherTitle : '--' }}
+            {{ teacherData.type ? type[+teacherData.type] : '--' }}
           </el-col>
         </el-row>
         <el-row>
-          <!-- <el-col
-            :span="4"
-            style="color:#898989;"
+          <el-col
+            :span="6"
+            style="color: #898989"
+          >
+            授课课时费(元):
+          </el-col>
+          <el-col :span="6">
+            {{ teacherData.courseCost }}
+          </el-col>
+          <el-col
+            :span="5"
+            style="color: #898989"
+          >
+            讲师职称:
+          </el-col>
+          <el-col :span="7">
+            {{ teacherData.teacherTitle ? teacherTitle[+teacherData.teacherTitle] : '--' }}
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col
+            :span="5"
+            style="color: #898989"
           >
             擅长领域：
           </el-col>
-          <el-col :span="8">
-            <span class="box_content_icon">计算机技术</span><span class="box_content_icon">计算机技术</span>
-          </el-col> -->
+          <el-col :span="7">
+            <div class="skilledFields">
+              <span
+                v-for="(item, index) in teacherData.skilledFields"
+                :key="index"
+                class="box_content_icon"
+              >{{ item }}</span>
+            </div>
+          </el-col>
           <el-col
             :span="5"
-            style="color:#898989;"
+            style="color: #898989"
           >
-            评分：
+            评分:
           </el-col>
           <el-col :span="7">
             <el-rate
               v-model="teacherData.teacherScore"
+              :score-template="`${teacherData.teacherScore}分`"
+              show-score
               disabled
             ></el-rate>
           </el-col>
@@ -151,7 +171,7 @@
           size="medium"
           @click="iseditSysRulus(0)"
         >
-          停用
+          冻结
         </el-button>
         <el-button
           v-show="teacherData.status == 0"
@@ -159,7 +179,7 @@
           type="primary"
           @click="iseditSysRulus(1)"
         >
-          启用
+          解冻
         </el-button>
         <el-button
           size="medium"
@@ -169,14 +189,6 @@
         </el-button>
       </div>
     </div>
-    <!-- <div class="compileLecturerr_introduce">
-      <div class="introduce_title">
-        讲师介绍
-      </div>
-      <div class="ntroduce_content">
-        <div v-html="teacherData.introduction"></div>
-      </div>
-    </div> -->
     <basic-container style="margin-top: 20px">
       <el-menu
         :default-active="activeIndex"
@@ -193,7 +205,7 @@
           授课情况
         </el-menu-item>
       </el-menu>
-      <div style="padding: 20px; min-height:32vh">
+      <div style="padding: 20px; min-height: 32vh">
         <div
           v-if="activeIndex === '0'"
           class="ntroduce_content"
@@ -220,6 +232,17 @@
               :popover-options="searchConfig.popoverOptions"
               @submit="handleSearch"
             />
+          </template>
+          <template #index="{ $index }">
+            {{ $index + 1 }}
+          </template>
+          <template #courseName="{ row }">
+            <el-link
+              type="primary"
+              @click="toClassInfo(row.id)"
+            >
+              {{ row.courseName }}
+            </el-link>
           </template>
           <template
             slot="multiSelectMenu"
@@ -303,12 +326,12 @@ import { getCourseListData } from '@/api/course/course'
 import { getTeacher, Teacherdelete, editSysRulus, getCourseList } from '@/api/lecturer/lecturer'
 import SearchPopover from '@/components/searchPopOver/index'
 import styles from '@/styles/variables.scss'
-import { getCategoryTree } from '@/api/live'
+import { classList } from '@/api/course/course'
 const TABLE_COLUMNS = [
   {
-    label: '序号',
+    label: '课程编号',
     prop: 'rowNum',
-    minWidth: 50
+    minWidth: 80
   },
   {
     label: '课程名称',
@@ -319,6 +342,7 @@ const TABLE_COLUMNS = [
   {
     label: '所在分类',
     prop: 'catalogName',
+    formatter: (row) => (row.catalogName ? row.catalogName : '--'),
     slot: true,
     minWidth: 120
   },
@@ -331,11 +355,11 @@ const TABLE_COLUMNS = [
     label: '授课时间',
     slot: true,
     prop: 'courseTime',
+    formatter: (row) => (row.courseTime ? row.courseTime : '--'),
     minWidth: 120
   }
 ]
 const TABLE_CONFIG = {
-  rowKey: 'id',
   showHandler: false,
   showIndexColumn: false,
   enablePagination: true,
@@ -422,6 +446,12 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableColumns: TABLE_COLUMNS,
       searchConfig: SEARCH_CONFIG,
+      teacherType: ['内部讲师', '外部讲师'],
+      professionalCata: ['--', '技术类', '管理类', '营销服务类', '技能类'],
+
+      teacherLevel: ['预备级', '助理级', '初级', '中级', '高级', '资深级', '专家级', '非讲师'],
+      type: ['--', '内训', '外聘'],
+      teacherTitle: ['--', '助理级', '初级', '中级', '高级', '研究员级', '无'],
       page: {
         currentPage: 1,
         size: 10,
@@ -437,19 +467,15 @@ export default {
         startTime: '',
         endTime: ''
       },
-      teacherData: {
-        photo: '',
-        status: '',
-        isPopularTeacher: '',
-        phonenum: '',
-        userEmail: '',
-        sex: '',
-        type: '',
-        teacherLevel: '',
-        teacherTitle: '',
-        introduction: ''
-      },
+      teacherData: null,
       name: ''
+    }
+  },
+  computed: {
+    teacherImg() {
+      return this.teacherData.photo
+        ? this.teacherData.photo
+        : require('@/assets/images/defaultTeacher.png')
     }
   },
   created() {
@@ -459,7 +485,7 @@ export default {
     this.isgetTeacher()
     this.loadTableData()
     let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'catalogId' })
-    getCategoryTree({ source: 'course' }).then((res) => {
+    classList().then((res) => {
       categoryIdType.config.treeParams.data = _.concat(
         [
           {
@@ -471,39 +497,15 @@ export default {
       )
     })
   },
-
   methods: {
-    // // 启动/停用系统规则列表
-    // iseditSysRulus(status) {
-    //   let params = {
-    //     id: '',
-    //     status: '' // '0 停用 1 正常',
-    //   }
-    //   params.id = this.$route.query.id
-    //   params.status = status
-    //   editSysRulus(params).then(() => {
-    //     this.$message({
-    //       message: '操作成功',
-    //       type: 'success'
-    //     })
-    //     this.isgetTeacher()
-    //   })
-    // },
-
-    // // 删除讲师
-    // isTeacherdelete(id) {
-    //   let params = {
-    //     ids: id
-    //   }
-    //   params.ids = this.$route.query.id
-    //   Teacherdelete(params).then(() => {
-    //     this.$message({
-    //       message: '操作成功',
-    //       type: 'success'
-    //     })
-    //     this.toLecturer()
-    //   })
-    // },
+    toClassInfo(id) {
+      this.$router.push({
+        path: '/course/detail',
+        query: {
+          id
+        }
+      })
+    },
     /**
      * 处理页码改变
      */
@@ -606,7 +608,7 @@ export default {
       params.status = i
       editSysRulus(params).then(() => {
         this.$message({
-          message: `${i ? '启用' : '停用'}成功`,
+          message: `${i ? '解冻' : '冻结'}成功`,
           type: 'success'
         })
         //刷新
@@ -619,7 +621,7 @@ export default {
     iseditSysRulus(i) {
       // 启用弹框
       if (i) {
-        this.$confirm('您确定要启用该讲师吗？', '提示', {
+        this.$confirm('您确定要解冻该讲师吗？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -650,7 +652,7 @@ export default {
             })
             // 如果没有课程&在线课程
             if (res.data.length == 0 || res.data.length == countIndex) {
-              this.$confirm('您确定要停用该讲师吗？', '提示', {
+              this.$confirm('您确定要冻结该讲师吗？', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -709,6 +711,8 @@ export default {
       this.name = this.$route.query.name
       getTeacher(params).then((res) => {
         this.teacherData = res.teacherInfo
+        this.teacherData.teacherScore =
+          this.teacherData.teacherScore === '' ? 0 : this.teacherData.teacherScore
         this.teacherData.introduction = _.unescape(this.teacherData.introduction)
       })
     }
@@ -808,9 +812,11 @@ export default {
       }
       .content_icon1 {
         background-color: #cbf5e8;
+        color: #09666b;
       }
       .content_icon2 {
-        background-color: #fff491;
+        background-color: #ffe0db;
+        color: #cf637c;
       }
       .content_icon3 {
         background-color: #c4e6ff;
@@ -837,6 +843,13 @@ export default {
     }
     .ntroduce_img {
       padding: 0 45px;
+    }
+  }
+  .skilledFields {
+    display: flex;
+    flex-wrap: wrap;
+    .box_content_icon {
+      flex-shrink: 0;
     }
   }
 }

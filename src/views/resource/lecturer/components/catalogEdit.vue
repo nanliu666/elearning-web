@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -36,7 +36,7 @@
             placeholder="请选择"
           >
             <el-option
-              style="height: auto;padding:0"
+              style="height: auto; padding: 0"
               :value="form.parentId"
               :label="parentOrgIdLabel"
             >
@@ -57,36 +57,6 @@
           </div>
         </el-col>
       </el-form-item>
-      <!-- <el-form-item>
-        <template slot="label">
-          <div>
-            是否公开
-
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="此选项可以选择该分类是否展示给其他子公司"
-              placement="top-start"
-            >
-              <i class="el-icon-question"></i>
-            </el-tooltip>
-          </div>
-        </template>
-        <el-select
-          v-model="form.isPublic"
-          placeholder="请选择"
-        >
-          <el-option
-            label="否"
-            :value="0"
-          ></el-option>
-          <el-option
-            label="是"
-            :value="1"
-          ></el-option>
-        </el-select>
-      </el-form-item> -->
-
       <!-- 可见范围 -->
       <el-form-item
         v-show="!parentOrgIdLabel || parentOrgIdLabel === '顶级'"
@@ -95,10 +65,10 @@
         <div>
           <OrgTree
             :id-list="form.orgIdList"
+            input-placeholder="搜索组织名称"
             @selectedValue="getOrgList"
           ></OrgTree>
         </div>
-        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
@@ -197,6 +167,7 @@ export default {
     submit() {
       if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        console.log(this.form)
         this.form.orgIds = this.form.orgIds.toString()
         this.form.source = 'lecturer'
         if (valid) {
@@ -220,6 +191,7 @@ export default {
             // 编辑
             this.loading = true
             this.form.id = this.form.idStr
+            this.form.parentIdStr = this.form.parentId
             editTeacherCatalog(_.assign(this.form, { source: 'teacher' }))
               .then(() => {
                 this.$message.success('修改成功')
@@ -289,7 +261,7 @@ export default {
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.form.parentId = data.id
+        this.form.parentId = data.idStr
         this.parentOrgIdLabel = data.name
       }
     }

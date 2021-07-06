@@ -3,7 +3,7 @@
     id="elective"
     class="fill"
   >
-    <page-header title="选修课安排" />
+    <page-header title="线上选修管理" />
     <!-- 选修课安排 详情页面 -->
     <basic-container block>
       <common-table

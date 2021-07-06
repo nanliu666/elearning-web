@@ -299,7 +299,27 @@ const TABLE_COLUMNS = [
   {
     label: '分类',
     prop: 'categoryName',
+    minWidth: 180
+  },
+  {
+    label: '知识体系',
+    prop: 'knowledgeSystemName',
+    minWidth: 180
+  },
+  {
+    label: '评分',
+    prop: 'composite',
     minWidth: 100
+  },
+  {
+    label: '创建人',
+    prop: 'creatorName',
+    minWidth: 180
+  },
+  {
+    label: '创建时间',
+    prop: 'createTime',
+    minWidth: 180
   },
   {
     label: '包含课程',

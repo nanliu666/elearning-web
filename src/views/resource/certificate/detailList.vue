@@ -52,22 +52,33 @@
 <script>
 const TABLE_COLUMNS = [
   {
-    label: '模板编号',
-    prop: 'templateId',
-    slot: true,
-    minWidth: 150
-  },
-  {
-    label: '模板名称',
+    label: '证书名称',
     prop: 'templateName',
     slot: true,
     minWidth: 120
   },
   {
-    label: '发放人数',
+    label: '获得人数',
     prop: 'grantNum',
     minWidth: 120
   },
+  {
+    label: '证书类型',
+    prop: 'category',
+    minWidth: 120
+  },
+  {
+    label: '生效日期',
+    prop: 'activeTime',
+    minWidth: 120
+  },
+  {
+    label: '有效期',
+    prop: '',
+    formatter: (row) => (row.bornTime && row.deadTime ? row.bornTime + '~' + row.deadTime : '--'),
+    minWidth: 120
+  },
+
   {
     label: '颁发机构',
     prop: 'awardAgency',
@@ -82,7 +93,7 @@ const TABLE_CONFIG = {
   enableMultiSelect: true,
   handlerColumn: {
     minWidth: 50,
-    fixed: false
+    fixed: 'right'
   }
 }
 const SEARCH_CONFIG = {
@@ -93,12 +104,33 @@ const SEARCH_CONFIG = {
       label: '',
       data: '',
       options: [],
-      config: { placeholder: '输入证书名称搜索', 'suffix-icon': 'el-icon-search' }
+      config: { placeholder: '输入证书名称搜索', 'suffix-icon': 'el-icon-search', maxlength: 10 }
     }
   ],
-  popoverOptions: []
+  popoverOptions: [
+    {
+      type: 'select',
+      label: '证书类型',
+      data: '',
+      field: 'category',
+      options: [
+        { label: '培训合格证书', value: 0 },
+        { label: '聘书', value: 1 }
+      ]
+    },
+    {
+      type: 'input',
+      label: '颁发机构',
+      data: '',
+      field: 'awardAgency',
+      config: {
+        maxlength: 10
+      }
+    }
+  ]
 }
 import { EXPORT_CERTIFICATE, VIEW_CERTIFICATE } from '@/const/privileges'
+import { exportToExcel } from '@/util/util'
 import { mapGetters } from 'vuex'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getCertificateGrantDetail, exportTemplateExcel } from '@/api/certificate/certificate'
@@ -153,18 +185,7 @@ export default {
     exportBatch(select) {
       const templateIds = _.join(_.map(select, 'templateId'), ',')
       exportTemplateExcel({ templateIds }).then((res) => {
-        const { data, headers } = res
-        const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
-        const blob = new Blob([data], { type: headers['content-type'] })
-        let dom = document.createElement('a')
-        let url = window.URL.createObjectURL(blob)
-        dom.href = url
-        dom.download = decodeURI(fileName)
-        dom.style.display = 'none'
-        document.body.appendChild(dom)
-        dom.click()
-        dom.parentNode.removeChild(dom)
-        window.URL.revokeObjectURL(url)
+        exportToExcel(res)
       })
     },
     /**
@@ -205,4 +226,9 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
+}
+</style>

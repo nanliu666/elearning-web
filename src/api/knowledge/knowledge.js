@@ -81,3 +81,17 @@ export const moveKnowledge = (params) => post('/manage/v1/knowledge/list/move', 
  * @param {string} params.pageSize  页面数量
  */
 export const getScopeList = (params) => get('/manage/v1/web/knowledge/getScopeList', params)
+/**
+ * 删除知识库评论
+ */
+export const deleteScope = (params) => get('/manage/v1/web/knowledge/deleteScope', params)
+
+/**
+ * 导出知识库评论
+ */
+export const exportScopeList = (params) =>
+  get('/manage/v1/web/knowledge/exportScopeList', params, { responseType: 'blob' })
+
+// 获取知识详情
+export const getDetailsById = (params) => get('/api/manage/v1/knowledge/manage/details', params)
+export const queryCategoryOrgList = (params) => get('/manage/v1/knowledge/catalog/list', params)

@@ -104,7 +104,7 @@ import ComEmpty from '@/components/common-empty/empty'
 import MarkHeaderCard from './components//MarkHeaderCard'
 import { addLine } from '@/util/util'
 import {
-  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MAP_TOTAL,
   QUESTION_TYPE_MULTIPLE,
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
@@ -126,7 +126,7 @@ export default {
   },
   filters: {
     typeFilter(data) {
-      return QUESTION_TYPE_MAP[data]
+      return QUESTION_TYPE_MAP_TOTAL[data]
     },
     number2zhcn(index) {
       return nzhcn.encodeS(index)
@@ -153,7 +153,6 @@ export default {
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {

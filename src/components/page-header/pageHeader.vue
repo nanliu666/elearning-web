@@ -3,11 +3,11 @@
     <span class="title">
       <i
         v-if="showBack"
-        class="icon-arrow-left-outlined"
+        class="el-icon-arrow-left"
         style="margin-right:12px;cursor: pointer;"
         @click="goBack"
       />
-      <span v-if="title"> {{ title }} </span>
+      <span v-if="!$slots.title">{{ title }}</span>
       <slot
         v-else
         name="title"
@@ -66,6 +66,6 @@ export default {
 }
 .button--wr {
   padding-bottom: 16px;
-  padding-top: 16px;
+  padding-top: 24px;
 }
 </style>

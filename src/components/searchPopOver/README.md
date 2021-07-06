@@ -5,11 +5,13 @@
   ref="searchPopover"
   :require-options="searchConfig.requireOptions"
   :popover-options="searchConfig.popoverOptions"
+  :has-slot-right="searchConfig.hasSlotRight"
   @submit="handleSubmit"
 />
 ```
 
 此组件接收两个对象数组 弹出框外配置 requireOptions 和 弹出框内配置 popoverOptions
+hasSlotRight用来自定义筛选右侧文字
 
 ```js
 [
@@ -46,6 +48,8 @@
         optionValue: 'dictKey',
         // 分组
         group: true
+        // 可搜索
+        filterable:true
         },
         //el-option数组
     options: [],

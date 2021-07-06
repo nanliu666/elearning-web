@@ -18,10 +18,10 @@
         {{ row.title }}
       </span>
     </template>
-    <template #publishColumn="{row}">
+    <template #publishColumn="{ row }">
       {{ format(row) }}
     </template>
-    <template #handler="{row}">
+    <template #handler="{ row }">
       <div class="table__handler">
         <el-button
           v-if="status === 'Published'"
@@ -33,10 +33,9 @@
           {{ row.top ? '已置顶' : '置顶' }}
         </el-button>
 
-        <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真) -->
+        <!-- 在新闻管理页面不支持编辑,在已发布的新闻页面编辑(参考低保真)  v-if="status === STATUS['Draft']" -->
 
         <el-button
-          v-if="status === STATUS['Draft']"
           v-p="EDIT_NEWS"
           type="text"
           size="medium"
@@ -275,10 +274,11 @@ export default {
       })
     },
 
-    handleEditItemBtnClick({ id }) {
+    handleEditItemBtnClick({ id, outsideLink }) {
+      var type = outsideLink && outsideLink.length > 0 ? 'link' : 'inside'
       this.$router.push({
         path: '/system/newsCenter/newsEdit',
-        query: { id }
+        query: { id, tagName: '编辑公告', type: type }
       })
     },
 
@@ -318,7 +318,11 @@ export default {
       this.loadTableData()
     },
     // 跳转新闻详情
-    handleItemLinkClick({ id }) {
+    handleItemLinkClick({ id, outsideLink }) {
+      if (outsideLink && outsideLink.length > 0) {
+        window.open(outsideLink)
+        return
+      }
       this.$router.push({
         path: '/system/newsCenter/newsDetail',
         query: {

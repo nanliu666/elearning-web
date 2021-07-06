@@ -33,7 +33,7 @@
           </el-input>
         </template>
         <template #imageTitle>
-          <div style="margin-bottom: -15px">
+          <div>
             场地照片
             <el-tooltip
               class="item"
@@ -231,7 +231,7 @@ export default {
                   } else if (value <= 100000 && value >= 0) {
                     callback()
                   } else {
-                    return callback(new Error('面积必须为正数'))
+                    return callback(new Error('面积必须为正整数'))
                   }
                 }
               },
@@ -355,6 +355,8 @@ export default {
       if (this.id) {
         const data = await queryClassroomInfo({ id: this.id })
         this.formData = data
+        //场景： 添加没有图片的教室，后期编辑添加图片，图片不显示问题    方案：返回值图片为空，删除
+        this.formData.picReqList = _.filter(data.picReqList, 'fileUrl')
       }
     },
     // 点击完成

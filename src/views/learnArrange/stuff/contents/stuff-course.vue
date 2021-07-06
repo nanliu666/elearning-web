@@ -8,7 +8,7 @@
       @change="courseChange"
     >
       <el-option
-        v-for="item in [{ course: '', courseName: '全部课程' }, ...data.courseOpitons]"
+        v-for="item in [{ course: '', courseName: '全部课程' }, ...data.courseOptions]"
         :key="item.course || item.courseId"
         :label="item.courseName"
         :value="item.course || item.courseId"

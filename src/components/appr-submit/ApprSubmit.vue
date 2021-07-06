@@ -4,6 +4,7 @@
     :visible.sync="visible"
     class="appr-submit-dialog"
     append-to-body
+    @close="dialogClose"
   >
     <common-form
       ref="form"
@@ -24,7 +25,7 @@
             <div>
               <span>{{ item.processName }}</span>
               <br />
-              <span style="white-space: break-spaces;">{{ item.line }}</span>
+              <span style="white-space: break-spaces">{{ item.line }}</span>
             </div>
           </el-option>
         </el-select>
@@ -54,7 +55,7 @@ import { Base64 } from 'js-base64'
 const COLUMNS = [
   {
     itemType: 'slot',
-    lable: '审批流程',
+    label: '',
     prop: 'processId',
     span: 24
   }
@@ -76,21 +77,32 @@ export default {
       process: null
     }
   },
-  watch: {
-    processId(val) {
-      this.process = _.find(this.processList, { processId: val })
-    }
-  },
   computed: {
     ...mapGetters(['userId', 'userInfo']),
     showSelect() {
       return this.processList.length > 1
     }
   },
+  watch: {
+    processId(val) {
+      this.process = _.find(this.processList, { processId: val })
+    }
+  },
+  activated() {
+    this.getProcessList()
+  },
   created() {
     this.getProcessList()
   },
+  deactivated() {
+    this.clearData()
+  },
   methods: {
+    clearData() {
+      // 清除缓存
+      this.processId = ''
+      this.process = null
+    },
     getProcessList() {
       getCourseProcessList({ categoryId: this.categoryId }).then((res) => {
         this.processList = res
@@ -159,7 +171,9 @@ export default {
         nodeData
       })
     },
-
+    dialogClose() {
+      this.$emit('apprCancel')
+    },
     /**
      * 组装审批流程数组
      */

@@ -34,6 +34,7 @@ export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
  * @returns {{orgs: Array<any>; users: Array<any>}}
  */
 export const getPostionUserChild = (params) => get('/manage/v1/positions/user/child', params)
+export const getPostionUserChild2 = (params) => get('/manage/v1/position/user/child', params)
 /**
  * 获取子业务部门和直属员工接口
  * @param {object} params 参数
@@ -342,7 +343,6 @@ export const updateUserIdBatchOrg = (params) =>
  * @desc 分组列表
  */
 export const getGroup = (params) => get('/api/user/v1/usergroup/list', params)
-
 /**
  * @desc 导入用户
  */

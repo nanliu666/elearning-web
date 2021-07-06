@@ -67,9 +67,9 @@
                     class="selector"
                     :options="treeData"
                     placeholder="请选择组织"
-                    :props="seletorProps"
+                    :props="selectorProps"
                     :value="queryForm.dept"
-                    @getValue="(name) => (queryForm.dept = name)"
+                    @getValue="(id) => (queryForm.dept = id)"
                   />
                 </el-form-item>
                 <el-form-item label="提交时间">
@@ -171,7 +171,7 @@
             width="180"
           >
             <template slot-scope="scope">
-              {{ scope.row.userName }}
+              {{ scope.row.userName.replace(/\(.+\)/g, '') }}
             </template>
           </el-table-column>
           <el-table-column
@@ -214,7 +214,7 @@
             <template slot-scope="scope">
               <el-button
                 type="text"
-                size="mini"
+                size="medium"
                 :disabled="scope.row.status == 0"
                 @click="showPreview(scope.row)"
               >
@@ -354,8 +354,8 @@ export default {
   data() {
     return {
       dialogLoading: false,
-      seletorProps: {
-        value: 'orgName',
+      selectorProps: {
+        value: 'orgId',
         label: 'orgName',
         children: 'children'
       },
@@ -394,7 +394,7 @@ export default {
       this.initData()
     },
     'queryForm.userName': _.debounce(function() {
-      this.getData()
+      this.resetPageAndGetList()
     }, 1000)
   },
   methods: {
@@ -458,8 +458,8 @@ export default {
       })
     },
     resetFormAndGetList() {},
-    pagination({ value, limit }) {
-      this.queryForm.pageNo = value
+    pagination({ page, limit }) {
+      this.queryForm.pageNo = page
       this.queryForm.pageSize = limit
       this.getData()
     },

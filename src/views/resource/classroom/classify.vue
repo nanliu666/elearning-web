@@ -104,6 +104,11 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
+    label: '所属组织',
+    prop: 'orgScopeName',
+    minWidth: 150
+  },
+  {
     label: '状态',
     prop: 'status',
     slot: true,

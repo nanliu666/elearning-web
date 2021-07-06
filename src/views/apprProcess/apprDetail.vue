@@ -31,7 +31,7 @@
           </div>
           <div class="apply-status">
             <div>
-              <div>状态</div>
+              <div>状态：</div>
               <div>{{ StatusCN[applyDetail.status] }}</div>
             </div>
           </div>
@@ -69,137 +69,12 @@
           v-show="show"
           class="apply-detail"
         >
-          <!-- 移过来的课程详情 start-->
-          <div class="details_course_detailed">
-            <div class="details_course_detailed_top">
-              <div class="details_course_detailed_img">
-                <img
-                  :src="courseData.url"
-                  alt=""
-                />
-              </div>
-
-              <div class="details_course_detailed_r">
-                <div class="details_course_detailed_r_title">
-                  {{ courseData.name }}
-                </div>
-                <ul>
-                  <li>
-                    <span class="text">讲师：</span> <span> {{ courseData.teacherId }} </span>
-                  </li>
-                  <li>
-                    <span class="text">所在分类：</span>
-                    <span> {{ courseData.catalogId }} </span>
-                  </li>
-                  <li>
-                    <span class="text">课程类型：</span>
-                    <span>
-                      <span v-show="courseData.type == 1">在线课程</span>
-                      <span v-show="courseData.type == 2">面授课程</span>
-                      <span v-show="courseData.type == 3">直播课程</span>
-                    </span>
-                  </li>
-                  <li>
-                    <span class="text">学时（小时）：</span>
-                    <span> {{ courseData.period }} </span>
-                  </li>
-                  <li>
-                    <span class="text">积分：</span> <span> {{ courseData.credit }} </span>
-                  </li>
-                  <li v-if="courseData.passCondition">
-                    <span class="text">通过条件：</span>
-                    <span
-                      v-for="(item, index) in courseData.passCondition.split(',')"
-                      :key="index"
-                    >
-                      <span
-                        v-if="item == 'a'"
-                      >教师评定
-                        {{ index != courseData.passCondition.split(',').length - 1 ? ',' : '' }}
-                      </span>
-                      <span
-                        v-if="item == 'b'"
-                      >考试通过{{
-                        index != courseData.passCondition.split(',').length - 1 ? ',' : ''
-                      }}
-                      </span>
-                      <span
-                        v-if="item == 'c'"
-                      >达到课程学时
-                        {{
-                          index != courseData.passCondition.split(',').length - 1 ? ',' : ''
-                        }}</span>
-                    </span>
-                  </li>
-                  <li>
-                    <span class="text">选修类型：</span>
-                    <span>
-                      <span v-show="courseData.electiveType == 1">开放选修</span>
-                      <span v-show="courseData.electiveType == 2">通过审批</span>
-                      <span v-show="courseData.electiveType == 3">禁止选修</span>
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="details_course_detailed_bar">
-              <span
-                :class="{ pitch: pitch == 1 }"
-                @click="setPitch(1)"
-              >详细信息</span>
-              <span
-                :class="{ pitch: pitch == 2 }"
-                @click="setPitch(2)"
-              >课程内容</span>
-            </div>
-            <div
-              v-show="pitch == 1"
-              class="details_course_detailed_pitch1"
-            >
-              <div class="title">
-                <i></i>
-                <span>课程介绍</span>
-              </div>
-              <div class="content">
-                <div v-html="courseData.introduction"></div>
-              </div>
-              <!-- <div class="title">
-                <i></i>
-                <span>课前思考</span>
-              </div> -->
-              <div class="content">
-                <div v-html="courseData.thinkContent"></div>
-              </div>
-            </div>
-            <div
-              v-show="pitch == 2"
-              class="details_course_detailed_pitch2"
-            >
-              <ul>
-                <li
-                  v-for="(item, index) in courseData.contents"
-                  :key="index"
-                  @click="jumpToLearn(item)"
-                >
-                  <div class="tooltip_">
-                    <i>{{ index + 1 }}</i>
-
-                    <span>
-                      <text-over-tooltip
-                        ref-name="testName1"
-                        class-name="fs20"
-                        :content="item.name"
-                      ></text-over-tooltip>
-                    </span>
-                  </div>
-                  <!-- <div class="btn">
-                    查看内容
-                  </div> -->
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!-- 移过来的课程详情 end-->
+          <!-- 详情 start-->
+          <component
+            :is="comType"
+            :apply-detail="applyDetail"
+          ></component>
+          <!-- 详情 end-->
         </div>
       </transition>
     </basic-container>
@@ -250,12 +125,13 @@
           撤回
         </el-button>
 
+        <!-- 暂时重新申请只支持课程审批 -->
         <el-button
-          v-if="isApplyUser && applyDetail.status === 'Cancel'"
+          v-if="isApplyUser && applyDetail.status === 'Cancel' && applyDetail.formKey =='CourseApplyInfo'"
           type="primary"
           size="medium"
           @click="handleReapplyClick"
-        >
+        >        
           重新申请
         </el-button>
 
@@ -357,6 +233,20 @@
 </template>
 
 <script>
+import { baseDictionaries } from '@/const/approve'
+import courseDetail from '@/views/approvalDetail/courseDetail'
+import applyCourseDevDet from '@/views/approvalDetail/applyCourseDevDet'
+import applyTrainingNeedsDet from '@/views/approvalDetail/applyTrainingNeedsDet'
+import applyOutsideTrainingDet from '@/views/approvalDetail/applyOutsideTrainingDet'
+import applyLeaveDet from '@/views/approvalDetail/applyLeaveDet'
+import applyTutorAuthDet from '@/views/approvalDetail/applyTutorAuthDet'
+import applyTrainingOuterBuyDet from '@/views/approvalDetail/applyTrainingOuterBuyDet'
+import applyStudyDoctorateDet from '@/views/approvalDetail/applyStudyDoctorateDet'
+import applyTeacherIdentificationDet from '@/views/approvalDetail/applyTeacherIdentificationDet'
+import applyOutsideTrainBookbuildingDet from '@/views/approvalDetail/applyOutsideTrainBookbuildingDet'
+import trainPlanDet from '@/views/trainingPlan/components/annualDetails'
+import applyKnowledgeShare from '@/views/approvalDetail/applyKnowledgeShare'
+
 import TextOverTooltip from '../course/components/TextOverTooltip'
 import { mapGetters } from 'vuex'
 import steps from './components/steps'
@@ -390,7 +280,19 @@ export default {
   name: 'Apprv2Detail',
   components: {
     steps,
-    TextOverTooltip
+    TextOverTooltip,
+    courseDetail,
+    applyCourseDevDet,
+    applyTrainingNeedsDet,
+    applyOutsideTrainingDet,
+    applyLeaveDet,
+    applyTutorAuthDet,
+    applyTrainingOuterBuyDet,
+    applyStudyDoctorateDet,
+    applyTeacherIdentificationDet,
+    applyOutsideTrainBookbuildingDet,
+    trainPlanDet,
+    applyKnowledgeShare
   },
   data() {
     return {
@@ -448,6 +350,11 @@ export default {
   },
 
   computed: {
+    // 获取审批详情类型
+    comType() {
+      let key = this.$route.query.formKey
+      return key ? baseDictionaries[key] : 'courseDetail'
+    },
     setDisabled() {
       return !this.hasCancel
     },
@@ -515,7 +422,7 @@ export default {
     this.loadData()
   },
   beforeRouteLeave(to, from, next) {
-    to.meta.$keepAlive = false // 禁用页面缓存
+    from.meta.$keepAlive = false // 禁用页面缓存
     next()
   },
   methods: {
@@ -655,7 +562,7 @@ export default {
           }
         })
         // 获取课程详情
-        this.getCourseData()
+        // this.getCourseData()
         // 获取审批流程详情
         this.getProcessDetail()
         // 处理流程数据
@@ -845,7 +752,7 @@ export default {
     },
     // 点击撤回
     handleCancelClick() {
-      this.$confirm('撤回后，课程将进入草稿箱，您确定要课程进行撤回?', '提醒', {
+      this.$confirm('是否确认撤回该申请?', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -996,10 +903,14 @@ export default {
     }
 
     .apply-status {
-      text-align: end;
+      text-align: center;
       border-left: 1px solid #e3e7e9;
+      justify-content: center;
+      display: flex;
       flex: 0.5;
-
+      > div {
+        text-align: start;
+      }
       :nth-child(2) {
         font-family: PingFangSC-Medium;
         font-size: 16px;

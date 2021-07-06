@@ -144,7 +144,7 @@ export default {
       if (this.type === 'edit') {
         this.orgTree = this.clearCurrentChildren(res)
         this.parentOrgIdLabel =
-          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
       } else {
         this.orgTree = res
       }

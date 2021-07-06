@@ -38,6 +38,7 @@
         >
           <div v-if="QUESTION_TYPE_GROUP !== sonitem.type">
             <span>{{ sonindex + 1 }}.</span>
+            <span v-show="paperData.isShowScore === 1">（{{ sonitem.score }}分）</span>
             <QustionPreview
               :data="sonitem"
               :has-answer="hasAnswer"
@@ -69,15 +70,7 @@
 </template>
 <script>
 import QustionPreview from './questionPreview'
-import {
-  QUESTION_TYPE_MAP,
-  QUESTION_TYPE_MULTIPLE,
-  QUESTION_TYPE_SINGLE,
-  QUESTION_TYPE_JUDGE,
-  QUESTION_TYPE_SHOER,
-  QUESTION_TYPE_BLANK,
-  QUESTION_TYPE_GROUP
-} from '@/const/examMange'
+import { QUESTION_TYPE_MAP_TOTAL, QUESTION_TYPE_GROUP } from '@/const/examMange'
 import { addLine } from '@/util/util'
 const nzhcn = require('nzh/cn')
 export default {
@@ -87,7 +80,7 @@ export default {
   },
   filters: {
     typeFilter(data) {
-      return QUESTION_TYPE_MAP[data]
+      return QUESTION_TYPE_MAP_TOTAL[data]
     },
     number2zhcn(index) {
       return nzhcn.encodeS(index)
@@ -109,12 +102,6 @@ export default {
     }
   },
   computed: {
-    QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
-    QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
-    QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
-    QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
-    QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
 
@@ -140,6 +127,7 @@ export default {
 <style scoped lang="scss">
 .preview-container {
   padding: 20px;
+  overflow: auto;
 }
 .preview-title-box {
   display: flex;

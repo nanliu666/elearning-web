@@ -73,7 +73,14 @@ export const columns = [
       value: 'value'
     }
   },
-
+  {
+    span: 24,
+    prop: 'processMap',
+    label: '适用预算范围',
+    itemType: 'slot',
+    required: true,
+    isHidden: true
+  },
   {
     span: 24,
     prop: 'tip',

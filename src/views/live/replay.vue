@@ -56,7 +56,7 @@
         >
           <i
             v-if="!leftHidden"
-            class="icon-arrow-left-outlined  iconfont"
+            class="iconimage_icon_leftarrow  iconfont"
           ></i>
           <i
             v-else

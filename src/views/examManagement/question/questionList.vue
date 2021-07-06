@@ -344,7 +344,10 @@ export default {
       }
     },
     handleEdit(id) {
-      this.$router.push({ path: '/examManagement/question/questionEdit', query: { id } })
+      this.$router.push({
+        path: '/examManagement/question/questionEdit',
+        query: { id, tagName: '编辑试题' }
+      })
     },
     loadData() {
       this.loading = true

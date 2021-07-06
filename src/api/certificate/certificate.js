@@ -70,3 +70,10 @@ export const getCertificateGrantDetail = (params) =>
  * */
 export const revokeCertificate = (params) =>
   post('/api/manage/v1/source/certificate/revoke', params)
+
+// 查看单个证书详细
+export const getSingle = (params) =>
+  get('/api/manage/v1/source/certificate/getSingleCertificate', params)
+// 编辑证书
+export const editCertificate = (params) =>
+  post('/api/manage/v1/source/certificate/editCertificate', params)

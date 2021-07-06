@@ -37,12 +37,14 @@ export default function() {
   if (!store.getters.token) {
     return
   }
-  store.dispatch('tokeLogin', store.getters.token).then((res) => {
-    if (res.account) {
-      resetRouter()
-      store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
-        router.$avueRouter.formatRoutes(menu, true)
-      })
-    }
-  })
+  setTimeout(() => {
+    store.dispatch('tokeLogin', store.getters.token).then((res) => {
+      if (res.account) {
+        resetRouter()
+        store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
+          router.$avueRouter.formatRoutes(menu, true)
+        })
+      }
+    })
+  }, 2000)  
 }

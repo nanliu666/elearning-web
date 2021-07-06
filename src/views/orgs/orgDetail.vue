@@ -83,7 +83,10 @@
               <el-col :span="4">
                 备注
               </el-col>
-              <el-col :span="20">
+              <el-col
+                :span="20"
+                style="white-space:normal;word-break:break-all"
+              >
                 {{ orgData.remark || '暂无' }}
               </el-col>
             </el-row>
@@ -118,7 +121,7 @@ export default {
         label: 'orgName'
       },
       orgData: {},
-      orgTypeObj: { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' },
+      orgTypeObj: { Enterprise: '公司', Company: '单位', Department: '部门', Group: '小组' },
       createOrgDailog: false,
       originOrgId: '',
       loading: false

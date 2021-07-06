@@ -1,5 +1,5 @@
 import request from '@/router/axios'
-import { get } from '@/router/axios'
+import { get, post } from '@/router/axios'
 // 组织机构查询
 export const getOrgTree = (params) => {
   return request({
@@ -91,3 +91,14 @@ export const getUserWorkList = (params) => {
 export const getJob = (params) => get('/api/org/v1/organization/job', params)
 export const getPosition = (params) => get('/api/org/v1/position', params)
 export const getTagList = (params) => get('/api/user/v1/user/tag/list', params)
+
+//导入组织
+export const importOrgs = (params) => post('/api/blade-system/v1/organization/import', params)
+
+//导入组织失败文件
+export const exportErrOrgs = (params) =>
+  get('/api/blade-system/v1/organization/exportErrFile', params, { responseType: 'blob' })
+
+//下载导入模板
+export const exportTemplateOrgs = (params) =>
+  get('/api/blade-system/v1/organization/exportTemplate', params, { responseType: 'blob' })

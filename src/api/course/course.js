@@ -14,7 +14,7 @@ export const delCourseContent = (params) => get('/api/manage/v1/course/delCourse
  * 删除课程接口
  * @param {Object} courseId - 参数
  * */
-export const delCourseInfo = (params) => del('/api/manage/v1/course/delCourseInfo', params)
+export const delCourseInfo = (params) => post('/api/manage/v1/course/delCourseInfo', params)
 /**
  * 查询课程信息列表
  * @param {Object} courseId - 参数
@@ -160,3 +160,32 @@ export const saveCourseLinkedStudentOrTeacher = (params) =>
  * @param {Object} params.zipComment      zip包名称
  **/
 export const zip = (params) => get('/api/common/oss/download/zip', params)
+
+// 课程分类查询
+export const classList = (params) => get('/api/manage/v1/course/getCatalog', params)
+// 课程编号唯一查询
+export const id = (params) => get('/api/manage/v1/course/hasRepeatCourseNo', params)
+
+// 查询课程评价
+export const courseEvaluation = (params) =>
+  get('/api/manage/v1/web/course/getCourseScopeList', params)
+// 获取课程内容
+export const getCourseRecord = (params) => get('/api/manage/v1/web/course/getCourseRecord', params)
+// 查询课程是否关联培训
+export const verifyCourseCanDelete = (params) =>
+  post('/api/manage/v1/course/verifyCourseCanDelete', params)
+
+//批量上传课程
+export const importCourse = (params) => post('/api/manage/v1/course/import', params)
+
+//错误文件下载
+export const exportErrFileCourse = (params) =>
+  get('/api/manage/v1/course/exportErrFile', params, { responseType: 'blob' })
+
+//下载模板
+export const exportDownloadTemplate = (params) =>
+  get('/api/manage/v1/course/downloadTemplate', params, { responseType: 'blob' })
+
+//批量同步课程
+export const syncCourses = (params) => post('manage/v1/course/syncCourses', params)  
+  

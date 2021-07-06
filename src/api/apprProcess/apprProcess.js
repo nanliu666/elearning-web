@@ -56,7 +56,7 @@ export const createApprReject = (params) => post('/appr/v2/appr/apply/reject', p
 // 撤销
 export const createApprCancel = (params) => post('/appr/v2/appr/apply/cancel', params)
 // 撤销2    课程审批撤销
-export const cancelCourseApply = (params) => get('api/appr/v2/appr/approve/course/cancel', params)
+export const cancelCourseApply = (params) => post('/api/appr/v2/appr/apply/cancel', params)
 // 催一下
 export const createApprUrge = (params) => post('/appr/v2/appr/apply/urge', params)
 /**
@@ -242,3 +242,7 @@ export const getOrgLeader = (params) => get('/appr/v2/appr/user/org/leader', par
  * @returns {Array<{userId: string; name: string; workNo: string; avatarUrl: string}>} 返回参数
  */
 export const getBizLeader = (params) => get('/appr/v2/appr/user/biz/leader', params)
+
+// 批量导出
+export const exportAppr = (params) =>
+  get('/api/appr/v2/appr/export/data', params, { responseType: 'blob' })

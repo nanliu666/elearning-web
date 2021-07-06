@@ -248,6 +248,26 @@
             </div>
           </div>
         </el-step>
+        <el-step v-if="progress && progress.length == 1">
+          <!-- 自定义图标 -->
+          <template
+            slot="icon"
+            class="icon"
+          >
+            <div>
+              <div class="img-box">
+                <el-avatar src="/svg/approveAuto.svg" />
+              </div>
+            </div>
+          </template>
+          <template slot="title">
+            <div class="title">
+              <div>
+                <span>系统自动通过</span>
+              </div>
+            </div>
+          </template>
+        </el-step>
       </el-steps>
     </div>
   </div>

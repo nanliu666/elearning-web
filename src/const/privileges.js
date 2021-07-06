@@ -3,8 +3,11 @@ export const ADD_COURSE = '/course/courseDraft/add' //新增
 export const TOP_COURSE = '/course/courseDraft/top' //置顶/取消置顶
 export const EDIT_COURSE = '/course/courseDraft/edit' //编辑
 export const DELETE_COURSE = '/course/courseDraft/delete' //删除
+export const SYNCHRONIZATION_COURSE = '/course/courseDraft/synchronization' //批量同步
 export const MOVE_COURSE = '/course/courseDraft/move' // 移动
-export const PUTAWAY_COURSE = '/course/courseDraft/putaway' // 上架/下架
+export const PUTAWAY_COURSE = '/course/courseDraft/putaway' // 发布/停用
+export const REFRESH_COURSE = '/course/courseDraft/test1'
+export const IMPORT_COURSE = '/course/courseDraft/importCourse' //导入课程
 // 课程中心的分类管理的鉴权
 export const ADD_COURSE_CATALOG = '/course/catalog/add' // 新增
 export const STOP_COURSE_CATALOG = '/course/catalog/stop' // 停用/启用
@@ -40,6 +43,7 @@ export const VIEW_REP = '/repository/knowledgeManagement/view' // 查看
 // 考评管理的分类管理的鉴权
 export const ADD_EXAM_CATALOG = '/examManagement/category/management/add' // 新建分类
 export const STOP_EXAM_CATALOG = '/examManagement/category/management/stop' // 停用
+export const AUTH_EXAM_CATALOG = '/examManagement/category/management/author' // 权限配置
 export const EDIT_EXAM_CATALOG = '/examManagement/category/management/edit' // 编辑
 export const DELETE_EXAM_CATALOG = '/examManagement/category/management/delete' // 删除
 export const ADD_GROUNP_EXAM_CATALOG = '/examManagement/category/management/addNewChild' // 新建子分类
@@ -63,6 +67,11 @@ export const BY_PERSON = '/examManagement/mark/MarkList/byPerson' // 逐人评�
 export const BY_QUESTION = '/examManagement/mark/MarkList/byQuestion' // 逐题评卷
 // 考评管理的成绩管理的鉴权
 export const VIEW_GRADE = '/examManagement/grade/achievement/view' // 查看考生成绩
+//考评管理的闯关竞赛
+export const COMPETITION_ADD = '/examManagement/competition/list/add' // 创建闯关
+export const COMPETITION_EDIT = '/examManagement/competition/list/edit' // 编辑闯关
+export const COMPETITION_DEL = '/examManagement/competition/list/del' // 删除闯关
+
 // 必修课程安排的鉴权
 export const ADD_REQUIRED = '/learnPlan/CoursePlanList/add' // 新建必修课程安排
 export const EDIT_REQUIRED = '/learnPlan/CoursePlanList/edit' // 编辑
@@ -82,6 +91,7 @@ export const ADD_CREDIT = '/creditManagement/creditRule/add' // 新建规则
 export const STOP_SYSTEM_RULE = '/creditManagement/systemRule/stop' // 停用
 // 积分明细的鉴权
 export const VIEW_CREDIT = '/creditManagement/credit/view' // 查看详情
+export const ADD_CREDIT_DETAIL = '/creditManagement/credit/add' // 查看详情
 // 积分明细的查看详情的鉴权
 export const DELETE_CREDIT_DETAIL = '/creditManagement/creditDetails/delete' // 删除
 // 讲师分类的鉴权
@@ -96,11 +106,13 @@ export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
 export const EDIT_LECTURER = '/lecturer/lecturer/edit' // 编辑
 export const DELETE_LECTURER = '/lecturer/lecturer/delete' // 删除
 export const ADD_LECTURER_GROUNP = '/lecturer/lecturer/addNewGroup' // 新建分组
+export const IMPORT_LECTURER = '/lecturer/lecturer/import' // 导入讲师
 // 证书管理的鉴权
 export const ADD_CERTIFICATE = '/certificate/certificateManage/add' // 新建模板
 export const STOP_CERTIFICATE = '/certificate/certificateManage/stop' // 停用
 export const PREVIEW_CERTIFICATE = '/certificate/certificateManage/preview' // 预览
 export const DELETE_CERTIFICATE = '/certificate/certificateManage/delete' // 删除
+export const EDIT_CERTIFICATE = '/certificate/certificateManage/edit' // 编辑
 // 证书发放明细的鉴权
 export const EXPORT_CERTIFICATE = '/certificate/detailList/export' // 导出Excel
 export const VIEW_CERTIFICATE = '/certificate/detailList/view' // 查看
@@ -113,6 +125,7 @@ export const ADD_ORG = '/orgs/orgManagement/add' // 新建组织
 export const ADD_ORG_CHILD = '/orgs/orgManagement/addChild' // 新建子组织
 export const EDIT_ORG = '/orgs/orgManagement/edit' // 编辑
 export const DELETE_ORG = '/orgs/orgManagement/delete' // 删除
+export const IMPORT_ORGS = '/orgs/orgManagement/importOrgs' //导入
 // 组织管理的组织详情的鉴权
 export const EDIT_ORGDETAIL = '/orgs/orgDetail/edit' // 编辑
 export const DELETE_ORGDELETE = '/orgs/orgDetail/delete' // 删除
@@ -128,7 +141,6 @@ export const BATCH_EXPORT = '/system/user/export' // 批量导出
 export const BULK_DEPARTURES = '/system/user/departures' // 批量离职
 export const BATCH_DEPARTMENT = '/system/user/department' // 批量修改部门
 export const BATCH_DELETE_USER = '/system/user/batchDelete' // 批量删除用户
-
 // 菜单管理的鉴权
 export const STOP_MENU = '/system/menu/stop' // 启用/停用
 // 新闻管理的鉴权
@@ -167,6 +179,7 @@ export const SORT_LIVE_CLASSIFY = '/live/classify/sort' // 调整排序
 export const ADD_LIVE = '/live/liveList/add' // 创建直播
 export const STOP_LIVE = '/live/liveList/stop' // 禁用
 export const EDIT_LIVE = '/live/liveList/edit' // 编辑
+export const VIEW_LIVE = '/live/liveList/view' // 查看详情
 export const DELETE_LIVE = '/live/liveList/delete' // 删除
 // 直播中心的直播回放的鉴权
 export const PUBLISH_LIVE_BACK = '/live/playBackListSingle/publish' // 恢复
@@ -195,6 +208,7 @@ export const DETAIL_STATION = '/system/station/detail' // 查看用户
 export const EDIT_STATION = '/system/station/edit' // 岗位编辑
 export const DELETE_STATION = '/system/station/delete' // 岗位删除
 export const EXPORTS_STATIONDETAIL = '/system/stationDetail/exports' // 批量导出(查看用户)
+export const IMPORT_STATION = '/system/station/import' // 岗位新增  批量导入
 
 // 运营管理
 export const DIY_EDIT_RELEASE_PC = '/diy/diyHomeEditPc/release' // 自定义案例编辑页发布（pc）
@@ -215,4 +229,79 @@ export const DIY_BANNER_EDIT_PC = '/diy/bannerPc/edit' // 首页定制-编辑ban
 export const DIY_BANNER_DELETE_PC = '/diy/bannerPc/DELETE' // 首页定制-删除banner（pc）
 export const DIY_BANNER_ADD_MOBILE = '/diy/bannerMobile/add' // 首页定制-新建banner（移动端）
 export const DIY_BANNER_EDIT_MOBILE = '/diy/bannerMobile/edit' // 首页定制-编辑banner（移动端）
-export const DIY_BANNER_DELETE_MOBILE = '/diy/bannerMobile/DELETE' // 首页定制-删除banner（移动端）
+export const DIY_BANNER_DELETE_MOBILE = '/diy/bannerMobile/DELETE' // 首页定制-删除banner（移动端
+export const DIY_ADD_APP = '/diy/appManage/add' // 发布新版本
+export const DIY_EDIT_APP = '/diy/appManage/edit' // 编辑app
+export const DIY_DEl_APP = '/diy/appManage/del' // 删除app
+
+// 培训计划上报
+export const TRAINING_PLAN_ADD = '/trainingPlan/submission/add' // 创建计划
+export const TRAINING_PLAN_EDIT = '/trainingPlan/submission/edit' // 编辑
+export const TRAINING_PLAN_CHANGE = '/trainingPlan/submission/change' // 变更
+export const TRAINING_PLAN_WITHDRAW = '/trainingPlan/submission/withdraw' // 撤回
+export const TRAINING_PLAN_DELETE = '/trainingPlan/submission/delete' // 删除
+
+// 培训计划制定
+export const TRAINING_DEVELOPMENT_ADD = '/trainingPlan/development/add' // 创建计划
+export const TRAINING_DEVELOPMENT_EDIT = '/trainingPlan/development/edit' // 编辑
+export const TRAINING_DEVELOPMENT_DELETE = '/trainingPlan/development/delete' // 删除
+
+// 学习地图-能力词典
+export const ABILITYDICTIONARY_ADD = '/studyMap/abilityDictionary/add' // 创建能力
+export const ABILITYDICTIONARY_EDIT = '/studyMap/abilityDictionary/edit' // 编辑
+export const ABILITYDICTIONARY_DELETE = '/studyMap/abilityDictionary/delete' // 删除
+export const ABILITYDICTIONARY_BATCHDELETE = '/studyMap/abilityDictionary/batchdelete' // 批量删除
+
+// 学习地图-岗位胜任力模型
+export const COMPETENCY_MODEL_ABILITYMANAGE = '/studyMap/competencyModel/abilityManage' // 管理能力
+
+// 学习地图-岗位晋升管理
+export const POST_PROMOTION_ROUTE = '/studyMap/postPromotion/promotionRoute' // 管理晋升路线
+export const POST_PROMOTION_ADD_ROUTE = '/studyMap/postPromotion/addRoute' // 添加晋升路线
+
+// 学习地图-人才盘点
+export const TALENTINVENTORY_LEARNINGSITUATION = '/studyMap/talentInventory/learningSituation' // 学习情况
+
+// 职级管理的鉴权
+export const ADD_RANK = '/system/rank/addRank' //  职级新增
+export const EDIT_RANK = '/system/rank/edit' //  职级编辑
+export const DELETE_RANK = '/system/rank/delete' //  职级删除
+
+//制度清单
+export const LIST_APPLY = '/system/listing/apply' //  课程管理-申请
+export const UPLOAD_FORM = '/system/listing/uploadForm' //  上传业务表单
+export const UPLOAD_TRAIN = '/system/listing/uploadTrain' //  上传培训制度
+export const LIST_DELETE = '/system/listing/delete' //  删除
+
+//导师管理
+export const TEACH_EDIT = '/resource/teachManage/teachList/edit' // 导师编辑
+export const TEACH_DEL = '/resource/teachManage/teachList/del' //  导师删除
+export const TEACH_CREATE = '/resource/teachManage/teachList/create' //  导师创建
+
+//教育经费-经费管理
+export const EDUCA_MANAGE_EDIT = '/educaFund/educaList/edit' //  编辑
+export const EDUCA_MANAGE_DEL = '/educaFund/educaList/del' //  删除
+export const EDUCA_MANAGE_CREATE = '/educaFund/educaList/create' //  创建
+//教育经费-经费明细
+export const EDUCA_DETAIL_EDIT = '/educaFund/educaDetails/edit' //  编辑
+export const EDUCA_DETAIL_DEL = '/educaFund/educaDetails/del' //  删除
+export const EDUCA_DETAIL_CREATE = '/educaFund/educaDetails/create' //  创建
+export const EDUCA_DETAIL_EXPORT = '/educaFund/educaDetails/export' //  导出
+//教育经费-年度经费详情
+export const EDUCA_INFO_EDIT = '/educaFund/educaInfo/edit' //  编辑
+export const EDUCA_INFO_DEL = '/educaFund/educaInfo/del' //  删除
+//社区管理-专区管理
+export const ADD_ZONE = '/community/zone/add' // 添加
+export const DEL_ZONE = '/community/zone/del' // 删除
+export const EDIT_ZONE = '/community/zone/edit' // 编辑
+export const STOP_ZONE = '/community/zone/stop' // 停与启
+//社区管理-专家库
+export const ADD_EXPERT = '/community/expert/add' // 添加
+export const DEL_EXPERT = '/community/expert/del' // 删除
+export const EDIT_EXPERT = '/community/expert/edit'
+
+//系统管理-分组管理
+export const ADD_GROUNP = '/system/groupManage/add' // 添加
+export const DEL_GROUNP = '/system/groupManage/del' // 删除
+export const EDIT_GROUNP = '/system/groupManage/edit' //编辑
+export const VIEW_GROUNP = '/system/groupManage/view' //查看用户

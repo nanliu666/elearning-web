@@ -270,7 +270,12 @@ export default {
       })
     },
     handleRemoveItems(data) {
-      this.$confirm('此操作将该权限, 是否继续?', '提示', {
+      //bugfix #2559 
+      var confirStr = "此操作将删除该权限, 是否继续?";
+      if(data.length>1){
+        confirStr = "此操作将批量删除权限, 是否继续?";
+      }
+      this.$confirm(confirStr, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

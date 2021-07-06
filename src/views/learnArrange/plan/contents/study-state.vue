@@ -253,7 +253,9 @@ export default {
     data: {
       type: Object,
       default() {
-        return {}
+        return {
+          data: []
+        }
       }
     },
     parentVm: {

@@ -48,7 +48,7 @@
               prop="content"
               label="选项"
               align="left"
-              min-width="320"
+              min-width="220"
               show-overflow-tooltip
             >
             </el-table-column>
@@ -62,6 +62,7 @@
             <el-table-column
               prop="writeRate"
               label="占比率"
+              min-width="100"
               align="left"
             >
               <template slot-scope="scope">
@@ -101,7 +102,7 @@ import { saveAs } from 'file-saver'
 import { question } from '@/api/questionnaire'
 import Pagination from '@/components/common-pagination'
 
-const FOLDER_NAME = 'chart'
+const FOLDER_NAME = '选项分布'
 const singleTypeColors = [
   '#01AAFC',
   '#016BFC',
@@ -364,6 +365,9 @@ export default {
           color: rgba(0, 11, 21, 0.85);
         }
         .statistics {
+          flex: 0 0 134px;
+          width: 134px;
+          margin-left: 12px;
           color: rgba(0, 11, 21, 0.45);
         }
       }

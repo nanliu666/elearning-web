@@ -72,16 +72,30 @@
             </div>
           </div>
         </template>
+
         <template
           slot="index"
           slot-scope="{ row }"
         >
           <span>{{ tableData.indexOf(row) + 1 }}</span>
         </template>
-
+        <template
+          slot="channelName"
+          slot-scope="{ row }"
+        >
+          <!-- <span
+            v-if="$p(VIEW_LIVE)"
+            class="ellipsis title"
+            @click="jumpDetail(row)"
+          >{{
+            row.channelName
+          }}</span> -->
+          <span>{{ row.channelName }}</span>
+        </template>
         <template v-slot:isUsed="{ row }">
           <span v-show="row.isUsed == 1">正常</span>
           <span v-show="row.isUsed == 0">禁用</span>
+          <span v-show="row.isUsed == 2">草稿</span>
         </template>
         <template #handler="{ row }">
           <div class="menuClass">
@@ -115,7 +129,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { ADD_LIVE, STOP_LIVE, EDIT_LIVE, DELETE_LIVE } from '@/const/privileges'
+import { ADD_LIVE, STOP_LIVE, EDIT_LIVE, DELETE_LIVE, VIEW_LIVE } from '@/const/privileges'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/live/editLive'
 import {
@@ -252,6 +266,7 @@ export default {
             options: [
               { value: '', label: '全部' },
               { value: '1', label: '正常' },
+               { value: '2', label: '草稿' },
               { value: '0', label: '禁用' }
             ]
           }
@@ -266,6 +281,7 @@ export default {
     ADD_LIVE: () => ADD_LIVE,
     STOP_LIVE: () => STOP_LIVE,
     EDIT_LIVE: () => EDIT_LIVE,
+    VIEW_LIVE: () => VIEW_LIVE,
     DELETE_LIVE: () => DELETE_LIVE,
     ...mapGetters(['privileges'])
   },
@@ -315,6 +331,10 @@ export default {
     })
   },
   methods: {
+    // 跳转详情
+    jumpDetail(row) {
+      this.$router.push({ path: '/live/detail', query: { liveId: row.liveId } })
+    },
     /**
      * @author guanfenda
      * @desc 加载第几页方法
@@ -357,7 +377,7 @@ export default {
           params.creatorId = searchParams.creatorId
         }
         this.tableLoading = true
-        getLiveList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then((res) => {
+        getLiveList(_.assign(params, this.page, { pageNo: this.page.currentPage },{type:0})).then((res) => {
           this.tableData = res.data
           this.page.total = res.totalNum
           this.tableLoading = false
@@ -478,6 +498,10 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
+  .title {
+    color: $primaryColor;
+    cursor: pointer;
+  }
 }
 .search_box button {
   line-height: initial;

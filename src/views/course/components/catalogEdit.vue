@@ -104,6 +104,7 @@
               <OrgTree
                 :id-list="form.orgIdList"
                 :org-source="1"
+                input-placeholder="搜索组织名称"
                 @selectedValue="getOrgList"
               ></OrgTree>
             </el-tab-pane>
@@ -201,7 +202,7 @@ export default {
       if (this.type === 'edit') {
         this.orgTree = this.clearCurrentChildren(res)
         this.parentOrgIdLabel =
-          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
       } else {
         this.orgTree = res
       }

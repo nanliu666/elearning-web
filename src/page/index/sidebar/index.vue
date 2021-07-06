@@ -1,7 +1,7 @@
 <template>
   <div class="avue-sidebar">
-    <logo style="text-align: center;padding: 20px 0;" />
-    <el-scrollbar style="height:calc(100% - 104px)">
+    <logo style="padding:20px 40px;" />
+    <el-scrollbar style="height:calc(100% - 110px)">
       <div
         v-if="validatenull(menu) && validatenull(menu.children)"
         class="avue-sidebar--tip"
@@ -38,7 +38,6 @@ import { mapGetters } from 'vuex'
 import logo from '../logo'
 import sidebarItem from './sidebarItem'
 import { validatenull } from '@/util/validate'
-
 export default {
   name: 'Sidebar',
   components: { sidebarItem, logo },
@@ -52,6 +51,7 @@ export default {
   created() {
     // this.index.openMenu(this.menuId)
   },
+
   mounted() {},
   methods: {
     validatenull(...args) {

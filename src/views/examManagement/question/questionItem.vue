@@ -2,7 +2,7 @@
   <div class="question-item">
     <div class="question-item__header">
       <common-form
-        v-if="value.editing"
+        v-if="isCurrent"
         ref="formHeader"
         :columns="headerColumns"
         :model="value"
@@ -14,14 +14,14 @@
       </span>
       <span class="question-item__handler">
         <el-button
-          v-if="value.editing"
+          v-if="isCurrent"
           type="text"
           @click="handleSubmit"
         >
           保存
         </el-button>
         <el-button
-          v-if="!value.editing"
+          v-if="!isCurrent"
           type="text"
           @click="handleEdit"
         >
@@ -29,6 +29,7 @@
         </el-button>
         <el-button
           type="text"
+          :disabled="index == 0"
           @click="handleDelete"
         >
           删除
@@ -51,7 +52,7 @@
     </div>
     <div class="question-item__content">
       <common-form
-        v-if="value.editing"
+        v-if="isCurrent"
         ref="formContent"
         :columns="contentColumns"
         :model="value"
@@ -134,10 +135,11 @@ import {
   QUESTION_TYPE_BLANK
   // QUESTION_TYPE_GROUP
 } from '@/const/examMange'
-import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS } from './config'
+import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS, MULTIPLE_SELECT_COLUMNS } from './config'
 import { createUniqueID } from '@/util/util'
 export default {
   name: 'QuestionItem',
+  inject: ['questionEditRef'],
   components: {
     QuestionOptions,
     ImageUploader,
@@ -154,6 +156,7 @@ export default {
   },
   data() {
     return {
+      cloneDeepValue: {}, // 用来保存数据恢复的副本
       headerColumns: [
         {
           prop: 'type',
@@ -204,42 +207,36 @@ export default {
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP
+    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
+    // 是不是当前的卡片展开
+    isCurrent: function() {
+      return this.questionEditRef.activeQuestion === this.index
+    }
   },
   watch: {
     'value.type': {
       handler(val, oldVal) {
+        // 单选
         if (val === QUESTION_TYPE_SINGLE) {
           this.contentColumns = SELECT_COLUMNS
         } else if (QUESTION_TYPE_MULTIPLE === val) {
-          const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
-          _SELECT_COLUMNS[2].rules = [
-            {
-              validator: (rule, value, callback) => {
-                if (_.some(value, (item) => !item.content && !item.url)) {
-                  return callback(new Error('选项内容请填写完整'))
-                } else if (!_.some(value, { isCorrect: 1 })) {
-                  return callback(new Error('请设置正确选项'))
-                } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
-                  return callback(new Error('多选题请最少选择两个正确答案'))
-                }
-                callback()
-              },
-              trigger: 'change'
-            }
-          ]
-          this.contentColumns = _SELECT_COLUMNS
+          // 多选
+          this.contentColumns = MULTIPLE_SELECT_COLUMNS
         } else if (val === QUESTION_TYPE_JUDGE) {
+          // 判断
           this.contentColumns = SELECT_COLUMNS
           this.value.options = [
             { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
             { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
           ]
         } else if (QUESTION_TYPE_SHOER === val) {
+          // 简答
           this.contentColumns = SHORT_COLUMNS
         } else if (QUESTION_TYPE_BLANK === val) {
+          // 填空
           this.contentColumns = FILL_COLUMNS
         } else {
+          // 此部分应该是无用代码，因为试题组内不能嵌套试题组
           SELECT_COLUMNS[2].rules = [
             {
               validator: (rule, value, callback) => {
@@ -280,17 +277,40 @@ export default {
         type: 'warning'
       })
         .then(() => {
+          this.questionEditRef.activeQuestion -= 1
           this.$emit('delete', this.index)
         })
         .catch()
     },
     handleEdit() {
-      this.$set(this.value, 'editing', true)
+      // 只能存在一个编辑的卡片
+      // 编辑之前先保存下副本，丢失后直接恢复到副本状态
+      this.cloneDeepValue = _.cloneDeep(this.value)
+      // 没有打开过卡片，无需提示
+      if (this.questionEditRef.activeQuestion !== -1) {
+        this.$confirm('离开修改内容将不会保存！', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 入参需要恢复的卡片
+          this.questionEditRef.backDataItem(this.questionEditRef.activeQuestion)
+          // 打开新卡片
+          this.$nextTick(() => {
+            this.questionEditRef.activeQuestion = this.index
+          })
+        })
+      } else {
+        this.questionEditRef.activeQuestion = this.index
+      }
+    },
+    closeEdit() {
+      this.questionEditRef.activeQuestion = -1
     },
     handleSubmit() {
       Promise.all([this.$refs.formHeader.validate(), this.$refs.formContent.validate()])
         .then(() => {
-          this.$set(this.value, 'editing', false)
+          this.closeEdit()
         })
         .catch()
     },

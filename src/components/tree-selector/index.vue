@@ -4,7 +4,9 @@
     v-model="valueId"
     :clearable="clearable"
     :placeholder="placeholder"
+    :disabled="disabled"
     @clear="clearHandle"
+    @focus="handleFocus"
   >
     <el-option
       :value="valueId"
@@ -14,7 +16,7 @@
         id="tree-option"
         ref="selectTree"
         :accordion="accordion"
-        :data="options"
+        :data="optionList"
         :props="props"
         :node-key="props.value"
         :default-expanded-keys="defaultExpandedKey"
@@ -26,6 +28,10 @@
 <script>
 export default {
   name: 'ElTreeSelect',
+  model: {
+    prop: 'value',
+    event: 'getValue'
+  },
   props: {
     /* 配置项 */
     props: {
@@ -40,6 +46,12 @@ export default {
     },
     /* 选项列表数据(树形结构的对象数组) */
     options: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
+    initialOptions: {
       type: Array,
       default: () => {
         return []
@@ -67,6 +79,10 @@ export default {
     placeholder: {
       type: String,
       default: '请选择'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -74,6 +90,11 @@ export default {
       valueId: this.value, // 初始值
       valueTitle: '',
       defaultExpandedKey: []
+    }
+  },
+  computed: {
+    optionList() {
+      return _.uniqBy(this.initialOptions.concat(this.options), this.props.value)
     }
   },
   watch: {
@@ -93,6 +114,9 @@ export default {
     }
   },
   methods: {
+    handleFocus() {
+      this.$emit('focus')
+    },
     // 初始化值
     initHandle() {
       if (this.valueId) {

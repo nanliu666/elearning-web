@@ -58,6 +58,9 @@
           批量删除
         </el-button>
       </template>
+      <template #userType="{ row }">
+        {{ row.orgName ? '公司员工' : '外部人员' }}
+      </template>
       <template slot="topMenu">
         <div class="operations">
           <search-popover
@@ -223,6 +226,7 @@ import {
   batchDeleteUserByIds
 } from '@/api/system/user'
 import { getRoleList, getPositionAll } from '@/api/system/role'
+import { getRankTree } from '@/api/system/rank'
 import { getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
 import {
@@ -254,12 +258,7 @@ const COLUMNS = [
     prop: 'userStatus',
     align: 'center',
     formatter(record) {
-      return (
-        {
-          1: '在职',
-          2: '离职'
-        }[record.userStatus] || ''
-      )
+      return { 1: '在职', 2: '离职' }[record.userStatus] || ''
     }
   },
   {
@@ -272,10 +271,31 @@ const COLUMNS = [
     }
   },
   {
+    label: '用户类型',
+    prop: 'userType',
+    align: 'left',
+    slot: true
+  },
+  {
     label: '部门',
     align: 'left',
     prop: 'orgName',
     width: 230
+  },
+  {
+    label: '直接领导',
+    align: 'left',
+    prop: 'leaderName'
+  },
+  {
+    label: '岗位',
+    align: 'left',
+    prop: 'positionName'
+  },
+  {
+    label: '职务',
+    align: 'left',
+    prop: 'post'
   },
   {
     label: '电话',
@@ -393,7 +413,33 @@ export default {
               }
             }
           },
-          { type: 'input', field: 'postLevel', label: '职级', config: {} },
+          // { type: 'input', field: 'postLevel', label: '职级', config: {} },
+          {
+            type: 'treeSelect',
+            field: 'postLevel',
+            label: '职级',
+            data: '',
+            config: {
+              selectParams: {
+                placeholder: '请选择职级',
+                multiple: false
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  value: 'id'
+                }
+              }
+            }
+          },
+
           { type: 'input', field: 'post', label: '职务', config: {} },
           { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
         ]
@@ -503,6 +549,12 @@ export default {
       const positionConfig = _.find(this.searchConfig.popoverOptions, { field: 'positionId' })
       _.set(positionConfig, 'config.treeParams.data', res)
     })
+
+    getRankTree().then((res) => {
+      //  debugger
+      const postLevelConfig = _.find(this.searchConfig.popoverOptions, { field: 'postLevel' })
+      _.set(postLevelConfig, 'config.treeParams.data', res)
+    })
   },
   activated() {
     this.loadData()
@@ -532,6 +584,7 @@ export default {
     },
     loadRoleData() {
       getRoleList({ categoryId: '' }).then((res) => {
+        res.unshift({ roleId: '-1', roleName: '无角色' })
         this.searchConfig.popoverOptions.find((item) => item.field === 'roleId').options = res
       })
     },
@@ -628,8 +681,8 @@ export default {
             type: 'success',
             message: '操作成功!'
           })
+          this.loadOrgData()
           this.loadData()
-          this.$emit('orgUserListUpdate', true)
         })
     },
     loadData() {
@@ -734,8 +787,8 @@ export default {
               type: 'success',
               message: '刪除成功!'
             })
+            this.loadOrgData()
             this.loadData()
-            this.$emit('orgUserListUpdate', true)
             this.$refs.crud.clearSelection()
           })
           .catch(() => {

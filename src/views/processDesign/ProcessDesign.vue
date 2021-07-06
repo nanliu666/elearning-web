@@ -199,11 +199,11 @@ export default {
       const p1 = getCmpData('basicSetting')
       const p3 = getCmpData('processDesign')
       Promise.all([p1, p3])
-        .then((res) => {
+        .then((res) => {          
           const param = {
             basicSetting: this.mockData.basicSetting,
             processData: res[1].formData
-          }
+          }          
           // 处理发布
           this.sendToServer(param)
         })
@@ -225,7 +225,7 @@ export default {
       this.base = []
       this.lineList = [] //节点线
       this.condition = [] //条件节点
-      this.processMap = {}
+      this.processMap = param.basicSetting.processMap
       this.endNode = [] //最后节点线
       this.lineEnd(processData)
       this.recursion(processData, param.processData)

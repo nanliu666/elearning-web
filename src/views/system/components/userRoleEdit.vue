@@ -321,7 +321,8 @@ export default {
 
     .left {
       width: 60%;
-      padding: 10px;
+      padding: 20px;
+      padding-bottom: 30px;
       padding-right: 20px;
       height: 500px;
       overflow: auto;

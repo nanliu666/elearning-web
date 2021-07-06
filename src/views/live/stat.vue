@@ -80,6 +80,10 @@
                     placeholder="请选择状态"
                   >
                     <el-option
+                      label="全部"
+                      value=""
+                    ></el-option>
+                    <el-option
                       label="正常"
                       value="1"
                     ></el-option>
@@ -473,6 +477,8 @@ export default {
       if (this.loading[this.currentTable]) return
       this.filterForm[this.currentTable].pageNo = 1
       this.filterForm[this.currentTable].pageSize = 10
+      if (!this.filterForm[this.currentTable].isUsed)
+        delete this.filterForm[this.currentTable].isUsed
       this.getList()
     },
     resetFormAndGetList() {

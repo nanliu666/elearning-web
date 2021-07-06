@@ -10,3 +10,12 @@ export const getQiniuToken = (params) => {
     params
   })
 }
+// 获取uploadId
+export const getQiniuUploadId = (params) => {
+  return request({
+    url: `http://up-z2.qiniup.com/${params.bucketName}/myBucket/objects/${params.objName}/uploads`,
+    method: 'post',
+    host: params.host,
+    Authorization: params.token
+  })
+}

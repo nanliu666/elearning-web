@@ -7,7 +7,7 @@
       <div class="left_box">
         <el-input
           v-model="filterText"
-          placeholder="输入关键字进行过滤"
+          :placeholder="inputPlaceholder"
         >
         </el-input>
         <div class="tree">
@@ -52,17 +52,25 @@
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   // 可见范围组织列表增加入参，orgSource:1  如果不是就不用 传
-  props: ['idList', 'isload', 'orgSource'],
+  props: {
+    idList: [String, Number, Array, Object],
+    isload: [String, Number, Array, Object],
+    orgSource: [String, Number, Array, Object],
+    inputPlaceholder: {
+      type: String,
+      default: '输入关键字进行过滤'
+    }
+  },
   data() {
     return {
       filterText: '',
-      orgData: [],
+      orgData: null,
       selected: [],
       defaultProps: {
         children: 'children',
         label: 'orgName',
-        disabled: 'disabled',
-        id: 'id'
+        disabled: 'disabled'
+        // id: 'id'
       }
     }
   },
@@ -75,7 +83,8 @@ export default {
     },
     idList() {
       this.createdSetCheckedKeys()
-    }
+    },
+    orgData() {}
   },
   created() {
     this.createdSetCheckedKeys()
@@ -83,12 +92,15 @@ export default {
   methods: {
     createdSetCheckedKeys() {
       this.loadOrgData().then(() => {
-        let list = this.idList
-        this.$refs.tree.setCheckedKeys(list)
-        this.selected = []
-        this.updateSelected(this.orgData)
+        if (this.idList instanceof Array) {
+          let list = this.idList
+          this.$refs.tree.setCheckedKeys(list)
+          this.selected = []
+          this.updateSelected(this.orgData)
+        }
       })
     },
+
     updateSelected(list = []) {
       list.forEach((item) => {
         const { id, children = [] } = item

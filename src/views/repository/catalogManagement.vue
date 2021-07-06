@@ -35,8 +35,8 @@
                   class="search-sort-box"
                   @click="toSort"
                 >
-                  <i class="el-icon-sort" />
-                  <span class="sort-text">调整排序</span>
+                  <!-- <i class="el-icon-sort" />
+                  <span class="sort-text">调整排序</span> -->
                 </div>
                 <el-popover
                   placement="bottom"
@@ -157,6 +157,11 @@ const TABLE_COLUMNS = [
     label: '分类名称',
     prop: 'name',
     slot: true,
+    minWidth: 150
+  },
+  {
+    label: '所属组织',
+    prop: 'orgScopeName',
     minWidth: 150
   },
   {

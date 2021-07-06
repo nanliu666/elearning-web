@@ -17,12 +17,14 @@ import 'nprogress/nprogress.css'
 import { Base64 } from 'js-base64'
 
 const instance = axios.create({
-  timeout: 100000, //默认超时时间
+  timeout: 3000000, //默认超时时间
   withCredentials: false, //跨域请求，允许保存cookie
   validateStatus: function(status) {
     return status >= 200 && status <= 500
   }
 })
+let cancelToken = axios.CancelToken
+let reqCancel = null
 
 // NProgress 配置
 NProgress.configure({
@@ -31,6 +33,13 @@ NProgress.configure({
 //http request拦截
 instance.interceptors.request.use(
   (config) => {
+    if (!config.cancelToken) {
+      config.cancelToken = new cancelToken(function executor(c) {
+        // executor 函数接收一个 cancel 函数作为参数
+        reqCancel = c
+      })
+    }
+
     //开启 progress bar
     NProgress.start()
     const meta = config.meta || {}
@@ -45,7 +54,11 @@ instance.interceptors.request.use(
         : 'learn'
     config.headers.appId = 'Admin'
 
-    if (!config.url.startsWith('/api') && !config.url.startsWith('api')) {
+    if (
+      !config.url.startsWith('/api') &&
+      !config.url.endsWith('eln/upload') &&
+      !config.url.startsWith('api')
+    ) {
       config.url = '/api' + config.url
     }
     if (getToken() && !isToken) {
@@ -129,9 +142,14 @@ instance.interceptors.response.use(
         }
         //如果是401则跳转到登录页面
         if (status === 401) store.dispatch('FedLogOut').then(() => router.push({ path: '/login' }))
+         //如果是666则跳转到付费页面
+         if (status === '666') store.dispatch('FedLogOut').then(() => router.push({ path: '/666' }))
         return Promise.reject(new Error(message))
       }
       if (String.prototype.endsWith.call(res.config.url, '/oauth/token')) {
+        return res.data
+      }
+      if (String.prototype.endsWith.call(res.config.url, '/eln/upload')) {
         return res.data
       }
       return res.data.response
@@ -142,6 +160,10 @@ instance.interceptors.response.use(
     return Promise.reject(new Error(error))
   }
 )
+
+export function cancel() {
+  return reqCancel('取消频繁请求')
+}
 
 export function post(urls, data, config = {}) {
   return instance.post(urls, data, config)

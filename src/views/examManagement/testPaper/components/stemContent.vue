@@ -139,7 +139,7 @@
 <script>
 import { getcategoryTree } from '@/api/examManage/category'
 import { getQuestionList } from '@/api/examManage/question'
-import { QUESTION_TYPE_MAP } from '@/const/examMange'
+import { QUESTION_TYPE_MAP_TOTAL } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 const TABLE_COLUMNS = [
   {
@@ -154,7 +154,7 @@ const TABLE_COLUMNS = [
     prop: 'type',
     minWidth: 100,
     formatter: (row) => {
-      return QUESTION_TYPE_MAP[row.type] || ''
+      return QUESTION_TYPE_MAP_TOTAL[row.type] || ''
     }
   }
 ]

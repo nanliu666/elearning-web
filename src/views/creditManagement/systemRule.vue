@@ -186,14 +186,13 @@ export default {
         const params = this.searchParams
         this.tableLoading = true
         getListSysRulus(_.assign(params)).then((res) => {
-          const hasRule = ['登录积分', '在线学习积分', '知识库积分', '资源共享积分']
-          const temp = _.filter(res, (item) => {
-            return _.some(hasRule, (ruleItem) => {
-              return item.sysRuleSource === ruleItem
-            })
-          })
-          this.tableData = temp
-          console.log(this.tableData)
+          //   const hasRule = ['登录积分', '在线学习积分', '知识库积分', '资源共享积分']
+          //   const temp = _.filter(res, (item) => {
+          //     return _.some(hasRule, (ruleItem) => {
+          //       return item.sysRuleSource === ruleItem
+          //     })
+          //   })
+          this.tableData = res
           this.tableLoading = false
         })
       } catch (error) {

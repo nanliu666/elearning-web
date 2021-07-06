@@ -5,9 +5,6 @@ const path = require('path')
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
-const MomentLocalesPlugin = require('moment-locales-webpack-plugin')
-const CompressWebpackPlugin = require('compress-webpack-plugin')
-
 module.exports = {
   //路径前缀
   publicPath: '/',
@@ -104,7 +101,7 @@ module.exports = {
         // target: 'http://apidev.epro.com.cn/',
 
         // 测试环境
-         target: 'http://139.159.141.248:8081',
+        target: 'http://139.159.141.248:8081',
 
         // 深圳本地开发环境
         // target: 'http://172.16.4.55:8081',
@@ -113,15 +110,25 @@ module.exports = {
         // target: 'http://192.168.40.134',
 
         // 贺磊IP
-        //target: 'http://172.16.4.120',
+        // target: 'http://10.134.5.206',
 
+        // 贤中
+        //target: 'http://10.134.5.65:8081',
+
+        // 张育彬
+        // target: 'http://10.134.5.145',
         // 殷云
         // target: 'http://172.16.4.237',
 
         // 李宁
         // target: 'http://139.159.141.248',
         // 浩敏
-        // target: 'http://172.16.4.92',
+        // target: 'http://10.134.5.217',
+        // 春光
+        // target: 'http://172.16.4.207',
+
+        // 浩敏
+        //target: 'http://172.16.4.92',
 
         // 黄云虹
         // target: 'http://172.16.4.231',
@@ -130,6 +137,10 @@ module.exports = {
         // target: 'https://saber.bladex.vip/',
         ws: true,
         changeOrigin: true
+      },
+      '/eln': {
+        //target: 'http://139.159.141.248:1888'
+        target: 'http://139.9.41.27:1888'
       }
     }
   },
@@ -138,19 +149,7 @@ module.exports = {
       alias: {
         src: resolve('src')
       }
-    },
-    plugins: [
-      new MomentLocalesPlugin({
-        localesToKeep: ['zh-cn']
-      }),
-      new CompressWebpackPlugin({
-        asset: '[path].gz[query]',
-        algorithm: 'gzip',
-        test: new RegExp('\\.(js|css)$'),
-        threshold: 10240,
-        minRatio: 0.8
-      })
-    ]
+    }
   },
   css: {
     loaderOptions: {

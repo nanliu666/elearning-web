@@ -10,6 +10,15 @@
       >
         创建讲师
       </el-button>
+      <el-button
+        slot="rightMenu"
+        v-p="IMPORT_LECTURER"
+        type="primary"
+        size="medium"
+        @click="toImportLecturer"
+      >
+        导入讲师
+      </el-button>
     </page-header>
     <basic-container block>
       <common-table
@@ -35,10 +44,10 @@
                 content="刷新"
                 effect="dark"
                 placement="top"
-                style="color:#acb3b8;"
+                style="color: #acb3b8"
               >
                 <el-button
-                  style="font-size: 16px; cursor:pointer;"
+                  style="font-size: 16px; cursor: pointer"
                   class="operations__btns--item"
                   size="mini"
                   icon="el-icon-refresh-right"
@@ -50,7 +59,7 @@
               </el-tooltip>
               <span
                 class="text_refresh"
-                style="font-size: 16px; cursor:pointer;"
+                style="font-size: 16px; cursor: pointer"
                 @click="islistTeacher(undefined)"
               >刷新</span>
               <el-popover
@@ -70,7 +79,7 @@
                     size="mini"
                     type="text"
                     icon="el-icon-setting"
-                    style="color:#acb3b8; font-size: 16px;"
+                    style="color: #acb3b8; font-size: 16px"
                   >
                     <!-- <i class="iconfont iconicon_setting" /> -->
                   </el-button>
@@ -98,7 +107,7 @@
         <template #multiSelectMenu="{ selection }">
           <el-button
             v-p="DELETE_LECTURER"
-            style="margin-bottom:0;"
+            style="margin-bottom: 0"
             type="text"
             @click="() => handleRemoveItems(selection)"
           >
@@ -129,19 +138,19 @@
             class="marginLine"
             type="text"
             size="medium"
-            @click.stop="iseditSysRulus(scope.row, 0, '停用')"
+            @click.stop="iseditSysRulus(scope.row, 0, '冻结')"
           >
-            停用
+            冻结
           </el-button>
           <span
             v-else
             v-p="STOP_LECTURER"
             class="marginLineColor"
-            style=" cursor:pointer; "
+            style="cursor: pointer"
             size="medium"
-            @click.stop="iseditSysRulus(scope.row, 1, '启用')"
+            @click.stop="iseditSysRulus(scope.row, 1, '解冻')"
           >
-            启用
+            解冻
           </span>
 
           <el-button
@@ -176,8 +185,10 @@
     >
       <div class="dialog_box">
         <i class="el-icon-warning dialog_box_icon-warning"></i>
-        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训，
-          <span>{{ showBtnDel ? '删除' : '停用' }}</span>后需尽快对课程进行调整。 你确定要<span>{{ showBtnDel ? '删除' : '停用' }}</span>该讲师吗？</span>
+        <span>您选中讲师名下有正在进行或未开始的面授课程或线下培训{{ showBtnDel ? '删除' : '停用' }}
+          <span></span>后需尽快对课程进行调整。 你确定要<span>{{
+            showBtnDel ? '删除' : '停用'
+          }}</span></span>该讲师吗？
         <div>
           <div
             class="showBtn"
@@ -231,84 +242,114 @@
 
 <script>
 import { getCourseListData } from '@/api/course/course'
-import { listTeacher, editSysRulus, Teacherdelete } from '@/api/lecturer/lecturer'
+import {
+  listTeacher,
+  editSysRulus,
+  Teacherdelete,
+  queryTeacherCataList
+} from '@/api/lecturer/lecturer'
 // import { delete } from 'vue/types/umd'
 // 侧栏数据
-
+const teacherLevel = ['预备级', '助理级', '初级', '中级', '高级', '资深级', '专家级', '非讲师']
+const teacherTitle = ['', '助理级', '初级', '中级', '高级', '研究员级', '无']
+const cata = ['', '技术类', '管理类', '营销服务类', '技能类']
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '讲师姓名',
     prop: 'name',
     width: '160',
-    slot: true
-    // fixed: 'left'
+    slot: true,
+    fixed: 'left'
   },
   {
-    label: '手机号码',
-    prop: 'phonenum',
+    label: '部门',
+    prop: 'orgName',
     align: 'center',
+    formatter: (row) => (row.teacher_type ? '--' : row.orgName),
     width: '160'
   },
   {
-    label: '电子邮箱',
-    prop: 'user_email',
+    label: '岗位',
+    prop: 'positionName',
     align: 'center',
+    formatter: (row) => (row.teacher_type ? '--' : row.positionName),
     width: '200'
+  },
+
+  {
+    label: '性别',
+    prop: 'sex',
+    formatter: (row) => (row.sex === 0 ? '女' : row.sex === 1 ? '男' : '--'),
+    width: '120'
   },
   {
     label: '状态',
     prop: 'status',
-    formatter: (row) => (row.status === 0 ? '停用' : '正常'),
+    formatter: (row) => (row.status ? '正常' : '冻结'),
     width: '80'
   },
   {
-    label: '性别',
-    prop: 'sex',
-    formatter: (row) => (row.sex === 0 ? '女' : '男'),
-    width: '120'
-  },
-  {
     label: '讲师类型',
-    prop: 'type',
-    formatter: (row) => (row.type === 1 ? '内训' : '外聘'),
+    prop: 'teacher_type',
+    formatter: (row) => (row.teacher_type === 0 ? '内部' : row.teacher_type === 1 ? '外部' : '--'),
     width: '120'
   },
-  // {
-  //   label: '擅长领域',
-  //   prop: 'lingyu',
-  //   minWidth: 130
-  // },
   {
-    label: '讲师级别',
+    label: '聘用类型',
+    prop: 'type',
+    formatter: (row) => (row.type === 1 ? '内训' : row.type === 2 ? '外聘' : '--'),
+    width: '120'
+  },
+  {
+    label: '讲师聘期',
+    prop: '',
+    formatter: (row) =>
+      row.hire_start_time && row.hire_end_time
+        ? row.hire_start_time + '~' + row.hire_end_time
+        : '--',
+    width: '200'
+  },
+  {
+    label: '讲师等级',
     prop: 'teacher_level',
+    formatter: (row) => teacherLevel[+row.teacher_level],
+    minWidth: '120'
+  },
+  {
+    label: '专业分类',
+    prop: 'professional_cata',
+    formatter: (row) => cata[+row.professional_cata],
     minWidth: '120'
   },
   {
     label: '讲师职称',
     prop: 'teacher_title',
-    minWidth: '80'
+    formatter: (row) => teacherTitle[+row.teacher_title],
+    minWidth: '120'
+  },
+  {
+    label: '擅长领域',
+    prop: 'skilled_field',
+    formatter: (row) => {
+      if (row.skilled_field instanceof Array) {
+        return row.skilled_field.join('; ')
+      } else return ''
+    },
+    minWidth: '130'
   },
   {
     label: '是否推荐',
     prop: 'is_recommend',
     align: 'center',
-    formatter: (row) => (row.is_recommend === 1 ? '是' : '否'),
+    formatter: (row) => (row.is_recommend === 1 ? '是' : row.is_recommend === 0 ? '否' : '--'),
     minWidth: '80'
   },
   {
-    label: '是否最新讲师',
-    prop: 'is_latest_teacher',
+    label: '联系方式',
+    prop: 'phonenum',
     align: 'center',
-    formatter: (row) => (row.is_latest_teacher === 1 ? '是' : '否'),
-    minWidth: '120'
-  },
-  {
-    label: '是否热门讲师',
-    prop: 'is_popular_teacher',
-    align: 'center',
-    formatter: (row) => (row.is_popular_teacher === 1 ? '是' : '否'),
-    minWidth: '120'
+    minWidth: '160'
   },
   {
     label: '创建人',
@@ -316,6 +357,7 @@ const TABLE_COLUMNS = [
     align: 'center',
     minWidth: '160'
   },
+
   {
     label: '创建时间',
     prop: 'create_time',
@@ -326,7 +368,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   handlerColumn: {
     width: 200,
-    fixed: false
+    fixed: 'right'
   },
   enableMultiSelect: true,
   enablePagination: true,
@@ -353,72 +395,90 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: '0', label: '停用' },
-      { value: '1', label: '正常' },
-      { value: '', label: '全部' }
+      { value: '', label: '全部' },
+      { value: '0', label: '冻结' },
+      { value: '1', label: '解冻' }
     ]
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'type',
-    label: '讲师类型',
+    label: '聘用类型',
     type: 'select',
     options: [
+      { value: '', label: '全部' },
       { value: '1', label: '内训' },
-      { value: '2', label: '外聘' },
-      { value: '', label: '全部' }
+      { value: '2', label: '外聘' }
     ]
   },
-  // {
-  //   config: { placeholder: '请选择' },
-  //   data: '',
-  //   field: 'lingyu',
-  //   label: '擅长领域',
-  //   type: 'select',
-  //   options: []
-  // },
   {
     config: { placeholder: '请输入' },
+    data: '',
+    field: 'skilled_field',
+    label: '擅长领域',
+    type: 'input'
+  },
+  {
+    data: '',
+    field: 'categoryId',
+    label: '讲师分类',
+    type: 'treeSelect',
+    config: {
+      multiple: true,
+      selectParams: {
+        placeholder: '讲师分类'
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'idStr'
+        }
+      }
+    }
+  },
+  {
+    config: { placeholder: '请选择' },
     data: '',
     field: 'teacher_level',
     label: '讲师级别',
-    type: 'input'
+    type: 'select',
+    options: [
+      { value: '00', label: '预备级' },
+      { value: '01', label: '助理级' },
+      { value: '02', label: '初级' },
+      { value: '03', label: '中级' },
+      { value: '04', label: '高级' },
+      { value: '05', label: '资深级' },
+      { value: '06', label: '专家级' },
+      { value: '07', label: '非讲师' }
+    ]
   },
   {
-    config: { placeholder: '请输入' },
+    config: { placeholder: '请选择' },
     data: '',
-    field: 'teacher_title',
-    label: '讲师职称',
-    type: 'input'
+    field: 'professional_cata',
+    label: '专业分类',
+    type: 'select',
+    options: [
+      { value: '01', label: '技术类' },
+      { value: '02', label: '管理类' },
+      { value: '03', label: '营销服务类' },
+      { value: '04', label: '技能' }
+    ]
   },
   {
-    // config: { placeholder: '请选择' },
     data: '',
     field: 'is_recommend',
     label: '是否推荐',
-    type: 'select',
-    options: [
-      { value: '1', label: '是' },
-      { value: '0', label: '否' }
-    ]
-  },
-  {
-    // config: { placeholder: '请选择' },
-    data: '',
-    field: 'is_latest_teacher',
-    label: '是否最新',
-    type: 'select',
-    options: [
-      { value: '1', label: '是' },
-      { value: '0', label: '否' }
-    ]
-  },
-  {
-    // config: { placeholder: '请选择' },
-    data: '',
-    field: 'is_popular_teacher',
-    label: '是否热门',
     type: 'select',
     options: [
       { value: '1', label: '是' },
@@ -431,7 +491,13 @@ const SEARCH_POPOVER_CONFIG = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
 }
 
-import { ADD_LECTURER, STOP_LECTURER, EDIT_LECTURER, DELETE_LECTURER } from '@/const/privileges'
+import {
+  ADD_LECTURER,
+  STOP_LECTURER,
+  EDIT_LECTURER,
+  DELETE_LECTURER,
+  IMPORT_LECTURER
+} from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
@@ -451,8 +517,6 @@ export default {
       showBtnData: false,
       showBtnDel: false,
       rowData: '',
-      // 保存左栏点过的的id或者默认id
-      clickId: '',
       props: {
         lazy: true,
         isLeaf: (data, node) => {
@@ -493,16 +557,8 @@ export default {
         total: 0
       },
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
-        return (
-          v != 'user_email' &&
-          v != 'status' &&
-          v != 'is_recommend' &&
-          v != 'is_popular_teacher' &&
-          v != 'is_latest_teacher' &&
-          v != 'createName' &&
-          v != 'create_time'
-        )
+      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter(() => {
+        return true
       }),
       searchPopoverConfig: SEARCH_POPOVER_CONFIG,
       // query: {},
@@ -517,6 +573,7 @@ export default {
     STOP_LECTURER: () => STOP_LECTURER,
     EDIT_LECTURER: () => EDIT_LECTURER,
     DELETE_LECTURER: () => DELETE_LECTURER,
+    IMPORT_LECTURER: () => IMPORT_LECTURER,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -533,12 +590,23 @@ export default {
   },
   created() {
     this.islistTeacher(undefined)
+    this.getTeacherList()
   },
   activated() {
     this.islistTeacher(undefined)
+    this.getTeacherList()
   },
   methods: {
-    isgetCatalogs() {},
+    // 获取讲师分类列表
+    getTeacherList() {
+      queryTeacherCataList({ source: 'teacher' }).then((res) => {
+        this.searchPopoverConfig.popoverOptions[3].config.treeParams.data = res
+      })
+    },
+    //导入
+    toImportLecturer() {
+      this.$router.push({ path: '/resource/lecturer/importLecturer' })
+    },
     // 去添加
     toAddLecturer() {
       this.$router.push({ path: '/resource/lecturer/addLecturer' })
@@ -559,16 +627,10 @@ export default {
     },
     // 去编辑
     tocompileLecturer(row) {
+      let query = { id: row.idStr }
       this.$router.push({
         path: '/resource/lecturer/compileLecturer',
-        query: {
-          id: row.idStr,
-          name: row.name,
-          userEmail: row.user_email,
-          sex: row.sex,
-          phonenum: row.phonenum,
-          user_id_str: row.user_id_str
-        }
+        query
       })
     },
 
@@ -584,7 +646,6 @@ export default {
         })
         this.islistTeacher()
         this.blockDialogVisible = false
-        this.$refs.myTree.islistTeacherCategory()
       })
     },
 
@@ -636,7 +697,7 @@ export default {
 
       editSysRulus(params).then(() => {
         this.$message({
-          message: `${i ? '启动' : '停用'}成功`,
+          message: `${i ? '解冻' : '冻结'}成功`,
           type: 'success'
         })
         this.blockDialogVisible = false
@@ -648,7 +709,7 @@ export default {
     iseditSysRulus(id, i, text) {
       // 启用弹框
       if (i) {
-        this.$confirm('您确定要启用该讲师吗？', '提示', {
+        this.$confirm('您确定要解冻该讲师吗？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -678,7 +739,7 @@ export default {
           })
           // 如果没有课程&在线课程
           if (res.data.length == 0 || res.data.length == countIndex) {
-            this.$confirm('您确定要停用该讲师吗？', '提示', {
+            this.$confirm('您确定要冻结该讲师吗？', '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
               type: 'warning'
@@ -704,22 +765,14 @@ export default {
     },
 
     // 查询讲师列表
-    islistTeacher(id) {
-      let params = { categoryId: id || this.clickId, ...this.searchParamsData, ...this.page }
+    islistTeacher() {
+      let params = { ...this.searchParamsData, ...this.page }
       if (!params.categoryId) {
         delete params.categoryId
       }
-      // console.log(params)
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
         this.page.total = res.totalNum || 0
-        // 下拉筛选框
-        // this.tableData.forEach((item) => {
-        //   SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push({
-        //     value: item.lingyu,
-        //     label: item.lingyu
-        //   })
-        // })
       })
     },
 
@@ -738,52 +791,51 @@ export default {
       this.page.pageNo = 1
       this.page.currentPage = 1
       this.searchParamsData = searchParams
-      this.islistTeacher(this.clickId)
+      this.islistTeacher()
     },
     // 批量删除
     handleRemoveItems(selection) {
       this.$confirm('确定将选择数据删除?', {
         type: 'warning'
-      })
-        .then(() => {
-          let params = {
-            ids: ''
-          }
+      }).then(() => {
+        let params = {
+          ids: ''
+        }
 
-          for (let i = 0; i < selection.length; i++) {
-            params.ids += selection[i].idStr + ','
-          }
-          Teacherdelete(params).then(() => {
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
+        for (let i = 0; i < selection.length; i++) {
+          params.ids += selection[i].idStr + ','
+        }
+        Teacherdelete(params).then(() => {
+          this.$message({
+            message: '操作成功',
+            type: 'success'
           })
-        })
-        .then(() => {
           // 删除完成后更新视图
           this.$refs.table.clearSelection()
           this.islistTeacher()
-          this.$refs.myTree.islistTeacherCategory()
+          // this.$refs.myTree.islistTeacherCategory()
         })
+      })
     }
   }
 }
 </script>
 
 <style lang="sass" scoped>
-/deep/.el-input
+::v-deep .el-input
   width: 100%
-/deep/.el-select
+
+.el-select
   width: 100%
+
 /deep/.el-input
 
 .operations__btns
-    color: #acb3b8
-    display: flex;
+  color: #acb3b8
+  display: flex
 .text_refresh
-    color: #acb3b8
-    margin-right: 5px
+  color: #acb3b8
+  margin-right: 5px
 $color_icon: #A0A8AE
 
 .basic-container--block
@@ -887,20 +939,15 @@ $color_icon: #A0A8AE
 
 /deep/.el-pagination {
   padding-right: 50px;
-  /deep/ .el-input {
-    // width: 65px;
-  }
 }
-
-.marginLine {
-  margin-left: 20px;
-}
-
 .marginLineColor {
   color: #01aafc;
-  margin-left: 20px;
 }
 /deep/.el-table__empty-block {
   text-align: left;
+}
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
 }
 </style>

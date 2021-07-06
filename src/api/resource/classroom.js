@@ -46,3 +46,9 @@ export const queryClassroom = (params) => get('/manage/v1/classroom/queryClassro
  * 查询预约列表
  */
 export const getBookList = (params) => get('/manage/v1/classroom/book/queryClassRoomList', params)
+
+/**
+ * 查询申请人列表
+ */
+ export const getClassroomApplicantList = (params) => get('/manage/v1/classroom/queryClassroomApplicant', params)
+

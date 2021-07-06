@@ -9,7 +9,7 @@
       :default-expanded-keys="[]"
       :highlight-current="true"
       show-checkbox
-      :check-strictly="false"
+      :check-strictly="systemNodeFlag"
       :node-key="defaultProps.id"
       :props="{ label: defaultProps.label, disabled: genDisabled }"
       :expand-on-click-node="false"
@@ -57,7 +57,8 @@ export default {
   data() {
     return {
       defaultValue: [],
-      activeData: {}
+      activeData: {},
+      systemNodeFlag:true
     }
   },
   methods: {
@@ -66,19 +67,34 @@ export default {
       let filterVal = []
       this.filterData(this.treeList, filterVal)
       let fiterTree = flatTree(filterVal)
-
-      const keys = []
+      // console.log(this.treeList,filterVal)
+      // console.log(fiterTree)
+      // const keys = []
+      // fiterTree.map((it) => {
+      //   // 修复当菜单类型为目录以及菜单都被勾选中
+      //   // TODO: 待补充：父级内有未被勾选的子集时应该显示半选，即删除父级id
+      //   if (it.isOwn !== 0 && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
+      //     this.defaultValue.push(it.menuId)
+      //     keys.push(it.menuId)
+      //   }
+      // })
+      const checkedKeys = []
       fiterTree.map((it) => {
-        // 修复当菜单类型为目录以及菜单都被勾选中
-        // TODO: 待补充：父级内有未被勾选的子集时应该显示半选，即删除父级id
-        if (it.isOwn !== 0 && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
+        // 修复当菜单 isOwn==1 && menuType === 'Menu' 才被选中
+        if (it.isOwn !== 0  && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
           this.defaultValue.push(it.menuId)
-          keys.push(it.menuId)
+          checkedKeys.push(it.menuId)
         }
       })
-      this.$refs.tree.setCheckedKeys(keys)
+      this.$nextTick(() => {
+        this.$refs.tree.setCheckedKeys(checkedKeys)
+        this.systemNodeFlag = false 
+      })
+
+      
     },
     filterData(data, table) {
+
       data.map((it) => {
         if (it.isOwn) {
           table.push(_.cloneDeep(it))

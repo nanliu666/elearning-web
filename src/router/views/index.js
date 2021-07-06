@@ -1,13 +1,15 @@
 import Layout from '@/page/index/'
 import ProcessDesign from '@/views/processDesign/ProcessDesign'
-import TrainingEdit from '@/views/training/trainingEdit'
 // import establishCourse from '@/views/course/establishCourse'
 // import compileCourse from '@/views/course/compileCourse'
-import ExamEdit from '@/views/examManagement/examSchedule/edit'
+// import ExamEdit from '@/views/examManagement/examSchedule/edit'
 import EditPlan from '@/views/learnPlan/EditPlan'
 import MenuAll from '@/views/system/menuAll'
 import demoRoutes from './demo'
 import questionnaireArrange from '@/views/questionnaire/arrange/edit'
+import trainingEdit from '@/views/training-edit/index'
+// import trainingEdit from '@/views/training/trainingEdit'
+import agreementEdit from '@/views/agreement/edit'
 export default [
   {
     path: '/',
@@ -24,8 +26,15 @@ export default [
   },
   {
     path: '/training/edit',
-    name: '编辑培训',
-    component: TrainingEdit,
+    component: trainingEdit,
+    meta: {
+      keepAlive: false,
+      isTab: false
+    }
+  },
+  {
+    path: '/agreement/edit',
+    component: agreementEdit,
     meta: {
       keepAlive: false,
       isTab: false
@@ -58,15 +67,15 @@ export default [
   //     isTab: false
   //   }
   // },
-  {
-    path: '/examManagement/examSchedule/edit',
-    name: '新建考试',
-    component: ExamEdit,
-    meta: {
-      keepAlive: true,
-      isTab: false
-    }
-  },
+  // {
+  //   path: '/examManagement/examSchedule/edit',
+  //   name: '新建考试',
+  //   component: ExamEdit,
+  //   meta: {
+  //     keepAlive: true,
+  //     isTab: false
+  //   }
+  // },
   {
     path: '/wel',
     component: Layout,
