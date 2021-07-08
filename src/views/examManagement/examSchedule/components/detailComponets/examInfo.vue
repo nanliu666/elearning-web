@@ -300,7 +300,7 @@ export default {
       tablePageConfig: {},
       tableConfig: _.cloneDeep(TABLE_CONFIG),
       tableColumns: [],
-      searchConfig: SEARCH_CONFIG
+      searchConfig: _.cloneDeep(SEARCH_CONFIG)
     }
   },
   computed: {},
@@ -318,7 +318,9 @@ export default {
         this.tableColumns = val ? ALL_COLUMNS : TABLE_COLUMNS
         this.queryInfo.isTested = val ? '0' : '1'
         let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
-        examSituation.options = val ? isTestOptions : notIsTestOptions
+        this.$nextTick(() => {
+          examSituation.options = val ? isTestOptions : notIsTestOptions
+        })
       },
       deep: true,
       immediate: true
