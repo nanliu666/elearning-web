@@ -431,8 +431,7 @@ export default {
           this.$message.success(`已成功${this.isEdit ? '修改' : '创建'}试卷`)
           this.handleBack()
         })
-        .catch((err) => {
-          this.$message.error(`创建失败，${err}`)
+        .catch(() => {
           window.console.error(JSON.stringify(params))
         })
         .finally(() => {
