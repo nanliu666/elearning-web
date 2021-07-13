@@ -53,7 +53,7 @@
             :props="treeProps"
             :expand-on-click-node="false"
             default-expand-all
-            :current-node-key="activeCategory.id"
+            :current-node-key="_.get(activeCategory, 'id')"
             @node-click="nodeClick"
           >
             <span
@@ -179,7 +179,7 @@ export default {
         value: 'id',
         children: 'children'
       },
-      activeCategory: { id: -1 },
+      activeCategory: {},
       parentOrgId: 0,
       treeSearch: '',
       treeLoading: false,
@@ -252,7 +252,6 @@ export default {
     }
   },
   activated() {
-    this.loadData()
     this.loadTree()
   },
   methods: {
@@ -272,14 +271,13 @@ export default {
       this.treeLoading = true
       getQuestionCategory({ parentId: '0', type: '0' })
         .then((data) => {
-          this.treeData = [{ id: -1, name: '未分类' }, ...data]
-          this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
-          getQuestionList({ pageNo: 1, pageSize: 1 }).then((res) => {
-            this.$set(this.treeData, 0, { id: -1, name: '未分类', relatedNum: res.totalNum })
-            setTimeout(() => {
-              this.$refs.categoryTree.setCurrentKey(this.activeCategory.id)
-            })
+          this.treeData = data
+          if (_.isEmpty(this.treeData)) return
+          setTimeout(() => {
+            this.$refs.categoryTree.setCurrentKey(_.get(this.treeData, '[0].id'))
           })
+          this.activeCategory = this.treeData[0]
+          this.loadData()
         })
         .catch(() => {})
         .finally(() => {
@@ -354,7 +352,7 @@ export default {
       getQuestionList({
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
-        categoryId: this.activeCategory.id === -1 ? null : this.activeCategory.id,
+        categoryId: this.activeCategory.id,
         ...this.query
       })
         .then((res) => {
