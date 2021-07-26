@@ -81,12 +81,12 @@
           placeholder="选择时间"
           @change="change"
         />
-        <el-cascader
-          v-if="item.type === 'cascader'"
-          v-model="item.data"
-          :options="item.options"
-          :props="item.props"
-        />
+        <!--        <el-cascader-->
+        <!--          v-if="item.type === 'cascader'"-->
+        <!--          v-model="item.data"-->
+        <!--          :options="item.options"-->
+        <!--          :props="item.props"-->
+        <!--        />-->
         <el-date-picker
           v-if="item.type === 'dataPicker'"
           v-model="item.data"
@@ -120,6 +120,16 @@
           :tree-params="item.config.treeParams"
           @change="change"
         />
+        <el-tree-select-new
+          v-if="item.type === 'treeSelectNew'"
+          :ref="item.field"
+          v-model="item.data"
+          :popover-class="item.config.fas"
+          :styles="item.styles"
+          :select-params="item.config.selectParams"
+          :tree-params="item.config.treeParams"
+          @change="change"
+        />
         <slot
           v-if="item.type === 'slot'"
           :name="item.field"
@@ -132,6 +142,22 @@
           :is-single="item.isSingle || false"
           @change="change"
         />-->
+
+        <lazy-load-cascader
+          v-if="item.type === 'lazycascader'"
+          ref="lazycascader"
+          v-model="item.data"
+          filterable
+          :disabled="item.disabled"
+          :placeholder="item.placeholder"
+          :filter-method="item.filterMethod"
+          :filter-props="item.filterProps"
+          :options="item.options"
+          :props="item.props"
+          clearable
+          @change="(data) => handleLazyCascaderChange(item, data)"
+        >
+        </lazy-load-cascader>
       </el-form-item>
       <el-form-item
         v-if="popoverOptions.length > 0"
@@ -159,6 +185,22 @@
                   :span="8"
                 >
                   <el-form-item :label="item.label">
+                    <lazy-load-cascader
+                      v-if="item.type === 'lazycascader'"
+                      ref="lazycascader"
+                      v-model="item.data"
+                      filterable
+                      :disabled="item.disabled"
+                      :placeholder="item.placeholder"
+                      :filter-method="item.filterMethod"
+                      :filter-props="item.filterProps"
+                      :options="item.options"
+                      :props="item.props"
+                      clearable
+                      @change="(data) => handleLazyCascaderChange(item, data)"
+                    >
+                    </lazy-load-cascader>
+
                     <el-input
                       v-if="item.type === 'input'"
                       v-model="item.data"
@@ -247,7 +289,11 @@
                       :default-time="item.config && item.config['default-time']"
                       :type="item.config && item.config.type ? item.config.type : 'date'"
                       :picker-options="item.config ? item.config.disabledDate : {}"
-                      :placeholder="item.config.placeholder ? item.config.placeholder : '结束时间'"
+                      :placeholder="
+                        item.config && item.config.placeholder
+                          ? item.config.placeholder
+                          : '结束时间'
+                      "
                       start-placeholder="开始时间"
                       end-placeholder="结束时间"
                       :unlink-panels="true"
@@ -260,6 +306,15 @@
                     />
                     <el-tree-select
                       v-if="item.type === 'treeSelect'"
+                      :ref="item.field"
+                      v-model="item.data"
+                      :popover-class="item.config.fas"
+                      :styles="item.styles"
+                      :select-params="item.config.selectParams"
+                      :tree-params="item.config.treeParams"
+                    />
+                    <el-tree-select-new
+                      v-if="item.type === 'treeSelectNew'"
                       :ref="item.field"
                       v-model="item.data"
                       :popover-class="item.config.fas"
@@ -319,12 +374,16 @@
 <script>
 import NumInterval from '../numInterval/numInterval'
 import ElTreeSelect from '../elTreeSelect/elTreeSelect'
+import elTreeSelectNew from '@/components/tree-selectorNew/index.vue'
+import lazyLoadCascader from '@/components/lazy-load-cascader'
 import _ from 'lodash'
 export default {
   name: 'SearchPopOver',
   components: {
+    lazyLoadCascader,
     NumInterval,
     ElTreeSelect,
+    elTreeSelectNew,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
@@ -392,6 +451,12 @@ export default {
     }
   },
   methods: {
+    handleLazyCascaderChange(item, data) {
+      item.data = Array.isArray(data) ? (data.length ? data[data.length - 1] : '') : data
+    },
+    dataChange() {
+      this.submitSearch()
+    },
     // 筛选已有值的options
     screenValueArr(arr) {
       this.requireOptions.forEach((item) => {
@@ -470,6 +535,12 @@ export default {
           item.field.split(',').forEach((it, idx) => {
             params[it] = item.data ? item.data[idx] : null
           })
+        } else if (item.type === 'lazycascader') {
+          params[item.field] = Array.isArray(item.data)
+            ? item.data.length
+              ? item.data[item.data.length - 1]
+              : ''
+            : item.data
         } else {
           params[item.field] = item.data
         }
@@ -487,6 +558,10 @@ export default {
         ) {
           item.data = []
         } else {
+          item.data = ''
+        }
+
+        if (item.type === 'lazycascader') {
           item.data = ''
         }
       })

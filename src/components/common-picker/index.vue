@@ -63,6 +63,7 @@
                     :data="tab.$data"
                     height="100%"
                     @row-click="(row) => handleTableRowClick(row, tab)"
+                    @select="(selection, row) => handleTableSelect(selection, row, tab)"
                     @selection-change="(rows) => handleTableSelectionChange(rows, tab)"
                   >
                     <el-table-column
@@ -84,6 +85,49 @@
                       </template>
                     </el-table-column>
                   </el-table>
+
+                  <div
+                    v-if="tab.type === 'scroll-tree'"
+                    v-infinite-scroll="() => loadTreeData(tab)"
+                    style="height: 100%; overflow-y: scroll"
+                    :infinite-scroll-disabled="tab.$noMore"
+                  >
+                    <el-tree
+                      :ref="'scroll-tree' + tab.$id"
+                      :check-strictly="tab.treeOption['check-strictly']"
+                      lazy
+                      :node-key="tab.treeOption['nodeKey'] || 'id'"
+                      :default-checked-keys="defaultExpandedKeys"
+                      show-checkbox
+                      :props="tab.treeOption.props"
+                      :data="tab.$data"
+                      :load="
+                        (node, resolve) => {
+                          if (node.data[tab.treeOption.nodeKey] === 'selected') {
+                            resolve(node.data[tab.treeOption.props.children])
+                          } else {
+                            resolve([])
+                          }
+                        }
+                      "
+                      @check="
+                        (node, { checkedNodes }) => treeCheckChange({ node, checkedNodes }, tab)
+                      "
+                    ></el-tree>
+                    <p
+                      v-if="tab.$noMore && tab.$data.length"
+                      class="load-tips"
+                    >
+                      没有更多了
+                    </p>
+                    <p
+                      v-if="tab.$data.length && tab.$loadLoading"
+                      :id="'loadLoading' + tab.$id"
+                      class="load-tips"
+                    >
+                      <i class="el-icon-loading"></i>
+                    </p>
+                  </div>
                 </div>
               </div>
             </el-tab-pane>
@@ -401,19 +445,99 @@ export default {
     }
   },
   methods: {
+    loadTreeData(tab, isSearch) {
+      tab.$loadLoading = true
+      if (isSearch) {
+        tab.$loading = true
+        tab.query.page.value = 1
+        tab.$noMore = false
+      } else {
+        tab.query.page.value++
+      }
+      this.handleRequest(tab)
+        .then((data) => {
+          // selection
+          const $selectedData = tab.$selectedData
+          if ($selectedData.length && !$selectedData.hasSelection) {
+            const initialData = {}
+            let {
+              props: { children, label, selectLabel },
+              nodeKey
+            } = tab.treeOption
+            const $children = $selectedData.filter(
+              (selector) =>
+                data.findIndex((item) => selector[tab.props.value] === item[tab.props.value]) < 0
+            )
+            if ($children.length) {
+              initialData[children] = JSON.parse(JSON.stringify($children))
+              initialData[nodeKey] = 'selected'
+              if (typeof label == 'function') {
+                label = selectLabel
+              }
+
+              initialData[label] = '已选'
+              data = [initialData].concat(data)
+              this.$nextTick(() => tab.$component.setChecked('selected', true, true))
+            }
+            $selectedData.hasSelection = true
+          }
+          if (isSearch) {
+            tab.$data = data
+          } else {
+            tab.$data = tab.$data.concat(data)
+          }
+          let { page, pageSize } = tab.query
+          page = page.value
+          pageSize = pageSize.value
+          if (page * pageSize >= tab.$total || !data.length) {
+            tab.$noMore = true
+            tab.$loadLoading = false
+          }
+
+          if (this.selectList.length) {
+            this.$nextTick(() => {
+              this.selectList.map((selector) => {
+                tab.$component.setChecked(selector[this.props.value], true, true)
+              })
+            })
+          }
+        })
+        .finally(() => {
+          tab.$loading = false
+        })
+    },
     loadTableData(tab) {
       this.requestTableData(tab)
     },
-    handleTableRowClick(row, tab) {
+    async handleTableRowClick(row, tab) {
       tab.$component.toggleRowSelection(row)
     },
+    async handleTableSelect(selection, row, tab) {
+      if (tab.checkRequest) {
+        const isRemove = !selection.includes(row)
+        const { handler = () => {} } = tab.checkRequest
+        const promise = new Promise((resolve) => {
+          handler(row, resolve)
+        })
+        if (this.selectLoading) return
+        this.selectLoading = true
+        let data = await promise
+
+        this.selectLoading = false
+        data.forEach((item) => {
+          item.$parentId = row[tab.props.value]
+          this.updateSelectList(item, isRemove, tab)
+        })
+      }
+    },
     handleTableSelectionChange(rows, tab) {
+      let list = [],
+        isRemove
       if (rows.length) {
         const selection = tab._selection
         if (selection.length) {
           const value = tab.props.value
-          const isRemove = selection.length > rows.length
-          let list = []
+          isRemove = selection.length > rows.length
           if (isRemove) {
             list = selection.filter(
               (selector) => rows.findIndex((row) => row[value] === selector[value]) < 0
@@ -423,26 +547,28 @@ export default {
               (row) => selection.findIndex((selector) => row[value] === selector[value]) < 0
             )
           }
-          list.forEach((row) => {
-            this.updateSelectList(row, isRemove, tab)
-          })
         } else {
-          rows.forEach((row) => {
-            this.updateSelectList(row, false, tab)
-          })
+          list = rows
+          isRemove = false
         }
       } else {
-        tab._selection.forEach((select) => {
-          this.updateSelectList(select, true, tab)
-        })
+        list = tab._selection
+        isRemove = true
       }
-      tab._selection = JSON.parse(JSON.stringify(rows))
+      list.forEach((row) => {
+        this.updateSelectList(row, isRemove, tab)
+      })
+
       tab.$selection = rows
+      tab._selection = JSON.parse(JSON.stringify(rows))
     },
     initTableLoadDom(tab) {
       this.$nextTick(() => {
         let el = tab.$component.$el
         const bodyWrap = el.querySelector('.el-table__body-wrapper')
+        if (tab.checkRequest) {
+          el.querySelector('.has-gutter .el-checkbox').style.display = 'none'
+        }
         let loadDiv = (tab.$loadDom = document.createElement('div'))
         loadDiv.className = 'load-text'
         loadDiv.style.textAlign = 'center'
@@ -509,6 +635,7 @@ export default {
           const promise = new Promise((resolve) => {
             handler($data, resolve)
           })
+          if (this.selectLoading) return
           this.selectLoading = true
           let data = await promise
           this.selectLoading = false
@@ -666,10 +793,9 @@ export default {
               })
             })
           }
-
           if (!$loadDom && tab.$data.length) {
             this.initTableLoadDom(tab)
-          } else {
+          } else if ($loadDom) {
             let { pageSize, page } = query
             pageSize = pageSize.value
             page = page.value
@@ -732,10 +858,11 @@ export default {
           this.selectList.push(selector)
         })
       this.tabOptions.forEach((tabOption, index) => {
-        if (tabOption.type === 'table') {
-          this.requestTableData(tabOption, true)
-        }
         const { type, $id } = tabOption
+        if (type !== 'tree') {
+          const request = type === 'table' ? this.requestTableData : this.loadTreeData
+          request(tabOption, true)
+        }
         this.$nextTick(() => {
           tabOption.$component = this.$refs[type + $id][0]
         })
@@ -743,8 +870,11 @@ export default {
           `tabOptions.${index}.query.search`,
           _.debounce((search) => {
             if (search !== tabOption.query.search) return
-            if (tabOption.type === 'tree') {
+            const type = tabOption.type
+            if (type === 'tree') {
               this.requestTreeData(undefined, undefined, tabOption)
+            } else if (type === 'scroll-tree') {
+              this.loadTreeData(tabOption, search)
             } else {
               this.requestTableData(tabOption, true)
             }
@@ -810,6 +940,7 @@ export default {
       const index = selectList.findIndex(
         (selector) => selector[this.props.value] === current[tab.props.value]
       )
+
       if (isRemove) {
         if (index > -1) {
           selectList.splice(index, 1)
@@ -822,6 +953,7 @@ export default {
           })
           selector.$parentId = current.$parentId
           selector.$tabId = tab.$id
+
           selectList.push(selector)
         }
       }
@@ -829,7 +961,7 @@ export default {
     handleDeleteSelector(selector, index) {
       const list = this.selectList
       list.splice(index, 1)
-      const { $tabId } = selector
+      let { $tabId } = selector
       if (!$tabId) {
         const tabs = this.tabOptions
         for (let i = 0; i < tabs.length; i++) {
@@ -846,14 +978,17 @@ export default {
                 return false
               }
             })
+
             $component.toggleRowSelection(row, false)
           }
         }
         return
       }
+      $tabId = +$tabId
       const tab = this.tabOptions[$tabId]
       let { type, $selection, $component } = tab
-      if (type === 'tree') {
+
+      if (type === 'tree' || type === 'scroll-tree') {
         this.$nextTick(() => {
           const parentId = selector.$parentId
           if (parentId) {
@@ -874,6 +1009,7 @@ export default {
             return false
           }
         })
+
         $component.toggleRowSelection(row, false)
       }
     },
@@ -892,8 +1028,9 @@ export default {
     },
     confirm() {
       let list = this.selectList.map((selector) => {
-        if (!selector.$requestApiName && selector.$tabId) {
-          selector.$requestApiName = this.tabOptions[selector.$tabId].request.name
+        const { $tabId } = selector
+        if (!selector.$requestApiName && $tabId) {
+          selector.$requestApiName = this.tabOptions[$tabId].request.name
           delete selector.$tabId
         }
         return selector
@@ -910,6 +1047,12 @@ export default {
 
 <style lang="scss">
 .common-picker {
+  .load-tips {
+    color: #a6a6a6;
+    text-align: center;
+    line-height: 25px;
+    margin: 0 !important;
+  }
   .el-table--border::after,
   .el-table--group::after,
   .el-table::before {
@@ -1027,6 +1170,7 @@ export default {
       }
       &.right {
         width: 40%;
+        overflow: hidden;
         .area-body {
           position: relative;
           .empty-tips {

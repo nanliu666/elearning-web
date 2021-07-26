@@ -151,3 +151,11 @@ export const outerTrainApplyList = (params) => get('/manage/v1/train/outerTrainA
 
 // 查询课程总结
 export const listSubmitFile = (params) => get('/manage/v1/trainsubmitfile/listSubmitFile', params)
+
+export const relatedKnowledgeList = (data) => {
+  return request({
+    url: '/api/blade-resource/v1/category/relatedKnowledgeList',
+    method: 'post',
+    data
+  })
+}

@@ -264,7 +264,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCreatorList } from '@/api/live'
+import { relatedKnowledgeList } from '@/api/training/training'
 
 // import leftColumn from '@/components/leftColumn'
 import {
@@ -558,7 +558,7 @@ export default {
 
   methods: {
     getCreatorList() {
-      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+      relatedKnowledgeList({ name: '' }).then((res) => {
         this.published.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(res)
       })
     },

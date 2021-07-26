@@ -27,7 +27,7 @@
       </div>
       <div class="btns">
         <el-button
-          v-show="!this.$route.query.id"
+          v-if="isShowDraft"
           size="medium"
           @click="isAddCourse(2)"
         >
@@ -116,7 +116,11 @@
             >
               <el-select
                 v-model="ruleForm.teacherId"
+                v-loadmore="teacherLoadMore"
                 filterable
+                remote
+                :remote-method="remoteTeacher"
+                @visible-change="(flag) => visibleChange(flag, true)"
               >
                 <el-option
                   v-for="(item, index) in TeacherData"
@@ -124,6 +128,20 @@
                   :value="item.idStr"
                   :label="item.name"
                 />
+                <el-option
+                  v-show="flag.teacher.valve"
+                  value="1"
+                  class="loading"
+                >
+                  <i class="el-icon-loading"></i>加载中
+                </el-option>
+                <el-option
+                  v-show="flag.teacher.noData"
+                  value="1"
+                  class="ending"
+                >
+                  {{ developerData.length === 0 ? '无数据' : '没有更多了' }}
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -222,7 +240,7 @@
                 placeholder="请输入"
                 controls-position="right"
                 :min="0"
-                :max="100"
+                :max="9999"
                 :step="0.5"
                 :precision="1"
               ></el-input-number>
@@ -237,7 +255,7 @@
                 placeholder="请输入"
                 controls-position="right"
                 :min="0"
-                :max="100"
+                :max="9999"
                 :step="1"
                 step-strictly
               ></el-input-number>
@@ -245,7 +263,7 @@
           </el-col>
         </el-row>
         <!-- 第五行 -->
-        <!-- <el-row>
+        <el-row>
           <el-col :span="11">
             <el-form-item label="课程认证等级">
               <el-select v-model="ruleForm.grade">
@@ -281,10 +299,10 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-        </el-row> -->
+        </el-row>
 
         <!-- 第六行 -->
-        <!-- <el-row>
+        <el-row>
           <el-col :span="11">
             <el-form-item label="开发费用">
               <el-input-number
@@ -303,7 +321,11 @@
             <el-form-item label="课程开发人">
               <el-select
                 v-model="ruleForm.developer"
+                v-loadmore="founderLoadMore"
                 filterable
+                remote
+                :remote-method="remoteFounder"
+                @visible-change="(flag) => visibleChange(flag, false)"
               >
                 <el-option
                   v-for="item in developerData"
@@ -311,12 +333,44 @@
                   :label="item.name"
                   :value="item.userId"
                 ></el-option>
+                <el-option
+                  v-show="flag.founder.valve"
+                  value="1"
+                  class="loading"
+                >
+                  <i class="el-icon-loading"></i>加载中
+                </el-option>
+                <el-option
+                  v-show="flag.founder.noData"
+                  value="1"
+                  class="ending"
+                >
+                  {{ developerData.length === 0 ? '无数据' : '没有更多了' }}
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row> -->
-        <!-- 第七行 -->
+        </el-row>
         <el-row>
+          <el-col :span="11">
+            <el-form-item
+              label="知识体系"
+              prop="parentOrgId"
+            >
+              <el-tree-select
+                ref="treeSelect"
+                v-model="ruleForm.knowledgeSystemId"
+                :select-params="column.props && column.props.selectParams"
+                :tree-params="column.props && column.props.treeParams"
+                v-bind="itemAttrs(column)"
+                :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
+                @node-click="nodeClick"
+                @searchFun="searchTreeFun($event)"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="2">
+          </el-col>
           <el-col :span="11">
             <el-form-item label="通过条件">
               <el-checkbox-group v-model="ruleForm.passCondition">
@@ -329,8 +383,9 @@
               </el-checkbox-group>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-          </el-col>
+        </el-row>
+        <!-- 第七行 -->
+        <el-row>
           <el-col :span="11">
             <el-form-item label="是否推荐">
               <el-switch
@@ -365,7 +420,7 @@
                     slot="tip"
                     class="el-upload__tip"
                   >
-                    只能上传jpg、jpeg、bmp、png文件，且不超过10MB
+                    只能上传jpg、jpeg、bmp、png文件，且不超过50MB
                   </div>
                 </div>
                 <img
@@ -403,7 +458,7 @@
               >
                 <div slot="content">
                   1.可根据章节类型添加内容；<br />
-                  2.支持上传文档、ppt、pdf、图片和视频文件，视频文件大小不超过2G，其他文件不超过5M；<br />
+                  2.支持上传文档、ppt、pdf、图片和视频文件，视频文件大小不超过2G，其他文件不超过50M；<br />
                   3.资源下载是提供给学员的附件材料，学员可以在前端学习页面进行下载 。
                 </div>
                 <i class="el-icon-question"></i>
@@ -737,23 +792,55 @@ import { getCourse, addCourse, listTeacher, editCourseInfo, id } from '@/api/cou
 import { queryTeacherlist } from '@/api/lecturer/lecturer'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 import { queryCategoryOrgList } from '@/api/resource/classroom'
+import { fileType } from '@/util/util'
+import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 export default {
   name: 'EstablishCourse',
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload'),
+    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'),
     ApprSubmit
   },
   data() {
     return {
+      column: {
+        label: '知识体系',
+        itemType: 'treeSelect',
+        prop: 'knowledgeSystemId',
+        required: false,
+        span: 11,
+        offset: 1,
+        props: {
+          selectParams: {
+            placeholder: '请选择知识体系',
+            multiple: false
+          },
+          treeParams: {
+            'check-strictly': true,
+            'default-expand-all': false,
+            'expand-on-click-node': false,
+            clickParent: true,
+            data: [],
+            filterable: true,
+            props: {
+              children: 'children',
+              label: 'name',
+              value: 'id'
+            }
+          }
+        }
+      },
       isQiNiu,
       fileList: [],
       previewImg: '', // 图片预览路径
       previewHtml: '', // 富文本预览
       previewVideo: '', // 视频预览路径
       perviewSrc: '', // 文档预览路径
-      word: /\.(txt|doc|wps|rtf|docx)$/, // 文档格式
-      video: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/, // 视频格式
+      word: /\.(ppt|pptx|doc|docx|xlsx|xls|pdf|wps|rtf)$/, // 文档格式
+      video: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov|flv)$/, // 视频格式
       image: /\.(jpg|jpeg|png|gif|bmp)$/, // 图片
+      audio: /\.(mp3|wma|wav)$/, //
       toForm: false,
       toCourse: false,
       tipsVisible: false,
@@ -876,7 +963,29 @@ export default {
         }
       ],
       pendingQueue: [],
-      uploadingQueue: []
+      uploadingQueue: [],
+      flag: {
+        founder: {
+          valve: false,
+          noData: false
+        },
+        teacher: {
+          valve: false,
+          noData: false
+        }
+      },
+      queryParams: {
+        founder: {
+          pageNo: 1,
+          pageSize: 20,
+          search: ''
+        },
+        teacher: {
+          pageNo: 1,
+          pageSize: 20,
+          likeQuery: ''
+        }
+      }
     }
   },
   computed: {
@@ -912,6 +1021,10 @@ export default {
         }
         return lang
       }
+    },
+    isShowDraft() {
+      console.log(this.$route)
+      return !this.$route.query.id || this.$route.query.type === '2'
     }
   },
   watch: {
@@ -928,40 +1041,6 @@ export default {
     }
   },
   created() {
-    if (this.$route.query.id) this.isLoading = true
-    else {
-      listTeacher({
-        pageSize: 9999999,
-        pageNo: 1
-      }).then((res) => {
-        this.TeacherData = res
-      })
-    }
-    this.uploadRef.forEach((ref) => {
-      ref.beforeUpload = this[ref.beforeUpload]
-    }),
-      this.isdeleteData()
-    this.isgetCatalog()
-    this.getInfo()
-    this.getSelectData()
-    this.disabledBtn = false
-    document.body.addEventListener('click', this.bodyClick)
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.isdeleteData()
-    })
-  },
-  activated() {
-    if (this.$route.query.id) this.isLoading = true
-    else {
-      listTeacher({
-        pageSize: 9999999,
-        pageNo: 1
-      }).then((res) => {
-        this.TeacherData = res
-      })
-    }
     // 检测断线重连
     window.addEventListener('online', () => {
       this.ruleForm.contents.map((c) => {
@@ -972,18 +1051,17 @@ export default {
         }
       })
     })
-    this.isdeleteData()
+    this.getSelectTeacher()
     this.isgetCatalog()
     this.getInfo()
-    this.getSelectData()
-    this.$refs.ruleForm.clearValidate()
+    this.initRelatedKnowledgeList()
     this.disabledBtn = false
     document.body.addEventListener('click', this.bodyClick)
   },
   deactivated() {
     document.body.removeEventListener('click', this.bodyClick)
   },
-  beforeRouteLeave(to, from, next) {
+  beforeRouteEnter(to, from, next) {
     from.meta.$keepAlive = false // 禁用页面缓存
     next()
   },
@@ -991,32 +1069,90 @@ export default {
     document.body.removeEventListener('click', this.bodyClick)
   },
   methods: {
-    toRevise(index) {
-      this.headIndex = index
+    searchTreeFun(data) {
+      //   搜索需要指定一个treeKey，拿到对应的component，返回过滤后的值
+      this.$refs.treeSelect.$refs.tree.filter(data)
+      //   this.$refs.treeSelect.map((v, i) => {
+      //     if (v.$attrs.treeKey == treeKey) {
+      //       const searchTarget = _.get(this.$refs, `treeSelect[${i}].$refs.tree`)
+      //       searchTarget.filter(data)
+      //     }
+      //   })
     },
-    bodyClick(e) {
-      if (this.tipsVisible && !e.path.includes(this.$refs.tip)) {
-        this.tipsVisible = false
+    nodeClick(data) {
+      this.ruleForm.knowledgeSystemId = data.id
+    },
+    itemAttrs(column) {
+      const copy = { ...defaultAttrs[column.itemType] }
+      for (const key in column) {
+        if (!noneItemAttrs.includes(key)) {
+          copy[key] = column[key]
+        }
       }
+      return copy
     },
-    // 图片上传成功
-    upLoadImg(file) {
-      this.img = file[0].localName
-      this.ruleForm.url = file[0].url
-      this.$refs.ruleForm.validateField('url')
+    // 初始化知识体系列表
+    initRelatedKnowledgeList() {
+      //   各资源下的知识体系下拉框列表
+      relatedKnowledgeList({ name: '' }).then((res) => (this.column.props.treeParams.data = res))
+    },
+    queryTeacherlist(params) {
+      return queryTeacherlist(params)
+    },
+    founderLoadMore() {
+      if (this.flag.founder.valve || this.flag.founder.noData) return
+      this.flag.founder.valve = true
+      this.queryParams.founder.pageSize += 20
+      if (this.queryParams.founder.pageSize >= 500) this.queryParams.founder.pageNo++
+      this.getSelectData()
+    },
+    teacherLoadMore() {
+      if (this.flag.teacher.valve || this.flag.teacher.noData) return
+      this.flag.teacher.valve = true
+      this.queryParams.teacher.pageSize += 20
+      if (this.queryParams.teacher.pageSize >= 500) this.queryParams.teacher.pageNo++
+      this.getSelectTeacher()
     },
     // 下拉框数据获取
     getSelectData() {
       // 课程开发人
-      queryTeacherlist({
-        pageNo: 1,
-        pageSize: 9999,
-        search: ''
-      }).then((res) => {
-        this.developerData = res.data
+      queryTeacherlist(this.queryParams.founder).then((res) => {
+        const length = this.developerData.length
+        this.developerData.push(...res.data)
+        this.developerData = _.uniqBy(this.developerData, 'userId')
+        this.flag.founder.noData = length === this.developerData.length
+        this.flag.founder.valve = false
       })
     },
-    beforeTaskUpload() {},
+    getSelectTeacher() {
+      listTeacher(this.queryParams.teacher).then((res) => {
+        const length = this.TeacherData.length
+        this.TeacherData.push(...res)
+        this.TeacherData = _.uniqBy(this.TeacherData, 'idStr')
+        this.flag.teacher.valve = false
+        this.flag.teacher.noData = length === this.TeacherData.length
+      })
+    },
+    remoteFounder(v) {
+      this.queryParams.founder.search = v.trim()
+      this.queryParams.founder.pageSize = 20
+      this.queryParams.founder.pageNo = 1
+      this.developerData = []
+      this.getSelectData()
+    },
+    remoteTeacher(v) {
+      this.queryParams.teacher.likeQuery = v.trim()
+      this.queryParams.teacher.pageSize = 20
+      this.queryParams.teacher.pageNo = 1
+      this.TeacherData = []
+      this.getSelectTeacher()
+    },
+    visibleChange(show, flag) {
+      if (show && (this.queryParams.teacher.likeQuery || this.queryParams.founder.search)) {
+        flag ? (this.queryParams.teacher.likeQuery = '') : (this.queryParams.founder.search = '')
+        flag ? this.getSelectTeacher() : this.getSelectData()
+      }
+    },
     // 添加作业btn
     addTask() {
       let item = {
@@ -1044,7 +1180,20 @@ export default {
       }
       return false
     },
-
+    toRevise(index) {
+      this.headIndex = index
+    },
+    bodyClick(e) {
+      if (this.tipsVisible && !e.path.includes(this.$refs.tip)) {
+        this.tipsVisible = false
+      }
+    },
+    // 图片上传成功
+    upLoadImg(file) {
+      this.img = file[0].localName
+      this.ruleForm.url = file[0].url
+      this.$refs.ruleForm.validateField('url')
+    },
     onUploadPending(fileData, content, contentIdx) {
       fileData.status = 'pending'
       const contents = this.ruleForm.contents
@@ -1186,7 +1335,7 @@ export default {
       this.$router.go(-1)
       const contents = this.ruleForm.contents
       if (contents.pending) return
-      this.$refs.ruleForm.clearValidate()
+      // this.$refs.ruleForm.clearValidate()
       contents.forEach((c) => {
         if (!c.fileData) return
         if (!c.fileData.observable) return
@@ -1213,8 +1362,10 @@ export default {
     // 编辑页面的数据前
     // 编辑页面的数据后
     async getInfo() {
-      let id = this.$route.query.id
+      const id = this.$route.query.id
+      this.developerData = (await queryTeacherlist(this.queryParams.teacher)).data
       if (!id) return
+      this.isLoading = true
       this.TeacherData = await listTeacher({
         pageSize: 9999999,
         pageNo: 1
@@ -1262,6 +1413,12 @@ export default {
         if (ini === 0) {
           this.ruleForm.teacherId = ''
         }
+        // 导入回显创建人
+        if (this.developerData.some((item) => item.userId !== res.developer))
+          this.developerData.push({
+            name: res.developerName,
+            userId: res.developer
+          })
       })
     },
     // 拿到列表数据
@@ -1388,14 +1545,13 @@ export default {
           }, 500)
           return
         }
-        // 判断是新增还是编辑
+        // 判断是新增草稿还是编辑草稿
         if (this.$route.query.id) {
           editCourseInfo(params).then(() => {
             this.$message({
               message: '保存成功',
               type: 'success'
             })
-            this.isdeleteData()
             this.$router.push({ path: '/course/courseDraft?status=' + status })
             this.disabledBtn = false
             this.isLoading = false
@@ -1406,7 +1562,6 @@ export default {
               message: '保存成功',
               type: 'success'
             })
-            this.isdeleteData()
             this.$router.push({ path: '/course/courseDraft?status=' + status })
             this.disabledBtn = false
             this.isLoading = false
@@ -1476,7 +1631,7 @@ export default {
                     this.isLoading = false
                   } else {
                     //发布成功清除数据
-                    this.isdeleteData()
+                    // this.isdeleteData()
                     this.$message({
                       message: '课程发布成功',
                       type: 'success'
@@ -1493,7 +1648,7 @@ export default {
                     this.submitApprApply(params.id ? params.id : id)
                   } else {
                     //发布成功清除数据
-                    this.isdeleteData()
+                    // this.isdeleteData()
                     this.$message({
                       message: '课程发布成功',
                       type: 'success'
@@ -1540,34 +1695,11 @@ export default {
           // this.$router.go(-1)
           this.$router.push({ path: '/course/courseDraft?status=' + status })
           //发布成功清除数据
-          this.isdeleteData()
+          // this.isdeleteData()
         })
         .finally(() => {
           this.isLoading = false
         })
-    },
-    // 清空数据
-    isdeleteData() {
-      this.resetForm = {
-        name: '',
-        teacherId: '',
-        type: '',
-        catalogId: '',
-        electiveType: '',
-        credit: '',
-        period: '',
-        grade: '',
-        level: '',
-        developCost: '',
-        developer: '',
-        knowledgeSystemId: '',
-        courseNo: '',
-        passCondition: [],
-        isRecommend: '',
-        introduction: '',
-        contents: [],
-        url: ''
-      }
     },
     // 是否空文件
     isFileSize(file) {
@@ -1583,13 +1715,13 @@ export default {
     DataUpload(file) {
       if (this.isFileSize(file)) return false
       const fileName = file.name.toLocaleLowerCase()
-      if (this.video.test(fileName)) {
+      if (this.video.test(fileName) || this.audio.test(fileName)) {
         if (file.size / 1024 / 1024 / 1024 > 2) {
-          this.$message.error('视频文件大小不能超过2GB')
+          this.$message.error('视频或音频文件大小不能超过2GB')
           return false
         }
-      } else if (file.size / 1024 / 1024 > 5) {
-        this.$message.error('文件大小不能超过5M')
+      } else if (file.size / 1024 / 1024 > 50) {
+        this.$message.error('文档、音频、图片、压缩文件大小不能超过50M')
         return false
       }
     },
@@ -1602,7 +1734,7 @@ export default {
         return false
       }
       if (!this.video.test(fileName)) {
-        this.$message.error('上传视频仅支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
+        this.$message.error('上传视频仅支持avi,wmv,mp4,3gp,rm,rmvb,mov,flv文件')
         return false
       }
     },
@@ -1615,11 +1747,10 @@ export default {
         this.$message.error('只能上传jpg、jpeg、bmp、png文件')
         return false
       }
-      if (file.size / 1024 / 1024 > 10) {
-        this.$message.error('上传图片大小不能超过10M!')
+      if (file.size / 1024 / 1024 > 50) {
+        this.$message.error('上传图片大小不能超过50M!')
         return false
       }
-      return true
     },
     // 批量校验
     CoursewareUpload(file) {
@@ -1635,11 +1766,11 @@ export default {
           }, 200)
           return false
         }
-      } else if (this.word.test(fileName) || /\.(ppt|pdf)$/.test(fileName)) {
-        if (file.size / 1024 / 1024 > 5) {
+      } else if (this.word.test(fileName) || this.image.test(fileName)) {
+        if (file.size / 1024 / 1024 > 50) {
           setTimeout(() => {
             this.$message({
-              message: '文档、PPT、PDF文件大小不能超过5M',
+              message: '文档、图片文件大小不能超过50M',
               type: 'error'
             })
           }, 200)
@@ -1648,7 +1779,7 @@ export default {
       } else {
         setTimeout(() => {
           this.$message({
-            message: '上传资料仅支持上传视频、文档、ppt、pdf、四种类型的课件',
+            message: '上传课件仅支持上传视频、文档、图片三种类型的课件',
             type: 'error'
           })
         }, 200)
@@ -1663,14 +1794,14 @@ export default {
     fileUpload(file) {
       const fileName = file.name.toLocaleLowerCase()
       if (this.isFileSize(file)) return false
-      if (this.word.test(fileName) || this.image.test(fileName) || /\.(ppt|pdf)$/.test(fileName)) {
-        if (file.size / 1024 / 1024 > 5) {
-          this.$message.error('上传文档大小不能超过5M')
+      if (this.word.test(fileName) || this.image.test(fileName)) {
+        if (file.size / 1024 / 1024 > 50) {
+          this.$message.error('上传文档或图片大小不能超过50M')
           return false
         }
         return true
       } else {
-        this.$message.error('上传文档仅支持文档、ppt、pdf、图片文件')
+        this.$message.error('上传文档仅支持文档、图片文件')
         return false
       }
     },
@@ -1745,18 +1876,14 @@ export default {
     //上传成功后调用预览(前台预览需求)
     async upLoadSuc(flie) {
       this.fileList = []
-      const name = flie[0].localName.toLocaleLowerCase()
+      let type = 0
+      const name = flie[0].localName.toLowerCase()
       const url = flie[0].fileUrl
-      let type = null
-      const word = /\.(txt|doc|wps|rtf|docx|)$/
-      if (word.test(name)) {
-        type = 0
-      } else if (/ppt$/.test(name)) {
-        type = 0
-      } else if (/pdf$/.test(name)) {
+      const { flag } = fileType(name)
+      if (/pdf$/.test(name)) {
         type = 20
-      } else {
-        return
+      } else if (flag === 1) {
+        type = 0
       }
       await getReviewUrl({
         isDownloa: 0,
@@ -1771,22 +1898,21 @@ export default {
     // 预览dialogfile
     async preview(flie) {
       // 预览
-      const name = flie.upLoad[0].localName.toLocaleLowerCase()
+      const name = flie.upLoad[0].localName.toLowerCase()
       const url = flie.upLoad[0].content
-      if (this.word.test(name)) {
-        this.type = 0
-      } else if (this.video.test(name)) {
+      const { flag } = fileType(name)
+      if (/\.pdf$/.test(name)) {
+        this.type = 20
+      } else if (flag === 0) {
         this.previewVideo = url
         this.showDialog = true
         return
-      } else if (this.image.test(name)) {
+      } else if (flag === 2) {
         this.previewImg = url
         this.showDialog = true
         return
-      } else if (/ppt$/.test(name)) {
+      } else if (flag === 1) {
         this.type = 0
-      } else if (/pdf$/.test(name)) {
-        this.type = 20
       } else if (url && flie.type === 1) {
         this.previewHtml = `<h2>${
           flie.upLoad[0].localName
@@ -1797,6 +1923,7 @@ export default {
         this.$message.warning('该文件类型暂不支持预览')
         return
       }
+
       let { data } = await getReviewUrl({
         isDownloa: 0,
         isShowTitle: 0,
@@ -2084,5 +2211,18 @@ export default {
       flex-shrink: 0;
     }
   }
+}
+.loading {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+  i {
+    margin-right: 10px;
+  }
+}
+.ending {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
 }
 </style>

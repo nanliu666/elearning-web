@@ -147,7 +147,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
@@ -238,7 +238,12 @@ export default {
   },
   activated() {
     getCreatorList().then((res) => {
-      this.searchConfig.popoverOptions[1].options.push(...res)
+      const options = this.searchConfig.popoverOptions[1].options
+      this.searchConfig.popoverOptions[1].options = _.uniqBy(options.concat(res), 'id')
+
+      this.searchConfig.popoverOptions[1].options = this.searchConfig.popoverOptions[1].options.filter(
+        (item) => item.id && item.name
+      )
     })
     this.loadTableData()
   },

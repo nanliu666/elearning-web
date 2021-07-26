@@ -225,6 +225,7 @@ import {
   updateUserIdBatchOrg,
   batchDeleteUserByIds
 } from '@/api/system/user'
+import { getStationParent } from '@/api/system/station'
 import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getRankTree } from '@/api/system/rank'
 import { getOrgTree } from '@/api/org/org'
@@ -328,6 +329,7 @@ const COLUMNS = [
     prop: 'createTime'
   }
 ]
+
 export default {
   name: 'User',
   components: {
@@ -348,6 +350,7 @@ export default {
   },
   data() {
     return {
+      queryListParams: {},
       batchVisible: false,
       query: {},
       loading: false,
@@ -389,29 +392,25 @@ export default {
           },
 
           {
-            type: 'treeSelect',
+            data: '',
             field: 'positionId',
             label: '岗位',
-            data: '',
-            config: {
-              selectParams: {
-                placeholder: '请选择岗位',
-                multiple: false
-              },
-              treeParams: {
-                data: [],
-                'check-strictly': true,
-                'default-expand-all': false,
-                'expand-on-click-node': false,
-                clickParent: true,
-                filterable: false,
-                props: {
-                  children: 'children',
-                  label: 'name',
-                  value: 'id'
-                }
-              }
-            }
+            type: 'lazySelect',
+            optionList: [],
+            placeholder: '请选择岗位',
+            optionProps: {
+              formatter: (item) => `${item.name}`,
+              key: 'name',
+              value: 'id'
+            },
+            load: (p) => {
+              console.log(this, 'ppppp')
+              p.name = p.search
+              return getStationParent(p)
+            },
+            remote: true,
+            searchable: true,
+            config: { optionLabel: 'name', optionValue: 'id' }
           },
           // { type: 'input', field: 'postLevel', label: '职级', config: {} },
           {
@@ -440,7 +439,7 @@ export default {
             }
           },
 
-          { type: 'input', field: 'post', label: '职务', config: {} },
+          { type: 'input', field: 'post', label: '职务' },
           { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
         ]
       },
@@ -557,6 +556,8 @@ export default {
     })
   },
   activated() {
+    //清空之前的选项
+    this.$refs.searchPopover.resetForm()
     this.loadData()
   },
   methods: {
@@ -691,15 +692,17 @@ export default {
       if (!this.activeOrg.orgId) {
         func = getOuterUserList
       }
-      func({
+      this.queryListParams = {
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
         orgId: this.activeOrg.orgId,
         ...this.query
-      })
+      }
+      func(this.queryListParams)
         .then((res) => {
           this.page.total = res.totalNum
           this.data = res.data
+          this.$emit('updateList', this.data)
           // this.selectionClear()
         })
         .finally(() => {

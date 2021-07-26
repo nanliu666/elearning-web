@@ -94,7 +94,7 @@
                 </el-form-item>
 
                 <el-form-item label="用户岗位">
-                  <el-cascader
+                  <!-- <el-cascader
                     ref="deptCascade"
                     v-model="queryForm.position"
                     style="width: 202px"
@@ -104,7 +104,18 @@
                     :show-all-levels="false"
                     clearable
                     @change="handleDeparmentChange"
-                  ></el-cascader>
+                  ></el-cascader> -->
+                  <!-- 下拉搜索 岗位-->
+                  <lazy-select
+                    :ref="positionConfig.field"
+                    v-model="positionConfig.data"
+                    :load="positionConfig.load"
+                    :option-list.sync="positionConfig.optionList"
+                    :placeholder="positionConfig.placeholder"
+                    :option-props="positionConfig.optionProps"
+                    :searchable="positionConfig.searchable"
+                    @select="positionChange"
+                  />
                 </el-form-item>
 
                 <el-form-item label="签订状态">
@@ -468,6 +479,7 @@
 
 <script>
 import Pagination from '@/components/common-pagination'
+import { getStationParent } from '@/api/system/station'
 import {
   getTrainAgreement,
   editTrainAgreementUser,
@@ -483,10 +495,31 @@ import { queryStation } from '@/api/system/station'
 export default {
   name: 'Management',
   components: {
-    Pagination
+    Pagination,
+    lazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   data() {
     return {
+      positionConfig:{
+        data: '',
+        field: 'positionId',
+        label: '岗位',
+        type: 'lazySelect',
+        optionList: [],
+        placeholder: '请选择岗位',
+        optionProps: {
+          formatter: (item) => `${item.name}(${item.fullOrg?item.fullOrg:'暂无'})`,
+          key: 'name',
+          value: 'id'
+        },
+        load: (p)=>{
+          p.name = p.search
+          return getStationParent(p)
+        },
+        remote:true,
+        searchable: true,
+        config: { optionLabel: 'name', optionValue: 'id' }
+    },
       multipleSelection: [],
       editLoading: false,
       statusLoading: false,
@@ -561,10 +594,19 @@ export default {
     }, 1000)
   },
   activated() {
+    //清空岗位数据
+    this.positionConfig.data= ""
     this.queryForm.id = this.data.id
     this.getData()
   },
   methods: {
+    //选择了岗位回调
+    async positionChange(val){
+        this.queryForm.position = val.id
+        if (this.$refs.deptCascade) {
+          this.$refs.deptCascade.dropDownVisible = false
+        }
+    },
     handleOrgChange(data) {
       this.queryForm.orgId = data[data.length - 1]
       if (this.$refs.orgCascade) {
@@ -606,6 +648,8 @@ export default {
     },
     resetQueryForm() {
       this.queryForm = { ...this.initForm, id: this.queryForm.id }
+      //清空岗位数据
+      this.positionConfig.data = ''
     },
     resetPageAndGetList() {
       this.queryForm.pageNo = 1

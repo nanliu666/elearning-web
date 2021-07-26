@@ -3,16 +3,15 @@
     ref="selector"
     v-loadmore="() => _remoteMethod()"
     class="el-lazy-select"
-    no-data-text="无数据"
     remote
     :value="value"
     :filterable="filterable"
     :remote-method="_remoteMethod"
-    :loading="searchLoading"
     :multiple="multiple"
     :clearable="clearable"
     :placeholder="placeholder"
     :disabled="disabled"
+    :loading="searchLoading"
     @visible-change="handleVisible"
     @change="handleChange"
   >
@@ -28,19 +27,22 @@
     >
       <i class="el-icon-loading" />
     </div>
-
     <div
-      v-if="noMore"
+      v-if="noMore && optionList.length && !loadLoading"
       class="tips-text"
     >
       没有更多了
     </div>
-    <div
-      v-if="!optionList.length"
-      class="tips-text"
+
+    <el-option
+      v-if="emptyTipsVisible"
+      value=""
     >
-      无数据
-    </div>
+      <span
+        :style="emptyStyle"
+        class="empty-tips"
+      >无数据</span>
+    </el-option>
   </el-select>
 </template>
 
@@ -49,6 +51,14 @@ const INITIAL_QUERY_PROPS = {
   page: 'pageNo',
   size: 'pageSize',
   search: 'search'
+}
+const INITIAL_RESPONSE_PROPS = {
+  data: 'data',
+  total: 'totalNum'
+}
+const uniqueObjArray = (array, key) => {
+  const map = {}
+  return array.filter((obj) => !map[obj[key]] && (map[obj[key]] = true))
 }
 export default {
   name: 'LazySelect',
@@ -70,16 +80,13 @@ export default {
     queryProps: {
       type: Object,
       default() {
-        return JSON.parse(JSON.stringify(INITIAL_QUERY_PROPS))
+        return INITIAL_QUERY_PROPS
       }
     },
     responseProps: {
       type: Object,
       default() {
-        return {
-          data: 'data',
-          total: 'totalNum'
-        }
+        return INITIAL_RESPONSE_PROPS
       }
     },
     value: {
@@ -114,7 +121,7 @@ export default {
       type: Number,
       default: 20
     },
-    initOptions: {
+    initialOptions: {
       type: Array,
       default() {
         return []
@@ -132,14 +139,33 @@ export default {
     }
   },
   computed: {
+    emptyStyle() {
+      return {
+        position: 'relative',
+        bottom: '1px',
+        'font-size': '13px',
+        color: '#9c9c9c',
+        'font-weight': 'normal',
+        'text-align': 'center',
+        'text-indent': '-20px',
+        'background-color': '#fff',
+        cursor: 'default',
+        display: 'inline-block',
+        width: 'calc(100% + 60px)',
+        'margin-left': '-20px'
+      }
+    },
+    emptyTipsVisible() {
+      return !this.optionList.length && !this.loadLoading && !this.searchLoading
+    },
     optionList: {
       get() {
         const searchValue = this.query[this.queryProps.search]
-        const initialData = this.initOptions.filter((option) => option[this.props.value])
+        const initialData = this.initialOptions.filter((option) => option[this.props.value])
         if (this.optionData.length) {
           return searchValue
             ? this.optionData
-            : _.uniqBy(initialData.concat(this.optionData), this.props.value)
+            : uniqueObjArray(initialData.concat(this.optionData), this.props.value)
         }
         if (!this.hasInitData) {
           // eslint-disable-next-line vue/no-async-in-computed-properties
@@ -154,39 +180,47 @@ export default {
     }
   },
   created() {
-    Object.assign(this.queryProps, INITIAL_QUERY_PROPS)
+    this.mergeConfig(this.queryProps, INITIAL_QUERY_PROPS)
+    this.mergeConfig(this.responseProps, INITIAL_RESPONSE_PROPS)
     this.query[this.queryProps.size] = this.querySize
   },
   methods: {
+    mergeConfig(config, defaultConfig) {
+      Object.keys(defaultConfig).forEach((key) => {
+        if (!config[key]) {
+          config[key] = defaultConfig[key]
+        }
+      })
+    },
     handleVisible(visible) {
       if (visible) {
         this._remoteMethod('')
       }
     },
     _remoteMethod(search) {
+      if (this.searchLoading || this.loadLoading) return
       const query = this.query
-      const hasSearch = !!search || search === ''
-      if (!this.hasInitData) {
-        this.query[this.queryProps.size] = 200
-        this.hasInitData = true
-      } else {
-        this.query[this.queryProps.size] = this.querySize
-      }
-
       let loading
-      if (hasSearch) {
+      const { size: sizeKey, page: pageKey, search: searchKey } = this.queryProps
+      if (search || search === '') {
+        query[pageKey] = 1
+        query[searchKey] = search
+        this.optionData = []
         loading = 'searchLoading'
-        query[this.queryProps.page] = 1
-        query[this.queryProps.search] = search
       } else {
         if (this.noMore) return
+        query[pageKey]++
         loading = 'loadLoading'
-        query[this.queryProps.page]++
       }
+
       this[loading] = true
-      if (hasSearch) {
-        this.optionData = []
+      if (!this.hasInitData) {
+        query[sizeKey] = 200
+        this.hasInitData = true
+      } else {
+        query[sizeKey] = this.querySize
       }
+
       return this.remoteMethod(query)
         .then((res) => {
           let data = [],
@@ -198,27 +232,28 @@ export default {
             data = res[dataKey]
             total = res[totalKey]
           }
-          this.optionData = _.uniqBy(this.optionData.concat(data), this.props.value)
-          if (this.dataFilter) {
+          this.optionData = uniqueObjArray(this.optionData.concat(data), this.props.value)
+          if (this.dataFilter && typeof this.dataFilter === 'function') {
             this.optionData = this.optionData.filter(this.dataFilter)
           }
-          this.noMore = query[this.queryProps.page] * query[this.queryProps.size] >= total
+          this.noMore = query[pageKey] * query[sizeKey] >= total
           this[loading] = false
         })
         .catch(() => {
-          query[this.queryProps.page]--
+          query[pageKey]--
         })
     },
     handleChange(value) {
+      const { value: valueKey, label: labelKey } = this.props
       this.$emit('change', value)
-      if (!value || !this.optionList.find((option) => option[this.props.value] === value)) return
+      if (!value || !this.optionList.find((option) => option[valueKey] === value)) return
       let data, label
       if (Array.isArray(value)) {
-        data = this.optionList.filter((option) => value.indexOf(option[this.props.value]) > -1)
-        label = data.map((item) => item[this.props.label])
+        data = this.optionList.filter((option) => value.indexOf(option[valueKey]) > -1)
+        label = data.map((item) => item[labelKey])
       } else {
-        data = this.optionList.find((option) => option[this.props.value] === value)
-        label = data[this.props.label]
+        data = this.optionList.find((option) => option[valueKey] === value)
+        label = data[labelKey]
       }
       this.$emit('getLabel', label)
       this.$emit('getSelected', data)
@@ -227,6 +262,22 @@ export default {
 }
 </script>
 <style lang="scss">
+.empty-tips {
+  font-size: 13px !important;
+  color: #9c9c9c;
+  font-weight: normal;
+  text-align: center;
+  text-indent: 20px;
+  background-color: #fff;
+  cursor: default;
+  display: inline-block;
+  width: calc(100% + 60px);
+  margin-left: -20px;
+  &:hover {
+    background-color: #ffffff;
+  }
+}
+
 .el-select-dropdown__wrap {
   overflow: scroll !important;
   max-height: 274px !important;

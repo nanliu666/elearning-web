@@ -95,9 +95,48 @@
 </template>
 
 <script>
-import { commonParams } from './paramsConfig'
-import { getOrgTreeSimple } from '@/api/org/org'
+// import { commonParams } from './paramsConfig'
+// import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 import SearchPopover from '@/components/searchPopOver/index'
+function loadSelectTreeFn(node, resolve) {
+  //  懒加载下拉树数据
+  let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+  getorganizationNew(params).then((res) => {
+    resolve(res)
+  })
+}
+const commonParams = {
+  type: 'treeSelectNew',
+  field: 'orgId',
+  label: '部门',
+  data: '',
+  config: {
+    selectParams: {
+      placeholder: '请输入内容',
+      multiple: false
+    },
+    treeParams: {
+      data: [],
+      'check-strictly': true,
+      'default-expand-all': false,
+      'expand-on-click-node': false,
+      clickParent: true,
+      load: loadSelectTreeFn,
+      lazy: true,
+      filterable: false,
+      props: {
+        isLeaf: (data) => {
+          return !data.hasChildren
+        },
+        children: 'children',
+        label: 'orgName',
+        disabled: 'disabled',
+        value: 'orgId'
+      }
+    }
+  }
+}
 let timeOut = null
 export default {
   components: { SearchPopover },
@@ -134,7 +173,8 @@ export default {
       paramsList: {},
       showColumnsVisible: [],
       noQuery: false,
-      isMerge: false
+      isMerge: false,
+      orgOption: ''
     }
   },
   watch: {
@@ -168,7 +208,6 @@ export default {
     this.$set(this, 'paramsList', {
       requireOptions: [commonParams, ...dataPicker, ...this.params]
     })
-    this.getOrgTree()
     this.isLoadData(this.queryData)
   },
   methods: {
@@ -180,13 +219,13 @@ export default {
       }
     },
     //获取树
-    getOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-        this.treeOptions = res
-        let orgId = _.find(this.paramsList.requireOptions, { field: 'orgId' })
-        orgId.config.treeParams.data = res
-      })
-    },
+    // getOrgTree() {
+    //   getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+    //     this.treeOptions = res
+    //     let orgId = _.find(this.paramsList.requireOptions, { field: 'orgId' })
+    //     orgId.config.treeParams.data = res
+    //   })
+    // },
     departmentSelect(val) {
       this.$emit('dateChange', [val.startTime, val.endTime] || [])
       this.$emit('paramsChange', val)

@@ -1,6 +1,6 @@
 // 配置编译环境和线上环境之间的切换
 let systemName = '易宝教育管理后台' // 系统名称
-var isQiNiu = true // 判断是用七牛(true)还是用内部(false)上传
+var isQiNiu = false // 判断是用七牛(true)还是用内部(false)上传
 let baseUploadUrl = {
   // 内部上传服务，各环境上传地址
   dev: 'https://file-test.epro-edu.com',
@@ -51,7 +51,7 @@ if (env.VUE_APP_ENV == 'dev') {
 }
 
 // 预览地址
-const previewUrl = 'https://convert.zexueyuan.com.cn/fcscloud'
+const previewUrl = 'https://convert.zexueyuan.com.cn/fcscloud/composite/httpfile'
 export {
   backBaseUrl,
   frontBaseUrl,

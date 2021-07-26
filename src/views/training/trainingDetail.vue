@@ -234,29 +234,6 @@
             </div>
           </el-col>
         </el-row>
-
-        <el-row>
-          <el-col :span="2">
-            <div class="col_title">
-              {{ '主办单位：' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.sponsor || '--' }}
-            </div>
-          </el-col>
-          <el-col :span="2">
-            <div class="col_title">
-              {{ '承办单位：' }}
-            </div>
-          </el-col>
-          <el-col :span="5">
-            <div class="col_content">
-              {{ showTrainDetail.organizer || '--' }}
-            </div>
-          </el-col>
-        </el-row>
       </div>
 
       <div
@@ -690,7 +667,7 @@
             </template>
 
             <template
-              v-if="showTrainDetail.isArranged"
+              v-if="showTrainDetail.isArranged && showTrainDetail.certificateId"
               #multiSelectMenu="{ selection }"
             >
               <el-button
@@ -846,7 +823,7 @@
               >
                 {{ scope.row.updateAssessment == 1 ? '修改评定' : '培训评定' }}
               </el-button>
-              <el-row v-else>
+              <el-row v-else-if="showTrainDetail.certificateId">
                 <el-button
                   v-if="scope.row.certificate == 1"
                   :disabled="scope.row.certificate != 1"
@@ -1080,7 +1057,7 @@
                   状态：<span v-if="item.status === 1">未开始</span>
                   <span v-if="item.status === 2">进行中</span><span v-if="item.status === 3">已结束</span></span>
 
-                <span style="width: 180px;">参培率： {{ item.participateRate }}</span>
+                <span style="width: 180px;">参培率： {{ item.participateRate + '%' }}</span>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -1344,15 +1321,24 @@
             :key="index"
             class="result_bottom_box"
           >
-            <div class="result_bottom_l">
+            <div
+              class="result_bottom_l"
+              style="font-size: 0"
+            >
               <span>
                 <!-- <img
                   src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3952183824,1808487741&fm=26&gp=0.jpg"
                   alt=""
                 /> -->
+                <img
+                  v-if="item.imageUrl"
+                  :src="item.imageUrl"
+                  alt=""
+                  style="margin-left: 0"
+                />
               </span>
-              <span>
-                {{ item.teacher_name }}
+              <span style="margin-right: 12px;text-align: left; margin-top: 22px; font-size: 14px;">
+                {{ item.teacherName }}<br />课程: {{ item.courseName }}
               </span>
             </div>
             <div class="result_bottom_r">
@@ -1453,6 +1439,7 @@ import {
   outerTrainApplyList
 } from '@/api/training/training'
 import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 
 // 表格属性
 const TABLE_COLUMNS = [
@@ -1604,31 +1591,17 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    // config: { placeholder: 'deptId' },
+    label: '部门',
+    disabled: false,
+    field: 'deptCode',
     data: '',
-    field: 'code',
-    label: '所属部门',
-    type: 'treeSelect',
-    config: {
-      selectParams: {
-        placeholder: '请输入内容',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'orgName',
-          disabled: 'disabled',
-          value: 'code'
-        }
-      }
-    }
+    placeholder: '请选择部门',
+    type: 'lazycascader',
+    filterMethod: () => {},
+    filterProps: {},
+    options: [],
+    change: () => {},
+    props: {}
   },
   {
     config: { placeholder: '请选择' },
@@ -1868,12 +1841,14 @@ export default {
     // this.isgetTrainEvaluate()
     // this.isExamList()
     this.loadOrgData()
+    this.loadNewOrgData()
   },
   async activated() {
     // this.loadData()
     // this.getInfo()
     this.loadOrgData()
     await this.isGetTrainDetail()
+    this.loadNewOrgData()
 
     // 获取报名情况数据
     this.getSigninForm.trainId = this.getRegisterForm.trainId = this.showTrainDetail.trainId
@@ -1899,7 +1874,45 @@ export default {
       this.tableColumns = TABLE_COLUMNS2
       this.tableConfig.showHandler = true
     }
-
+    const org = (this.orgOption = this.searchPopoverConfig.popoverOptions[0])
+    org.filterMethod = this.loadNewOrgData
+    org.filterProps = {
+      size: {
+        key: 'pageSize',
+        value: 1000
+      },
+      page: {
+        key: 'pageNo',
+        value: 0
+      },
+      search: {
+        key: 'orgName',
+        value: ''
+      }
+    }
+    org.props = {
+      checkStrictly: true,
+      multiple: false,
+      label: 'orgName',
+      value: 'orgCode',
+      // moreLoad: this.loadNewOrgData,
+      lazy: true,
+      lazyLoad: this.orgLazyLoad,
+      loadProps: {
+        size: {
+          key: 'pageSize',
+          value: 10
+        },
+        page: {
+          key: 'pageNo',
+          value: 1
+        },
+        value: {
+          key: 'parentId',
+          value: ''
+        }
+      }
+    }
     // if(this.showTrainDetail.trainScope == 'inside') { this.tableConfig.showHandler = true }
 
     this.$forceUpdate()
@@ -1909,6 +1922,37 @@ export default {
   //   next()
   // },
   methods: {
+    orgLazyLoad(node, resolve) {
+      if (!node.data) return []
+      this.loadNewOrgData({ parentId: node.data.id }, resolve)
+    },
+    loadNewOrgData(query, resolve) {
+      if (query && typeof query === 'object') {
+        if (!query.pageSize) {
+          Object.assign(query, { pageSize: 10, pageNo: 1 })
+        } else {
+          if (query.name) {
+            delete query.parentId
+          } else {
+            delete query.name
+          }
+        }
+      } else {
+        query = { name: query }
+      }
+
+      if (!query.name) {
+        query.parentId = query.parentId || '0'
+      }
+      // 接口
+      getorganizationNew(query).then((res) => {
+        if (resolve) {
+          resolve(res)
+        } else {
+          this.orgOption.options = res
+        }
+      })
+    },
     editEvaluateCondition(data) {
       this.evaluateDialogParams = {
         userId: data.stuId,
@@ -2230,6 +2274,7 @@ export default {
       return getTrainDetail({ trainId: this.$route.query.id }).then((res) => {
         this.showTrainDetail = res
         this.showTrainDetail.introduction = _.unescape(this.showTrainDetail.introduction)
+        console.log(this.showTrainDetail)
         this.$forceUpdate()
       })
     },
@@ -2891,6 +2936,8 @@ export default {
         .result_bottom_r {
           display: flex;
           padding-top: 30px;
+          align-items: flex-end;
+          padding-bottom: 5px;
           span {
             &:nth-child(1) {
               margin: 0 10px 0 45px;

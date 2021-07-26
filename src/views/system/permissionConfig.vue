@@ -67,7 +67,6 @@ export default {
   },
   methods: {
     handleMenuAddBtnClick() {
-      console.log('新增所有权限')
       this.configVisible = !this.configVisible
     },
     handleClick() {

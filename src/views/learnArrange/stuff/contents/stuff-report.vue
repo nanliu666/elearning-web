@@ -5,10 +5,12 @@
       class="table-list"
     >
       <el-table
-        v-loading="data.report.loading"
+        v-for="(table, i) in data.report"
+        :key="i"
+        v-loading="table.loading"
         element-loading-background="rgba(0, 0, 0, 0.8)"
         element-loading-spinner="el-icon-loading"
-        :data="data.report"
+        :data="table.trainAttachmentVOS"
         empty-text="暂未提交"
       >
         <el-table-column
@@ -18,11 +20,11 @@
         >
           <template slot="header">
             <el-tooltip
-              :content="'来源: ' + data.trainName"
+              :content="'课程: ' + table.name"
               placement="top"
             >
               <div class="course-title">
-                {{ '来源: ' + data.trainName }}
+                {{ '来源: ' + table.name }}
               </div>
             </el-tooltip>
           </template>
@@ -55,8 +57,8 @@
             <el-button
               type="text"
               size="small"
-              :disabled="!data.report.length"
-              @click="downloadZip(data.report)"
+              :disabled="!table.trainAttachmentVOS.length"
+              @click="downloadZip(table)"
             >
               打包下载
             </el-button>
@@ -66,7 +68,7 @@
             <el-button
               type="text"
               size="small"
-              @click="download(scope.row, data.report)"
+              @click="download(scope.row, table)"
             >
               下载
             </el-button>
@@ -109,7 +111,7 @@ export default {
         responseType: 'blob',
         emulateJSON: true
       }
-      table.forEach((item) => {
+      table.trainAttachmentVOS.forEach((item) => {
         let { fileName: name, filePath: path } = item
         if (!path || !name) return
         if (path.indexOf('http') !== 0) {
@@ -123,6 +125,7 @@ export default {
 
       let url = `api/common/oss/download/zip?filePath=${params.filePath}&fileName=${params.fileName}
       &responseType=blob&emulateJSON=true&zipComment=${params.zipComment}`
+
       this.repDownload(url).then(() => {
         table.loading = false
         this.$forceUpdate()

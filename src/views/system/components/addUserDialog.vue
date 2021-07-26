@@ -105,13 +105,15 @@ export default {
   watch: {
     row: function() {
       this.$nextTick(() => {
-        this.getData()
+        if (this.row.name){
+          this.getData(2)
+        }
       })
     },
     'formData.userId': function() {
       this.$nextTick(() => {
         if (this.row.name) return
-        this.getOrgIds()
+        this.getOrgIds(0)
       })
     }
   },
@@ -121,26 +123,28 @@ export default {
     // 2拿创建人id跟 roleId type=0 去查询管理范围 // /api/user/v1/user/getMgmtOrgIds
     async getOrgIds() {
       let params = {
-        type: 0,
+        type: this.row.name?2:0,
         roleId: this.$route.query.roleId,
-        userId: this.formData.userId
+        userId: this.row.name?this.formData._userId : this.formData.userId
       }
+      if(!params.userId) return
       let res = await getMgmtOrgIds(params)
-      if (res) res = res.split(',')
-      this.formData.orgIdList = res || []
+      if (res) this.formData.orgIdList = res || []
+      
     },
 
     // 编辑回显
-    getData() {
+    async getData(type) {
       this.formData.userId = this.row.name || '' //显示名字
       this.formData._userId = this.row.userId || '' //真实ID
       // this.formData.userId = this.row.userId || ''
       // this.formData.name = this.row.name || ''
-      if (this.row.orgIds) {
-        this.formData.orgIdList = this.row.orgIds.split(',')
-      } else {
-        this.formData.orgIdList = []
-      }
+      await this.getOrgIds(type)
+      // if (this.row.orgIds) {
+      //   this.formData.orgIdList = this.row.orgIds.split(',')
+      // } else {
+      //   this.formData.orgIdList = []
+      // }
     },
 
     loadUser(params) {
@@ -175,6 +179,7 @@ export default {
             type: 'success'
           })
           this.close()
+          
         })
       }
     },
@@ -182,6 +187,11 @@ export default {
     close() {
       this.clear()
       this.$emit('update:visible', false)
+      this.form = { orgIds: [] }
+          this.formData={
+            userId: '',
+            orgIdList: []
+          }
     },
     clear() {
       this.$emit('after-submit', '123')

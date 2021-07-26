@@ -166,7 +166,7 @@ const SEARCH_CONFIG = {
             children: 'children',
             label: 'orgName',
             disabled: 'disabled',
-            value: 'orgId'
+            value: 'code'
           }
         }
       }

@@ -14,7 +14,10 @@ export const editExpert = (params) => post('/api/blade-margin/v1/community/exper
 // 创建专家
 export const addExpert = (params) => post('/api/blade-margin/v1/community/expert/add', params)
 // 查询全部专区
-export const queryZone = (params) =>
+export const queryAllZone = (params) =>
   get('/api/blade-margin/v1/community/area/queryAllForDropList', params)
+// 查询包含专家的专区
+export const queryZone = (params) =>
+  get('/api/blade-margin/v1/community/area/queryAreasContainExpert', params)
 // 查询单个专家
 export const queryExpert = (params) => get('/api/blade-margin/v1/community/expert/getOne', params)

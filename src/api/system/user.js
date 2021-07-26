@@ -50,6 +50,15 @@ export const getBizUserChild = (params) => get('/org/v1/biz/org/user/child', par
  * @param {string} params.pageSize
  */
 export const getOuterUser = (params) => get('/user/v1/user/outer', params)
+/**
+ * 获取外部用户
+ * @param {object} params 参数
+ * @param {string} params.pageNo
+ * @param {string} params.pageSize
+ */
+export const exportUserList = (params) =>
+  get('/org/v1/org/user/export', params, { responseType: 'blob' })
+
 /* 获取外部用户
  * @param {object} params 参数
  * @param {string} params.pageNo
@@ -358,3 +367,14 @@ export const importUserErrorFile = (params) =>
  * @param {strign} 用户ID
  */
 export const batchDeleteUserByIds = (params) => del('/user/v1/user/deleteByIds', params)
+
+/**
+ * @desc 分组导入
+ */
+export const usergroupImport = (params) => post('/api/user/v1/usergroup/import', params)
+
+/**
+ * @desc 下载分组导入错误信息
+ */
+export const groupErrFileExport = (params) =>
+  get('/api/user/v1/usergroup/errFileExport', params, { responseType: 'blob' })

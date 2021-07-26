@@ -12,6 +12,7 @@
       @page-size-change="handlePageSizeChange"
     > -->
     <common-table
+      v-if="flag"
       ref="table"
       :columns="columnsVisible | columnsFilter"
       :config="tableConfig"
@@ -231,7 +232,8 @@ export default {
       dataRuleDialog: false,
       loading: false,
       menuId: '',
-      pageRuleDialog: false
+      pageRuleDialog: false,
+      flag: true
     }
   },
   computed: {
@@ -264,16 +266,26 @@ export default {
       }
       await delPrivilege(params)
       this.refreshTableData()
+      this.flag = false
+      this.$nextTick(() => {
+        this.flag = true
+      })
       this.$message({
         type: 'success',
         message: '删除成功!'
       })
     },
+    recursion(arr) {
+      arr.filter((item) => {
+        if (item.children && item.children.length > 0) this.recursion(item.children)
+        return this.$dataStore.menuData.push(item.menuId)
+      })
+    },
     handleRemoveItems(data) {
-      //bugfix #2559 
-      var confirStr = "此操作将删除该权限, 是否继续?";
-      if(data.length>1){
-        confirStr = "此操作将批量删除权限, 是否继续?";
+      //bugfix #2559
+      var confirStr = '此操作将删除该权限, 是否继续?'
+      if (data.length > 1) {
+        confirStr = '此操作将批量删除权限, 是否继续?'
       }
       this.$confirm(confirStr, '提示', {
         confirmButtonText: '确定',
@@ -387,11 +399,10 @@ export default {
         let arr = []
         this.filterData(tableData, arr)
         this.tableData = arr
-        console.log(this.tableData)
         // 更新分页器数据
-        // this.page.total = _.size(tableData)
+        this.$dataStore.menuData = []
+        this.recursion(this.tableData)
         this.page.total = _.size(this.tableData)
-        console.log(_.size(tableData))
       } catch (error) {
         window.console.log(error)
       } finally {

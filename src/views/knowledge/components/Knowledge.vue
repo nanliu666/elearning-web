@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="input-wrapper">
         <el-input
-          v-model="filterForm.courseName"
+          v-model="filterForm.resName"
           clearable
           size="medium"
           placeholder="输入知识库名称搜索"
@@ -12,7 +12,7 @@
       <el-popover
         v-model="filterFormVisible"
         placement="bottom"
-        width="1050"
+        width="960"
         :offset="316"
         transition="false"
       >
@@ -40,21 +40,24 @@
           </el-form-item>
 
           <el-form-item label="所在分类">
-            <tree-selector
+            <el-cascader
+              ref="cascader"
               v-model="filterForm.catalogId"
               :options="categoryData"
+              clearable
+              filterable
+              filter
+              style="width: 100%"
               placeholder="请选择"
-              :props="{
-                value: 'id',
-                label: 'name',
-                children: 'children'
-              }"
-            />
+              :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+              :show-all-levels="false"
+              @change="handleCategoryChange"
+            ></el-cascader>
           </el-form-item>
 
           <el-form-item label="上传模式">
             <el-select
-              v-model="filterForm.courseType"
+              v-model="filterForm.uploadType"
               clearable
               placeholder="请选择"
             >
@@ -81,7 +84,7 @@
               @click="
                 filterForm = {
                   ...initialFilterForm,
-                  titleOrNo: filterForm.deptName
+                  resName: filterForm.resName
                 }
               "
             >
@@ -109,14 +112,15 @@
         <span>{{ `已选中${multipleSelection.length}项` }}</span><el-button
           type="text"
           size="small"
+          @click="() => cancel()"
         >
-          全部删除
+          取消关联
         </el-button>
       </div>
       <el-table
-        :loading="tableLoading"
+        v-loading="tableLoading"
         :data="data"
-        height="35vh"
+        height="55vh"
         @selection-change="handleSelectionChange"
       >
         <el-table-column
@@ -127,6 +131,7 @@
 
         <el-table-column
           type="index"
+          label="序号"
           fixed="left"
           width="55"
         >
@@ -134,19 +139,32 @@
 
         <el-table-column
           fixed="left"
-          prop="sourceName"
+          prop="resName"
           min-width="120"
           show-overflow-tooltip
           label="资源名称"
         >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              @click="
+                $router.push({ path: '/repository/knowledgeDetail', query: { id: scope.row.id } })
+              "
+            >
+              {{ scope.row.resName }}
+            </el-button>
+          </template>
         </el-table-column>
 
         <el-table-column
           label="状态"
           prop="status"
-          min-width="120"
+          min-width="65"
           show-overflow-tooltip
         >
+          <template slot-scope="scope">
+            {{ getStatus(scope.row) }}
+          </template>
         </el-table-column>
         <el-table-column
           label="所在分类"
@@ -154,29 +172,33 @@
           min-width="120"
           show-overflow-tooltip
         >
+          <template slot-scope="scope">
+            {{ scope.row.catalogName || '--' }}
+          </template>
         </el-table-column>
 
         <el-table-column
           label="上传模式"
           prop="updateType"
-          min-width="120"
+          min-width="70"
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            {{ scope.row.updateType | getUpdateType }}
+            {{ getUploadType(scope.row.uploadType) }}
           </template>
         </el-table-column>
         <el-table-column
           label="更新时间"
           prop="updateTime"
-          min-width="120"
+          min-width="80"
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            {{ scope.row.updateTime }}
+            {{ scope.row.updateTime || '--' }}
           </template>
         </el-table-column>
         <el-table-column
+          v-p="relevanceBtn"
           label="操作"
           header-align="center"
           align="center"
@@ -204,37 +226,19 @@
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
 import Pagination from '@/components/common-pagination'
-import TreeSelector from '@/components/tree-selector'
+import { getKnowledgeCatalogList, getKnowledgeList, removeKnowledgeSystem } from '@/api/knowledge'
 
 export default {
   name: 'KnowledgeCourse',
   components: {
-    Pagination,
-    TreeSelector
-  },
-  filters: {
-    getCourseType(type) {
-      switch (type) {
-        case 1:
-          return '在线课程'
-        case 2:
-          return '面授课程'
-        case 3:
-          return '直播课程'
-      }
-    },
-    getUpdateType(type) {
-      switch (type) {
-        case 1:
-          return '开放选修'
-        case 3:
-          return '禁止选修'
-      }
-    }
+    Pagination
   },
   props: {
+    knowledgeSystemId: {
+      type: String,
+      default: ''
+    },
     relevanceBtn: {
       type: String,
       default: ''
@@ -247,23 +251,31 @@ export default {
       multipleSelection: [],
       tableLoading: false,
       filterFormVisible: false,
-      initialFilterForm: {},
-      filterForm: {
-        courseName: '',
-        status: '1',
-        teacherId: '',
+      initialFilterForm: {
+        resName: '',
+        status: '',
+        knowledgeSystemId: this.knowledgeSystemId,
         catalogId: '',
-        courseType: '',
-        electiveType: '',
+        uploadType: '',
+        pageNo: 1,
+        pageSize: 10
+      },
+      filterForm: {
+        resName: '',
+        status: '',
+        knowledgeSystemId: this.knowledgeSystemId,
+        catalogId: '',
+        uploadType: '',
         pageNo: 1,
         pageSize: 10
       },
       total: 0,
       statusOptions: [
-        { value: 0, label: '已发布' },
-        { value: 1, label: '已停用' },
-        { value: 2, label: '审批中' },
-        { value: 3, label: '审批结束' }
+        { value: '1', label: '上架' },
+        { value: '2', label: '下架' },
+        { value: '3', label: '审批中' },
+        { value: '4', label: '已拒绝' },
+        { value: '5', label: '已撤回' }
       ],
       uploadTypeOptions: [
         { value: '1', label: '本地文件' },
@@ -271,28 +283,101 @@ export default {
       ]
     }
   },
+  created() {
+    this.getCategoryData()
+  },
   methods: {
-    cancel() {},
-    handleSelectionChange(val) {
-      this.multipleSelection = val
+    handleCategoryChange(data) {
+      if (!data) return
+      this.filterForm.catalogId = data[data.length - 1]
+      if (this.$refs.cascader) {
+        this.$refs.cascader.dropDownVisible = false
+      }
     },
-    pagination({ page: pageNo, limit: pageSize }) {
-      Object.assign(this.filterForm, { pageNo, pageSize })
+    getStatus(row) {
+      switch (row.approveStatus) {
+        case 0:
+          return '审核中'
+        case 1:
+          return row.status === 0 ? '已发布' : '未发布'
+        case 2:
+          return '审批驳回'
+        case 3:
+          return '已撤回'
+      }
+    },
+    pagination({ page, limit }) {
+      if (limit !== this.filterForm.pageSize) {
+        this.filterForm.pageNo = 1
+      } else {
+        this.filterForm.pageNo = page
+      }
+      this.filterForm.pageSize = limit
       this.getData()
     },
-    getData() {
-      if (this.tableLoading) return
-      this.tableLoading = true
-      getCourseListData(this.filterForm).then((res = {}) => {
-        const { data = [], totalNum = 0 } = res
-        this.data = data
-        this.total = totalNum
+    getUploadType(type) {
+      switch (type) {
+        case 0:
+          return '本地文件'
+        case 1:
+          return '链接文件'
+      }
+    },
+    cancel(target) {
+      let params = [],
+        message
+      if (target) {
+        message = '确定要对该知识库取消关联吗？'
+        params = [target.id]
+      } else {
+        message = '确定要对所选知识库取消关联吗？'
+        params = this.multipleSelection.map((item) => item.id)
+      }
+
+      this.$confirm(message, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       })
+        .then(() => {
+          removeKnowledgeSystem({ knowledgeIds: params.join(',') }).then(() => {
+            this.$message.success('操作成功')
+            this.getData()
+          })
+        })
+        .catch(() => {})
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
     },
     resetPageAndGetList() {
       Object.assign(this.filterForm, { pageNo: 1, pageSize: 10 })
       this.getData()
+    },
+    getCategoryData() {
+      getKnowledgeCatalogList({ status: 0 }).then((res) => {
+        this.categoryData = res
+      })
+    },
+    getData() {
+      if (this.tableLoading) return
+      this.tableLoading = true
+      getKnowledgeList(this.filterForm)
+        .then((res = {}) => {
+          const { data = [], totalNum = 0 } = res
+          this.data = data
+          this.total = totalNum
+        })
+        .finally(() => (this.tableLoading = false))
     }
+  },
+  watch: {
+    knowledgeSystemId() {
+      this.getData()
+    },
+    'filterForm.resName': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000)
   }
 }
 </script>

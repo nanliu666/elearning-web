@@ -38,7 +38,6 @@ export default {
         }
       }
     },
-
     treeList: {
       type: Array,
       default() {
@@ -58,10 +57,16 @@ export default {
     return {
       defaultValue: [],
       activeData: {},
-      systemNodeFlag:true
+      systemNodeFlag: true
     }
   },
   methods: {
+    recursion(arr) {
+      return arr.filter((item) => {
+        if (item.children && item.children.length > 0) item.children = this.recursion(item.children)
+        return this.$dataStore.menuData.includes(item)
+      })
+    },
     initDefault() {
       this.defaultValue = []
       let filterVal = []
@@ -78,23 +83,23 @@ export default {
       //     keys.push(it.menuId)
       //   }
       // })
-      const checkedKeys = []
+      let checkedKeys = []
+
       fiterTree.map((it) => {
         // 修复当菜单 isOwn==1 && menuType === 'Menu' 才被选中
-        if (it.isOwn !== 0  && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
+        if (it.isOwn !== 0 && (it.menuType === 'Menu' || it.menuType === 'Dir')) {
           this.defaultValue.push(it.menuId)
           checkedKeys.push(it.menuId)
         }
       })
+      this.menuId = []
       this.$nextTick(() => {
-        this.$refs.tree.setCheckedKeys(checkedKeys)
-        this.systemNodeFlag = false 
-      })
-
-      
+        checkedKeys = this.recursion(checkedKeys)
+        this.$refs.tree.setCheckedKeys(checkedKeys)
+        this.systemNodeFlag = false
+      })
     },
     filterData(data, table) {
-
       data.map((it) => {
         if (it.isOwn) {
           table.push(_.cloneDeep(it))
@@ -135,10 +140,8 @@ export default {
       } else {
         this.$emit('nodeClick', data, false, 0)
       }
-
       // this.$refs.tree.setCheckedKeys([data.menuId])
     },
-
     // 根据树形内选中的节点，改变数据内的isOwn字段
     setOwn(arr, treeKeys) {
       arr.forEach((item) => {

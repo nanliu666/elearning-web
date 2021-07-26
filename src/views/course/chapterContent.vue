@@ -1,9 +1,6 @@
 <template>
   <div class="content">
-    <page-header
-      title="查看章节内容"
-      show-back
-    />
+    <page-header title="查看章节内容" show-back />
     <el-container>
       <el-aside width="290px">
         <div
@@ -27,10 +24,7 @@
         </div>
       </el-aside>
       <el-main>
-        <div
-          v-if="currentChapter"
-          class="content"
-        >
+        <div v-if="currentChapter" class="content">
           <!-- 文章类型 -->
           <div
             v-if="currentChapter.type == '1'"
@@ -42,12 +36,9 @@
             "
           ></div>
           <!-- 文档-->
-          <div
-            v-if="currentChapter.type === '2'"
-            class="chapter-file"
-          >
+          <div v-if="currentChapter.type === '2'" class="chapter-file">
             <video
-              v-if="video.test(currentChapter.localName.toLocaleLowerCase())"
+              v-if="video.test(currentChapter.localName.toLowerCase())"
               ref="videoRef"
               controlslist="nodownload"
               autoplay
@@ -57,13 +48,13 @@
               style="width: 100%"
             ></video>
             <img
-              v-else-if="image.test(currentChapter.localName.toLocaleLowerCase())"
+              v-else-if="image.test(currentChapter.localName.toLowerCase())"
               ref="currentImg"
               :src="previewImg"
               style="display: block; margin: 0 auto"
             />
             <iframe
-              v-else-if="word.test(currentChapter.localName.toLocaleLowerCase())"
+              v-else-if="word.test(currentChapter.localName.toLowerCase())"
               :src="previewSrc"
               width="100%"
               height="100%"
@@ -71,35 +62,23 @@
             ></iframe>
           </div>
           <!--资料下载-->
-          <div
-            v-if="currentChapter.type == '3'"
-            class="content-download"
-          >
+          <div v-if="currentChapter.type == '3'" class="content-download">
             <div class="img-wr">
               <img :src="getFileImageUrl(currentChapter.content)" />
             </div>
             <div class="download-wr">
               <div class="file-name">
-                {{ currentChapter.localName.toLocaleLowerCase() }}
+                {{ currentChapter.localName.toLowerCase() }}
               </div>
-              <a
-                target="_blank"
-                :href="currentChapter.content"
-              >
-                <el-button
-                  type="primary"
-                  size="medium"
-                >立即下载</el-button>
+              <a target="_blank" :href="currentChapter.content">
+                <el-button type="primary" size="medium">立即下载</el-button>
               </a>
             </div>
           </div>
           <!--作业-->
-          <div
-            v-if="currentChapter.type == '4'"
-            class="content--test"
-          >
+          <div v-if="currentChapter.type == '4'" class="content--test">
             <video
-              v-if="video.test(currentChapter.localName.toLocaleLowerCase())"
+              v-if="video.test(currentChapter.localName.toLowerCase())"
               ref="videoRef"
               controlslist="nodownload"
               autoplay
@@ -109,22 +88,19 @@
               style="width: 100%"
             ></video>
             <img
-              v-else-if="image.test(currentChapter.localName.toLocaleLowerCase())"
+              v-else-if="image.test(currentChapter.localName.toLowerCase())"
               ref="currentImg"
               :src="previewImg"
               style="display: block; margin: 0 auto"
             />
             <iframe
-              v-else-if="word.test(currentChapter.localName.toLocaleLowerCase())"
+              v-else-if="word.test(currentChapter.localName.toLowerCase())"
               :src="previewSrc"
               width="100%"
               height="100%"
               frameborder="0"
             ></iframe>
-            <div
-              v-else
-              class=".content-download"
-            >
+            <div v-else class=".content-download">
               <div class="img-wr">
                 <img :src="getFileImageUrl(currentChapter.content)" />
               </div>
@@ -132,24 +108,15 @@
                 <div class="file-name">
                   {{ currentChapter.localName }}
                 </div>
-                <a
-                  target="_blank"
-                  :href="currentChapter.content"
-                >
-                  <el-button
-                    type="primary"
-                    size="medium"
-                  >立即下载</el-button>
+                <a target="_blank" :href="currentChapter.content">
+                  <el-button type="primary" size="medium">立即下载</el-button>
                 </a>
               </div>
             </div>
           </div>
 
           <!-- 视频 -->
-          <div
-            v-if="currentChapter.type == '5'"
-            class="content--richtext"
-          >
+          <div v-if="currentChapter.type == '5'" class="content--richtext">
             <video
               ref="videoRef"
               controlslist="nodownload"
@@ -169,13 +136,14 @@
 <script>
 import { getReviewUrl } from '@/util/util'
 import { getCourseRecord } from '@/api/course/course'
+import { fileType } from '@/util/util'
 export default {
   data() {
     return {
       type: ['文章', '文档', '资料下载', '作业', '视频'],
       courseContent: [],
       active: null,
-      word: /\.(txt|doc|wps|rtf|docx|ppt|pdf)$/, // 文档格式
+      word: /\.(ppt|pptx|doc|docx|xlsx|xls|txt|pdf|wps|rtf)$/, // 文档格式
       video: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/, // 视频格式
       image: /\.(jpg|jpeg|png|gif|bmp)$/, // 图片
       compress: /\.(rar|zip)$/, // 压缩包
@@ -201,7 +169,7 @@ export default {
       if (index === -1) return this.$message.error('文件丢失,请联系管理员')
       this.previewSrc = ''
       this.currentChapter = this.courseContent[index]
-      const fileName = this.currentChapter.localName.toLocaleLowerCase()
+      const fileName = this.currentChapter.localName.toLowerCase()
       if (this.word.test(fileName) || this.image.test(fileName)) this.preview(this.currentChapter)
     },
     // 下载资料
@@ -219,19 +187,19 @@ export default {
       return `/img/file/image_icon_${fileDict[ext] || 'other'}.png`
     },
     async preview(file) {
+      console.log(file.localName)
       // 预览
-      const name = file.localName.toLocaleLowerCase()
+      const name = file.localName.toLowerCase()
       let type = null
-      if (/ppt$/.test(name)) {
-        type = 0
-      } else if (/pdf$/.test(name)) {
+      const { flag } = fileType(name)
+      if (/pdf$/.test(name)) {
         type = 20
-      } else if (this.word.test(name)) {
+      } else if (flag === 1) {
         type = 0
-      } else if (this.image.test(name)) {
+      } else if (flag === 2) {
         return (this.previewImg = file.content)
       } else {
-        this.$message.warning('该文件类型暂不支持预览')
+        this.$message.warning('此文件类型无法预览，推荐下载之后打开')
         return
       }
 

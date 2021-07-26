@@ -185,7 +185,8 @@ export default {
         fileSize,
         jobId,
         id: fileName ? id : '',
-        userId: this.parentVm.data.stuId
+        userId: this.parentVm.data.stuId,
+        trainId: this.parentVm.data.trainId
       }
       table.loading = true
       const message = fileName ? '修改成功' : '上传成功'

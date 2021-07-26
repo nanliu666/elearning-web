@@ -217,7 +217,7 @@ export default {
       columns: BASIC_COLUMNS,
       model: {
         id: '',
-        reviewerName:'',
+        reviewerNames:'',
         reviewer:'',
         questionTimeLimitType: 0, // 0-不计时,1-按原试题设置,2-重新设置
         questionTimeLimit: 1, //每题限时默认为1
@@ -321,9 +321,9 @@ export default {
       if(this.model.reviewer && this.model.reviewer.length>0){
         this.model.reviewer.forEach((item,index)=>{
           if(!_.find(res.data, { id: item })){
-            let nameArr =  this.model.reviewerName.split(',')
+            // let nameArr =  this.model.reviewerNames.split(',')
             res.data.push({
-                name:nameArr[index],
+                name:this.model.reviewerNames[index],
                 userId:item
             })
           }

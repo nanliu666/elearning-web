@@ -24,14 +24,14 @@
             @getValue="getValue"
           >
             <template #default>
-              <div style="display: flex;">
+              <div style="display: flex">
                 <el-button>上传</el-button>
               </div>
               <div
                 slot="tip"
-                style="color: #a1a8ae; font-size:12px"
+                style="color: #a1a8ae; font-size: 12px"
               >
-                图片文件大小＜10MB，其他类型文件大小＜2G，最多{{ limit }}个文件
+                每个文档大小不超过50M，视频大小不超过2G,最多{{ limit }}个文件
               </div>
             </template>
           </common-upload>
@@ -53,7 +53,6 @@
               :key="index"
               class="uploader-li"
             >
-              <!-- @click.stop="previewFile(item)" -->
               <span class="uploader-file ellipsis">{{ item.fileName }}</span>
               <i
                 class="el-icon-close"
@@ -64,7 +63,7 @@
         </template>
         <template #basicTitle>
           <!-- 用来占位的 -->
-          <div style="height: 85px; color: transparent;" />
+          <div style="height: 85px; color: transparent" />
         </template>
         <template #introduction>
           <tinymce
@@ -107,7 +106,8 @@ import {
   addKnowledgeList,
   updateKnowledge,
   getKnowledgeManageDetails,
-  queryCategoryOrgList
+  queryCategoryOrgList,
+  relatedKnowledgeList
 } from '@/api/knowledge/knowledge'
 //import { queryCategoryOrgList } from '@/api/resource/classroom'
 import CommonUpload from '@/components/common-upload/commonUpload'
@@ -158,24 +158,32 @@ const FORM_COLUMNS = [
     span: 11,
     offset: 0
   },
-
   {
-    itemType: 'select',
     label: '知识体系',
+    itemType: 'treeSelect',
     prop: 'knowledgeSystemId',
-    maxlength: 20,
+    required: false,
     span: 11,
     offset: 1,
-    options: [
-      {
-        label: '大数据',
-        value: '0'
+    props: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
       },
-      {
-        label: '沟通技巧',
-        value: '1'
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: true,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
       }
-    ]
+    }
   },
 
   {
@@ -387,10 +395,10 @@ export default {
           //视频
           const isLimitLength = _.size(this.formData.attachments) < this.limit
           if (this.isFileSize(file)) return false
-          const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/
+          const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov|flv)$/
           const isLt2GB = file.size / 1024 / 1024 <= 2048
           if (!regx.test(file.name.toLowerCase())) {
-            this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov文件')
+            this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov,flv文件')
             return false
           }
           if (!isLt2GB) {
@@ -406,19 +414,14 @@ export default {
           //文档
           const isLimitLength = _.size(this.formData.attachments) < this.limit
           if (this.isFileSize(file)) return false
-          const regx = /^.*\.(doc|docx|wps|rtf|rar|zip|xls|xlsx|ppt|pptx|pdf|jpg|bmp|jpeg|png)$/
-          const regxtxt = /.*\.(txt)$/
-          const isLt10M = file.size / 1024 / 1024 <= 10
+          const regx = /^.*\.(ppt|pptx|doc|docx|xlsx|xls|pdf|wps|rtf|jpg|jpeg|png|gif|bmp)$/
+          const isLt10M = file.size / 1024 / 1024 <= 50
           if (!regx.test(file.name.toLowerCase())) {
-            this.$message.error('上传文档只支持文档、ppt、pdf、图片文件')
-            return false
-          }
-          if (regxtxt.test(file.name.toLowerCase())) {
-            this.$message.error('不支持上传txt类型课件!')
+            this.$message.error('上传文档只支持文档、ppt、pdf、图片格式文件')
             return false
           }
           if (!isLt10M) {
-            this.$message.error('上传资料大小不能超过 10M!')
+            this.$message.error('上传文档或图片大小不能超过 50M!')
             return false
           }
           if (!isLimitLength) {
@@ -430,34 +433,25 @@ export default {
           //资料下载
           const isLimitLength = _.size(this.formData.attachments) < this.limit
           if (this.isFileSize(file)) return false
-          const regx = /^.*\.(doc|docx|wps|rtf|xls|xlsx|ppt|pptx|pdf|avi|wmv|mp4|3gp|rm|rmvb|mov|jpg|bmp|jpeg|png|zip|rar)$/
-          const regxImg = /^.*\.(jpg|jpeg|png|bmp)$/
-          const regxtxt = /.*\.(txt)$/
+          const word = /^.*\.(ppt|pptx|doc|docx|xlsx|xls|txt|pdf|wps|rtf|jpg|jpeg|png|gif|bmp|rar|zip)$/
+          const video = /\.(avi|wmv|mp4|3gp|rm|rmvb|mov|mp3|wma|wav|flv)$/
+          const auido = /\.(mp3|wma|wav)$/
           const isLt2GB = file.size / 1024 / 1024 <= 2048
-          const isLtImg = file.size / 1024 / 1024 <= 10
-          if (!regx.test(file.name.toLowerCase())) {
-            this.$message.error('上传资料仅支持上传视频、文档、ppt、pdf、图片五种类型的课件')
-            return false
-          }
-          if (regxtxt.test(file.name.toLowerCase())) {
-            this.$message.error('不支持上传txt类型课件!')
-            return false
-          }
-          if (!isLt2GB) {
-            this.$message.error('上传课件大小不能超过 2GB!')
-            return false
-          }
-          if (regxImg.test(file.name.toLowerCase())) {
+          const isLtImg = file.size / 1024 / 1024 <= 50
+          if (word.test(file.name.toLowerCase())) {
             if (!isLtImg) {
-              this.$message.error('上传图片大小不能超过 10MB!')
+              this.$message.error('上传文件大小不能超过 50MB!')
               return false
             }
-            if (!isLimitLength) {
-              this.$message.error('上传文件数量超过限制!')
+          } else if (video.test(file.name.toLowerCase()) || auido.test(file.name.toLowerCase())) {
+            if (!isLt2GB) {
+              this.$message.error('上传视频或者音频大小不能超过 2GB!')
               return false
             }
-
-            return true
+          }
+          if (!isLimitLength) {
+            this.$message.error('上传文件数量超过限制!')
+            return false
           }
           //  return true
         }
@@ -491,8 +485,6 @@ export default {
       // }
       return true
     },
-
-    //
     onUploadProgress(fileData) {
       this.videoFlag = true
       this.videoUploadPercent = Math.floor(fileData.percent)
@@ -501,11 +493,6 @@ export default {
       setTimeout(() => {
         this.videoFlag = false
       }, 3000)
-    },
-
-    // 预览附件
-    previewFile(data) {
-      window.open(data.fileUrl)
     },
     // 删除上传文件
     deleteUpload(data) {
@@ -523,7 +510,8 @@ export default {
      * 初始选择数据
      */
     initData() {
-      let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      let catalogId = _.find(this.formColumns, { prop: 'catalogId' }),
+        knowledgeSystemId = _.find(this.formColumns, { prop: 'knowledgeSystemId' })
       // let tagsList = _.find(this.formColumns, { prop: 'tags' })
       // if (tagsList) {
       //   getKnowledgeManageTaglist().then((res) => {
@@ -535,6 +523,13 @@ export default {
           (res) => (catalogId.props.treeParams.data = res)
         )
       }
+      //   各资源下的知识体系下拉框列表
+      if (knowledgeSystemId) {
+        relatedKnowledgeList({ name: '' }).then(
+          (res) => (knowledgeSystemId.props.treeParams.data = res)
+        )
+      }
+
       if (this.id) {
         this.loadDetail()
       }

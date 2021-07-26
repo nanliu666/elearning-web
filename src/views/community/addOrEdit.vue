@@ -121,24 +121,7 @@ export default {
       }
     }
   },
-  async activated() {
-    if (this.$route.query.id) {
-      const res = await quertZone({ id: this.$route.query.id })
-      for (const key in this.form) {
-        if (key === 'managerId') {
-          this.form.managerId = res.managerId.split(/,/g)
-        } else if (key === 'orgIds') {
-          this.form.orgIds = res.orgList
-        } else if (key === 'positionIds') {
-          this.form.positionIds = res.positionList
-        } else if (key === 'userIds') {
-          this.form.userIds = res.userList
-        } else {
-          this.form[key] = res[key]
-        }
-      }
-    }
-  },
+
   methods: {
     async submitZone() {
       await this.$refs.relation.validate()
@@ -153,8 +136,13 @@ export default {
         userIds
       }
       params.managerId = params.managerId.join(',')
-      if (this.$route.query.id) await aditZone({ id: this.$route.query.id, ...params })
-      else await addZone(params)
+      try {
+        if (this.$route.query.id) await aditZone({ id: this.$route.query.id, ...params })
+        else await addZone(params)
+      } catch {
+        this.loading = false
+        return
+      }
       this.$message.success('添加成功')
       this.goOut()
     },
@@ -171,6 +159,10 @@ export default {
         this.$refs.zoneInfo.clearValidate()
       })
     }
+  },
+  beforeRouteEnter(to, form, next) {
+    to.meta.$keepAlive = false
+    next()
   }
 }
 </script>

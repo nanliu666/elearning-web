@@ -7,12 +7,20 @@
     >
       <template slot="rightMenu">
         <el-button
-          v-p="ADD_ROLE_USER"
+          v-p="ADD_GROUNPUSER"
           type="primary"
           size="medium"
           @click="handlerAdd"
         >
           添加用户
+        </el-button>
+        <el-button
+          v-p="IMPORT_GROUNPUSER"
+          type="primary"
+          size="medium"
+          @click="importUser"
+        >
+          导入用户
         </el-button>
       </template>
     </page-header>
@@ -73,7 +81,7 @@
                 编辑
               </el-button> -->
               <el-button
-                v-p="DELETE_ROLE_USER"
+                v-p="DEL_GROUNPUSER"
                 type="text"
                 size="medium"
                 @click.stop="handleDelete(scope.row, scope.index)"
@@ -85,25 +93,35 @@
         </div>
       </div>
     </div>
-    <addUserDialogGroup
+    <common-picker
+      ref="person-picker"
+      v-model="personList"
+      :visible.sync="editVisible"
+      :options="personPickerOptions"
+      :reserve="false"
+      @change="addUserByOrg"
+    />
+    <!-- <addUserDialogGroup
       :visible.sync="editVisible"
       @after-submit="handleAfterSubmit"
-    />
+    /> -->
   </div>
 </template>
 
 <script>
-// import { deleteV1Job } from '@/api/organize/position'
+import CommonPicker from '@/components/common-picker'
 import { getToken } from '@/util/auth'
-import addUserDialogGroup from './components/addUserDialogGroup'
-// import { getV1Position, deleteV1Position } from '@/api/organize/position'
-import { getGroupUser, delGroupUser } from '@/api/system/role'
-import { ADD_ROLE_USER, DELETE_ROLE_USER } from '@/const/privileges'
+// import addUserDialogGroup from './components/addUserDialogGroup'
+import { getOrgUserChild } from '@/api/system/user'
+import { getUserList } from '@/api/examManage/schedule'
+import { getGroupUser, delGroupUser, addGroupUser } from '@/api/system/role'
+import { ADD_GROUNPUSER, IMPORT_GROUNPUSER, DEL_GROUNPUSER } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'RoleUsers',
   components: {
-    addUserDialogGroup
+    // addUserDialogGroup,
+    CommonPicker
   },
   data() {
     return {
@@ -122,7 +140,7 @@ export default {
       tableConfig: {
         showHandler: true,
         showIndexColumn: false,
-        rowKey: 'userId',
+        // rowKey: 'userId',
         enableMultiSelect: true,
         handlerColumn: {
           width: 80
@@ -165,19 +183,94 @@ export default {
         search: '',
         roleId: ''
       },
-      editVisible: false
+      editVisible: false,
+      personPickerOptions: [
+        {
+          name: '组织机构',
+          request: getOrgUserChild,
+          response: {
+            props: {
+              data: ['orgs', 'users'],
+              total: 'totalNum'
+            },
+            processData(item) {
+              item.userId = item.userId || item.id
+              return item
+            }
+          },
+          type: 'tree',
+          placeholder: '搜索组织部门或成员姓名',
+          checkRequest: {
+            condition: function($data) {
+              return $data.id
+            },
+            handler: function($data, resolve) {
+              getUserList({ orgId: $data.id }).then((res = []) => {
+                res = res.map((item) => {
+                  item.orgId = [...new Set([item.orgId, $data.id])].filter((item) => !!item)
+                  if (item.positionId) {
+                    item.positionId = [item.positionId]
+                  }
+                  return item
+                })
+                resolve(res)
+              })
+            }
+          },
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
+            },
+            'check-strictly': false,
+            nodeKey: 'userId'
+          },
+          query: {
+            search: {
+              key: 'search',
+              value: ''
+            },
+            id: {
+              key: 'parentId',
+              from: 'id',
+              value: '0',
+              initialValue: '0'
+            }
+          },
+          props: {
+            value: 'userId',
+            select: [
+              'userId',
+              'name',
+              'orgName',
+              'positionName',
+              'workNo',
+              'phoneNum',
+              'orgId',
+              'positionId'
+            ]
+          }
+        }
+      ]
     }
   },
   computed: {
-    ADD_ROLE_USER: () => ADD_ROLE_USER,
-    DELETE_ROLE_USER: () => DELETE_ROLE_USER,
-    ...mapGetters(['privileges'])
+    ADD_GROUNPUSER: () => ADD_GROUNPUSER,
+    IMPORT_GROUNPUSER: () => IMPORT_GROUNPUSER,
+    DEL_GROUNPUSER: () => DEL_GROUNPUSER,
+    ...mapGetters(['privileges']),
+    personList: {
+      get: function() {
+        return []
+      },
+      set: function() {}
+    }
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p([DELETE_ROLE_USER])
+        this.tableConfig.showHandler = this.$p([DEL_GROUNPUSER])
       },
       deep: true
     }
@@ -186,6 +279,32 @@ export default {
     this.getData()
   },
   methods: {
+    importUser() {
+      this.$router.push({
+        path: '/system/importGroupUsers',
+        query: {
+          groupId: this.$route.query.groupId
+        }
+      })
+    },
+    addUserByOrg(list) {
+      let params = {
+        groupId: this.$route.query.groupId,
+        userIds: _.map(list, 'bizId')
+      }
+      addGroupUser(params)
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '操作成功!'
+          })
+          this.close()
+          this.handleAfterSubmit()
+        })
+        .finally(() => {
+          this.submitting = false
+        })
+    },
     goBack() {
       this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
       this.$router.back(-1)

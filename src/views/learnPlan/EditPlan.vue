@@ -291,7 +291,7 @@ export default {
       data.participantsList = participantsList.map((item) => {
         return {
           department: item.orgName,
-          departmentId: item.orgId[0],
+          departmentId: item.orgId ? (Array.isArray(item.orgId) ? item.orgId[0] : item.orgId) : '',
           name: item.bizName,
           phonenum: item.phoneNum,
           workNo: item.workNo,
@@ -343,7 +343,7 @@ export default {
       planDetail({ id: this.id })
         .then((res) => {
           if (res.startTime && res.endTime) {
-            res.timeRange = [res.startTime, res.endTime]
+            res.timeRange = [res.startTime.replace(/\//g, '-'), res.endTime.replace(/\//g, '-')]
           } else {
             res.timeRange = []
           }
@@ -387,11 +387,12 @@ export default {
               }
             })
             participantsList = participantsList.map((item) => {
-              const { department, name, phonenum, userId, workNo } = item
+              const { department, name, phonenum, userId, workNo, departmentId } = item
               return {
                 bizName: name,
                 bizId: userId,
                 phoneNum: phonenum,
+                orgId:[departmentId],
                 positionName: department,
                 workNo
               }

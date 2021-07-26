@@ -63,31 +63,18 @@
           :data="data"
           row-key="id"
           height="60vh"
+          default-expand-all
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         >
-          <el-table-column
-            fixed="left"
-            align="left"
-            width="45"
-          />
           <el-table-column
             v-if="columns['知识体系名称']"
             fixed="left"
             align="left"
-            :show-overflow-tooltip="true"
             prop="name"
+            :show-overflow-tooltip="true"
             label="知识体系名称"
-            width="180"
+            min-width="220"
           >
-            <template slot-scope="scope">
-              <div
-                class="column-title"
-                style="color: #01aafc; cursor: pointer;"
-                @click="toDetail(scope.row)"
-              >
-                {{ scope.row.name }}
-              </div>
-            </template>
           </el-table-column>
 
           <el-table-column
@@ -95,12 +82,10 @@
             align="left"
             :show-overflow-tooltip="true"
             label="描述"
-            min-width="180"
+            width="260"
           >
             <template slot-scope="scope">
-              <div class="column-title">
-                {{ scope.row.description || '--' }}
-              </div>
+              {{ scope.row.description || '--' }}
             </template>
           </el-table-column>
           <el-table-column
@@ -119,16 +104,24 @@
             :show-overflow-tooltip="true"
             prop="creatorName"
             label="创建人"
-            min-width="180"
+            min-width="120"
           >
           </el-table-column>
           <el-table-column
-            align="left"
+            align="center"
             label="操作"
             fixed="right"
-            width="180"
+            width="280"
           >
             <template slot-scope="scope">
+              <el-button
+                v-p="EDIT_KNOWLEDGE"
+                type="text"
+                size="medium"
+                @click="toDetail(scope.row)"
+              >
+                查看详情
+              </el-button>
               <el-button
                 v-p="EDIT_KNOWLEDGE"
                 type="text"
@@ -162,7 +155,8 @@
     <el-dialog
       :title="dialogTitle"
       :visible.sync="dialogVisible"
-      width="45%"
+      width="750px"
+      @open="onDialogOpen"
     >
       <el-form
         ref="form"
@@ -186,13 +180,19 @@
           label="上级知识体系"
           prop="parentId"
         >
-          <tree-selector
+          <el-cascader
+            ref="cascader"
             v-model="form.parentId"
-            style="width: 100%;"
+            clearable
+            filterable
+            filter
+            style="width: 100%"
+            placeholder="请选择"
             :options="treeData"
-            placeholder="请选择所在分类"
-            :props="selectorProps"
-          />
+            :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+            :show-all-levels="false"
+            @change="handleCascaderChange"
+          ></el-cascader>
         </el-form-item>
 
         <el-form-item
@@ -226,14 +226,21 @@
 </template>
 
 <script>
-import { getCategoryTree, addCategory, deleteCategory, editCategory } from '@/api/live'
+import {
+  getCategoryTree,
+  addCategory,
+  deleteCategory,
+  editCategory,
+  checkCategory
+} from '@/api/live'
 import TreeSelector from '@/components/tree-selector'
 import { ADD_KNOWLEDGE, EDIT_KNOWLEDGE, DELETE_KNOWLEDGE, CHILD_KNOWLEDGE } from '@/const/knowledge'
 const ORIGIN_FORM = {
   id: '',
   name: '',
   parentId: '',
-  description: ''
+  description: '',
+  source: 'knowledgeSystem'
 }
 const ORIGIN_QUERY = {
   name: '',
@@ -291,59 +298,61 @@ export default {
     }, 1000)
   },
   activated() {
-    this.getCategoryData()
-    // this.getList()
-    this.data = [
-      {
-        id: '123',
-        name: '体系名称·1',
-        description:
-          '体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间体系化的提高部门之间',
-        creatorName: '创建人1223',
-        updateTime: '2020-12-15',
-        children: [
-          {
-            id: '456',
-            name: '体系名称·1的child',
-            description: '体系名称描述体系名称描述体系名称描述体系名称描述体系名称描述',
-            creatorName: '创建人12231221323',
-            updateTime: '2020-12-15'
-          }
-        ]
-      }
-    ]
+    this.getData()
   },
   methods: {
+    handleCascaderChange(data) {
+      if (!data) return
+      this.form.parentId = data[data.length - 1]
+      if (this.$refs.cascader) {
+        this.$refs.cascader.dropDownVisible = false
+      }
+    },
+    onDialogOpen() {
+      this.$nextTick(() => {
+        this.$refs.form.clearValidate()
+      })
+    },
+    getData() {
+      this.getCategoryData()
+      this.getList()
+    },
     getCategoryData() {
       getCategoryTree({ source: 'knowledgeSystem', addFlag: '1' }).then((res) => {
         this.treeData = res
       })
     },
-    handleAddChild({ parentId }) {
-      this.form = { ...ORIGIN_FORM, parentId }
+    handleAddChild({ id }) {
+      this.form = { ...ORIGIN_FORM, parentId: id, id }
+      this.dialogTitle = '新建子知识体系'
       this.dialogVisible = true
     },
-    toDetail(item) {
+    toDetail({ id }) {
       this.$router.push({
-        path: '/knowledge/detail',
+        path: '/resource/knowledge/detail',
         query: {
-          id: item.idStr
+          id
         }
       })
     },
     handleUpdate(item) {
       if (item) {
-        const { idStr: id, name, parentId } = item
+        let { idStr: id, name, parentId } = item
+        if (parentId === '0') {
+          parentId = ''
+        }
         Object.assign(this.form, { id, name, parentId })
+        this.dialogTitle = '编辑知识体系'
       } else {
         this.form = { ...ORIGIN_FORM }
+        this.dialogTitle = '创建知识体系'
       }
       this.dialogVisible = true
     },
     handleUpdateConfirm() {
       this.$refs.form.validate((valid) => {
         if (!valid) return
-        const api = this.form.id ? editCategory : addCategory
+        const api = this.dialogTitle === '编辑知识体系' ? editCategory : addCategory
         this.confirmLoading = true
         api(this.form)
           .then((res) => {
@@ -351,7 +360,7 @@ export default {
             if (typeof res === 'boolean') {
               this.$message.success('新建成功')
               this.dialogVisible = false
-              this.getList()
+              this.getData()
             } else {
               this.$message.error(resMsg)
             }
@@ -362,14 +371,25 @@ export default {
       })
     },
     beforeDelete(id) {
-      return new Promise((resolve, reject) => {})
+      return new Promise((resolve) => {
+        checkCategory({ id })
+          .then((res) => {
+            resolve(res)
+          })
+          .catch(() => {
+            resolve(false)
+          })
+      })
     },
     async handleDelete(target) {
       const id = target.id
       target.delLoading = true
+      this.$forceUpdate()
       const result = await this.beforeDelete(id)
+      target.delLoading = false
+      this.$forceUpdate()
       const message = result
-        ? `#${target.name}#下有关联内容，确定要删除吗？删除之后所关联的相关内容不再包含此知识体系。？`
+        ? `#${target.name}#下有关联内容，确定要删除吗？删除之后所关联的相关内容不再包含此知识体系？`
         : '您确定要删除选中的知识体系吗？'
       this.$confirm(message, '提醒', {
         confirmButtonText: '确定',
@@ -389,7 +409,18 @@ export default {
       this.loading = true
       getCategoryTree(this.query)
         .then((res = []) => {
-          this.data = res
+          this.data = res.map((item) => {
+            const { id, name, children = [], description, updateTime, creatorName, parentId } = item
+            return {
+              id,
+              name,
+              children,
+              description,
+              updateTime,
+              creatorName,
+              parentId
+            }
+          })
         })
         .finally(() => {
           this.loading = false
@@ -400,6 +431,10 @@ export default {
 </script>
 <style lang="scss">
 .knowledge {
+  .el-table__row .expanded .el-table_1_column_1 {
+    color: #01aafc;
+    cursor: pointer;
+  }
   .column-title {
     white-space: nowrap;
     overflow: hidden;

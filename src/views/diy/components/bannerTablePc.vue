@@ -163,8 +163,8 @@ export default {
           this.initBannerData()
         }
       },
-      deep: true,
-      immediate: true
+      deep: true
+      // immediate: true
     }
   },
   mounted() {

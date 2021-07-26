@@ -129,7 +129,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
@@ -187,21 +187,22 @@ export default {
             config: { optionLabel: 'name', optionValue: 'id' },
             loading: false,
             noMore: false,
-            pageNo: 2,
-            loadMoreFun(item) {
-              if (item.loading || item.noMore) return
-              item.loading = true
-              getCreatorList({ source: 'questionnaire' }).then((res) => {
-                if (res.length > 0) {
-                  item.options.push(...res)
-                  item.pageNo += 1
-                  item.loading = false
-                } else {
-                  item.noMore = true
-                  item.loading = false
-                }
-              })
-            }
+            pageNo: 2
+            // loadMoreFun(item) {
+            //   if (item.loading || item.noMore) return
+            //   item.loading = true
+            //   getCreatorList({ source: 'questionnaire' }).then((res) => {
+            //
+            //     if (res.length > 0) {
+            //       item.options.push(...res)
+            //       item.pageNo += 1
+            //       item.loading = false
+            //     } else {
+            //       item.noMore = true
+            //       item.loading = false
+            //     }
+            //   })
+            // }
           }
         ]
       },

@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="input-wrapper">
         <el-input
-          v-model="filterForm.liveName"
+          v-model="filterForm.titleOrNo"
           clearable
           size="medium"
           placeholder="输入直播名称搜索"
@@ -12,8 +12,9 @@
       <el-popover
         v-model="filterFormVisible"
         placement="bottom"
-        width="1050"
+        width="800"
         transition="false"
+        :offset="300"
       >
         <el-form
           label-position="left"
@@ -23,9 +24,12 @@
           label-width="100px"
           style="padding: 24px"
         >
-          <el-form-item label="状态">
+          <el-form-item
+            label="状态"
+            style="margin-right: 50px;"
+          >
             <el-select
-              v-model="filterForm.status"
+              v-model="filterForm.isUsed"
               clearable
               placeholder="请选择状态"
             >
@@ -39,16 +43,19 @@
           </el-form-item>
 
           <el-form-item label="所在分类">
-            <tree-selector
-              v-model="filterForm.catalogId"
+            <el-cascader
+              ref="cascader"
+              v-model="filterForm.categoryId"
               :options="categoryData"
-              placeholder="请选择"
-              :props="{
-                value: 'id',
-                label: 'name',
-                children: 'children'
-              }"
-            />
+              clearable
+              filterable
+              filter
+              style="width: 100%"
+              placeholder="请选择所在分类"
+              :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+              :show-all-levels="false"
+              @change="handleCategoryChange"
+            ></el-cascader>
           </el-form-item>
 
           <div style="text-align: right; margin-right: 75px">
@@ -64,8 +71,8 @@
               size="medium"
               @click="
                 filterForm = {
-                  ...initialFilterForm,
-                  titleOrNo: filterForm.deptName
+                  ...initFilterForm,
+                  titleOrNo: filterForm.titleOrNo
                 }
               "
             >
@@ -90,17 +97,19 @@
         v-if="multipleSelection.length"
         class="multipleSelection"
       >
-        <span>{{ `已选中${multipleSelection.length}项` }}</span><el-button
+        <span class="tips">{{ `已选中${multipleSelection.length}项` }}</span>
+        <el-button
           type="text"
           size="small"
+          @click="() => cancel()"
         >
-          全部删除
+          取消关联
         </el-button>
       </div>
       <el-table
-        :loading="tableLoading"
+        v-loading="tableLoading"
         :data="data"
-        height="35vh"
+        height="55vh"
         @selection-change="handleSelectionChange"
       >
         <el-table-column
@@ -111,6 +120,7 @@
 
         <el-table-column
           type="index"
+          label="序号"
           fixed="left"
           width="55"
         >
@@ -118,23 +128,32 @@
 
         <el-table-column
           fixed="left"
-          prop="sourceName"
-          min-width="220"
+          min-width="120"
           show-overflow-tooltip
           label="直播名称"
         >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              @click="$router.push({ path: '/live/Detail', query: { liveId: scope.row.liveId } })"
+            >
+              {{ scope.row.channelName }}
+            </el-button>
+          </template>
         </el-table-column>
 
         <el-table-column
           label="状态"
-          prop="status"
-          min-width="120"
+          min-width="60"
           show-overflow-tooltip
         >
+          <template slot-scope="scope">
+            {{ (statusOptions.find((o) => o.value === scope.row.isUsed) || { label: '--' }).label }}
+          </template>
         </el-table-column>
         <el-table-column
           label="所在分类"
-          prop="catalogName"
+          prop="categoryName"
           min-width="120"
           show-overflow-tooltip
         >
@@ -142,22 +161,22 @@
 
         <el-table-column
           label="包含课程"
-          prop="course"
-          min-width="120"
-          show-overflow-tooltip
-        >
-        </el-table-column>
-        <el-table-column
-          label="更新时间"
-          prop="updateTime"
           min-width="120"
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            {{ scope.row.updateTime }}
+            {{ scope.row.courses || '--' }}
           </template>
         </el-table-column>
         <el-table-column
+          label="更新时间"
+          prop="updateTime"
+          min-width="100"
+          show-overflow-tooltip
+        >
+        </el-table-column>
+        <el-table-column
+          v-p="relevanceBtn"
           label="操作"
           header-align="center"
           align="center"
@@ -165,7 +184,6 @@
         >
           <template slot-scope="scope">
             <el-button
-              v-P="relevanceBtn"
               type="text"
               @click="cancel(scope.row)"
             >
@@ -186,38 +204,21 @@
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
 import Pagination from '@/components/common-pagination'
-import TreeSelector from '@/components/tree-selector'
-
+import { cancelKnowledgeSystem } from '@/api/knowledge'
+import { getLiveList } from '@/api/live/liveList'
+import { getCategoryTree } from '@/api/live'
 export default {
-  name: 'KnowledgeCourse',
+  name: 'Live',
   components: {
-    Pagination,
-    TreeSelector
-  },
-  filters: {
-    getCourseType(type) {
-      switch (type) {
-        case 1:
-          return '在线课程'
-        case 2:
-          return '面授课程'
-        case 3:
-          return '直播课程'
-      }
-    },
-    getUpdateType(type) {
-      switch (type) {
-        case 1:
-          return '开放选修'
-        case 3:
-          return '禁止选修'
-      }
-    }
+    Pagination
   },
   props: {
     relevanceBtn: {
+      type: String,
+      default: ''
+    },
+    knowledgeSystemId: {
       type: String,
       default: ''
     }
@@ -229,56 +230,109 @@ export default {
       multipleSelection: [],
       tableLoading: false,
       filterFormVisible: false,
-      initialFilterForm: {},
+      initFilterForm: {
+        categoryId: '',
+        isUsed: '',
+        titleOrNo: '',
+        knowledgeSystemId: this.knowledgeSystemId,
+        pageNo: 1,
+        pageSize: 10
+      },
       filterForm: {
-        courseName: '',
-        status: '1',
-        teacherId: '',
-        catalogId: '',
-        courseType: '',
-        electiveType: '',
+        categoryId: '',
+        isUsed: '',
+        titleOrNo: '',
+        knowledgeSystemId: this.knowledgeSystemId,
         pageNo: 1,
         pageSize: 10
       },
       total: 0,
       statusOptions: [
-        { value: 0, label: '已发布' },
-        { value: 1, label: '已停用' },
-        { value: 2, label: '审批中' },
-        { value: 3, label: '审批结束' }
-      ],
-      uploadTypeOptions: [
-        { value: '1', label: '本地文件' },
-        { value: '2', label: '链接文件' }
+        { value: 0, label: '停用' },
+        { value: 1, label: '正常' }
       ]
     }
   },
+  created() {
+    this.getCategoryData()
+    this.getData()
+  },
   methods: {
-    cancel() {},
+    getCategoryData() {
+      getCategoryTree({ source: 'live' }).then((res) => {
+        this.categoryData = res
+      })
+    },
+    handleCategoryChange(data) {
+      if (!data) return
+      this.filterForm.categoryId = data[data.length - 1]
+      if (this.$refs.cascader) {
+        this.$refs.cascader.dropDownVisible = false
+      }
+    },
+    cancel(target) {
+      let params = [],
+        message
+      if (target) {
+        message = '确定要对该直播取消关联吗？'
+        params = [target.liveId]
+      } else {
+        message = '确定要对所选直播取消关联吗？'
+        params = this.multipleSelection.map((item) => item.liveId)
+      }
+
+      this.$confirm(message, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          cancelKnowledgeSystem({ liveIds: params.join(',') }).then(() => {
+            this.$message.success('操作成功')
+            this.getData()
+          })
+        })
+        .catch(() => {})
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    pagination({ page: pageNo, limit: pageSize }) {
-      Object.assign(this.filterForm, { pageNo, pageSize })
+    pagination({ page, limit }) {
+      if (limit !== this.filterForm.pageSize) {
+        this.filterForm.pageNo = 1
+      } else {
+        this.filterForm.pageNo = page
+      }
+      this.filterForm.pageSize = limit
       this.getData()
     },
     getData() {
       if (this.tableLoading) return
       this.tableLoading = true
-      getCourseListData(this.filterForm).then((res = {}) => {
-        const { data = [], totalNum = 0 } = res
-        this.data = data
-        this.total = totalNum
-      })
+      getLiveList(this.filterForm)
+        .then((res = {}) => {
+          const { data = [], totalNum = 0 } = res
+          this.data = data
+          this.total = totalNum
+        })
+        .finally(() => (this.tableLoading = false))
     },
     resetPageAndGetList() {
       Object.assign(this.filterForm, { pageNo: 1, pageSize: 10 })
       this.getData()
     }
+  },
+  watch: {
+    knowledgeSystemId() {
+      this.getData()
+    },
+    'filterForm.titleOrNo': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000)
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .knowledge-live {
   .filter-wrapper {
     display: flex;
@@ -314,11 +368,13 @@ export default {
       font-size: 13px;
       color: #6b6b6b;
       margin-left: 3px;
-      span {
-        &:first-child {
-          font-size: 14px;
-          margin-right: 10px;
-        }
+      .tips {
+        display: inline-block;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+      .el-button--text {
+        padding: 0;
       }
     }
   }

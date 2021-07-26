@@ -18,8 +18,7 @@
           </p>
           <a
             target="_blank"
-            download="用户导入模板.xsl"
-            :href="'https://file.zexueyuan.com.cn/3da7b8c602ae42f6af90fb34d40ee887.xlsx'"
+            :href="templateLink"
           >
             <el-button
               size="medium"
@@ -107,11 +106,11 @@
             </el-button>
           </el-upload>
         </div>
-        <!-- <common-table
+        <common-table
           :columns="TABLE_COLUMNS"
           :config="TABLE_CONFIG"
           :data="failedList"
-        /> -->
+        />
       </div>
       <div
         v-if="step === '2'"
@@ -142,43 +141,61 @@
 import { exportToExcel } from '@/util/util'
 import { QUESTION_IMPORT_URL } from './config'
 import { importUser, importUserErrorFile } from '@/api/system/user'
-const TABLE_CONFIG = {}
+import { getTemplate } from '@/api/system/template'
+const TABLE_CONFIG = {
+  maxHeight: '580px',
+  showHandler: false,
+  showIndexColumn: false,
+  enableMultiSelect: false
+}
 const TABLE_COLUMNS = [
-  { label: '行号', prop: 'tid', fixed: 'left' },
-  { label: '试题类型', prop: 'type' },
-  { label: '题干', prop: 'content' },
-  { label: '试题分类', prop: 'son' },
-  { label: '分值', prop: 'score' },
-  { label: '试题分析', prop: 'analysis' },
-  { label: '难度', prop: 'difficulty' },
-  { label: '错误原因', prop: 'reason', fixed: 'right', width: '200px' }
+  { label: '行号', prop: 'lineNo', fixed: 'left', minWidth: 100 },
+  { label: '姓名', prop: 'name', minWidth: 150 },
+  { label: '身份证号', prop: 'idNo', minWidth: 150 },
+  { label: '在职状态', prop: 'status', minWidth: 150 },
+  { label: '性别', prop: 'sexStr', minWidth: 150 },
+  { label: '部门', prop: 'orgName', minWidth: 150 },
+  { label: '电话', prop: 'phonenum', minWidth: 150 },
+  { label: '邮箱', prop: 'userEmail', minWidth: 150 },
+  { label: '角色', prop: 'roleName', minWidth: 150 },
+  { label: '直属领导', prop: 'leader', minWidth: 150 },
+  { label: '岗位', prop: 'position', minWidth: 150 },
+  { label: '出生日期', prop: 'birthDate', minWidth: 150 },
+  { label: '职级', prop: 'postLevel', minWidth: 150 },
+  { label: '职务', prop: 'post', minWidth: 150 },
+  { label: '职称', prop: 'positionTitle', minWidth: 150 },
+  { label: '入职日期', prop: 'entryDate', minWidth: 150 },
+  { label: '备注', prop: 'userRemark', minWidth: 150 },
+  { label: '错误信息', prop: 'errMsg', fixed: 'right', minWidth: 220 }
 ]
 export default {
   name: 'ImportUser',
   data() {
     return {
+      templateLink: '',
       importDisabled: true,
       uploadList: [],
       successCount: 0,
       failedCount: 0,
       failedList: [],
       importRes: {},
-      step: '0' // 0 未导入，1 导入中，2 导入完成
+      step: '0', // 0 未导入，1 导入中，2 导入完成
+      TABLE_CONFIG,
+      TABLE_COLUMNS
     }
   },
   computed: {
-    QUESTION_IMPORT_URL: () => QUESTION_IMPORT_URL,
-    TABLE_COLUMNS: () => TABLE_COLUMNS,
-    TABLE_CONFIG: () => TABLE_CONFIG
+    QUESTION_IMPORT_URL: () => QUESTION_IMPORT_URL
   },
   activated() {
     this.reset()
+    this.downTemplate()
   },
   methods: {
     reset() {
       this.successCount = 0
       this.failedCount = 0
-      this.failedList = 0
+      this.failedList = []
       this.step = '0'
       this.uploadList = []
       this.$refs.uploader && this.$refs.uploader.clearFiles()
@@ -210,13 +227,19 @@ export default {
       this.importDisabled = true
     },
     httpRequest(file) {
+      const loading = this.$loading({
+        lock: true,
+        text: '正在导入，请稍等！',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.7)'
+      })
       const parmas = new FormData()
       parmas.append('file', file.file)
       importUser(parmas)
         .then((res) => {
           this.successCount += res.successNum
           this.failedCount = res.failedNum
-          // this.failedList = res.importFailDatal
+          this.failedList = res.failedList
           this.importRes = res
           this.$refs.uploader1 && this.$refs.uploader1.clearFiles()
           if (this.failedCount == 0) {
@@ -226,6 +249,14 @@ export default {
           }
         })
         .catch()
+        .finally(() => {
+          loading.close()
+        })
+    },
+    downTemplate() {
+      getTemplate({ code: 't1' }).then((res) => {
+        this.templateLink = res.fileUrl
+      })
     },
     downloadFile() {
       importUserErrorFile({
@@ -248,6 +279,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
+}
 .question-import {
   /deep/ .basic-container--block {
     height: calc(100% - 92px);

@@ -73,7 +73,6 @@ import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
 import { TRAIN_STATUS } from '@/const/configData'
-import { cancel } from '@/router/axios'
 // 积分明细配置
 const onlineAll = [
   {
@@ -277,7 +276,7 @@ const onlineStudy = [
     label: '是否通过',
     prop: 'isPass',
     formatter: (row) => {
-      return row.isPass == 'Yes' || row.isPass == 'yes' ? '是' : '否'
+      return row.isPass.toLowerCase() == 'yes' ? '是' : row.isPass.toLowerCase() == 'no' ? '否' : ''
     }
   }
   // {
@@ -487,9 +486,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)
       this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)

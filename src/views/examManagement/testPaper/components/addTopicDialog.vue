@@ -91,7 +91,6 @@ export default {
         {
           itemType: 'cascader',
           hasLabelSolt: true,
-          showAllLevels: false,
           label: '',
           span: 24,
           prop: 'categoryIds',
@@ -102,6 +101,7 @@ export default {
           clearable: true,
           props: {
             multiple: true,
+            checkStrictly: true,
             value: 'id',
             label: 'name'
           }
@@ -162,7 +162,7 @@ export default {
     'formData.type': {
       handler(val) {
         if (val) {
-          this.getTopicCategory(val)
+          this.getTopicCategory()
         }
       },
       deep: true,
@@ -213,12 +213,14 @@ export default {
     initcategoryIds() {
       const deepEditData = _.cloneDeep(this.topicData)
       const { categoryIds } = deepEditData
+      // 由于入参只入最末一级id，所以现在回显的数据结构是[['1'], ['2']]，将其展开
       const flattenIds = _.flatten(categoryIds)
       // 存在深层的结构数据
       const hasDeepIdList = _.filter(
         this.relatedList,
         (item) => _.includes(flattenIds, item.id) && item.parentId !== '0'
       )
+      // 获取到深层id数组
       const hasDeepId = _.map(hasDeepIdList, 'id')
       // 自己就是第一层id,在返回数据中，除了深层数据，就是表层数据
       const firstIdList = _.difference(flattenIds, hasDeepId)
@@ -234,12 +236,14 @@ export default {
       }
       loop(this.categoryIdsOptions)
       let targetIdList = []
+
       _.each(hasDeepIdList, (tempItem) => {
         let flag = false
         let compareKey = tempItem.parentId
         let middleIdlist = [tempItem.id, compareKey]
         while (!flag) {
           const targetId = keyToValueMap.get(compareKey)
+          // 结束条件是父id为0
           if (targetId != '0') {
             middleIdlist.push(targetId)
             compareKey = targetId
@@ -258,6 +262,7 @@ export default {
     initRelatedSource() {
       const loop = (data) => {
         if (_.isEmpty(data.children)) return
+
         _.each(data.children, (item) => {
           this.pickNum(item)
           loop(item)
@@ -300,22 +305,23 @@ export default {
     },
     /**
      * @desc 获取试题来源
-     * @param relateType
      * */
-    async getTopicCategory(relateType) {
+    async getTopicCategory() {
       let params = {
         type: '0',
-        relateType: relateType,
+        relateType: this.formData.type,
         expireStatus: '1'
       }
       const treeData = await getcategoryTree(params)
-      let categoryObject = await this.category(relateType)
+      let categoryObject = await this.category(this.formData.type)
       this.categoryIdsOptions = [
-        { id: '0', name: '未分类', relatedNum: categoryObject.totalNum, parentId: '0' },
+        // { id: '0', name: '未分类', relatedNum: categoryObject.totalNum, parentId: '0' },
         ...treeData
       ]
       const categoryIdsProp = _.find(this.formColumns, { prop: 'categoryIds' })
       categoryIdsProp.options = this.categoryIdsOptions
+      // 切换题目类型清空试题数组
+      this.relatedList = []
       this.initRelatedSource()
       if (this.isEdit) {
         this.initcategoryIds()

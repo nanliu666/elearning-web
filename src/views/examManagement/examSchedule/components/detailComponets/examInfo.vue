@@ -194,60 +194,7 @@ const TABLE_CONFIG = {
     minWidth: 150
   }
 }
-const SEARCH_CONFIG = {
-  requireOptions: [
-    {
-      type: 'input',
-      field: 'name',
-      label: '',
-      data: '',
-      options: [],
-      config: { placeholder: '请输入学员名称搜索', 'suffix-icon': 'el-icon-search' }
-    }
-  ],
-  popoverOptions: [
-    {
-      type: 'treeSelect',
-      field: 'orgId',
-      label: '所属部门',
-      data: '',
-      config: {
-        selectParams: {
-          placeholder: '请输入内容',
-          multiple: false
-        },
-        treeParams: {
-          data: [],
-          'check-strictly': true,
-          'default-expand-all': false,
-          'expand-on-click-node': false,
-          clickParent: true,
-          filterable: false,
-          props: {
-            children: 'children',
-            label: 'orgName',
-            disabled: 'disabled',
-            value: 'orgId'
-          }
-        }
-      }
-    },
-    {
-      type: 'select',
-      field: 'batchNumber',
-      label: '考试批次',
-      data: '',
-      options: []
-    },
-    {
-      type: 'select',
-      field: 'examSituation',
-      label: '考试情况',
-      data: '',
-      options: []
-    }
-  ]
-}
+
 const notIsTestOptions = [
   { value: '', label: '全部' },
   { value: 1, label: '未开始' },
@@ -265,7 +212,8 @@ import {
   getBatchList,
   getBatchNumber
 } from '@/api/examManage/schedule'
-import { getOrgTreeSimple } from '@/api/org/org'
+// import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 export default {
   name: 'ExamInfo',
   inject: ['paperDetail'],
@@ -300,7 +248,65 @@ export default {
       tablePageConfig: {},
       tableConfig: _.cloneDeep(TABLE_CONFIG),
       tableColumns: [],
-      searchConfig: _.cloneDeep(SEARCH_CONFIG)
+      searchConfig: _.cloneDeep({
+        requireOptions: [
+          {
+            type: 'input',
+            field: 'name',
+            label: '',
+            data: '',
+            options: [],
+            config: { placeholder: '请输入学员名称搜索', 'suffix-icon': 'el-icon-search' }
+          }
+        ],
+        popoverOptions: [
+          {
+            type: 'treeSelectNew',
+            field: 'orgId',
+            label: '所属部门',
+            data: '',
+            config: {
+              selectParams: {
+                placeholder: '请输入内容',
+                multiple: false
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                load: this.loadSelectTreeFn,
+                lazy: true,
+                filterable: false,
+                props: {
+                  isLeaf: (data) => {
+                    return !data.hasChildren
+                  },
+                  children: 'children',
+                  label: 'orgName',
+                  disabled: 'disabled',
+                  value: 'orgId'
+                }
+              }
+            }
+          },
+          {
+            type: 'select',
+            field: 'batchNumber',
+            label: '考试批次',
+            data: '',
+            options: []
+          },
+          {
+            type: 'select',
+            field: 'examSituation',
+            label: '考试情况',
+            data: '',
+            options: []
+          }
+        ]
+      })
     }
   },
   computed: {},
@@ -331,6 +337,17 @@ export default {
     this.loadTableData()
   },
   methods: {
+    async loadSelectTreeFn(node, resolve) {
+      //  懒加载下拉树数据
+      if (this.$refs.tree != undefined) this.checkedKeys = this.$refs.tree.getCheckedKeys()
+      let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+      getorganizationNew(params).then((res) => {
+        // res.map(val=>val.hasChildren=true)
+        resolve(res)
+      })
+      if (this.$refs.tree != undefined) this.$refs.tree.setCheckedKeys(this.checkedKeys)
+    },
+
     setTableConfig(val) {
       this.tableConfig.enableMultiSelect = val
       this.tableConfig.showHandler = val
@@ -341,18 +358,18 @@ export default {
       let examSituation = _.find(this.searchConfig.popoverOptions, { field: 'examSituation' })
       let batchNumber = _.find(this.searchConfig.popoverOptions, { field: 'batchNumber' })
       if (fieldOrgId) {
-        getOrgTreeSimple({ parentOrgId: 0 }).then(
-          (res) =>
-            (fieldOrgId.config.treeParams.data = _.concat(
-              [
-                {
-                  orgName: '全部',
-                  orgId: ''
-                }
-              ],
-              res
-            ))
-        )
+        // getOrgTreeSimple({ parentOrgId: 0 }).then(
+        //   (res) =>
+        //     (fieldOrgId.config.treeParams.data = _.concat(
+        //       [
+        //         {
+        //           orgName: '全部',
+        //           orgId: ''
+        //         }
+        //       ],
+        //       res
+        //     ))
+        // )
       }
       if (examSituation) {
         examSituation.options = isTestOptions

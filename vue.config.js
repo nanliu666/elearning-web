@@ -87,7 +87,7 @@ module.exports = {
     })
   },
   devServer: {
-    port: 1888,
+    port: 1889,
     open: true,
     proxy: {
       '/api': {
@@ -102,9 +102,10 @@ module.exports = {
 
         // 测试环境
         target: 'http://139.159.141.248:8081',
-
+        // 深圳本地p3环境
+        //target: 'http://10.134.5.72:8081',
         // 深圳本地开发环境
-        // target: 'http://172.16.4.55:8081',
+        //  target: 'http://172.16.4.55:8081',
 
         // 辛桃发IP
         // target: 'http://192.168.40.134',
@@ -118,7 +119,7 @@ module.exports = {
         // 张育彬
         // target: 'http://10.134.5.145',
         // 殷云
-        // target: 'http://172.16.4.237',
+        //target: 'http://10.134.5.122',
 
         // 李宁
         // target: 'http://139.159.141.248',

@@ -27,26 +27,38 @@
       <el-col class="fill sidebar">
         <div class="left-treeSearch">
           <el-input
-            v-model="treeSearch"
+            v-model.trim="treeSearch"
             clearable
             suffix-icon="el-icon-search"
             placeholder="组织名称"
           />
         </div>
         <div class="left-tree">
-          <el-tree
+          <!-- <el-tree
             ref="orgTree"
             v-loading="treeLoading"
+            lazy
             show-checkbox
+            :load="loadNode"
             :data="treeData"
             :filter-node-method="filterNode"
             node-key="orgId"
             :props="treeProps"
             :expand-on-click-node="false"
-            default-expand-all
             @check="nodeClick"
           >
-          </el-tree>
+          </el-tree> -->
+          <el-tree
+            ref="orgTree"
+            show-checkbox
+            :load="lazyLoadOrgTree"
+            node-key="id"
+            lazy
+            :data="treeData"
+            :props="treeProps"
+            :expand-on-click-node="false"
+            @check="nodeClick"
+          />
         </div>
       </el-col>
       <el-col
@@ -114,9 +126,28 @@
 </template>
 
 <script>
-import { getOrgTree } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 import { exportProject } from '@/api/educaFund/educaFund'
 import { EDUCA_DETAIL_CREATE, EDUCA_DETAIL_EXPORT } from '@/const/privileges'
+const loadOrgTree = async ({ parentId, parentPath }) => {
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getorganizationNew({ parentId })
+  // 在这里处理两个数组为树形组件需要的结构
+  const orgs = data || []
+  const target = _.concat(
+    _.map(orgs, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.id}`,
+          orgId: item.id,
+          orgName: item.name
+        },
+        item
+      )
+    )
+  )
+  return target
+}
 var timeout = null
 export default {
   name: 'EducaDetails',
@@ -128,6 +159,9 @@ export default {
     const treeLabel = (data) => {
       return `${data.orgName}（${data.userNum}）`
     }
+    const hasChildren = (data) => {
+      return !data.hasChildren
+    }
     return {
       loading: false,
       importData: [],
@@ -136,15 +170,16 @@ export default {
         pageSize: 5000,
         total: 0
       },
+      activeOrg: [],
       importVisible: false,
       treeData: [], // 组织架构数据
       treeProps: {
         labelText: '标题',
         label: treeLabel,
         value: 'orgId',
+        isLeaf: hasChildren,
         children: 'children'
       },
-      activeOrg: [],
       treeSearch: '',
       treeLoading: false
     }
@@ -155,13 +190,52 @@ export default {
   },
   watch: {
     treeSearch(val) {
-      this.$refs.orgTree.filter(val)
+      // this.$refs.orgTree.filter(val)
+      this.searchLoadData(val)
     }
   },
-  mounted() {
-    this.loadTree()
+  created() {
+    this.treeLoading = true
   },
   methods: {
+    searchLoadData: _.debounce(function(orgName) {
+      let params
+      if (orgName) {
+        params = { orgName }
+      } else {
+        params = { parentId: '0' }
+      }
+      this.loading = true
+      getorganizationNew(params)
+        .then((res) => {
+          const orgs = res || []
+          const target = _.concat(
+            _.map(orgs, (item) =>
+              _.assign(
+                {
+                  orgId: item.id,
+                  orgName: item.name
+                },
+                item
+              )
+            )
+          )
+          this.treeData = target
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    }, 400),
+
+    async lazyLoadOrgTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.orgId : '0'
+      if (parentId === '0') this.loading = true
+      const target = await loadOrgTree({
+        parentId
+      })
+      this.loading = false
+      resolve(target)
+    },
     // 创建费用预算
     handleAdd() {
       const y = new Date().getFullYear()
@@ -228,18 +302,6 @@ export default {
           this.loading = false
         })
     },
-    //获取组织名称
-    loadTree(parentOrgId = '0') {
-      this.treeLoading = true
-      getOrgTree({ parentOrgId })
-        .then((data) => {
-          this.treeData = data || []
-        })
-        .finally(() => {
-          this.treeLoading = false
-        })
-    },
-
     filterNode(value, data) {
       if (!value) return true
       return data.orgName.indexOf(value) !== -1
@@ -250,6 +312,11 @@ export default {
       timeout = setTimeout(() => {
         this.activeOrg = checkedId
       }, 600)
+    },
+    loadNode(node, resolve) {
+      getOrgTree({ parentOrgId: node.data.orgId }).then((res) => {
+        resolve(res[0].children)
+      })
     }
   }
 }

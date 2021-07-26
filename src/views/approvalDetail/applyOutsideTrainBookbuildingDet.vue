@@ -91,7 +91,8 @@
           class="experienceList"
         >
           <span class="name">研修成果：</span>
-          <span class="wContent">{{ formDetaill.trainResult }}</span>
+          <!-- <span class="wContent">{{ formDetaill.trainResult }}</span> -->
+          <span class="wContent">{{ getTrainResultStr(formDetaill)}}</span>
         </el-col>
         <el-col
           :span="24"
@@ -207,6 +208,16 @@ export default {
   },
   mounted() {},
   methods: {
+    getTrainResultStr(obj){
+      let type = {
+        1:'课程开发',
+        2:'经验交流',
+        3:'课程攻关',
+        4:'其他形式'
+      }
+      let content = obj.trainResult === '4' ? `${obj.trainResultContent?'('+obj.trainResultContent+')':''}` : ''
+      return `${type[obj.trainResult]} ${content}`
+    },
     getAges(birth) {
       var age = birth ? moment().get('year') - Number(birth.substr(0, 4)) : ''
       return age

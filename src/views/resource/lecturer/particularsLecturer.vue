@@ -108,12 +108,12 @@
         </el-row>
         <el-row>
           <el-col
-            :span="6"
+            :span="5"
             style="color: #898989"
           >
             授课课时费(元):
           </el-col>
-          <el-col :span="6">
+          <el-col :span="7">
             {{ teacherData.courseCost }}
           </el-col>
           <el-col
@@ -447,7 +447,7 @@ export default {
       tableColumns: TABLE_COLUMNS,
       searchConfig: SEARCH_CONFIG,
       teacherType: ['内部讲师', '外部讲师'],
-      professionalCata: ['--', '技术类', '管理类', '营销服务类', '技能类'],
+      professionalCata: ['--', '技术类', '管理类', '营销类', '技能类'],
 
       teacherLevel: ['预备级', '助理级', '初级', '中级', '高级', '资深级', '专家级', '非讲师'],
       type: ['--', '内训', '外聘'],

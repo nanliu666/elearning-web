@@ -92,7 +92,7 @@ import {
   queryStudyPlanExperience,
   queryStudyAllCorseList
 } from '@/api/learnArrange'
-import { getOnlineCourse, listSubmitFile } from '@/api/training/training'
+import { getOnlineCourse } from '@/api/training/training'
 
 export default {
   name: 'StuffDetail',
@@ -184,7 +184,8 @@ export default {
       })
     },
     listSubmitFile() {
-      listSubmitFile({ trainId: this.data.trainId }).then((res = []) => {
+      const { trainId, stuId: userId } = this.data
+      materials({ trainId, userId }).then((res = []) => {
         this.tabData.report = res
       })
     },

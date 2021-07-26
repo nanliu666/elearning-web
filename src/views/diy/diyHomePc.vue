@@ -22,12 +22,12 @@
           style="overflow: auto"
         >
           <el-input
-            v-model="treeSearch"
+            v-model.trim="treeSearch"
             clearable
             placeholder="组织名称"
             style="margin-bottom: 10px"
           />
-          <el-tree
+          <!-- <el-tree
             ref="orgTree"
             v-loading="treeLoading"
             :filter-node-method="filterNode"
@@ -37,7 +37,17 @@
             :expand-on-click-node="false"
             @node-click="nodeClick"
           >
-          </el-tree>
+          </el-tree> -->
+          <el-tree
+            ref="orgTree"
+            :load="lazyLoadOrgTree"
+            node-key="id"
+            lazy
+            :data="treeData"
+            :props="treeProps"
+            :expand-on-click-node="false"
+            @node-click="nodeClick"
+          />
         </basic-container>
       </el-col>
       <!-- 右侧定制列表 -->
@@ -45,6 +55,7 @@
         class="content"
         style="height: 100%"
       >
+        <!-- <newtree /> -->
         <custom-list-pc :active-org="activeOrg"></custom-list-pc>
       </el-col>
     </el-row>
@@ -52,15 +63,43 @@
 </template>
 <script>
 import { getOrganization } from '@/api/system/user'
+import { getorganizationNew } from '@/api/org/org'
 import customListPc from './components/customListPc'
 import { DIY_HOME_ADD_PC } from '@/const/privileges'
+// import newtree from './components/loadingTree.vue'
+const loadOrgTree = async ({ parentId, parentPath }) => {
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getorganizationNew({ parentId })
+  // 在这里处理两个数组为树形组件需要的结构
+  const orgs = data || []
+  const target = _.concat(
+    _.map(orgs, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.id}`,
+          orgId: item.id,
+          orgName: item.name
+        },
+        item
+      )
+    )
+  )
+  return target
+}
+
 export default {
   name: 'DiyHomePc',
   components: {
-    customListPc
+    customListPc,
+    // newtree
   },
   data() {
+    const hasChildren = (data) => {
+      return !data.hasChildren
+    }
     return {
+      loading: false,
+      isMounted: false,
       treeSearch: '',
       treeLoading: false,
       treeData: [], // 组织架构数据
@@ -68,6 +107,7 @@ export default {
         labelText: '标题',
         label: 'orgName',
         value: 'orgId',
+        isLeaf: hasChildren,
         children: 'children'
       },
       activeOrg: { id: '0', orgId: '0', orgName: '全部', hasChildren: false }
@@ -78,14 +118,60 @@ export default {
   },
   watch: {
     treeSearch(val) {
-      this.$refs.orgTree.filter(val)
+      this.searchLoadData(val)
     }
   },
-  async mounted() {
-    await this.loadTree()
-    this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
+  mounted() {
+    this.isMounted = true
+    // await this.loadTree()
+    // this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
   },
   methods: {
+    searchLoadData: _.debounce(function(orgName) {
+      let params
+      if (orgName) {
+        params = { orgName }
+      } else {
+        params = { parentId: '0' }
+      }
+      this.loading = true
+      getorganizationNew(params)
+        .then((res) => {
+          const orgs = res || []
+          const target = _.concat(
+            _.map(orgs, (item) =>
+              _.assign(
+                {
+                  orgId: item.id,
+                  orgName: item.name
+                },
+                item
+              )
+            )
+          )
+          this.treeData = target
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    }, 400),
+
+    async lazyLoadOrgTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.orgId : '0'
+      if (parentId === '0') this.loading = true
+      const target = await loadOrgTree({
+        parentId
+      })
+      if (this.isMounted) {
+        this.isMounted = false
+        this.activeOrg = target[0]
+        this.$nextTick(() => {
+          this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeOrg.orgId)
+        })
+      }
+      this.loading = false
+      resolve(target)
+    },
     //  创建方案
     addNewPlan() {
       this.$router.push({

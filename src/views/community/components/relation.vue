@@ -24,7 +24,7 @@
         size="medium"
         suffix-icon="el-icon-search"
         clearable
-        :value="searchName"
+        :value="inputValue"
         @input="search"
       ></el-input>
     </div>
@@ -53,7 +53,7 @@
           class="tag-table"
         >
           <el-col
-            v-for="org in showlist(departmentList, departmentPage)"
+            v-for="org in showlist(departmentList, departmentPage, 1)"
             :key="org.id"
             :span="8"
           >
@@ -109,7 +109,7 @@
           class="tag-table"
         >
           <el-col
-            v-for="position in showlist(positionList, positionPage)"
+            v-for="position in showlist(positionList, positionPage, 2)"
             :key="position.positionId"
             :span="8"
           >
@@ -210,7 +210,7 @@
         ref="personTable"
         style="margin-top: 12px"
         height="450"
-        :data="showlist(personList, personPage, true)"
+        :data="showlist(personList, personPage, 3)"
         align="center"
         header-align="center"
         row-key="bizId"
@@ -311,16 +311,15 @@
 import Pagination from '@/components/common-pagination'
 import CommonPicker from '@/components/common-picker'
 import { userImportCheck, getOrgChild } from '@/api/train/train'
-import { getPostionUserChild2, getGroup } from '@/api/system/user'
+import { getGroup } from '@/api/system/user'
 import XLSX from 'xlsx'
 import { getUsergroupList, getPositionUserList1 } from '@/api/examManage/schedule'
-
+import { getStationParent } from '@/api/system/station'
+import { getTemplate } from '@/api/system/template'
+import axios from 'axios'
 const requiredTHeader = [
-  { name: '账号', key: 'phonenum' },
-  { name: '用户编号', key: 'workNo' },
-  { name: '姓名', key: 'userName' },
-  { name: '所在部门', key: 'orgName' },
-  { name: '用户岗位', key: 'positionName' }
+  { name: '用户手机号', key: 'phonenum' },
+  { name: '姓名', key: 'userName' }
 ]
 export default {
   name: 'Relation',
@@ -338,6 +337,10 @@ export default {
   },
   data() {
     return {
+      valve: true,
+      inputValue: '',
+      usersArr: [],
+      timer: null,
       searchName: '',
       // 部门
       departmentList: [],
@@ -414,52 +417,49 @@ export default {
       positionPickerOptions: [
         {
           name: '岗位',
-          request: getPostionUserChild2,
-          resolveRequest: {
-            handler: function(node, resolve) {
-              const {
-                data: { positionId, parentIds }
-              } = node
-              getPostionUserChild2({ parentId: positionId }).then((res) => {
-                const { positions = [] } = res
-                positions.forEach((pos) => {
-                  pos.parentIds = parentIds ? [positionId].concat(parentIds) : [positionId]
-                })
-                resolve(positions)
-              })
-            }
-          },
-          type: 'tree',
+          request: getStationParent,
+          type: 'scroll-tree',
           placeholder: '搜索岗位名称',
-          treeOption: {
-            'check-strictly': true,
-            props: {
-              label: 'positionName',
-              children: 'children'
-            },
-            nodeKey: 'positionId'
-          },
           response: {
             props: {
-              data: 'positions'
+              data: 'data',
+              total: 'totalNum'
             }
+          },
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
+            },
+            'check-strictly': false,
+            nodeKey: 'userId'
+          },
+          props: {
+            value: 'id',
+            select: ['id', 'name', 'workNum']
+          },
+          label: function(data) {
+            const { name } = data
+            return name
           },
           query: {
             search: {
-              key: 'search',
+              key: 'name',
               value: ''
             },
-            id: {
-              key: 'parentId',
-              value: '0',
-              initialValue: '0',
-              from: 'positionId'
+            page: {
+              key: 'pageNo',
+              value: 1
+            },
+            pageSize: {
+              key: 'pageSize',
+              value: 50
             }
           },
-          props: {
-            label: 'positionName',
-            value: 'positionId',
-            select: ['positionId', 'positionName', 'workNum', 'parentIds']
+          resolveRequest: {
+            handler() {
+              return false
+            }
           }
         }
       ],
@@ -480,20 +480,62 @@ export default {
       personPickerOptions: [
         {
           name: '岗位',
+          request: getStationParent,
+          type: 'scroll-tree',
+          placeholder: '搜索岗位名称',
           response: {
             props: {
-              data: ['positions', 'users']
+              data: 'data',
+              total: 'totalNum'
             }
           },
-          request: getPostionUserChild2,
-          type: 'tree',
-          placeholder: '搜索岗位名称',
-          checkRequest: {
-            condition: function($data) {
-              return !$data.userId
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
             },
+            'check-strictly': false,
+            nodeKey: 'userId'
+          },
+          props: {
+            value: 'userId',
+            select: [
+              'userId',
+              'name',
+              'orgName',
+              'positionName',
+              'workNo',
+              'phoneNum',
+              'orgId',
+              'positionId'
+            ]
+          },
+          label: function(data) {
+            const { name } = data
+            return name
+          },
+          query: {
+            search: {
+              key: 'name',
+              value: ''
+            },
+            page: {
+              key: 'pageNo',
+              value: 1
+            },
+            pageSize: {
+              key: 'pageSize',
+              value: 50
+            }
+          },
+          resolveRequest: {
+            handler() {
+              return false
+            }
+          },
+          checkRequest: {
             handler: function($data, resolve) {
-              getPositionUserList1({ parentId: $data.positionId }).then((res = {}) => {
+              getPositionUserList1({ parentId: $data.id }).then((res = {}) => {
                 if (Array.isArray(res)) {
                   resolve(res)
                 } else {
@@ -505,35 +547,6 @@ export default {
                 }
               })
             }
-          },
-          treeOption: {
-            props: {
-              label: function(node) {
-                if (node.positionId) {
-                  return node.positionName
-                }
-                return node.name
-              },
-              children: 'children',
-              selectLabel: 'name'
-            },
-            nodeKey: 'userId'
-          },
-          query: {
-            search: {
-              key: 'search',
-              value: ''
-            },
-            id: {
-              key: 'parentId',
-              value: '0',
-              initialValue: '0',
-              from: 'positionId'
-            }
-          },
-          props: {
-            value: 'userId',
-            select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phoneNum', 'orgId']
           }
         },
         {
@@ -621,27 +634,49 @@ export default {
     },
     totalNum() {
       const data = [...this.departmentList, ...this.positionList]
-      return this.peopleNum(data) + this.personList.length
+      const filterArr = {
+        org: this.departmentList.map((item) => (item = item.name)),
+        position: this.positionList.map((item) => item.positionName)
+      }
+      let totalNum = this.personList.reduce((total, item) => {
+        return (
+          total +
+          Number(
+            !(
+              filterArr.org.includes(item.orgName) || filterArr.position.includes(item.positionName)
+            )
+          )
+        )
+      }, 0)
+      console.log(totalNum)
+      return this.peopleNum(data) + totalNum
     },
     // 显示的列表
     showlist() {
       return (data, page, flag) => {
-        if (flag && !!this.searchName) {
-          data = data.filter((item) => item.bizName === this.searchName)
-          const departmentIds = this.departmentList.map((item) => item.id)
-          const positionIds = this.positionList.map((item) => item.positionId)
-          data = data.filter((item) => {
-            let flag = true
-            if (departmentIds.length) {
-              flag = departmentIds.includes(item.orgId[0])
-            }
-            if (positionIds.length) {
-              flag = positionIds.includes(item.positionId[0]) && flag
-            }
-            return flag
-          })
+        if (this.searchName) {
+          if (flag === 3) {
+            data = data.filter((item) => item.bizName.indexOf(this.searchName) !== -1)
+          } else {
+            if (!this.usersArr.length) return
+            const staff = this.personList.filter(
+              (item) => item.bizName.indexOf(this.searchName) !== -1
+            )
+            data = data.filter((item) => {
+              if (flag === 1) {
+                return this.usersArr.some(
+                  (org) => org.orgId === item.id && staff.some((item) => item.bizId === org.userId)
+                )
+              } else if (flag === 2) {
+                return this.usersArr.some(
+                  (position) =>
+                    position.positionId === item.positionId &&
+                    staff.some((item) => item.bizId === position.userId)
+                )
+              }
+            })
+          }
         }
-
         page.total = data.length
         const start = (page.pageNo - 1) * page.pageSize
         const totalNum =
@@ -651,7 +686,6 @@ export default {
     }
   },
   activated() {
-    this.$refs.form.clearValidate()
     this.departmentList = this.form.orgIds
     this.positionList = this.form.positionIds
     this.personList = this.form.userIds
@@ -680,28 +714,24 @@ export default {
         this.personList.splice(index, 1)
       }
     },
-    handleDownloadTemplate() {
-      const header = ['账号', '用户编号', '姓名', '所在部门', '用户岗位']
-      const data = [['13200000000', '01920192', '张三', '事业部/设计中心', '初级设计师']]
-      this.handleExportExcel({ header, data })
-    },
-    handleExportExcel({
-      header,
-      data,
-      filename = '用户导入模板',
-      autoWidth = true,
-      bookType = 'xlsx'
-    }) {
-      return import('@/vendor/Export2Excel').then((excel) => {
-        excel.export_json_to_excel({
-          header,
-          data,
-          filename,
-          autoWidth,
-          bookType
+    async handleDownloadTemplate() {
+      const { fileUrl, fileName } = await getTemplate({ code: 't3' })
+      axios
+        .get(fileUrl, {
+          responseType: 'blob'
         })
-      })
+        .then((res) => {
+          console.log(res)
+          let a = document.createElement('a')
+          a.style.display = 'none'
+          a.href = window.URL.createObjectURL(res.data)
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        })
     },
+
     handleSelectionChange(selections) {
       this.multipleSelection = selections
     },
@@ -713,16 +743,17 @@ export default {
       this.multipleSelection = []
     },
     handleImportExcel(file) {
-      let reader = new FileReader()
+      var reader = new FileReader()
       reader.onload = (e) => {
-        let data = e.target.result
-        const { SheetNames, Sheets } = XLSX.read(data, { type: 'binary' })
+        var data = e.target.result
+        let { SheetNames, Sheets } = XLSX.read(data, { type: 'binary' })
         const valid = this.checkSheets(Sheets)
+
         if (!valid) return
-        let rowData = SheetNames.map((name) => {
+        SheetNames = SheetNames.filter((name) => name.indexOf('用户导入数据') > -1)
+        var rowData = SheetNames.map((name) => {
           return XLSX.utils.sheet_to_json(Sheets[name])
         })
-
         const promises = []
         rowData.forEach((data) => {
           promises.push(this.validateExcelData(data))
@@ -756,13 +787,12 @@ export default {
         let params = data.map((item) => {
           let newItem = {}
           for (const key in item) {
-            let header = requiredTHeader.find((header) => header.name == key)
+            let header = requiredTHeader.find((header) => key.indexOf(header.name) > -1)
             if (!header) continue
             newItem[header.key] = item[key]
           }
           return newItem
         })
-
         userImportCheck(params)
           .then((res = {}) => {
             const { failUserInfo = [], successUserInfo = [] } = res
@@ -781,8 +811,8 @@ export default {
                 }
               )
               const data = failUserInfo.map((info) => {
-                const { phonenum, workNo, userName, orgName, positionName } = info
-                return [phonenum, workNo, userName, orgName, positionName, '找不到该账号']
+                const { phonenum, userName, failDesc } = info
+                return [phonenum, userName, failDesc]
               })
               this.handleExportExcel({
                 header: requiredTHeader.map((header) => header.name).concat('错误信息'),
@@ -808,26 +838,79 @@ export default {
             headers.push(cur.v)
           }
         })
-        const missHeaders = requiredTHeader.filter((h) => !headers.includes(h.name))
+        const missHeaders = requiredTHeader
+          .map((header) => header.name)
+          .filter((name) => {
+            for (let i = 0; i < headers.length; i++) {
+              const header = headers[i]
+              let left, right
+              if (name.length > header.length) {
+                left = name
+                right = header
+              } else {
+                left = header
+                right = name
+              }
+              if (!left || !right) continue
+              left += ''
+              right += ''
+              if (left.indexOf(right) > -1) {
+                return false
+              }
+            }
+            return true
+          })
         if (missHeaders.length) {
           const requestTips =
-            key +
-            '缺少表头：[' +
-            missHeaders.map((header) => header.name).join(',') +
-            ']请检查重新上传'
+            key + '缺少表头：[' + missHeaders.map((name) => name).join(',') + ']请检查重新上传'
           this.$alert(requestTips, '导入错误', { confirmButtonText: '确定', type: 'warning' })
           return false
         }
         return true
       }
     },
+    handleExportExcel({
+      header,
+      data,
+      filename = '用户导入模板',
+      autoWidth = true,
+      bookType = 'xlsx'
+    }) {
+      return import('@/vendor/Export2Excel').then((excel) => {
+        excel.export_json_to_excel({
+          header,
+          data,
+          filename,
+          autoWidth,
+          bookType
+        })
+      })
+    },
     search(e) {
-      this.searchName = e.trim()
+      if (!this.valve) return
+      clearTimeout(this.timer)
+      if (!e.trim()) {
+        this.inputValue = e.trim()
+        this.searchName = e.trim()
+        return
+      }
+      this.inputValue = e.trim()
+      this.valve = false
+      this.timer = setTimeout(() => {
+        this.searchName = this.inputValue
+        getOrgChild({ search: e.trim() }).then((res) => {
+          this.usersArr = res.users
+          this.valve = true
+        })
+      }, 500)
+
       this.personPage = {
         pageNo: 1,
         pageSize: 10,
         total: 0
       }
+      this.positionPage.pageNo = 1
+      this.departmentPage.pageNo = 1
     },
     validate() {
       return this.$refs.form.validate()
