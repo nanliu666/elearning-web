@@ -10,17 +10,18 @@
             v-p="ADD_TRAIN"
             type="primary"
             size="medium"
+            @click.native="goAdd('inside')"
           >
-            创建培训<i class="el-icon-arrow-down el-icon--right"></i>
+            创建培训
           </el-button>
-          <el-dropdown-menu slot="dropdown">
+          <!-- <el-dropdown-menu slot="dropdown">
             <el-dropdown-item @click.native="goAdd('inside')">
               内训
             </el-dropdown-item>
             <el-dropdown-item @click.native="goAdd('outer')">
               外训
             </el-dropdown-item>
-          </el-dropdown-menu>
+          </el-dropdown-menu> -->
         </el-dropdown>
       </div>
     </div>
@@ -443,17 +444,17 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   }
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
-  {
-    config: { placeholder: '请选择' },
-    data: '',
-    field: 'trainScope',
-    label: '类别',
-    type: 'select',
-    options: [
-      { value: 'inside', label: '内训' },
-      { value: 'outer', label: '外训' }
-    ]
-  },
+  // {
+  //   config: { placeholder: '请选择' },
+  //   data: '',
+  //   field: 'trainScope',
+  //   label: '类别',
+  //   type: 'select',
+  //   options: [
+  //     { value: 'inside', label: '内训' },
+  //     { value: 'outer', label: '外训' }
+  //   ]
+  // },
   {
     type: 'treeSelect',
     field: 'categoryId',
