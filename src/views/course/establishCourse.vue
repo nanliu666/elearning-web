@@ -263,7 +263,7 @@
           </el-col>
         </el-row>
         <!-- 第五行 -->
-        <el-row>
+        <!-- <el-row>
           <el-col :span="11">
             <el-form-item label="课程认证等级">
               <el-select v-model="ruleForm.grade">
@@ -299,10 +299,10 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
 
         <!-- 第六行 -->
-        <el-row>
+        <!-- <el-row>
           <el-col :span="11">
             <el-form-item label="开发费用">
               <el-input-number
@@ -350,7 +350,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
         <el-row>
           <el-col :span="11">
             <el-form-item

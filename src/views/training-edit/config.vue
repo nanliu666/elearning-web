@@ -204,6 +204,37 @@
       ></el-input>
     </el-form-item>
 
+    <el-form-item
+      v-if="type === 'inside'"
+      label="主办单位"
+      prop="sponsor"
+      class="half-form-item"
+      :class="{ 'margin-right-120': form.trainWay === '1' }"
+    >
+      <el-input
+        v-model="form.sponsor"
+        :readonly="isUnderwayEdit"
+        :maxlength="32"
+        placeholder="请输入"
+        clearable=""
+      ></el-input>
+    </el-form-item>
+
+    <el-form-item
+      v-if="type === 'inside'"
+      label="承办单位"
+      prop="organizer"
+      class="half-form-item"
+    >
+      <el-input
+        v-model="form.organizer"
+        :readonly="isUnderwayEdit"
+        :maxlength="32"
+        placeholder="请输入"
+        clearable=""
+      ></el-input>
+    </el-form-item>
+
     <div class="form-area-title">
       详细信息
     </div>
