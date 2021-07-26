@@ -186,9 +186,7 @@
             label="所属部门"
           >
             <template slot-scope="scope">
-              <div>
-                {{ scope.row.dept || '--' }}
-              </div>
+              {{ scope.row.dept || '--' }}
             </template>
           </el-table-column>
           <el-table-column

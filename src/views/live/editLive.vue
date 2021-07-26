@@ -51,6 +51,7 @@
           size="mini"
           class="backward"
           type="default"
+          v-if="isRelease==='0'"
           @click="submit_live_data(2)"
         >
           存草稿
@@ -129,6 +130,7 @@
                   <el-option
                     v-for="item in select_liveStatus"
                     :key="item.value"
+                    :disabled="isRelease==='1'&&item.value===2?true:false"
                     :label="item.label"
                     :value="item.value"
                   ></el-option>
@@ -178,7 +180,26 @@
                 </el-select>
               </el-form-item>
             </el-col>
-
+            <el-col :span="12">
+              <el-form-item
+                label="知识体系"
+              >
+                <tree-selector
+                  v-model="basicForm.knowledgeSystemId"
+                  style="width: 100%;"
+                  class="selector"
+                  :options="knowledgeTree"
+                  placeholder="请选择"
+                  :props="{
+                    value: 'id',
+                    label: 'name',
+                    children: 'children'
+                  }"
+                  :filterable="true"
+                  @focus="getKnowledgeList"
+                />
+              </el-form-item>
+            </el-col>
             <el-col :span="24">
               <el-form-item
                 label="直播场景"
@@ -278,6 +299,7 @@
                 </el-row>
               </el-form-item>
             </el-col>
+            
             <!-- <el-col :span="24">
               <el-form-item
                 label="课程封面"
@@ -1409,8 +1431,10 @@ import {
   getOtherUser,
   getUsersByOrgId,
   getLiveDetails,
-  getStudentByLiveId
+  getStudentByLiveId,
+  getKnowledgeList
 } from '@/api/live/editLive'
+import TreeSelector from '@/components/tree-selector'
 import EditExamineDrawer from '@/views/training/components/drawerComponents/editExamineDrawer'
 import moment from 'moment'
 const NODE_TYPE = {
@@ -1430,10 +1454,14 @@ const TestConfig = {
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload'),
-    EditExamineDrawer
+    EditExamineDrawer,
+    TreeSelector
   },
   data() {
     return {
+      isRelease:'0',
+      knowledgeSystemLabel:'',
+      knowledgeTree:[],
       signupDeadline: '',
       isApprove: false,
       isRegister: false,
@@ -1475,6 +1503,7 @@ export default {
             end_time: ''
           }
         ],
+        knowledgeSystemId:'',
         select_loopCycle_value: '',
         loopTime: [],
         select_mode_time_value: [],
@@ -1753,6 +1782,8 @@ export default {
       this.getStudentInfoList()
       this.isEdit = true
     }
+    //获取知识体系
+    this.getKnowledgeList()
     //修改tab  标题
     this.$store.commit('SET_TAG_LABEL', `${this.$route.query.id?'编辑直播':'创建直播'}`)
     //   获取直播分类
@@ -1765,6 +1796,7 @@ export default {
         }
       })
     })
+    
     // 获取其他用户
     getOtherUser({
       categoryId: '',
@@ -1787,6 +1819,12 @@ export default {
     next()
   },
   methods: {
+    //get 知识体系
+    getKnowledgeList(){
+      getKnowledgeList({name:''}).then(res=>{
+        this.knowledgeTree = res
+      })
+    },
     //批量选择登记观看信息callback
     registerNumSelectionChange(arr){
       this.registerNumSelection = arr
@@ -2210,7 +2248,7 @@ export default {
               return true
             }
           })
-          self.$refs.otherUserTree.setChecked(item.id, false)
+          self.$refs.otherUserTree?self.$refs.otherUserTree.setChecked(item.id, false):''
         })
         this.toggle_StudentsPage(1)
       })
@@ -2611,7 +2649,8 @@ export default {
         isApprove: this.isApprove,
         signupDeadline: this.signupDeadline
           ? moment(this.signupDeadline).format('YYYY-MM-DD HH:mm:ss')
-          : ''
+          : '',
+        knowledgeSystemId:this.basicForm.knowledgeSystemId || ''
       }
 
       // 提交关联课程数据
@@ -2780,12 +2819,15 @@ export default {
       getLiveDetails({
         liveId: id
       }).then((res) => {
+        this.isRelease = res.isRelease
         this.liveClassification_option.label = res.categoryName
         this.basicForm.title = res.channelName
         this.liveClassification_option.value = res.categoryId
         this.basicForm.liveClassification_value = res.categoryId
         this.basicForm.select_liveStatus_value = res.isUsed
         this.basicForm.select_linkNumber_value = res.linkMicLimit
+        this.basicForm.knowledgeSystemId = res.knowledgeSystemId
+        this.knowledgeSystemLabel = res.knowledgeSystemFullName
         this.toggle_scene = res.scene
         this.examine.data = res.examList
         this.isApprove = res.isApprove

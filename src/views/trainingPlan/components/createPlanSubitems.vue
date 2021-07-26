@@ -81,7 +81,7 @@
                   <el-input-number
                     v-if="scope.row.seen"
                     v-model="scope.row.budget"
-                    :min="1"
+                    :min="0"
                     :max="1000000000"
                     :controls="false"
                     step-strictly

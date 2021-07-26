@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="input-wrapper">
         <el-input
-          v-model="filterForm.courseName"
+          v-model="filterForm.coursePlanName"
           clearable
           size="medium"
           placeholder="输入线上必修名称搜索"
@@ -12,8 +12,8 @@
       <el-popover
         v-model="filterFormVisible"
         placement="bottom"
-        width="1050"
-        :offset="316"
+        width="680"
+        :offset="270"
         transition="false"
       >
         <el-form
@@ -21,14 +21,17 @@
           :inline="true"
           :model="filterForm"
           class="filter-form"
-          label-width="100px"
+          label-width="75px"
           style="padding: 24px"
         >
-          <el-form-item label="状态">
+          <el-form-item
+            label="状态"
+            style="margin-right: 30px"
+          >
             <el-select
               v-model="filterForm.status"
               clearable
-              placeholder="请选择状态"
+              placeholder="请选择"
             >
               <el-option
                 v-for="option in statusOptions"
@@ -39,51 +42,22 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="讲师">
-            <lazy-select v-model="filterForm.teacherId" />
-          </el-form-item>
           <el-form-item label="所在分类">
-            <tree-selector
+            <el-cascader
+              ref="cascader"
               v-model="filterForm.catalogId"
               :options="categoryData"
+              clearable
+              filterable
+              filter
+              style="width: 100%"
               placeholder="请选择"
-              :props="{
-                value: 'id',
-                label: 'name',
-                children: 'children'
-              }"
-            />
+              :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+              :show-all-levels="false"
+              @change="handleCategoryChange"
+            ></el-cascader>
           </el-form-item>
 
-          <el-form-item label="课程类型">
-            <el-select
-              v-model="filterForm.courseType"
-              clearable
-              placeholder="请选择"
-            >
-              <el-option
-                v-for="option in typeOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="选修类型">
-            <el-select
-              v-model="filterForm.electiveType"
-              clearable
-              placeholder="请选择"
-            >
-              <el-option
-                v-for="option in electiveOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
           <div style="text-align: right; margin-right: 75px">
             <el-button
               type="primary"
@@ -98,7 +72,7 @@
               @click="
                 filterForm = {
                   ...initialFilterForm,
-                  titleOrNo: filterForm.deptName
+                  coursePlanName: filterForm.coursePlanName
                 }
               "
             >
@@ -126,14 +100,15 @@
         <span>{{ `已选中${multipleSelection.length}项` }}</span><el-button
           type="text"
           size="small"
+          @click="() => cancel()"
         >
-          全部删除
+          取消关联
         </el-button>
       </div>
       <el-table
-        :loading="tableLoading"
+        v-loading="tableLoading"
         :data="data"
-        height="35vh"
+        height="55vh"
         @selection-change="handleSelectionChange"
       >
         <el-table-column
@@ -143,11 +118,19 @@
         </el-table-column>
         <el-table-column
           fixed="left"
-          prop="name"
+          prop="coursePlanName"
           min-width="150"
           show-overflow-tooltip
           label="线上必修名称"
         >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              @click="toDetail(scope.row)"
+            >
+              {{ scope.row.coursePlanName }}
+            </el-button>
+          </template>
         </el-table-column>
 
         <el-table-column
@@ -155,21 +138,13 @@
           min-width="100"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.status | getStatus }}</span>
+            <span>{{ getStatus(scope.row.status) }}</span>
           </template>
         </el-table-column>
 
         <el-table-column
-          prop="teacherName"
-          min-width="120"
-          show-overflow-tooltip
-          label="讲师"
-        >
-        </el-table-column>
-
-        <el-table-column
           label="所在分类"
-          prop="catalogName"
+          prop="categoryName"
           min-width="120"
           show-overflow-tooltip
         >
@@ -177,25 +152,24 @@
 
         <el-table-column
           label="学习时间"
-          prop="courseType"
+          min-width="190"
+          show-overflow-tooltip
+        >
+          <template slot-scope="scope">
+            {{ scope.row.startTime + '~' + scope.row.endTime }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="更新时间"
           min-width="120"
           show-overflow-tooltip
         >
           <template slot-scope="scope">
-            {{ scope.row.courseType | getCourseType }}
+            {{ scope.row.updateTime || '--' }}
           </template>
         </el-table-column>
         <el-table-column
-          label="选修类型"
-          prop="electiveType"
-          min-width="120"
-          show-overflow-tooltip
-        >
-          <template slot-scope="scope">
-            {{ scope.row.electiveType | getElectiveType }}
-          </template>
-        </el-table-column>
-        <el-table-column
+          v-p="relevanceBtn"
           label="操作"
           header-align="center"
           fixed="right"
@@ -222,56 +196,20 @@
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
 import Pagination from '@/components/common-pagination'
-import lazySelect from '@/components/el-lazy-select'
-import TreeSelector from '@/components/tree-selector'
-
+import { commonCancelRelation, queryPlan } from '@/api/knowledge'
+import { getCategoryTree } from '@/api/learnPlan'
 export default {
   name: 'KnowledgeRequiredCourse',
   components: {
-    Pagination,
-    lazySelect,
-    TreeSelector
-  },
-  filters: {
-    getStatus(status) {
-      switch (status) {
-        case 0:
-          return '审核中'
-        case 1:
-          return '已发布'
-        case 2:
-          return '草稿'
-        case 3:
-          return '已停用'
-        case 11:
-          return '已拒绝'
-        case 12:
-          return '已撤回'
-      }
-    },
-    getCourseType(type) {
-      switch (type) {
-        case 1:
-          return '在线课程'
-        case 2:
-          return '面授课程'
-        case 3:
-          return '直播课程'
-      }
-    },
-    getElectiveType(type) {
-      switch (type) {
-        case 1:
-          return '开放选修'
-        case 3:
-          return '禁止选修'
-      }
-    }
+    Pagination
   },
   props: {
     relevanceBtn: {
+      type: String,
+      default: ''
+    },
+    knowledgeSystemId: {
       type: String,
       default: ''
     }
@@ -283,67 +221,131 @@ export default {
       multipleSelection: [],
       tableLoading: false,
       filterFormVisible: false,
-      initialFilterForm: {},
-      filterForm: {
-        courseName: '',
-        status: '1',
-        teacherId: '',
+      initialFilterForm: {
+        coursePlanName: '',
+        status: '',
         catalogId: '',
-        courseType: '',
-        electiveType: '',
+        knowledgeSystemId: this.knowledgeSystemId,
+        pageNo: 1,
+        pageSize: 10
+      },
+      filterForm: {
+        coursePlanName: '',
+        status: '',
+        catalogId: '',
+        knowledgeSystemId: this.knowledgeSystemId,
         pageNo: 1,
         pageSize: 10
       },
       total: 0,
       statusOptions: [
-        { value: 0, label: '审核中' },
-        { value: 1, label: '已发布' },
-        { value: 2, label: '草稿' },
-        { value: 3, label: '已停用' },
-        { value: 12, label: '已撤回' },
-        { value: 11, label: '已拒绝' }
-      ],
-      typeOptions: [
-        { value: 1, label: '在线课程' },
-        { value: 2, label: '面授课程' },
-        { value: 3, label: '直播课程' }
-      ],
-      electiveOptions: [
-        { value: '1', label: '开放选修' },
-        { value: '3', label: '禁止选修' }
+        { value: 1, label: '未开始' },
+        { value: 2, label: '进行中' },
+        { value: 3, label: '已结束' },
+        { value: 4, label: '草稿' }
       ]
     }
   },
+  created() {
+    this.getCategoryData()
+    this.getData()
+  },
   methods: {
+    toDetail(data) {
+      const query = {}
+      Object.keys(data).forEach((key) => {
+        query[key] = data[key]
+      })
+      this.$router.push({
+        path: '/learnArrange/plan/detail',
+        query: {
+          data: JSON.stringify(data)
+        }
+      })
+    },
+    handleCategoryChange(data) {
+      if (!data) return
+      this.filterForm.catalogId = data[data.length - 1]
+      if (this.$refs.cascader) {
+        this.$refs.cascader.dropDownVisible = false
+      }
+    },
+    getCategoryData() {
+      getCategoryTree({ addFlag: '1' }).then((res) => {
+        this.categoryData = res
+      })
+    },
+    getStatus(status) {
+      switch (status) {
+        case 1:
+          return '未开始'
+        case 2:
+          return '进行中'
+        case 3:
+          return '已结束'
+        case 4:
+          return '草稿'
+      }
+    },
     cancel(target) {
-      const message = target ? '确定要对该课程取消关联吗？' : '确定要对所选课程取消关联吗？'
+      let params = [],
+        message
+      if (target) {
+        message = '确定要对该线上必修安排取消关联吗？'
+        params = [target.id]
+      } else {
+        message = '确定要对所选线上必修安排取消关联吗？'
+        params = this.multipleSelection.map((item) => item.id)
+      }
 
       this.$confirm(message, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {})
+        .then(() => {
+          commonCancelRelation({ source: 'requiredCourse', ids: params.join(',') }).then(() => {
+            this.$message.success('操作成功')
+            this.getData()
+          })
+        })
         .catch(() => {})
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    pagination({ page: pageNo, limit: pageSize }) {
-      Object.assign(this.filterForm, { pageNo, pageSize })
+    pagination({ page, limit }) {
+      if (limit !== this.filterForm.pageSize) {
+        this.filterForm.pageNo = 1
+      } else {
+        this.filterForm.pageNo = page
+      }
+      this.filterForm.pageSize = limit
       this.getData()
     },
     getData() {
       if (this.tableLoading) return
       this.tableLoading = true
-      getCourseListData(this.filterForm).then((res) => {
-        const { data } = res
-      })
+      queryPlan(this.filterForm)
+        .then((res = {}) => {
+          const { data = [], totalNum = 0 } = res
+          this.data = data
+          this.total = totalNum
+        })
+        .finally(() => (this.tableLoading = false))
     },
     resetPageAndGetList() {
       Object.assign(this.filterForm, { pageNo: 1, pageSize: 10 })
       this.getData()
     }
+  },
+  watch: {
+    knowledgeSystemId() {
+      this.getData()
+    },
+    'filterForm.coursePlanName': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000)
   }
 }
 </script>

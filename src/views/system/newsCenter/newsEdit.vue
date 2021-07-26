@@ -127,13 +127,13 @@
               labelWidth: '95px'
             }"
           >
-            <template slot="isVisibles">
+            <!-- <template slot="isVisibles">
               <TrainingSelectUser
                 v-model="formData.visibles"
                 title="发布范围"
                 select-type="Org,OuterUser,Position"
               />
-            </template>
+            </template> -->
           </common-form>
         </div>
       </div>
@@ -295,11 +295,13 @@ export default {
           span: 24
         },
         {
-          itemType: 'slot',
+          itemType: 'trainselectuser',
           label: '发布范围',
-          prop: 'isVisibles',
+          prop: 'visibles',
           required: true,
-          span: 24
+          span: 24,
+          title:"发布范围",
+          selectType:"Org,OuterUser,Position"
         }
       ],
       uploader: {

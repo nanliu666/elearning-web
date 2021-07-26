@@ -35,8 +35,8 @@
             :check-list="buttonData || []"
             :default-props="{
               value: 'menuId',
-              label: 'name',
-              check: 'isOwn'
+              label: 'menuName',
+              check: 'isShow'
             }"
             :disabled="disabled"
           />
@@ -69,7 +69,7 @@
 <script>
 import checkLimits from './roleCheckPermission'
 import menuRulePermission from './menuRulePermission'
-import { getRoleMenuPermission, postOrgPrivilege } from '../../../api/system/menu'
+import { postOrgPrivilege, menuPrivilege } from '../../../api/system/menu'
 import { flatTree } from '@/util/util'
 
 const pages = [
@@ -130,8 +130,8 @@ export default {
       orgPrivileges: [],
       menuPrivileges: [],
       menuProps: {
-        label: 'name',
-        id: 'menuId'
+        label: 'menuName',
+        id: 'id'
       },
       pages,
       page: [],
@@ -176,38 +176,34 @@ export default {
     },
     visible() {}
   },
-  created() {
+  async mounted() {
     this.roleId = this.$route.query.roleId
-
     this.getRolePrivilege()
   },
   methods: {
     filterData(data, table) {
-      data.map((it, i) => {
-        if (it.menuType !== 'Button') {
+      data.map((it) => {
+        if (it.menuType !== 'Button' && !!it.isOwn) {
           table.push(_.cloneDeep(it))
+          table[table.length - 1].childrenList = _.get(_.cloneDeep(it), 'children', [])
+          table[table.length - 1].children = []
         }
-        if (it.children && it.children.length > 0) {
-          if (table[i]) {
-            table[i].childrenList = _.get(_.cloneDeep(it), 'children', [])
-            table[i].children = []
-            this.filterData(it.children, table[i].children)
-          }
+        if (it.menuType === 'Button') {
+          if (this.$dataStore.menuData.includes(it.menuId)) it.isShow = true
+          else it.isShow = false
+        }
+        if (it.children && it.children.length > 0 && it.menuType !== 'Button' && !!it.isOwn) {
+          this.filterData(it.children, table[table.length - 1].children)
         }
       })
     },
     // 查询用户权限
     getRolePrivilege() {
-      const params = {
-        roleId: this.roleId,
-        clientId: this.clientId,
-        parentId: 0
-      }
       this.loading = true
       // putRolePermission
-      getRoleMenuPermission(params)
+      menuPrivilege({ userId: this.$store.getters.userId })
         .then((res) => {
-          this.menuPrivileges = JSON.parse(JSON.stringify(res))
+          this.menuPrivileges = JSON.parse(JSON.stringify(res.menuPrivileges))
           this.menuPrivileges.map((item) => {
             item.cleck = false
           })
@@ -280,7 +276,7 @@ export default {
       fiterTree.map((it) => {
         if (it.childrenList && it.childrenList.length > 0) {
           it.childrenList.map((it) => {
-            it.menuType === 'Button' && it.isOwn && pageButtonId.push(it.menuId)
+            it.menuType === 'Button' && it.isShow && pageButtonId.push(it.menuId)
           })
         }
       })
@@ -412,12 +408,12 @@ export default {
           }
         }
       }
-
       if (data) {
+        console.log(data)
         this.buttonData = []
         data.childrenList &&
           data.childrenList.map((it) => {
-            if (it.menuType === 'Button') {
+            if (it.menuType === 'Button' && it.isOwn) {
               this.buttonData.push(it)
             }
           })

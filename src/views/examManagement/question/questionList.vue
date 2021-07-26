@@ -1,6 +1,17 @@
 <template>
   <div class="question-list  fill">
     <page-header title="题库管理">
+      <el-button
+        slot="rightMenu"
+        v-p="EXPORT_QUSTION"
+        style="margin-right: 10px"
+        type="primary"
+        size="medium"
+        :disabled="_.isEmpty(tableData)"
+        @click="exportData"
+      >
+        导出
+      </el-button>
       <el-dropdown
         slot="rightMenu"
         v-p="ADD_QUSTION"
@@ -21,14 +32,6 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <!-- <el-button
-        slot="rightMenu"
-        type="primary"
-        size="medium"
-        @click="jumpEdit()"
-      >
-        创建试题
-      </el-button> -->
     </page-header>
     <el-row
       style="height: calc(100% - 92px);"
@@ -52,7 +55,7 @@
             node-key="id"
             :props="treeProps"
             :expand-on-click-node="false"
-            default-expand-all
+            :default-expand-all="false"
             :current-node-key="_.get(activeCategory, 'id')"
             @node-click="nodeClick"
           >
@@ -147,11 +150,22 @@
         </basic-container>
       </el-col>
     </el-row>
+    <export-dialog
+      :visible.sync="isShowExportDialog"
+      :total-num="page.total"
+      :export-api="exportQuestionList"
+      :export-params="queryListParams"
+    />
   </div>
 </template>
 
 <script>
-import { getQuestionList, delQuestion, getQuestionCategory } from '@/api/examManage/question'
+import {
+  getQuestionList,
+  delQuestion,
+  getQuestionCategory,
+  exportQuestionList
+} from '@/api/examManage/question'
 import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 const COLUMNS = [
@@ -161,15 +175,19 @@ const COLUMNS = [
     slot: true
   }
 ]
-import { DELETE_QUSTION, EDIT_QUSTION, ADD_QUSTION } from '@/const/privileges'
+import { DELETE_QUSTION, EDIT_QUSTION, ADD_QUSTION, EXPORT_QUSTION } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 export default {
   name: 'QuestionList',
   components: {
-    SearchPopover: () => import('@/components/searchPopOver/index')
+    SearchPopover: () => import('@/components/searchPopOver/index'),
+    exportDialog: () => import('@/components/common-export/exportDialog.vue')
   },
   data() {
     return {
+      queryListParams: {}, // 剥离请求题库列表的入参，因为导出弹窗亦需要此入参
+      isShowExportDialog: false, // 是否展示导出弹窗
       query: {},
       loading: false,
       treeData: [], // 组织架构数据
@@ -225,18 +243,44 @@ export default {
             field: 'status',
             label: '状态',
             options: _.map(QUESTION_STATUS_MAP, (val, key) => ({ label: val, value: key }))
+          },
+          {
+            label: '知识体系',
+            type: 'treeSelect',
+            field: 'knowledgeSystemId',
+            config: {
+              selectParams: {
+                placeholder: '请选择知识体系',
+                multiple: false
+              },
+              treeParams: {
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                data: [],
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  value: 'id'
+                }
+              }
+            }
           }
         ]
       }
     }
   },
   computed: {
+    exportQuestionList: () => exportQuestionList,
     columns: () => COLUMNS,
     QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
     QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     DELETE_QUSTION: () => DELETE_QUSTION,
     EDIT_QUSTION: () => EDIT_QUSTION,
     ADD_QUSTION: () => ADD_QUSTION,
+    EXPORT_QUSTION: () => EXPORT_QUSTION,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -253,8 +297,22 @@ export default {
   },
   activated() {
     this.loadTree()
+    this.initRelatedKnowledgeList()
   },
   methods: {
+    exportData() {
+      this.isShowExportDialog = true
+    },
+    //   初始化知识体系列表
+    async initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(this.searchConfig.popoverOptions, {
+        field: 'knowledgeSystemId'
+      })
+      await relatedKnowledgeList({ name: '' }).then((res) => {
+        res.unshift({ id: '', name: '全部' })
+        knowledgeSystemId.config.treeParams.data = res
+      })
+    },
     deleteHTMLTag(...args) {
       return deleteHTMLTag(...args)
     },
@@ -349,12 +407,13 @@ export default {
     },
     loadData() {
       this.loading = true
-      getQuestionList({
+      this.queryListParams = {
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
         categoryId: this.activeCategory.id,
         ...this.query
-      })
+      }
+      getQuestionList(this.queryListParams)
         .then((res) => {
           this.page.total = res.totalNum
           this.tableData = res.data

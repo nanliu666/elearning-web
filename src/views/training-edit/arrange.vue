@@ -364,7 +364,7 @@
                   :remote-method="getBookList"
                   :query-props="{ search: 'roomName' }"
                   :props="{ value: 'id', label: 'roomName' }"
-                  :init-options="offlineForm.classRoomOptions"
+                  :initial-options="offlineForm.classRoomOptions"
                   @getSelected="
                     (data) => {
                       offlineForm.classroomName = data.roomName
@@ -478,6 +478,7 @@
                   :remote-method="getOnlineCourseList"
                   :query-props="{ search: 'courseName' }"
                   :props="{ value: 'id', label: 'courseName' }"
+                  :initial-options="onlineForm.initialOptions"
                   @getSelected="(data) => handleCourseSelected(data, 'onlineForm')"
                 />
               </el-form-item>
@@ -594,7 +595,7 @@
                   <lazy-select
                     v-model="examForm.testPaper"
                     :remote-method="getExamList"
-                    :init-options="examForm.initialOptions"
+                    :initial-options="examForm.examOptions"
                   >
                   </lazy-select>
                 </el-form-item>
@@ -1507,13 +1508,14 @@ export default {
       if (target) {
         this.examForm = JSON.parse(JSON.stringify(target))
         this.examForm._target = target
-        const { examName: name, id } = target
-        this.examForm.initialOptions = [
-          {
-            id,
-            name
-          }
-        ]
+        // const { examName, testPaper } = target
+        // const form = this.examForm
+        // form.examOptions = [
+        //   {
+        //     id: testPaper,
+        //     name: examName
+        //   }
+        // ]
       } else {
         this.examForm = {
           examTime: '',
@@ -1574,6 +1576,12 @@ export default {
       if (target) {
         const form = (this.onlineForm = JSON.parse(JSON.stringify(target)))
         form._target = target
+        form.initialOptions = [
+          {
+            courseName: target.courseName,
+            id: target.course
+          }
+        ]
       } else {
         this.onlineForm = {
           period: 0,

@@ -145,6 +145,7 @@
             v-model="form.subjectId"
             :remote-method="loadMoreSubject"
             :disabled="!!form.id"
+            :initial-options="subjectOptions"
             :props="{
               value: 'id',
               label: 'asqName'
@@ -223,10 +224,11 @@
         </div>
 
         <el-table
+          ref="personTable"
           :data="currentPersonList"
           align="center"
           header-align="center"
-          row-key="userId"
+          row-key="bizId"
           @selection-change="handleSelectionChange"
         >
           <el-table-column
@@ -369,6 +371,7 @@ export default {
     return {
       step: '1',
       selectorData: [],
+      subjectOptions: [],
       pickerOptionsStart: {},
       pickerOptionsEnd: {},
       selectorProps: {
@@ -631,6 +634,12 @@ export default {
           })
           delete res.users
           Object.assign(this.form, res)
+          this.subjectOptions = [
+            {
+              id: res.subjectId,
+              asqName: res.subjectName
+            }
+          ]
         })
       }
     },
@@ -668,13 +677,18 @@ export default {
           const list = this.personList
           if (target) {
             list.splice(
-              list.findIndex((person) => person.id === target.id),
+              list.findIndex((person) => person.bizId === target.bizId),
               1
             )
+            if (this.multipleSelection.includes(target) && this.multipleSelection.length === 1) {
+              this.multipleSelection = []
+              this.$refs.personTable.clearSelection()
+            }
             return
           }
           this.personList = list.filter((person) => this.multipleSelection.indexOf(person) < 0)
           this.multipleSelection = []
+          this.$refs.personTable.clearSelection()
         })
         .catch(() => {})
     },

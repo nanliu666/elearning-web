@@ -6,7 +6,7 @@
         v-p="ADD_LECTURER_CLASSIFY"
         type="primary"
         size="medium"
-        @click="$refs.orgEdit.create()"
+        @click="$refs.orgEdit.add()"
       >
         创建分类
       </el-button>
@@ -84,7 +84,6 @@
       ref="orgEdit"
       :visible="createOrgDailog"
       @refresh="loadTableData"
-      @changevisible="changevisible"
     />
   </div>
 </template>
@@ -131,7 +130,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },

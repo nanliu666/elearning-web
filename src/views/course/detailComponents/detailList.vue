@@ -94,7 +94,8 @@
 <script>
 import { getStudyList, exportStudyList } from '@/api/course/course'
 import SearchPopover from '@/components/searchPopOver/index'
-import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
+import { exportToExcel } from '@/util/util'
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -174,30 +175,17 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'treeSelect',
+    label: '部门',
+    disabled: false,
     field: 'orgId',
-    label: '所属部门',
     data: '',
-    config: {
-      selectParams: {
-        placeholder: '请输入内容',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'orgName',
-          disabled: 'disabled',
-          value: 'orgId'
-        }
-      }
-    }
+    placeholder: '请选择部门',
+    type: 'lazycascader',
+    filterMethod: () => {},
+    filterProps: {},
+    options: [],
+    change: () => {},
+    props: {}
   },
   {
     type: 'select',
@@ -276,6 +264,7 @@ export default {
   data() {
     return {
       moveKnowledgeRow: {},
+      orgOption: [],
       formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
@@ -309,27 +298,83 @@ export default {
 
   activated() {
     this.refreshTableData()
-    this.loadOrgData()
     this.$refs.searchPopover.resetForm()
   },
   created() {
     this.refreshTableData()
+  },
+  mounted() {
+    const org = (this.orgOption = this.searchPopoverConfig.popoverOptions[0])
+    org.filterMethod = this.loadOrgData
+    org.filterProps = {
+      size: {
+        key: 'pageSize',
+        value: 1000
+      },
+      page: {
+        key: 'pageNo',
+        value: 0
+      },
+      search: {
+        key: 'orgName',
+        value: ''
+      }
+    }
+    org.props = {
+      checkStrictly: true,
+      label: 'orgName',
+      value: 'orgId',
+      // moreLoad: this.loadOrgData,
+      lazy: true,
+      lazyLoad: this.orgLazyLoad,
+      loadProps: {
+        size: {
+          key: 'pageSize',
+          value: 10
+        },
+        page: {
+          key: 'pageNo',
+          value: 1
+        },
+        value: {
+          key: 'parentId',
+          value: ''
+        }
+      }
+    }
     this.loadOrgData()
   },
   methods: {
-    loadOrgData() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then(
-        (res) =>
-          (this.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(
-            [
-              {
-                orgName: '全部',
-                orgId: ''
-              }
-            ],
-            res
-          ))
-      )
+    orgLazyLoad(node, resolve) {
+      if (!node.data) return []
+      this.loadOrgData({ parentId: node.data.id }, resolve)
+    },
+    loadOrgData(query, resolve) {
+      if (query && typeof query === 'object') {
+        if (!query.pageSize) {
+          Object.assign(query, { pageSize: 10, pageNo: 1 })
+        } else {
+          if (query.name) {
+            delete query.parentId
+          } else {
+            delete query.name
+          }
+        }
+      } else {
+        query = { name: query }
+      }
+      if (!query.name) {
+        query.parentId = query.parentId || '0'
+      }
+      // 接口
+      getorganizationNew(query).then((res) => {
+        const data = res
+        if (resolve) {
+          resolve(data)
+        } else {
+          this.orgOption.options = data
+        }
+      })
     },
 
     // 批量操作
@@ -338,8 +383,9 @@ export default {
       _.each(selected, (item) => {
         selectedIds.push(item.courseId)
       })
-      let res = await exportStudyList({ courseId: this.$route.query.id })
-      console.log(res)
+      await exportStudyList({ courseId: this.$route.query.id }).then((res) => {
+        exportToExcel(res)
+      })
       this.$message.success('操作成功')
       this.$refs.table.clearSelection()
       this.loadTableData()

@@ -50,11 +50,13 @@
               >
                 <el-select
                   v-model="ruleForm.userId"
+                  v-loadmore="loadMore"
                   placeholder="请选择"
                   filterable
                   remote
                   :remote-method="remoteMethod"
                   popper-class="lecturer_el_select"
+                  @visible-change="visibleChange"
                 >
                   <el-option
                     v-for="item in Teacherlist"
@@ -62,6 +64,20 @@
                     :label="item.name"
                     :value="item.userId"
                   ></el-option>
+                  <el-option
+                    v-show="valve"
+                    value="1"
+                    class="loading"
+                  >
+                    <i class="el-icon-loading"></i>加载中
+                  </el-option>
+                  <el-option
+                    v-show="noData"
+                    value="1"
+                    class="ending"
+                  >
+                    {{ Teacherlist.length === 0 ? '无数据' : '到底了' }}
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item
@@ -396,6 +412,10 @@
               prop="introduction"
             >
               <tinymce v-model="ruleForm.introduction" />
+              <span
+                v-if="!ruleForm.introduction"
+                class="introduction"
+              >可为讲师添加教育经验、获奖情况、专业特长等详细介绍</span>
             </el-form-item>
           </div>
         </el-form>
@@ -463,7 +483,7 @@ export default {
       //聘用形式
       type: ['内训', '外聘'],
       //专业类型
-      professionalCata: ['技术类', '管理类', '营销服务类', '技能类'],
+      professionalCata: ['技术类', '管理类', '营销类', '技能类'],
       //证书编号集
       certNo: [],
       // 添加擅长领域input框是否显示
@@ -524,10 +544,18 @@ export default {
         positionName: [{ required: true, message: '请输入岗位', trigger: 'blur' }],
         type: [{ required: true, message: '请选择聘用类型', trigger: 'change' }],
         professionalCata: [{ required: true, message: '请选择专业类型', trigger: 'change' }],
+        categoryId: [{ required: true, message: '请选择所属分类', trigger: 'change' }],
         teacherLevel: [{ required: true, message: '请选择聘用类型', trigger: 'change' }],
         certNo: [{ type: Number, message: '证书编号只能为数字', trigger: 'blur' }],
         date: [{ required: true, message: '请选择讲师聘期', trigger: 'change' }]
-      }
+      },
+      queryParams: {
+        pageNo: 1,
+        pageSize: 20,
+        search: ''
+      },
+      valve: false,
+      noData: false
     }
   },
   watch: {
@@ -563,23 +591,18 @@ export default {
   },
   async created() {
     this.ruleFormClone = _.cloneDeep(this.ruleForm)
-    await this.isqueryTeacherlist()
     await this.islistTeacherCategory()
-    if (this.$route.query.id) {
-      this.getTeacher()
-    }
-    console.log(this.$refs.el_select)
-  },
-  async activated() {
-    this.$refs.ruleForm.clearValidate()
-    await this.isqueryTeacherlist()
-    await this.islistTeacherCategory()
-    this.parentOrgIdLabel = ''
     if (this.$route.query.id) {
       this.getTeacher()
     }
   },
   methods: {
+    visibleChange(show) {
+      if (show) {
+        this.queryParams.search = ''
+        this.isqueryTeacherlist()
+      }
+    },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
         this.ruleForm.categoryId = data.id
@@ -599,15 +622,11 @@ export default {
       })
     },
     remoteMethod(v) {
-      // 搜索请求
-      let params = {
-        pageNo: 1,
-        pageSize: -1,
-        search: v
-      }
-      queryTeacherlist(params).then((res) => {
-        this.Teacherlist = res.data
-      })
+      this.queryParams.search = v.trim()
+      this.queryParams.pageSize = 20
+      this.queryParams.pageNo = 1
+      this.Teacherlist = []
+      this.isqueryTeacherlist()
     },
     // 获取讲师数据
     getTeacher() {
@@ -637,17 +656,19 @@ export default {
         this.data = res
       })
     },
-
+    loadMore() {
+      if (this.valve || this.noData) return
+      this.valve = true
+      this.queryParams.pageNo += 20
+      this.isqueryTeacherlist()
+    },
     // 查询创建讲师的数据
     isqueryTeacherlist() {
-      let params = {
-        pageNo: 1,
-        pageSize: 9999,
-        search: ''
-      }
-
-      queryTeacherlist(params).then((res) => {
-        this.Teacherlist = res.data
+      queryTeacherlist(this.queryParams).then((res) => {
+        this.Teacherlist.push(...res.data)
+        this.valve = false
+        if (res.data.length === 0) return (this.noData = true)
+        else this.noData = false
       })
     },
     toClass() {
@@ -741,7 +762,6 @@ export default {
 .upload-demo {
   padding-right: 10px;
   position: relative;
-
   .avatar {
     position: absolute;
     top: 0;
@@ -858,6 +878,13 @@ export default {
 }
 .editorTitle {
   position: relative;
+  .introduction {
+    position: absolute;
+    top: 158px;
+    left: 18px;
+    z-index: 99999999;
+    color: #dcdcdc;
+  }
 }
 .yen {
   position: absolute;
@@ -873,8 +900,21 @@ export default {
 ::v-deep .el-input-number.is-controls-right {
   width: 20vw;
 }
+.loading {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+  i {
+    margin-right: 10px;
+  }
+}
+.ending {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+}
 </style>
-<style lang="scss">
+<style lang="scss" scoped>
 .lecturer_el_select {
   .el-select-dropdown__wrap.el-scrollbar__wrap {
     height: 100%;

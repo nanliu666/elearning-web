@@ -170,6 +170,11 @@
               v-model="model[column.prop]"
               v-bind="itemAttrs(column)"
             />
+            <train-select-user
+              v-if="column.itemType == 'trainselectuser'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+            />
             <slot
               v-if="column.itemType == 'slot'"
               v-bind="itemAttrs(column)"
@@ -179,7 +184,7 @@
               v-if="column.desc"
               class="desc"
             >
-              {{ column.desc }}
+              {{ column.desc}}
             </div>
           </el-form-item>
         </div>
@@ -202,6 +207,7 @@ export default {
   name: 'CommonForm',
   components: {
     elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'),
+    trainSelectUser:() => import('@/components/trainingSelectUser/trainingSelectUser.vue'),
     LazySelect
   },
   props: {

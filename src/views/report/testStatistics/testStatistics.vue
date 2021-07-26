@@ -61,11 +61,8 @@
                   @showColunmsChange="showColunmsChange"
                   @resetQuery="resetQuery"
                 >
-                  <template
-                    v-if="activeName === '1'"
-                    slot="frist"
-                  >
-                    <span class="labelscreen">考试</span>
+                  <template slot="frist">
+                    <span class="labelscreen">{{ activeName === '1' ? '考试' : '考试名称' }}</span>
                     <lazy-select
                       v-model="params.examName"
                       :options-width="250"
@@ -120,7 +117,6 @@ import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
 import { MYEXAMSOURCE, EXAM_PATTERN } from '@/const/configData'
-import { cancel } from '@/router/axios'
 // 个人积分统计配置
 const onlineAll = [
   {
@@ -272,14 +268,14 @@ const onlineStudy = [
   }
 ]
 const perScoreParams = [
-  {
-    type: 'input',
-    field: 'examName',
-    label: '考试名称',
-    data: '',
-    options: [],
-    config: { placeholder: '请输入考试名称' }
-  },
+  // {
+  //   type: 'input',
+  //   field: 'examName',
+  //   label: '考试名称',
+  //   data: '',
+  //   options: [],
+  //   config: { placeholder: '请输入考试名称' }
+  // },
   {
     type: 'input',
     field: 'projectName',
@@ -370,6 +366,7 @@ export default {
     examChange(val) {
       if (!val.id) return
       this.newExamName = val.examName
+      if (this.activeName === '0') return
       getExamBatch({
         examId: val.id
       }).then((res) => {
@@ -402,9 +399,10 @@ export default {
     getQuery(isPage, key) {
       if (key === 'clickQuery') {
         this.reqParam = JSON.parse(JSON.stringify(this.params))
-        if (this.activeName === '1') {
-          this.reqParam.examName = this.params.examName ? this.newExamName : ''
-        }
+        // if (this.activeName === '1') {
+        //   this.reqParam.examName = this.params.examName ? this.newExamName : ''
+        // }
+        this.reqParam.examName = this.params.examName ? this.newExamName : ''
       }
       if (this.activeName === '0') {
         this.getTabelData(isPage)
@@ -471,9 +469,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)
       this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)

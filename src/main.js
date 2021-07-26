@@ -98,7 +98,9 @@ iconfontVersion.forEach((ele) => {
 Vue.prototype.$message = $message
 
 Vue.config.productionTip = false
-
+Vue.prototype.$dataStore = {
+  menuData: null
+}
 // 页面初始化
 import init from '@/init'
 

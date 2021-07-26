@@ -413,10 +413,11 @@ export default {
         type: '1'
       }
       getcategoryTree(params).then((res) => {
-        this.searchConfig.popoverOptions[0].config.treeParams.data = [
-          { id: '0', name: '未分类' },
-          ...res
-        ]
+        this.searchConfig.popoverOptions[0].config.treeParams.data = res
+        // this.searchConfig.popoverOptions[0].config.treeParams.data = [
+        //   { id: '0', name: '未分类' },
+        //   ...res
+        // ]
       })
     },
     /**

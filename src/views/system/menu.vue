@@ -25,7 +25,6 @@
         :data="tableData"
         :loading="tableLoading"
         :page-config="tablePageConfig"
-        :page="page"
       >
         <template #topMenu>
           <div class="operations">
@@ -187,7 +186,7 @@ const TABLE_CONFIG = {
     width: 60
   },
   enableMultiSelect: false,
-  enablePagination: true,
+  enablePagination: false,
   showHandler: true,
   showIndexColumn: false,
   // 树形结构懒加载

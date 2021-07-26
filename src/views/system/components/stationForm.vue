@@ -280,11 +280,12 @@ export default {
             .then(() => {
               this.handleClose()
               // this.loadOrgData()
-              this.$emit('initData', this.rowData.parentId)
+              this.$emit('initData', { parentId: this.rowData.parentId, isInitData: true })
               this.$message({
                 type: 'success',
                 message: '保存成功!'
               })
+              this.$refs.form.resetFields()
             })
             .finally(() => {
               this.saveLoading = false
@@ -295,11 +296,12 @@ export default {
           .then(() => {
             this.handleClose()
             // this.loadOrgData()
-            this.$emit('initData', this.rowData.parentId)
+            this.$emit('initData', { parentId: this.rowData.parentId, isInitData: true })
             this.$message({
               type: 'success',
               message: '保存成功!'
             })
+            this.$refs.form.resetFields()
           })
           .finally(() => {
             this.saveLoading = false

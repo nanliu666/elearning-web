@@ -75,6 +75,7 @@ export default {
   watch: {
     checkList: {
       handler(val) {
+        console.log(val)
         if (val.length > 0) {
           // 列表选中状态改变时，改变全选按钮状态
           // console.log(val)

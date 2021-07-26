@@ -20,7 +20,6 @@
           <a
             v-if="templateIsUrl"
             target="_blank"
-            download="用户导入模板.xsl"
             :href="downloadTemplate"
           >
             <el-button
@@ -119,11 +118,11 @@
             </el-button>
           </el-upload>
         </div>
-        <!-- <common-table
-          :columns="TABLE_COLUMNS"
+        <common-table
+          :columns="columns"
           :config="TABLE_CONFIG"
           :data="failedList"
-        /> -->
+        />
       </div>
       <div
         v-if="step === '2'"
@@ -157,6 +156,12 @@ import { exportToExcel } from '@/util/util'
 //   downloadLecturerTemplate,
 //   importLecturerErrorFile
 // } from '@/api/lecturer/lecturer'
+const TABLE_CONFIG = {
+  maxHeight: '580px',
+  showHandler: false,
+  showIndexColumn: false,
+  enableMultiSelect: false
+}
 export default {
   name: 'ImportData',
   props: {
@@ -178,10 +183,27 @@ export default {
       //上传
       type: [Function],
       required: true
+    },
+    query: {
+      //导入额外请求参数
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    columns: {
+      //列项
+      type: Array,
+      default: () => []
+    },
+    resKey: {
+      type: String,
+      default: 'errData'
     }
   },
   data() {
     return {
+      TABLE_CONFIG,
       importDisabled: true,
       uploadList: [],
       successCount: 0,
@@ -235,13 +257,23 @@ export default {
       this.importDisabled = true
     },
     httpRequest(file) {
+      const loading = this.$loading({
+        lock: true,
+        text: '正在导入，请稍等！',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.7)'
+      })
       const parmas = new FormData()
       parmas.append('file', file.file)
+      const keys = Object.keys(this.query)
+      keys.forEach((val) => {
+        parmas.append(val, this.query[val])
+      })
       this.uploadFunction(parmas)
         .then((res) => {
           this.successCount += res.successNum
           this.failedCount = res.failedNum
-          // this.failedList = res.importFailDatal
+          this.failedList = res[this.resKey]
           this.importRes = res
           this.$refs.uploader1 && this.$refs.uploader1.clearFiles()
           if (this.failedCount == 0) {
@@ -251,6 +283,9 @@ export default {
           }
         })
         .catch()
+        .finally(() => {
+          loading.close()
+        })
     },
     getTemplate() {
       this.downloadTemplate().then((res) => {
@@ -265,12 +300,16 @@ export default {
       })
     },
     handleSubmit() {
+      // 去结果页
+      this.$emit('toResult', false)
       this.$refs.uploader.submit()
     },
     jumpToQuestionList() {
+      this.$emit('toResult', true)
       this.$router.go(-1)
     },
     handleCancel() {
+      this.$emit('toResult', true)
       this.$router.go(-1)
     }
   }
@@ -278,6 +317,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
+}
 .question-import {
   /deep/ .basic-container--block {
     height: calc(100% - 92px);

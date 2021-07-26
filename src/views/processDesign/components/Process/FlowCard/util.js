@@ -152,6 +152,9 @@ export class NodeUtils {
    */
   static deleteNode(nodeData, processData, checkEmpty = true) {
     let prevNode = this.getPreviousNode(nodeData.prevId, processData)
+    //如果只剩一个节点  不允许删除
+    if(prevNode.type === 'start') return
+
     if (checkEmpty && prevNode.type === 'empty') {
       if (this.isConditionNode(nodeData)) {
         this.deleteNode(prevNode, processData)

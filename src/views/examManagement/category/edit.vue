@@ -110,7 +110,7 @@
 </template>
 
 <script>
-const CLIENT_TYPE = ['题库', '试卷/考试']
+const CLIENT_TYPE = ['题库', '试卷/考试/闯关竞赛']
 import { getCategoryList, putCategory, postCategory } from '@/api/examManage/category'
 import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { mapGetters } from 'vuex'
@@ -258,6 +258,15 @@ export default {
     edit(row) {
       this.type = 'edit'
       this.form = _.cloneDeep(row)
+      if (this.form.orgIdList.length) {
+        this.form.orgIdList = this.form.orgIdList.reduce((pre, cur, index) => {
+          pre.push({
+            orgId: cur,
+            orgName: this.form.orgNames.split(',')[index]
+          })
+          return pre
+        }, [])
+      }
       this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
       this.loadOrgTree()

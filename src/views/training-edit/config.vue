@@ -43,14 +43,14 @@
         ref="categoryCascader"
         v-model="form.categoryId"
         :disabled="isUnderwayEdit"
+        clearable
         filterable
-        :filter-method="handleCategoryFilter"
+        filter
         style="width: 100%"
         placeholder="请选择所在分类"
-        :options="categoryData"
+        :options="computedCategoryData"
         :props="{ checkStrictly: true, label: 'name', value: 'id' }"
         :show-all-levels="false"
-        clearable
         @change="handleCategoryChange"
       ></el-cascader>
     </el-form-item>
@@ -65,8 +65,8 @@
         :disabled="isUnderwayEdit"
         :default-time="['00:00:00', '23:59:59']"
         style="width: 100%;"
-        type="daterange"
-        format="yyyy-MM-dd"
+        type="datetimerange"
+        format="yyyy-MM-dd HH:mm:ss"
         value-format="yyyy-MM-dd HH:mm:ss"
         start-placeholder="开始日期"
         end-placeholder="截止日期"
@@ -79,15 +79,23 @@
       prop="knowledgeSystemId"
       class="half-form-item"
     >
-      <tree-selector
+      <lazy-load-cascader
+        ref="lazycascader"
         v-model="form.knowledgeSystemId"
+        style="width: 100%"
+        filterable
         :disabled="isUnderwayEdit"
-        style="width: 100%;"
-        class="selector"
-        :options="knowledgeData"
         placeholder="请选择"
-        :props="selectorProps"
-        @focus="getKnowledgeData"
+        :filter-method="(name) => getKnowledgeData(name)"
+        :options="knowledgeData"
+        :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+        clearable
+        @change="
+          (data) =>
+            Array.isArray(data)
+              ? (form.knowledgeSystemId = data[data.length - 1])
+              : (form.knowledgeSystemId = data)
+        "
       />
     </el-form-item>
 
@@ -171,8 +179,14 @@
         :disabled="isUnderwayEdit"
         :remote-method="getUserList"
         :props="{ value: 'userId', label: 'name' }"
-        :init-options="headTeacherOptions"
-        @getSelected="(data) => (form.contactPhone = data.phonenum)"
+        :initial-options="headTeacherOptions"
+        @getSelected="
+          (data) => {
+            if (data.phonenum) {
+              form.contactPhone = data.phonenum
+            }
+          }
+        "
       />
     </el-form-item>
 
@@ -180,41 +194,9 @@
       label="手机号码"
       prop="contactPhone"
       class="half-form-item"
-      :class="{ 'margin-right-120': form.trainWay !== '1' }"
     >
       <el-input
         v-model="form.contactPhone"
-        :readonly="isUnderwayEdit"
-        :maxlength="32"
-        placeholder="请输入"
-        clearable=""
-      ></el-input>
-    </el-form-item>
-
-    <el-form-item
-      v-if="type === 'inside'"
-      label="主办单位"
-      prop="sponsor"
-      class="half-form-item"
-      :class="{ 'margin-right-120': form.trainWay === '1' }"
-    >
-      <el-input
-        v-model="form.sponsor"
-        :readonly="isUnderwayEdit"
-        :maxlength="32"
-        placeholder="请输入"
-        clearable=""
-      ></el-input>
-    </el-form-item>
-
-    <el-form-item
-      v-if="type === 'inside'"
-      label="承办单位"
-      prop="organizer"
-      class="half-form-item"
-    >
-      <el-input
-        v-model="form.organizer"
         :readonly="isUnderwayEdit"
         :maxlength="32"
         placeholder="请输入"
@@ -385,6 +367,7 @@
       <lazy-select
         v-model="form.certificateId"
         :disabled="isUnderwayEdit"
+        :data-filter="(item) => item.status == 1"
         :remote-method="getCertificateList"
         :props="{ label: 'name', value: 'id' }"
       ></lazy-select>
@@ -490,18 +473,20 @@
 
 <script>
 import lazySelect from '@/components/el-lazy-select'
-import { getCreatorList } from '@/api/live'
 import { querySubject } from '@/api/questionnaire'
 import { getOrgUserList } from '@/api/system/user'
 import { getCategoryTree } from '@/api/train/train'
 import { getCertificateList } from '@/api/certificate/certificate'
-import TreeSelector from '@/components/tree-selector'
 import toolbar from '@/components/tinymce/src/toolbar'
+import { getStationParent } from '@/api/system/station'
+import { relatedKnowledgeList } from '@/api/training/training'
+import lazyLoadCascader from '@/components/lazy-load-cascader'
+
 export default {
   name: 'TrainingEditConfig',
   components: {
-    TreeSelector,
     lazySelect,
+    lazyLoadCascader,
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   props: {
@@ -541,11 +526,7 @@ export default {
     return {
       tinymceOption: {},
       tinymceToolbar: toolbar,
-      selectorProps: {
-        value: 'id',
-        label: 'name',
-        children: 'children'
-      },
+
       knowledgeData: [],
       pickerOptions: {
         disabledDate(date) {
@@ -595,10 +576,19 @@ export default {
         asqId: [{ trigger: 'change', message: '请选择评估问卷', required: true }],
         headTeacher: [{ trigger: 'change', message: '请选择项目经理', required: true }]
       },
-      wordCount: 0
+      wordCount: 0,
+      stationData: []
     }
   },
   computed: {
+    computedCategoryData: {
+      set(val) {
+        this.categoryData = val
+      },
+      get() {
+        return this.categoryData
+      }
+    },
     cost() {
       const { costBudget, people } = this.form
       const result = (costBudget / people).toFixed(1)
@@ -682,6 +672,30 @@ export default {
     this.getData()
   },
   methods: {
+    getStationParent(query, resolve) {
+      if (query && typeof query === 'object') {
+        if (!query.pageSize) {
+          Object.assign(query, { pageSize: 10, pageNo: 1 })
+        } else {
+          if (query.name) {
+            delete query.parentId
+          } else {
+            delete query.name
+          }
+        }
+      } else {
+        query = { name: query }
+      }
+
+      getStationParent(query).then((res) => {
+        const { data } = res
+        if (resolve) {
+          resolve(data)
+        } else {
+          this.stationData = res.data
+        }
+      })
+    },
     disableTinymce() {
       const fn = () => {
         this.tinymceOption.readonly = 1
@@ -722,9 +736,9 @@ export default {
       const text = el.innerHTML.replace(/<\/?[^<>]+>/g, '')
       this.wordCount = img.length + text.length
     },
-    handleCategoryFilter(_, keyword) {
-      this.getCategoryData(keyword)
-    },
+    handleCategoryFilter: _.debounce(function(el) {
+      this.getCategoryData(el.target.value)
+    }, 1000),
     handleCategoryChange(data) {
       if (!data) return
       this.form.categoryId = data[data.length - 1]
@@ -771,8 +785,10 @@ export default {
         })
       })
     },
-    getKnowledgeData() {
-      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+    getKnowledgeData(name) {
+      const data = { name: '' }
+      if (name) data.name = name
+      relatedKnowledgeList(data).then((res) => {
         this.knowledgeData = res
       })
     },
@@ -791,9 +807,10 @@ export default {
       this.getCategoryData()
       this.getKnowledgeData()
       this.handleWordCount()
+      this.getStationParent()
     },
     getCertificateList(params) {
-      return getCertificateList(Object.assign(params))
+      return getCertificateList(Object.assign(params, { status: 1 }))
     },
     toCategory() {
       const routeData = this.$router.resolve({
@@ -810,7 +827,7 @@ export default {
         params.search = search
       }
       getCategoryTree(params).then((res) => {
-        this.categoryData = res
+        this.computedCategoryData = res
       })
     }
   }

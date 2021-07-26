@@ -65,3 +65,6 @@ export const ableCategory = (params) => put('/manage/v1/evaluation/category/able
 export const getStudentByLiveId = (params) => get('/common/v1/live/student', params)
 // 添加直播草稿
 export const postAddLiveDraft = (params) => post('/blade-resource/v1/live/plan/draftLivePlan', params)
+
+// 搜索知识分类
+export const getKnowledgeList = (params) => post('/blade-resource/v1/category/relatedKnowledgeList', params)

@@ -13,13 +13,15 @@
         <div class="tree">
           <el-tree
             ref="tree"
+            v-loading="loading"
             class="filter-tree"
             :data="orgData"
             :props="defaultProps"
-            default-expand-all
             :filter-node-method="filterNode"
-            node-key="id"
+            node-key="orgId"
             show-checkbox
+            :load="loadNode"
+            lazy
             @check="handleCheckItem"
           >
           </el-tree>
@@ -28,7 +30,7 @@
     </div>
     <div class="right">
       <div class="title">
-        已选：
+        已选（以选中结果为准）：
       </div>
       <div
         v-for="(item, index) in selected"
@@ -49,7 +51,7 @@
   </div>
 </template>
 <script>
-import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 export default {
   // 可见范围组织列表增加入参，orgSource:1  如果不是就不用 传
   props: {
@@ -67,11 +69,12 @@ export default {
       orgData: null,
       selected: [],
       defaultProps: {
-        children: 'children',
         label: 'orgName',
-        disabled: 'disabled'
-        // id: 'id'
-      }
+        disabled: 'disabled',
+        value: 'orgId'
+      },
+      loading: false,
+      idListChange:false
     }
   },
   watch: {
@@ -82,7 +85,7 @@ export default {
       this.handleSubmit()
     },
     idList() {
-      this.createdSetCheckedKeys()
+      this.createdSetCheckedKeys(true,this.idList)
     },
     orgData() {}
   },
@@ -90,17 +93,30 @@ export default {
     this.createdSetCheckedKeys()
   },
   methods: {
-    createdSetCheckedKeys() {
+    createdSetCheckedKeys(hasCheckList,arr) {
       this.loadOrgData().then(() => {
         if (this.idList instanceof Array) {
-          let list = this.idList
+          let list = this.idList.reduce((pre,cur)=>{
+            pre.push(cur.orgId)
+            return pre
+          },[])
           this.$refs.tree.setCheckedKeys(list)
           this.selected = []
-          this.updateSelected(this.orgData)
+          if(hasCheckList){
+            this.setSelected(arr)
+          }else{
+            this.setSelected(this.idList)
+          }
+          // this.updateSelected(this.orgData)
         }
       })
     },
-
+    setSelected(list = []){
+      list.forEach((item) => {
+        item.id = item.orgId
+        this.selected.push(item)
+      })
+    },
     updateSelected(list = []) {
       list.forEach((item) => {
         const { id, children = [] } = item
@@ -121,15 +137,61 @@ export default {
     },
     loadOrgData() {
       this.selected = []
-      return getOrgTreeSimple({ parentOrgId: 0, orgSource: this.orgSource }).then((res) => {
-        this.orgData = res
+      this.loading = true
+      return getorganizationNew({ parentId: '0' })
+        .then((res) => {
+          this.orgData = res
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    handleCheckItem(node, { checkedNodes,checkedKeys }) {
+      // window.console.log(this.orgData)
+      //获取当前tree 选中的数据    合并传入的数据，并去重
+      let arr  = this.selected.reduce((pre,cur)=>{
+        pre.push(cur)
+        return pre
+      },[])
+      checkedNodes.forEach(item=>{
+        if(checkedKeys.indexOf(item.id)>=0){
+          arr.push({
+            id:item.id,
+            orgId:item.orgId,
+            orgName:item.orgName
+          })
+        }
       })
+      // if(checkedNodes.length<=0){
+      //   //删除当前节点
+      //   let idx = _.findIndex(arr, ['id', node.id])
+      //   let i = _.findIndex(this.selected, ['id', node.id])
+      //   this.selected.splice(i,1)
+      //   arr.splice(idx,1)
+      //   //删除当前节点子节点
+      //   // let childRes = []
+      //   // this.delChildNode(node,childRes)
+      //   // console.log(childRes,'') 
+      //   // childRes.forEach(y=>{
+      //   //   let t = _.findIndex(arr, ['id', y])
+      //   //   arr.splice(t,1)
+      //   // })
+      // }
+      arr = _.uniqBy(arr,'id')
+      this.selected =  arr
     },
-    handleCheckItem(node, { checkedNodes }) {
-      // window.console.log(node)
-      this.selected = checkedNodes
+    delChildNode(node,res){
+      let nodeInfo = this.$refs.tree.getNode(node.orgId)
+      if(nodeInfo.childNodes.length>0){
+        _.forEach(nodeInfo.childNodes,x=>{
+          res.push(x.data.id)
+          if(x.childNodes.length>0){
+            this.delChildNode(x,res)
+          }
+        })
+        
+      }
     },
-
     handleUncheckItem(item) {
       this.selected.splice(this.selected.indexOf(item), 1)
       this.posArr(item)
@@ -153,6 +215,12 @@ export default {
           this.posArrCrr(itemi)
           this.posArrCrr(item)
         }
+      })
+    },
+    async loadNode(node, resolve) {
+      if (!node.data) return
+      await getorganizationNew({ parentId: node.data.orgId }).then((res) => {
+        resolve(res)
       })
     }
   }

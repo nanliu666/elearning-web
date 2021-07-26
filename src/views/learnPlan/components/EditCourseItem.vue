@@ -256,6 +256,7 @@ export default {
       } else if (moment(value[1]).isAfter(this.planTimeRange[1])) {
         callback(new Error('课程结束时间需要小于等于计划结束时间'))
       } else {
+          value[1] = value[1].split(' ')[0] + ' 23:59:59'
         callback()
       }
     },

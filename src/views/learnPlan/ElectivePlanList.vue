@@ -77,13 +77,14 @@
 import SearchPopover from '@/components/searchPopOver/index'
 import { queryLog, delLog } from '@/api/learnPlan'
 
-import { getOrgTreeSimple } from '../../api/org/org'
+import { getorganizationNew, getOrgTreeSimple } from '../../api/org/org'
+
 // 表格属性
 const TABLE_COLUMNS = [
   {
     label: '课程编号',
     width: 180,
-    prop: 'courseId'
+    prop: 'courseNo'
   },
   {
     label: '课程名称',
@@ -139,30 +140,17 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     data: ''
   },
   {
-    type: 'treeSelect',
-    field: 'departmentId',
     label: '组织名称',
+    disabled: false,
+    field: 'departmentId',
     data: '',
-    config: {
-      selectParams: {
-        placeholder: '请输入内容',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'orgName',
-          disabled: 'disabled',
-          value: 'orgId'
-        }
-      }
-    }
+    placeholder: '请选择部门',
+    type: 'lazycascader',
+    filterMethod: () => {},
+    filterProps: {},
+    options: [],
+    change: () => {},
+    props: {}
   },
   {
     type: 'input',
@@ -230,11 +218,83 @@ export default {
   activated() {
     // this.initSearchData()
     this.loadTableData()
+
+    this.loadNewOrgData()
+    const org = (this.orgOption = this.searchPopoverConfig.popoverOptions[1])
+    org.filterMethod = this.loadNewOrgData
+    org.filterProps = {
+      size: {
+        key: 'pageSize',
+        value: 1000
+      },
+      page: {
+        key: 'pageNo',
+        value: 0
+      },
+      search: {
+        key: 'orgName',
+        value: ''
+      }
+    }
+    org.props = {
+      checkStrictly: true,
+      multiple: false,
+      label: 'orgName',
+      value: 'orgId',
+      // moreLoad: this.loadNewOrgData,
+      lazy: true,
+      lazyLoad: this.orgLazyLoad,
+      loadProps: {
+        size: {
+          key: 'pageSize',
+          value: 10
+        },
+        page: {
+          key: 'pageNo',
+          value: 1
+        },
+        value: {
+          key: 'parentId',
+          value: ''
+        }
+      }
+    }
   },
   created() {
     this.loadOrgData()
   },
   methods: {
+    orgLazyLoad(node, resolve) {
+      if (!node.data) return []
+      this.loadNewOrgData({ parentId: node.data.id }, resolve)
+    },
+    loadNewOrgData(query, resolve) {
+      if (query && typeof query === 'object') {
+        if (!query.pageSize) {
+          Object.assign(query, { pageSize: 10, pageNo: 1 })
+        } else {
+          if (query.name) {
+            delete query.parentId
+          } else {
+            delete query.name
+          }
+        }
+      } else {
+        query = { name: query }
+      }
+
+      if (!query.name) {
+        query.parentId = query.parentId || '0'
+      }
+      // 接口
+      getorganizationNew(query).then((res) => {
+        if (resolve) {
+          resolve(res)
+        } else {
+          this.orgOption.options = res
+        }
+      })
+    },
     loadOrgData() {
       getOrgTreeSimple({ parentOrgId: 0 }).then(
         (res) =>

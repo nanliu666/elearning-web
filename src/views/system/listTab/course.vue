@@ -104,12 +104,13 @@
 import {
   getAllCourse,
   createCourseUser,
-  getKnowledgeSystem,
   listTeacherComboBox,
   noPrivilegeTree,
   listCatalog
 } from '@/api/system/systemList'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
+import { getorganizationNew } from '@/api/org/org'
 import styles from '@/styles/variables.scss'
 import { LIST_APPLY } from '@/const/privileges'
 const TABLE_COLUMNS = [
@@ -142,6 +143,11 @@ const TABLE_COLUMNS = [
   {
     label: '所在分类',
     prop: 'catalogName'
+  },
+  {
+    label: '归属组织',
+    prop: 'orgNames',
+    minWidth: 160
   },
   {
     label: '授课方式',
@@ -292,21 +298,21 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
       placeholder: '请选择'
     }
   },
+  // {
+  //   field: 'knowledgeSystemId',
+  //   label: '知识体系',
+  //   type: 'select',
+  //   options: [],
+  //   config: { optionLabel: 'name', optionValue: 'idStr', placeholder: '请选择' }
+  // },
   {
+    type: 'treeSelect',
     field: 'knowledgeSystemId',
     label: '知识体系',
-    type: 'select',
-    options: [],
-    config: { optionLabel: 'name', optionValue: 'idStr', placeholder: '请选择' }
-  },
-  {
-    field: 'orgId',
-    label: '组织',
-    type: 'treeSelect',
+    data: '',
     config: {
       selectParams: {
         placeholder: '请选择',
-        // 是否多选
         multiple: false
       },
       treeParams: {
@@ -318,8 +324,39 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
         filterable: false,
         props: {
           children: 'children',
-          label: 'orgName',
+          label: 'name',
           disabled: '',
+          value: 'id'
+        }
+      }
+    }
+  },
+  {
+    type: 'treeSelectNew',
+    field: 'orgId',
+    label: '组织',
+    data: '',
+    config: {
+      selectParams: {
+        placeholder: '请选择组织',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        load: loadSelectTreeFn,
+        lazy: true,
+        filterable: false,
+        props: {
+          isLeaf: (data) => {
+            return !data.hasChildren
+          },
+          children: 'children',
+          label: 'orgName',
+          disabled: 'disabled',
           value: 'orgId'
         }
       }
@@ -329,6 +366,13 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
 const searchConfig = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS,
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS
+}
+function loadSelectTreeFn(node, resolve) {
+  //  懒加载下拉树数据
+  let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+  getorganizationNew(params).then((res) => {
+    resolve(res)
+  })
 }
 export default {
   name: 'CatelogManager',
@@ -377,7 +421,6 @@ export default {
     this.getTeacher() //讲师
     this.getClass() //课程分类
     this.funKnowledgeSystem() //知识体系
-    this.getOrganiz() //组织
   },
   methods: {
     //处理页码改变
@@ -449,10 +492,11 @@ export default {
     },
     //知识体系
     funKnowledgeSystem() {
-      getKnowledgeSystem({ source: 'knowledgeSystem' }).then((res) => {
+      relatedKnowledgeList({ id: '0' }).then((res) => {
         this.searchConfig.popoverOptions.forEach((val) => {
           if (val.field === 'knowledgeSystemId') {
-            val.options = res
+            val.config.treeParams.data = res
+            val.config.treeParams.data.unshift({ name: '全部', id: '' })
           }
         })
       })

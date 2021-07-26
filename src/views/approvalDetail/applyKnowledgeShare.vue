@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-if="knowInfo"
-    v-loading="isLoading"
-    class="applyKnowledgeShare"
-  >
+  <div v-if="knowInfo" v-loading="isLoading" class="applyKnowledgeShare">
     <h3>{{ knowInfo.resName }}</h3>
     <ul class="info">
       <li>
@@ -22,10 +18,7 @@
     <h3 style="padding-top: 40px">
       资料附件
     </h3>
-    <div
-      v-if="!knowInfo.attachments.length"
-      class="address"
-    >
+    <div v-if="!knowInfo.attachments.length" class="address">
       <span>资源地址:</span>
       <span class="url">{{ knowInfo.resUrl }}</span>
       <el-button
@@ -40,54 +33,34 @@
     </div>
     <div v-else>
       <el-row>
-        <el-checkbox
-          v-model="checkAll"
-          :indeterminate="isIndeterminate"
-          @change="selectAll"
-        >
+        <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="selectAll">
           全选
         </el-checkbox>
-        <span
-          v-show="bulkLoad"
-          class="bulk"
-          @click="loadAll"
-        >
+        <span v-show="bulkLoad" class="bulk" @click="loadAll">
           <i class="iconfont iconimage_icon_download"></i>
           <span>批量下载</span>
         </span>
       </el-row>
       <ul class="enclosureGroup">
-        <li
-          v-for="(item, index) in knowInfo.attachments"
-          :key="index"
-          class="enclosure"
-        >
-          <div
-            class="mask"
-            :style="{ visibility: selectList[index] ? 'visible' : 'hidden' }"
-          >
+        <li v-for="(item, index) in knowInfo.attachments" :key="index" class="enclosure">
+          <div class="mask" :style="{ visibility: selectList[index] ? 'visible' : 'hidden' }">
             <div class="checkbox">
-              <el-checkbox
-                v-model="selectList[index]"
-                @change="checkItem(item)"
-              />
+              <el-checkbox v-model="selectList[index]" @change="checkItem(item)" />
             </div>
             <i
               class="iconfont iconimage_icon_download"
               style="cursor: pointer"
               @click="downLoad(item)"
-            >下载</i>
+              >下载</i
+            >
             <i
               class="iconfont iconimage_icon_eye"
               style="cursor: pointer"
               @click="previewContent(item)"
-            >预览</i>
+              >预览</i
+            >
           </div>
-          <svg
-            v-if="showIcon(index)"
-            class="icon"
-            aria-hidden="true"
-          >
+          <svg v-if="showIcon(index)" class="icon" aria-hidden="true">
             <use :xlink:href="iconType(item.fileName)"></use>
           </svg>
           <img
@@ -100,26 +73,14 @@
             {{ item.fileName }}
           </p>
         </li>
-        <div
-          v-if="refresh"
-          style="refresh"
-        ></div>
+        <div v-if="refresh" style="refresh"></div>
       </ul>
     </div>
     <div v-if="introduction">
       <h3>资料介绍</h3>
-      <p
-        class="introduce"
-        v-html="knowInfo.introduction"
-      ></p>
+      <p class="introduce" v-html="knowInfo.introduction"></p>
     </div>
-    <el-dialog
-      :visible="preview"
-      width="80%"
-      title="内容预览"
-      top="7vh"
-      @close="close"
-    >
+    <el-dialog :visible="preview" width="80%" title="内容预览" top="7vh" @close="close">
       <video
         v-if="previewVideo"
         width="100%"
@@ -128,11 +89,7 @@
         autoplay
         controls
       ></video>
-      <img
-        v-if="previewImg"
-        :src="previewImg"
-        style="width: 100%; height: 100%"
-      />
+      <img v-if="previewImg" :src="previewImg" style="width: 100%; height: 100%" />
       <iframe
         v-if="perviewSrc"
         width="100%"
@@ -148,6 +105,7 @@
 import { getDetailsById } from '@/api/knowledge/knowledge'
 import { downLoadFile } from '@/util/util'
 import { getStore } from '@/util/store.js'
+import { fileType } from '@/util/util'
 import axios from 'axios'
 import '@/config/iconfont'
 export default {
@@ -164,11 +122,7 @@ export default {
   data() {
     return {
       knowInfo: null,
-      word: /\.(txt|doc|wps|rtf|docx|xls|xlsx)$/, // 文档格式
-      video: /\.(avi|wmv|mp4|3gp|rm|rmvb|mov)$/, // 视频格式
       image: /\.(jpg|jpeg|png|GIF|gif|bmp)$/, // 图片
-      compress: /\.(rar|zip)$/, // 压缩包
-      audio: /\.(mp3|wma|wav)$/, // 音频
       type: null,
       perviewSrc: '',
       preview: false,
@@ -185,17 +139,19 @@ export default {
   computed: {
     iconType() {
       return (type) => {
-        const ppt = /\.(ppt)$/
+        type = type.toLowerCase()
+        const { flag } = fileType(type)
+        const ppt = /\.(ppt|pptx)$/
         const pdf = /\.(pdf)$/
         const xls = /\.(xls|xlsx)$/
-        if (this.image.test(type)) return '#iconimage'
-        else if (this.video.test(type)) return '#iconvi'
-        else if (this.compress.test(type)) return '#iconyasuobao'
-        else if (this.word.test(type)) return '#icondoc'
+        if (flag === 2) return '#iconimage'
+        else if (flag === 0) return '#iconvi'
+        else if (flag === 3) return '#iconyasuobao'
         else if (ppt.test(type)) return '#iconppt'
         else if (pdf.test(type)) return '#iconpdf'
-        else if (this.audio.test(type)) return '#iconyinpin'
+        else if (flag === 4) return '#iconyinpin'
         else if (xls.test(type)) return '#iconxls'
+        else if (flag === 1) return '#icondoc'
         else return '#iconppt'
       }
     },
@@ -251,15 +207,17 @@ export default {
     },
     // 预览
     previewContent(file) {
-      const name = file.fileName.toLowerCase()
-      if (this.word.test(name)) {
-        this.type = 0
-      } else if (/ppt$/.test(name)) {
-        this.type = 0
-      } else if (/pdf$/.test(name)) {
+      const { flag } = fileType(file.fileName)
+      if (/pdf$/.test(file.fileName.toLowerCase())) {
         this.type = 20
-      } else if (this.image.test(name)) {
+      } else if (flag === 1) {
+        this.type = 0
+      } else if (flag === 2) {
         this.previewImg = file.url
+        this.preview = true
+        return
+      } else if (flag === 0) {
+        this.previewVideo = file.url
         this.preview = true
         return
       } else {
@@ -277,11 +235,6 @@ export default {
         }
       }).then((res) => {
         if (res.data.errorcode === 0) {
-          if (this.type === 69) {
-            this.previewImg = res.data.data.viewUrl
-            this.preview = true
-            return
-          }
           this.perviewSrc = res.data.data.viewUrl
           this.preview = true
         } else {
@@ -435,6 +388,7 @@ export default {
   }
   ::v-deep .el-dialog__body {
     height: 80vh;
+    padding: 20px;
   }
   .bulk {
     margin-left: 20px;

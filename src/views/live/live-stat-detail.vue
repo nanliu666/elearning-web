@@ -157,7 +157,10 @@
 
       <div class="table-container">
         <div class="table-header">
-           <el-tabs v-model="activeTab" @tab-click="handleClick">
+          <el-tabs
+            v-model="activeTab"
+            @tab-click="handleClick"
+          >
             <el-tab-pane
               label="数据统计"
               name="data"
@@ -170,9 +173,9 @@
             </el-tab-pane>
           </el-tabs>
 
-          <div class="operate-area" >
+          <div class="operate-area">
             <el-checkbox
-              v-if="activeTab==='data'"
+              v-if="activeTab === 'data'"
               v-model="getData2params.isMerge"
               v-p="CONCAT_LIVE_START"
               class="checkbox"
@@ -199,7 +202,7 @@
         </div>
 
         <el-table
-          v-if="activeTab==='data'"
+          v-if="activeTab === 'data'"
           v-loading="tableLoading"
           :data="tableData"
           height="50vh"
@@ -243,14 +246,14 @@
         </el-table>
 
         <el-table
-          v-if="activeTab==='register'"
+          v-if="activeTab === 'register'"
           v-loading="tableLoading"
           :data="registerData"
           height="50vh"
         >
           <el-table-column
-            :key="column.prop"
             v-for="column in registerColumns"
+            :key="column.prop"
             align="center"
             :prop="column.prop"
             :label="column.label"
@@ -292,7 +295,7 @@
 <script>
 import { parseTime } from '@/util/util'
 import Pagination from '@/components/common-pagination'
-import { getSummary, getAudience,getChannelAuthInfo } from '@/api/live'
+import { getSummary, getAudience, getChannelAuthInfo } from '@/api/live'
 import { CONCAT_LIVE_START } from '@/const/privileges'
 
 export default {
@@ -302,10 +305,10 @@ export default {
   },
   data() {
     return {
-      activeTab:'data',
+      activeTab: 'data',
       checked: false,
       tableData: [],
-      registerData:[],
+      registerData: [],
       filename: '直播数据统计',
       autoWidth: true,
       bookType: 'xlsx',
@@ -333,7 +336,7 @@ export default {
         pageSize: 10
       },
       getData2Date: '',
-      registerColumns:[]
+      registerColumns: []
     }
   },
   computed: {
@@ -344,9 +347,9 @@ export default {
       const [startDate = '', endDate = ''] = val || []
       this.getData2params.startDate = startDate
       this.getData2params.endDate = endDate
-      if(this.activeTab==='data'){
+      if (this.activeTab === 'data') {
         this.getTableData()
-      }else{
+      } else {
         this.getRegister()
       }
     },
@@ -363,11 +366,11 @@ export default {
     this.getData()
   },
   methods: {
-    handleClick(){
+    handleClick() {
       this.getData2params.pageNo = 1
-      if(this.activeTab==='data'){
+      if (this.activeTab === 'data') {
         this.getTableData()
-      }else{
+      } else {
         this.getRegister()
       }
     },
@@ -382,31 +385,30 @@ export default {
         })
       })
     },
-    getRegister(){
+    getRegister() {
       this.tableLoading = true
-      debugger
       let params = {
-        liveId:this.getData2params.livePlanId,
-        startTime:this.getData2params.startDate,
-        endTime:this.getData2params.endDate,
-        pageNo:this.getData2params.pageNo,
-        pageSize:this.getData2params.pageSize,
+        liveId: this.getData2params.livePlanId,
+        startTime: this.getData2params.startDate,
+        endTime: this.getData2params.endDate,
+        pageNo: this.getData2params.pageNo,
+        pageSize: this.getData2params.pageSize
       }
       getChannelAuthInfo(params)
         .then((res) => {
           let arr = JSON.parse(res.infoFeilds)
           this.registerData = []
           this.registerColumns = []
-          _.forEach(arr,(item,index)=>{
+          _.forEach(arr, (item, index) => {
             this.registerColumns.push({
-              prop:`registerCloumn${index}`,
-              label:item.name
+              prop: `registerCloumn${index}`,
+              label: item.name
             })
           })
-          _.forEach(res.channelAuthInfos.data,item=>{
-            item.params = item.params.substring(1,item.params.length-1)
+          _.forEach(res.channelAuthInfos.data, (item) => {
+            item.params = item.params.substring(1, item.params.length - 1)
             let arr = item.params.split(',')
-            arr.forEach((x,i)=>{
+            arr.forEach((x, i) => {
               item[`registerCloumn${i}`] = arr[i]
             })
           })

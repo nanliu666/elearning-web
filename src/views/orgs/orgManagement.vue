@@ -38,6 +38,7 @@
         ref="table"
         :columns="tableColumns | columnsFilter(columnsVisible)"
         :config="tableConfig"
+        :load="loadFn"
         :data="tableData"
         :loading="tableLoading"
       >
@@ -161,7 +162,7 @@
 </template>
 
 <script>
-import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader } from '@/api/org/org'
+import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader, getorganizationNew } from '@/api/org/org'
 import SearchPopover from '@/components/searchPopOver/index'
 import OrgEdit from './components/orgEdit'
 
@@ -199,17 +200,7 @@ const TABLE_COLUMNS = [
     minWidth: 120
   }
 ]
-const TABLE_CONFIG = {
-  rowKey: 'orgId',
-  showHandler: true,
-  defaultExpandAll: true,
-  showIndexColumn: false,
-  enablePagination: true,
-  handlerColumn: {
-    width: 160,
-    fixed: false
-  }
-}
+// const TABLE_CONFIG = 
 import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG, IMPORT_ORGS } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -224,7 +215,19 @@ export default {
     return {
       tableLoading: false,
       tableData: [],
-      tableConfig: TABLE_CONFIG,
+      tableConfig: {
+        rowKey: 'orgId',
+        showHandler: true,
+        defaultExpandAll: false,
+        showIndexColumn: false,
+        enablePagination: true,
+        load:this.loadFn,
+        lazy:true,
+        handlerColumn: {
+          width: 160,
+          fixed: false
+        }
+      },
       tableColumns: TABLE_COLUMNS,
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
       checkColumn: [
@@ -241,14 +244,14 @@ export default {
       searchConfig: {
         requireOptions: [
           {
-            type: 'treeSelect',
-            field: 'parentOrgId',
+            type: 'treeSelectNew',
+            field: 'parentId',
             label: '',
-            data: '',
+            data: '',            
             config: {
               selectParams: {
-                placeholder: '请输入内容',
-                multiple: false
+                placeholder: '请输入内容',               
+                multiple: false,
               },
               treeParams: {
                 data: [],
@@ -256,8 +259,11 @@ export default {
                 'default-expand-all': false,
                 'expand-on-click-node': false,
                 clickParent: true,
-                filterable: false,
-                props: {
+                load:this.loadSelectTreeFn,
+                lazy:true,
+                filterable: false,                           
+                props: {                  
+                  isLeaf:'hasChildren',
                   children: 'children',
                   label: 'orgName',
                   disabled: 'disabled',
@@ -325,12 +331,12 @@ export default {
       newOrg: {},
       rules: {
         orgName: [{ required: true, message: '请输入组织名称', trigger: 'blur' }],
-        parentOrgId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
+        parentId: [{ required: true, message: '请选择上级组织', trigger: 'change' }],
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'change' }]
       },
       createOrgDailog: false,
       orgTypeObj: { Enterprise: '公司', Company: '单位', Department: '部门', Group: '小组' },
-      searchParams: { parentOrgId: 0 }
+      searchParams: { parentId: '0' }
     }
   },
   computed: {
@@ -354,11 +360,12 @@ export default {
     getOrgLeader({ pageNo: 1, pageSize: 100 }).then((res) => {
       this.searchConfig.popoverOptions[2].options.push(...res.data)
     })
-    getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-      this.searchConfig.requireOptions[0].config.treeParams.data = res
-      this.$refs['searchPopover'].treeDataUpdateFun(res, 'parentOrgId')
-      this.searchConfig.requireOptions[0].data = res[0].orgId
-    })
+    // getorganizationNew({ parentId: 0 }).then((res) => {
+    //   res.map(val=>val.hasChildren=true)     
+    //   this.searchConfig.requireOptions[0].config.treeParams.data = res
+    //   // this.$refs['searchPopover'].treeDataUpdateFun(res, 'parentId')
+    //   // this.searchConfig.requireOptions[0].data = res[0].orgId
+    // })
   },
   activated() {
     this.loadTableData()
@@ -371,6 +378,20 @@ export default {
     refresh() {
       this.loadTableData()
     },
+    async loadSelectTreeFn(node, resolve){ //  懒加载下拉树数据
+      let params={parentId:node.data&&node.data.id?node.data.id:'0'}
+      getorganizationNew(params).then((res) => {
+        // res.map(val=>val.hasChildren=true)        
+        resolve(res)
+      })      
+    },
+    async loadFn(tree, treeNode, resolve){ // 懒加载表格数据      
+      let params={parentId:tree.id}
+      getorganizationNew(params).then((res) => {
+        res.map(val=>val.hasChildren=true)        
+        resolve(res)
+      })
+    },
     async loadTableData() {
       if (this.tableLoading) {
         return
@@ -378,9 +399,10 @@ export default {
       try {
         const params = this.searchParams
         this.tableLoading = true
-        if (Array.isArray(params.parentOrgId)) params.parentOrgId = params.parentOrgId[0]['']
-        getOrgTree(params).then((res) => {
+        if (Array.isArray(params.parentId)) params.parentId = params.parentId[0]['']
+        getorganizationNew(params).then((res) => {
           this.tableData = res
+          this.tableData.map(val=>val.hasChildren=true)          
           this.multipleSelection = []
           this.tableLoading = false
 

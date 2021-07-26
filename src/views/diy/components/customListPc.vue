@@ -142,12 +142,12 @@ export default {
         this.activeOrg = val
         this.initHomeData()
       },
-      deep: true,
-      immediate: true
+      deep: true
+      // immediate: true
     }
   },
   activated() {
-    this.initHomeData()
+    // this.initHomeData()
   },
   methods: {
     handleSizeChange(val) {

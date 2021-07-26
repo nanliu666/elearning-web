@@ -91,7 +91,7 @@
 
         <template #handler="{ row }">
           <el-button
-            v-if="row.status"
+            v-if="row.status && row.status != 3"
             v-p="STOP_CERTIFICATE"
             :disabled="row.status === 3"
             type="text"
@@ -405,7 +405,7 @@ export default {
     // 批量删除
     multipleDeleteClick(selectArr) {
       let currentArr = selectArr.filter((item) => {
-        return item.status === 0
+        return item.status === 0 || item.status === 3
       })
       let deactivate = selectArr.length - currentArr.length
       let selectedIds = []
@@ -446,19 +446,22 @@ export default {
     // 删除
     handleRemove(row) {
       let info = `${
-        row.status ? '该证书模版处于启用状态，请停用后删除。' : '您确定要删除选中的证书模版吗？'
+        row.status && row.status !== 3
+          ? '该证书模版处于启用状态，请停用后删除。'
+          : '您确定要删除选中的证书模版吗？'
       }`
-      let params = row.status
-        ? {
-            confirmButtonText: '我知道了',
-            showCancelButton: false,
-            type: 'warning'
-          }
-        : {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
+      let params =
+        row.status && row.status !== 3
+          ? {
+              confirmButtonText: '我知道了',
+              showCancelButton: false,
+              type: 'warning'
+            }
+          : {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
       // 提示
       this.$confirm(info, '提示', params)
         .then(() => {
@@ -624,7 +627,7 @@ export default {
   }
 }
 .preview {
-  transform: scale(0.67);
+  transform: scale(0.5);
 }
 </style>
 <style lang="sass" scoped>

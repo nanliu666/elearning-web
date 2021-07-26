@@ -52,7 +52,7 @@
               :length="testPaper.length"
               @delete="handleDeleteBlock"
               @update="update"
-            ></themeBlock>
+            />
           </div>
         </div>
         <div class="flex flexcenter footer">
@@ -115,7 +115,7 @@ const BASE_COLUMNS = [
         required: true
       }
     },
-    required: false,
+    required: true,
     span: 11,
     offset: 2
   },

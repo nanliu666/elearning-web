@@ -55,6 +55,10 @@
               v-if="!isUnderwayEdit"
               type="default"
               size="medium"
+              :disabled="
+                (typeof form.status != 'undefined' && form.trainCurrentStatus == 1) ||
+                  (form.trainCurrentStatus == 2 && !this.$route.query.isNext)
+              "
               :loading="publishLoading1"
               @click="publish(1)"
             >
@@ -88,6 +92,7 @@
         :active-setting-data="activeSettingData"
         :setting-data="settingData"
         :is-underway-edit="isUnderwayEdit"
+        :is-next="isNext"
         @importPersonData="onImportPersonData"
       />
 
@@ -112,6 +117,10 @@
           v-if="!isUnderwayEdit"
           type="default"
           size="medium"
+          :disabled="
+            (typeof form.status != 'undefined' && form.trainCurrentStatus == 1) ||
+              (form.trainCurrentStatus == 2 && !this.$route.query.isNext)
+          "
           :loading="publishLoading1"
           @click="publish(1)"
         >
@@ -148,7 +157,6 @@ import {
 } from '@/api/train/train'
 import { save } from '@/api/questionnaire'
 const ORIGIN_FORM = {
-  sponsor: '',
   trainCurrentStatus: '',
   headTeacherName: '',
   evaluateCondition: '1',
@@ -258,6 +266,9 @@ export default {
     }
   },
   computed: {
+    isNext() {
+      return !!this.$route.query.isNext
+    },
     isUnderwayEdit() {
       if (this.form.trainCurrentStatus === 2 && !this.$route.query.isNext) {
         return true
@@ -579,7 +590,7 @@ export default {
           return item
         })
         data.trainExam = trainExam.map((item) => {
-          delete item.$additional
+          item.operationType = !item.id || this.$route.query.isNext ? 'Add' : 'Update'
           return item
         })
         data.trainOnlineCourse = trainOnlineCourse.map((item) => {
@@ -726,7 +737,6 @@ export default {
               trainExam,
               personnelObjects
             } = res
-
             if (this.type === 'inside') {
               trainOfflineTodo.forEach((item, index) => {
                 item.$id = '' + index
@@ -784,19 +794,11 @@ export default {
               info.trainTime = []
             }
 
-            let {
-              headTeacher,
-              headTeacherName,
-              contactPhone,
-              evaluateCondition,
-              trainWay,
-              introduction
-            } = info
+            let { headTeacher, headTeacherName, evaluateCondition, trainWay, introduction } = info
             this.headTeacherOptions = [
               {
                 userId: headTeacher,
-                name: headTeacherName,
-                phonenum: contactPhone
+                name: headTeacherName
               }
             ]
 
@@ -822,13 +824,18 @@ export default {
               this.$forceUpdate()
             })
             if (!this.$route.query.isNext && this.type === 'outer') {
-              queryOuterTrainObject({ trainId: this.id }).then((res = { data: [] }) => {
-                this.form.trainObjectsList = res.data.map((item) => {
-                  item.bizName = item.userName
-                  item.phoneNum = item.phonenum
-                  item.bizId = item.userId
-                  return item
-                })
+              queryOuterTrainObject({ trainId: this.id }).then((res) => {
+                const { totalNum = 0 } = res
+                queryOuterTrainObject({ trainId: this.id, pageSize: totalNum }).then(
+                  (res = { data: [] }) => {
+                    this.form.trainObjectsList = res.data.map((item) => {
+                      item.bizName = item.userName
+                      item.phoneNum = item.phonenum
+                      item.bizId = item.userId
+                      return item
+                    })
+                  }
+                )
               })
             }
           })

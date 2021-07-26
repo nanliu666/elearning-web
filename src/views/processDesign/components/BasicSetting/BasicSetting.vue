@@ -139,6 +139,7 @@ export default {
               reject({ target: this.tabName })
               return
             }
+
             if (
               (this.conf.categoryId == '2' || this.conf.categoryId == '10') &&
               (typeof this.conf.processMap.max == 'undefined' ||
@@ -146,6 +147,14 @@ export default {
             ) {
               this.$message({
                 message: '请填写：适用预算范围',
+                type: 'warning'
+              })
+              reject({ target: this.tabName })
+              return
+            }
+            if (this.conf.processMap.max <= this.conf.processMap.min&&(this.conf.categoryId == '2' || this.conf.categoryId == '10')) {
+              this.$message({
+                message: '最大金额必须大于最小金额',
                 type: 'warning'
               })
               reject({ target: this.tabName })

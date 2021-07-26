@@ -260,6 +260,15 @@ export default {
       this.type = 'edit'
       this.loadOrgTree()
       this.form = _.cloneDeep(row)
+      if(this.form.orgIdList.length){
+         this.form.orgIdList = this.form.orgIdList.reduce((pre,cur,index)=>{
+          pre.push({
+            orgId:cur,
+            orgName:this.form.orgNames.split(',')[index]
+          })
+          return pre
+        },[])
+      }
       this.$emit('changevisible', true)
     },
     findOrg(id) {

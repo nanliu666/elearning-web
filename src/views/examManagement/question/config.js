@@ -1,7 +1,11 @@
 //export const QUESTION_IMPORT_URL = '"https://oa-file-dev.bestgrand.com.cn/题库导入模板.xls"'
 import { deleteHTMLTag } from '@/util/util'
-export const QUESTION_IMPORT_URL =
-  '"https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls"'
+export const QUESTION_IMPORT_URL = {
+  xugong:"https://xlms-file.xcmg.com:11443/eln/default/20210706/14/55/0/77d0b8bbc8c98fe9d8aba4222a6d59b5.xls",
+  zehui:'https://file-test.zexueyuan.com.cn/fe942c7cee4a4f5baff6a7f94182be6d.xls',
+  dev:'https://oa-file-dev.bestgrand.com.cn/386b097398e949e4a045218fcf8ac5d8.xls'
+}
+
 const _RICH_TETX_CONFIG = [
   {
     validator: (rule, value, callback) => {

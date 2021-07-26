@@ -18,7 +18,7 @@
         :config="tableConfig"
         :data="tableData"
         :loading="tableLoading"
-        :page="page"
+        :page="tablePage"
         @current-page-change="handleCurrentPageChange"
         @page-size-change="handlePageSizeChange"
       >
@@ -29,7 +29,40 @@
               :popover-options="searchPopoverConfig.popoverOptions"
               :require-options="searchPopoverConfig.requireOptions"
               @submit="handleSearch"
-            />
+              @reset="searchParams.creatorId = ''"
+            >
+              <template #creatorId>
+                <el-select
+                  v-model="searchParams.creatorId"
+                  v-loadmore="loadMore"
+                  filterable
+                  remote
+                  :remote-method="remoteFounder"
+                  @visible-change="visibleChange"
+                >
+                  <el-option
+                    v-for="item in classify"
+                    :key="item.creatorId"
+                    :label="item.name"
+                    :value="item.creatorId"
+                  ></el-option>
+                  <el-option
+                    v-show="valve"
+                    value="1"
+                    class="loading"
+                  >
+                    <i class="el-icon-loading"></i>加载中
+                  </el-option>
+                  <el-option
+                    v-show="noData"
+                    value="1"
+                    class="ending"
+                  >
+                    {{ classify.length === 0 ? '无数据' : '没有更多了' }}
+                  </el-option>
+                </el-select>
+              </template>
+            </seach-popover>
             <div class="operations__btns">
               <el-tooltip
                 class="operations__btns--tooltip"
@@ -98,10 +131,19 @@
           >
             批量删除
           </el-button>
+          <el-button
+            v-p="COMPETITION_DEL"
+            style="margin-bottom: 0"
+            type="text"
+            @click="batchExport(selection)"
+          >
+            批量导出
+          </el-button>
         </template>
         <template #handler="{ row }">
           <el-button
             v-p="COMPETITION_EDIT"
+            :disabled="isEdit(row)"
             type="text"
             @click="edit(row.id)"
           >
@@ -118,7 +160,7 @@
         <template #name="{ row }">
           <el-button
             type="text"
-            @click="goToInfo"
+            @click="goToInfo(row.id)"
           >
             {{ row.name }}
           </el-button>
@@ -130,32 +172,56 @@
 
 <script>
 import { COMPETITION_ADD, COMPETITION_EDIT, COMPETITION_DEL } from '@/const/privileges'
+import { getCompetitionList, creatUser, delCompetition } from '@/api/examManage/competition'
+import { getcategoryTree } from '@/api/examManage/category'
 import { mapGetters } from 'vuex'
+import moment from 'moment'
 const TABLE_COLUMNS = [
   {
     label: '闯关竞赛名称',
     prop: 'name',
-    slot: true
+    slot: true,
+    minWidth: '120px'
   },
   {
     label: '分类',
-    prop: 'name'
+    prop: 'categoryName',
+    minWidth: '80px'
   },
   {
     label: '状态',
-    prop: 'name'
+    prop: 'status',
+    formatter: (row) => {
+      const day = moment().valueOf()
+      const start = moment(row.beginTime).valueOf()
+      const end =
+        moment(row.endTime)
+          .add(1, 'd')
+          .valueOf() - 1000
+      return day < start ? '未开始' : day > end ? '已结束' : '进行中'
+    }
   },
   {
     label: '有效期限',
-    prop: 'name'
+    prop: 'beginTime',
+    minWidth: '150px',
+    formatter: (row) => {
+      if (row.beginTime && row.endTime) {
+        return (
+          row.beginTime.split(' ')[0].replaceAll('-', '/') +
+          ' - ' +
+          row.endTime.split(' ')[0].replaceAll('-', '/')
+        )
+      }
+    }
   },
   {
     label: '竞赛关数',
-    prop: 'name'
+    prop: 'barrierNum'
   },
   {
     label: '参与人数',
-    prop: 'name'
+    prop: 'raceJoinNum'
   }
 ]
 const TABLE_CONFIG = {
@@ -171,7 +237,7 @@ const TABLE_CONFIG = {
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入专区名称' },
+    config: { placeholder: '输入闯关竞赛名称' },
     data: '',
     field: 'name',
     label: '',
@@ -181,11 +247,11 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     data: '',
-    field: 'orgId',
+    field: 'categoryId',
     label: '分类',
     type: 'treeSelect',
     config: {
-      multiple: true,
+      multiple: false,
       selectParams: {
         placeholder: '请选择'
       },
@@ -198,7 +264,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
         filterable: false,
         props: {
           children: 'children',
-          label: 'orgName',
+          label: 'name',
           disabled: 'disabled',
           value: 'id'
         }
@@ -212,26 +278,24 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '状态',
     type: 'select',
     options: [
-      { value: 0, label: '未开始' },
-      { value: 1, label: '进行中' },
-      { value: 2, label: '已结束' }
+      { value: 1, label: '未开始' },
+      { value: 2, label: '进行中' },
+      { value: 3, label: '已结束' }
     ]
   },
   {
-    config: { placeholder: '请选择' },
-    data: '',
-    field: 'status',
+    field: 'creatorId',
     label: '创建人',
-    type: 'select',
-    options: []
+    type: 'slot'
   },
   {
     type: 'dataPicker',
-    data: 'time',
+    data: '',
+    field: 'beginTime,endTime',
     label: '创建时间',
     config: {
       // 显示类型
-      type: 'datetime',
+      type: 'daterange',
       placeholder: '请选择'
     }
   }
@@ -264,44 +328,150 @@ export default {
       tableLoading: false,
       searchPopoverConfig: SEARCH_CONFIG,
       searchParams: {
-        name: '',
-        orgId: ''
-      },
-      page: {
-        currentPage: 1,
+        pageNo: 1,
         pageSize: 10,
+        name: '',
+        creatorId: '',
+        categoryId: '',
+        beginTime: '',
+        endTime: '',
+        status: ''
+      },
+      tablePage: {
+        size: 10,
+        currentPage: 1,
         total: 0
+      },
+      valve: false,
+      noData: false,
+      classify: [],
+      classflyParams: {
+        pageNo: 1,
+        pageSize: 20,
+        name: ''
       },
       columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
         return v
       })
     }
   },
+  created() {
+    this.getData()
+    getcategoryTree({
+      type: 1,
+      parentId: 0
+    }).then((res) => {
+      this.searchPopoverConfig.popoverOptions[0].config.treeParams.data = res
+    })
+    this.getSelectData()
+  },
   methods: {
     refresh() {
       this.getData()
     },
-    getData() {},
-    batchDel() {},
-    edit() {},
-    del() {},
-    addCompetition() {
-      this.$router.push('/examManagement/competition/addAndEdit')
+    getData() {
+      this.tableLoading = true
+      getCompetitionList(this.searchParams)
+        .then((res) => {
+          this.tableData = res.data
+          this.tablePage.total = res.totalNum
+        })
+        .finally(() => {
+          this.tableLoading = false
+        })
     },
-    goToInfo() {},
+    batchDel(ids) {
+      ids = ids.reduce((total, item) => total + item.id + ',', '').slice(0, -1)
+      this.del(ids)
+    },
+    edit(id) {
+      this.$router.push({
+        path: '/examManagement/competition/addAndEdit',
+        query: {
+          tagName: '编辑闯关竞赛',
+          id
+        }
+      })
+    },
+    async del(id) {
+      await this.$confirm('您确定要删除选中的闯关竞赛吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await delCompetition(id)
+      this.getData()
+      this.$refs.table.clearSelection()
+      this.$message.success('删除成功')
+    },
+    addCompetition() {
+      this.$router.push({
+        path: '/examManagement/competition/addAndEdit',
+        query: {
+          tagName: '创建闯关竞赛'
+        }
+      })
+    },
+    goToInfo(id) {
+      this.$router.push({
+        path: '/examManagement/competition/info',
+        query: {
+          id
+        }
+      })
+    },
     handleCurrentPageChange(params) {
-      this.page.currentPage = params
+      this.tablePage.currentPage = params
+      this.searchParams.pageNo = params
       this.getData()
     },
     handlePageSizeChange(params) {
-      this.page.currentPage = 1
-      this.page.pageSize = params
+      this.tablePage.currentPage = 1
+      this.tablePage.pageSize = params
+      this.searchParams.pageNo = 1
+      this.searchParams.pageSize = params
       this.getData()
     },
-    handleSearch(searchParams) {
-      this.searchParams = searchParams
-      this.page.currentPage = 1
+    handleSearch(data) {
+      delete data.creatorId
+      this.searchParams
+      this.searchParams = {
+        ...this.searchParams,
+        ...data
+      }
+      this.classflyParams.pageNo = 1
       this.getData()
+    },
+    loadMore() {
+      if (this.valve || this.noData) return
+      this.valve = true
+      this.classflyParams.pageSize += 20
+      this.getSelectData()
+    },
+    getSelectData() {
+      creatUser(this.classflyParams).then((res) => {
+        const length = this.classify.length
+        this.classify.push(...res.records)
+        this.classify = _.uniqBy(this.classify, 'creatorId')
+        this.noData = length === this.classify.length
+        this.valve = false
+      })
+    },
+    remoteFounder(v) {
+      this.classflyParams.name = v.trim()
+      this.classflyParams.pageSize = 20
+      this.classflyParams.pageNo = 1
+      this.classify = []
+      this.getSelectData()
+    },
+    visibleChange(flag) {
+      if (flag) {
+        this.classflyParams.name = ''
+        this.getSelectData()
+      }
+    },
+    isEdit(data) {
+      return moment().valueOf() > moment(data.beginTime)
     }
   }
 }
@@ -369,5 +539,18 @@ export default {
     content: '--';
     color: gray;
   }
+}
+::v-deep.loading {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+  i {
+    margin-right: 10px;
+  }
+}
+::v-deep.ending {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
 }
 </style>

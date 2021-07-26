@@ -210,10 +210,29 @@ import {
   updateStatusKnowledgeList,
   getKnowledgeCatalogList,
   // getKnowledgeManageTaglist,
-  moveKnowledge
+  moveKnowledge,
+  relatedKnowledgeList
 } from '@/api/knowledge/knowledge'
 import SearchPopover from '@/components/searchPopOver/index'
+import {
+  ADD_REP,
+  TOP_REP,
+  PUTAWAY_REP,
+  EDIT_REP,
+  DELETE_REP,
+  MOVE_REP,
+  VIEW_REP
+} from '@/const/privileges'
+import { mapGetters } from 'vuex'
+import { getorganizationNew } from '@/api/org/org'
 // const approveStatus = ['审核中', '审批通过', '已拒绝', '已撤回']
+function loadSelectTreeFn(node, resolve) {
+  //  懒加载下拉树数据
+  let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+  getorganizationNew(params).then((res) => {
+    resolve(res)
+  })
+}
 // 表格属性
 const TABLE_COLUMNS = [
   { type: 'index', label: '序号' },
@@ -266,7 +285,7 @@ const TABLE_COLUMNS = [
   {
     label: '知识体系',
     slot: true,
-    prop: 'knowledgeSystemId',
+    prop: 'knowledgeSystemFullName',
     width: 150
   },
   {
@@ -297,7 +316,6 @@ const TABLE_CONFIG = {
   highlightSelect: true
 }
 const TABLE_PAGE_CONFIG = {}
-
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
@@ -362,7 +380,7 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
   },
 
   {
-    type: 'treeSelect',
+    type: 'treeSelectNew',
     field: 'orgId',
     label: '部门',
     data: '',
@@ -377,27 +395,45 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
         'default-expand-all': false,
         'expand-on-click-node': false,
         clickParent: true,
+        load: loadSelectTreeFn,
+        lazy: true,
         filterable: false,
         props: {
+          isLeaf: (data) => {
+            return !data.hasChildren
+          },
           children: 'children',
           label: 'orgName',
           disabled: 'disabled',
-          value: 'id'
+          value: 'orgId'
         }
       }
     }
   },
 
   {
-    type: 'select',
-    field: 'knowledgeSystemId',
     label: '知识体系',
-    data: '',
-    options: [
-      { value: '', label: '全部' },
-      { value: 0, label: '大数据' },
-      { value: 1, label: '沟通技巧' }
-    ]
+    type: 'treeSelect',
+    field: 'knowledgeSystemId',
+    config: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     type: 'select',
@@ -453,17 +489,7 @@ const FORM_COLUMNS = [
     }
   }
 ]
-import {
-  ADD_REP,
-  TOP_REP,
-  PUTAWAY_REP,
-  EDIT_REP,
-  DELETE_REP,
-  MOVE_REP,
-  VIEW_REP
-} from '@/const/privileges'
-import { mapGetters } from 'vuex'
-import { getOrgTreeSimple } from '@/api/org/org'
+
 export default {
   name: 'KnowledgeManagement',
   components: {
@@ -579,18 +605,17 @@ export default {
   activated() {
     this.initSearchData()
     this.refreshTableData()
-    this.getOrgTree()
+    this.initRelatedKnowledgeList()
   },
   methods: {
-    //获取树
-    getOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-        this.treeOptions = res
-        let orgId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'orgId' })
-        orgId.config.treeParams.data = res
+    //   初始化知识体系列表
+    async initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(SEARCH_POPOVER_POPOVER_OPTIONS, { field: 'knowledgeSystemId' })
+      await relatedKnowledgeList({ name: '' }).then((res) => {
+        res.unshift({ id: '', name: '全部' })
+        knowledgeSystemId.config.treeParams.data = res
       })
     },
-
     selectorChange(id) {
       this.query.orgId = id
       this.loadTableData()

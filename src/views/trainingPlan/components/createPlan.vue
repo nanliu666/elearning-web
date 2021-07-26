@@ -86,11 +86,9 @@
                   >
                     <el-link
                       target="_blank"
-                      download="培训计划模板.xsl"
+                      download="培训计划导入模板.xls"
                       :underline="false"
-                      :href="
-                        'https://file-test.epro-edu.com/eln/default/20210625/15/05/3/150015732ec73fe4b32bd14138ace953.xlsx'
-                      "
+                      :href="templateLink"
                     >
                       <el-button type="text">
                         模板下载
@@ -338,7 +336,7 @@
 <script>
 import { categoryMap } from '@/const/approve'
 import ApprSubmit from '@/components/appr-submit/ApprSubmit'
-
+import { getTemplate } from '@/api/system/template'
 import createPlanSubitems from './createPlanSubitems'
 import {
   saveTrainPlan, // 培训计划上报创建
@@ -390,6 +388,12 @@ export default {
         1: '计划内',
         2: '已取消'
       },
+      trainLevelTemp: {
+        1: '公司级',
+        2: '单位级',
+        3: '部门级',
+        label: '公司级'
+      },
       ruleForm: {
         year: '',
         trainPlanDetails: []
@@ -416,7 +420,8 @@ export default {
         }
       },
       development: false, // 判断是培训上报还是培训制定
-      planSubitemsId: 1 //编辑计划子项的id
+      planSubitemsId: 1, //编辑计划子项的id
+      templateLink: ''
     }
   },
   watch: {
@@ -430,9 +435,15 @@ export default {
   },
   activated() {
     this.initData()
-    console.log(222)
+    this.downTemplate()
   },
   methods: {
+    //   动态获取下载模板\
+    downTemplate() {
+      getTemplate({ code: 't5' }).then((res) => {
+        this.templateLink = res.fileUrl
+      })
+    },
     goBack() {
       this.$router.back(-1)
     },
@@ -570,11 +581,24 @@ export default {
     async httpRequest(file) {
       const parmas = new FormData()
       parmas.append('file', file.file)
-      this.tableLoading = true
+      const loading = this.$loading({
+        lock: true,
+        text: '正在导入，请稍等！',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.7)'
+      })
       await importTrainPlan(parmas)
         .then((res) => {
-          if (!res.successList.length) {
-            this.$message.error('导入失败,请下载模板正确输入!')
+          this.$alert(
+            `已成功导入${res.successList.length}条数据，导入失败${res.failList.length}条数据，已自动下载错误报告，可修改后重新导入。`,
+            '导入提醒',
+            {
+              confirmButtonText: '确定',
+              type: 'warning'
+            }
+          )
+          if (res.failList.length) {
+            this.batchExport(res.failList)
           }
           let cloneData = JSON.parse(JSON.stringify(res.successList))
           cloneData.forEach((v) => {
@@ -584,8 +608,81 @@ export default {
           this.ruleForm.trainPlanDetails = [...this.ruleForm.trainPlanDetails, ...cloneData]
         })
         .finally(() => {
-          this.tableLoading = false
+          loading.close()
         })
+    },
+    // 批量导出
+    batchExport(selection) {
+      import('@/vendor/Export2Excel').then((excel) => {
+        const tHeader = [
+          '培训项目',
+          '培训对象',
+          '培训内容',
+          '培训目标',
+          '培训人数',
+          '培训类别',
+          '培训开始月份',
+          '培训结束月份',
+          '实施部门',
+          '计划等级',
+          '培训方式',
+          '评估方式',
+          '项目数量',
+          '费用预算-费用说明',
+          '错误信息'
+        ]
+        const filterVal = [
+          'trainProject',
+          'trainObject',
+          'content',
+          'target',
+          'traineeNum',
+          'trainType',
+          'trainStart',
+          'trainEnd',
+          'trainOrgName',
+          'trainLevel',
+          'trainModelName',
+          'evaluationMethod',
+          'sessions',
+          'budgetDesc',
+          'errMsg'
+        ]
+        let data = this.formatJson(filterVal, selection)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: '错误报告',
+          autoWidth: true,
+          bookType: 'xlsx'
+        })
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) =>
+        filterVal.map((j) => {
+          switch (j) {
+            case 'trainType':
+              return this.trainTypeTemp[v[j]]
+            case 'trainLevel':
+              return this.trainLevelTemp[v[j]]
+            case 'trainModelName':
+              return this.trainModeTemp[v['trainMode']]
+            case 'evaluationMethod': {
+              let data = v[j] ? v[j].split(',') : ''
+              if (Array.isArray(data)) {
+                data.forEach((t, v) => {
+                  data[v] = this.evaluationMethodTemp[t]
+                })
+                data.join(',')
+              }
+              return data
+            }
+            default:
+              return v[j]
+          }
+        })
+      )
     },
     beforeUpload(file) {
       const regx = /^.*\.(xls|xlsx)$/
@@ -694,7 +791,7 @@ export default {
               .then(async (res) => {
                 if (flag) {
                   //保存不走审批流
-                  await this.submitApprApply(res.id)
+                  await this.submitApprApply(res)
                 }
                 this.$message.success('提交审核成功')
                 this.$router.push({ path: '/trainingPlan/submission' })
@@ -707,7 +804,7 @@ export default {
               .then(async (res) => {
                 if (flag) {
                   //保存不走审批流
-                  await this.submitApprApply(res.id)
+                  await this.submitApprApply(res)
                 }
                 this.$message.success('提交审核成功')
                 this.$router.push({ path: '/trainingPlan/submission' })
@@ -748,9 +845,10 @@ export default {
       this.submitPlanData(true)
     },
     // 提交审批
-    submitApprApply(applyId) {
+    submitApprApply(res) {
       this.$refs.apprSubmit.submit({
-        formId: applyId,
+        formId: res.planId,
+        formData: res.apprPlanId,
         processName: categoryMap['13'],
         formKey: this.formKey
       })
@@ -759,7 +857,6 @@ export default {
     submitDevelop() {
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) return
-        console.log(this.planId)
         // 判断计划子项是否有空值，导入字段不正确会置空
         let repeatNum = 0,
           includeItems = [
@@ -797,7 +894,6 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(async () => {
-          console.log(this.ruleForm)
           this.loading = true
           //   删除子计划的id集合
           if (this.deletePlanList.length) {

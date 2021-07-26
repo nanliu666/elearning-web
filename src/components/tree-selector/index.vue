@@ -5,6 +5,8 @@
     :clearable="clearable"
     :placeholder="placeholder"
     :disabled="disabled"
+    :filterable="filterable"
+    :filter-method="filterable ? filterNodes : () => {}"
     @clear="clearHandle"
     @focus="handleFocus"
   >
@@ -19,6 +21,7 @@
         :data="optionList"
         :props="props"
         :node-key="props.value"
+        :filter-node-method="filterNode"
         :default-expanded-keys="defaultExpandedKey"
         @node-click="handleNodeClick"
       ></el-tree>
@@ -83,6 +86,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    filterable: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -114,6 +121,15 @@ export default {
     }
   },
   methods: {
+    //tree过滤
+    filterNode(value, data) {
+      if (!value) return true
+      return data[`${this.props.label}`].indexOf(value) !== -1
+    },
+    //过滤数据函数
+    filterNodes(val) {
+      this.$refs.selectTree.filter(val)
+    },
     handleFocus() {
       this.$emit('focus')
     },
@@ -167,7 +183,7 @@ export default {
 <style scoped>
 .el-scrollbar .el-scrollbar__view .el-select-dropdown__item {
   height: auto;
-  max-height: 274px;
+  /* max-height: 274px; */
   padding: 0;
   overflow: hidden;
   overflow-y: auto;

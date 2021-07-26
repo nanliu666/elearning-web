@@ -132,6 +132,7 @@ import { mapGetters } from 'vuex'
 import { ADD_LIVE, STOP_LIVE, EDIT_LIVE, DELETE_LIVE, VIEW_LIVE } from '@/const/privileges'
 import SearchPopover from '@/components/searchPopOver/index'
 import { getcategoryTree } from '@/api/live/editLive'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 import {
   getLiveList,
   delLive,
@@ -266,9 +267,35 @@ export default {
             options: [
               { value: '', label: '全部' },
               { value: '1', label: '正常' },
-               { value: '2', label: '草稿' },
+              { value: '2', label: '草稿' },
               { value: '0', label: '禁用' }
             ]
+          },
+          {
+            type: 'treeSelect',
+            field: 'knowledgeSystemId',
+            label: '知识体系',
+            data: '',
+            config: {
+              selectParams: {
+                placeholder: '请选择',
+                multiple: false
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                filterable: false,
+                props: {
+                  children: 'children',
+                  label: 'name',
+                  disabled: 'disabled',
+                  value: 'id'
+                }
+              }
+            }
           }
         ]
       },
@@ -311,6 +338,8 @@ export default {
       this.searchConfig.popoverOptions[0].config.treeParams.data = res
       console.log(res)
     })
+    //获取知识体系
+    this.getCreatorList()
   },
   created() {
     // 加载数据
@@ -331,6 +360,13 @@ export default {
     })
   },
   methods: {
+    getCreatorList() {
+      relatedKnowledgeList({ id: '0' }).then((res) => {
+        this.searchConfig.popoverOptions[3].config.treeParams.data = _.concat(res)
+        this.searchConfig.popoverOptions[3].config.treeParams.data.unshift({ name: '全部', id: '' })
+      })
+    },
+
     // 跳转详情
     jumpDetail(row) {
       this.$router.push({ path: '/live/detail', query: { liveId: row.liveId } })
@@ -375,9 +411,12 @@ export default {
           params.categoryId = searchParams.categoryId
           params.isUsed = searchParams.isUsed
           params.creatorId = searchParams.creatorId
+          params.knowledgeSystemId = searchParams.knowledgeSystemId
         }
         this.tableLoading = true
-        getLiveList(_.assign(params, this.page, { pageNo: this.page.currentPage },{type:0})).then((res) => {
+        getLiveList(
+          _.assign(params, this.page, { pageNo: this.page.currentPage }, { type: 0 })
+        ).then((res) => {
           this.tableData = res.data
           this.page.total = res.totalNum
           this.tableLoading = false

@@ -199,7 +199,7 @@ export default {
         .then((res = {}) => {
           const { userInfo = [], todoName } = res
           if (!userInfo.length) {
-            this.$message.error('没有学员信息')
+            this.$message.error('暂无学员信息，不能下载签到表')
             return
           }
           this.beforeExportExcel(

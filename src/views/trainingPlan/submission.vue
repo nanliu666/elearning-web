@@ -261,9 +261,10 @@ export default {
       this.submitAudit(this.auditData)
     },
     // 提交审批
-    submitApprApply(applyId) {
+    submitApprApply(res) {
       this.$refs.apprSubmit.submit({
-        formId: applyId,
+        formId: res.planId,
+        formData: res.apprPlanId,
         processName: categoryMap['13'],
         formKey: this.formKey
       })
@@ -272,14 +273,12 @@ export default {
     submitAudit(row) {
       this.$refs.apprSubmit.validate().then(async () => {
         // 7-执行中待删除 8-已完成待删除
-        console.log(row)
         await changeStatusToDelete({
           planId: row.id,
           status: { 1: '7', 3: '8' }[row.status]
         }).then(async (res) => {
-          console.log(res)
           await this.submitApprApply(res)
-          this.auditData = ''
+          this.auditData = {}
           this.$message.success('提交成功!')
           this.initTrainPlanList()
         })

@@ -84,7 +84,7 @@
               :should-init-data="false"
               :remote-method="listTrain"
               :props="{ value: 'id', label: 'trainName' }"
-              :init-options="trainOptions"
+              :initial-options="trainOptions"
               @getLabel="(label) => (form.name = label + '协议')"
             />
           </el-form-item>
@@ -128,13 +128,11 @@
               </span>
               <span class="header-item">
                 <span class="desc">人均费用(元)：</span>
-                <span
-                  class="data"
-                >￥{{ $route.query.costBudgetAvg || response.costBudgetAvg }}</span>
+                <span class="data">￥{{ response.costBudgetAvg }}</span>
               </span>
               <span class="header-item">
                 <span class="desc">服务年限:</span>
-                <span class="data">{{ $route.query.serviceYear || response.serviceYear }}年</span>
+                <span class="data">{{ response.serviceYear }}年</span>
               </span>
             </div>
 

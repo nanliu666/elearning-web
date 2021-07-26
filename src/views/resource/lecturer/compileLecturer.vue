@@ -250,7 +250,7 @@
             <el-col :span="10">
               <el-form-item
                 label="所属分类"
-                prop="c"
+                prop="categoryId"
               >
                 <span
                   class="categoryId"
@@ -453,7 +453,7 @@ export default {
       //聘用形式
       type: ['内训', '外聘'],
       //专业类型
-      professionalCata: ['技术类', '管理类', '营销服务类', '技能类'],
+      professionalCata: ['技术类', '管理类', '营销类', '技能类'],
       //证书编号集
       certNo: [],
       // 添加擅长领域input框是否显示
@@ -515,7 +515,8 @@ export default {
         professionalCata: [{ required: true, message: '请选择专业类型', trigger: 'change' }],
         teacherLevel: [{ required: true, message: '请选择聘用类型', trigger: 'change' }],
         certNo: [{ type: Number, message: '证书编号只能为数字', trigger: 'blur' }],
-        date: [{ required: true, message: '请选择讲师聘期', trigger: 'change' }]
+        date: [{ required: true, message: '请选择讲师聘期', trigger: 'change' }],
+        categoryId: [{ required: true, message: '请选择所属分类', trigger: 'change' }]
       }
     }
   },

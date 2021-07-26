@@ -72,7 +72,6 @@ import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
 // import { LIVE_STATUS } from '@/const/configData'
-import { cancel } from '@/router/axios'
 // 积分明细配置
 const onlineAll = [
   {
@@ -466,9 +465,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)
       this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)

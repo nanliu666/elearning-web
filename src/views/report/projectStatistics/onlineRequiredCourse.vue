@@ -71,7 +71,6 @@ import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
 import { EMPLOYTYPE } from '@/const/configData'
-import { cancel } from '@/router/axios'
 // 积分明细配置
 const onlineAll = [
   {
@@ -179,12 +178,12 @@ const onlineStudy = [
     minWidth: 150,
     prop: 'isPass',
     slot: true
-  },
-  {
-    label: '通过时间',
-    minWidth: 150,
-    prop: 'passTime'
   }
+  // {
+  //   label: '通过时间',
+  //   minWidth: 150,
+  //   prop: 'passTime'
+  // }
 ]
 
 const perScoreParams = [
@@ -349,9 +348,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)
       this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)

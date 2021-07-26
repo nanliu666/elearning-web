@@ -3,10 +3,11 @@
     :title="title"
     :visible="dialogVisible"
     width="60%"
+    :before-close="cancel"
     @closed="cancel"
   >
     <div
-      v-if="flag"
+      v-if="isEdit"
       class="info"
     >
       <div>
@@ -40,7 +41,11 @@
       >
         <el-select
           v-model="form.userId"
-          prop="userId"
+          v-loadmore="() => loadMore(0)"
+          filterable
+          remote
+          :remote-method="(value) => remote(value, 0)"
+          @visible-change="(flag) => visibleChange(flag, queryParams[0].search, 0)"
         >
           <el-option
             v-for="item in expertOptions"
@@ -48,6 +53,20 @@
             :label="item.name"
             :value="item.userId"
           ></el-option>
+          <el-option
+            v-show="flag[0].valve"
+            value="1"
+            class="loading"
+          >
+            <i class="el-icon-loading"></i>加载中
+          </el-option>
+          <el-option
+            v-show="flag[0].noData"
+            value="1"
+            class="ending"
+          >
+            {{ expertOptions.length === 0 ? '无数据' : '没有更多了' }}
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item
@@ -55,15 +74,36 @@
         prop="areaId"
       >
         <el-select
+          ref="areaIdSelect"
           v-model="form.areaId"
+          v-loadmore="() => loadMore(1)"
           multiple
+          filterable
+          remote
+          :remote-method="(value) => remote(value, 1)"
+          @change="areaIdChange()"
+          @visible-change="(flag) => visibleChange(flag, queryParams[1].name, 1)"
         >
           <el-option
             v-for="item in zoneOptions"
             :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            :label="item.name"
+            :value="item.id"
           ></el-option>
+          <el-option
+            v-show="flag[1].valve"
+            value="1"
+            class="loading"
+          >
+            <i class="el-icon-loading"></i>加载中
+          </el-option>
+          <el-option
+            v-show="flag[1].noData"
+            value="1"
+            class="ending"
+          >
+            {{ zoneOptions.length === 0 ? '无数据' : '没有更多了' }}
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="专家介绍">
@@ -87,7 +127,7 @@
     </el-form>
     <footer>
       <el-button
-        v-if="flag"
+        v-if="isEdit"
         size="medium"
         type="primary"
         @click="edit"
@@ -114,8 +154,8 @@
 </template>
 
 <script>
-import { getOrgTreeSearch } from '@/api/org/org'
-import { editExpert, addExpert, queryExpert } from '@/api/community/expertDatabase'
+import { editExpert, addExpert, queryExpert, queryAllZone } from '@/api/community/expertDatabase'
+import { getOrgUserList } from '@/api/system/user'
 export default {
   props: {
     title: {
@@ -126,17 +166,12 @@ export default {
       required: true,
       type: Boolean
     },
-    zoneOptions: {
-      required: true,
-      type: Array
-    },
     expertId: {
       type: String
     }
   },
   data() {
     return {
-      expertOptions: [],
       form: {
         userId: '',
         areaId: [],
@@ -153,11 +188,30 @@ export default {
         communityAreaDropList: [],
         introduce: '',
         rewarded: ''
-      }
+      },
+      expertOptions: [],
+      zoneOptions: [],
+      flag: [
+        { valve: false, noData: false },
+        { valve: false, noData: false }
+      ],
+      queryParams: [
+        {
+          pageNo: 1,
+          pageSize: 20,
+          orgId: 0,
+          search: ''
+        },
+        {
+          pageNo: 1,
+          pageSize: 20,
+          name: ''
+        }
+      ]
     }
   },
   computed: {
-    flag() {
+    isEdit() {
       return this.title === '查看专家' ? true : false
     },
     community() {
@@ -178,18 +232,57 @@ export default {
             }
           })
       }
+    },
+    'form.areaId'(val) {
+      if (val) {
+        this.$nextTick(() => {
+          let textElement = this.$refs.areaIdSelect.$el.childNodes[0].children[0].children[0]
+            .children[0]
+          textElement.offsetWidth >= 275 &&
+            (textElement.parentElement.title = textElement.innerText)
+        })
+      }
     }
   },
-  async created() {
-    const res = await getOrgTreeSearch({
-      pageNo: 1,
-      pageSize: 999999,
-      orgId: 0
-    })
-    this.expertOptions = res.users
-    this.expertInfoClone = _.cloneDeep(this.expertInfo)
+  created() {
+    this.getSelectData(0)
+    this.getSelectData(1)
   },
   methods: {
+    loadMore(type) {
+      if (this.flag[type].valve || this.flag[type].noData) return
+      this.flag[type].valve = true
+      this.queryParams[type].pageNo++
+      this.getSelectData(type)
+    },
+    remote(v, type) {
+      type ? (this.queryParams[type].name = v.trim()) : (this.queryParams[type].search = v.trim())
+      this.queryParams[type].pageSize = 20
+      this.queryParams[type].pageNo = 1
+      type ? (this.zoneOptions = []) : (this.expertOptions = [])
+      this.getSelectData(type)
+    },
+    visibleChange(show, value, type) {
+      if (show && value) {
+        type ? (this.queryParams[1].name = '') : (this.queryParams[0].search = '')
+        this.getSelectData(type)
+      }
+    },
+    getSelectData(type) {
+      if (type === 0) {
+        getOrgUserList(this.queryParams[0]).then((res) => {
+          this.expertOptions.push(...res.data)
+          this.flag[type].noData = !res.data.length
+          this.flag[type].valve = false
+        })
+      } else if (type === 1) {
+        queryAllZone(this.queryParams[1]).then((res) => {
+          this.zoneOptions.push(...res.data)
+          this.flag[type].noData = !res.data.length
+          this.flag[type].valve = false
+        })
+      }
+    },
     cancel() {
       this.$emit('cancle')
       this.expertInfo = {
@@ -205,7 +298,7 @@ export default {
         introduce: '',
         rewarded: ''
       }
-      this.$refs.form.clearValidate()
+      this.$refs.form && this.$refs.form.clearValidate()
     },
     async update() {
       await this.$refs.form.validate()
@@ -227,6 +320,11 @@ export default {
     },
     edit() {
       this.title = '编辑专家'
+    },
+    areaIdChange() {
+      let arr = this.zoneOptions.filter((item) => this.form.areaId.includes(item.value))
+      arr = arr.map((item) => (item = item.label))
+      this.$refs.areaIdSelect.$el.children[0].children[0].title = arr.join(',')
     }
   }
 }
@@ -238,6 +336,16 @@ export default {
 }
 /deep/.el-form-item__label {
   float: none;
+}
+::v-deep span.el-tag.el-tag--info.el-tag--small.el-tag--light {
+  display: flex;
+  align-items: center;
+  span.el-select__tags-text {
+    max-width: 275px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 .info {
   padding: 0 24px;
@@ -267,5 +375,27 @@ footer {
   padding-top: 14px;
   border-top: 1px solid #e3e7e9;
   padding-right: 45px;
+}
+::v-deep form.el-form {
+  padding: 0 24px;
+}
+::v-deep span.el-tag.el-tag--info.el-tag--small.el-tag--light {
+  max-width: 310px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.loading {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+  i {
+    margin-right: 10px;
+  }
+}
+.ending {
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
 }
 </style>

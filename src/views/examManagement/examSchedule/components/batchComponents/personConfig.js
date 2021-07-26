@@ -1,6 +1,7 @@
 import { getOrgChild } from '@/api/train/train'
 import { getPostionUserChild2, getGroup } from '@/api/system/user'
 import { getUsergroupList, getPositionUserList1 } from '@/api/examManage/schedule'
+import { getStationParent } from '@/api/system/station'
 export const COLUMNS_CONFIGS = [
   {
     prop: 'examTime',
@@ -30,20 +31,62 @@ export const COLUMNS_CONFIGS = [
 export const PERSON_OPTIONS = [
   {
     name: '岗位',
+    request: getStationParent,
+    type: 'scroll-tree',
+    placeholder: '搜索岗位名称',
     response: {
       props: {
-        data: ['positions', 'users']
+        data: 'data',
+        total: 'totalNum'
       }
     },
-    request: getPostionUserChild2,
-    type: 'tree',
-    placeholder: '搜索岗位名称',
-    checkRequest: {
-      condition: function($data) {
-        return !$data.userId
+    treeOption: {
+      props: {
+        label: 'name',
+        children: 'children'
       },
+      'check-strictly': false,
+      nodeKey: 'userId'
+    },
+    props: {
+      value: 'userId',
+      select: [
+        'userId',
+        'name',
+        'orgName',
+        'positionName',
+        'workNo',
+        'phoneNum',
+        'orgId',
+        'positionId'
+      ]
+    },
+    label: function(data) {
+      const { name } = data
+      return name
+    },
+    query: {
+      search: {
+        key: 'name',
+        value: ''
+      },
+      page: {
+        key: 'pageNo',
+        value: 1
+      },
+      pageSize: {
+        key: 'pageSize',
+        value: 50
+      }
+    },
+    resolveRequest: {
+      handler() {
+        return false
+      }
+    },
+    checkRequest: {
       handler: function($data, resolve) {
-        getPositionUserList1({ parentId: $data.positionId }).then((res = {}) => {
+        getPositionUserList1({ parentId: $data.id }).then((res = {}) => {
           if (Array.isArray(res)) {
             resolve(res)
           } else {
@@ -55,37 +98,66 @@ export const PERSON_OPTIONS = [
           }
         })
       }
-    },
-    treeOption: {
-      props: {
-        label: function(node) {
-          if (node.positionId) {
-            return node.positionName
-          }
-          return node.name
-        },
-        children: 'children',
-        selectLabel: 'name'
-      },
-      nodeKey: 'userId'
-    },
-    query: {
-      search: {
-        key: 'search',
-        value: ''
-      },
-      id: {
-        key: 'parentId',
-        value: '0',
-        initialValue: '0',
-        from: 'positionId'
-      }
-    },
-    props: {
-      value: 'userId',
-      select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phoneNum', 'orgId']
     }
   },
+  // {
+  //   name: '岗位',
+  //   response: {
+  //     props: {
+  //       data: ['positions', 'users']
+  //     }
+  //   },
+  //   request: getPostionUserChild2,
+  //   type: 'tree',
+  //   placeholder: '搜索岗位名称',
+  //   checkRequest: {
+  //     condition: function($data) {
+  //       return !$data.userId
+  //     },
+  //     handler: function($data, resolve) {
+  //       getPositionUserList1({ parentId: $data.positionId }).then((res = {}) => {
+  //         if (Array.isArray(res)) {
+  //           resolve(res)
+  //         } else {
+  //           let data = []
+  //           Object.keys(res).forEach((key) => {
+  //             data = data.concat(res[key])
+  //           })
+  //           resolve(data)
+  //         }
+  //       })
+  //     }
+  //   },
+  //   treeOption: {
+  //     props: {
+  //       label: function(node) {
+  //         if (node.positionId) {
+  //           return node.positionName
+  //         }
+  //         return node.name
+  //       },
+  //       children: 'children',
+  //       selectLabel: 'name'
+  //     },
+  //     nodeKey: 'userId'
+  //   },
+  //   query: {
+  //     search: {
+  //       key: 'search',
+  //       value: ''
+  //     },
+  //     id: {
+  //       key: 'parentId',
+  //       value: '0',
+  //       initialValue: '0',
+  //       from: 'positionId'
+  //     }
+  //   },
+  //   props: {
+  //     value: 'userId',
+  //     select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phoneNum', 'orgId']
+  //   }
+  // },
   {
     name: '分组',
     request: getGroup,
@@ -197,52 +269,49 @@ export const ORG_OPTIONS = [
 export const POSITION_OPTIONS = [
   {
     name: '岗位',
-    request: getPostionUserChild2,
-    resolveRequest: {
-      handler: function(node, resolve) {
-        const {
-          data: { positionId, parentIds }
-        } = node
-        getPostionUserChild2({ parentId: positionId }).then((res) => {
-          const { positions = [] } = res
-          positions.forEach((org) => {
-            org.parentIds = parentIds ? [positionId].concat(parentIds) : [positionId]
-          })
-          resolve(positions)
-        })
-      }
-    },
-    type: 'tree',
+    request: getStationParent,
+    type: 'scroll-tree',
     placeholder: '搜索岗位名称',
-    treeOption: {
-      'check-strictly': true,
-      props: {
-        label: 'positionName',
-        children: 'children'
-      },
-      nodeKey: 'positionId'
-    },
     response: {
       props: {
-        data: 'positions'
+        data: 'data',
+        total: 'totalNum'
       }
+    },
+    treeOption: {
+      props: {
+        label: 'name',
+        children: 'children'
+      },
+      'check-strictly': false,
+      nodeKey: 'id'
+    },
+    props: {
+      value: 'id',
+      select: ['id', 'name', 'workNum']
+    },
+    label: function(data) {
+      const { name } = data
+      return name
     },
     query: {
       search: {
-        key: 'search',
+        key: 'name',
         value: ''
       },
-      id: {
-        key: 'parentId',
-        value: '0',
-        initialValue: '0',
-        from: 'positionId'
+      page: {
+        key: 'pageNo',
+        value: 1
+      },
+      pageSize: {
+        key: 'pageSize',
+        value: 50
       }
     },
-    props: {
-      label: 'positionName',
-      value: 'positionId',
-      select: ['positionId', 'positionName', 'workNum', 'parentIds']
+    resolveRequest: {
+      handler() {
+        return false
+      }
     }
   }
 ]

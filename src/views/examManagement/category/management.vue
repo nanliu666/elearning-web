@@ -155,7 +155,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   // enableMultiSelect: true, // TODO: 以后添加多选
