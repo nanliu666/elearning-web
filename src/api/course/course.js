@@ -201,4 +201,4 @@ export const exportDownloadTemplate = (params) =>
   get('/api/manage/v1/course/downloadTemplate', params, { responseType: 'blob' })
 
 //批量同步课程
-export const syncCourses = (params) => post('manage/v1/course/syncCourses', params)
+export const syncCourses = (params) => get('/api/manage/v1/course/syncCourses', params)
