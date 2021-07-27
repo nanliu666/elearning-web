@@ -161,6 +161,7 @@ const ORIGIN_FORM = {
   headTeacherName: '',
   evaluateCondition: '1',
   organizer: '',
+  sponsor: '',
   certificateId: '',
   applyJoinEndDate: '',
   focusTest: '',
@@ -564,7 +565,8 @@ export default {
       const form = JSON.parse(JSON.stringify(this.form))
       const introduction = form.introduction
       form.introduction = _.escape(introduction)
-
+      const kId = this.form.knowledgeSystemId
+      form.knowledgeSystemId = Array.isArray(kId) ? kId[kId.length - 1] : kId
       let userList = []
       if (this.type === 'outer') {
         userList = form.trainObjectsList

@@ -90,12 +90,6 @@
         :options="knowledgeData"
         :props="{ checkStrictly: true, label: 'name', value: 'id' }"
         clearable
-        @change="
-          (data) =>
-            Array.isArray(data)
-              ? (form.knowledgeSystemId = data[data.length - 1])
-              : (form.knowledgeSystemId = data)
-        "
       />
     </el-form-item>
 
@@ -194,6 +188,7 @@
       label="手机号码"
       prop="contactPhone"
       class="half-form-item"
+      :class="{ 'margin-right-120': form.trainWay != '1' }"
     >
       <el-input
         v-model="form.contactPhone"
