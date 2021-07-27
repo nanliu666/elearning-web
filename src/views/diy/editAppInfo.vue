@@ -91,7 +91,7 @@ export default {
         title:"",
         onlineStatus:"",
         versionNo:'',
-        coerceStatus:'',
+        coerceStatus:false,
         content:'',
         deviceType:'1',
         apkAddress:'',
@@ -135,7 +135,7 @@ export default {
       return this.type==='edit'?'编辑APP':(this.type==='detail'?'APP详情':'添加APP')
     }
   },
-  mounted() {
+  activated() {
     if (this.id) {
       this.getDetail()
     }
@@ -183,6 +183,7 @@ export default {
             this.form.coerceStatus = this.form.coerceStatus?1:0
             let fun = this.type==='edit'?updateApp:add
             if(this.type==='edit')this.form.id = this.id
+            if(this.form.deviceType==='2') delete this.form.apkSize
             fun({
               ...this.form
             }).then(res=>{
