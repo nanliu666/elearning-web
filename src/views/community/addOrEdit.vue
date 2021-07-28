@@ -80,6 +80,7 @@ export default {
         headImg: '',
         coverPic: '',
         managerId: [],
+        managerList:[],
         orgIds: [],
         positionIds: [],
         userIds: []
@@ -115,11 +116,13 @@ export default {
           this.form.positionIds = res.positionList
         } else if (key === 'userIds') {
           this.form.userIds = res.userList
-        } else {
+        } else if(key === 'managerList'){
+          this.form[key] = res[key]
+        }
+        else {
           this.form[key] = res[key]
         }
       }
-      this.form.managerList = res.managerList
     }
   },
 
