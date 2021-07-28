@@ -1,0 +1,6 @@
+export { default as Course } from './Course'
+export { default as Knowledge } from './Knowledge'
+export { default as Live } from './Live'
+export { default as Question } from './Question'
+export { default as RequiredCourse } from './RequiredCourse'
+export { default as Training } from './Training'

@@ -2,7 +2,7 @@
   <el-dialog
     title="题目来源"
     :visible.sync="roleVisible"
-    width="1100px"
+    width="1200px"
     :close-on-click-modal="false"
     :modal-append-to-body="false"
     :before-close="onClose"
@@ -33,8 +33,7 @@
                       :model="form"
                       :config="config"
                       :columns="columns"
-                    >
-                    </commonForm>
+                    />
                     <el-button
                       size="medium"
                       class="search"
@@ -139,7 +138,7 @@
 <script>
 import { getcategoryTree } from '@/api/examManage/category'
 import { getQuestionList } from '@/api/examManage/question'
-import { QUESTION_TYPE_MAP } from '@/const/examMange'
+import { QUESTION_TYPE_MAP_TOTAL } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 const TABLE_COLUMNS = [
   {
@@ -154,7 +153,7 @@ const TABLE_COLUMNS = [
     prop: 'type',
     minWidth: 100,
     formatter: (row) => {
-      return QUESTION_TYPE_MAP[row.type] || ''
+      return QUESTION_TYPE_MAP_TOTAL[row.type] || ''
     }
   }
 ]
@@ -218,44 +217,8 @@ export default {
     }
   },
   data() {
-    const BASE_COLUMNS = [
-      {
-        prop: 'category',
-        itemType: 'treeSelect',
-        props: {
-          selectParams: {
-            placeholder: '题目分类',
-            multiple: false
-          },
-          treeParams: {
-            'check-strictly': true,
-            'default-expand-all': false,
-            'expand-on-click-node': false,
-            clickParent: true,
-            data: [],
-            filterable: false,
-            props: {
-              children: 'children',
-              label: 'name',
-              value: 'id'
-            },
-            required: true
-          }
-        },
-        label: '题目分类',
-        span: 10,
-        required: false
-      },
-      {
-        prop: 'search',
-        itemType: 'input',
-        type: 'datetimerange',
-        label: '题目标题',
-        span: 10,
-        required: false
-      }
-    ]
     return {
+      categoryIdsOptions: [],
       pageConfig: {
         layout: 'prev, pager, next'
       },
@@ -265,7 +228,33 @@ export default {
       },
       selectData: [],
       selection: [],
-      columns: BASE_COLUMNS,
+      columns: [
+        {
+          itemType: 'cascader',
+          label: '题目分类',
+          span: 12,
+          prop: 'category',
+          options: [],
+          required: false,
+          filterable: true,
+          collapseTags: true,
+          clearable: true,
+          props: {
+            checkStrictly: true,
+            multiple: true,
+            value: 'id',
+            label: 'name'
+          }
+        },
+        {
+          prop: 'search',
+          itemType: 'input',
+          type: 'datetimerange',
+          label: '题目标题',
+          span: 10,
+          required: false
+        }
+      ],
       tableData: [],
       tableLoading: false,
       page: {
@@ -375,18 +364,28 @@ export default {
      *
      * */
     getData() {
-      let params = {
-        categoryId: this.form.category === 0 ? null : this.form.category,
-        search: this.form.search,
-        type: this.type,
-        status: 'normal'
-      }
-      getQuestionList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
-        (res) => {
-          this.tableData = res.data
-          this.page.total = res.totalNum
+      let targetIdList = []
+      _.each(this.form.category, (item) => {
+        targetIdList.push(item[_.size(item) - 1])
+      })
+      const categoryIds = _.join(targetIdList, ',')
+      if (categoryIds) {
+        let params = {
+          categoryIds,
+          search: this.form.search,
+          type: this.type,
+          status: 'normal'
         }
-      )
+        getQuestionList(_.assign(params, this.page, { pageNo: this.page.currentPage })).then(
+          (res) => {
+            this.tableData = res.data
+            this.page.total = res.totalNum
+          }
+        )
+      } else {
+        this.tableData = []
+        this.page.total = 0
+      }
     },
     /**
      * @author guanfenda
@@ -399,12 +398,11 @@ export default {
         type: 0
       }
       getcategoryTree(params).then((res) => {
-        this.columns.find((it) => it.prop === 'category').props.treeParams.data = this.treeData = [
-          { id: 0, name: '未分类' },
+        const categoryIdsProp = _.find(this.columns, { prop: 'category' })
+        categoryIdsProp.options = this.categoryIdsOptions = [
+          // { id: 0, name: '未分类', parentId: '0' },
           ...res
         ]
-
-        this.form.category = res[0].id
       })
     },
     // 搜索
@@ -439,8 +437,10 @@ export default {
 .table {
   /deep/ .top-menu {
     margin-bottom: 20px;
+    height: 60px;
   }
 }
+
 /deep/ .el-dialog__header {
   padding: 16px 0;
   margin: 0 24px;
@@ -488,7 +488,7 @@ export default {
 }
 .table {
   min-height: 300px;
-  width: 450px;
+  width: 650px;
 }
 .refresh-text {
   padding-left: 6px;
@@ -505,7 +505,8 @@ export default {
   }
 }
 .addTopic {
-  padding: 0 20px;
+  width: 80px;
+  padding: 0 2px;
   cursor: pointer;
 }
 .select {

@@ -47,7 +47,21 @@
         class="approver-pane"
         style="height: 100%;padding-left: 24px;"
       >
+        <div class="apprTypeC">
+          <el-radio-group v-model="apprType">
+            <el-radio :label="'user'">
+              指定人员
+            </el-radio>
+            <el-radio :label="'position'">
+              指定岗位
+            </el-radio>
+          </el-radio-group>
+        </div>
+        <h3 v-if="apprType == 'position'">
+          选择岗位
+        </h3>
         <fc-org-select
+          v-if="apprType == 'user'"
           ref="approver-org"
           v-model="orgCollection"
           button-type="button"
@@ -55,6 +69,30 @@
           :is-range="true"
           :tab-list="['user']"
         />
+        <!-- <el-tree-select
+          v-if="apprType == 'position'"
+          :select-params="positionSelectParams"
+          :tree-params="positionTreeParams"
+          @searchFun="searchFun"
+          @node-click="nodeClickFn"
+        >
+        </el-tree-select> -->
+        <!-- 下拉搜索 岗位-->
+        <lazy-select
+           v-if="apprType == 'position'"
+          :ref="positionConfig.field"
+          v-model="positionConfig.data"
+          :load="positionConfig.load"
+          :option-list.sync="positionConfig.optionList"
+          :placeholder="positionConfig.placeholder"
+          :option-props="positionConfig.optionProps"
+          :searchable="positionConfig.searchable"
+          @select="positionChange"
+        >
+        
+        </lazy-select>
+
+
         <br />
         <p>多人审批时采用的审批方式</p>
         <el-radio
@@ -111,10 +149,11 @@
   </div>
 </template>
 <script>
+import { getStationParent } from '@/api/system/station'
 import { mapGetters } from 'vuex'
 import { NodeUtils } from '../FlowCard/util.js'
 import Clickoutside from 'element-ui/src/utils/clickoutside'
-
+import { queryStation, positionUserList } from '@/api/system/station'
 // 审批人类型枚举
 const ASSIGNEE_TYPE = {
   // competentBusiness: 'competentBusiness', // 业务主管
@@ -126,7 +165,26 @@ const ASSIGNEE_TYPE = {
   // tag: 'tag', // 指定标签
   user: 'user' // 指定成员
 }
-
+const positionConfig = {
+      data: '',
+      field: 'positionId',
+      label: '岗位',
+      type: 'lazySelect',
+      optionList: [],
+      placeholder: '请选择岗位',
+      optionProps: {
+        formatter: (item) => `${item.name}(${item.fullOrg?item.fullOrg:'暂无'})`,
+        key: 'name',
+        value: 'id'
+      },
+      load: (p)=>{
+        p.name = p.search
+        return getStationParent(p)
+      },
+      remote:true,
+      searchable: true,
+      config: { optionLabel: 'name', optionValue: 'id' }
+  }
 // 默认表单模版
 const defaultApproverForm = {
   approvers: [], // 审批人集合
@@ -145,10 +203,14 @@ const defaultApproverForm = {
 }
 
 export default {
+  name: 'PropPanel',
   directives: {
     Clickoutside
   },
-  components: {},
+  components: {
+    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'), //
+    lazySelect: () => import('@/components/lazy-select/lazySelect')
+  },
   props: {
     /*当前节点数据*/
     value: {
@@ -163,6 +225,27 @@ export default {
   },
   data() {
     return {
+      positionConfig:positionConfig,
+      positionSelectParams: {
+        // 岗位下拉配置
+        placeholder: '请选择岗位',
+        multiple: true
+      },
+      positionTreeParams: {
+        // 岗位下拉配置
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: true,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      },
       type: {
         istag: true,
         isposition: true
@@ -185,6 +268,8 @@ export default {
       dialogVisible: false, // 控制流程条件选项Dialog显隐
       // 当前节点数据
       properties: {},
+      apprType: 'user', // 指定审批人类型：是岗位还是某个人
+      positionData: '', //当前选中的岗位的数据
       // 发起人  start节点和condition节点需要
       orgCollection: {
         user: []
@@ -201,15 +286,21 @@ export default {
   },
   computed: {
     assigneeTypeObect: () => ASSIGNEE_TYPE,
-
     ...mapGetters(['fieldList'])
   },
   watch: {
     processData: {
-      handler() {},
+      handler() {
+        this.apprType =
+          (this.processData.childNode &&
+            this.processData.childNode.properties &&
+            this.processData.childNode.properties.apprType) ||
+          'position'
+      },
       deep: true
     },
     value(newVal) {
+      this.positionData = ''
       if (newVal && newVal.properties) {
         this.visible = true
         this.properties = newVal.properties
@@ -222,7 +313,14 @@ export default {
       }
       this.isApproverNode() && this.initApproverNodeData()
       this.isCopyNode() && this.initCopyNodeData()
+      //岗位替换为下拉加载    --------    如果面板显示，初始化岗位数据,不回显
+      if(val){
+        this.positionConfig.data = ''
+      }
     }
+  },
+   mounted() {
+    // this.getStationFn()
   },
   methods: {
     copyNodeConfirm() {
@@ -240,12 +338,41 @@ export default {
     getOrgSelectLabel(type) {
       return this.$refs[type + '-org'] ? this.$refs[type + '-org']['selectedLabels'] : ''
     },
+    //选择了岗位回调
+    async positionChange(val){
+        this.positionData = val
+    },
+    searchFun(val) {
+      //岗位搜索
+      this.getStationFn(val)
+    },
+    nodeClickFn(backData, node) {
+      //选中岗位后回调
+      this.positionData = node
+    },
+    async getStationFn(name) {
+      //获取岗位
+      let sendData = { name: name }
+      await queryStation(sendData).then((res) => {
+        this.positionTreeParams.data = res
+      })
+    },
     /**
      * 审批节点确认保存
      */
     async approverNodeComfirm() {
+      let positionDatas = this.positionData
       const assigneeType = this.approverForm.assigneeType
-      let content = this.getOrgSelectLabel('approver')
+      // let content =
+      //   positionDatas && this.apprType == 'position'
+      //     ? positionDatas.data.name
+      //     : this.getOrgSelectLabel('approver')
+      //岗位替换为下拉加载岗位----单层（徐工没有tree）
+      let content =
+        positionDatas && this.apprType == 'position'
+          ? positionDatas.name
+          : this.getOrgSelectLabel('approver')
+      this.approverForm.apprType = this.apprType
 
       this.approverForm.approvers = this.orgCollection[assigneeType] //这里处理发起人自选和发起人及抄送人姓名等
       let attribute = []
@@ -261,8 +388,34 @@ export default {
       this.$emit('confirm', this.properties, content || '请选择审批人')
       this.visible = false
     },
+
     // 保存回调
-    confirm() {
+    async confirm() {
+      let positionDatas = this.positionData
+      if (this.positionData && this.apprType == 'position') {
+        
+        // var resData = await positionUserList({ positionId: positionDatas.data.id })
+        //选择岗位替换为下拉选择
+        var resData = await positionUserList({ positionId: positionDatas.id })
+        //如果该岗位下没有用户  终止
+        if(resData.length<=0){
+          this.$message({type:'info',message:'该岗位下暂无数据'})
+          return false
+        }
+        resData.forEach((item, i) => {
+          let backData = {
+            isLeaf: true,
+            disabled: true,
+            _nodeKey: `1_${item.userId}`,
+            bizId: `${item.userId}`,
+            bizName: `${item.name}`,
+            type: 'Position'
+          }
+          resData[i] = { ...item, ...backData }
+        })
+        
+        this.orgCollection.user = resData
+      }
       this.isCopyNode() && this.copyNodeConfirm()
       this.isApproverNode() && this.approverNodeComfirm()
     },
@@ -456,7 +609,8 @@ export default {
     padding-left 24px
   }
 }
-
+.approver-pane h3{padding:0 0 5px 0;margin:0;font-size:14px}
+.approver-pane .apprTypeC{padding:0 0 50px 0}
 .condition-pane {
   height: calc(100% -50px)
   ///*overflow scroll*/

@@ -87,40 +87,23 @@
                   prop="subjectName"
                   style="margin-right: 0"
                 >
-                  <el-select
+                  <lazy-select
                     v-model="queryForm.subjectName"
-                    v-el-select-loadmore="loadmoreSubject"
-                    style="width: 457px;"
-                    clearable
-                    filterable
-                    remote
-                    reserve-keyword
-                    :loading="remoteLoading"
-                    placeholder="请输入"
-                    :remote-method="(query) => remoteMethod(query)"
-                    @focus="() => remoteMethod('')"
+                    :remote-method="loadMoreSubject"
+                    :response-props="{
+                      data: 'list'
+                    }"
+                    :props="{
+                      value: 'asqName',
+                      label: 'asqName'
+                    }"
+                    :query-props="{
+                      page: 'currentPage',
+                      size: 'size',
+                      search: 'asqName'
+                    }"
                   >
-                    <el-option
-                      v-for="item in subjectOptions"
-                      :key="item.id"
-                      :label="item.asqName"
-                      :value="item.asqName"
-                    >
-                    </el-option>
-
-                    <div
-                      v-if="subjectLoading"
-                      style="color: #9c9c9c; line-height: 34px;text-align: center;"
-                    >
-                      加载中...
-                    </div>
-                    <div
-                      v-if="noMoreSubject && !subjectLoading"
-                      style="color: #9c9c9c;line-height: 34px;text-align: center;"
-                    >
-                      没有更多了
-                    </div>
-                  </el-select>
+                  </lazy-select>
                 </el-form-item>
 
                 <el-form-item
@@ -365,7 +348,7 @@
               <el-button
                 v-p="EDIT_ARRANGE"
                 type="text"
-                size="small"
+                size="medium"
                 @click="handleEdit(scope.row)"
               >
                 编辑
@@ -373,7 +356,7 @@
               <el-button
                 v-p="DELETE_ARRANGE"
                 type="text"
-                size="small"
+                size="medium"
                 :loading="scope.row.deleteLoading"
                 @click="handleDelete(scope.row)"
               >
@@ -386,7 +369,7 @@
               >
                 <el-button
                   type="text"
-                  size="small"
+                  size="medium"
                 >
                   更多<i class="el-icon-arrow-more"></i>
                 </el-button>
@@ -394,14 +377,14 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
                     v-p="START_ARRANGE"
-                    :disabled="shouldbeDisabled(scope.row)"
+                    :disabled="shouldDisabled(scope.row) || scope.row.status != 1"
                     @click.native="handleStatusChange(scope.row.id, 2, scope.row.planName)"
                   >
                     开始
                   </el-dropdown-item>
                   <el-dropdown-item
                     v-p="PAUSE_ARRANGE"
-                    :disabled="shouldbeDisabled(scope.row)"
+                    :disabled="shouldDisabled(scope.row) || scope.row.status != 2"
                     @click.native="handleStatusChange(scope.row.id, 1, scope.row.planName)"
                   >
                     暂停
@@ -440,6 +423,7 @@
 
 <script>
 import Pagination from '@/components/common-pagination'
+import lazySelect from '@/components/el-lazy-select'
 import {
   queryQuestionnaireList,
   questionnaireList,
@@ -464,29 +448,8 @@ export default {
   name: 'Management',
   components: {
     Pagination,
-    TreeSelector
-  },
-  directives: {
-    'el-select-loadmore': {
-      bind(el, binding) {
-        // 获取element-ui定义好的scroll盒子
-        const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
-        SELECTWRAP_DOM.addEventListener('scroll', () => {
-          /**
-           * scrollHeight 获取元素内容高度(只读)
-           * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
-           * clientHeight 读取元素的可见高度(只读)
-           * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
-           * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
-           */
-          const condition =
-            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
-          if (condition) {
-            binding.value()
-          }
-        })
-      }
-    }
+    TreeSelector,
+    lazySelect
   },
 
   data() {
@@ -513,7 +476,6 @@ export default {
     return {
       subjectLoading: false,
       remoteLoading: false,
-      subjectOptions: [],
       noMoreSubject: false,
       queryFormVisible: false,
       columns: {
@@ -609,34 +571,8 @@ export default {
     this.getData()
   },
   methods: {
-    loadmoreSubject() {
-      if (this.subjectLoading) return
-      this.subjectQuery.currentPage++
-      this.remoteMethod(true)
-    },
-
-    remoteMethod(query) {
-      this.subjectLoading = true
-      if (typeof query != 'boolean') {
-        this.subjectQuery.asqName = query
-        this.subjectQuery.currentPage = 1
-        this.subjectOptions = []
-        this.remoteLoading = true
-      }
-      questionnaireList(this.subjectQuery)
-        .then((res) => {
-          const { list = [] } = res
-          if (typeof query != 'boolean') {
-            this.noMoreSubject = true
-          } else {
-            this.noMoreSubject = !list.length
-          }
-          this.subjectOptions = this.subjectOptions.concat(list)
-        })
-        .finally(() => {
-          this.subjectLoading = false
-          this.remoteLoading = false
-        })
+    loadMoreSubject(params) {
+      return questionnaireList(params)
     },
     resetQueryForm() {
       this.queryForm = { ...this.initForm, planName: this.queryForm.planName }
@@ -649,7 +585,7 @@ export default {
         }
       })
     },
-    shouldbeDisabled(item) {
+    shouldDisabled(item) {
       const { option } = item
       if (option == 0) return true
       if (item.status == 1) {
@@ -758,7 +694,7 @@ export default {
       })
     },
     handleDelete(target) {
-      if (target.status == 2) {
+      if (target.status === 2) {
         this.$alert('你选择的问卷安排正在进行中，不能进行删除操作！', '提醒', {
           confirmButtonText: '确认',
           type: 'warning'
@@ -773,7 +709,6 @@ export default {
       })
         .then(() => {
           let ids = target ? [target] : this.multipleSelection
-
           ids = ids.map((item) => item.id).join('')
           if (target) {
             target.deleteLoading = true
@@ -782,6 +717,7 @@ export default {
           }
           deleteQuestionnaire({ ids })
             .then(() => {
+              this.getList()
               this.$message.success('删除成功')
             })
             .finally(() => {
@@ -796,7 +732,6 @@ export default {
     },
     getData() {
       this.getList()
-
       queryCategoryOrgList({ source: 'questionnaire' }).then((res) => {
         this.selectorData = res
       })

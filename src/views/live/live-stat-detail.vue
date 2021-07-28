@@ -157,12 +157,25 @@
 
       <div class="table-container">
         <div class="table-header">
-          <div class="title">
-            数据统计
-          </div>
+          <el-tabs
+            v-model="activeTab"
+            @tab-click="handleClick"
+          >
+            <el-tab-pane
+              label="数据统计"
+              name="data"
+            >
+            </el-tab-pane>
+            <el-tab-pane
+              label="登记列表"
+              name="register"
+            >
+            </el-tab-pane>
+          </el-tabs>
 
           <div class="operate-area">
             <el-checkbox
+              v-if="activeTab === 'data'"
               v-model="getData2params.isMerge"
               v-p="CONCAT_LIVE_START"
               class="checkbox"
@@ -189,6 +202,7 @@
         </div>
 
         <el-table
+          v-if="activeTab === 'data'"
           v-loading="tableLoading"
           :data="tableData"
           height="50vh"
@@ -230,6 +244,40 @@
           >
           </el-table-column>
         </el-table>
+
+        <el-table
+          v-if="activeTab === 'register'"
+          v-loading="tableLoading"
+          :data="registerData"
+          height="50vh"
+        >
+          <el-table-column
+            v-for="column in registerColumns"
+            :key="column.prop"
+            align="center"
+            :prop="column.prop"
+            :label="column.label"
+          >
+          </el-table-column>
+          <!-- <el-table-column
+            align="center"
+            prop="sex"
+            label="性别"
+          >
+          </el-table-column>
+          <el-table-column
+            align="center"
+            prop="phone"
+            label="手机号"
+          >
+          </el-table-column>
+          <el-table-column
+            align="center"
+            prop="createTime"
+            label="填写时间"
+          >
+          </el-table-column> -->
+        </el-table>
       </div>
 
       <div class="page-container">
@@ -247,7 +295,7 @@
 <script>
 import { parseTime } from '@/util/util'
 import Pagination from '@/components/common-pagination'
-import { getSummary, getAudience } from '@/api/live'
+import { getSummary, getAudience, getChannelAuthInfo } from '@/api/live'
 import { CONCAT_LIVE_START } from '@/const/privileges'
 
 export default {
@@ -257,8 +305,10 @@ export default {
   },
   data() {
     return {
+      activeTab: 'data',
       checked: false,
       tableData: [],
+      registerData: [],
       filename: '直播数据统计',
       autoWidth: true,
       bookType: 'xlsx',
@@ -285,7 +335,8 @@ export default {
         pageNo: 1,
         pageSize: 10
       },
-      getData2Date: ''
+      getData2Date: '',
+      registerColumns: []
     }
   },
   computed: {
@@ -296,6 +347,11 @@ export default {
       const [startDate = '', endDate = ''] = val || []
       this.getData2params.startDate = startDate
       this.getData2params.endDate = endDate
+      if (this.activeTab === 'data') {
+        this.getTableData()
+      } else {
+        this.getRegister()
+      }
     },
     getData2params: {
       handler() {
@@ -310,6 +366,14 @@ export default {
     this.getData()
   },
   methods: {
+    handleClick() {
+      this.getData2params.pageNo = 1
+      if (this.activeTab === 'data') {
+        this.getTableData()
+      } else {
+        this.getRegister()
+      }
+    },
     getData() {
       this.getSummary()
       this.getTableData()
@@ -320,6 +384,41 @@ export default {
           this.data[key] = +res[key]
         })
       })
+    },
+    getRegister() {
+      this.tableLoading = true
+      let params = {
+        liveId: this.getData2params.livePlanId,
+        startTime: this.getData2params.startDate,
+        endTime: this.getData2params.endDate,
+        pageNo: this.getData2params.pageNo,
+        pageSize: this.getData2params.pageSize
+      }
+      getChannelAuthInfo(params)
+        .then((res) => {
+          let arr = JSON.parse(res.infoFeilds)
+          this.registerData = []
+          this.registerColumns = []
+          _.forEach(arr, (item, index) => {
+            this.registerColumns.push({
+              prop: `registerCloumn${index}`,
+              label: item.name
+            })
+          })
+          _.forEach(res.channelAuthInfos.data, (item) => {
+            item.params = item.params.substring(1, item.params.length - 1)
+            let arr = item.params.split(',')
+            arr.forEach((x, i) => {
+              item[`registerCloumn${i}`] = arr[i]
+            })
+          })
+          this.registerData = res.channelAuthInfos.data
+          this.total = res.channelAuthInfos.totalNum
+          this.tableLoading = false
+        })
+        .catch(() => {
+          this.tableLoading = false
+        })
     },
     getTableData() {
       this.tableLoading = true
@@ -482,9 +581,6 @@ export default {
     .table-container {
       margin-top: 64px;
       .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         margin-bottom: 16px;
         .title {
           font-size: 18px;

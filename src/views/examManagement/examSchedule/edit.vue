@@ -1,111 +1,79 @@
 <template>
   <div class="page">
-    <header class="page__header">
-      <div class="page-actions">
-        <div
-          style="border-right: 1px solid #c5c5c5; cursor: pointer"
-          @click="exit"
+    <page-header
+      :title="pageTitle"
+      show-back
+    />
+    <div class="step__container">
+      <div class="step__box">
+        <el-steps
+          :space="200"
+          :active="activeStep"
+          finish-status="success"
+          align-center
         >
-          <i class="el-icon-arrow-left" /> 返回
-        </div>
+          <el-step title="信息配置" @click.native="changeTab(0)"></el-step>
+          <el-step title="考生批次" @click.native="changeTab(1)"></el-step>
+        </el-steps>
       </div>
-      <div class="step-tab">
-        <div
-          v-for="(item, index) in steps"
-          :key="index"
-          class="step"
-          :class="[activeStep === index ? 'active' : '']"
-          @click="jumpStep(index)"
-        >
-          <span class="step-index">
-            <i
-              :class="[item.icon]"
-              class="iconfont"
-            />
-          </span>
-          {{ item.label }}
-        </div>
-        <div
-          class="ghost-step step"
-          :style="{ transform: translateX }"
-        />
-      </div>
-      <div class="page-right">
-        <el-button
-          v-if="!id"
-          v-loading="submitLoading && publishType === 'draft'"
-          size="medium"
-          @click="publishFun('draft')"
-        >
-          存草稿
-        </el-button>
-        <el-button
-          v-if="activeStep !== 0"
-          size="medium"
-          @click="handlePreviousStep"
-        >
-          上一步
-        </el-button>
-        <el-button
-          v-if="activeStep === 0"
-          size="medium"
-          type="primary"
-          @click="handleNextStep"
-        >
-          下一步
-        </el-button>
-        <el-button
-          v-if="activeStep === 1"
-          v-loading="submitLoading && publishType === 'publish'"
-          size="medium"
-          type="primary"
-          @click="publishFun('publish')"
-        >
-          发布
-        </el-button>
-      </div>
-    </header>
-    <el-row
-      v-loading="loading"
-      type="flex"
-      justify="center"
-      class="page__content"
-    >
-      <el-col
-        :xl="16"
-        :lg="16"
-        :md="20"
-        :sm="22"
-        :xs="24"
-        class="page__content--inner"
+    </div>
+    <div class="main__container">
+      <ExamInfo
+        v-show="activeStep === 0"
+        ref="examInfo"
+      />
+      <ExamBatch
+        v-show="activeStep === 1"
+        ref="examBatch"
+        @jump="jumpStepByBatch"
+      />
+    </div>
+    <div class="footer__container">
+      <el-button
+        v-if="activeStep === 0"
+        type="primary"
+        @click="handleNextStep"
       >
-        <ExamInfo
-          v-show="activeStep === 0"
-          ref="examInfo"
-        />
-        <ExamBatch
-          v-show="activeStep === 1"
-          ref="examBatch"
-          @jump="jumpStepByBatch"
-        />
-      </el-col>
-    </el-row>
+        下一步
+      </el-button>
+      <el-button
+        v-if="activeStep === 1"
+        v-loading="submitLoading && publishType === 'publish'"
+        type="primary"
+        @click="publishFun('publish')"
+      >
+        完成
+      </el-button>
+      <el-button
+        v-if="!id"
+        v-loading="submitLoading && publishType === 'draft'"
+        @click="publishFun('draft')"
+      >
+        存草稿
+      </el-button>
+      <el-button
+        v-if="activeStep !== 0"
+        @click="handlePreviousStep"
+      >
+        上一步
+      </el-button>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import ExamInfo from './components/examInfo'
-import ExamBatch from './components/examBatch'
-import { postExamArrange, putExamArrange, getExamArrange } from '@/api/examManage/schedule'
+import { postExamArrange, putExamArrange } from '@/api/examManage/schedule'
 import moment from 'moment'
 const REFS_LIST = ['examInfo', 'examBatch']
 // 培训编辑
 export default {
   name: 'ExamEdit',
   components: {
-    ExamInfo,
-    ExamBatch
+    ExamInfo: () =>
+      import('@/views/examManagement/examSchedule/components/editComponents/examInfo'),
+    ExamBatch: () =>
+      import('@/views/examManagement/examSchedule/components/editComponents/examBatch')
   },
   data() {
     return {
@@ -128,20 +96,23 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['userId']),
-    translateX() {
-      return `translateX(${this.steps.findIndex((item, index) => index === this.activeStep) *
-        100}%)`
+    pageTitle() {
+      return this.$route.query.tagName
     },
+    ...mapGetters(['userId']),
     id() {
       return _.get(this.$route.query, 'id', null)
     }
   },
-  mounted() {
-    this.$route.meta.keepAlive = false
-    this.initData()
+  beforeRouteLeave(to, from, next) {
+    from.meta.$keepAlive = false
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    next()
   },
   methods: {
+    changeTab(i){
+      this.activeStep = i
+    },
     jumpStepByBatch() {
       if (this.activeStep === 0) {
         this.jumpStep(1)
@@ -149,15 +120,8 @@ export default {
     },
     jumpStep(index) {
       this.activeStep = index
-      // if (index === 0) {
-      // } else {
-      //   this.$refs[REFS_LIST[this.activeStep]].getData().then(() => {
-      //     this.activeStep = index
-      //   })
-      // }
     },
     /***
-     * @author guanfenda
      * @desc 返回上一步
      *
      * */
@@ -165,69 +129,11 @@ export default {
       this.activeStep = this.activeStep === 0 ? 0 : this.activeStep - 1
     },
     /***
-     * @author guanfenda
      * @desc 处理下一步 验证当前form是否符合规范
      *
      * */
     handleNextStep() {
       this.activeStep = this.activeStep === 1 ? 0 : this.activeStep + 1
-      // this.$refs[REFS_LIST[0]].getData().then(() => {
-      // })
-    },
-    initData() {
-      const examInfo = this.$refs.examInfo
-      if (this.id) {
-        // 编辑的时候的数据回显
-        getExamArrange({ id: this.id }).then((res) => {
-          //TODO: 不知为何测试环境不能置灰，先测试下
-          if (examInfo) {
-            examInfo.model = res
-            this.$nextTick(() => {
-              this.setDisabled(examInfo)
-            })
-            this.setLazySelectFisrt(examInfo, res)
-            examInfo.loadTestPaper()
-          }
-          this.$store.commit('SET_PAPER_TIME', res.paperExpiredTime)
-        })
-      } else {
-        examInfo.modelDisabled = false
-        examInfo.setColumnsDisable(false)
-      }
-    },
-    // 懒加载的默认值
-    setLazySelectFisrt(examInfo, res) {
-      examInfo.testPaperDefault = [
-        {
-          name: res.paperName,
-          id: res.testPaper
-        }
-      ]
-      _.each(res.reviewerNames, (item, index) => {
-        _.set(examInfo, `reviewerDefault[${index}].name`, item)
-      })
-      _.each(res.reviewer, (item, index) => {
-        _.set(examInfo, `reviewerDefault[${index}].userId`, item)
-      })
-    },
-    // 设置置灰原则
-    setDisabled(examInfo) {
-      const type = _.get(this.$route, 'query.type')
-      let disable = false
-      //非草稿箱
-      if (
-        type === 'edit' &&
-        examInfo.model.type === 0 &&
-        (examInfo.model.status === '2' || examInfo.model.status === '3')
-      ) {
-        // 正在进行中的考试以及已结束的考试需要置灰
-        disable = true
-      } else {
-        // 草稿与未开始的考试不要置灰
-        disable = false
-      }
-      examInfo.modelDisabled = disable
-      examInfo.setColumnsDisable(disable)
     },
     // 发布区分编辑发布还是新增发布
     publishFun(type) {
@@ -254,7 +160,7 @@ export default {
       this.submitLoading = true
       editFun(params)
         .then(() => {
-          const tips = type === 'draft' ? '已发布草稿' : '已成功创建考试'
+          const tips = type === 'draft' ? '已发布草稿' : `已成功${this.id ? '保存' : '创建'}考试`
           this.$message.success(`${tips}，1秒后将自动返回`)
           setTimeout(() => {
             this.submitLoading = false
@@ -307,11 +213,7 @@ export default {
 <style lang="scss" scoped>
 $header-height: 54px;
 .page {
-  width: 100vw;
-  height: 100vh;
-  padding-top: $header-height;
   box-sizing: border-box;
-
   .page__header {
     width: 100%;
     height: $header-height;
@@ -407,15 +309,28 @@ $header-height: 54px;
       padding-right: 20px;
     }
   }
-  .page__content {
+  .step__container {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    height: 100px;
     width: 100%;
-    height: 100%;
-    overflow: auto;
-    box-sizing: border-box;
-    background: #f5f5f7;
-    .page__content--inner {
-      margin-top: 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #d7d7d7;
+    .step__box {
+      width: 100%;
     }
+    /deep/ .el-steps {
+      justify-content: center;
+    }
+  }
+  .main__container {
+    padding: 40px 120px;
+    background-color: #fff;
+  }
+  .footer__container {
+    padding: 0 120px 40px;
+    background-color: #fff;
   }
 }
 </style>

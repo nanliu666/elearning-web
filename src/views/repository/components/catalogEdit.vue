@@ -191,7 +191,7 @@ export default {
       if (this.type === 'edit') {
         this.orgTree = this.clearCurrentChildren(res)
         this.parentOrgIdLabel =
-          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
       } else {
         this.orgTree = res
       }
@@ -293,6 +293,15 @@ export default {
     edit(row) {
       this.type = 'edit'
       this.form = _.cloneDeep(row)
+       if(this.form.orgIdList.length){
+         this.form.orgIdList = this.form.orgIdList.reduce((pre,cur,index)=>{
+          pre.push({
+            orgId:cur,
+            orgName:this.form.orgNames.split(',')[index]
+          })
+          return pre
+        },[])
+      }
       this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
       this.loadOrgTree()

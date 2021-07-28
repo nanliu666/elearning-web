@@ -211,7 +211,7 @@ export default {
           label: '角色级别',
           prop: 'orgType',
           formatter(row) {
-            let arr = { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' }
+            let arr = { Enterprise: '公司', Company: '单位', Department: '部门', Group: '小组' }
             return arr[row.orgType]
           }
         },

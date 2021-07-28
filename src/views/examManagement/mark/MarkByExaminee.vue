@@ -138,7 +138,7 @@
           <el-button
             type="primary"
             size="medium"
-            @click="submit"
+            @click="submit('1')"
           >
             提交评分
           </el-button>
@@ -150,7 +150,7 @@
           </el-button>
           <el-button
             size="medium"
-            @click="save"
+            @click="save('0')"
           >
             保存
           </el-button>
@@ -180,7 +180,7 @@ import QustionPreview from './components/questionPreview'
 import MarkHeaderCard from './components//MarkHeaderCard'
 import { addLine } from '@/util/util'
 import {
-  QUESTION_TYPE_MAP,
+  QUESTION_TYPE_MAP_TOTAL,
   QUESTION_TYPE_MULTIPLE,
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
@@ -201,7 +201,7 @@ export default {
   },
   filters: {
     typeFilter(data) {
-      return QUESTION_TYPE_MAP[data]
+      return QUESTION_TYPE_MAP_TOTAL[data]
     },
     number2zhcn(index) {
       return nzhcn.encodeS(index)
@@ -222,7 +222,8 @@ export default {
       },
       isView: false,
       impersonalityList: [], //客观题
-      subjectivityList: [] // 主观题
+      subjectivityList: [], // 主观题
+      flag: true // TODO: 区分保存和新增
     }
   },
   computed: {
@@ -232,7 +233,6 @@ export default {
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   activated() {
@@ -258,8 +258,8 @@ export default {
       })
     },
     // 保存
-    save() {
-      this.submit()
+    save(flag) {
+      this.submit(flag)
     },
     // 提交且评下一个
     submitAndNext() {
@@ -280,7 +280,8 @@ export default {
         })
     },
     // 提交
-    submit() {
+    submit(flag) {
+      this.flag = flag
       this.checkRequired()
     },
     checkEmpty() {
@@ -309,7 +310,8 @@ export default {
       if (_.isEmpty(list)) return
       const params = {
         id: this.examineeAchievementDO.id,
-        list
+        list,
+        isSubmit: this.flag
       }
       postSubmitByOne(params)
         .then(() => {

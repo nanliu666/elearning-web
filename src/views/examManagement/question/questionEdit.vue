@@ -8,160 +8,151 @@
       v-loading="loading"
       block
     >
-      <el-row
-        type="flex"
-        justify="center"
-      >
-        <el-col
-          :xl="16"
-          :lg="16"
-          :md="18"
-          :sm="20"
-          :xs="22"
+      <div class="main__container">
+        <common-form
+          ref="form"
+          :columns="columns"
+          :model="form"
         >
-          <common-form
-            ref="form"
-            :columns="columns"
-            :model="form"
-          >
-            <template #title1="">
-              <h3 class="title">
-                基础信息
-              </h3>
-            </template>
-            <template #title2="">
-              <h3 class="title">
-                试题内容
-              </h3>
-            </template>
-            <template #score-label="">
-              试题分数
-              <el-tooltip
-                class="item"
-                effect="dark"
-                content="试题分数设置仅可应用手工试卷，随机试卷需要重新设置分数"
-                placement="top-start"
-              >
-                <i class="el-icon-question" />
-              </el-tooltip>
-            </template>
-            <template #options-label="">
-              选项
-              <el-tooltip
-                v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(form.type)"
-                class="item"
-                effect="dark"
-                placement="top-start"
-              >
-                <div slot="content">
-                  1.选中的选项为试题的正确答案；<br />2.最多添加10个选项，每项最多150个字；<br />3.每个选项最多插入一个图片。
-                </div>
-                <i class="el-icon-question" />
-              </el-tooltip>
-            </template>
-            <template
-              v-if="form.type === QUESTION_TYPE_BLANK"
-              #content-label=""
+          <template #title1="">
+            <h3 class="title">
+              基础信息
+            </h3>
+          </template>
+          <template #title2="">
+            <h3 class="title">
+              试题内容
+            </h3>
+          </template>
+          <template #score-label="">
+            试题分数
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="试题分数设置仅可应用手工试卷，随机试卷需要重新设置分数"
+              placement="top-start"
             >
-              题干
-              <span
-                class="tips"
-              >（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）</span>
-            </template>
-            <template
-              v-else
-              #content-label=""
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </template>
+          <template #options-label="">
+            选项
+            <el-tooltip
+              v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(form.type)"
+              class="item"
+              effect="dark"
+              placement="top-start"
             >
-              题干
-              <el-tooltip
-                class="item"
-                effect="dark"
-                placement="top-start"
-              >
-                <div slot="content">
-                  支持上传png、jpg、jpeg格式文件，单个文件大小＜5MB，最多5个文件
-                </div>
-                <i class="el-icon-question" />
-              </el-tooltip>
-            </template>
-            <template
-              v-if="form.type === QUESTION_TYPE_BLANK"
-              #answer-label=""
-            >
-              标准答案
-              <span
-                class="tips"
-              >（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）</span>
-            </template>
-            <template slot="attachments">
-              <image-uploader
-                ref="uploader"
-                v-model="form.attachments"
-              />
-            </template>
-            <template #options="">
-              <question-options
-                v-if="form.type !== QUESTION_TYPE_JUDGE"
-                v-model="form.options"
-                :is-check-box="form.type === QUESTION_TYPE_MULTIPLE"
-              ></question-options>
-              <template v-else>
-                <el-radio
-                  v-for="item in form.options"
-                  :key="item.key"
-                  v-model="item.isCorrect"
-                  :label="1"
-                  @change="(val) => handleRadioCheck(val, item)"
-                >
-                  {{ item.content }}
-                </el-radio>
-              </template>
-            </template>
-            <template #subQuestions="">
-              <div class="sub-questions">
-                <template v-for="(question, index) in form.subQuestions">
-                  <question-item
-                    ref="subQuestion"
-                    :key="question.key"
-                    :value="question"
-                    :parent="form.subQuestions"
-                    :index="index"
-                    @delete="handleDeleteSubQuestion($event)"
-                    @move="handleMoveSubQuestions"
-                  />
-                </template>
-                <div
-                  v-if="form.subQuestions.length < 20"
-                  class="sub-questions__add"
-                  @click="handleAddSub"
-                >
-                  <i class="iconimage_icon_plus-outlined iconfont"> </i>添加子试题（最多20项）
-                </div>
+              <div slot="content">
+                1.选中的选项为试题的正确答案；<br />2.最多添加10个选项，每项最多150个字；<br />3.每个选项最多插入一个图片。
               </div>
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </template>
+          <template
+            v-if="form.type === QUESTION_TYPE_BLANK"
+            #content-label=""
+          >
+            题干
+            <span
+              class="tips"
+            >（说明：在需要填空的地方，用英文输入法输入三根下划线表示，即“___”。）</span>
+          </template>
+          <template
+            v-else
+            #content-label=""
+          >
+            题干
+            <el-tooltip
+              class="item"
+              effect="dark"
+              placement="top-start"
+            >
+              <div slot="content">
+                支持上传png、jpg、jpeg格式文件，单个文件大小＜5MB，最多5个文件
+              </div>
+              <i class="el-icon-question" />
+            </el-tooltip>
+          </template>
+          <template
+            v-if="form.type === QUESTION_TYPE_BLANK"
+            #answer-label=""
+          >
+            标准答案
+            <span
+              class="tips"
+            >（说明：1.多个答案应该用“|”隔开； 2.如果一个空有多个标准答案请用“&”隔开。）</span>
+          </template>
+          <template slot="attachments">
+            <image-uploader
+              ref="uploader"
+              v-model="form.attachments"
+            />
+          </template>
+          <template #options="">
+            <question-options
+              v-if="form.type !== QUESTION_TYPE_JUDGE"
+              v-model="form.options"
+              :is-check-box="form.type === QUESTION_TYPE_MULTIPLE"
+            ></question-options>
+            <template v-else>
+              <el-radio
+                v-for="item in form.options"
+                :key="item.key"
+                v-model="item.isCorrect"
+                :label="1"
+                @change="(val) => handleRadioCheck(val, item)"
+              >
+                {{ item.content }}
+              </el-radio>
             </template>
-          </common-form>
-          <div class="page-footer">
-            <el-button
-              v-loading="submiting"
-              type="primary"
-              size="medium"
-              @click="handleSubmit()"
-            >
-              保存
-            </el-button>
-            <!-- @click="handleSubmit(true)" -->
-            <el-button
-              v-if="!id"
-              v-loading="submitingAndContinue"
-              size="medium"
-              style="margin-left:16px;"
-              @click="handleSubmit(true)"
-            >
-              完成并继续创建
-            </el-button>
-          </div>
-        </el-col>
-      </el-row>
+          </template>
+          <template #subQuestions="">
+            <div class="sub-questions">
+              <template v-for="(question, index) in form.subQuestions">
+                <!-- 当前只能维护一卡片个被编辑的状态，未保存不能进行下一个新增 -->
+                <!-- 开新的一个未保存会丢失，编辑之前的未保存会恢复到未编辑之前的数据 -->
+                <!-- 试题组的保存的时候必须存在至少一个子试题 -->
+                <question-item
+                  ref="subQuestion"
+                  :key="question.key"
+                  :value="question"
+                  :parent="form.subQuestions"
+                  :index="index"
+                  @delete="handleDeleteSubQuestion($event)"
+                  @move="handleMoveSubQuestions"
+                />
+              </template>
+              <div
+                v-if="form.subQuestions.length < 20"
+                class="sub-questions__add"
+                @click="handleAddSub"
+              >
+                <i class="iconimage_icon_plus-outlined iconfont" />添加子试题（最多20项）
+              </div>
+            </div>
+          </template>
+        </common-form>
+        <div class="page-footer">
+          <el-button
+            v-loading="submiting"
+            type="primary"
+            size="medium"
+            @click="handleSubmit()"
+          >
+            保存
+          </el-button>
+          <el-button
+            v-if="!id"
+            v-loading="submitingAndContinue"
+            size="medium"
+            style="margin-left:16px;"
+            @click="handleSubmit(true)"
+          >
+            完成并继续创建
+          </el-button>
+        </div>
+      </div>
     </basic-container>
   </div>
 </template>
@@ -180,13 +171,21 @@ import QuestionOptions from './questionOptions'
 import ImageUploader from './imageUploader'
 import QuestionItem from './questionItem'
 import { createUniqueID } from '@/util/util'
-import { SELECT_COLUMNS, SHORT_COLUMNS, FILL_COLUMNS, GROUP_COLUMNS } from './config'
+import {
+  SELECT_COLUMNS,
+  SHORT_COLUMNS,
+  FILL_COLUMNS,
+  GROUP_COLUMNS,
+  MULTIPLE_SELECT_COLUMNS
+} from './config'
 import {
   createQuestion,
   getQuestion,
   modifyQuestion,
   getQuestionCategory
 } from '@/api/examManage/question'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
+import moment from 'moment'
 
 const BASIC_COLUMNS = [
   { prop: 'title1', span: 24, itemType: 'slotout' },
@@ -221,13 +220,15 @@ const BASIC_COLUMNS = [
           value: 'id'
         }
       }
-    }
+    },
+    required: true
   },
   {
     prop: 'score',
     label: '试题分数',
     itemType: 'inputNumber',
     min: 0,
+    max: 9999999,
     precision: 1,
     step: 0.1
   },
@@ -254,6 +255,31 @@ const BASIC_COLUMNS = [
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     offset: 4,
     itemType: 'datePicker'
+  },
+  {
+    label: '知识体系',
+    itemType: 'treeSelect',
+    prop: 'knowledgeSystemId',
+    required: false,
+    props: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: true,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
   },
   { span: 24, prop: 'title2', itemType: 'slotout' }
 ]
@@ -336,32 +362,48 @@ const createSubQustion = () => ({
   type: QUESTION_TYPE_SINGLE,
   content: '',
   score: 0,
-  editing: true,
+  editType: 'add',
   options: createOptions(),
   attachments: [],
   key: createUniqueID()
 })
-import { deleteHTMLTag } from '@/util/util'
 export default {
   name: 'QuestionEdit',
+  provide() {
+    return {
+      questionEditRef: this // 注入当前父实例
+    }
+  },
   components: {
     QuestionOptions,
     ImageUploader,
     QuestionItem
   },
+  beforeRouteLeave(to, from, next) {
+    this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
+    from.meta.$keepAlive = false // 禁用页面缓存
+    next()
+  },
   data() {
     return {
+      initStartTime: moment().startOf('year'),
+      timeLimit: 0, // 答题限时单位秒
+      activeQuestion: -1,
+      cloneDeepOptions: {},
       form: {
         type: QUESTION_TYPE_SINGLE,
         categoryId: null,
         score: 0,
         difficulty: null,
         expiredTime: null,
+        knowledgeSystemId: null,
         content: null,
         analysis: null,
         answer: null,
         attachments: [],
-        timeLimitDate: new Date(2020, 1, 1, 0, 0, 0),
+        timeLimitDate: moment()
+          .startOf('year')
+          .format('YYYY-MM-DD HH:mm:ss'),
         options: createOptions(),
         subQuestions: [createSubQustion()]
       },
@@ -391,48 +433,38 @@ export default {
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER
   },
   watch: {
+    /**
+     * 根据试题类型切换表单内容
+     */
     'form.type': {
-      handler(val, oldVal) {
+      handler(val) {
         this.$nextTick(() => {
           this.$refs.form.clearValidate()
         })
-        /**
-         * 根据试题类型切换表单内容
-         */
         if (val === QUESTION_TYPE_SINGLE) {
-          this.removeContentHTML()
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
-        } else if (QUESTION_TYPE_MULTIPLE === val) {
-          this.removeContentHTML()
-          const _SELECT_COLUMNS = _.cloneDeep(SELECT_COLUMNS)
-          _SELECT_COLUMNS[2].rules = [
-            {
-              validator: (rule, value, callback) => {
-                if (_.some(value, (item) => !item.content && !item.url)) {
-                  return callback(new Error('选项内容请填写完整'))
-                } else if (!_.some(value, { isCorrect: 1 })) {
-                  return callback(new Error('请设置正确选项'))
-                } else if (_.filter(value, { isCorrect: 1 }).length < 2) {
-                  return callback(new Error('多选题请最少选择两个正确答案'))
-                }
-                callback()
-              },
-              trigger: 'change'
-            }
-          ]
-          this.columns = [...BASIC_COLUMNS, ..._SELECT_COLUMNS]
+          this.getFormOptions(createOptions())
         } else if (val === QUESTION_TYPE_JUDGE) {
-          this.removeContentHTML()
           this.columns = [...BASIC_COLUMNS, ...SELECT_COLUMNS]
-          this.form.options = [
+          const initJudgeOptions = [
             { key: createUniqueID(), content: '正确', isCorrect: 1, url: '' },
             { key: createUniqueID(), content: '错误', isCorrect: 0, url: '' }
           ]
+          this.getFormOptions(initJudgeOptions)
+        } else if (QUESTION_TYPE_MULTIPLE === val) {
+          const _SELECT_COLUMNS = _.cloneDeep(MULTIPLE_SELECT_COLUMNS)
+          this.columns = [...BASIC_COLUMNS, ..._SELECT_COLUMNS]
+          this.getFormOptions(createOptions())
         } else if (QUESTION_TYPE_SHOER === val) {
           this.columns = [...BASIC_COLUMNS, ...SHORT_COLUMNS]
         } else if (QUESTION_TYPE_BLANK === val) {
           this.columns = [...BASIC_COLUMNS, ...FILL_COLUMNS]
         } else if (QUESTION_TYPE_GROUP === val) {
+          // 编辑一进来默认不打开所有卡片保持-1
+          // 之前有激活卡片，在切换的时候回到激活状态
+          if (!this.id) {
+            this.activeQuestion = this.activeQuestion === -1 ? 0 : this.activeQuestion
+          }
           this.columns = [...BASIC_COLUMNS_GROUP, ...GROUP_COLUMNS]
         }
         /**
@@ -454,31 +486,41 @@ export default {
             this.form.subQuestions.push(createSubQustion())
           }
         }
-        // 从多选题切换到单选题时把正确答案置空
-        if (oldVal === QUESTION_TYPE_MULTIPLE && val === QUESTION_TYPE_SINGLE) {
-          _.forEach(this.form.options, (item) => {
-            item.isCorrect = 0
-          })
+      },
+      deep: true
+    },
+    'form.timeLimitDate': {
+      handler(val) {
+        // 时间格式转换成多少秒
+        if (val) {
+          this.timeLimit = moment(val).diff(moment(_.cloneDeep(this.initStartTime)), 'seconds')
         }
       },
+      deep: true,
       immediate: true
     }
   },
-  activated() {
+  mounted() {
     if (this.id) {
       this.loadData()
     }
     this.loadCategoryData()
+    this.initRelatedKnowledgeList()
   },
   beforeDestroy() {
     this.scoreWatcher && this.scoreWatcher()
   },
   methods: {
-    // 当富文本切换当input删除多余的html标签
-    removeContentHTML() {
-      if (!_.isEmpty(this.form.content)) {
-        this.form.content = deleteHTMLTag(this.form.content)
-      }
+    // 维护每一个题型的项
+    setCloneOptions() {
+      // 每一种题型有维护自己的单独选项
+      _.set(this.cloneDeepOptions, this.form.type, this.form.options)
+    },
+    getFormOptions(initData) {
+      // 题型初建，新增一个，题型切换时，恢复到之前的选项
+      const selfOptions = _.get(this.cloneDeepOptions, this.form.type)
+      this.form.options = !_.isEmpty(selfOptions) ? selfOptions : initData
+      this.setCloneOptions()
     },
     handleDeleteSubQuestion(index) {
       this.form.subQuestions.splice(index, 1)
@@ -492,14 +534,51 @@ export default {
       }
     },
     /**
+     * 恢复数据的方法
+     * 入参backIndex，哪个卡片需要恢复数据
+     */
+    backDataItem(backIndex) {
+      // 如果是编辑的数据，需要恢复到之前的数据
+      const REF_TEMP = this.$refs.subQuestion
+      const cloneTmep = _.cloneDeep(_.get(REF_TEMP, `[${backIndex}].cloneDeepValue`))
+      this.form.subQuestions[backIndex] = cloneTmep
+      this.$forceUpdate()
+    },
+    /**
+     * 新增一条试题卡片
+     */
+    pushOneItem() {
+      this.form.subQuestions.push(createSubQustion())
+      this.activeQuestion = _.size(this.form.subQuestions) - 1
+    },
+    /**
      * 添加子试题
      */
     handleAddSub() {
-      if (this.form.subQuestions.length >= 20) {
+      if (_.size(this.form.subQuestions) >= 20) {
         this.$message.error('最多只能添加20项子试题')
         return
       }
-      this.form.subQuestions.push(createSubQustion())
+      // 没有子试题或者是之前所有的子试题都是已保存的状态，直接加一个子试题
+      if (_.isEmpty(this.form.subQuestions) || this.activeQuestion === -1) {
+        this.pushOneItem()
+      } else {
+        this.$confirm('离开修改内容将不会保存！', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 如果是直接新的数据，在未保存的时候需要丢弃次卡片
+          if (this.$refs.subQuestion[this.activeQuestion].value.editType === 'add') {
+            this.form.subQuestions.splice(this.activeQuestion, 1)
+          } else {
+            // 不是新数据需要恢复数据
+            this.backDataItem(this.activeQuestion)
+          }
+          // 并且新增一条
+          this.pushOneItem()
+        })
+      }
     },
     handleRadioCheck(val, option) {
       this.form.options.forEach((item) => {
@@ -510,10 +589,7 @@ export default {
     },
     handleSubmit(isContinue) {
       this.$refs.form.validate().then(() => {
-        if (
-          this.form.type === QUESTION_TYPE_GROUP &&
-          _.some(this.form.subQuestions, { editing: true })
-        ) {
+        if (this.form.type === QUESTION_TYPE_GROUP && this.activeQuestion !== -1) {
           this.$message.error('有子试题没有保存，请先保存')
           return
         }
@@ -525,14 +601,14 @@ export default {
           'analysis',
           'options',
           'expiredTime',
-          'attachments'
+          'attachments',
+          'knowledgeSystemId'
         ])
-        // 前端保留一位小数，提交时乘以10化为整数，使用时要除以10
         if (data.score) {
           data.score = parseInt(data.score)
         }
         data.content = _.escape(this.form.content)
-        data.timeLimit = (this.form.timeLimitDate.getTime() - new Date(2020, 1, 1)) / 1000
+        data.timeLimit = this.timeLimit
         if (this.form.answer && this.form.type === QUESTION_TYPE_BLANK) {
           data.options = [{ content: this.form.answer, isCorrect: 1 }]
         } else {
@@ -587,29 +663,32 @@ export default {
       this.$refs.form.resetFields()
       this.form.options = createOptions()
       this.form.attachments = []
+      this.form.content = ''
       this.form.subQuestions = [createSubQustion()]
+    },
+    setFileList(options) {
+      _.each(options, (option) => {
+        option.key = createUniqueID()
+        if (option.url) {
+          option.fileList = [{ url: option.url }]
+        } else {
+          option.fileList = []
+        }
+      })
     },
     loadData() {
       this.loading = true
       getQuestion({ id: this.id })
         .then((res) => {
-          // console.log(res)
           this.form = res
-          this.$set(
-            this.form,
-            'timeLimitDate',
-            new Date(new Date(2020, 1, 1).getTime() + (res.timeLimit || 0) * 1000)
-          )
+          const { timeLimit } = res
+          const editTime = _.cloneDeep(this.initStartTime)
+            .add(timeLimit, 's')
+            .format('YYYY-MM-DD HH:mm:ss')
+          this.$set(this.form, 'timeLimitDate', editTime)
           this.form.score = res.score
           this.form.content = _.unescape(res.content)
-          this.form.options.forEach((option) => {
-            option.key = createUniqueID()
-            if (option.url) {
-              option.fileList = [{ url: option.url }]
-            } else {
-              option.fileList = []
-            }
-          })
+          this.setFileList(this.form.options)
           if (res.type == QUESTION_TYPE_BLANK) {
             this.$set(this.form, 'answer', _.get(_.head(res.options), 'content', ''))
           }
@@ -621,7 +700,12 @@ export default {
           })
           if (!_.isEmpty(this.form.subQuestions)) {
             this.form.subQuestions = _.sortBy(this.form.subQuestions, 'sort')
+            _.each(this.form.subQuestions, (sub) => {
+              this.setFileList(sub.options)
+            })
           }
+
+          this.setCloneOptions()
         })
         .finally(() => {
           this.loading = false
@@ -641,6 +725,14 @@ export default {
           }
         })
       })
+    },
+    // 初始化知识体系列表
+    initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(BASIC_COLUMNS, { prop: 'knowledgeSystemId' })
+      //   各资源下的知识体系下拉框列表
+      relatedKnowledgeList({ name: '' }).then(
+        (res) => (knowledgeSystemId.props.treeParams.data = res)
+      )
     }
   }
 }
@@ -652,6 +744,9 @@ export default {
   min-height: calc(100% - 92px);
 }
 .question-edit {
+  .main__container {
+    padding: 0px 60px;
+  }
   .title {
     font-size: 18px;
   }

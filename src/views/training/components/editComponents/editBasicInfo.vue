@@ -376,7 +376,7 @@ export default {
       }
     },
     getCatalogs() {
-      getAllCatalog().then((res) => {
+      getAllCatalog({ addFlag: '1' }).then((res) => {
         this.infoFormColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },

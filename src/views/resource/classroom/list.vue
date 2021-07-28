@@ -345,6 +345,8 @@ export default {
     },
     // 搜索
     handleSearch(params) {
+      this.queryInfo.pageNo = 1
+      this.page.currentPage = 1
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },

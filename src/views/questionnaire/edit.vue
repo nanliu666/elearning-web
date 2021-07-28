@@ -49,7 +49,7 @@
               :value="form.categoryId"
               :options="treeData"
               placeholder="请选择所在分类"
-              :props="seletorProps"
+              :props="selectorProps"
               @getValue="(id) => (form.categoryId = id)"
             />
           </el-form-item>
@@ -459,7 +459,7 @@ export default {
         remark: '',
         asqQuestions: []
       },
-      seletorProps: {
+      selectorProps: {
         value: 'id',
         label: 'name',
         children: 'children'

@@ -57,8 +57,8 @@
           </div>
         </el-col>
       </el-form-item>
-      <!-- 可见范围 -->
-      <el-form-item
+      <!-- 可见范围 bug3230-->
+      <!-- <el-form-item
         v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
         label="可见范围"
       >
@@ -68,8 +68,7 @@
             @selectedValue="getOrgList"
           ></OrgTree>
         </div>
-        <!-- {{ userList }} -->
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
     <span
       v-if="type === 'create'"
@@ -144,7 +143,7 @@ export default {
       if (this.type === 'edit') {
         this.orgTree = this.clearCurrentChildren(res)
         this.parentOrgIdLabel =
-          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
       } else {
         this.orgTree = res
       }

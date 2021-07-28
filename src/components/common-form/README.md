@@ -27,20 +27,23 @@
 
 除此之外支持所有FormItem组件的属性，另外，此字段传的除以下和FormItem属性以外的其他参数将会全部传递给表单组件
 
-| 参数        | 说明                                                     | 是否必填 |  类型   | 默认值 |
-| :---------- | :------------------------------------------------------- | :------: | :-----: | :----: |
-| prop        | 表单域 model 字段                                        |    是    | String  |   -    |
-| label       | 标签文本                                                 |    是    | String  |   -    |
-| itemType    | 字段类型，可选值见下                                     |    是    | String  |   -    |
-| span        | 该字段的栅格占据的列数                                   |    否    | Number  |   10   |
-| offset      | 该字段的栅格左侧的间隔格数                               |    否    | Number  |   -    |
-| options     | 选项数据，当字段类型为select/cascader/radio/checkbox必填 |    否    |  Array  |   -    |
-| props       | 配置项，详情见下                                         |    否    | Object  |   -    |
-| rules       | 校验规则                                                 |    否    |  Array  |   -    |
-| required    | 是否必填，当为true时会自动添加一个必填的校验规则         |    否    | Boolean | false  |
-| placeholder | 自定义占位内容                                           |    否    | String  |        |
-| isVisible   | 是否隐藏且占位，默认不隐藏                               |    否    | Boolean |  true  |
-| isHidden    | 是否隐藏且不占位，默认不隐藏                             |    否    | Boolean | false  |
+| 参数           | 说明                                                                 | 是否必填 |  类型   | 默认值 |
+| :------------- | :------------------------------------------------------------------- | :------: | :-----: | :----: |
+| prop           | 表单域 model 字段                                                    |    是    | String  |   -    |
+| label          | 标签文本                                                             |    是    | String  |   -    |
+| itemType       | 字段类型，可选值见下                                                 |    是    | String  |   -    |
+| span           | 该字段的栅格占据的列数                                               |    否    | Number  |   10   |
+| offset         | 该字段的栅格左侧的间隔格数                                           |    否    | Number  |   -    |
+| options        | 选项数据，当字段类型为select/cascader/radio/checkbox必填             |    否    |  Array  |   -    |
+| props          | 配置项，详情见下                                                     |    否    | Object  |   -    |
+| rules          | 校验规则                                                             |    否    |  Array  |   -    |
+| required       | 是否必填，当为true时会自动添加一个必填的校验规则                     |    否    | Boolean | false  |
+| placeholder    | 自定义占位内容                                                       |    否    | String  |        |
+| isVisible      | 是否隐藏且占位，默认不隐藏                                           |    否    | Boolean |  true  |
+| isHidden       | 是否隐藏且不占位，默认不隐藏                                         |    否    | Boolean | false  |
+| hasLabelSwitch | 是否label右侧是switch开关，可以用来控制当前的prop的disable，默认隐藏 |    否    | Boolean | false  |
+| hasLabelRight  | 是否label右侧是插槽自定义内容，默认隐藏                              |    否    | Boolean | false  |
+| hasLabelSolt   | label是否是自定义插槽，默认只展示名字                                |    否    | Boolean | false  |
 
 
 ### itemType 可选值

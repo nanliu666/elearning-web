@@ -24,14 +24,14 @@
             @getValue="getValue"
           >
             <template #default>
-              <div style="display: flex;">
+              <div style="display: flex">
                 <el-button>上传</el-button>
               </div>
               <div
                 slot="tip"
-                style="color: #a1a8ae; font-size:12px"
+                style="color: #a1a8ae; font-size: 12px"
               >
-                图片文件大小＜10MB，其他类型文件大小＜2G，最多{{ limit }}个文件
+                每个文档大小不超过50M，视频大小不超过2G,最多{{ limit }}个文件
               </div>
             </template>
           </common-upload>
@@ -53,12 +53,7 @@
               :key="index"
               class="uploader-li"
             >
-              <span
-                class="uploader-file ellipsis"
-                @click.stop="previewFile(item)"
-              >{{
-                item.fileName
-              }}</span>
+              <span class="uploader-file ellipsis">{{ item.fileName }}</span>
               <i
                 class="el-icon-close"
                 @click.stop="deleteUpload(item)"
@@ -68,7 +63,7 @@
         </template>
         <template #basicTitle>
           <!-- 用来占位的 -->
-          <div style="height: 85px; color: transparent;" />
+          <div style="height: 85px; color: transparent" />
         </template>
         <template #introduction>
           <tinymce
@@ -110,18 +105,20 @@
 import {
   addKnowledgeList,
   updateKnowledge,
-  getKnowledgeManageDetails
+  getKnowledgeManageDetails,
+  queryCategoryOrgList,
+  relatedKnowledgeList
 } from '@/api/knowledge/knowledge'
-import { queryCategoryOrgList } from '@/api/resource/classroom'
+//import { queryCategoryOrgList } from '@/api/resource/classroom'
 import CommonUpload from '@/components/common-upload/commonUpload'
 import { mapGetters } from 'vuex'
 const FORM_COLUMNS = [
   {
     itemType: 'input',
-    label: '资源名称',
+    label: '知识名称',
     prop: 'resName',
     required: true,
-    maxlength: 100,
+    maxlength: 60,
     span: 11,
     offset: 0
   },
@@ -158,37 +155,44 @@ const FORM_COLUMNS = [
     label: '提供人',
     prop: 'providerName',
     maxlength: 20,
-    span: 11
+    span: 11,
+    offset: 0
   },
   {
-    prop: 'basicTitle',
-    itemType: 'slotout',
+    label: '知识体系',
+    itemType: 'treeSelect',
+    prop: 'knowledgeSystemId',
+    required: false,
     span: 11,
     offset: 1,
-    label: ''
+    props: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: true,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
   },
-  // {
-  //   itemType: 'select',
-  //   label: '添加标签',
-  //   prop: 'tags',
-  //   required: false,
-  //   filterable: true,
-  //   multiple: true,
-  //   disabled: true,
-  //   props: {
-  //     label: 'name',
-  //     value: 'id'
-  //   },
-  //   options: [],
-  //   span: 11,
-  //   offset: 1
-  // },
+
   {
     itemType: 'radio',
     label: '上传模式',
     prop: 'uploadType',
     required: true,
     span: 11,
+    offset: 0,
     options: [
       {
         label: '本地文件',
@@ -199,18 +203,33 @@ const FORM_COLUMNS = [
         value: 1
       }
     ]
-  }
-]
-const uploadConfigList = [
+  },
   {
     itemType: 'switch',
     label: '是否允许下载',
     prop: 'allowDownload',
+    offset: 1,
     required: false,
     activeValue: 0,
     inactiveValue: 1,
-    span: 11,
-    offset: 1
+    span: 11
+  }
+]
+const uploadConfigList = [
+  {
+    itemType: 'select',
+    prop: 'type',
+    label: '知识类型',
+    span: 8,
+    data: '',
+    offset: 0,
+    required: true,
+    options: [
+      { value: 1, label: '视频' },
+      { value: 2, label: '文档' },
+      { value: 3, label: '资料下载' }
+    ],
+    disabled: false
   },
   {
     itemType: 'slot',
@@ -220,7 +239,7 @@ const uploadConfigList = [
       label: 'jobName',
       value: 'id'
     },
-    required: false,
+    required: true,
     span: 24
   }
 ]
@@ -235,6 +254,7 @@ const UPLOAD_ONLINE = [
   }
 ]
 import { deleteHTMLTag } from '@/util/util'
+// import PDF from '@/util/jspdf'
 export default {
   name: 'KnowledgeEdit',
   components: {
@@ -242,10 +262,10 @@ export default {
   },
   data() {
     return {
-      limit: 5,
+      limit: 20,
       introductionColumn: {
         prop: 'introduction',
-        label: '资源介绍',
+        label: '知识介绍',
         itemType: 'slot',
         rules: [{ required: false, validator: this.checkTinyMax, trigger: ['blur', 'change'] }],
         span: 24
@@ -263,7 +283,9 @@ export default {
         resUrl: '',
         allowDownload: 0, //是否运行下载 0允许 1不允许
         introduction: '',
-        attachments: []
+        attachments: [],
+        knowledgeSystemId: '',
+        type: 2
       },
       submitting: false,
       videoFlag: false,
@@ -312,10 +334,16 @@ export default {
   },
   mounted() {
     this.pageTitle = this.id ? '编辑资源' : '创建资源'
+
     // TODO: 待自测新增分类后进入创建资源
     if (this.catalogId) {
       this.formData.catalogId = this.catalogId
     }
+    //如果是编辑就置灰知识类型
+    this.$nextTick(() => {
+      const column = this.localColumns.find((column) => column.label == '知识类型')
+      column.disabled = this.id ? true : false
+    })
     this.initData()
   },
   methods: {
@@ -342,45 +370,121 @@ export default {
       }
       this.formData.attachments = _.uniqBy([...this.formData.attachments, ...value], 'fileName')
     },
+
+    // 是否空文件
+    isFileSize(file) {
+      if (file.size === 0) {
+        this.$message({
+          message: '请不要上传空文件哦！',
+          type: 'warning'
+        })
+        return true
+      }
+    },
     // 上传格式校验
     beforeUpload(file) {
-      const fileTypeIndex = file.name.lastIndexOf('.')
-      const fileType = file.name.substring(fileTypeIndex + 1, file.length)
-      const imageSizeLimit = file.size / 1024 / 1024 < 10 //图片限制10M
-      const othersSizeLimit = file.size / 1024 / 1024 / 1024 < 2 // 其余文件限制大小为2G
-      const TYPE_LIST = ['exe', 'bat']
-      const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP']
-      const isImage = _.some(IMAGE_TYPE, (item) => {
-        return item === fileType
-      })
-      let isLtFileSize = isImage ? imageSizeLimit : othersSizeLimit
-      const notBatNorExe = _.some(TYPE_LIST, (item) => {
-        return item === fileType
-      })
-      const isEmpty = file.size === 0
+      // const fileTypeIndex = file.name.lastIndexOf('.')
+      // const fileType = file.name.substring(fileTypeIndex + 1, file.length)
+      //  const imageSizeLimit = file.size / 1024 / 1024 < 10 //图片限制10M
+      //  const othersSizeLimit = file.size / 1024 / 1024 / 1024 < 2 // 其余文件限制大小为2G
+      //  const TYPE_LIST = ['exe', 'bat']
+      //  const IMAGE_TYPE = ['jpg', 'jpeg', 'pbg', 'GIF', 'BMP','PDF','ppt','word','excel'] //文档
+
+      if (this.formData.uploadType == 0) {
+        if (this.formData.type == 1) {
+          //视频
+          const isLimitLength = _.size(this.formData.attachments) < this.limit
+          if (this.isFileSize(file)) return false
+          const regx = /^.*\.(avi|wmv|mp4|3gp|rm|rmvb|mov|flv)$/
+          const isLt2GB = file.size / 1024 / 1024 <= 2048
+          if (!regx.test(file.name.toLowerCase())) {
+            this.$message.error('上传视频只支持avi,wmv,mp4,3gp,rm,rmvb,mov,flv文件')
+            return false
+          }
+          if (!isLt2GB) {
+            this.$message.error('上传视频大小不能超过 2GB!')
+            return false
+          }
+          if (!isLimitLength) {
+            this.$message.error('上传文件数量超过限制!')
+            return false
+          }
+          return true
+        } else if (this.formData.type == 2) {
+          //文档
+          const isLimitLength = _.size(this.formData.attachments) < this.limit
+          if (this.isFileSize(file)) return false
+          const regx = /^.*\.(ppt|pptx|doc|docx|xlsx|xls|pdf|wps|rtf|jpg|jpeg|png|gif|bmp)$/
+          const isLt10M = file.size / 1024 / 1024 <= 50
+          if (!regx.test(file.name.toLowerCase())) {
+            this.$message.error('上传文档只支持文档、ppt、pdf、图片格式文件')
+            return false
+          }
+          if (!isLt10M) {
+            this.$message.error('上传文档或图片大小不能超过 50M!')
+            return false
+          }
+          if (!isLimitLength) {
+            this.$message.error('上传文件数量超过限制!')
+            return false
+          }
+          return true
+        } else {
+          //资料下载
+          const isLimitLength = _.size(this.formData.attachments) < this.limit
+          if (this.isFileSize(file)) return false
+          const word = /^.*\.(ppt|pptx|doc|docx|xlsx|xls|txt|pdf|wps|rtf|jpg|jpeg|png|gif|bmp|rar|zip)$/
+          const video = /\.(avi|wmv|mp4|3gp|rm|rmvb|mov|mp3|wma|wav|flv)$/
+          const auido = /\.(mp3|wma|wav)$/
+          const isLt2GB = file.size / 1024 / 1024 <= 2048
+          const isLtImg = file.size / 1024 / 1024 <= 50
+          if (word.test(file.name.toLowerCase())) {
+            if (!isLtImg) {
+              this.$message.error('上传文件大小不能超过 50MB!')
+              return false
+            }
+          } else if (video.test(file.name.toLowerCase()) || auido.test(file.name.toLowerCase())) {
+            if (!isLt2GB) {
+              this.$message.error('上传视频或者音频大小不能超过 2GB!')
+              return false
+            }
+          }
+          if (!isLimitLength) {
+            this.$message.error('上传文件数量超过限制!')
+            return false
+          }
+          //  return true
+        }
+      }
+      // const isImage = _.some(regx, (item) => {
+      //   return item === fileType
+      // })
+      // let isLtFileSize = isImage ? imageSizeLimit : othersSizeLimit
+      // const notBatNorExe = _.some(TYPE_LIST, (item) => {
+      //   return item === fileType
+      // })
+      // const isEmpty = file.size === 0
       const isLimitLength = _.size(this.formData.attachments) < this.limit
-      if (isEmpty) {
-        this.$message.error('上传文件不能为空!')
-        return false
-      }
-      if (!isLtFileSize) {
-        this.$message.error(
-          `上传${isImage ? '图片' : ''}文件大小不能超过${isImage ? '10M' : '2G'}!`
-        )
-        return false
-      }
+      // if (isEmpty) {
+      //   this.$message.error('上传文件不能为空!')
+      //   return false
+      // }
+      // if (!isLtFileSize) {
+      //   this.$message.error(
+      //     `上传${isImage ? '图片' : ''}文件大小不能超过${isImage ? '10M' : '2G'}!`
+      //   )
+      //   return false
+      // }
       if (!isLimitLength) {
         this.$message.error('上传文件数量超过限制!')
         return false
       }
-      if (notBatNorExe) {
-        this.$message.error('不允许上传.exe .bat类型文件')
-        return false
-      }
-      return isLtFileSize && isLimitLength && !notBatNorExe && !isEmpty
+      // if (notBatNorExe) {
+      //   this.$message.error('不允许上传.exe .bat类型文件')
+      //   return false
+      // }
+      return true
     },
-
-    //
     onUploadProgress(fileData) {
       this.videoFlag = true
       this.videoUploadPercent = Math.floor(fileData.percent)
@@ -390,11 +494,6 @@ export default {
         this.videoFlag = false
       }, 3000)
     },
-
-    // 预览附件
-    previewFile(data) {
-      window.open(data.fileUrl)
-    },
     // 删除上传文件
     deleteUpload(data) {
       let index = _.findIndex(this.formData.attachments, (item) => {
@@ -402,12 +501,17 @@ export default {
       })
       this.formData.attachments.splice(index, 1)
       this.videoFlag = false
+      if (this.formData.attachments.length < 1) {
+        const column = this.localColumns.find((column) => column.label === '知识类型')
+        column.disabled = false
+      }
     },
     /**
      * 初始选择数据
      */
     initData() {
-      let catalogId = _.find(this.formColumns, { prop: 'catalogId' })
+      let catalogId = _.find(this.formColumns, { prop: 'catalogId' }),
+        knowledgeSystemId = _.find(this.formColumns, { prop: 'knowledgeSystemId' })
       // let tagsList = _.find(this.formColumns, { prop: 'tags' })
       // if (tagsList) {
       //   getKnowledgeManageTaglist().then((res) => {
@@ -415,10 +519,17 @@ export default {
       //   })
       // }
       if (catalogId) {
-        queryCategoryOrgList({ source: 'knowledge' }).then(
+        queryCategoryOrgList({ status: '0', id: '0' }).then(
           (res) => (catalogId.props.treeParams.data = res)
         )
       }
+      //   各资源下的知识体系下拉框列表
+      if (knowledgeSystemId) {
+        relatedKnowledgeList({ name: '' }).then(
+          (res) => (knowledgeSystemId.props.treeParams.data = res)
+        )
+      }
+
       if (this.id) {
         this.loadDetail()
       }
@@ -500,7 +611,9 @@ export default {
         'resName',
         'resUrl',
         'updateTime',
-        'uploadType'
+        'uploadType',
+        'knowledgeSystemId',
+        'type'
       ]
       const param = _.assign({ knowledgeId: this.id }, _.pick(params, API_PARAMS))
       await updateKnowledge(param)
@@ -538,7 +651,9 @@ $color_font_uploader: #a0a8ae;
     justify-content: flex-start;
     align-items: center;
     margin-bottom: 4px;
-    cursor: pointer;
+    .el-icon-close {
+      cursor: pointer;
+    }
     &:hover {
       color: $primaryColor;
     }

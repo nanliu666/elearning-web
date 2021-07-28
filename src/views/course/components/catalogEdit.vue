@@ -102,8 +102,10 @@
               name="first"
             >
               <OrgTree
+                ref="orgtree"
                 :id-list="form.orgIdList"
                 :org-source="1"
+                input-placeholder="搜索组织名称"
                 @selectedValue="getOrgList"
               ></OrgTree>
             </el-tab-pane>
@@ -201,7 +203,7 @@ export default {
       if (this.type === 'edit') {
         this.orgTree = this.clearCurrentChildren(res)
         this.parentOrgIdLabel =
-          this.form.parentId === '0' ? '顶级' : this.findOrg(this.form.parentId).name
+          this.form.parentId === '0' ? '无上级分类' : this.findOrg(this.form.parentId).name
       } else {
         this.orgTree = res
       }
@@ -240,7 +242,7 @@ export default {
     submit(type) {
       if (this.type === 'create' && this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
-        this.form.orgIds = this.form.orgIds.toString()
+        this.form.orgIds = this.form.orgIds.join(',');
         // this.form.orgIdsBackstage = this.form.orgIdsBackstage.toString()
         this.form.source = 'course'
         if (valid) {
@@ -265,7 +267,6 @@ export default {
               })
           } else {
             this.loading = true
-            // editCatalog(this.form)
             editCatalog(_.assign(this.form, { source: 'course' }))
               .then(() => {
                 this.$message.success('修改成功')
@@ -307,11 +308,20 @@ export default {
     },
     edit(row) {
       this.type = 'edit'
-      this.loadOrgTree()
+      // this.loadOrgTree()
       this.form = _.cloneDeep(row)
+      if(this.form.orgIdList.length){
+         this.form.orgIdList = this.form.orgIdList.reduce((pre,cur,index)=>{
+          pre.push({
+            orgId:cur,
+            orgName:this.form.orgNames.split(',')[index]
+          })
+          return pre
+        },[])
+      }
       this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
-      this.loadOrgTree()
+      // this.loadOrgTree()
     },
     findOrg(id) {
       let org = {}

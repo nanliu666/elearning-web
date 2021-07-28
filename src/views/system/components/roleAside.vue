@@ -1,6 +1,18 @@
 <template>
   <el-aside class="aside-wrap">
     <div class="role-aside_wrap">
+      <div
+        v-p="ADD_ROLE_CATALOG"
+        class="bottom-wrap"
+      >
+        <div
+          class="bottom-item"
+          @click="createNew()"
+        >
+          <i class="el-icon-circle-plus" />
+          创建分类
+        </div>
+      </div>
       <div class="tree-wrap">
         <div class="tree">
           <asideTree
@@ -12,18 +24,6 @@
             @reload="reload"
             @edit="handleEdit"
           />
-        </div>
-      </div>
-      <div
-        v-p="ADD_ROLE_CATALOG"
-        class="bottom-wrap"
-      >
-        <div
-          class="bottom-item"
-          @click="createNew()"
-        >
-          <i class="el-icon-circle-plus" />
-          创建分类
         </div>
       </div>
     </div>
@@ -230,7 +230,7 @@ export default {
         .then(() => {
           this.initCatform()
           this.loading = false
-          this.$message.success('创建分组成功')
+          this.$message.success('创建分类成功')
           this.onClickVisible(str)
           this.$emit('reload')
         })
@@ -329,12 +329,13 @@ export default {
 }
 
 .bottom-wrap {
-  margin-top: 10px;
   /*border-top: 1px solid rgba(215, 215, 215, 1) ;*/
   display: flex;
-  height: 64px;
-  line-height: 64px;
-  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.0980392156862745);
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+  // box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.0980392156862745);
 
   .bottom-item {
     flex: 1;

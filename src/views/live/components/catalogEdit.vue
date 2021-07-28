@@ -56,6 +56,36 @@
           </div>
         </el-col>
       </el-form-item>
+      <!-- 可见范围 -->
+      <el-form-item
+        v-show="!parentOrgIdLabel"
+        label=""
+      >
+        <div>
+          <el-tabs v-model="activeName">
+            <el-tab-pane
+              label="可见范围"
+              name="first"
+            >
+              <OrgTree
+                :id-list="form.orgIdList"
+                :org-source="1"
+                input-placeholder="搜索组织名称"
+                @selectedValue="getOrgList"
+              ></OrgTree>
+            </el-tab-pane>
+            <!-- <el-tab-pane
+              label="所属范围"
+              name="second"
+            >
+              <OrgTree
+                :id-list="form.orgIdListBackstage"
+                @selectedValue="getOrgIdsBackstage"
+              ></OrgTree>
+            </el-tab-pane> -->
+          </el-tabs>
+        </div>
+      </el-form-item>
     </el-form>
     <span
       v-if="type === 'create'"
@@ -91,9 +121,11 @@
 </template>
 
 <script>
+import OrgTree from '@/components/UserOrg-Tree/OrgTree'
 import { getCategoryTree, addCategory, editCategory } from '@/api/live'
 export default {
   name: 'CatalogEdit',
+  components: { OrgTree },
   props: {
     visible: {
       type: Boolean,
@@ -102,6 +134,7 @@ export default {
   },
   data() {
     return {
+      activeName: 'first',
       type: 'create',
       radioDisable: {
         Company: false,
@@ -110,6 +143,7 @@ export default {
       },
       form: {
         parentId: '',
+        orgIds: [],
         name: '',
         source: 'live'
       },
@@ -121,10 +155,24 @@ export default {
       loading: false
     }
   },
+  watch: {
+    visible(val) {
+      if (!val) {
+        this.$refs.ruleForm.resetFields()
+        this.$set(this.form, 'name', '')
+        this.$set(this.form, 'parentId', '')
+      }
+    }
+  },
   methods: {
+    // 可见范围返回数据
+    getOrgList(val) {
+      this.form.orgIds = val.map((item) => item.id)
+    },
     async loadOrgTree() {
       let res = await getCategoryTree({ source: 'live' })
       this.orgTree = this.type === 'edit' ? this.clearCurrentChildren(res) : res
+      this.form.parentId = this.form.parentId === '0' ? '' : this.form.parentId
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -160,6 +208,7 @@ export default {
     submit(type) {
       // if (this.checkSameName()) return
       this.$refs.ruleForm.validate((valid, obj) => {
+        this.form.orgIds = this.form.orgIds.toString()
         if (valid) {
           if (this.type !== 'edit') {
             this.loading = true
@@ -171,6 +220,7 @@ export default {
             const parmas = {
               name: this.form.name,
               parentId: this.form.parentId,
+              orgIds: this.form.orgIds,
               source: 'live'
             }
             addCategory(parmas)
@@ -197,6 +247,7 @@ export default {
               name: this.form.name,
               parentId: this.form.parentId,
               id: this.form.idStr,
+              orgIds: this.form.orgIds,
               source: 'live'
             }
             editCategory(parmas)
@@ -215,6 +266,9 @@ export default {
           return false
         }
       })
+      // this.$refs.ruleForm.resetFields()
+      // this.$set(this.form, 'name', '')
+      // this.$set(this.form, 'parentId', '')
     },
     // 创建分类
     create() {
@@ -222,7 +276,9 @@ export default {
       this.parentOrgIdLabel = ''
       this.$emit('changevisible', true)
       this.orgTree[0] && this.handleOrgNodeClick()
-      this.$refs.ruleForm.clearValidate()
+      // this.$nextTick(()=>{
+      //   this.$refs.ruleForm.resetFields()
+      // })
     },
     // 新建子分类
     createChild(row) {
@@ -238,6 +294,15 @@ export default {
     edit(row) {
       this.type = 'edit'
       this.form = _.cloneDeep(row)
+      if (this.form.orgIdList.length) {
+        this.form.orgIdList = this.form.orgIdList.reduce((pre, cur, index) => {
+          pre.push({
+            orgId: cur,
+            orgName: this.form.orgNames.split(',')[index]
+          })
+          return pre
+        }, [])
+      }
       this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
       this.$emit('changevisible', true)
       this.loadOrgTree()
@@ -266,7 +331,7 @@ export default {
         Group: false
       }
       this.$emit('changevisible', false)
-      this.$refs.ruleForm.clearValidate()
+      // this.$refs.ruleForm.clearValidate()
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {

@@ -10,7 +10,7 @@
         v-loading="table.loading"
         element-loading-background="rgba(0, 0, 0, 0.8)"
         element-loading-spinner="el-icon-loading"
-        :data="table.vos"
+        :data="table.trainAttachmentVOS"
         empty-text="暂未提交"
       >
         <el-table-column
@@ -57,7 +57,7 @@
             <el-button
               type="text"
               size="small"
-              :disabled="!table.vos.length"
+              :disabled="!table.trainAttachmentVOS.length"
               @click="downloadZip(table)"
             >
               打包下载

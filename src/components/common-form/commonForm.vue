@@ -19,19 +19,38 @@
             v-bind="elFormItemAttrs(column)"
             :rules="getRules(column)"
           >
-            <slot
+            <span
               slot="label"
-              :name="column.prop + '-label'"
+             
             >
-              {{ column.label }}
-              <el-switch
-                v-if="column.hasLabelSwitch"
-                v-model="model[column.labelSwitchConfig.prop]"
-                v-bind="itemAttrs(column.labelSwitchConfig)"
-                class="label__switch"
-                @change="changeLabel(column, model[column.labelSwitchConfig.prop])"
-              />
-            </slot>
+              <span
+                v-if="_.get(column, 'hasLabelSolt', false)"
+                style="display: inline-block"
+                :style="{ width: _.get(column, 'required', true) ? 'calc(100% - 20px)' : '100%' }"
+              >
+                <slot :name="column.prop + '-label-slot'" />
+              </span>
+              <span v-else>
+                <span>{{ column.label }}</span>
+                <el-switch
+                  v-if="column.hasLabelSwitch"
+                  v-model="model[column.labelSwitchConfig.prop]"
+                  v-bind="itemAttrs(column.labelSwitchConfig)"
+                  class="label__switch"
+                  @change="
+                    changeLabel(
+                      column,
+                      model[column.labelSwitchConfig.prop],
+                      column.labelSwitchConfig.prop
+                    )
+                  "
+                />
+                <slot
+                  v-if="column.hasLabelRight"
+                  :name="column.prop + 'LabelRight'"
+                />
+              </span>
+            </span>
             <el-input-number
               v-if="column.itemType == 'inputNumber'"
               v-model="model[column.prop]"
@@ -41,7 +60,7 @@
             />
             <el-input
               v-if="column.itemType == 'input'"
-              v-model="model[column.prop]"
+              v-model.trim="model[column.prop]"
               v-bind="itemAttrs(column)"
               :placeholder="column.placeholder ? column.placeholder : `请输入${column.label}`"
               @input="column.props && column.props.onlyNumber && inputNumber($event, column)"
@@ -125,12 +144,14 @@
 
             <el-tree-select
               v-if="column.itemType == 'treeSelect'"
+              ref="treeSelect"
               v-model="model[column.prop]"
               :select-params="column.props && column.props.selectParams"
               :tree-params="column.props && column.props.treeParams"
               v-bind="itemAttrs(column)"
               :placeholder="column.placeholder ? column.placeholder : `请选择${column.label}`"
               @node-click="_nodeClickFun"
+              @searchFun="searchTreeFun($event, column.treeKey)"
             />
             <lazy-select
               v-if="column.itemType === 'lazySelect'"
@@ -149,6 +170,11 @@
               v-model="model[column.prop]"
               v-bind="itemAttrs(column)"
             />
+            <train-select-user
+              v-if="column.itemType == 'trainselectuser'"
+              v-model="model[column.prop]"
+              v-bind="itemAttrs(column)"
+            />
             <slot
               v-if="column.itemType == 'slot'"
               v-bind="itemAttrs(column)"
@@ -158,7 +184,7 @@
               v-if="column.desc"
               class="desc"
             >
-              {{ column.desc }}
+              {{ column.desc}}
             </div>
           </el-form-item>
         </div>
@@ -181,6 +207,7 @@ export default {
   name: 'CommonForm',
   components: {
     elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'),
+    trainSelectUser:() => import('@/components/trainingSelectUser/trainingSelectUser.vue'),
     LazySelect
   },
   props: {
@@ -223,10 +250,24 @@ export default {
   },
   mounted() {},
   methods: {
+    /**
+     * 为什么存在0，因为当前是通过v-for渲染出来
+     * 文档访问路径：https://cn.vuejs.org/v2/guide/components-edge-cases.html#%E8%AE%BF%E9%97%AE%E5%AD%90%E7%BB%84%E4%BB%B6%E5%AE%9E%E4%BE%8B%E6%88%96%E5%AD%90%E5%85%83%E7%B4%A0
+     */
+    searchTreeFun(data, treeKey) {
+      //   搜索需要指定一个treeKey，拿到对应的component，返回过滤后的值
+      this.$refs.treeSelect.map((v, i) => {
+        if (v.$attrs.treeKey == treeKey) {
+          const searchTarget = _.get(this.$refs, `treeSelect[${i}].$refs.tree`)
+          searchTarget.filter(data)
+        }
+      })
+    },
     _nodeClickFun(data, node) {
       this.$emit('node-click', data, node)
     },
-    changeLabel(column, value) {
+    changeLabel(column, value, prop) {
+      this.$emit('changeLabel', prop, value)
       _.set(column, 'disabled', !value)
     },
     elFormItemAttrs(column) {

@@ -93,3 +93,48 @@ export const downloadZip = (c) => {
   )
   return request(config)
 }
+
+export const offlineSignExcel = (params) => {
+  return request({
+    url: '/api/manage/v1/train/offline/sign/excel',
+    method: 'get',
+    params
+  })
+}
+
+//查询线上必修课程情况
+export const queryStudyCourseList = (params) => {
+  return request({
+    url: '/blade-manage/v1/study/plan/queryStudyCourseList',
+    method: 'get',
+    params
+  })
+}
+
+//查询线上必修考试情况  
+export const queryStudyExamList = (params) => {
+  return request({
+    url: '/blade-manage/v1/study/plan/queryStudyExamList',
+    method: 'get',
+    params
+  })
+}
+
+//查询线上必修考试详情列表
+export const getExamineeList = (params) => {
+  return request({
+    url: '/api/manage/v1/web/teacher/getExamineeList',
+    method: 'get',
+    params
+  })
+}
+
+//查询线上必修考试详情情况    
+export const getExamDetail = (params) => {
+  return request({
+    url: '/api/manage/v1/web/teacher/getExamDetail',
+    method: 'get',
+    params
+  })
+}
+

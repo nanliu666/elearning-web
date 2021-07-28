@@ -9,6 +9,9 @@
     </div>
 
     <div class="intro-wrapper">
+      <div>
+        <img class="img" :src="data.coverUrl" alt="">
+      </div>
       <div class="intro-left">
         <div class="title">
           <div class="name">
@@ -39,30 +42,35 @@
             <span class="text">{{ data.categoryName }}</span>
           </div>
           <div class="intro-item">
-            有效时间：
+            知识体系：
+            <span class="text">{{ data.knowledgeSystemName || '--'}} </span>
+          </div>
+        </div>
+        <div class="intro-list">
+          <div class="intro-item">
+            学习时间：
             <span class="text">{{ data.startTime }} ~ {{ data.endTime }}</span>
-          </div>
-        </div>
-        <div class="intro-list">
-          <div class="intro-item">
-            创建人：
-            <span class="text">{{
-              data.trainWay === 1 ? '在线' : data.trainWay === 2 ? '面授' : '混合'
-            }}</span>
-          </div>
-          <div class="intro-item">
-            创建时间：
-            <span class="text">{{ data.createTime }}</span>
-          </div>
-        </div>
-        <div class="intro-list">
-          <div class="intro-item">
-            主办单位：
-            <span class="text">{{ data.sponsor }}</span>
           </div>
           <div class="intro-item">
             积分：
             <span class="text">{{ data.credit }}</span>
+          </div>
+        </div>
+        <div class="intro-list">
+          <div class="intro-item">
+            项目经理：
+            <span class="text">{{ data.managerName }}</span>
+          </div>
+          <div class="intro-item">
+            
+             创建人：
+            <span class="text">{{ data.creatorName }}</span>
+          </div>
+        </div>
+        <div class="intro-list">
+          <div class="intro-item">
+            创建时间：
+            <span class="text">{{ data.createTime}}</span>
           </div>
         </div>
       </div>
@@ -118,8 +126,13 @@
 </template>
 
 <script>
-import { StudyState } from './contents'
-import { queryStudyInfo, queryStudyList } from '@/api/learnArrange'
+import { StudyState, StudyCourse, ExamState } from './contents'
+import {
+  queryStudyInfo,
+  queryStudyList,
+  queryStudyCourseList,
+  queryStudyExamList
+} from '@/api/learnArrange'
 import { getOrgTree } from '@/api/org/org'
 
 import { deletePlan, updateStatus } from '@/api/learnPlan'
@@ -127,18 +140,32 @@ import { deletePlan, updateStatus } from '@/api/learnPlan'
 export default {
   name: 'TrainDetail',
   components: {
-    StudyState
+    StudyState,
+    ExamState,
+    StudyCourse
   },
   data() {
     return {
       reference: {
-        'study-state': '学习情况'
+        'study-state': '学习情况',
+        'study-course': '课程安排',
+        'exam-state': '考试情况'
       },
       data: {},
-      tabs: ['study-state'],
+      tabs: ['study-state', 'study-course', 'exam-state'],
       activeTab: 'study-state',
       tabData: {
         'study-state': {
+          data: [],
+          orgData: [],
+          total: 0
+        },
+        'study-course': {
+          data: [],
+          orgData: [],
+          total: 0
+        },
+        'exam-state': {
           data: [],
           orgData: [],
           total: 0
@@ -152,14 +179,23 @@ export default {
     }
   },
   activated() {
-    const $data = JSON.parse(this.$route.query.data)
-    Object.assign(this.data, $data)
+    Object.assign(this.data, JSON.parse(this.$route.query.data))
     this.getData()
   },
   deactivated() {
     this.data = {}
     this.tabData = {
       'study-state': {
+        data: [],
+        orgData: [],
+        total: 0
+      },
+      'study-course': {
+        data: [],
+        orgData: [],
+        total: 0
+      },
+      'exam-state': {
         data: [],
         orgData: [],
         total: 0
@@ -174,7 +210,9 @@ export default {
     getData() {
       this.queryStudyInfo()
       this.queryStudyList()
-      getOrgTree({ parentOrgId: 0 }).then((res) => {
+      this.queryStudyCourseList()
+      this.queryStudyExamList()
+      getOrgTree({ parentOrgId: 0 }).then((res = []) => {
         this.tabData['study-state'].orgData = res
       })
     },
@@ -183,14 +221,36 @@ export default {
       if (Array.isArray(data.deptName)) {
         data.deptName = data.deptName[data.deptName.length - 1]
       }
-      return queryStudyList(data).then((res) => {
+      return queryStudyList(data).then((res = {}) => {
         const { data = [], totalNum = 0 } = res
         this.tabData['study-state'].data = data
         this.tabData['study-state'].total = totalNum
       })
     },
+    queryStudyCourseList(params = {}) {
+      const data = { id: this.data.id, ...params }
+      if (Array.isArray(data.deptName)) {
+        data.deptName = data.deptName[data.deptName.length - 1]
+      }
+      return queryStudyCourseList(data).then((res = {}) => {
+        const { data = [], totalNum = 0 } = res
+        this.tabData['study-course'].data = data
+        this.tabData['study-course'].total = totalNum
+      })
+    },
+    queryStudyExamList(params = {}) {
+      const data = { id: this.data.id, ...params }
+      if (Array.isArray(data.deptName)) {
+        data.deptName = data.deptName[data.deptName.length - 1]
+      }
+      return queryStudyExamList(data).then((res = {}) => {
+        const { data = [], totalNum = 0 } = res
+        this.tabData['exam-state'].data = data
+        this.tabData['exam-state'].total = totalNum
+      })
+    },
     queryStudyInfo() {
-      queryStudyInfo({ id: this.data.id }).then((res) => {
+      queryStudyInfo({ id: this.data.id }).then((res = {}) => {
         this.data = Object.assign(this.data, res)
         this.tabData.studyName = this.data.studyName
         this.$forceUpdate()
@@ -297,6 +357,11 @@ export default {
     box-shadow: 0 2px 12px 0 rgba(0, 61, 112, 0.08);
     border-radius: 4px;
     cursor: default;
+    .img{
+      width: 350px;
+      margin-right: 24px;
+      border-radius: 4px;
+    }
     .intro-left {
       flex: 1;
       .title {

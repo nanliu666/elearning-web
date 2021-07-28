@@ -48,6 +48,10 @@
                   v-if="classroomDetail.roomArea"
                   class="li-value"
                 >{{ classroomDetail.roomArea }} m²</span>
+                <span
+                  v-else
+                  class="li-value"
+                >--</span>
               </li>
               <li class="details-li">
                 <span class="li-label">地址：</span>
@@ -102,7 +106,45 @@
               :require-options="searchConfig.requireOptions"
               :popover-options="searchConfig.popoverOptions"
               @submit="handleSearch"
-            />
+              @reset="handelReset"
+            >
+              <template #creatorId>
+                <el-select
+                    v-model="queryInfo.creatorId"
+                    v-el-select-loadmore="loadmoreSubject"
+                    clearable
+                    filterable
+                    remote
+                    reserve-keyword
+                    :loading="remoteLoading"
+                    placeholder="请输入"
+                    @change="applicantChange"
+                    :remote-method="(query) => remoteMethod(query)"
+                    @focus="() => remoteMethod('')"
+                  >
+                    <el-option
+                      v-for="item in subjectOptions"
+                      :key="item.creatorId"
+                      :label="item.creatorName"
+                      :value="item.creatorId"
+                    >
+                    </el-option>
+
+                    <div
+                      v-if="subjectLoading"
+                      style="color: #9c9c9c; line-height: 34px;text-align: center;"
+                    >
+                      加载中...
+                    </div>
+                    <div
+                      v-if="noMoreSubject && !subjectLoading"
+                      style="color: #9c9c9c;line-height: 34px;text-align: center;"
+                    >
+                      没有更多了
+                    </div>
+                  </el-select>
+              </template>
+            </search-popover>
           </template>
           <template #useTime="{row}">
             {{ row.startTime }} - {{ row.endTime }}
@@ -156,15 +198,18 @@ const SEARCH_CONFIG = {
       label: '',
       data: '',
       options: [],
-      config: { placeholder: '请输入课程、培训、活动名称搜索', 'suffix-icon': 'el-icon-search' }
+      config: { placeholder: '请输入使用目的搜索', 'suffix-icon': 'el-icon-search' }
     }
   ],
   popoverOptions: [
     {
-      type: 'select',
-      field: 'batchNumber',
+      type: 'slot',
+      field: 'creatorId',
       label: '申请人',
       data: '',
+      config:{
+        filterable:true
+      },
       options: []
     },
     {
@@ -181,7 +226,7 @@ const SEARCH_CONFIG = {
   ]
 }
 import SearchPopover from '@/components/searchPopOver/index'
-import { queryClassroomInfo, getBookList } from '@/api/resource/classroom'
+import { queryClassroomInfo, getBookList, getClassroomApplicantList } from '@/api/resource/classroom'
 import CommonImageView from '@/components/common-image-viewer/viewer'
 import styles from '@/styles/variables.scss'
 export default {
@@ -199,8 +244,38 @@ export default {
       return TEXT[key]
     }
   },
+  directives: {
+    'el-select-loadmore': {
+      bind(el, binding) {
+        // 获取element-ui定义好的scroll盒子
+        const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap')
+        SELECTWRAP_DOM.addEventListener('scroll', () => {
+          /**
+           * scrollHeight 获取元素内容高度(只读)
+           * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
+           * clientHeight 读取元素的可见高度(只读)
+           * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
+           * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
+           */
+          const condition =
+            SELECTWRAP_DOM.scrollHeight - SELECTWRAP_DOM.scrollTop <= SELECTWRAP_DOM.clientHeight
+          if (condition) {
+            binding.value()
+          }
+        })
+      }
+    }
+  },
   data() {
     return {
+      subjectLoading:false,
+      remoteLoading: false,
+      noMoreSubject: false,
+      subjectQuery: {
+        pageNo: 1,
+        pageSize: 20,
+        creatorName: ''
+      },
       activeColor: styles.primaryColor,
       activeIndex: '0',
       page: {
@@ -215,6 +290,7 @@ export default {
         usedPurpose: '', //课程,培训,活动
         creatorId: '' // 申请人id
       },
+      subjectOptions: [],
       classroomDetail: {},
       tableLoading: false,
       tableData: [],
@@ -234,6 +310,38 @@ export default {
     this.loadTableData()
   },
   methods: {
+    applicantChange(val){
+      let v = _.filter(this.subjectOptions,{'creatorId':val})
+      this.queryInfo.creatorId = v[0].creatorId
+    },
+    loadmoreSubject() {
+      if (this.subjectLoading) return
+      this.subjectQuery.pageNo++
+      this.remoteMethod(true)
+    },
+    remoteMethod(query){
+      this.subjectLoading = true
+      if (typeof query != 'boolean') {
+        this.subjectQuery.creatorName = query
+        this.subjectQuery.pageNo = 1
+        this.subjectOptions = []
+        this.remoteLoading = true
+      }
+      getClassroomApplicantList(this.subjectQuery)
+        .then((res) => {
+          const { records = [] } = res
+          if (typeof query != 'boolean') {
+            this.noMoreSubject = true
+          } else {
+            this.noMoreSubject = !records.length
+          }
+          this.subjectOptions = this.subjectOptions.concat(records)
+        })
+        .finally(() => {
+          this.subjectLoading = false
+          this.remoteLoading = false
+        })
+    },
     /**
      * 处理页码改变
      */
@@ -248,8 +356,12 @@ export default {
       this.queryInfo.pageSize = param
       this.loadTableData()
     },
+    handelReset(){
+      this.queryInfo.creatorId = ''
+    },
     // 搜索
     handleSearch(params) {
+      delete params.creatorId
       this.queryInfo = _.assign(this.queryInfo, params)
       this.loadTableData()
     },

@@ -6,7 +6,7 @@
     <el-tree
       ref="tree"
       :data="treeList || []"
-      :default-expanded-keys="[1]"
+      :default-expanded-keys="[]"
       :default-checked-keys="defaultValue"
       :highlight-current="true"
       show-checkbox

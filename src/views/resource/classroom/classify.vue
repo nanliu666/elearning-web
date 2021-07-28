@@ -104,6 +104,11 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
+    label: '所属组织',
+    prop: 'orgScopeName',
+    minWidth: 150
+  },
+  {
     label: '状态',
     prop: 'status',
     slot: true,
@@ -124,7 +129,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },

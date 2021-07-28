@@ -8,7 +8,7 @@
           size="medium"
           @click="toAddCertificate"
         >
-          创建模板
+          创建证书模板
         </el-button>
       </template>
     </page-header>
@@ -47,7 +47,7 @@
               >
                 <i
                   slot="reference"
-                  style="cursor: pointer;"
+                  style="cursor: pointer"
                   class="el-icon-setting"
                 />
                 <!-- 设置表格列可见性 -->
@@ -85,91 +85,71 @@
         </template>
 
         <!-- 状态 -->
-        <template #status="{row}">
-          {{ row.status === 0 ? '停用' : '正常' }}
+        <template #status="{ row }">
+          {{ row.status === 0 ? '停用' : row.status === 1 ? '正常' : '已失效' }}
         </template>
 
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <el-button
-            v-if="row.status"
+            v-if="row.status && row.status != 3"
             v-p="STOP_CERTIFICATE"
+            :disabled="row.status === 3"
             type="text"
-            @click.stop="blockStart(row.id, 0)"
+            @click.stop="blockStart(row.id, true)"
           >
             停用
           </el-button>
           <el-button
             v-else
             v-p="STOP_CERTIFICATE"
+            :disabled="row.status === 3"
             type="text"
-            @click.stop="blockStart(row.id, 1)"
+            @click.stop="blockStart(row.id)"
           >
-            启用 &nbsp;
+            启用
           </el-button>
-          <!-- 预览框 -->
-          <el-tooltip
-            v-p="PREVIEW_CERTIFICATE"
-            placement="top"
-            effect="light"
-          >
-            <div
-              slot="content"
-              class="preview"
-            >
-              <div class="previewTitle">
-                <span>预览</span>
-              </div>
-              <div class="previewContent">
-                <div class="preview_right_box">
-                  <img
-                    :src="preview.backUrl"
-                    alt=""
-                    class="bgimg"
-                  />
-                  <div class="name">
-                    {{ preview.name }}
-                  </div>
-                  <div class="text">
-                    {{ preview.text }}
-                  </div>
-                  <div class="IssuingAgency">
-                    {{ preview.awardAgency }}
-                  </div>
-                  <img
-                    v-if="preview.logoUrl"
-                    :src="preview.logoUrl"
-                    alt=""
-                    class="logo"
-                  />
-                  <div class="studentName">
-                    张三
-                  </div>
-                  <div class="serial">
-                    <div>证书编号:</div>
-                    <div>{{ CertificateNumberInitials }}-20201130-0001</div>
-                    <div>{{ preview.createTime ? preview.createTime.substr(0, 10) : '' }}</div>
-                  </div>
-                </div>
-              </div>
-              <!-- <div class="previewBtn">
-                <el-button>取消</el-button>
-                <el-button type="primary">
-                  确定
-                </el-button>
-              </div> -->
-            </div>
-            <el-button type="text">
-              <span @mouseover="previewMouseOver(row.id)">预览</span>
-            </el-button>
-          </el-tooltip>
-
           <el-button
-            v-p="DELETE_CERTIFICATE"
+            v-p="EDIT_CERTIFICATE"
             type="text"
-            @click="handleRemove(row)"
+            @click.stop="edit(row.id)"
           >
-            删除
+            编辑
           </el-button>
+          <el-dropdown>
+            <i class="el-icon-arrow-down el-icon-more" />
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>
+                <el-button
+                  type="text"
+                  @click.stop="previewMouseOver(row.id)"
+                >
+                  预览
+                </el-button>
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <el-button
+                  v-p="DELETE_CERTIFICATE"
+                  type="text"
+                  @click="handleRemove(row)"
+                >
+                  删除
+                </el-button>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <!-- 预览框 -->
+          <el-dialog
+            title="预览"
+            :visible="previewDialog"
+            :modal="false"
+            width="600px"
+            @close="previewDialog = false"
+          >
+            <CertificateTemplate
+              class="preview"
+              :certificate-data="preview"
+            />
+          </el-dialog>
         </template>
       </common-table>
     </basic-container>
@@ -185,18 +165,39 @@ import {
   updateStatus,
   delTemplate
 } from '@/api/certificate/certificate'
-
+import CertificateTemplate from './components/CertificateTemplate.vue'
 // 表格属性
 const TABLE_COLUMNS = [
   {
-    label: '编号',
-    width: 70,
-    type: 'index'
-  },
-  {
-    label: '模板名称',
+    label: '证书名称',
     width: 180,
     prop: 'name'
+  },
+  {
+    label: '状态',
+    slot: true,
+    prop: 'status',
+    minWidth: 100
+  },
+  {
+    label: '生效日期',
+    prop: 'activeTime',
+    formatter: (row) => row.activeTime.split(' ')[0],
+    minWidth: 100
+  },
+  {
+    label: '有效日期',
+    formatter: (row) => {
+      if (row.bornTime && row.deadTime)
+        return `${row.bornTime.split(' ')[0]} ~ ${row.deadTime.split(' ')[0]}`
+      else return '--'
+    },
+    minWidth: 200
+  },
+  {
+    label: '证书类型',
+    prop: 'category',
+    minWidth: 100
   },
   {
     label: '文案',
@@ -208,10 +209,15 @@ const TABLE_COLUMNS = [
     prop: 'awardAgency',
     minWidth: 100
   },
+
   {
-    label: '状态',
-    slot: true,
-    prop: 'status',
+    label: '创建人',
+    prop: 'creatorName',
+    minWidth: 100
+  },
+  {
+    label: '更新日期',
+    prop: 'updateTime',
     minWidth: 100
   }
 ]
@@ -222,7 +228,9 @@ const TABLE_CONFIG = {
   rowKey: 'id',
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
   handlerColumn: {
-    fixed: false
+    fixed: 'right',
+    minWidth: 130,
+    center: true
   }
 }
 const TABLE_PAGE_CONFIG = {}
@@ -230,7 +238,7 @@ const TABLE_PAGE_CONFIG = {}
 // 搜索配置
 const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   {
-    config: { placeholder: '输入模板名称搜索', 'suffix-icon': 'el-icon-search' },
+    config: { placeholder: '输入证书名称搜索', 'suffix-icon': 'el-icon-search' },
     data: '',
     field: 'name',
     label: '',
@@ -239,20 +247,31 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'input',
-    field: 'agency',
-    label: '颁发机构',
-    data: ''
-    // config: { optionLabel: 'name', optionValue: 'id' }
-  },
-  {
     type: 'select',
     field: 'status',
     label: '状态',
     data: '',
     options: [
-      { value: 0, label: '停用' },
-      { value: 1, label: '正常' }
+      { value: '0', label: '停用' },
+      { value: '1', label: '正常' },
+      { value: '3', label: '已失效' }
+    ]
+  },
+  {
+    type: 'input',
+    field: 'agency',
+    label: '颁发机构',
+    data: '',
+    config: { maxlength: 10 }
+  },
+  {
+    type: 'select',
+    field: 'category',
+    label: '证书类型',
+    data: '',
+    options: [
+      { value: '0', label: '培训合格证书' },
+      { value: '1', label: '聘书' }
     ]
   }
 ]
@@ -293,13 +312,15 @@ import {
   ADD_CERTIFICATE,
   STOP_CERTIFICATE,
   PREVIEW_CERTIFICATE,
-  DELETE_CERTIFICATE
+  DELETE_CERTIFICATE,
+  EDIT_CERTIFICATE
 } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
   name: 'KnowledgeManagement',
   components: {
-    SearchPopover
+    SearchPopover,
+    CertificateTemplate
   },
   filters: {
     // 过滤不可见的列
@@ -308,8 +329,10 @@ export default {
   },
   data() {
     return {
+      previewDialog: false,
       preview: {},
       moveKnowledgeRow: {},
+
       formColumns: FORM_COLUMNS,
       formData: {
         catalogId: ''
@@ -335,8 +358,7 @@ export default {
       tableConfig: TABLE_CONFIG,
       tableData: [],
       tableLoading: false,
-      tablePageConfig: TABLE_PAGE_CONFIG,
-      CertificateNumberInitials: '' //证书编号首字母
+      tablePageConfig: TABLE_PAGE_CONFIG
     }
   },
   computed: {
@@ -344,6 +366,7 @@ export default {
     STOP_CERTIFICATE: () => STOP_CERTIFICATE,
     PREVIEW_CERTIFICATE: () => PREVIEW_CERTIFICATE,
     DELETE_CERTIFICATE: () => DELETE_CERTIFICATE,
+    EDIT_CERTIFICATE: () => EDIT_CERTIFICATE,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -354,7 +377,8 @@ export default {
           ADD_CERTIFICATE,
           STOP_CERTIFICATE,
           PREVIEW_CERTIFICATE,
-          DELETE_CERTIFICATE
+          DELETE_CERTIFICATE,
+          EDIT_CERTIFICATE
         ])
       },
       deep: true
@@ -365,6 +389,15 @@ export default {
     this.refreshTableData()
   },
   methods: {
+    // 编辑证书
+    edit(id) {
+      this.$router.push({
+        path: '/resource/certificate/editCertificate',
+        query: {
+          id
+        }
+      })
+    },
     // 去新建证书
     toAddCertificate() {
       this.$router.push({ path: '/resource/certificate/addCertificate' })
@@ -372,7 +405,7 @@ export default {
     // 批量删除
     multipleDeleteClick(selectArr) {
       let currentArr = selectArr.filter((item) => {
-        return item.status === 0
+        return item.status === 0 || item.status === 3
       })
       let deactivate = selectArr.length - currentArr.length
       let selectedIds = []
@@ -413,22 +446,30 @@ export default {
     // 删除
     handleRemove(row) {
       let info = `${
-        row.status ? '该证书模版处于启用状态，请停用后删除。' : '您确定要删除选中的证书模版吗？'
+        row.status && row.status !== 3
+          ? '该证书模版处于启用状态，请停用后删除。'
+          : '您确定要删除选中的证书模版吗？'
       }`
+      let params =
+        row.status && row.status !== 3
+          ? {
+              confirmButtonText: '我知道了',
+              showCancelButton: false,
+              type: 'warning'
+            }
+          : {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
       // 提示
-      this.$confirm(info, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
+      this.$confirm(info, '提示', params)
         .then(() => {
           if (!row.status) {
             delTemplate({ templateIds: row.id }).then(() => {
               this.$message.success('删除成功')
               this.loadTableData()
             })
-          } else {
-            this.$message.error('删除失败!')
           }
         })
         .catch(() => {
@@ -440,29 +481,31 @@ export default {
     },
     // 停用&启用
     blockStart(id, i) {
-      let info = `${
-        i
-          ? '您确定要启用该证书模版吗？'
-          : '您确定要停用该证书模版吗？停用后，该证书模版将暂停使用。'
-      }`
-
-      this.$confirm(info, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          updateStatus({ templateId: id, choice: i }).then(() => {
-            this.$message.success(`${i ? '启用' : '停用'}成功`)
-            this.loadTableData()
-          })
+      if (i) {
+        let info = '您确定要停用该证书模版吗？停用后，该证书模版将暂停使用。'
+        this.$confirm(info, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消操作'
+          .then(() => {
+            updateStatus({ templateId: id, choice: 0 }).then(() => {
+              this.$message.success('停用成功')
+              this.loadTableData()
+            })
           })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消操作'
+            })
+          })
+      } else {
+        updateStatus({ templateId: id, choice: 1 }).then(() => {
+          this.$message.success('启用成功')
+          this.loadTableData()
         })
+      }
     },
     //   预览Btn
     previewMouseOver(id) {
@@ -471,8 +514,9 @@ export default {
           .splice(0, 2)
           .join('')
           .toUpperCase()
-        this.CertificateNumberInitials = currentstr ? currentstr : 'YB'
+        this.previewDialog = true
         this.preview = res
+        this.preview.certificateNo = (currentstr ? currentstr : 'YB') + '-20201130-0001'
       })
     },
 
@@ -531,109 +575,22 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.preview_right_box {
-  position: relative;
-  border: 1px solid #d9dbdc;
-  margin-top: 15px;
-  width: 100%;
-  height: 100%;
-  .bgimg {
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background-repeat: no-repeat;
-  }
-  .name {
-    position: absolute;
-    top: 22%;
-    left: 50%;
-    font-size: 30px;
-    font-weight: 700;
-    transform: translateX(-50%);
-    text-align: center;
-    width: 85%;
-  }
-  .text {
-    position: absolute;
-    top: 58%;
-    left: 50%;
-    font-size: 12px;
-    font-weight: 700;
-    transform: translateX(-50%);
-    color: #8b8a8a;
-    width: 50%;
-    height: 28%;
-    text-align: center;
-    word-wrap: break-word;
-  }
-  .IssuingAgency {
-    position: absolute;
-    top: 85.6%;
-    left: 55%;
-    z-index: 99999;
-    transform: translateX(-50%);
-  }
-  .logo {
-    position: absolute;
-    top: 75.6%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px !important;
-    height: 40px !important;
-  }
-  .studentName {
-    position: absolute;
-    top: 46%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 22px;
-    font-weight: 500;
-  }
-  .serial {
-    position: absolute;
-    right: 9%;
-    bottom: 9%;
-    color: #8b8a8a;
-    font-size: 8px;
-  }
+/deep/.cell:empty::before {
+  content: '--';
+  color: gray;
 }
-
-.preview {
-  z-index: 999;
-  width: 422px;
-  height: 360px;
-  border-radius: 4px;
-  background: #ffffff;
-  box-shadow: 0 2px 12px 0;
-  border: 1px solid #ccc;
-  margin: -12px;
-  padding: 20px;
-  .previewTitle {
-    font-family: PingFangSC-Medium;
-    font-size: 18px;
-    color: rgba(0, 11, 21, 0.85);
-    letter-spacing: 0;
-    line-height: 28px;
-    font-weight: 900;
+::v-deep .el-dropdown {
+  padding-left: 5px;
+  color: #a1a7ae;
+}
+::v-deep .el-dialog {
+  margin: 0 auto;
+  .el-dialog__body {
     display: flex;
-    justify-content: space-between;
-    height: 40px;
-    // border-bottom: 1px solid #ebeced;
-  }
-  .previewContent {
-    width: 374px;
-    height: 280px;
-    overflow: hidden;
-    margin-top: -5px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .previewBtn {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    height: 500px;
   }
 }
 .top-button {
@@ -669,12 +626,15 @@ export default {
     }
   }
 }
+.preview {
+  transform: scale(0.5);
+}
 </style>
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
 .status-span
-    padding: 4px;
-    border-radius: 2px;
+  padding: 4px
+  border-radius: 2px
 .basic-container--block
   height: calc(100% - 92px)
   min-height: calc(100% - 92px)

@@ -13,6 +13,12 @@ export const getTrainDetail = (params) => get('/api/manage/v1/train/getTrainDeta
  * @param {Object} courseId - 参数
  * */
 export const studentList = (params) => get('/api/manage/v1/train/studentList', params)
+
+/**
+ * 学员培训列表
+ * @param {Object} courseId - 参数
+ * */
+export const outerStudentList = (params) => get('/api/manage/v1/train/outer/studentList', params)
 /**
  * 查询培训线上课程
  * @param {Object} courseId - 参数
@@ -137,5 +143,19 @@ export const querySignList = (params) => {
     url: '/api/manage/v1/train/sign/list',
     method: 'get',
     params
+  })
+}
+
+// 外训报名情况列表
+export const outerTrainApplyList = (params) => get('/manage/v1/train/outerTrainApplyList', params)
+
+// 查询课程总结
+export const listSubmitFile = (params) => get('/manage/v1/trainsubmitfile/listSubmitFile', params)
+
+export const relatedKnowledgeList = (data) => {
+  return request({
+    url: '/api/blade-resource/v1/category/relatedKnowledgeList',
+    method: 'post',
+    data
   })
 }

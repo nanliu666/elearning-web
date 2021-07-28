@@ -6,12 +6,15 @@ export const postAddLive = (params) => post('/api/common/v1/live/plan/addLivePla
 // 添加直播
 export const postEditLive = (params) => post('/api/common/v1/live/plan/editLivePlan', params)
 
-// 添加直播
-export const getStudentList = (params) => get('/api/common/v1/live/student', params)
-
 // 获取直播详情
 export const getLiveDetails = (params) => get('api/common/v1/live/plan/getLivePlan', params)
-
+/**
+ * 讲师直播详情-学员列表
+ * liveId 直播id
+ * pageNo 请求页码
+ * pageSize 每页条数
+ */
+export const getStudentList = (params) => get('/common/v1/live/student', params)
 // 分类查询接口
 export const getcategoryTree = (params) => get('/api/common/v1/category/getCategoryTree', params)
 
@@ -56,7 +59,12 @@ export const delCategory = (params) => del('/manage/v1/evaluation/category', par
 export const ableCategory = (params) => put('/manage/v1/evaluation/category/able', params)
 
 /**
- * 
+ *
  * 讲师直播详情-学员列表
  */
 export const getStudentByLiveId = (params) => get('/common/v1/live/student', params)
+// 添加直播草稿
+export const postAddLiveDraft = (params) => post('/blade-resource/v1/live/plan/draftLivePlan', params)
+
+// 搜索知识分类
+export const getKnowledgeList = (params) => post('/blade-resource/v1/category/relatedKnowledgeList', params)

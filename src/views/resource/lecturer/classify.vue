@@ -6,9 +6,9 @@
         v-p="ADD_LECTURER_CLASSIFY"
         type="primary"
         size="medium"
-        @click="$refs.orgEdit.create()"
+        @click="$refs.orgEdit.add()"
       >
-        新建分类
+        创建分类
       </el-button>
     </page-header>
     <basic-container block>
@@ -84,7 +84,6 @@
       ref="orgEdit"
       :visible="createOrgDailog"
       @refresh="loadTableData"
-      @changevisible="changevisible"
     />
   </div>
 </template>
@@ -103,6 +102,11 @@ const TABLE_COLUMNS = [
     label: '分类名称',
     prop: 'name',
     slot: true,
+    minWidth: 150
+  },
+  {
+    label: '所属组织',
+    prop: 'orgScopeName',
     minWidth: 150
   },
   {
@@ -126,7 +130,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },
@@ -233,7 +237,7 @@ export default {
   },
   activated() {
     getCreatorList({ source: 'teacher' }).then((res) => {
-      this.searchConfig.popoverOptions[1].options.push(...res)
+      this.searchConfig.popoverOptions[1].options = [...res]
     })
     this.loadTableData()
   },

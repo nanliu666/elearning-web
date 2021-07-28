@@ -2,6 +2,16 @@
   <div class="course">
     <!-- 头部 -->
     <page-header title="课程管理">
+      <!-- v-p="EXPORT_COURSE" -->
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        :disabled="_.isEmpty(tableData)"
+        type="primary"
+        @click="exportData"
+      >
+        导出
+      </el-button>
       <el-button
         slot="rightMenu"
         v-p="ADD_COURSE"
@@ -10,6 +20,15 @@
         @click="toEstablishCourse"
       >
         创建课程
+      </el-button>
+      <el-button
+        slot="rightMenu"
+        v-p="IMPORT_COURSE"
+        size="medium"
+        type="primary"
+        @click="importCourse"
+      >
+        导入课程
       </el-button>
     </page-header>
 
@@ -25,17 +44,6 @@
     </div>
 
     <div class="course_in">
-      <!-- 导航 -->
-      <div class="select_bar">
-        <span
-          :class="{ select: status == 1 }"
-          @click="showSelect(1)"
-        >已发布</span>
-        <span
-          :class="{ select: status == 2 }"
-          @click="showSelect(2)"
-        >草稿</span>
-      </div>
       <!-- 内容 -->
       <div class="draft">
         <!-- 表格内容 -->
@@ -74,13 +82,11 @@
                       type="text"
                       @click="refreshTableData"
                     >
-                      <!-- <i class="iconfont iconicon_refresh" /> -->
                     </el-button>
                   </el-tooltip>
                   <span
-                    v-p="'/course/courseDraft/test1'"
                     class="text_refresh"
-                    style="cursor: pointer; font-size: 18px"
+                    style="cursor: pointer; font-size: 16px"
                     @click="refreshTableData"
                   >刷新</span>
                   <el-popover
@@ -99,14 +105,6 @@
                         class="el-icon-setting"
                         style="color: #acb3b8; font-size: 18px; margin-left: 0px"
                       />
-                      <!-- <el-button
-                        class="operations__btns--item"
-                        size="mini"
-                        type="text"
-                        icon="el-icon-setting"
-                        
-                      >
-                      </el-button> -->
                     </el-tooltip>
 
                     <!-- 设置表格列可见性 -->
@@ -130,6 +128,14 @@
 
             <template #multiSelectMenu="{ selection }">
               <el-button
+                v-p="SYNCHRONIZATION_COURSE"
+                style="margin-bottom: 0"
+                type="text"
+                @click="() => synchronizationCourse(selection)"
+              >
+                批量同步
+              </el-button>
+              <el-button
                 v-p="DELETE_COURSE"
                 style="margin-bottom: 0"
                 type="text"
@@ -138,341 +144,264 @@
                 批量删除
               </el-button>
             </template>
-            <!-- //序号 -->
-            <template
-              slot="index"
-              slot-scope="{ row }"
-            >
-              <span>{{ tableData.indexOf(row) + 1 }}</span>
-            </template>
-
             <!-- 课程名称 -->
             <template
               slot="courseName"
               slot-scope="{ row }"
             >
-              <!-- <el-button v-p="'/course/courseDraft/test1'" type="text" @click="todetail(row.id)">
-                {{ row.courseName }}
-              </el-button> -->
-              <div
-                class="courseNameBox"
+              <el-link
+                type="primary"
+                class="courseName"
                 @click="todetail(row.id)"
               >
-                <div class="coverUrl">
-                  <img
-                    v-if="row.coverUrl"
-                    :src="row.coverUrl"
-                    alt=""
-                  />
-                </div>
-                <!-- <span class="coverName">{{ row.courseName }}</span> -->
-                <div>
-                  <text-over-tooltip
-                    ref-name="testName1"
-                    class-name="blueColor"
-                    :content="row.courseName"
-                  ></text-over-tooltip>
-                  <span v-if="row.courseName == ''">--</span>
-                </div>
-              </div>
+                {{ row.courseName ? row.courseName : '--' }}
+              </el-link>
             </template>
-            <!-- 课程类型 -->
-            <template
-              slot="type"
-              slot-scope="{ row }"
-            >
-              <span v-if="row.type == 1">在线课程</span>
-              <span v-if="row.type == 2">面授课程</span>
-              <span v-if="row.type == 3">直播课程</span>
-            </template>
-
-            <!-- //通过条件（前端为多选，用a,b,c,d,...组合）a:教师评定 ，b:考试通过，c:达到课程学时 -->
-            <template
-              slot="passCondition"
-              slot-scope="{ row }"
-            >
-              <span
-                v-for="(item, index) in row.passCondition.split(',')"
-                :key="index"
+            <template #handler="{ row, column }">
+              <el-button
+                v-if="row.isPutaway"
+                v-p="PUTAWAY_COURSE"
+                type="text"
+                :disabled="disabled(0, row.status)"
+                @click="handleCommand(0, row)"
               >
-                <span
-                  v-if="item == 'a'"
-                >教师评定 {{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}
-                </span>
-                <span
-                  v-if="item == 'b'"
-                >考试通过{{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}
-                </span>
-                <span
-                  v-if="item == 'c'"
-                >达到课程学时
-                  {{ index != row.passCondition.split(',').length - 1 ? ',' : '' }}</span>
-              </span>
-              <span v-if="row.passCondition == ''">--</span>
-            </template>
-
-            <!-- electiveType: 2, //选修类型 (1:开放选修 2:通过审批 3:禁止选修) -->
-            <template
-              slot="electiveType"
-              slot-scope="{ row }"
-            >
-              <span v-if="row.electiveType === 1">开放选修</span>
-              <span v-if="row.electiveType === 2">通过审批</span>
-              <span v-if="row.electiveType === 3">禁止选修</span>
-            </template>
-            <!-- 标签 -->
-            <!-- <template slot="atags" slot-scope="{ row }">
-              s
-              <span v-for="(item, index) in row.atags" :key="index" class="atags_icon">{{
-                item
-              }}</span>
-            </template> -->
-            <!-- // isRecommend: 1, //是否推荐课程（0:否；1：是） -->
-            <template
-              slot="isRecommend"
-              slot-scope="{ row }"
-            >
-              <span v-if="row.isRecommend == 0">否</span>
-              <span v-if="row.isRecommend == 1">是</span>
-            </template>
-            <!-- // isPutaway	是否上架 (0：下架；1：上架) -->
-            <template
-              slot="isPutaway"
-              slot-scope="{ row }"
-            >
-              <span v-if="row.isPutaway === 0">下架</span>
-              <span v-if="row.isPutaway === 1">上架</span>
-            </template>
-
-            <!-- isTop: 0, //是否置顶（0：否；1：是） -->
-            <template
-              slot="handler"
-              slot-scope="scope"
-            >
-              <!-- 已发布 -->
-              <div v-show="status == 1">
-                <el-button
-                  v-if="scope.row.isTop == 0"
-                  v-p="TOP_COURSE"
-                  type="text"
-                  size="medium"
-                  @click.stop="handleConfig(scope.row, 1)"
-                >
-                  置顶
-                </el-button>
-                <el-button
-                  v-if="scope.row.isTop == 1"
-                  v-p="TOP_COURSE"
-                  type="text"
-                  size="medium"
-                  @click.stop="handleConfig(scope.row, 0)"
-                >
-                  已置顶
-                </el-button>
-                <el-button
-                  v-if="scope.row.isPutaway === 1"
-                  v-p="PUTAWAY_COURSE"
-                  type="text"
-                  size="medium"
-                  @click="alterIsPutaway(scope.row.id, 0)"
-                >
-                  下架
-                </el-button>
-                <el-button
-                  v-if="scope.row.isPutaway === 0"
-                  v-p="PUTAWAY_COURSE"
-                  type="text"
-                  size="medium"
-                  @click="alterIsPutaway(scope.row.id, 1)"
-                >
-                  上架
-                </el-button>
-                <el-dropdown
-                  v-if="$p([EDIT_COURSE, DELETE_COURSE, MOVE_COURSE])"
-                  trigger="hover"
-                  style="color: #a0a8ae"
-                  @command="handleCommand($event, scope.row)"
-                >
-                  <span
-                    class="el-dropdown-link"
-                    style="margin-left: 10px"
-                  >
-                    <i class="el-icon-more" />
-                  </span>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item
-                      v-p="EDIT_COURSE"
-                      command="edit"
-                    >
-                      编辑
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      v-p="DELETE_COURSE"
-                      command="del"
-                    >
-                      删除
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      v-p="MOVE_COURSE"
-                      command="move"
-                    >
-                      移动
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </div>
-              <!-- 草稿 -->
-              <div v-show="status == 2">
-                <el-button
-                  v-p="PUTAWAY_COURSE"
-                  type="text"
-                  @click="handleCommand('edit', scope.row)"
-                >
-                  编辑
-                </el-button>
-                <el-button
-                  v-p="PUTAWAY_COURSE"
-                  type="text"
-                  @click="handleCommand('del', scope.row)"
-                >
-                  删除
-                </el-button>
-              </div>
+                停用
+              </el-button>
+              <el-button
+                v-else
+                v-p="PUTAWAY_COURSE"
+                type="text"
+                :disabled="disabled(0, row.status)"
+                @click="handleCommand(1, row)"
+              >
+                发布
+              </el-button>
+              <el-button
+                v-p="EDIT_COURSE"
+                type="text"
+                :disabled="disabled(1, row.status)"
+                @click="handleCommand(2, row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                v-p="DELETE_COURSE"
+                type="text"
+                :disabled="disabled(2, row.status)"
+                @click="handleCommand(3, row, column)"
+              >
+                删除
+              </el-button>
             </template>
           </common-table>
         </basic-container>
       </div>
     </div>
-
+    <!-- 停用弹框 -->
     <el-dialog
-      title="移动"
-      :visible.sync="dialogFormVisible"
+      title="提醒"
+      :visible="stopVisible"
       append-to-body
-      width="500px"
+      width="420px"
+      @close="cancel"
     >
-      <div style="margin-bottom: 15px">
-        所在分类：{{ moveKnowledgeRow.catalogName }}
+      <div class="dialog_box">
+        <i
+          class="el-icon-warning dialog_box_icon-warning"
+          style="color: #f3cc84; margin-right: 10px; font-size: 18px"
+        ></i>
+        <span v-html="information"></span>
+        <div>
+          <div
+            class="showBtn"
+            @click="showBtn = !showBtn"
+          >
+            <span>查看关联内容</span>
+            <i
+              v-show="!showBtn"
+              class="el-icon-arrow-down"
+            ></i>
+            <i
+              v-show="showBtn"
+              class="el-icon-arrow-up"
+            ></i>
+          </div>
+          <div
+            v-for="(item, index) in relatedContent"
+            v-show="showBtn"
+            :key="index"
+          >
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="item"
+              placement="top-start"
+              :disabled="item.length < 15"
+            >
+              <div class="item_box">
+                {{ item }}
+              </div>
+            </el-tooltip>
+          </div>
+        </div>
       </div>
-      <common-form
-        ref="form"
-        :columns="formColumns"
-        :model="formData"
-      >
-      </common-form>
+
       <div
         slot="footer"
         class="dialog-footer"
       >
-        <el-button @click="dialogFormVisible = false">
-          取消
+        <el-button
+          v-show="!showBtnDel"
+          @click="cancel"
+        >
+          取 消
         </el-button>
         <el-button
+          v-show="!showBtnDel"
           type="primary"
-          @click="isMoveCourse"
+          @click="stopUsing"
         >
-          保存
+          确 定
+        </el-button>
+        <el-button
+          v-show="showBtnDel"
+          type="primary"
+          @click="cancel"
+        >
+          知道了
         </el-button>
       </div>
     </el-dialog>
+    <export-dialog
+      :visible.sync="isShowExportDialog"
+      :total-num="page.total"
+      :export-api="exportCourseList"
+      :export-params="queryListParams"
+    />
   </div>
 </template>
 
 <script>
 import {
   getCourseListData,
+  listTeacher,
+  getCourseInfoUserList,
   delCourseInfo,
   putawayOperate,
-  getCatalog,
-  updateCourseTop,
-  moveCourse,
-  getCourseInfoUserList
+  classList,
+  syncCourses,
+  verifyCourseCanDelete,
+  exportCourseList
 } from '@/api/course/course'
-// import { delete } from 'vue/types/umd'
-import TextOverTooltip from './components/TextOverTooltip'
-
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 // 表格属性
-const TABLE_COLUMNS = [
+const type = ['在线', '面授', '直播']
+const electiveType = ['开放选修', '通过审批', '禁止选修']
+const tableColumns = [
   {
-    label: '序号',
-    prop: 'index',
-    width: '70',
-    slot: true
+    label: '课程编号',
+    prop: 'courseNo',
+    fixed: 'left',
+    minWidth: 150
   },
   {
     label: '课程名称',
-    minWidth: 130,
     prop: 'courseName',
     slot: true,
-    showOverflowTooltip: false,
-    headerAlign: 'center'
+    minWidth: 150,
+    fixed: 'left'
+  },
+  {
+    label: '状态',
+    prop: 'status',
+    formatter: (row) => {
+      let str = '--'
+      switch (row.status) {
+        case 0:
+          str = '审核中'
+          break
+        case 1:
+          str = '已发布'
+          break
+        case 2:
+          str = '草稿'
+          break
+        case 3:
+          str = '已停用'
+          break
+        case 11:
+          str = '已拒绝'
+          break
+        case 12:
+          str = '已撤回'
+          break
+      }
+      return str
+    },
+    minWidth: 120
   },
   {
     label: '讲师',
     prop: 'teacherName',
-    width: 80,
-    slot: false
+    minWidth: 120
   },
   {
-    label: '状态',
-    prop: 'isPutaway',
-    slot: true,
-    width: 80
+    label: '课程分类',
+    prop: 'catalogName',
+    minWidth: 120
   },
   {
-    label: '所在分类',
-    prop: 'catalogName'
+    label: '归属组织',
+    prop: 'orgScopeName',
+    minWidth: 120
   },
   {
-    label: '课程类型',
+    label: '授课方式',
     prop: 'type',
-    slot: true
-  },
-  {
-    label: '通过条件',
-    prop: 'passCondition',
-    slot: true
+    formatter: (row) => (type[row.type - 1] ? type[row.type - 1] : '--'),
+    minWidth: 120
   },
   {
     label: '选修类型',
     prop: 'electiveType',
-    slot: true
+    formatter: (row) =>
+      electiveType[row.electiveType - 1] ? electiveType[row.electiveType - 1] : '--',
+    minWidth: 120
+  },
+  {
+    label: '知识体系',
+    prop: 'knowledgeSystemFullName',
+    minWidth: 120
   },
   {
     label: '是否推荐',
     prop: 'isRecommend',
-    width: 80,
-    slot: true
+    formatter: (row) => (row.isRecommend === 0 ? '否' : '是'),
+    minWidth: 120
   },
   {
     label: '创建人',
-    prop: 'creatorName'
+    prop: 'creatorName',
+    minWidth: 120
   },
   {
     label: '更新时间',
+    slot: true,
     prop: 'updateTime',
-    width: 170,
-    headerAlign: 'center',
-    align: 'center'
+    minWidth: 120
   }
 ]
-const TABLE_CONFIG = {
-  handlerColumn: {
-    width: 200,
-    fixed: false
-  },
-
+const tableConfig = {
   enableMultiSelect: true,
-  enablePagination: true,
   showHandler: true,
-  showIndexColumn: false
-  // 树形结构懒加载
-}
-const TABLE_PAGE_CONFIG = {
-  page: {
-    pageNo: 1,
-    pageSize: 10,
-    total: 0
-  }
+
+  handlerColumn: {
+    label: '操作',
+    minWidth: 150,
+    fixed: 'right'
+  },
+  highlightSelect: true,
+  rowKey: 'id'
 }
 
 // 搜索配置
@@ -489,13 +418,16 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
     config: { placeholder: '请选择' },
     data: '',
-    field: 'isPutaway',
+    field: 'status',
     label: '状态',
     type: 'select',
     options: [
-      { value: '2', label: '全部' },
-      { value: '1', label: '上架' },
-      { value: '0', label: '下架' }
+      { value: 0, label: '审核中' },
+      { value: 1, label: '已发布' },
+      { value: 2, label: '草稿' },
+      { value: 3, label: '已停用' },
+      { value: 12, label: '已撤回' },
+      { value: 11, label: '已拒绝' }
     ]
   },
   {
@@ -504,38 +436,47 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '讲师',
     type: 'select',
     options: [],
-    config: { optionLabel: 'teacherName', optionValue: 'teacherId', placeholder: '请选择' }
+    config: {
+      placeholder: '请选择',
+      filterable: true
+    }
   },
   {
     data: '',
     field: 'catalogId',
-    label: '所在分类',
-    type: 'select',
-    options: [],
-    config: { optionLabel: 'catalogName', optionValue: 'catalogId', placeholder: '请选择' }
+    label: '课程分类',
+    type: 'treeSelect',
+    config: {
+      multiple: true,
+      selectParams: {
+        placeholder: '请选择'
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
   },
   {
     config: { placeholder: '请选择' },
     data: '',
     field: 'courseType',
-    label: '课程类型',
+    label: '授课方式',
     type: 'select',
     options: [
-      { value: 1, label: '在线课程' },
-      { value: 2, label: '面授课程' },
-      { value: 3, label: '直播课程' }
-    ]
-  },
-  {
-    config: { placeholder: '请选择' },
-    data: '',
-    field: 'passCondition',
-    label: '通过条件',
-    type: 'select',
-    options: [
-      { value: 'a', label: '教师评定' },
-      { value: 'b', label: '考试通过' },
-      { value: 'c', label: '达到课程学时' }
+      { value: 1, label: '在线' },
+      { value: 2, label: '面授' },
+      { value: 3, label: '直播' }
     ]
   },
   {
@@ -545,9 +486,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '选修类型',
     type: 'select',
     options: [
-      { value: 1, label: '开放选修' },
-      { value: 2, label: '通过审批' },
-      { value: 3, label: '禁止选修' }
+      { value: '1', label: '开放选修' },
+      // { value: '2', label: '通过审批' },
+      { value: '3', label: '禁止选修' }
     ]
   },
   {
@@ -567,35 +508,15 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '创建人',
     type: 'select',
     options: [],
-    config: { optionLabel: 'creatorName', optionValue: 'creatorId', placeholder: '请选择' }
-  }
-  // {
-  //   config: { placeholder: '请选择' },
-  //   data: '',
-  //   field: 'tags',
-  //   label: '标签',
-  //   type: 'select',
-  //   options: [
-  //     { value: 1, label: '标签1' },
-  //     { value: 2, label: '标签2' },
-  //     { value: 3, label: '标签3' }
-  //   ]
-  // }
-]
-const SEARCH_POPOVER_CONFIG = {
-  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
-  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
-}
-const FORM_COLUMNS = [
+    config: { placeholder: '请选择', filterable: true }
+  },
   {
-    label: '移动到新分类',
-    itemType: 'treeSelect',
-    prop: 'catalogId',
-    required: true,
-    span: 24,
-    props: {
+    label: '知识体系',
+    type: 'treeSelect',
+    field: 'knowledgeSystemId',
+    config: {
       selectParams: {
-        placeholder: '请选择所在分类',
+        placeholder: '请选择知识体系',
         multiple: false
       },
       treeParams: {
@@ -609,52 +530,49 @@ const FORM_COLUMNS = [
           children: 'children',
           label: 'name',
           value: 'id'
-        },
-        required: true
+        }
       }
     }
   }
 ]
+const searchConfig = {
+  popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
+  requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS
+}
+
 import { mapGetters } from 'vuex'
 import {
   ADD_COURSE,
+  EXPORT_COURSE,
   TOP_COURSE,
   EDIT_COURSE,
   DELETE_COURSE,
   MOVE_COURSE,
-  PUTAWAY_COURSE
+  PUTAWAY_COURSE,
+  REFRESH_COURSE,
+  IMPORT_COURSE,
+  SYNCHRONIZATION_COURSE
 } from '@/const/privileges'
 export default {
   // 搜索组件
   components: {
     SeachPopover: () => import('@/components/searchPopOver'),
-    TextOverTooltip
+    exportDialog: () => import('@/components/common-export/exportDialog.vue')
   },
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
+      _.filter(tableColumns, ({ prop }) => _.includes(visibleColProps, prop))
   },
-
   data() {
     return {
+      queryListParams: {}, // 剥离请求题库列表的入参，因为导出弹窗亦需要此入参
+      isShowExportDialog: false, // 是否展示导出弹窗
+      stopId: '',
       throttle: false, // 节流阀
       loading: false,
-      formData: {
-        catalogId: ''
-      },
-      formColumns: FORM_COLUMNS,
-      moveKnowledgeRow: {},
-      // 移动数据
-      CourseNameBarData: [], //显示
-      CourseNameBar: [],
-      moveId: '',
-      // 移动dialog
-      dialogFormVisible: false,
       // Dialog无数据
       dialogVisible: false,
-      // 导航
-      status: 1,
       // 表格
       query: {
         name: ''
@@ -666,25 +584,60 @@ export default {
       },
       searchParams: '',
       // 默认选中所有列
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop).filter((v) => {
+      columnsVisible: _.map(tableColumns, ({ prop }) => prop).filter((v) => {
         return v != 'passCondition' && v != 'creatorName' && v != 'updateTime'
       }),
-      searchPopoverConfig: SEARCH_POPOVER_CONFIG,
+      searchPopoverConfig: searchConfig,
       // query: {},
-      tableColumns: TABLE_COLUMNS,
-      tableConfig: TABLE_CONFIG,
+      tableColumns: tableColumns,
+      tableConfig: tableConfig,
       tableData: [],
-      tablePageConfig: TABLE_PAGE_CONFIG
+      stopVisible: false,
+      relatedContent: [],
+      showBtn: false,
+      information: '',
+      showBtnDel: false
     }
   },
   computed: {
+    exportCourseList: () => exportCourseList,
     ADD_COURSE: () => ADD_COURSE,
+    EXPORT_COURSE: () => EXPORT_COURSE,
     TOP_COURSE: () => TOP_COURSE,
     EDIT_COURSE: () => EDIT_COURSE,
     DELETE_COURSE: () => DELETE_COURSE,
     MOVE_COURSE: () => MOVE_COURSE,
     PUTAWAY_COURSE: () => PUTAWAY_COURSE,
-    ...mapGetters(['privileges'])
+    REFRESH_COURSE: () => REFRESH_COURSE,
+    IMPORT_COURSE: () => IMPORT_COURSE,
+    SYNCHRONIZATION_COURSE: () => SYNCHRONIZATION_COURSE,
+    ...mapGetters(['privileges']),
+    disabled() {
+      return (type, status) => {
+        let boolean = false
+        switch (status) {
+          case 0:
+            boolean = true
+            break
+          case 1:
+            boolean = false
+            break
+          case 2:
+            boolean = type === 0
+            break
+          case 3:
+            boolean = false
+            break
+          case 11:
+            boolean = type === 0
+            break
+          case 12:
+            boolean = type === 0
+            break
+        }
+        return boolean
+      }
+    }
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
@@ -702,104 +655,47 @@ export default {
     }
   },
   created() {
-    this.status = this.$route.query.status ? this.$route.query.status : 1
     this.refreshTableData()
-    // this.loadData()
-    this.getInfo()
-    this.isgetCatalog()
-  },
-  activated() {
-    // this.loadData()
-    this.status = this.$route.query.status ? this.$route.query.status : 1
-
     this.getInfo()
     this.getScreenInfo()
   },
+  activated() {
+    this.getInfo()
+    this.getScreenInfo()
+    this.initRelatedKnowledgeList()
+  },
+  mounted() {
+    this.$nextTick().then(() => {
+      this.$refs.seachPopover.resetForm()
+    })
+  },
   methods: {
+    exportData() {
+      this.isShowExportDialog = true
+    },
+    //   初始化知识体系列表
+    async initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(SEARCH_POPOVER_POPOVER_OPTIONS, { field: 'knowledgeSystemId' })
+      await relatedKnowledgeList({ name: '' }).then((res) => {
+        res.unshift({ id: '', name: '全部' })
+        knowledgeSystemId.config.treeParams.data = res
+      })
+    },
+    //导入课程
+    importCourse() {
+      this.$router.push('/course/importCourse')
+    },
     // 去详情
     todetail(id) {
       this.$router.push({ path: '/course/detail?id=' + id })
     },
-
-    // 打开移动弹窗
-    moveFun(row) {
-      this.dialogFormVisible = true
-      this.moveKnowledgeRow = row
-    },
-
     toEstablishCourse() {
-      this.$router.push({ path: '/course/establishCourse' })
-    },
-    // 移动
-    // isMoveCourse() {
-    //   let params = {
-    //     catalogId: this.CourseNameBar[this.CourseNameBar.length - 1], //目录课程
-    //     courseId: this.moveId //课程
-    //   }
-    //   moveCourse(params).then(() => {
-    //     this.dialogFormVisible = false
-    //   })
-    // },
-    // 保存移动
-    async isMoveCourse() {
-      this.$refs.form.validate().then((data) => {
-        if (data) {
-          this.dialogFormVisible = false
-          moveCourse({
-            courseId: this.moveKnowledgeRow.id,
-            catalogId: this.formData.catalogId
-          }).then(() => {
-            this.$message.success('移动成功')
-            this.getInfo()
-          })
+      this.$router.push({
+        path: '/course/establishCourse',
+        meta: {
+          $keepAlive: false
         }
       })
-    },
-    // 拿到移动数据
-    getCategoryList() {
-      return getCatalog().then((res) => {
-        return _.concat(
-          [
-            {
-              id: '',
-              name: '全部'
-            }
-          ],
-          res
-        )
-      })
-    },
-    async isgetCatalog() {
-      // getCatalog().then((res) => {
-      //   // console.log(res)
-      //   this.CourseNameBarData = res
-      // })
-
-      let catalogId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'catalogId' })
-      let moveCatalogId = _.find(this.formColumns, { prop: 'catalogId' })
-      // let tagId = _.find(this.searchPopoverConfig.popoverOptions, { field: 'tagId' })
-      // if (tagId) {
-      //   getKnowledgeManageTaglist().then(
-      //     (res) =>
-      //       (tagId.options = _.concat(
-      //         [
-      //           {
-      //             id: '',
-      //             name: '全部'
-      //           }
-      //         ],
-      //         res
-      //       ))
-      //   )
-      // }
-      let catalogList = await this.getCategoryList()
-      if (catalogId) {
-        // catalogId.config.treeParams.data = catalogList
-        FORM_COLUMNS[0].props.treeParams.data = this.ListData(catalogList)
-      }
-      if (moveCatalogId) {
-        moveCatalogId.props.treeParams.data = _.drop(catalogList)
-      }
     },
     // 递归过滤数据
     ListData(arr) {
@@ -814,97 +710,82 @@ export default {
       }
       return arr
     },
-    // 上架&下架
-    alterIsPutaway(id, i) {
-      // console.log({ id })
-      let lang = ''
-      if (!i) {
-        lang = '您确定要下架该课程吗？下架后，该课程将不能访问。'
-      } else {
-        lang = '您确定要上架该课程吗？'
-      }
-      this.$confirm(lang, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          putawayOperate({ courseIds: [id], choice: i }).then(() => {
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
-            this.getInfo()
-          })
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '操作已取消'
-          })
-        })
-    },
-
     // 去目录管理
     toCatalog() {
       this.$router.push({ path: '/course/catalog' })
     },
-    // isTop: 0, //是否置顶（0：否；1：是）
-    handleConfig(row, i) {
-      // console.log({ courseId: row.id, choice: i })
-      updateCourseTop({ courseId: row.id, choice: i }).then(() => {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
+    // 操作函数
+    async handleCommand(e, row) {
+      if (e === 0) {
+        verifyCourseCanDelete([row.id]).then((res) => {
+          this.showBtnDel = false
+          this.stopVisible = true
+          this.stopId = row.id
+          this.information = `课程停用后，将不在前台的课程中心发布展示，若<br />
+          要对正在关联的线上必修、培训、直播、学习地图<br />
+          生效，请在对应模块中进行调整.<br />
+          您确定要继续停用该课程吗？`
+          if (res.resultCode === 292) this.relatedContent = res.resultList
         })
-        this.getInfo()
-      })
-    },
-    // 编辑&删除&移动
-    handleCommand(e, row) {
-      if (e === 'edit') {
+      } else if (e === 1) {
+        await putawayOperate({ choice: 1, courseIds: [row.id] })
+        this.refreshTableData()
+        this.$message({
+          type: 'success',
+          message: '发布成功'
+        })
+      } else if (e === 2) {
         // 去编辑
         this.$router.push({
-          path: '/course/establishCourse?id=' + row.id + '&catalogName=' + row.catalogName
+          path:
+            '/course/compileCourse?id=' +
+            row.id +
+            '&catalogName=' +
+            row.catalogName +
+            '&type=' +
+            row.status,
+          meta: {
+            $keepAlive: false
+          }
         })
-      }
-      if (e === 'del') {
-        // 删除
-        this.$confirm('此操作将删除该课程, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            delCourseInfo({ courseIds: row.id }).then(() => {
-              this.$message({
-                type: 'success',
-                message: '删除成功!'
+      } else if (e === 3) {
+        verifyCourseCanDelete([row.id]).then((res) => {
+          if (res.resultCode !== 200) {
+            this.showBtnDel = true
+            this.stopVisible = true
+            this.information = '本课程已关联培训/线上必修,暂时不能删除.'
+            this.relatedContent = res.resultList
+          } else {
+            this.$confirm('你确定要删除该课程?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            })
+              .then(async () => {
+                await delCourseInfo([row.id])
+                this.refreshTableData()
+                this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
               })
-              this.getInfo()
-            })
-          })
-          .catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-      }
-      if (e === 'move') {
-        // 移动
-        // this.dialogFormVisible = true
-        // this.moveId = row.id
-        this.moveFun(row)
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          }
+        })
       }
     },
     //  处理页码改变
     handleCurrentPageChange(param) {
       this.page.currentPage = param
-
       this.getInfo()
     },
     handlePageSizeChange(param) {
+      this.page.currentPage = 1
       this.page.pageSize = param
       this.getInfo()
     },
@@ -914,27 +795,91 @@ export default {
       this.page.currentPage = 1
       this.getInfo()
     },
-
+    //批量同步课程
+    synchronizationCourse(selection) {
+      this.$confirm('此操作将批量同步选中课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          let arr = selection.reduce((pre, cur) => {
+            pre.push(cur.id)
+            return pre
+          }, [])
+          syncCourses({ courseIds:arr }).then((r) => {
+            this.$message({
+              type: 'info',
+              message: r.resMsg
+            })
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          })
+        })
+    },
+    // 批量删除
     handleRemoveItems(selection) {
       // 批量删除
-      let params = ''
+      let params = []
+      // 关联培训或者审核中
+      let noDel = []
       selection.forEach((item) => {
-        params += item.id + ','
+        params.push(item.id)
+        if (item.status === 0) {
+          noDel.push(item.id)
+        }
       })
       this.$confirm('此操作将删除选中课程, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          delCourseInfo({ courseIds: params }).then(() => {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
+        .then(async () => {
+          const res = await verifyCourseCanDelete(params)
+          if (res.resultCode !== 200 || noDel.length !== 0) {
+            this.$confirm(
+              '你选择的课程中包含已关联培训/线上必修和审批中的课程,暂时不能删除.，不能进行删除操作，是否忽略继续删除其它课程？',
+              '提示',
+              {
+                confirmButtonText: '继续删除',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            )
+              .then(async () => {
+                if (res.resultCode === 293)
+                  params = res.resultList.filter((item) => !noDel.includes(item))
+                else if (res.resultCode === 292 || res.resultCode === 291)
+                  return this.$message.success('删除成功!')
+                else params = params.filter((item) => !noDel.includes(item))
+                if (!params.length) return this.$message.success('删除成功!')
+                await delCourseInfo(params)
+                this.$message.success('删除成功!')
+                this.$refs.table.clearSelection()
+                if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
+                  --this.page.currentPage
+                }
+                this.getInfo()
+              })
+              .catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消删除'
+                })
+              })
+          } else {
+            await delCourseInfo(params)
+            this.$message.success('删除成功!')
             this.$refs.table.clearSelection()
+            if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
+              --this.page.currentPage
+            }
             this.getInfo()
-          })
+          }
         })
         .catch(() => {
           this.$message({
@@ -942,9 +887,15 @@ export default {
             message: '已取消删除'
           })
         })
-      this.refreshTableData()
     },
-
+    // 停用
+    stopUsing() {
+      putawayOperate({ choice: 0, courseIds: [this.stopId] }).then(() => {
+        this.$message.success('停用成功')
+        this.cancel()
+        this.refreshTableData()
+      })
+    },
     // 刷新列表数据
     refreshTableData() {
       this.getInfo()
@@ -970,63 +921,34 @@ export default {
     },
 
     // 给筛选拿数据
-
     getScreenInfo() {
-      let params = {
-        currentPage: '',
-        size: '',
-        status: ''
-      }
-      params = { ...this.page }
-      params.status = this.status
-
-      if (params.isPutaway == 2) {
-        delete params.isPutaway
-      }
-      params.pageSize = 9999
-      getCourseListData(params).then((res) => {
-        // 下拉筛选框
-        let data1 = JSON.parse(JSON.stringify(res.data))
-        data1 = this.arrayUnique(data1, 'teacherName')
-        data1 = this.arrClearBlank(data1, 'teacherName')
-
-        let data2 = JSON.parse(JSON.stringify(res.data))
-        data2 = this.arrayUnique(data2, 'catalogName')
-        data2 = this.arrClearBlank(data2, 'catalogName')
-
-        // let data7 = JSON.parse(JSON.stringify(res.data))
-        // data7 = this.arrayUnique(data7, 'creatorName')
-        // data7 = this.arrClearBlank(data7, 'creatorName')
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-        if (this.status == 1) {
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[2].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data1)
-          SEARCH_POPOVER_POPOVER_OPTIONS[2].options.push(...data2)
-        } else {
-          SEARCH_POPOVER_POPOVER_OPTIONS[0].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[0].options.push(...data1)
-          SEARCH_POPOVER_POPOVER_OPTIONS[1].options.push(...data2)
-        }
-
-        // SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
+      listTeacher({
+        pageSize: 9999999,
+        pageNo: 1
+      }).then((res) => {
+        res = this.arrayUnique(res, 'name')
+        res = this.arrClearBlank(res, 'name')
+        let arr = []
+        res.forEach((item, index) => {
+          arr[index] = { value: item.idStr, label: item.name }
+        })
+        this.searchPopoverConfig.popoverOptions[1].options = [...arr]
       })
       getCourseInfoUserList().then((res) => {
-        let data7 = JSON.parse(JSON.stringify(res))
-        data7 = this.arrayUnique(data7, 'creatorName')
-        data7 = this.arrClearBlank(data7, 'creatorId')
-
-        if (this.status == 1) {
-          SEARCH_POPOVER_POPOVER_OPTIONS[7].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[7].options.push(...data7)
-        } else {
-          SEARCH_POPOVER_POPOVER_OPTIONS[6].options = []
-          SEARCH_POPOVER_POPOVER_OPTIONS[6].options.push(...data7)
-        }
+        let arr = []
+        res = this.arrayUnique(res, 'creatorName')
+        res = this.arrClearBlank(res, 'creatorName')
+        res.forEach((item, index) => {
+          arr[index] = { value: item.creatorId, label: item.creatorName }
+        })
+        this.searchPopoverConfig.popoverOptions[6].options = [...arr]
+      })
+      classList().then((res) => {
+        res = this.arrayUnique(res, 'name')
+        res = this.arrClearBlank(res, 'name')
+        this.searchPopoverConfig.popoverOptions[2].config.treeParams.data = res
       })
     },
-
     // 拿数据
     getInfo() {
       if (this.throttle) return
@@ -1037,11 +959,10 @@ export default {
         pageSize: this.page.pageSize
       }
       let params = { ...page, ...this.searchParams }
-      params.status = this.status
-
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
+      this.queryListParams = params
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
@@ -1049,52 +970,9 @@ export default {
         this.loading = false
       })
     },
-    // 导航
-    showSelect(index) {
-      this.status = index
-      // 把筛选数据清空
-      this.searchParams = ''
-      this.page.currentPage = 1
-
-      this.getInfo()
-      this.getScreenInfo()
-      if (this.$refs.seachPopover) this.$refs.seachPopover.resetForm()
-      this.$refs.table.clearSelection()
-      let unshiftData = {
-        config: { placeholder: '请选择' },
-        data: '',
-        field: 'isPutaway',
-        label: '状态',
-        type: 'select',
-        options: [
-          { value: '0', label: '下架' },
-          { value: '1', label: '上架' },
-          { value: '2', label: '全部' }
-        ]
-      }
-
-      // console.log(this.$refs.table.clearSelection());
-
-      // 草稿没有状态
-      if (this.status == 1) {
-        // 已发布
-        TABLE_COLUMNS[3] = {
-          label: '状态',
-          prop: 'isPutaway',
-          slot: true,
-          width: 80
-        }
-
-        if (unshiftData.label != SEARCH_POPOVER_POPOVER_OPTIONS[0].label) {
-          SEARCH_POPOVER_POPOVER_OPTIONS.unshift(unshiftData)
-        }
-      } else {
-        // 草稿
-        if (unshiftData.label == SEARCH_POPOVER_POPOVER_OPTIONS[0].label) {
-          SEARCH_POPOVER_POPOVER_OPTIONS.splice(0, 1)
-          TABLE_COLUMNS[3] = {}
-        }
-      }
+    cancel() {
+      this.stopVisible = false
+      this.relatedContent = []
     }
   }
 }
@@ -1144,20 +1022,6 @@ export default {
 .course_in {
   position: relative;
   background-color: #fff;
-  .select_bar {
-    height: 50px;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    span {
-      height: 50px;
-      line-height: 50px;
-      margin-left: 30px;
-      cursor: pointer;
-    }
-    .select {
-      border-bottom: 2px solid #1677ff;
-    }
-  }
   .draft {
     padding: 25px;
   }
@@ -1289,6 +1153,15 @@ export default {
 /deep/.el-card {
   border: none !important;
 }
+::v-deep a.courseName.el-link.el-link--primary.is-underline {
+  width: 100%;
+  span.el-link--inner {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
 </style>
 
 <style lang="scss" scoped>
@@ -1297,6 +1170,9 @@ export default {
 }
 /deep/.el-select {
   width: 100%;
+}
+/deep/ .page-wrap {
+  padding-right: 20px;
 }
 /deep/.el-input .operations__btns {
   color: #acb3b8;
@@ -1386,5 +1262,16 @@ export default {
 /deep/.cell:empty::before {
   content: '--';
   color: gray;
+}
+.showBtn {
+  margin-top: 10px;
+  color: #01aafc;
+}
+.item_box {
+  margin-top: 10px;
+  width: 236px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -1,6 +1,27 @@
 <template>
   <div class="question-list  fill">
     <page-header title="积分台账">
+      <el-dropdown
+        slot="rightMenu"
+        v-p="ADD_CREDIT_DETAIL"
+        @command="createCredit"
+      >
+        <el-button
+          type="primary"
+          size="medium"
+        >
+          添加积分
+          <i class="el-icon-arrow-down el-icon--right" />
+        </el-button>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="once">
+            单次添加
+          </el-dropdown-item>
+          <el-dropdown-item command="batch">
+            批量导入
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </page-header>
     <el-row
       style="height: calc(100% - 92px);"
@@ -17,7 +38,7 @@
             placeholder="组织名称"
             style="margin-bottom:10px;"
           />
-          <el-tree
+          <!-- <el-tree
             ref="categoryTree"
             v-loading="treeLoading"
             :filter-node-method="filterNode"
@@ -29,14 +50,25 @@
             @node-click="nodeClick"
           >
             <span
-              slot-scope="{ node, data }"
+              slot-scope="{ data }"
               class="custom-tree-node"
             >
               <span>{{ data.orgName }}{{ '  ' }} ({{
                 data.orgId ? data.userNum : outerUserCount
               }})</span>
             </span>
-          </el-tree>
+          </el-tree> -->
+          <el-tree
+            ref="orgTree"
+            :load="lazyLoadOrgTree"
+            node-key="id"
+            lazy
+            :data="treeData"
+            :props="treeProps"
+            :check-on-click-node="true"
+            :expand-on-click-node="false"
+            @node-click="nodeClick"
+          />
         </basic-container>
       </el-col>
       <el-col
@@ -96,14 +128,18 @@
         </basic-container>
       </el-col>
     </el-row>
+    <add-credit-dialog
+      :visible.sync="dialogVisible"
+      @updateTable="loadData"
+    />
   </div>
 </template>
 
 <script>
 import { getListScoreDetails } from '@/api/credit/credit'
-import { QUESTION_TYPE_MAP, QUESTION_STATUS_MAP } from '@/const/examMange'
 import { deleteHTMLTag } from '@/util/util'
 import { getOrganization } from '@/api/system/user'
+import { getorganizationNew } from '@/api/org/org'
 const COLUMNS = [
   {
     prop: 'name',
@@ -148,15 +184,36 @@ const COLUMNS = [
     align: 'center'
   }
 ]
-import { VIEW_CREDIT } from '@/const/privileges'
+import { VIEW_CREDIT, ADD_CREDIT_DETAIL } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+const loadOrgTree = async ({ parentId, parentPath }) => {
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getorganizationNew({ parentId })
+  // 在这里处理两个数组为树形组件需要的结构
+  const orgs = data || []
+  const target = _.concat(
+    _.map(orgs, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.id}`,
+          orgId: item.id,
+          orgName: item.name
+        },
+        item
+      )
+    )
+  )
+  return target
+}
 export default {
   name: 'Credit',
   components: {
+    AddCreditDialog: () => import('./components/addCreditDialog.vue'),
     SearchPopover: () => import('@/components/searchPopOver/index')
   },
   data() {
     return {
+      dialogVisible: false,
       outerUserCount: 0,
       loading: false,
       treeData: [], // 组织架构数据
@@ -218,9 +275,8 @@ export default {
   },
   computed: {
     columns: () => COLUMNS,
-    QUESTION_STATUS_MAP: () => QUESTION_STATUS_MAP,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     VIEW_CREDIT: () => VIEW_CREDIT,
+    ADD_CREDIT_DETAIL: () => ADD_CREDIT_DETAIL,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -231,20 +287,77 @@ export default {
       },
       deep: true
     },
+    // treeSearch(val) {
+    //   this.$refs.categoryTree.filter(val)
+    // }
     treeSearch(val) {
-      console.log('val:', val)
-      this.$refs.categoryTree.filter(val)
+      this.searchLoadData(val)
     }
   },
-  activated() {
-    this.loadData()
-  },
   mounted() {
-    this.loadTree()
-    this.loadData()
     this.getOuterNum()
   },
   methods: {
+    searchLoadData: _.debounce(function(orgName) {
+      let params
+      if (orgName) {
+        params = { orgName }
+      } else {
+        params = { parentId: '0' }
+      }
+      this.loading = true
+      getorganizationNew(params)
+        .then((res) => {
+          const orgs = res || []
+          const target = _.concat(
+            _.map(orgs, (item) =>
+              _.assign(
+                {
+                  orgId: item.id,
+                  orgName: item.name
+                },
+                item
+              )
+            )
+          )
+          this.treeData = target
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    }, 400),
+
+    async lazyLoadOrgTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.orgId : '0'
+      const target = await loadOrgTree({
+        parentId
+      })
+      if (!_.isEmpty(target) && parentId === '0') {
+        this.activeCategory = _.get(target, '[0].orgId')
+        this.loadData()
+        this.$nextTick(() => {
+          this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeCategory)
+        })
+      }
+      resolve(target)
+    },
+
+    createCredit($event) {
+      switch ($event) {
+        case 'once':
+          this.onceFun()
+          break
+        default:
+          this.batchFun()
+          break
+      }
+    },
+    onceFun() {
+      this.dialogVisible = true
+    },
+    batchFun() {
+      this.$router.push({ path: '/creditManagement/creditImport' })
+    },
     loadTree(parentOrgId = '0') {
       this.treeLoading = true
       getOrganization({ parentOrgId })
@@ -284,8 +397,7 @@ export default {
       return data.orgName.indexOf(value) !== -1
     },
     nodeClick(data) {
-      console.log('data:', data)
-      this.activeCategory = data
+      this.activeCategory = data.orgId
       this.page.currentPage = 1
       this.loadData()
     },
@@ -296,8 +408,9 @@ export default {
     handleSubmitSearch(params) {
       this.page.currentPage = 1
       let currentParam = {
-        likeQuery: params.search
-        // userId:params.search
+        likeQuery: params.search,
+        startTime: params.startTime,
+        endTime: params.endTime
       }
 
       this.query = { ...currentParam }
@@ -323,7 +436,7 @@ export default {
       getListScoreDetails({
         currentPage: this.page.currentPage,
         size: this.page.size,
-        orgId: this.activeCategory ? this.activeCategory.orgId : null,
+        orgId: this.activeCategory,
         operType: '1',
         ...this.query
       })

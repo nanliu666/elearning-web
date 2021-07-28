@@ -14,8 +14,9 @@
     @visible-change="visibleChange"
   >
     <el-option
-      v-for="item in _.uniqBy(_.compact([...firstOption, ...optionList]), optionProps.key)"
-      :key="optionProps.key ? item[optionProps.key] : item[optionProps.value]"
+      class="options"
+      v-for="item in _.uniqBy(_.compact([...firstOption, ...optionList]), optionProps.value)"
+      :key="optionProps.key ? `${item[optionProps.key]}${item[optionProps.value]}` : item[optionProps.value]"
       :label="optionProps.formatter ? optionProps.formatter(item) : item[optionProps.label]"
       :value="item[optionProps.value]"
     />
@@ -85,6 +86,10 @@ export default {
       type: Function,
       default: () => {}
     },
+    payloadParams: {
+      type: Object,
+      default: () => {}
+    },
     placeholder: {
       type: String,
       default: '请选择'
@@ -113,6 +118,14 @@ export default {
       noMore: false,
       pageNo: 1,
       search: ''
+    }
+  },
+  watch: {
+    payloadParams: {
+      handler() {
+        this.loadOptionData(true)
+      },
+      deep: true
     }
   },
   created() {
@@ -147,8 +160,9 @@ export default {
         this.pageNo = 1
       }
       this.loading = true
-
-      this.load({ pageNo: this.pageNo, pageSize: this.pageSize, search: this.search })
+      const basicParams = { pageNo: this.pageNo, pageSize: this.pageSize, search: this.search }
+      const params = _.assign(basicParams, this.payloadParams)
+      this.load(params)
         .then((res) => {
           this.pageNo += 1
           if (!_.isEmpty(firstOption)) {
@@ -164,6 +178,7 @@ export default {
           } else {
             this.noMore = false
           }
+          
           this.$emit('update:optionList', this.optionList)
         })
         .finally(() => {
@@ -182,5 +197,11 @@ export default {
 .loading {
   padding: 12px 0;
   text-align: center;
+}
+.options{
+  overflow: hidden;
+  text-overflow:ellipsis;
+  white-space: nowrap;
+  max-width: 330px;
 }
 </style>

@@ -48,7 +48,7 @@
                     class="selector"
                     :options="treeData"
                     placeholder="请选择"
-                    :props="seletorProps"
+                    :props="selectorProps"
                     :value="queryForm.categoryId"
                     @getValue="(id) => (queryForm.categoryId = id)"
                   />
@@ -155,8 +155,11 @@
       </div>
 
       <div class="table-container">
-        <div style="margin-bottom: 8px; height:21px;">
-          <!-- <div v-if="multipleSelection.length">
+        <div
+          v-if="multipleSelection.length"
+          style="margin-bottom: 8px; height:21px;"
+        >
+          <!-- <div>
             <span>{{ `已选中${multipleSelection.length}项` }}</span>
             <span
               style="
@@ -268,7 +271,7 @@
               <el-button
                 v-p="EDIT_QUESTION"
                 type="text"
-                size="small"
+                size="medium"
                 @click="handleEdit(scope.row)"
               >
                 编辑
@@ -276,7 +279,7 @@
               <el-button
                 v-p="DELETE_QUESTION"
                 type="text"
-                size="small"
+                size="medium"
                 @click="handleDelete(scope.row)"
               >
                 删除
@@ -284,7 +287,7 @@
               <el-button
                 v-p="COPY_QUESTION"
                 type="text"
-                size="small"
+                size="medium"
                 :loading="scope.row.copyLoading"
                 @click="handleCopy(scope.row)"
               >
@@ -359,7 +362,7 @@ export default {
         创建时间: true,
         创建人: true
       },
-      seletorProps: {
+      selectorProps: {
         value: 'id',
         label: 'name',
         children: 'children'

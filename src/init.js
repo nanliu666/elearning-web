@@ -34,9 +34,17 @@ export default function() {
   if (!store.getters.userId) {
     return
   }
-  store.dispatch('GetUserPrivilege', store.getters.userId).then((menu) => {
-    resetRouter()
-    router.$avueRouter.formatRoutes(menu, true)
-    // updateWaitApprCount()
-  })
+  if (!store.getters.token) {
+    return
+  }
+  setTimeout(() => {
+    store.dispatch('tokeLogin', store.getters.token).then((res) => {
+      if (res.account) {
+        resetRouter()
+        store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
+          router.$avueRouter.formatRoutes(menu, true)
+        })
+      }
+    })
+  }, 2000)  
 }

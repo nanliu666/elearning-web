@@ -40,7 +40,7 @@ export default {
     }
   },
   methods: {
-    setLoadingVisbile(visible) {
+    setLoadingVisible(visible) {
       if (!this.charts) return
       visible
         ? this.charts.showLoading({
@@ -61,6 +61,17 @@ export default {
           axisPointer: {
             // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+          },
+          formatter: function(params) {
+            let res = ''
+            params.map((data) => {
+              let { value, seriesName, seriesType, marker } = data
+              marker = marker.replace('[object Object]', '#95cdf6')
+              const text = seriesName + ': ' + (seriesType === 'line' ? value + '%' : value + '人')
+              res += marker + text + '<br>'
+            })
+
+            return res
           }
         },
         legend: {
@@ -162,7 +173,8 @@ export default {
             name: '通过率',
             type: 'line',
             yAxisIndex: 1,
-            stack: 'total',
+            symbolSize: 12,
+            // symbol: 'circle',
             data: this.data.passRate,
             itemStyle: {
               color: '#00D66F'
@@ -172,6 +184,9 @@ export default {
         yAxis.push({
           type: 'value',
           name: '通过率',
+          max: 100,
+          min: 0,
+          interval: 20,
           axisLabel: {
             formatter: '{value}%'
           }
@@ -206,6 +221,15 @@ export default {
         })
       }
       this.charts.setOption(option)
+
+      if (!this.initial) {
+        charts.on('finished', function() {
+          window.onresize = function() {
+            charts.resize()
+          }
+        })
+        this.initial = true
+      }
     }
   }
 }

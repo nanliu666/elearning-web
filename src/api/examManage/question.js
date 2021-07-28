@@ -11,6 +11,17 @@ import axios from 'axios'
  * @param {String} params.search
  * */
 export const getQuestionList = (params) => get('/manage/v1/question/list', params)
+/**
+ * 获取题库列表
+ * @param {Object} params - 参数
+ * @param {String} params.pageNo - 请求页码
+ * @param {String} params.pageSize - 每页条数
+ * @param {String} params.status - 状态
+ * @param {String} params.type - 类型
+ * @param {String} params.search
+ * */
+export const exportQuestionList = (params) =>
+  get('/manage/v1/question/export', params, { responseType: 'blob' })
 
 /**
  * 新增试题

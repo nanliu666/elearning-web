@@ -47,7 +47,7 @@ export const getUsergroupList = (params) => get('/api/user/v1/usergroup/queryUse
 /**
  * 获取当前岗位下的所有人
  */
-// export const getPositionUserList = (params) => get('/manage/v1/user/info/position', params)
+export const getPositionUserList1 = (params) => get('/manage/v1/user/info/position', params)
 export const getPositionUserList = (params) => get('/manage/v1/positions/user/child', params)
 /**
  * 获取考试安排列表
@@ -61,6 +61,14 @@ export const getExamStatisticsList = (params) => get('/manage/v1/exam/arrange/li
  * 获取详情页-考生概况
  */
 export const getBatchList = (params) => get('/manage/v1/examinee/batch', params)
+/**
+ *考试报名列表
+ */
+export const examJoinList = (params) => post('/manage/v1/exam/arrange/examJoinList', params)
+/**
+ *审核考试报名
+ */
+export const approveExamJoin = (params) => post('/manage/v1/exam/arrange/approveExamJoin', params)
 /**
  * 获取考生批次
  */
@@ -94,7 +102,8 @@ export const delExamPreview = (params) => del('/manage/v1/exam/preview', params)
 /**
  * 获取批次
  */
-export const getBatchNumber = (params) => get('/manage//v1/exam/batch/number', params)
+export const getBatchNumber = (params) => get('/manage/v1/exam/batch/number', params)
+
 /**
  * 获取证书模板
  */

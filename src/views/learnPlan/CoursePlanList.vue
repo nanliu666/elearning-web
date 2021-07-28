@@ -15,7 +15,7 @@
           size="medium"
           @click="jumpEdit"
         >
-          创建课程安排
+          创建线上必修安排
         </el-button>
       </template>
     </page-header>
@@ -48,12 +48,7 @@
             @node-click="nodeClick"
             @refreshTree="getCategoryData"
           ></leftColumn> -->
-        <div style="border-right: 1px solid #ccc;overflow-y: auto;">
-          <my-column
-            :column-interface="columnInterface"
-            @treeClick="treeClick"
-          ></my-column>
-        </div>
+
         <!-- </div> -->
         <!-- <div class="divider"></div> -->
         <common-table
@@ -269,6 +264,8 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
+import { relatedKnowledgeList } from '@/api/training/training'
+
 // import leftColumn from '@/components/leftColumn'
 import {
   getlearnPlanList,
@@ -307,17 +304,31 @@ const TABLE_COLUMNS = [
     headerAlign: 'center',
     align: 'center'
   },
-  // {
-  //   label: '分类',
-  //   prop: 'categoryName',
-  //   minWidth: 100
-  // },
-  // {
-  //   label: '包含课程',
-  //   formatter: (row) => _.map(row.courseList, 'courseName').join(','),
-  //   prop: 'courseList',
-  //   minWidth: 100
-  // },
+  {
+    label: '分类',
+    prop: 'categoryName',
+    minWidth: 180
+  },
+  {
+    label: '知识体系',
+    prop: 'knowledgeSystemName',
+    minWidth: 180
+  },
+  {
+    label: '评分',
+    prop: 'composite',
+    minWidth: 100
+  },
+  {
+    label: '创建人',
+    prop: 'creatorName',
+    minWidth: 180
+  },
+  {
+    label: '创建时间',
+    prop: 'createTime',
+    minWidth: 180
+  },
   {
     label: '状态',
     formatter: (row) => ({ 1: '未开始', 2: '进行中', 3: '已结束' }[row.status] || '-'),
@@ -358,6 +369,32 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   }
 ]
 let SEARCH_POPOVER_POPOVER_OPTIONS = [
+  {
+    type: 'treeSelect',
+    field: 'knowledgeSystemId',
+    label: '知识体系',
+    data: '',
+    config: {
+      selectParams: {
+        placeholder: '请选择',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
+  },
   {
     type: 'input',
     field: 'coursePlanNo',
@@ -417,9 +454,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'CoursePlanList',
   components: {
-    SearchPopover,
+    SearchPopover
     // leftColumn,
-    MyColumn: () => import('./components/MyColumn')
+    // MyColumn: () => import('./components/MyColumn')
   },
   filters: {
     // 过滤不可见的列
@@ -516,9 +553,16 @@ export default {
   activated() {
     this.refreshPublished()
     this.loadDraftData()
+    this.getCreatorList()
   },
 
   methods: {
+    getCreatorList() {
+      relatedKnowledgeList({ name: '' }).then((res) => {
+        this.published.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(res)
+      })
+    },
+
     // 点击左侧档返回数据
     treeClick(id) {
       this.published.queryInfo.categoryId = id
@@ -755,10 +799,9 @@ export default {
           background: #ebeced;
         }
         .commonTable {
-          // width: ;
-          margin-left: 33px;
+          width: 100%;
           height: 100%;
-          width: calc(100% - 35px - 300px);
+          // width: calc(100% - 35px - 300px);
         }
       }
     }

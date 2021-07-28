@@ -137,3 +137,12 @@ export const updateRoleMenuPermission = (params) =>
       ...params
     }
   })
+
+// 获取可添加的权限
+export const menuPrivilege = (params) => {
+  return request({
+    url: '/api/sys/v1/user/menu/privilege',
+    method: 'get',
+    params
+  })
+}

@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div ref="HandmadeTestPaper">
     <page-header
-      :title="form.id && !copy ? '编辑随机试卷' : '创建随机试卷'"
+      :title="pageTitle"
       show-back
     />
     <basic-container
-      v-loading="loading"
+      v-loading="pageLoading"
       block
     >
       <div class="content">
@@ -16,37 +16,14 @@
           ref="form"
           :model="form"
           class="form"
-          :columns="columns"
-        >
-          <template #isMulti>
-            <div>
-              <el-switch
-                v-model="form.isMulti"
-                inactive-text="单项变为不定项选择"
-                :active-value="1"
-                :inactive-value="0"
-              >
-              </el-switch>
-            </div>
-          </template>
-          <template #isShowScore>
-            <div>
-              <el-switch
-                v-model="form.isShowScore"
-                inactive-text="试卷上显示试题分数"
-                :active-value="1"
-                :inactive-value="0"
-              >
-              </el-switch>
-            </div>
-          </template>
-        </commonForm>
+          :columns="formColumns"
+        />
         <div class="title flex flex-justify-between">
           <div>
             试题设置:
             <span class="tip">
-              <span>（当前总分：{{ form.totalScore == 0 ? 0 : form.totalScore }}分</span>
-              <span v-if="surplusScore">，剩余分数：{{ surplusScore }}分</span>）
+              <span>（当前总分：{{ form.totalScore }}分</span>
+              <span v-if="surplusScore">，剩余分数：{{ _.round(surplusScore, 1) }}分</span>）
             </span>
           </div>
           <div>
@@ -55,121 +32,29 @@
               type="primary"
               @click="handleAddTopic"
             >
-              添加题目
+              {{ isRandomPaper ? '添加题目' : '添加题型' }}
             </el-button>
           </div>
         </div>
-        <common-table
-          id="demo"
-          ref="table"
-          class="table"
-          :columns="columnsVisible | columnsFilter"
-          :config="tableConfig"
-          :data="tableData"
-        >
-          <template #index="{$index}">
-            {{ $index + 1 }}
-          </template>
-          <template #type="{row}">
-            <el-select
-              v-model="row.type"
-              placeholder="请选择"
-              @change="handeleTestQuestions($event, row)"
-            >
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              >
-              </el-option>
-            </el-select>
-          </template>
-          <template #categoryId="{row}">
-            <el-tree-select
-              :ref="'cascader' + row.id"
-              v-model="row.categoryIds"
-              :select-params="row.column.props && row.column.props.selectParams"
-              :tree-params="row.column.props && row.column.props.treeParams"
-              v-bind="itemAttrs(row.column)"
-              :placeholder="
-                row.column.placeholder ? row.column.placeholder : `请选择${row.column.label}`
-              "
-              @valueChange="check($event, row)"
+        <randomTable
+          v-if="isRandomPaper"
+          ref="randomTable"
+          @countScore="countScore"
+        />
+        <div v-else>
+          <div
+            v-for="block in testPaper"
+            :key="block.id"
+            class="block"
+          >
+            <themeBlock
+              :block-data="block"
+              :length="testPaper.length"
+              @delete="handleDeleteBlock"
+              @update="update"
             />
-            <div
-              v-if="valid && row.categoryIds.length === 0"
-              class="valid"
-            >
-              请选择
-            </div>
-          </template>
-          <template #totalQuestionNum="{row}">
-            <div v-if="row.totalQuestionNum">
-              {{ row.totalQuestionNum }}
-            </div>
-            <div v-else>
-              一 一
-            </div>
-          </template>
-          <template #questionNum="{row}">
-            <div>
-              <el-input-number
-                v-model="row.questionNum"
-                style="width: 120px"
-                controls-position="right"
-                :min="0"
-                :step="1"
-                :precision="0"
-                @change="questionChange($event, row)"
-              />
-              <div
-                v-if="row.questionNum > row.totalQuestionNum"
-                class="valid"
-              >
-                不能大于题库总数
-              </div>
-              <div
-                v-else-if="(valid && row.questionNum == 0) || (valid && !row.questionNum)"
-                class="valid"
-              >
-                不能为小于等于0
-              </div>
-            </div>
-          </template>
-          <template #score="{row}">
-            <el-input-number
-              v-model="row.score"
-              style="width: 120px"
-              controls-position="right"
-              :min="0"
-              :step="1"
-              :precision="1"
-              @change="questionChange($event, row)"
-            />
-            <div
-              v-if="valid && !row.score"
-              class="valid"
-            >
-              请输入
-            </div>
-            <div
-              v-else-if="valid && row.score == 0"
-              class="valid"
-            >
-              不能输入为0
-            </div>
-          </template>
-          <template #handler="{row}">
-            <el-button
-              type="text"
-              :disabled="tableData.length === 1"
-              @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
-          </template>
-        </common-table>
+          </div>
+        </div>
         <div class="flex flexcenter footer">
           <el-button
             type="primary"
@@ -180,7 +65,7 @@
           </el-button>
           <el-button
             size="medium"
-            @click="handleBack"
+            @click="cancel"
           >
             取消
           </el-button>
@@ -192,17 +77,16 @@
 
 <script>
 import { postTestPaper, putTestPaper, getTestPaper } from '@/api/examManagement/achievement'
+import randomTable from './components/randomTable'
+import themeBlock from './components/themeBlock'
 import { getcategoryTree } from '@/api/examManage/category'
-import { getQuestionList } from '@/api/examManage/question'
-import { defaultAttrs, noneItemAttrs } from '@/components/common-form/config'
-import { QUESTION_TYPE_MAP } from '@/const/examMange'
-
 const BASE_COLUMNS = [
   {
     prop: 'name',
     itemType: 'input',
     label: '试卷名称',
     span: 11,
+    disabled: false,
     maxlength: 32,
     required: true
   },
@@ -235,23 +119,6 @@ const BASE_COLUMNS = [
     span: 11,
     offset: 2
   },
-
-  {
-    prop: 'isMulti',
-    itemType: 'slot',
-    label: '',
-    span: 11,
-    required: false
-  },
-  {
-    prop: 'isShowScore',
-    itemType: 'slot',
-    label: '',
-    span: 11,
-    offset: 2,
-    required: false,
-    props: {}
-  },
   {
     prop: 'planScore',
     itemType: 'inputNumber',
@@ -278,6 +145,16 @@ const BASE_COLUMNS = [
     }
   },
   {
+    prop: 'isShowScore',
+    itemType: 'switch',
+    label: '试卷上显示试题分数',
+    span: 11,
+    activeValue: 1,
+    inactiveValue: 0,
+    required: false,
+    props: {}
+  },
+  {
     prop: 'remark',
     itemType: 'input',
     label: '备注',
@@ -287,348 +164,278 @@ const BASE_COLUMNS = [
     required: false
   }
 ]
-const TABLE_COLUMNS = [
-  {
-    label: '序号',
-    prop: 'index',
-    slot: true,
-    align: 'center',
-    minWidth: 80
-  },
-  {
-    label: '试题类型',
-    prop: 'type',
-    slot: true,
-    minWidth: 120
-  },
-  {
-    label: '试题来源',
-    prop: 'categoryId',
-    slot: true,
-    minWidth: 220
-  },
-  {
-    label: '题库试题总数',
-    prop: 'totalQuestionNum',
-    align: 'center',
-    slot: true,
-    minWidth: 120
-  },
-  {
-    label: '试卷试题数',
-    prop: 'questionNum',
-    slot: true,
-    minWidth: 145
-  },
-  {
-    label: '单题分数',
-    slot: true,
-    prop: 'score',
-    minWidth: 145
-  }
-]
-const TABLE_CONFIG = {
-  rowKey: 'id',
-  showHandler: true,
-  defaultExpandAll: false,
-  showIndexColumn: false,
-  enablePagination: false,
-  enableMultiSelect: false, // TODO：关闭批量删除
-  handlerColumn: {
-    minWidth: 100
-  }
+const BASIC_THEME_DATA = {
+  key: 1,
+  type: 'single_choice',
+  title: '',
+  tableData: []
 }
-
 export default {
   name: 'RandomTestPaper',
-  filters: {
-    // 过滤不可见的列
-    columnsFilter: (visibleColProps) =>
-      _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
-  },
   components: {
-    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect')
+    randomTable,
+    themeBlock
   },
   data() {
     return {
-      copy: '',
+      formColumns: BASE_COLUMNS,
       form: {
         name: '',
         categoryId: '',
-        expiredTime: '',
         totalScore: 0,
         planScore: 0,
         remark: '',
-        isScore: '',
-        isShowScore: '',
-        isMulti: ''
+        isShowScore: 0
       },
-      loading: false,
-      column: {
-        span: 20,
-        prop: 'categoryIds',
-        itemType: 'treeSelect',
-        label: '试题来源',
-        required: true,
-        offset: 2,
-        props: {
-          selectParams: {
-            placeholder: '请选择试题来源',
-            multiple: true,
-            collapseTags: true
-          },
-          treeParams: {
-            data: [],
-            'show-checkbox': true,
-            'check-strictly': true,
-            'default-expand-all': false,
-            'expand-on-click-node': false,
-            clickParent: true,
-            multiple: true,
-            filterable: false,
-            props: {
-              children: 'children',
-              label: 'name',
-              value: 'id'
-            }
-          }
-        }
-      },
+      testPaper: [_.cloneDeep(BASIC_THEME_DATA)],
       surplusScore: 0,
-      valid: false,
-      options: [],
-      tableData: [],
-      tableItem: {
-        id: '1',
-        type: 'single_choice',
-        expiredTime: '',
-        categoryIds: [],
-        totalQuestionNum: '',
-        questionNum: '',
-        score: '',
-        isShowScore: '',
-        isMulti: ''
-      },
-      tableConfig: TABLE_CONFIG,
-      tableColumns: TABLE_COLUMNS,
-      columnsVisible: _.map(TABLE_COLUMNS, ({ prop }) => prop),
-      columns: BASE_COLUMNS
+      pageLoading: false
+    }
+  },
+  computed: {
+    // 是否是编辑状态
+    isEdit() {
+      return this.$route.query.id
+    },
+    // 是否复制,另类的新增
+    isCopy() {
+      return this.$route.query.copy
+    },
+    isRandomPaper() {
+      return _.get(this.$route, 'query.paperType', 'random') === 'random'
+    },
+    pageTitle() {
+      const randomOrMuan = this.isRandomPaper ? '随机' : '手工'
+      let handleText = ''
+      if (this.isCopy) {
+        handleText = '复制'
+      } else {
+        // 存在id并非copy的为编辑
+        handleText = this.isEdit ? '编辑' : '创建'
+      }
+      return `${handleText}${randomOrMuan}试卷`
+    },
+    // 随机试卷的表格数据
+    randomTopicList() {
+      return _.get(this.$refs, 'randomTable.tableData', [])
     }
   },
   watch: {
     /**
-     * @author guanfenda
      * @desc 如果改变了计划分数 重新计算剩余分数
      * */
     'form.planScore': {
       handler() {
-        if (!_.isEmpty(this.tableData)) {
-          this.questionChange()
-        }
+        this.countScore()
       },
       deep: true
-    },
-    'form.isScore'() {
-      let planScoreConfig = this.columns.find((it) => it.prop == 'planScore')
-      if (this.form.isScore) {
-        planScoreConfig.required = true
-      } else {
-        planScoreConfig.required = false
-      }
     }
   },
-  activated() {
-    this.options = []
-    this.surplusScore = 0
-    this.form.totalScore = 0
-    for (let key in QUESTION_TYPE_MAP) {
-      //这里是格式化题目类型结构
-      this.options.push({ value: key, label: QUESTION_TYPE_MAP[key] })
-    }
-    this.copy = this.$route.query.copy
-    //  获取试卷分类的数据
+  mounted() {
+    this.$set(this.formColumns[0], 'disabled', false)
     this.getTestPaperCategory()
-    if (!this.$route.query.id) {
-      this.tableData = []
-      this.pushItem()
-    } else {
-      // 编辑获取数据
-      this.getData()
+    if (!this.$route.query.id) return //新建无需加载试卷数据
+    this.getData()
+    // 编辑需要置灰
+    if (!this.isCopy && this.isEdit) {
+      this.$set(this.formColumns[0], 'disabled', true)
     }
+  },
+  beforeRouteEnter(to, from, next) {
+    to.meta.$keepAlive = false // 禁用页面缓存
+    next()
   },
   beforeRouteLeave(to, from, next) {
-    this.valid = false
-    // 卸载页面的时候手动清空置灰
-    this.columns.find((it) => it.prop === 'name').disabled = false
-    this.$refs.form && this.$refs.form.resetFields()
-    this.testPaper = []
+    _.assign(this.$data, this.$options.data())
     this.$store.commit('DEL_TAG', this.$store.state.tags.tag)
     next()
   },
   methods: {
     /**
-     * @author guanfenda
-     * @desc  试题类型改变，试题来源重新请求
-     * @params data 类型的值，row 当前行改变的数据
+     * @desc 双向数据绑定（因为for的对象它是引用类型，所以不能通过v-modle，或者$emit('update')，重新指定引用方向）
      * */
-    async handeleTestQuestions(data, row) {
-      row.categoryIds = []
-      row.totalQuestionNum = ''
-      row.questionNum = ''
-      row.column.props.treeParams.data = await this.getTopicCategory(data)
+    update(data) {
+      if (data) {
+        this.testPaper.map((it) => {
+          it.key === data.key && (it = Object.assign(it, data))
+        })
+        this.countScore()
+      }
     },
     /**
-     * @author fuanfenda
-     * treeSelect 属性格式化（过滤）
+     * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
      * */
-    itemAttrs(column) {
-      const copy = { ...defaultAttrs[column.itemType] }
-      for (const key in column) {
-        if (!noneItemAttrs.includes(key)) {
-          copy[key] = column[key]
-        }
+    countScore() {
+      let randomScore = 0
+      const manualScoreList = _.flatten(_.map(this.testPaper, 'tableData'))
+      let manualScore = 0
+      // 随机试卷的计算方式
+      if (this.isRandomPaper) {
+        if (_.isEmpty(this.randomTopicList)) return
+        randomScore = _.sum(_.map(this.randomTopicList, (it) => it.score * it.questionNum))
+      } else {
+        // 手工试卷的计算方式
+        if (_.isEmpty(manualScoreList)) return
+        manualScore = _.sum(_.map(manualScoreList, (it) => _.get(it, 'score', 0)))
       }
-      return copy
+      this.form.totalScore = this.isRandomPaper ? randomScore : manualScore
+      this.surplusScore = this.form.planScore - this.form.totalScore
     },
     /**
-     * @author guanfenda
-     * @desc 获取试题来源，并绑定试题来源数据
-     * @param relateType 试题类型 column 试题来源potions
-     * */
-    async getTopicCategory(relateType = '') {
-      let params = {
-        type: '0',
-        relateType: relateType,
-        expireStatus: '1'
-      }
-      const treeData = await getcategoryTree(params)
-      let categoryObject = await this.category(relateType)
-      return [{ id: '0', name: '未分类', relatedNum: categoryObject.totalNum }, ...treeData]
-    },
-    /***
-     * @author guanfendca
-     * @desc 获取未分类
+     * @desc 删除当前手工试卷的行
      *
      * */
-    category(relateType) {
-      let params = {
-        status: 'normal',
-        pageNo: 1,
-        pageSize: 1,
-        type: relateType
+    handleDeleteBlock(data) {
+      if (this.testPaper.length > 1) {
+        this.$confirm('您确定要删除选中的题型吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.testPaper = this.testPaper.filter((it) => {
+            return it.key !== data.key
+          })
+          this.$message.success('已成功删除该题型')
+        })
       }
-
-      return new Promise((resolve, reject) => {
-        getQuestionList(params)
-          .then((res) => {
-            resolve(res)
-          })
-          .finally(() => {
-            reject()
-          })
+    },
+    /**
+     * @desc  添加大题
+     *
+     * */
+    handleAddType() {
+      BASIC_THEME_DATA.key += 1
+      this.testPaper.push(_.cloneDeep(BASIC_THEME_DATA))
+      this.$nextTick(() => {
+        let scroll = this.$refs.HandmadeTestPaper
+        scroll.scrollTop = scroll.scrollHeight
       })
     },
     /**
-     * @author guanfenda
-     * @desc 添加试题
-     * */
-    async pushItem() {
-      let tableItem = _.cloneDeep(this.tableItem)
-      tableItem.column = _.cloneDeep(this.column)
-      this.tableData.push(tableItem)
-      tableItem.column.props.treeParams.data = await this.getTopicCategory(tableItem.type)
-    },
-    /**
-     * @author guanfenda
-     * @desc 获取试卷分类
-     * */
+     * 获取试卷分类
+     */
     getTestPaperCategory() {
       let params = {
         type: '1',
         expireStatus: '1'
       }
       getcategoryTree(params).then((res) => {
-        this.columns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
+        this.formColumns.find((it) => it.prop === 'categoryId').props.treeParams.data = res
       })
     },
     /**
-     * @author guanfenda
+     * @desc 添加题目
+     * */
+    handleAddTopic() {
+      if (this.isRandomPaper) {
+        this.$refs.randomTable.handleAddTopic()
+      } else {
+        this.handleAddType()
+      }
+    },
+    /**
      * @desc 查找试卷详情
      * */
     getData() {
-      this.columns.find((it) => it.prop === 'name').disabled = true
-      if (!this.$route.query.id) return //如果没有试卷id，终止下面代码
-      let params = {
-        id: this.$route.query.id
-      }
-      this.loading = true
-      getTestPaper(params)
+      this.pageLoading = true
+      getTestPaper({ id: this.$route.query.id })
         .then(async (res) => {
           this.form = _.cloneDeep(res)
-          await Promise.all(
-            _.map(res.randomSettings, async (item) => {
-              return (async () => {
-                item.column = _.cloneDeep(this.column)
-                // 前端实现自己组装未分类的数据
-                if (_.isEmpty(item.categoryIds)) {
-                  item.categoryIds = ['0']
-                }
-                //TODO: 待优化，将题型相同的试题类型只需要拉一次接口
-                const data = await this.getTopicCategory(item.type)
-                item.column.props.treeParams.data = data
-              })()
-            })
-          )
-          this.tableData = res.randomSettings
-          !this.copy && (this.columns.find((it) => it.prop === 'name').disabled = true)
+          if (this.isRandomPaper) {
+            _.set(this.$refs, 'randomTable.tableData', res.randomSettings)
+          } else {
+            const manualSettings = res.manualSettings.map((it) => ({
+              ...it,
+              score: it.score,
+              Original: it.score
+            }))
+            const list = _.groupBy(manualSettings, (it) => it.parentSort)
+            this.testPaper = []
+            for (let key in list) {
+              this.testPaper.push({
+                type: list[key][0].type,
+                title: list[key][0].title,
+                key: list[key][0].id,
+                tableData: list[key]
+              })
+            }
+          }
+          this.countScore()
         })
         .finally(() => {
-          this.loading = false
+          this.pageLoading = false
         })
     },
-    /**
-     * @author guanfenda
-     * @desc 试题设置里的行操作删除
-     * */
-    handleDelete(row) {
-      this.tableData = this.tableData.filter((it) => it.id !== row.id)
-      this.questionChange()
+    checkSubmit() {
+      let isPass = true
+      if (!this.isRandomPaper) {
+        // 手工试卷的题型有一个表格为空或者有一个表格下的题目分数未设置
+        const list = this.testPaper.filter(
+          (it) => it.tableData.length === 0 || it.tableData.filter((item) => !item.score).length
+        )
+        if (list.length > 0) {
+          let text = ''
+          list[0].tableData.length == 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目列表是否选择`)
+          list[0].tableData.length !== 0 &&
+            (text = `请检查试题设置 ${list[0].title} 的题目是否填写分数`)
+          this.$message.warning(text)
+          isPass = false
+        }
+      } else {
+        if (_.isEmpty(this.randomTopicList)) {
+          this.$message.error('试题设置最少需要存在一条')
+          isPass = false
+        }
+      }
+      return isPass
+    },
+    handleParams() {
+      const randomSettings = this.isRandomPaper
+        ? _.map(this.randomTopicList, (item, index) => {
+            return { ...item, sort: index }
+          })
+        : []
+      let manualSettings = []
+      this.testPaper.map((it, index) => {
+        it.tableData &&
+          it.tableData.map((item, i) => {
+            manualSettings.push({
+              parentSort: index + 1,
+              questionId: item.questionId,
+              content: item.content,
+              timeLimit: item.timeLimit,
+              score: item.score,
+              sort: i + 1,
+              title: it.title,
+              type: it.type
+            })
+          })
+      })
+      const params = {
+        ..._.cloneDeep(this.form),
+        randomSettings,
+        manualSettings,
+        type: _.get(this.$route, 'query.paperType', 'random')
+      }
+      return params
     },
     handleSubmit() {
-      if (
-        this.tableData.filter(
-          (it) => !it.categoryIds || !it.questionNum || !it.totalQuestionNum || !parseInt(it.score)
-        ).length > 0
-      ) {
-        //检查行是否选择了试题来源，试卷试题是否配置，是否选择了题库试题有试题数的，是否给了分数
-        this.$message.warning('请检查试题设置')
-        return
-      }
-      //后台要精确到一位小数，提交是乘以10
-      let randomSettings = this.tableData.map((it, index) => ({
-        ...it,
-        score: it.score,
-        sort: index
-      }))
-      let form = _.cloneDeep(this.form)
-      let params = {
-        ...form,
-        randomSettings,
-        type: 'random'
-      }
-      let testPaperMether =
-        this.$route.query.id && !this.$route.query.copy ? putTestPaper : postTestPaper
-      this.loading = true
+      if (!this.checkSubmit()) return
+      const params = this.handleParams()
+      // 复制与新增接口一致
+      let testPaperMether = this.isEdit && !this.isCopy ? putTestPaper : postTestPaper
+      this.pageLoading = true
       testPaperMether(params)
         .then(() => {
-          this.$message.success('提交成功')
+          this.$message.success(`已成功${this.isEdit ? '修改' : '创建'}试卷`)
           this.handleBack()
         })
         .catch(() => {
           window.console.error(JSON.stringify(params))
         })
         .finally(() => {
-          this.loading = false
+          this.pageLoading = false
         })
     },
     /***
@@ -636,17 +443,16 @@ export default {
      * @desc 提交试卷（添加或者修改）
      * */
     onSubmit() {
-      this.valid = true
-      this.$refs.form.validate().then((valid) => {
-        if (!valid) return
-        if (this.surplusScore === '' || this.surplusScore === '0') {
+      this.$refs.form.validate().then(() => {
+        // 无剩余分数直接提交，否则需要进行一次提示
+        if (this.surplusScore == 0) {
           this.handleSubmit()
         } else {
           this.$confirm(
             '您设置试卷的当前总分与计划分数不一致，试卷创建后以当前设置的分数为准。是否继续创建试卷？',
             '提示',
             {
-              confirmButtonText: '继续创建',
+              confirmButtonText: `继续${this.isEdit ? '保存' : '创建'}`,
               cancelButtonText: '返回修改',
               type: 'warning'
             }
@@ -656,48 +462,10 @@ export default {
         }
       })
     },
-    /**
-     * @author guanfenda
-     * @desc 试题改变或者分数改变都会触发，重新计算剩余分数，和当前总分数
-     * */
-    questionChange() {
-      let scoreList = _.compact(this.tableData.map((it) => it.score * it.questionNum))
-      scoreList.length === 0 && (this.surplusScore = this.form.planScore)
-      let totalScoreTemp = 0
-      scoreList.length &&
-        (totalScoreTemp = scoreList.reduce((prev, cur) => {
-          return Number(prev) + Number(cur)
-        }, 0))
-      this.form.totalScore = totalScoreTemp.toFixed(1)
-      if (!this.form.planScore) {
-        this.surplusScore = 0
-      }
-      if (this.form.totalScore && this.form.planScore) {
-        let score = this.form.planScore - this.form.totalScore
-        this.surplusScore = Math.round(score).toString()
-      }
-    },
-    /**
-     * @author guanfenda
-     * @desc 试题来源改变触发的事件
-     * @params row 当前触发行的数据，data 选中的节点数据
-     * */
-    check(data, row) {
-      row.totalQuestionNum = _.compact(data.map((it) => it.relatedNum)).reduce((prev, cur) => {
-        return prev + cur
-      }, 0)
-      let random = (min, max) => Math.floor(Math.random() * (max - min)) + min
-      row.questionNum = random(1, row.totalQuestionNum)
-      this.questionChange()
-    },
-    /**
-     * @author guanfenda
-     * @desc 添加行
-     * */
-    handleAddTopic() {
-      this.tableItem.id += 1
-      this.valid = false
-      this.pushItem()
+
+    cancel() {
+      this.$message.warning('创建试卷已取消')
+      this.handleBack()
     },
     /**
      * @author guanfenda
@@ -716,7 +484,6 @@ export default {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
 }
-
 .title {
   font-size: 18px;
   font-weight: 800;
@@ -732,12 +499,6 @@ export default {
 .content {
   max-width: 896px;
   margin: 0 auto;
-
-  .form {
-  }
-
-  .table {
-  }
 }
 
 /deep/ .el-switch__label.is-active {

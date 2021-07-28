@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div style="height:100%">
     <page-header title="分组管理">
       <el-button
         slot="rightMenu"
+        v-p="ADD_GROUNP"
         size="medium"
         type="primary"
         @click="onHandleEdit('add')"
@@ -59,7 +60,7 @@
           slot-scope="scope"
         >
           <el-button
-            v-p="AUTH_ROLE"
+            v-p="VIEW_GROUNP"
             type="text"
             size="medium"
             @click.stop="handleCheck(scope.row, scope.index)"
@@ -67,7 +68,7 @@
             查看用户
           </el-button>
           <el-button
-            v-p="EDIT_ROLE"
+            v-p="EDIT_GROUNP"
             type="text"
             size="medium"
             @click.stop="onHandleEdit('edit', scope.row)"
@@ -75,7 +76,7 @@
             编辑
           </el-button>
           <el-button
-            v-p="DELETE_ROLE"
+            v-p="DEL_GROUNP"
             type="text"
             size="medium"
             @click.stop="handleDel(scope.row, scope.index)"
@@ -134,7 +135,7 @@
 
 <script>
 import { groupList, addGroup, sysDelGroup, sysEditGroup } from '../../api/system/role'
-import { ADD_ROLE, VIEW_ROLE, EDIT_ROLE, DELETE_ROLE, AUTH_ROLE } from '@/const/privileges'
+import { ADD_GROUNP, DEL_GROUNP, EDIT_GROUNP, VIEW_GROUNP } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 
 const TABLE_CONFIG = {
@@ -182,18 +183,17 @@ export default {
     }
   },
   computed: {
-    ADD_ROLE: () => ADD_ROLE,
-    VIEW_ROLE: () => VIEW_ROLE,
-    EDIT_ROLE: () => EDIT_ROLE,
-    DELETE_ROLE: () => DELETE_ROLE,
-    AUTH_ROLE: () => AUTH_ROLE,
+    ADD_GROUNP: () => ADD_GROUNP,
+    DEL_GROUNP: () => DEL_GROUNP,
+    EDIT_GROUNP: () => EDIT_GROUNP,
+    VIEW_GROUNP: () => VIEW_GROUNP,
     ...mapGetters(['privileges'])
   },
   watch: {
     // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
     privileges: {
       handler() {
-        this.tableConfig.showHandler = this.$p([VIEW_ROLE, EDIT_ROLE, DELETE_ROLE, AUTH_ROLE])
+        this.tableConfig.showHandler = this.$p([ADD_GROUNP, DEL_GROUNP, EDIT_GROUNP, VIEW_GROUNP])
       },
       deep: true
     }

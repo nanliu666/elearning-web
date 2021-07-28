@@ -49,6 +49,17 @@
         >
           批量修改部门
         </el-button>
+        <el-button
+          v-p="BATCH_DELETE_USER"
+          type="text"
+          style="margin-bottom: 0"
+          @click="batchDelete(selection)"
+        >
+          批量删除
+        </el-button>
+      </template>
+      <template #userType="{ row }">
+        {{ row.orgName ? '公司员工' : '外部人员' }}
       </template>
       <template slot="topMenu">
         <div class="operations">
@@ -211,9 +222,12 @@ import {
   delUser,
   getOuterUserList,
   bulkDepartures,
-  updateUserIdBatchOrg
+  updateUserIdBatchOrg,
+  batchDeleteUserByIds
 } from '@/api/system/user'
+import { getStationParent } from '@/api/system/station'
 import { getRoleList, getPositionAll } from '@/api/system/role'
+import { getRankTree } from '@/api/system/rank'
 import { getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
 import {
@@ -224,7 +238,8 @@ import {
   DELETE_USER,
   BATCH_EXPORT,
   BULK_DEPARTURES,
-  BATCH_DEPARTMENT
+  BATCH_DEPARTMENT,
+  BATCH_DELETE_USER
 } from '@/const/privileges'
 const COLUMNS = [
   {
@@ -244,12 +259,7 @@ const COLUMNS = [
     prop: 'userStatus',
     align: 'center',
     formatter(record) {
-      return (
-        {
-          1: '在职',
-          2: '离职'
-        }[record.userStatus] || ''
-      )
+      return { 1: '在职', 2: '离职' }[record.userStatus] || ''
     }
   },
   {
@@ -262,10 +272,31 @@ const COLUMNS = [
     }
   },
   {
+    label: '用户类型',
+    prop: 'userType',
+    align: 'left',
+    slot: true
+  },
+  {
     label: '部门',
     align: 'left',
     prop: 'orgName',
     width: 230
+  },
+  {
+    label: '直接领导',
+    align: 'left',
+    prop: 'leaderName'
+  },
+  {
+    label: '岗位',
+    align: 'left',
+    prop: 'positionName'
+  },
+  {
+    label: '职务',
+    align: 'left',
+    prop: 'post'
   },
   {
     label: '电话',
@@ -298,6 +329,7 @@ const COLUMNS = [
     prop: 'createTime'
   }
 ]
+
 export default {
   name: 'User',
   components: {
@@ -318,6 +350,7 @@ export default {
   },
   data() {
     return {
+      queryListParams: {},
       batchVisible: false,
       query: {},
       loading: false,
@@ -359,13 +392,35 @@ export default {
           },
 
           {
-            type: 'treeSelect',
+            data: '',
             field: 'positionId',
             label: '岗位',
+            type: 'lazySelect',
+            optionList: [],
+            placeholder: '请选择岗位',
+            optionProps: {
+              formatter: (item) => `${item.name}`,
+              key: 'name',
+              value: 'id'
+            },
+            load: (p) => {
+              console.log(this, 'ppppp')
+              p.name = p.search
+              return getStationParent(p)
+            },
+            remote: true,
+            searchable: true,
+            config: { optionLabel: 'name', optionValue: 'id' }
+          },
+          // { type: 'input', field: 'postLevel', label: '职级', config: {} },
+          {
+            type: 'treeSelect',
+            field: 'postLevel',
+            label: '职级',
             data: '',
             config: {
               selectParams: {
-                placeholder: '请选择岗位',
+                placeholder: '请选择职级',
                 multiple: false
               },
               treeParams: {
@@ -383,8 +438,8 @@ export default {
               }
             }
           },
-          { type: 'input', field: 'postLevel', label: '职级', config: {} },
-          { type: 'input', field: 'post', label: '职务', config: {} },
+
+          { type: 'input', field: 'post', label: '职务' },
           { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
         ]
       },
@@ -450,6 +505,7 @@ export default {
     BATCH_EXPORT: () => BATCH_EXPORT,
     BULK_DEPARTURES: () => BULK_DEPARTURES,
     BATCH_DEPARTMENT: () => BATCH_DEPARTMENT,
+    BATCH_DELETE_USER: () => BATCH_DELETE_USER,
     ...mapGetters(['privileges'])
   },
   watch: {
@@ -492,8 +548,16 @@ export default {
       const positionConfig = _.find(this.searchConfig.popoverOptions, { field: 'positionId' })
       _.set(positionConfig, 'config.treeParams.data', res)
     })
+
+    getRankTree().then((res) => {
+      //  debugger
+      const postLevelConfig = _.find(this.searchConfig.popoverOptions, { field: 'postLevel' })
+      _.set(postLevelConfig, 'config.treeParams.data', res)
+    })
   },
   activated() {
+    //清空之前的选项
+    this.$refs.searchPopover.resetForm()
     this.loadData()
   },
   methods: {
@@ -521,6 +585,7 @@ export default {
     },
     loadRoleData() {
       getRoleList({ categoryId: '' }).then((res) => {
+        res.unshift({ roleId: '-1', roleName: '无角色' })
         this.searchConfig.popoverOptions.find((item) => item.field === 'roleId').options = res
       })
     },
@@ -617,6 +682,7 @@ export default {
             type: 'success',
             message: '操作成功!'
           })
+          this.loadOrgData()
           this.loadData()
         })
     },
@@ -626,15 +692,17 @@ export default {
       if (!this.activeOrg.orgId) {
         func = getOuterUserList
       }
-      func({
+      this.queryListParams = {
         pageNo: this.page.currentPage,
         pageSize: this.page.size,
         orgId: this.activeOrg.orgId,
         ...this.query
-      })
+      }
+      func(this.queryListParams)
         .then((res) => {
           this.page.total = res.totalNum
           this.data = res.data
+          this.$emit('updateList', this.data)
           // this.selectionClear()
         })
         .finally(() => {
@@ -701,6 +769,35 @@ export default {
             this.$message({
               type: 'error',
               message: '保存失败,请联系管理员!'
+            })
+          })
+      })
+    },
+    //批量删除用户
+    batchDelete(selection) {
+      this.$confirm('确定要把选中的用户批量删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        let userStr = selection.map((v) => v.userId)
+        let params = {
+          userIds: userStr.join(',')
+        }
+        batchDeleteUserByIds(params)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '刪除成功!'
+            })
+            this.loadOrgData()
+            this.loadData()
+            this.$refs.crud.clearSelection()
+          })
+          .catch(() => {
+            this.$message({
+              type: 'error',
+              message: '刪除失败,请联系管理员!'
             })
           })
       })

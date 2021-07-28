@@ -15,37 +15,28 @@
         :columns="columns"
       >
         <template #examineeName>
-          {{ form.name }}
+          <div class="name__container">
+            <span class="name__label">考生姓名：</span>
+            <span>{{ form.name || form.userName }}</span>
+          </div>
         </template>
-        <template #answerTime>
-          <el-input
-            v-model="form.answerTime"
-            placeholder="请输入答题时间"
-            @input="numberInput($event, 'answerTime')"
-          >
-            <i
-              slot="suffix"
-              class="answerTime"
-            >分钟</i>
-          </el-input>
+        <template #examTimeLabelRight>
+          <div style="display: inline-block; float: right">
+            <span>考试时间：</span>
+            <span>{{ `${form.answerTime ? form.answerTime : 0}分钟` }}</span>
+          </div>
+        </template>
+        <template #scoreLabelRight>
+          <div style="display: inline-block; float: right">
+            <span>试卷总分：</span>
+            <span>{{ form.totalScore }}分</span>
+          </div>
         </template>
         <template #score>
           <el-input
             v-model="form.score"
             placeholder="请输入成绩"
             @input="numberInput($event, 'score')"
-          >
-            <i
-              slot="suffix"
-              class="answerTime"
-            >分</i>
-          </el-input>
-        </template>
-        <template #totalScore>
-          <el-input
-            v-model="form.totalScore"
-            placeholder="请输入试卷总分"
-            @input="numberInput($event, 'totalScore')"
           >
             <i
               slot="suffix"
@@ -77,12 +68,16 @@
 </template>
 
 <script>
-import { getExamineeAchievementEdit } from '@/api/examManagement/achievement'
+import { getExamineeAchievementEdit, updateOfflineGrade } from '@/api/examManagement/achievement'
 import moment from 'moment'
 export default {
   name: 'ExamineeDialog',
   components: {},
   props: {
+    isOnline: {
+      type: Boolean,
+      default: true
+    },
     visible: {
       type: Boolean,
       default: false
@@ -112,14 +107,16 @@ export default {
     const BASE_COLUMNS = [
       {
         prop: 'examineeName',
-        itemType: 'slot',
-        label: '考生姓名',
+        itemType: 'slotout',
+        label: '',
         span: 24,
         required: false
       },
       {
         prop: 'examTime',
         itemType: 'datePicker',
+        hasLabelRight: true,
+        isHidden: true,
         type: 'datetimerange',
         valueFormat: 'yyyy-MM-dd HH:mm:ss',
         label: '考试时间',
@@ -127,32 +124,12 @@ export default {
         required: true
       },
       {
-        prop: 'answerTime',
-        itemType: 'slot',
-        type: 'datetimerange',
-        label: '答题时间',
-        span: 24,
-        required: true,
-        props: {
-          onlyNumber: true
-        }
-      },
-      {
         prop: 'score',
         itemType: 'slot',
+        hasLabelRight: true,
         label: '成绩',
         span: 24,
         rules: [{ required: true, message: '请输入成绩', trigger: ['blur', 'change'] }],
-        props: {
-          onlyNumber: true
-        }
-      },
-      {
-        prop: 'totalScore',
-        itemType: 'slot',
-        label: '试卷总分',
-        span: 24,
-        required: true,
         props: {
           onlyNumber: true
         }
@@ -171,6 +148,7 @@ export default {
       },
       {
         prop: 'status',
+        isHidden: true,
         itemType: 'select',
         label: '答卷状态',
         span: 24,
@@ -179,12 +157,13 @@ export default {
           label: 'label',
           value: 'value'
         },
+        // 答卷状态: 1-已发布 2-考试中 3-已提交 4-阅卷中 5-已阅卷
         options: [
           { label: '已发布', value: '1' },
-          { label: '已提交', value: '2' },
-          { label: '已阅卷', value: '3' },
-          { label: '考试中', value: '4' },
-          { label: '阅卷中', value: '5' }
+          { label: '考试中', value: '2' },
+          { label: '已提交', value: '3' },
+          { label: '阅卷中', value: '4' },
+          { label: '已阅卷', value: '5' }
         ]
       }
     ]
@@ -206,15 +185,36 @@ export default {
     }
   },
   watch: {
+    isOnline: {
+      handler(val) {
+        if (!_.isEmpty(this.columns)) {
+          const examTimeProp = _.find(this.columns, { prop: 'examTime' })
+          _.set(examTimeProp, 'isHidden', !val)
+          _.set(examTimeProp, 'required', val)
+          const scoreProp = _.find(this.columns, { prop: 'score' })
+          _.set(scoreProp, 'hasLabelRight', val)
+          const statusProp = _.find(this.columns, { prop: 'status' })
+          _.set(statusProp, 'isHidden', !val)
+          _.set(statusProp, 'required', val)
+          this.$forceUpdate()
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    'form.examTime': {
+      handler(val) {
+        this.form.answerTime = this.getDiffTime(val)
+      },
+      immediate: true,
+      deep: true
+    },
     row: {
       handler: function(newVal) {
         let { examTime, ...others } = newVal
-        const timeList = _.split(examTime, '~')
-        const timeDiff = Math.ceil(moment(timeList[1]).diff(moment(timeList[0]), 'seconds') / 60)
         this.form = {
           ...others,
-          answerTime: timeDiff,
-          examTime: examTime.split('~')
+          examTime: examTime && examTime.split('~')
         }
       },
       immediate: true,
@@ -226,15 +226,23 @@ export default {
       }
     }
   },
-  mounted() {},
   methods: {
+    getDiffTime(examTime) {
+      if (!examTime) return
+      const timeDiff = Math.ceil(moment(examTime[1]).diff(moment(examTime[0]), 'seconds') / 60)
+      return timeDiff
+    },
     onsubmit() {
       this.$refs.form.validate().then((valid) => {
         if (!valid) return
-        let params = _.assign(_.cloneDeep(this.form), {
+        const tempParams = _.cloneDeep(this.form)
+        const offlineParams = _.pick(tempParams, ['id', 'score', 'isPass'])
+        const onLineParams = _.assign(tempParams, {
           isPass: this.form.isPass == '0' ? false : true
         })
-        getExamineeAchievementEdit(params).then(() => {
+        const params = this.isOnline ? onLineParams : offlineParams
+        const loadFun = this.isOnline ? getExamineeAchievementEdit : updateOfflineGrade
+        loadFun(params).then(() => {
           this.$message.success('修改成功')
           this.$emit('loadData')
           this.onClose()
@@ -265,6 +273,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.name__container {
+  margin-bottom: 24px;
+  .name__label {
+    font-size: 14px;
+    color: #0f0000;
+  }
+}
 /deep/ .el-dialog__header {
   padding: 16px 0;
   margin: 0 24px;

@@ -24,9 +24,10 @@
         :type="passwordType"
         auto-complete="off"
         placeholder="请输入密码"
+        :show-password="true"
         @keyup.enter.native="handleLogin"
       >
-        <i
+        <!-- <i
           v-if="passwordType !== 'password'"
           slot="suffix"
           class="icon-basics-eyeopen-outlined eye-icon"
@@ -37,7 +38,7 @@
           slot="suffix"
           class="icon-basics-eyeblind-outlined eye-icon"
           @click="showPassword"
-        />
+        /> -->
       </el-input>
     </el-form-item>
     <el-form-item
@@ -173,8 +174,11 @@ export default {
                 ? decodeURI(this.$route.query.previewUrl)
                 : this.tagWel.value
               this.$router.push({ path })
-              this.$store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
-                this.$router.$avueRouter.formatRoutes(menu, true)
+
+              this.$nextTick(() => {
+                this.$store.dispatch('GetUserPrivilege', res.user_id).then((menu) => {
+                  this.$router.$avueRouter.formatRoutes(menu, true)
+                })
               })
               loading.close()
             })

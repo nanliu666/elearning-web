@@ -24,6 +24,7 @@ import 'tinymce/plugins/media' // 插入视频插件
 import 'tinymce/plugins/table' // 插入表格插件
 import 'tinymce/plugins/lists' // 列表插件
 import 'tinymce/plugins/wordcount'
+import 'tinymce/plugins/paste'
 import 'tinymce/plugins/code'
 import 'tinymce/plugins/link'
 import 'tinymce/plugins/colorpicker'
@@ -69,11 +70,18 @@ export default {
     height: {
       type: Number,
       default: 800
+    },
+    otherOptions: {
+      type: Object,
+      default() {
+        return {}
+      }
     }
   },
   data() {
     return {
       init: {
+        ...this.otherOptions,
         language_url: `${this.baseUrl}/tinymce/zh_CN.js`,
         language: 'zh_CN',
         skin_url: `${this.baseUrl}/tinymce/skins/ui/oxide`,
@@ -123,7 +131,8 @@ export default {
             }
           })
         }
-      }
+      },
+      editor: tinymce.activeEditor
     }
   },
   methods: {

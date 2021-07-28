@@ -66,7 +66,7 @@ export default {
 
 * 项目引入了MockJS,可以对所有接口进行模拟
 
-* Mock代码位于`/src/mock`文件夹,文件夹下的`index.js`是mock主入口，这里可以控制所有mock的打开和关闭,文件夹下的`modules`文件夹下是各个业务对应MOCK文件，一般一个模块写一个js文件
+* Mock代码位于`/src/mock`文件夹,文件夹下的`knowledge.js`是mock主入口，这里可以控制所有mock的打开和关闭,文件夹下的`modules`文件夹下是各个业务对应MOCK文件，一般一个模块写一个js文件
 
 * 写法统一按下面示例
 ```js
@@ -168,7 +168,7 @@ export default ({ mock }) => {
     │    ├──loadmore.js //v-loadmore elementUI select选项滚动加载更多
     │    └──pcheck.js //v-p 权限校验，不通过则隐藏
     ├──mock // mock代码
-    │    ├──index.js // mock总开关
+    │    ├──knowledge.js // mock总开关
     │    ├──menu.js // 菜单mock
     │    └──。。。 // 其他接口mock，分模块放置接口mock
     ├──page // 基础布局组件

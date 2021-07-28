@@ -64,7 +64,7 @@ const switchConfig = [
     prop: 'objectiveQuestions'
   },
   {
-    label: '判断题答对得分，不答不得分，答错扣分',
+    label: '判断题答对得分，不答或答错扣分',
     prop: 'decideItem'
   }
 ]

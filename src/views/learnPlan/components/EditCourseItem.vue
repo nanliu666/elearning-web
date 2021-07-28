@@ -184,7 +184,7 @@ export default {
           itemType: 'checkbox',
           label: '通过条件',
           options: [
-            { label: '教师评定', value: 'a' },
+            // { label: '教师评定', value: 'a' },
             { label: '考试通过', value: 'b' },
             { label: '达到课程学时', value: 'c' }
           ],
@@ -197,7 +197,7 @@ export default {
           type: 'daterange',
           valueFormat: 'yyyy-MM-dd HH:mm:ss',
           label: '开课时间',
-          required: true,
+          required: false,
           rules: [
             {
               validator: this.validateDateRange,
@@ -229,7 +229,10 @@ export default {
       pageSize: 1
     }
     getCourseListData(params).then((res) => {
-      this.course.passRule = res.data[0].passCondition.split(',')
+      if(res.data.length>0){
+         this.course.passRule = res.data[0].passCondition.split(',')
+      }
+     
     })
     console.log(this.course)
     // this.course.timeList = [{ list: ['', ''] }]
@@ -245,11 +248,15 @@ export default {
       })
     },
     validateDateRange(rule, value, callback) {
-      if (moment(value[0]).isBefore(this.planTimeRange[0])) {
+      if(!value || value.length==0){
+        callback()
+      }
+      else if (moment(value[0]).isBefore(this.planTimeRange[0])) {
         callback(new Error('课程开始时间需要大于等于计划开始时间'))
       } else if (moment(value[1]).isAfter(this.planTimeRange[1])) {
         callback(new Error('课程结束时间需要小于等于计划结束时间'))
       } else {
+          value[1] = value[1].split(' ')[0] + ' 23:59:59'
         callback()
       }
     },
@@ -264,7 +271,7 @@ export default {
     },
     handleViewTextPaper(course, exam) {
       this.paperId = exam.testPaper
-      this.paperType = exam.testPaperType
+      this.paperType = exam.paperType
       // this.$router.push({
       //   path: '/examManagement/examSchedule/preview',
       //   query: { paperId: exam.testPaper, paperType: exam.testPaperType }

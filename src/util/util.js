@@ -1,7 +1,25 @@
 import { validatenull } from './validate'
 import moment from 'moment'
 import axios from 'axios'
-
+import { previewUrl } from '@/config/env'
+/**
+ * 将excel导出
+ * @param {*} res 处理导出数据
+ */
+export const exportToExcel = (res) => {
+  const { data, headers } = res
+  const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
+  const blob = new Blob([data], { type: headers['content-type'] })
+  let dom = document.createElement('a')
+  let url = window.URL.createObjectURL(blob)
+  dom.href = url
+  dom.download = decodeURI(fileName)
+  dom.style.display = 'none'
+  document.body.appendChild(dom)
+  dom.click()
+  dom.parentNode.removeChild(dom)
+  window.URL.revokeObjectURL(url)
+}
 /**
  * 七牛云下载转成blob弹窗形式
  * @param {string} html
@@ -743,4 +761,72 @@ export function getCanvasImgColorUrl(color) {
   const dataURL = lineBlock.toDataURL('image/png', 1)
 
   return dataURL
+}
+
+// office预览
+const instance = axios.create({
+  timeout: 100000, //默认超时时间
+  withCredentials: false, //跨域请求，允许保存cookie
+  validateStatus: function(status) {
+    return status >= 200 && status <= 500
+  }
+})
+//获取转码后的文件-永中文件预览
+export const getReviewUrl = async (params = {}) => {
+  let str = ''
+  for (let key in params) {
+    str += `${key}=${params[key]}&`
+  }
+  str = str.substr(0, str.length - 1)
+  return await instance.post(`${previewUrl}?${str}`)
+}
+//获取指定日期的下一天
+export const dateAdd = (startDate) => {
+  if (!startDate) return ''
+  startDate = new Date(startDate)
+  startDate = +startDate + 1000 * 60 * 60 * 24
+  startDate = new Date(startDate)
+  var nextStartDate =
+    startDate.getFullYear() +
+    '-' +
+    (startDate.getMonth() + 1 >= 10
+      ? `${startDate.getMonth() + 1}`
+      : `0${startDate.getMonth() + 1}`) +
+    '-' +
+    (startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`)
+  return nextStartDate
+}
+/**
+ * @todo 获取文件类型
+ * @param {Object} file 文件对象
+ * @return {Object}
+ * flag : video: 0,word: 1,image: 2,compress:3,auido: 4,no suffix: -1
+ * err: 文件大小超出
+ */
+export const fileType = (name, size = 0) => {
+  let obj = {
+    flag: null,
+    err: null
+  }
+  const fileName = name.toLowerCase()
+  const fileSize = size / 1024 / 1024
+  const word = /\.(ppt|pptx|doc|docx|xlsx|xls|pdf|wps|rtf)$/
+  const video = /\.(avi|wmv|mp4|3gp|rm|rmvb|mov|flv)$/
+  const image = /\.(jpg|jpeg|png|gif|bmp)$/
+  const compress = /\.(rar|zip)$/
+  const audio = /\.(mp3|wma|wav)$/
+  const regxArr = [video, word, image, compress, audio]
+  obj.flag = regxArr.findIndex((item) => item.test(fileName))
+  switch (obj.flag) {
+    case 0:
+      obj.err = fileSize / 1024 > 2 ? '视频大小不能超过2G' : null
+      break
+    case 4:
+      obj.err = fileSize / 1024 > 2 ? '音频大小不能超过2G' : null
+      break
+    default:
+      obj.err = fileSize > 50 ? '文件大小不能超过50M' : null
+      break
+  }
+  return obj
 }

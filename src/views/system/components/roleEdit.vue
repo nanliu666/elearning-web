@@ -43,13 +43,13 @@
               :disabled="radioDisabled('Enterprise')"
               label="Enterprise"
             >
-              企业
+              公司
             </el-radio>
             <el-radio
               :disabled="radioDisabled('Company')"
               label="Company"
             >
-              公司
+              单位
             </el-radio>
             <el-radio
               :disabled="radioDisabled('Department')"

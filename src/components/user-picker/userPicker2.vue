@@ -182,12 +182,6 @@ export default {
     Pagination
   },
   props: {
-    initList: {
-      type: Array,
-      default() {
-        return []
-      }
-    },
     visible: {
       type: Boolean,
       default: false

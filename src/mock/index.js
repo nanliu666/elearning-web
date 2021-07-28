@@ -87,6 +87,5 @@ export default (enable) => {
   remind(options)
 
   process(options)
-
   mailList(options)
 }

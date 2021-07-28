@@ -36,7 +36,7 @@
                 阅读量:
               </label>
               <span class="article__info--value">
-                {{ _.get(paneData, 'readNum', null) }}
+                {{ _.get(paneData, 'hits', null) }}
               </span>
             </li>
           </ul>
@@ -154,6 +154,7 @@ $color_info: #757c85
 .enclosure
   color: #757c85
   font-size: 14px
+  word-break: break-all
 .link
 
   color: #757c85

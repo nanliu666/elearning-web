@@ -6,8 +6,8 @@
       @submit.native.prevent
     >
       <el-form-item
-        v-for="item in requireOptions"
-        :key="item.field"
+        v-for="(item, index) in requireOptions"
+        :key="`${item.field}${index}`"
         :label="item.label"
         :class="[item.type === 'treeSelect' ? 'treeSelect' : '', 'require-form-item']"
       >
@@ -29,18 +29,19 @@
           :placeholder="'请选择'"
           :multiple="item.config && item.config.multiple"
           :collapse-tags="item.config && item.config.multiple"
+          :filterable="item.config && item.config.filterable"
           @visible-change="item.firstLoad && item.firstLoad($event, item)"
           @change="change"
         >
           <template v-if="item.config && item.config.group">
             <el-option-group
-              v-for="group in item.options"
-              :key="group.label"
+              v-for="(group, i) in item.options"
+              :key="`${group.label}${i}`"
               :label="group.label"
             >
               <el-option
-                v-for="it in group.options"
-                :key="it.value"
+                v-for="(it, c) in group.options"
+                :key="`${it.value}${c}`"
                 :label="it[_.get(item, 'config.optionLabel', 'label')]"
                 :value="it[_.get(item, 'config.optionValue', 'value')]"
               />
@@ -48,8 +49,8 @@
           </template>
           <template v-else>
             <el-option
-              v-for="it in item.options"
-              :key="it[_.get(item, 'config.optionValue', 'value')]"
+              v-for="(it, x) in item.options"
+              :key="`${it[_.get(item, 'config.optionValue', 'value')]}${x}`"
               :label="it[_.get(item, 'config.optionLabel', 'label')]"
               :value="it[_.get(item, 'config.optionValue', 'value')]"
             />
@@ -80,11 +81,12 @@
           placeholder="选择时间"
           @change="change"
         />
-        <el-cascader
-          v-if="item.type === 'cascader'"
-          v-model="item.data"
-          :options="item.options"
-        />
+        <!--        <el-cascader-->
+        <!--          v-if="item.type === 'cascader'"-->
+        <!--          v-model="item.data"-->
+        <!--          :options="item.options"-->
+        <!--          :props="item.props"-->
+        <!--        />-->
         <el-date-picker
           v-if="item.type === 'dataPicker'"
           v-model="item.data"
@@ -92,7 +94,11 @@
           :value-format="
             item.config && item.config['value-format'] ? item.config['value-format'] : 'yyyy-MM-dd'
           "
+          :range-separator="
+            item.config && item.config.rangeSeparator ? item.config.rangeSeparator : '-'
+          "
           :default-time="item.config && item.config['default-time']"
+          :picker-options="item.config ? item.config.disabledDate : {}"
           placeholder="结束时间"
           start-placeholder="开始时间"
           end-placeholder="结束时间"
@@ -114,6 +120,20 @@
           :tree-params="item.config.treeParams"
           @change="change"
         />
+        <el-tree-select-new
+          v-if="item.type === 'treeSelectNew'"
+          :ref="item.field"
+          v-model="item.data"
+          :popover-class="item.config.fas"
+          :styles="item.styles"
+          :select-params="item.config.selectParams"
+          :tree-params="item.config.treeParams"
+          @change="change"
+        />
+        <slot
+          v-if="item.type === 'slot'"
+          :name="item.field"
+        />
         <!-- <tree-select
           v-if="item.type === 'treeSelect'"
           v-model="item.data"
@@ -122,6 +142,22 @@
           :is-single="item.isSingle || false"
           @change="change"
         />-->
+
+        <lazy-load-cascader
+          v-if="item.type === 'lazycascader'"
+          ref="lazycascader"
+          v-model="item.data"
+          filterable
+          :disabled="item.disabled"
+          :placeholder="item.placeholder"
+          :filter-method="item.filterMethod"
+          :filter-props="item.filterProps"
+          :options="item.options"
+          :props="item.props"
+          clearable
+          @change="(data) => handleLazyCascaderChange(item, data)"
+        >
+        </lazy-load-cascader>
       </el-form-item>
       <el-form-item
         v-if="popoverOptions.length > 0"
@@ -144,11 +180,27 @@
                 :gutter="24"
               >
                 <el-col
-                  v-for="item in popoverOptions"
-                  :key="item.field"
+                  v-for="(item, j) in popoverOptions"
+                  :key="`${item.field}${j}`"
                   :span="8"
                 >
                   <el-form-item :label="item.label">
+                    <lazy-load-cascader
+                      v-if="item.type === 'lazycascader'"
+                      ref="lazycascader"
+                      v-model="item.data"
+                      filterable
+                      :disabled="item.disabled"
+                      :placeholder="item.placeholder"
+                      :filter-method="item.filterMethod"
+                      :filter-props="item.filterProps"
+                      :options="item.options"
+                      :props="item.props"
+                      clearable
+                      @change="(data) => handleLazyCascaderChange(item, data)"
+                    >
+                    </lazy-load-cascader>
+
                     <el-input
                       v-if="item.type === 'input'"
                       v-model="item.data"
@@ -156,6 +208,7 @@
                       :placeholder="
                         (item.config && item.config.placeholder) || '请输入' + item.label
                       "
+                      :maxlength="item.config && item.config.maxlength"
                       :suffix-icon="item.config && item.config['suffix-icon']"
                       class="elInput"
                     />
@@ -167,17 +220,18 @@
                       :placeholder="'请选择'"
                       :multiple="item.config && item.config.multiple"
                       :collapse-tags="item.config && item.config.multiple"
+                      :filterable="item.config && item.config.filterable"
                       @visible-change="item.firstLoad && item.firstLoad($event, item)"
                     >
                       <template v-if="item.config && item.config.group">
                         <el-option-group
-                          v-for="group in item.options"
-                          :key="group.label"
+                          v-for="(group, k) in item.options"
+                          :key="`${group.label}${k}`"
                           :label="group.label"
                         >
                           <el-option
-                            v-for="it in group.options"
-                            :key="it.value"
+                            v-for="(it, z) in group.options"
+                            :key="`${it.value}${z}`"
                             :label="it[_.get(item, 'config.optionLabel', 'label')]"
                             :value="it[_.get(item, 'config.optionValue', 'value')]"
                           />
@@ -185,8 +239,8 @@
                       </template>
                       <template v-else>
                         <el-option
-                          v-for="it in item.options"
-                          :key="it[_.get(item, 'config.optionValue', 'value')]"
+                          v-for="(it, l) in item.options"
+                          :key="`${it[_.get(item, 'config.optionValue', 'value')]}${l}`"
                           :label="it[_.get(item, 'config.optionLabel', 'label')]"
                           :value="it[_.get(item, 'config.optionValue', 'value')]"
                         />
@@ -219,6 +273,7 @@
                       v-if="item.type === 'cascader'"
                       v-model="item.data"
                       :options="item.options"
+                      :props="item.props"
                     />
                     <el-date-picker
                       v-if="item.type === 'dataPicker'"
@@ -228,9 +283,17 @@
                           ? item.config['value-format']
                           : 'yyyy-MM-dd'
                       "
+                      :range-separator="
+                        item.config && item.config.rangeSeparator ? item.config.rangeSeparator : '-'
+                      "
                       :default-time="item.config && item.config['default-time']"
                       :type="item.config && item.config.type ? item.config.type : 'date'"
-                      placeholder="结束时间"
+                      :picker-options="item.config ? item.config.disabledDate : {}"
+                      :placeholder="
+                        item.config && item.config.placeholder
+                          ? item.config.placeholder
+                          : '结束时间'
+                      "
                       start-placeholder="开始时间"
                       end-placeholder="结束时间"
                       :unlink-panels="true"
@@ -250,6 +313,15 @@
                       :select-params="item.config.selectParams"
                       :tree-params="item.config.treeParams"
                     />
+                    <el-tree-select-new
+                      v-if="item.type === 'treeSelectNew'"
+                      :ref="item.field"
+                      v-model="item.data"
+                      :popover-class="item.config.fas"
+                      :styles="item.styles"
+                      :select-params="item.config.selectParams"
+                      :tree-params="item.config.treeParams"
+                    />
                     <lazy-select
                       v-if="item.type === 'lazySelect'"
                       :ref="item.field"
@@ -259,6 +331,10 @@
                       :placeholder="item.placeholder"
                       :option-props="item.optionProps"
                       :searchable="item.searchable"
+                    />
+                    <slot
+                      v-if="item.type === 'slot'"
+                      :name="item.field"
                     />
                   </el-form-item>
                 </el-col>
@@ -289,6 +365,7 @@
             筛选
           </el-button>
         </el-popover>
+        <slot v-if="hasSlotRight" />
       </el-form-item>
     </el-form>
   </div>
@@ -297,17 +374,26 @@
 <script>
 import NumInterval from '../numInterval/numInterval'
 import ElTreeSelect from '../elTreeSelect/elTreeSelect'
-
+import elTreeSelectNew from '@/components/tree-selectorNew/index.vue'
+import lazyLoadCascader from '@/components/lazy-load-cascader'
+import _ from 'lodash'
 export default {
   name: 'SearchPopOver',
   components: {
+    lazyLoadCascader,
     NumInterval,
     ElTreeSelect,
+    elTreeSelectNew,
     LazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
     // TODO待优化：为解决预订教室弹窗的popover样式，暂时只想到这个解决方案
     isCustomPopoverClass: {
+      type: Boolean,
+      default: false
+    },
+    // 定制筛选按钮右侧文字
+    hasSlotRight: {
       type: Boolean,
       default: false
     },
@@ -365,6 +451,12 @@ export default {
     }
   },
   methods: {
+    handleLazyCascaderChange(item, data) {
+      item.data = Array.isArray(data) ? (data.length ? data[data.length - 1] : '') : data
+    },
+    dataChange() {
+      this.submitSearch()
+    },
     // 筛选已有值的options
     screenValueArr(arr) {
       this.requireOptions.forEach((item) => {
@@ -443,6 +535,12 @@ export default {
           item.field.split(',').forEach((it, idx) => {
             params[it] = item.data ? item.data[idx] : null
           })
+        } else if (item.type === 'lazycascader') {
+          params[item.field] = Array.isArray(item.data)
+            ? item.data.length
+              ? item.data[item.data.length - 1]
+              : ''
+            : item.data
         } else {
           params[item.field] = item.data
         }
@@ -460,6 +558,10 @@ export default {
         ) {
           item.data = []
         } else {
+          item.data = ''
+        }
+
+        if (item.type === 'lazycascader') {
           item.data = ''
         }
       })

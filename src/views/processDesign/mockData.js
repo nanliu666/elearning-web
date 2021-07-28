@@ -8,7 +8,8 @@ export default {
     approverDistinct: 1,
     approverNull: 0,
     isOpinion: '',
-    tip: ''
+    tip: '',
+    processMap: { max: '', min: '' }
   },
   processData: {
     type: 'start',

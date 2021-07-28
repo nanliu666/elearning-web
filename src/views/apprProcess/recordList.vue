@@ -65,6 +65,19 @@
             </div>
           </div>
         </template>
+        <template
+          slot="multiSelectMenu"
+          slot-scope="{ selection }"
+        >
+          <el-button
+            type="text"
+            size="medium"
+            icon="el-icon-delete"
+            @click="exportFn(selection)"
+          >
+            批量导出
+          </el-button>
+        </template>
         <template #status="{row}">
           <span
             class="status-span"
@@ -98,10 +111,11 @@
 
 <script>
 import { STATUS_TO_TEXT, STATUS_DICTS } from '@/const/approve'
-import { categoryOptions, categoryMap } from '@/const/approve'
+import { categoryOptions, baseFormKey } from '@/const/approve'
 import { getUserWorkList } from '@/api/org/org'
-import { getRecordList } from '@/api/apprProcess/apprProcess'
+import { getRecordList, exportAppr } from '@/api/apprProcess/apprProcess'
 import { mapGetters } from 'vuex'
+import { exportToExcel } from '@/util/util'
 const TABLE_COLUMNS = [
   {
     label: '审批编号',
@@ -111,8 +125,8 @@ const TABLE_COLUMNS = [
   },
   {
     label: '审批类型',
-    prop: 'categoryId',
-    formatter: (row) => categoryMap[row.categoryId] || '',
+    prop: 'formKey',
+    formatter: (row) => baseFormKey[row.formKey] || '',
     minWidth: 120
   },
   {
@@ -149,6 +163,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'apprNo',
   showHandler: true,
+  enableMultiSelect: true,
   showIndexColumn: false,
   enablePagination: true,
   handlerColumn: {
@@ -261,6 +276,22 @@ export default {
   },
 
   methods: {
+    async exportFn(selection) {
+      // 批量下载
+      if (selection && selection.length > 0) {
+        let apprNoS = selection.map((item) => {
+          return item.apprNo
+        })
+
+        let sendData = {
+          fileType: 'excel',
+          apprNo: apprNoS.join(',')
+        }
+        exportAppr(sendData).then((res) => {
+          exportToExcel(res)
+        })
+      }
+    },
     statusToText(status) {
       return STATUS_TO_TEXT[status]
     },

@@ -77,24 +77,24 @@
               @change="scoreChange"
             />
             <div
-              v-if="valid && !row.score"
+              v-if="!row.score"
               class="valid"
             >
               请输入
             </div>
           </template>
-          <template #handler="{row}">
+          <template #handler="{row, $index}">
             <el-button
               type="text"
-              :disabled="getUpDisabled(row)"
-              @click="handleUp(row)"
+              :disabled="$index === 0"
+              @click="moveUp($index)"
             >
               上移
             </el-button>
             <el-button
               type="text"
-              :disabled="getDowmDisabled(row)"
-              @click="handleDown(row)"
+              :disabled="$index === tableData.length - 1"
+              @click="moveDown($index)"
             >
               下移
             </el-button>
@@ -136,7 +136,7 @@
 
 <script>
 import stemContent from './stemContent'
-import { QUESTION_TYPE_MAP } from '@/const/examMange'
+import { QUESTION_TATOL_ARR } from '@/const/examMange'
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
@@ -226,13 +226,6 @@ const BASE_COLUMNS = [
     ]
   },
   {
-    prop: 'isMulti',
-    itemType: 'slot',
-    label: '',
-    span: 11,
-    required: false
-  },
-  {
     prop: 'isShowScore',
     itemType: 'slot',
     label: '',
@@ -276,10 +269,6 @@ export default {
         return {}
       }
     },
-    valid: {
-      type: Boolean,
-      default: false
-    },
     length: {
       type: Number,
       default: () => {
@@ -299,7 +288,7 @@ export default {
         title: ''
       },
       stemList: [],
-      typeList: [],
+      typeList: QUESTION_TATOL_ARR,
       tableConfig: TABLE_CONFIG,
       columnsVisible: TABLE_COLUMNS,
       columns: BASE_COLUMNS,
@@ -353,13 +342,6 @@ export default {
         this.newData()
       },
       deep: true
-    }
-  },
-  mounted() {
-    this.typeList = []
-    this.tableData = []
-    for (let key in QUESTION_TYPE_MAP) {
-      this.typeList.push({ value: key, label: QUESTION_TYPE_MAP[key] })
     }
   },
   methods: {
@@ -448,41 +430,30 @@ export default {
       }
       this.$emit('update', _.cloneDeep(block))
     },
-    getUpDisabled(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      return index === 0
-    },
-    getDowmDisabled(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      return _.size(this.tableData) === index + 1
+    moveFun(sourceIndex, targetIndex) {
+      this.tableData[sourceIndex] = this.tableData.splice(
+        targetIndex,
+        1,
+        this.tableData[sourceIndex]
+      )[0]
     },
     /***
      * @author guanfenda
      * @desc 下移
      * */
-    handleDown(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      if (index !== this.tableData.length - 1) {
-        this.tableData[index] = this.tableData.splice(index + 1, 1, this.tableData[index])[0]
-      }
+    moveDown(index) {
+      const sourceIndex = index
+      const targetIndex = index + 1
+      this.moveFun(sourceIndex, targetIndex)
     },
     /***
      * @author guanfenda
      * @desc 上移
      * */
-    handleUp(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      if (index !== 0) {
-        this.tableData[index] = this.tableData.splice(index - 1, 1, this.tableData[index])[0]
-      }
+    moveUp(index) {
+      const sourceIndex = index
+      const targetIndex = index - 1
+      this.moveFun(sourceIndex, targetIndex)
     },
     /**
      * @author guanfenda
@@ -550,8 +521,12 @@ label {
 .valid {
   position: absolute;
   line-height: 18px !important;
-  bottom: -3px;
+  bottom: 2px;
+  left: 25px;
   font-size: 12px;
   color: #f56c6c;
+}
+/deep/ .el-table__row {
+  height: 86px;
 }
 </style>

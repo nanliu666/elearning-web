@@ -1,12 +1,12 @@
 <template>
   <div class="materials">
     <page-header
-      title="查看上报材料"
+      title="查看附件材料"
       show-back
     />
     <div class="materials_top">
       <div class="materials_top_title">
-        {{ courseData.name }}的上报材料
+        {{ courseData.name }}的附件材料
       </div>
       <div class="materials_top_box">
         <div class="materials_top_box_item">
@@ -18,17 +18,13 @@
           <span>{{ courseData.deptName }}</span>
         </div>
         <div class="materials_top_box_item">
-          <span>名称：</span>
+          <span>课程名称：</span>
           <span>{{ courseData.courseName }}</span>
         </div>
         <div class="materials_top_box_item">
-          <span>作业提交率：</span>
-          <span>{{ courseData.jobTimes || 0 }}次 / {{ courseData.jobPercent || 0 }}% </span>
+          <span>作业提交次数：</span>
+          <span>{{ courseData.jobTimes || 0 }} / {{ courseData.totalJob || 0 }}次</span>
         </div>
-        <!-- <div class="materials_top_box_item">
-          <span>学习心得提交率：</span>
-          <span>{{ courseData.jobTimes }} / {{ courseData.jobPercent }}% </span>
-        </div> -->
       </div>
     </div>
     <div class="materials_content">

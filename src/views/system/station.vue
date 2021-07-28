@@ -10,6 +10,15 @@
       >
         创建岗位
       </el-button>
+      <el-button
+        slot="rightMenu"
+        v-p="IMPORT_STATION"
+        type="primary"
+        size="medium"
+        @click="importStation"
+      >
+        批量导入
+      </el-button>
     </page-header>
 
     <basic-container block>
@@ -20,6 +29,9 @@
         :columns="columnsVisible | columnsFilter"
         :data="tableData"
         :loading="tableLoading"
+        :page="page"
+        @current-page-change="handleCurrentPageChange"
+        @page-size-change="handlePageSizeChange"
       >
         <template
           slot="multiSelectMenu"
@@ -39,11 +51,27 @@
         </template>
         <template #topMenu>
           <div class="operations">
-            <div class="operations__left">
+            <div class="operations-left">
               <seach-popover
                 :require-options="searchPopoverConfig.requireOptions"
                 @submit="handleSearch"
               />
+              <!-- 岗位面包屑 -->
+              <div style="display: flex; align-items: center; margin-top: 10px">
+                <span>当前岗位层级：</span>
+                <el-breadcrumb separator-class="el-icon-arrow-right">
+                  <el-breadcrumb-item
+                    v-for="(item, index) in positionBreadcrumb"
+                    :key="index"
+                    style="cursor: pointer"
+                    @click.native="index != positionBreadcrumb.length - 1 && goLevel(item)"
+                  >
+                    <el-tag size="mini">
+                      {{ item.label }}
+                    </el-tag>
+                  </el-breadcrumb-item>
+                </el-breadcrumb>
+              </div>
             </div>
             <div class="operations-right">
               <div
@@ -93,7 +121,7 @@
             <el-button
               size="medium"
               type="text"
-              :disabled="row.fullName.split('|').length >= 5"
+              :disabled="positionBreadcrumb.length >= 5"
               @click.stop="() => handleCreateSubordinate(row, 'create')"
             >
               创建下级岗位
@@ -127,6 +155,7 @@
       <station-form
         ref="stationForm"
         :row-data="rowData"
+        :position-breadcrumb="positionBreadcrumb"
         @initData="loadData"
       ></station-form>
     </basic-container>
@@ -143,6 +172,10 @@ const TABLE_COLUMNS = [
   {
     label: '岗位描述',
     prop: 'remark'
+  },
+  {
+    label: '所属组织',
+    prop: 'fullOrg'
   },
   {
     label: '创建人',
@@ -175,10 +208,11 @@ import {
   EXPORTS_STATION,
   DETAIL_STATION,
   EDIT_STATION,
-  DELETE_STATION
+  DELETE_STATION,
+  IMPORT_STATION
 } from '@/const/privileges'
 import { dateFormat } from '@/util/date'
-import { queryStation, getStationChild } from '@/api/system/station'
+import { getStationParent } from '@/api/system/station'
 export default {
   name: 'Jobs',
   components: {
@@ -208,8 +242,8 @@ export default {
         rowKey: 'id',
         lazy: true,
         treeProps: { children: 'children', hasChildren: 'hasChildren' },
-        load: async (tree, treeNode, resolve) => {
-          this.loadTree(tree, treeNode, resolve)
+        load: async (tree) => {
+          this.loadTree(tree)
         },
         handlerColumn: {
           width: '200',
@@ -221,7 +255,17 @@ export default {
       autoWidth: true,
       bookType: 'xlsx',
       rowData: {},
-      searchParams: {}
+      page: {
+        currentPage: 1,
+        size: 10,
+        total: 0
+      },
+      positionBreadcrumb: [
+        {
+          value: '0',
+          label: '顶级岗位'
+        }
+      ]
     }
   },
   computed: {
@@ -229,15 +273,29 @@ export default {
     EXPORTS_STATION: () => EXPORTS_STATION,
     DETAIL_STATION: () => DETAIL_STATION,
     EDIT_STATION: () => EDIT_STATION,
-    DELETE_STATION: () => DELETE_STATION
+    DELETE_STATION: () => DELETE_STATION,
+    IMPORT_STATION: () => IMPORT_STATION
   },
   mounted() {
     this.loadData()
   },
   methods: {
+    //  处理页码改变
+    handleCurrentPageChange(param) {
+      this.page.currentPage = param
+      this.loadData(this.searchPopoverConfig.requireOptions[0].data)
+    },
+    handlePageSizeChange(param) {
+      this.page.size = param
+      this.loadData(this.searchPopoverConfig.requireOptions[0].data)
+    },
     // 查看用户
     handleViewUser(row) {
       this.$router.push({ path: '/system/stationDetail', query: { id: row.id } })
+    },
+    //批量导入
+    importStation() {
+      this.$router.push({ path: '/system/importStation' })
     },
     // 创建岗位
     addStation() {
@@ -250,15 +308,28 @@ export default {
       this.$refs.stationForm.openDialog({ create: '创建下级岗位', edit: '编辑岗位' }[type], type)
     },
     handleSearch: _.debounce(function(params) {
-      this.loadData(params)
+      this.page.currentPage = 1
+      this.loadData(params.name)
     }, 500),
     // 加载数据
     async loadData(value) {
+      let params = {
+        pageNo: this.page.currentPage,
+        pageSize: this.page.size,
+        parentId: this.positionBreadcrumb[this.positionBreadcrumb.length - 1].value,
+        name: value || ''
+      }
+      //  { parentId: this.rowData.parentId, isInitData: true } stationForm组件返回数据
+
+      if (value && value.isInitData) {
+        params.parentId = value.parentId
+        params.name = ''
+      }
       this.tableLoading = true
-      this.tableData = []
-      await queryStation({ name: (value && value.name) || '' })
+      await getStationParent(params)
         .then((res) => {
-          this.tableData = res
+          this.tableData = res.data
+          this.page.total = res.totalNum
         })
         .finally(() => {
           this.tableLoading = false
@@ -286,8 +357,8 @@ export default {
     },
     // 刷新
     refresh() {
-      this.searchPopoverConfig.requireOptions[0].data = ''
-      this.loadData()
+      this.page.currentPage = 1
+      this.loadData(this.searchPopoverConfig.requireOptions[0].data)
     },
     // 编辑删除按钮
     handleCommand(command, row) {
@@ -300,23 +371,27 @@ export default {
           break
       }
     },
-    async loadTree(tree, treeNode, resolve) {
-      try {
-        let params = {
-          parentId: tree.id
-        }
-        await getStationChild(params).then((res) => {
-          resolve(res)
-        })
-      } catch (err) {
-        resolve([])
-      }
+    async loadTree(tree) {
+      this.page.currentPage = 1
+      this.positionBreadcrumb.push({ value: tree.id, label: tree.name })
+      this.loadData(this.searchPopoverConfig.requireOptions[0].data)
+    },
+    goLevel(item) {
+      this.page.currentPage = 1
+      this.positionBreadcrumb = this.positionBreadcrumb.slice(
+        0,
+        this.positionBreadcrumb.indexOf(item) + 1
+      )
+      this.loadData(this.searchPopoverConfig.requireOptions[0].data)
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 $color_icon: #a0a8ae;
+/deep/ .top-menu {
+  height: auto !important;
+}
 .refresh-container {
   cursor: pointer;
   color: #a0a8ae;
@@ -332,6 +407,10 @@ $color_icon: #a0a8ae;
   align-items: center;
   display: flex;
   justify-content: space-between;
+  //   &-left {
+  //     display: flex;
+  //     align-items: center;
+  //   }
   &-right {
     display: flex;
     align-items: center;

@@ -4,7 +4,11 @@
     v-model="valueId"
     :clearable="clearable"
     :placeholder="placeholder"
+    :disabled="disabled"
+    :filterable="filterable"
+    :filter-method="filterable ? filterNodes : () => {}"
     @clear="clearHandle"
+    @focus="handleFocus"
   >
     <el-option
       :value="valueId"
@@ -14,9 +18,10 @@
         id="tree-option"
         ref="selectTree"
         :accordion="accordion"
-        :data="options"
+        :data="optionList"
         :props="props"
         :node-key="props.value"
+        :filter-node-method="filterNode"
         :default-expanded-keys="defaultExpandedKey"
         @node-click="handleNodeClick"
       ></el-tree>
@@ -26,6 +31,10 @@
 <script>
 export default {
   name: 'ElTreeSelect',
+  model: {
+    prop: 'value',
+    event: 'getValue'
+  },
   props: {
     /* 配置项 */
     props: {
@@ -40,6 +49,12 @@ export default {
     },
     /* 选项列表数据(树形结构的对象数组) */
     options: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    },
+    initialOptions: {
       type: Array,
       default: () => {
         return []
@@ -67,6 +82,14 @@ export default {
     placeholder: {
       type: String,
       default: '请选择'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    filterable: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -74,6 +97,11 @@ export default {
       valueId: this.value, // 初始值
       valueTitle: '',
       defaultExpandedKey: []
+    }
+  },
+  computed: {
+    optionList() {
+      return _.uniqBy(this.initialOptions.concat(this.options), this.props.value)
     }
   },
   watch: {
@@ -93,6 +121,18 @@ export default {
     }
   },
   methods: {
+    //tree过滤
+    filterNode(value, data) {
+      if (!value) return true
+      return data[`${this.props.label}`].indexOf(value) !== -1
+    },
+    //过滤数据函数
+    filterNodes(val) {
+      this.$refs.selectTree.filter(val)
+    },
+    handleFocus() {
+      this.$emit('focus')
+    },
     // 初始化值
     initHandle() {
       if (this.valueId) {
@@ -143,7 +183,7 @@ export default {
 <style scoped>
 .el-scrollbar .el-scrollbar__view .el-select-dropdown__item {
   height: auto;
-  max-height: 274px;
+  /* max-height: 274px; */
   padding: 0;
   overflow: hidden;
   overflow-y: auto;

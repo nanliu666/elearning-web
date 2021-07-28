@@ -59,14 +59,14 @@
             label="Enterprise"
             disabled
           >
-            企业
+            公司
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
             label="Company"
             :disabled="radioDisabled('Company')"
           >
-            公司
+            单位
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"

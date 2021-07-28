@@ -126,7 +126,12 @@
     >
       <select-view
         v-if="
-          [QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_SINGLE, QUESTION_TYPE_JUDGE].includes(data.type)
+          [
+            QUESTION_TYPE_MULTIPLE,
+            QUESTION_TYPE_SINGLE,
+            QUESTION_TYPE_JUDGE,
+            QUESTION_TYPE_RANDOM
+          ].includes(data.type)
         "
         :data="data"
       />
@@ -146,13 +151,13 @@ import SelectView from './SelectView'
 import GapAndShort from './GapAndShort'
 import { addLine } from '@/util/util'
 import {
-  QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
   QUESTION_TYPE_SHOER,
   QUESTION_TYPE_BLANK,
-  QUESTION_TYPE_GROUP
+  QUESTION_TYPE_GROUP,
+  QUESTION_TYPE_RANDOM
 } from '@/const/examMange'
 export default {
   name: 'QustionPreview',
@@ -190,8 +195,8 @@ export default {
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
-    QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
+    QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP,
+    QUESTION_TYPE_RANDOM: () => QUESTION_TYPE_RANDOM
   },
   watch: {
     data: {

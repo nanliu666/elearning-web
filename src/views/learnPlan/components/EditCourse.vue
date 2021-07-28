@@ -171,12 +171,19 @@ export default {
       type: String,
       default: ''
     },
+
     /**
      * 学习计划时间范围
      */
     planTimeRange: {
       type: Array,
       default: () => []
+    },
+    model: {
+      type: Object,
+      default() {
+        return {}
+      }
     }
   },
   data() {
@@ -194,6 +201,17 @@ export default {
       checkedCourseIds: [],
       isIndeterminate: false,
       activeCollapses: []
+    }
+  },
+  watch:{
+    "model":{
+      handler(val){
+        if(this.planId){
+          this.courseList = val.courseList
+        }
+      },
+      deep:true,
+      immediate:true
     }
   },
   computed: {},
@@ -352,6 +370,24 @@ export default {
     },
     // 设置前置条件
     handleSetPrecondition(course) {
+      //如果是编辑
+      let beforeCourseMap,arr = []
+      if(this.planId){
+        beforeCourseMap = course.beforeCourse.reduce((pre,cur)=>{
+          let str = typeof cur === 'string' ? cur : cur.courseId
+          pre[str] = []
+          return pre
+        },{})
+        _.forIn(beforeCourseMap, (value, key) => {
+          let c = _.find(this.model.courseList,{'courseId':key})
+          arr.push({
+              courseId: c.courseId,
+              courseName: c.courseName,
+              required: c?1:0
+            })
+        });
+        course.beforeCourse = arr
+      }
       this.settingPreCourse = course
       this.precondDialogVisible = true
       setTimeout(() => {

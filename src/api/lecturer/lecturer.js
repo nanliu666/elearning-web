@@ -1,4 +1,7 @@
 import { get, post, del, put } from '@/router/axios'
+
+//获取证书编号
+export const cardNum = (params) => post('/api/manage/v1/getCertNoList', params)
 /**
  * 查询讲师分类列表接口
  * @param {Object} courseId - 参数
@@ -83,3 +86,16 @@ export const getCreatorList = (params) => get('/api/manage/v1/teacher/getCreator
  *  讲师分类停用启用
  * */
 export const updateStatus = (params) => post('/api/manage/v1/teacher/catalog/updateStatus', params)
+/**
+ * @desc 导入讲师
+ */
+ export const importLecturer = (params) => post('/api/manage/v1/teacher/import', params)
+ /**
+ * @desc 下载导入讲师模板
+ */
+  export const downloadLecturerTemplate = (params) => get('/api/manage/v1/teacher/exportTemplate', params,  { responseType: 'blob' })
+ /**
+  * @desc 导入讲师错误报告  
+  */
+ export const importLecturerErrorFile = (params) => get('/api/manage/v1/teacher/exportErrFile', params, { responseType: 'blob' })
+ 

@@ -113,7 +113,7 @@
           </div>
         </template>
         <template #categoryName="{row}">
-          {{ row.categoryName ? row.categoryName : '--' }}
+          {{ row.categoryName ? row.categoryName : '未分类' }}
         </template>
         <template #expiredTime="{row}">
           {{ row.expiredTime ? row.expiredTime : '--' }}
@@ -343,11 +343,9 @@ export default {
       deep: true
     }
   },
-  mounted() {
+  activated() {
     this.getCategory()
     this.getCreatUsers()
-  },
-  activated() {
     this.loadTableData()
   },
   methods: {
@@ -415,10 +413,11 @@ export default {
         type: '1'
       }
       getcategoryTree(params).then((res) => {
-        this.searchConfig.popoverOptions[0].config.treeParams.data = [
-          { id: '0', name: '未分类' },
-          ...res
-        ]
+        this.searchConfig.popoverOptions[0].config.treeParams.data = res
+        // this.searchConfig.popoverOptions[0].config.treeParams.data = [
+        //   { id: '0', name: '未分类' },
+        //   ...res
+        // ]
       })
     },
     /**
@@ -434,49 +433,10 @@ export default {
      * @author guanfenda
      * @desc 跳转到创建页面
      * */
-    handleCommand(data, id, copy) {
-      if (typeof id === 'object') {
-        //判断是新增
-        id = null
-      }
-      if (data === 'manual') {
-        //手工试卷
-        this.handleManual(id, copy)
-      } else {
-        //随机试卷
-        this.handleRandom(id, copy)
-      }
-    },
-    /**
-     * @author guanfenda
-     * @desc 跳转到随机试卷
-     * @params  id 试卷id copy 是否复制数据
-     * */
-    handleRandom(id, copy) {
-      let query = {
-        tagName: '创建随机试卷'
-      }
-      id && ((query.id = id), (query.tagName = '编辑随机试卷'))
-      copy && ((query.copy = copy), (query.tagName = '创建随机试卷'))
+    handleCommand(data) {
       this.$router.push({
         path: '/examManagement/testPaper/randomTestPaper',
-        query
-      })
-    },
-    /**
-     * @author guanfenda
-     * @desc 跳转到手工试卷
-     * @params  id 试卷id copy 是否复制数据
-     * */
-    handleManual(id, copy) {
-      let query = {
-        tagName: '创建手工试卷'
-      }
-      id && ((query.id = id), (query.tagName = '编辑手工试卷'))
-      copy && ((query.copy = copy), (query.tagName = '创建手工试卷'))
-      this.$router.push({
-        path: '/examManagement/testPaper/handmadeTestPaper',
-        query
+        query: { tagName: `创建${data === 'random' ? '随机' : '手工'}试卷`, paperType: data }
       })
     },
     /**
@@ -485,7 +445,14 @@ export default {
      * @params row 试卷数据
      * */
     handleLookUp(row) {
-      this.handleCommand(row.type, row.id)
+      this.$router.push({
+        path: '/examManagement/testPaper/randomTestPaper',
+        query: {
+          id: row.id,
+          tagName: `编辑${row.type === 'random' ? '随机' : '手工'}试卷`,
+          paperType: row.type
+        }
+      })
     },
     /**
      * @author guanfenda
@@ -493,7 +460,15 @@ export default {
      * @params row 试卷数据
      * */
     handleCope(row) {
-      this.handleCommand(row.type, row.id, 'copy')
+      this.$router.push({
+        path: '/examManagement/testPaper/randomTestPaper',
+        query: {
+          id: row.id,
+          copy: 'copy',
+          paperType: row.type,
+          tagName: `复制${row.type === 'random' ? '随机' : '手工'}试卷`
+        }
+      })
     },
     /**
      * @author guanfenda

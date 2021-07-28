@@ -171,3 +171,6 @@ export default {
 <style lang="stylus" scoped>
 @import 'index.styl';
 </style>
+<style>
+.flow-container .node-wrap:first-of-type .el-popover__reference {display: none;}
+</style>

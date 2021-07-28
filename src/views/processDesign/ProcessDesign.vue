@@ -225,7 +225,7 @@ export default {
       this.base = []
       this.lineList = [] //节点线
       this.condition = [] //条件节点
-      this.processMap = {}
+      this.processMap = param.basicSetting.processMap
       this.endNode = [] //最后节点线
       this.lineEnd(processData)
       this.recursion(processData, param.processData)
@@ -510,7 +510,8 @@ export default {
         } else if (data.properties.assigneeType === 'user') {
           //指定成员人，
           item.assignee = 'taskUser_' + data.properties.attribute
-          let length = data.content.split(',').length
+          let length = data.properties.attribute.split(',').length
+          //   let length = data.content.split(',').length
           if (length > 1) {
             origin.variable = 'optional_' + data.nodeId //这个前端发起用的变量
             item.assignee = '${taskUser_' + data.nodeId + '}'

@@ -62,12 +62,13 @@
           </div>
         </template>
         <template slot="multiSelectMenu">
-          <!--          <el-button-->
-          <!--            type="text"-->
-          <!--            icon="el-icon-delete"-->
-          <!--          >-->
-          <!--            批量导出-->
-          <!--          </el-button>-->
+          <el-button
+            type="text"
+            icon="el-icon-sold-out"
+            @click="exportBatch(selection)"
+          >
+            批量导出
+          </el-button>
         </template>
         <template #name="{row}">
           <el-link
@@ -94,6 +95,7 @@
 </template>
 
 <script>
+import { exportToExcel } from '@/util/util'
 import { getAchievement, getPaperMaker } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
 const TABLE_COLUMNS = [
@@ -105,14 +107,14 @@ const TABLE_COLUMNS = [
     minWidth: 150
   },
   {
-    label: '试卷类型',
-    prop: 'paperType',
+    label: '考试方式',
+    prop: 'examPattern',
     formatter: (row) => {
       return (
         {
-          random: '随机试卷',
-          manual: '手工试卷'
-        }[row.paperType] || ''
+          general: '在线考试',
+          offline: '线下考试'
+        }[row.examPattern] || ''
       )
     },
     minWidth: 120
@@ -141,14 +143,14 @@ const TABLE_CONFIG = {
   defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: false,
-  enableMultiSelect: false, // TODO：关闭批量删除
+  enableMultiSelect: false,
   handlerColumn: {
-    minWidth: 150,
-    fixed: false
+    minWidth: 150
   }
 }
 import { VIEW_GRADE } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+import { exportGrantExcel } from '@/api/certificate/certificate'
 export default {
   name: 'Achievement',
   components: { SearchPopover },
@@ -236,6 +238,14 @@ export default {
     this.getPaperMaker()
   },
   methods: {
+    // 批量导出
+    exportBatch(select) {
+      const ids = _.join(_.map(select, 'id'), ',')
+      // TODO批量导出成绩管理接口缺失
+      exportGrantExcel({ ids }).then((res) => {
+        exportToExcel(res)
+      })
+    },
     getPaperMaker() {
       getPaperMaker().then((res) => {
         this.searchConfig.popoverOptions.find((it) => it.field == 'paperMaker').options = res
@@ -245,7 +255,7 @@ export default {
     handleLookUp(row) {
       this.$router.push({
         path: '/examManagement/grade/ExamineeAchievement',
-        query: { id: row.id }
+        query: { id: row.id, examPattern: row.examPattern }
       })
     },
 

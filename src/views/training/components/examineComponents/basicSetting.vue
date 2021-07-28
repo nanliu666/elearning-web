@@ -43,7 +43,29 @@
           />
         </el-radio-group>
       </template>
-
+      <template #questionTimeLimitType>
+        <el-radio-group
+          v-model="model.questionTimeLimitType"
+          :disabled="modelDisabled"
+        >
+          <el-radio :label="0">
+            不计时
+          </el-radio>
+          <el-radio :label="1">
+            按试题原设置时间
+          </el-radio>
+          <radio-input
+            :label="2"
+            :input-value.sync="model.questionTimeLimit"
+            text-before="每题限时"
+            text-after="分钟"
+            :input-props="{
+              maxLength: 4,
+              disabled: modelDisabled || model.questionTimeLimitType !== 2
+            }"
+          />
+        </el-radio-group>
+      </template>
       <template #joinNum>
         <el-radio-group v-model="model.joinNum">
           <div class="flex-flow flex flexcenter">
@@ -92,6 +114,89 @@ import { getExamList } from '@/api/examManage/schedule'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 import { Validate } from '../validate'
+const BASIC_COLUMNS = [
+  {
+    itemType: 'datePicker',
+    span: 24,
+    type: 'datetimerange',
+    valueFormat: 'yyyy-MM-dd HH:mm:ss',
+    prop: 'examTime',
+    label: '考试日期'
+  },
+  {
+    itemType: 'input',
+    span: 24,
+    required: true,
+    maxLength: 20,
+    prop: 'examName',
+    label: '考试名称'
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    required: true,
+    prop: 'testPaper',
+    label: '关联用卷'
+  },
+  {
+    itemType: 'slot',
+    span: 24,
+    required: true,
+    trigger: ['blur', 'change'],
+    prop: 'reviewer',
+    label: '评卷人'
+  },
+  {
+    itemType: 'radio',
+    prop: 'answerMode',
+    label: '答题模式',
+    span: 24,
+    options: [
+      { label: '整卷模式', value: 1 },
+      { label: '逐题考试', value: 2 }
+    ]
+  },
+  {
+    itemType: 'slot',
+    prop: 'reckonTime',
+    label: '考试时长',
+    span: 24
+  },
+  {
+    itemType: 'slot',
+    prop: 'questionTimeLimitType',
+    label: '逐题计时',
+    span: 24
+  },
+  {
+    itemType: 'radio',
+    prop: 'strategy',
+    label: '考试时间策略',
+    span: 24,
+    options: [
+      { label: '允许进入考试的时间', value: 0 },
+      { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
+    ]
+  },
+  {
+    itemType: 'slot',
+    prop: 'joinNum',
+    label: '参加次数',
+    span: 24
+  },
+  {
+    itemType: 'slot',
+    prop: 'integral',
+    label: '积分',
+    span: 24
+  },
+  {
+    itemType: 'slot',
+    prop: 'publishTime',
+    label: '发布考试',
+    span: 24
+  }
+]
 export default {
   name: 'BasicSetting',
   components: {
@@ -109,98 +214,17 @@ export default {
   data() {
     return {
       input: '',
-      columns: [
-        {
-          itemType: 'datePicker',
-          span: 24,
-          type: 'datetimerange',
-          rules: [
-            {
-              required: true,
-              message: '请选择考试日期',
-              trigger: 'blur'
-            },
-            { required: true, validator: this.validateExamTime, trigger: ['change'] }
-          ],
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          prop: 'examTime',
-          label: '考试日期'
-        },
-        {
-          itemType: 'input',
-          span: 24,
-          required: true,
-          maxLength: 20,
-          prop: 'examName',
-          label: '考试名称'
-        },
-        {
-          itemType: 'slot',
-          span: 24,
-          rules: [
-            { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
-          ],
-          prop: 'testPaper',
-          label: '关联用卷'
-        },
-        {
-          itemType: 'slot',
-          span: 24,
-          required: true,
-          trigger: ['blur', 'change'],
-          prop: 'reviewer',
-          label: '评卷人'
-        },
-        {
-          itemType: 'radio',
-          prop: 'answerMode',
-          label: '答题模式',
-          span: 24,
-          options: [
-            { label: '整卷模式', value: 1 },
-            { label: '逐题考试', value: 2 }
-          ]
-        },
-        {
-          itemType: 'slot',
-          prop: 'reckonTime',
-          label: '考试时长',
-          span: 24
-        },
-        {
-          itemType: 'slot',
-          prop: 'joinNum',
-          label: '参加次数',
-          span: 24
-        },
-        {
-          itemType: 'radio',
-          prop: 'strategy',
-          label: '考试时间策略',
-          span: 24,
-          options: [
-            { label: '允许进入考试的时间', value: 0 },
-            { label: '允许参考时间（到结束时间，会自动提交。）', value: 1 }
-          ]
-        },
-        {
-          itemType: 'slot',
-          prop: 'integral',
-          label: '积分',
-          span: 24
-        },
-        {
-          itemType: 'slot',
-          prop: 'publishTime',
-          label: '发布考试',
-          span: 24
-        }
-      ],
+      columns: BASIC_COLUMNS,
       model: {
         id: '',
+        reviewerNames:'',
+        reviewer:'',
+        questionTimeLimitType: 0, // 0-不计时,1-按原试题设置,2-重新设置
+        questionTimeLimit: 1, //每题限时默认为1
         examTime: [],
         examName: '',
         testPaper: '',
+        testPaperName:'',
         reviewer: null,
         answerMode: 1,
         reckonTime: false,
@@ -220,13 +244,38 @@ export default {
     ...mapGetters(['trainTimeInVuex'])
   },
   watch: {
+    entryCName: {
+      handler(val) {
+        // 直播不需要校验直播时间与考试时间的关系
+        const basicRule = {
+          required: true,
+          message: '请选择考试日期',
+          trigger: 'blur'
+        }
+        const validateExamTimeRule = {
+          required: true,
+          validator: this.validateExamTime,
+          trigger: ['change']
+        }
+        let targetRule = val === '直播' ? [basicRule] : [basicRule, validateExamTimeRule]
+        _.set(this.columns, '[0].rules', targetRule)
+      },
+      deep: true,
+      immediate: true
+    },
     'model.testPaper': {
       handler(val) {
+        // 设置试卷校验
+        const rules = [
+          { required: true, validator: this.validateTestPaper, trigger: ['blur', 'change'] }
+        ]
+        _.set(_.find(this.columns, { prop: 'testPaper' }), 'rules', rules)
         this.$set(
           this.model,
           'testPaperType',
           _.get(_.find(this.testPaperList, { id: val }), 'type')
         )
+        
       }
     }
   },
@@ -266,11 +315,33 @@ export default {
         this.$refs.form.validateField('testPaper')
       }
     },
-    loadCoordinator(params) {
-      return getWorkList(_.assign(params, { orgId: 0 }))
+    async loadCoordinator(params) {
+      let res = await getWorkList(_.assign(params, { orgId: 0 }))
+      //如果萍评卷人列表没有当前用户  自己添加一个
+      if(this.model.reviewer && this.model.reviewer.length>0){
+        this.model.reviewer.forEach((item,index)=>{
+          if(!_.find(res.data, { id: item })){
+            // let nameArr =  this.model.reviewerNames.split(',')
+            res.data.push({
+                name:this.model.reviewerNames[index],
+                userId:item
+            })
+          }
+        })
+      }
+        
+      return res
     },
-    loadTestPaper(params) {
-      return getExamList(_.assign(params, { status: 'normal' }))
+    async loadTestPaper(params) {
+      let res = await getExamList(_.assign(params, { status: 'normal' }))
+      //如果试卷列表没有当前试卷  自己添加一个
+        if(!_.find(res.data, { id: this.model.testPaper })){
+          res.data.push({
+              name:this.model.testPaperName,
+              id:this.model.testPaper
+          })
+        }
+        return res
     }
   }
 }

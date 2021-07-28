@@ -13,7 +13,67 @@
               {{ konwledgeDetail.status | statusFilterer }}
             </el-tag>
           </div>
-          <ul class="details-ul">
+
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <span class="li-label">创建人：</span>
+              <span class="li-value">{{ konwledgeDetail.creatorName || '--' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">更新时间：</span>
+              <span class="li-value">{{ konwledgeDetail.updateTime || '--' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">提供人：</span>
+              <span class="li-value">{{
+                konwledgeDetail.providerName ? konwledgeDetail.providerName : '--'
+              }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">所在分类：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName || '--' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">知识体系：</span>
+              <span class="li-value">{{ konwledgeDetail.knowledgeSystemFullName || '--' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">提供人岗位：</span>
+              <span class="li-value">{{ konwledgeDetail.providerPosition || '--' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">知识类型：</span>
+              <span class="li-value">{{
+                konwledgeDetail.type == '1'
+                  ? '视频'
+                  : konwledgeDetail.type == '2'
+                    ? '文档'
+                    : '资料下载'
+              }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">是否允许下载：</span>
+              <span class="li-value">{{ konwledgeDetail.allowDownload === 0 ? '是' : '否' }}</span>
+            </el-col>
+            <el-col :span="8">
+              <span class="li-label">提供人部门：</span>
+              <span class="li-value">{{ konwledgeDetail.providerOrgName || '--' }}</span>
+            </el-col>
+
+            <el-col :span="8">
+              <span class="li-label">上传模式：</span>
+              <span class="li-value">{{
+                konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
+              }}</span>
+            </el-col>
+
+            <!-- <el-col :span="24" v-if="konwledgeDetail.uploadType === 1">
+              <span class="li-label">链接地址：</span>
+              <span class="li-value">{{ konwledgeDetail.resUrl }}</span>
+            </el-col> -->
+          </el-row>
+
+          <!-- <ul class="details-ul">
             <li class="details-li">
               <span class="li-label">创建人：</span>
               <span class="li-value">{{ konwledgeDetail.creatorName }}</span>
@@ -22,21 +82,30 @@
               <span class="li-label">更新时间：</span>
               <span class="li-value">{{ konwledgeDetail.updateTime }}</span>
             </li>
-            <li class="details-li">
-              <span class="li-label">所在分类：</span>
-              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
-            </li>
+
             <li class="details-li">
               <span class="li-label">提供人：</span>
               <span class="li-value">{{
                 konwledgeDetail.providerName ? konwledgeDetail.providerName : '--'
               }}</span>
             </li>
+
             <li class="details-li">
-              <span class="li-label">上传模式：</span>
-              <span class="li-value">{{
-                konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
-              }}</span>
+              <span class="li-label">所在分类：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
+            </li>
+            
+            <li class="details-li">
+              <span class="li-label">知识体系：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
+            </li>
+            <li class="details-li">
+              <span class="li-label">提供人岗位：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
+            </li>
+            <li class="details-li">
+              <span class="li-label">知识类型：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
             </li>
             <li
               v-if="konwledgeDetail.uploadType === 0"
@@ -45,6 +114,19 @@
               <span class="li-label">是否允许下载：</span>
               <span class="li-value">{{ konwledgeDetail.allowDownload === 0 ? '是' : '否' }}</span>
             </li>
+
+            <li class="details-li">
+              <span class="li-label">提供人部门：</span>
+              <span class="li-value">{{ konwledgeDetail.catalogName }}</span>
+            </li>
+
+            <li class="details-li">
+              <span class="li-label">上传模式：</span>
+              <span class="li-value">{{
+                konwledgeDetail.uploadType === 0 ? '本地文件' : '链接文件'
+              }}</span>
+            </li>
+            
             <li
               v-if="konwledgeDetail.uploadType === 1"
               class="details-li"
@@ -53,7 +135,7 @@
               <span class="li-label">链接地址：</span>
               <span class="li-value">{{ konwledgeDetail.resUrl }}</span>
             </li>
-          </ul>
+          </ul> -->
         </div>
         <div class="details-bottom">
           <li class="bottom-li">
@@ -81,7 +163,7 @@
             </div>
           </li>
           <li
-            v-if="konwledgeDetail.allowDownload"
+            v-if="konwledgeDetail.allowDownload == 0"
             class="bottom-li"
           >
             <div class="bottom-li-title">
@@ -94,121 +176,60 @@
         </div>
       </div>
     </basic-container>
-    <basic-container style="margin-top: 20px">
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        :active-text-color="activeColor"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">
-          资源介绍
-        </el-menu-item>
-        <el-menu-item
-          v-if="_.size(konwledgeDetail.attachments) > 0"
-          index="2"
+    <basic-container class="basic-container-tab">
+      <el-tabs v-model="activeIndex">
+        <el-tab-pane
+          name="1"
+          label="知识介绍"
         >
-          附件
-        </el-menu-item>
-        <el-menu-item index="3">
-          评价
-        </el-menu-item>
-      </el-menu>
-      <div style="padding: 20px; min-height:32vh">
-        <div
-          v-if="activeIndex === '1'"
-          v-html="_.unescape(konwledgeDetail.introduction)"
-        />
-        <section v-if="activeIndex === '2'">
-          <div class="image-ul">
-            <div
-              v-for="(item, index) in fileGroup.true"
-              :key="index"
-              class="image__li"
-            >
-              <common-image-view
-                :is-download="true"
-                :url="item.url"
-                :file-name="item.fileName"
-                :preview-src-list="previewSrcList"
-                @downloadFile="downloadFile"
-              />
-            </div>
-          </div>
-          <ul
-            v-for="(item, index) in fileGroup.false"
-            :key="index"
-          >
-            <li class="file-title">
-              <span>{{ item.fileName }}</span>
-              <i
-                class="el-icon-download"
-                style="margin-left: 10px; cursor: pointer"
-                @click.stop="downloadFile(item)"
-              />
-            </li>
-          </ul>
-        </section>
-        <div v-if="activeIndex === '3'">
-          <Evaluate :evaluate-score="konwledgeDetail.evaluateScore" />
-        </div>
-      </div>
+          <KnowledgeInfo
+            v-if="activeIndex == '1' && konwledgeDetail"
+            :konwledge-detail="konwledgeDetail"
+          />
+        </el-tab-pane>
+        <el-tab-pane
+          name="2"
+          label="评价"
+        >
+          <Evaluate
+            v-if="activeIndex == '2'"
+            :evaluate-score="konwledgeDetail.evaluateScore"
+          />
+        </el-tab-pane>
+      </el-tabs>
     </basic-container>
   </div>
 </template>
 
 <script>
 import { getKnowledgeManageDetails } from '@/api/knowledge/knowledge'
-import CommonImageView from '@/components/common-image-viewer/viewer'
+// import CommonImageView from '@/components/common-image-viewer/viewer'
 import styles from '@/styles/variables.scss'
-import axios from 'axios'
 import Evaluate from './components/Evaluate'
+import KnowledgeInfo from './components/knowledgeInfo'
 export default {
   filters: {
     statusFilterer(data) {
-      return data === '0' ? '已上架' : '已下架'
+      return data === '0' ? '已发布' : '已停用'
     }
   },
   components: {
-    CommonImageView,
-    Evaluate
+    // CommonImageView,
+    Evaluate,
+    KnowledgeInfo
   },
   data() {
     return {
       activeColor: styles.primaryColor,
-      fileGroup: {},
       previewSrcList: [],
       activeIndex: '1',
-      konwledgeDetail: {}
+      konwledgeDetail: ''
     }
   },
   activated() {
     this.initData()
   },
   methods: {
-    downloadFile(data) {
-      axios
-        .get(
-          data.url,
-          // 将responseType的默认json改为blob
-          {
-            responseType: 'blob',
-            emulateJSON: true
-          }
-        )
-        .then((res) => {
-          let objectUrl = URL.createObjectURL(res.data)
-          const a = document.createElement('a')
-          a.download = data.fileName
-          a.style.display = 'none'
-          a.href = objectUrl
-          document.body.appendChild(a)
-          a.click()
-          a.remove()
-          window.URL.revokeObjectURL(objectUrl)
-        })
-    },
     /**
      * 标识状态
      */
@@ -224,39 +245,31 @@ export default {
      */
     initData() {
       getKnowledgeManageDetails({ id: this.$route.query.id }).then((res) => {
+        res.evaluateScore = Number(res.evaluateScore)
         this.konwledgeDetail = res
-        this.fileGroup = _.groupBy(this.konwledgeDetail.attachments, (item) => {
-          return this.fileTypeIsImage(item.fileName)
-        })
-        _.each(this.fileGroup.true, (item) => {
-          this.previewSrcList.push(item.url)
-        })
       })
-    },
-    // 判断当前格式是否为图片类型的格式
-    fileTypeIsImage(fileName) {
-      const lastIndex = fileName.lastIndexOf('.')
-      const fileType = fileName.substr(lastIndex + 1, fileName.length)
-      const imageType = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff']
-      if (imageType.includes(fileType)) {
-        return true
-      } else {
-        return false
-      }
-    },
-    /**
-     * 处理nav切换
-     */
-    handleSelect(key) {
-      this.activeIndex = key
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-/deep/ .el-menu--horizontal {
-  border-bottom: 1px solid #cccccc !important;
+/deep/.el-card {
+  border: none;
+}
+.li-label {
+  min-width: 80px;
+  display: inline-block;
+  color: rgba(0, 11, 21, 0.45);
+}
+.li-value {
+  color: #1e1e1e;
+  word-break: break-all;
+}
+.basic-container-tab {
+  margin-top: 20px;
+  min-height: 42vh;
+  background: #fff;
 }
 .details-container {
   background-color: #fff;
@@ -281,14 +294,6 @@ export default {
         width: 50%;
         display: flex;
         margin-bottom: 10px;
-        .li-label {
-          min-width: 80px;
-          display: inline-block;
-          color: #666666;
-        }
-        .li-value {
-          color: #1e1e1e;
-        }
       }
     }
   }
@@ -314,19 +319,5 @@ export default {
       }
     }
   }
-}
-.image-ul {
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  .image__li {
-    margin-bottom: 40px;
-  }
-}
-.file-title {
-  margin-bottom: 10px;
-  font-family: PingFangSC-Regular;
-  font-size: 14px;
-  color: #000b15;
 }
 </style>

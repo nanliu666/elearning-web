@@ -45,7 +45,7 @@
             批量撤回
           </el-button>
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="REVOKE_CERTIFICATE_DETAIL"
@@ -56,7 +56,6 @@
               撤回证书
             </el-button>
             <el-button
-              v-if="false"
               v-p="SOURCE_CERTIFICATE_DETAIL"
               type="text"
               @click="viewCertificate(row)"
@@ -65,6 +64,14 @@
             </el-button>
           </div>
         </template>
+        <template #status="data">
+          <span v-if="data.row.status === '1'">已获得</span>
+          <span
+            v-else-if="data.row.status === '2'"
+            style="color: red"
+          >已撤销</span>
+          <span v-else>--</span>
+        </template>
       </common-table>
     </basic-container>
   </div>
@@ -72,6 +79,11 @@
 
 <script>
 const TABLE_COLUMNS = [
+  {
+    label: '证书编号',
+    prop: 'certificateNo',
+    minWidth: 150
+  },
   {
     label: '姓名',
     prop: 'stuName',
@@ -96,17 +108,7 @@ const TABLE_COLUMNS = [
   {
     label: '状态',
     prop: 'status',
-    formatter(data) {
-      return data.status == '1' ? '已获得' : '已撤销'
-    },
-    minWidth: 120
-  },
-  {
-    label: '撤回时间',
-    prop: 'revokeTime',
-    formatter(data) {
-      return _.isEmpty(data.revokeTime) ? '--' : data.revokeTime
-    },
+    slot: true,
     minWidth: 120
   }
 ]
@@ -164,7 +166,7 @@ const SEARCH_CONFIG = {
             children: 'children',
             label: 'orgName',
             disabled: 'disabled',
-            value: 'orgId'
+            value: 'code'
           }
         }
       }
@@ -199,6 +201,7 @@ import {
   revokeCertificate,
   exportGrantExcel
 } from '@/api/certificate/certificate'
+import { exportToExcel } from '@/util/util'
 import { getOrgTreeSimple } from '@/api/org/org'
 export default {
   components: { SearchPopover },
@@ -253,46 +256,62 @@ export default {
   },
   methods: {
     // 查看来源
-    viewCertificate() {},
+    viewCertificate(data) {
+      if (data.bizType === 'exam') {
+        this.$router.push({
+          path: '/examManagement/examSchedule/detail',
+          query: {
+            id: data.bizId
+          }
+        })
+      } else if (data.bizType === 'train') {
+        this.$router.push({
+          path: '/training/trainingDetail',
+          query: {
+            id: data.bizId,
+            status: data.status
+          }
+        })
+      }
+    },
     // 撤回证书
-    revokeCertificateFun(row) {
+    async revokeCertificateFun(row) {
       const isBatch = _.isArray(row)
-      const canRevokeList = _.filter(row, (item) => {
-        return item.status === '1'
-      })
+      let ids = null
       const revokeTips = isBatch
-        ? `您确定要为${_.get(canRevokeList, '[0].stuName')}等${_.size(
-            canRevokeList
-          )}个学员撤回证书吗？`
+        ? `您确定要为${_.get(row, '[0].stuName')}等${_.size(row)}个学员撤回证书吗？`
         : `您确定要撤回${row.stuName}的证书吗？`
-      const ids = isBatch ? _.map(canRevokeList, 'id') : [row.id]
-      this.$confirm(revokeTips, '提醒', {
+      await this.$confirm(revokeTips, '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        revokeCertificate({ ids }).then(() => {
-          this.loadTableData()
-          this.$message.success('撤回证书成功')
-        })
       })
+      if (isBatch) {
+        const canRevokeList = _.filter(row, (item) => {
+          return item.status === '2'
+        })
+        if (canRevokeList.length > 0) {
+          await this.$confirm(
+            '您选中的学员中有包含不能撤回证书的学员,无法进行撤回操作,是否忽略,继续撤回其他学员证书?',
+            '提醒',
+            {
+              confirmButtonText: '继续撤回',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+        }
+      }
+      ids = isBatch ? _.map(row, 'id') : [row.id]
+      await revokeCertificate({ ids })
+      this.loadTableData()
+      this.$message.success('撤回证书成功')
     },
     // 批量导出
     exportBatch(select) {
       const ids = _.join(_.map(select, 'id'), ',')
       exportGrantExcel({ ids }).then((res) => {
-        const { data, headers } = res
-        const fileName = headers['content-disposition'].replace(/\w+;filename=(.*)/, '$1')
-        const blob = new Blob([data], { type: headers['content-type'] })
-        let dom = document.createElement('a')
-        let url = window.URL.createObjectURL(blob)
-        dom.href = url
-        dom.download = decodeURI(fileName)
-        dom.style.display = 'none'
-        document.body.appendChild(dom)
-        dom.click()
-        dom.parentNode.removeChild(dom)
-        window.URL.revokeObjectURL(url)
+        exportToExcel(res)
       })
     },
     /**
@@ -311,7 +330,6 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      console.log('params:', params)
       let currentStatus = ''
       if (params.status && params.status === 'No') {
         currentStatus = '2'

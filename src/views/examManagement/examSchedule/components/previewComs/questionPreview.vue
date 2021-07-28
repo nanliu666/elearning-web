@@ -27,7 +27,12 @@
       <!-- 判断题、单选题、多选题 -->
       <div
         v-if="
-          [QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_JUDGE].includes(data.type)
+          [
+            QUESTION_TYPE_SINGLE,
+            QUESTION_TYPE_MULTIPLE,
+            QUESTION_TYPE_JUDGE,
+            QUESTION_TYPE_RANDOM
+          ].includes(data.type)
         "
         class="qustion__options__box"
       >
@@ -46,7 +51,7 @@
               {{ '' }}
             </el-radio>
             <el-checkbox
-              v-if="QUESTION_TYPE_MULTIPLE === data.type"
+              v-if="[QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_RANDOM].includes(data.type)"
               :value="hasAnswer ? option.isCorrect : 0"
               :true-label="1"
               :class="{ hidden__pre: !hasAnswer }"
@@ -57,7 +62,11 @@
             </el-checkbox>
             <span>
               <span
-                v-if="[QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE].includes(data.type)"
+                v-if="
+                  [QUESTION_TYPE_SINGLE, QUESTION_TYPE_MULTIPLE, QUESTION_TYPE_RANDOM].includes(
+                    data.type
+                  )
+                "
                 style="margin-right: 4px"
               >{{ QUESTION_PREFACE[index] }}.</span>
               <span>{{ _.unescape(option.content) }}</span>
@@ -104,8 +113,8 @@ import questionView from './questionView'
 import { addLine } from '@/util/util'
 import {
   QUESTION_PREFACE,
-  QUESTION_TYPE_MAP,
   QUESTION_TYPE_MULTIPLE,
+  QUESTION_TYPE_RANDOM,
   QUESTION_TYPE_SINGLE,
   QUESTION_TYPE_JUDGE,
   QUESTION_TYPE_SHOER,
@@ -135,11 +144,11 @@ export default {
   computed: {
     QUESTION_PREFACE: () => QUESTION_PREFACE,
     QUESTION_TYPE_MULTIPLE: () => QUESTION_TYPE_MULTIPLE,
+    QUESTION_TYPE_RANDOM: () => QUESTION_TYPE_RANDOM,
     QUESTION_TYPE_SINGLE: () => QUESTION_TYPE_SINGLE,
     QUESTION_TYPE_JUDGE: () => QUESTION_TYPE_JUDGE,
     QUESTION_TYPE_BLANK: () => QUESTION_TYPE_BLANK,
     QUESTION_TYPE_SHOER: () => QUESTION_TYPE_SHOER,
-    QUESTION_TYPE_MAP: () => QUESTION_TYPE_MAP,
     QUESTION_TYPE_GROUP: () => QUESTION_TYPE_GROUP
   },
   watch: {

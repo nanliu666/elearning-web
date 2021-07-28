@@ -34,6 +34,7 @@ export const getOrgUserChild = (params) => get('/org/v1/org/user/child', params)
  * @returns {{orgs: Array<any>; users: Array<any>}}
  */
 export const getPostionUserChild = (params) => get('/manage/v1/positions/user/child', params)
+export const getPostionUserChild2 = (params) => get('/manage/v1/position/user/child', params)
 /**
  * 获取子业务部门和直属员工接口
  * @param {object} params 参数
@@ -49,6 +50,15 @@ export const getBizUserChild = (params) => get('/org/v1/biz/org/user/child', par
  * @param {string} params.pageSize
  */
 export const getOuterUser = (params) => get('/user/v1/user/outer', params)
+/**
+ * 获取外部用户
+ * @param {object} params 参数
+ * @param {string} params.pageNo
+ * @param {string} params.pageSize
+ */
+export const exportUserList = (params) =>
+  get('/org/v1/org/user/export', params, { responseType: 'blob' })
+
 /* 获取外部用户
  * @param {object} params 参数
  * @param {string} params.pageNo
@@ -342,3 +352,29 @@ export const updateUserIdBatchOrg = (params) =>
  * @desc 分组列表
  */
 export const getGroup = (params) => get('/api/user/v1/usergroup/list', params)
+/**
+ * @desc 导入用户
+ */
+export const importUser = (params) => post('/api/user/v1/user/import', params)
+/**
+ * @desc 导入用户错误报告
+ */
+export const importUserErrorFile = (params) =>
+  get('/api/user/v1/user/exportErrFile', params, { responseType: 'blob' })
+
+/**
+ * @desc 批量删除用户
+ * @param {strign} 用户ID
+ */
+export const batchDeleteUserByIds = (params) => del('/user/v1/user/deleteByIds', params)
+
+/**
+ * @desc 分组导入
+ */
+export const usergroupImport = (params) => post('/api/user/v1/usergroup/import', params)
+
+/**
+ * @desc 下载分组导入错误信息
+ */
+export const groupErrFileExport = (params) =>
+  get('/api/user/v1/usergroup/errFileExport', params, { responseType: 'blob' })

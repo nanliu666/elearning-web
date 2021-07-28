@@ -2,7 +2,7 @@
   <el-dialog
     v-if="visible"
     v-loading="loading"
-    :title="type === 'create' ? '新建分类' : type === 'createChild' ? '新建子分类' : '编辑分类'"
+    :title="type === 'create' ? '创建分类' : type === 'createChild' ? '创建子分类' : '编辑分类'"
     :visible="visible"
     width="800px"
     :modal-append-to-body="false"
@@ -36,14 +36,14 @@
             placeholder="请选择"
           >
             <el-option
-              style="height: auto;padding:0"
+              style="height: auto; padding: 0"
               :value="form.parentId"
               :label="parentOrgIdLabel"
             >
               <el-tree
                 ref="orgTree"
                 :data="orgTree"
-                node-key="orgId"
+                node-key="idStr"
                 :props="{
                   children: 'children',
                   label: 'name'
@@ -57,48 +57,18 @@
           </div>
         </el-col>
       </el-form-item>
-      <!-- <el-form-item>
-        <template slot="label">
-          <div>
-            是否公开
-
-            <el-tooltip
-              class="item"
-              effect="dark"
-              content="此选项可以选择该分类是否展示给其他子公司"
-              placement="top-start"
-            >
-              <i class="el-icon-question"></i>
-            </el-tooltip>
-          </div>
-        </template>
-        <el-select
-          v-model="form.isPublic"
-          placeholder="请选择"
-        >
-          <el-option
-            label="否"
-            :value="0"
-          ></el-option>
-          <el-option
-            label="是"
-            :value="1"
-          ></el-option>
-        </el-select>
-      </el-form-item> -->
-
       <!-- 可见范围 -->
       <el-form-item
-        v-show="!parentOrgIdLabel || parentOrgIdLabel === '顶级'"
+        v-if="parentOrgIdLabel === '顶级' && type !== 'createChild'"
         label="可见范围"
       >
         <div>
           <OrgTree
             :id-list="form.orgIdList"
+            input-placeholder="搜索组织名称"
             @selectedValue="getOrgList"
           ></OrgTree>
         </div>
-        <!-- {{ userList }} -->
       </el-form-item>
     </el-form>
     <span
@@ -126,12 +96,6 @@ export default {
   components: {
     OrgTree
   },
-  props: {
-    visible: {
-      type: Boolean,
-      default: false
-    }
-  },
   data() {
     return {
       type: 'create',
@@ -145,7 +109,8 @@ export default {
         name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
       orgTree: [],
-      loading: false
+      loading: false,
+      visible: false
     }
   },
   methods: {
@@ -155,13 +120,10 @@ export default {
     },
     async loadOrgTree() {
       let res = await queryTeacherCataList({ source: 'teacher', addFlag: '1' })
-      if (this.type === 'edit') {
-        this.orgTree = this.clearCurrentChildren(res)
-        this.parentOrgIdLabel =
-          this.form.parentId == '0' ? '顶级' : this.findOrg(this.form.parentId).name
-      } else {
-        this.orgTree = res
-      }
+      if (this.type === 'edit') this.orgTree = this.clearCurrentChildren(res)
+      else this.orgTree = res
+      this.parentOrgIdLabel =
+        +this.form.parentId === 0 ? '顶级' : this.findOrg(this.form.parentId).name
     },
     // 过滤当前选择编辑的分类的子类
     clearCurrentChildren(res) {
@@ -210,7 +172,7 @@ export default {
               .then(() => {
                 this.$message.success('创建成功')
                 this.loading = false
-                this.$emit('changevisible', false)
+                this.handleClose()
                 this.$emit('refresh')
               })
               .catch(() => {
@@ -220,6 +182,8 @@ export default {
             // 编辑
             this.loading = true
             this.form.id = this.form.idStr
+            this.form.parentIdStr = this.form.parentId
+            console.log(this.form)
             editTeacherCatalog(_.assign(this.form, { source: 'teacher' }))
               .then(() => {
                 this.$message.success('修改成功')
@@ -229,7 +193,7 @@ export default {
               .catch(() => {
                 this.loading = false
               })
-            this.$emit('changevisible', false)
+            this.handleClose()
           }
         } else {
           this.$message.error(obj[Object.keys(obj)[0]][0].message)
@@ -238,32 +202,45 @@ export default {
       })
     },
     // 新建分类
-    create() {
-      this.type = 'create'
-      this.parentOrgIdLabel = ''
-      this.$emit('changevisible', true)
-      this.orgTree[0] && this.handleOrgNodeClick()
-      this.$set(this.form, 'isPublic', 0)
-      this.$set(this.form, 'name', '')
-      this.$set(this.form, 'parentId', '')
-      this.loadOrgTree()
+    add() {
+      this.visible = true
+      this.$nextTick(() => {
+        this.type = 'create'
+        this.orgTree[0] && this.handleOrgNodeClick()
+        this.$set(this.form, 'isPublic', 0)
+        this.$set(this.form, 'name', '')
+        this.$set(this.form, 'parentId', '')
+        this.parentOrgIdLabel = '顶级'
+        this.loadOrgTree()
+      })
     },
     // 新建子分类
     createChild(row) {
-      this.type = 'createChild'
-      this.form = _.cloneDeep(row)
-      this.form.parentId = row.id
-      this.parentOrgIdLabel = row.name
-      this.$emit('changevisible', true)
-      this.$set(this.form, 'isPublic', 0)
-      this.$set(this.form, 'name', '')
-      this.loadOrgTree()
+      this.visible = true
+      this.$nextTick(() => {
+        this.type = 'createChild'
+        this.form = _.cloneDeep(row)
+        this.form.parentId = row.idStr
+        this.$set(this.form, 'isPublic', 0)
+        this.$set(this.form, 'name', '')
+        this.loadOrgTree()
+      })
     },
     edit(row) {
       this.type = 'edit'
       this.loadOrgTree()
       this.form = _.cloneDeep(row)
-      this.parentOrgIdLabel = row.parentId === '0' ? '' : this.findOrg(row.parentId).name
+      if (this.form.orgIdList.length) {
+        this.form.orgIdList = this.form.orgIdList.reduce((pre, cur, index) => {
+          pre.push({
+            orgId: cur,
+            orgName: this.form.orgNames.split(',')[index]
+          })
+          return pre
+        }, [])
+      }
+      this.form.parentId = this.form.parentIdStr
+      this.visible = true
       this.$emit('changevisible', true)
       this.loadOrgTree()
     },
@@ -271,7 +248,7 @@ export default {
       let org = {}
       function deep(arr) {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].id === id) {
+          if (arr[i].idStr === id) {
             org = arr[i]
             return
           }
@@ -284,12 +261,12 @@ export default {
       return org
     },
     handleClose() {
-      this.form = { parentId: '' }
-      this.$emit('changevisible', false)
+      this.visible = false
+      this.form = {}
     },
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.form.parentId = data.id
+        this.form.parentId = data.idStr
         this.parentOrgIdLabel = data.name
       }
     }

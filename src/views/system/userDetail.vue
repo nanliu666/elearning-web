@@ -171,6 +171,13 @@ export default {
       userData: {},
       columns: [
         {
+          label: '用户类型',
+          prop: 'type',
+          formatter(record) {
+            return record.orgName ? '公司员工' : '外部人员'
+          }
+        },
+        {
           label: '所在部门',
           prop: 'orgName'
         },

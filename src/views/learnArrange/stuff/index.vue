@@ -24,12 +24,15 @@
           <span class="text">{{ data.deptName }}</span>
         </div>
         <div class="intro-item">
-          线上必修安排名称：
+          {{ data.type == 'plan' ? '线上必修安排名称：' : '培训名称：' }}
           <span class="text">{{ data.trainName || data.studyName }}</span>
         </div>
       </div>
       <div class="intro-list">
-        <div class="intro-item">
+        <div
+          v-if="data.type === 'inside'"
+          class="intro-item"
+        >
           作业提交率：
           <span class="text">{{
             data.job ||
@@ -38,15 +41,19 @@
                 : '--')
           }}</span>
         </div>
+
         <div
-          v-if="!data.type"
+          v-if="data.type === 'inside'"
           class="intro-item"
         >
-          培训上报材料：
-          <span class="text">{{ data.isSubmit === 'Yes' ? '已提交' : '未提交' }}</span>
+          学习心得提交率：
+          <span class="text">
+            {{ data.feelPercent ? data.feelPercent + '次' : '--' }}
+          </span>
         </div>
         <div class="intro-item">
-          <span class="text"></span>
+          {{ data.type === 'plan' ? '培训上报材料：' : '培训总结：' }}
+          <span class="text">{{ data.isSubmit === 'Yes' ? '已提交' : '未提交' }}</span>
         </div>
       </div>
     </div>
@@ -76,7 +83,7 @@
 </template>
 
 <script>
-import { study, course, train } from './contents'
+import { study, course, train, report } from './contents'
 import {
   queryCourseWork,
   experience,
@@ -92,23 +99,26 @@ export default {
   components: {
     study,
     train,
-    course
+    course,
+    report
   },
   data() {
     return {
       data: {},
-      tabs: ['course', 'study', 'train'],
+      tabs: ['course', 'study', 'train', 'report'],
       activeTab: 'course',
       reference: {
         course: '课程作业',
         study: '学习心得',
-        train: '培训上报材料'
+        train: '培训总结',
+        report: '培训总结'
       },
       tabData: {
         course: [],
-        courseOpitons: [],
+        courseOptions: [],
         study: [],
-        train: []
+        train: [],
+        report: []
       }
     }
   },
@@ -132,6 +142,8 @@ export default {
     Object.keys(this.$route.query).forEach((key) => {
       this.data[key] = query[key]
     })
+    this.tabs = ['course', 'study', 'train', 'report']
+    this.activeTab = 'course'
     this.$forceUpdate()
     this.getData()
   },
@@ -139,26 +151,42 @@ export default {
     this.data = {}
     this.tabData = {
       course: [],
-      courseOpitons: [],
+      courseOptions: [],
       study: [],
-      train: []
+      train: [],
+      report: []
     }
     this.activeTab = 'course'
   },
   methods: {
     getData() {
+      if (this.data.type === 'outer') {
+        this.listSubmitFile()
+        this.activeTab = 'report'
+        this.tabs = ['report']
+        this.tabData.trainName = this.data.trainName
+        this.$forceUpdate()
+        return
+      } else if (this.data.type === 'inside') {
+        this.tabs = this.tabs.slice(0, -1)
+        this.activeTab = 'course'
+      }
       this.queryWork()
-
       this.getOnlineCourse()
-
       this.queryExperience()
       if (this.data.type === 'plan') {
         this.tabs = ['course', 'study']
         return
       }
       const { trainId, stuId: userId } = this.data
-      materials({ trainId, userId }).then((res) => {
+      materials({ trainId, userId }).then((res = []) => {
         this.tabData.train = res
+      })
+    },
+    listSubmitFile() {
+      const { trainId, stuId: userId } = this.data
+      materials({ trainId, userId }).then((res = []) => {
+        this.tabData.report = res
       })
     },
     queryWork(courseId = '') {
@@ -202,8 +230,8 @@ export default {
           }
         })
         this.tabData.course = vos
+        this.$forceUpdate()
       })
-      this.$forceUpdate()
     },
     getOnlineCourse() {
       const { trainId, studyPlanId, type } = this.data
@@ -216,8 +244,8 @@ export default {
         api = getOnlineCourse
         params.trainId = trainId
       }
-      api(params).then((res) => {
-        this.tabData.courseOpitons = res
+      api(params).then((res = []) => {
+        this.tabData.courseOptions = res
         this.$forceUpdate()
       })
     },
@@ -232,7 +260,7 @@ export default {
         api = experience
         params.trainId = trainId
       }
-      api(params).then((res) => {
+      api(params).then((res = []) => {
         this.tabData.study = res
         this.$forceUpdate()
       })

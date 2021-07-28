@@ -2,15 +2,15 @@
   <div class="addLecturer">
     <div
       class="addLecturer_head"
-      @click="toLecturer"
+      @click="toLecturer(false)"
     >
-      <i class="el-icon-arrow-left"></i> {{ $route.query.id ? '编辑讲师' : '创建讲师' }}
+      <i class="el-icon-arrow-left"></i>
+      {{ '编辑讲师' }}
     </div>
     <div class="addLecturer_content">
       <div class="addLecturer_content_title">
         基础信息
       </div>
-
       <!-- 表单区域 -->
       <div class="addLecturer_form">
         <el-form
@@ -22,45 +22,44 @@
         >
           <!-- 第一行 -->
           <el-row>
-            <el-col :span="10">
-              <el-form-item
-                label="讲师姓名"
-                prop="userId"
+            <el-form-item
+              label="讲师类型"
+              prop="teacherType"
+            >
+              <el-radio-group
+                v-model="ruleForm.teacherType"
+                disabled
               >
-                <el-input
-                  v-model="ruleForm.userId"
-                  maxlength="32"
-                  disabled
-                ></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="2">
-            </el-col>
-            <el-col :span="10">
-              <el-form-item
-                label="手机号码"
-                prop="phonenum"
-              >
-                <el-input
-                  v-model="ruleForm.phonenum"
-                  maxlength="32"
-                  disabled
-                ></el-input>
-              </el-form-item>
-            </el-col>
+                <el-radio label="0">
+                  内部讲师
+                </el-radio>
+                <el-radio label="1">
+                  外部讲师
+                </el-radio>
+              </el-radio-group>
+            </el-form-item>
           </el-row>
-
           <!-- 第二行 -->
           <el-row>
             <el-col :span="10">
               <el-form-item
-                label="电子邮件"
-                prop="userEmail"
+                v-if="ruleForm.teacherType === '0'"
+                label="讲师姓名"
+                prop="userId"
               >
                 <el-input
-                  v-model="ruleForm.userEmail"
-                  maxlength="32"
+                  v-model="ruleForm.name"
                   disabled
+                />
+              </el-form-item>
+              <el-form-item
+                v-else
+                label="讲师姓名"
+                prop="userName"
+              >
+                <el-input
+                  v-model="ruleForm.userName"
+                  placeholder="请输入"
                 ></el-input>
               </el-form-item>
             </el-col>
@@ -68,89 +67,212 @@
             </el-col>
             <el-col :span="10">
               <el-form-item
+                v-if="ruleForm.teacherType === '0'"
                 label="性别"
-                prop="sex"
               >
-                <el-radio
+                <el-radio-group
                   v-model="ruleForm.sex"
-                  :label="1"
-                  disabled
+                  :disabled="ruleForm.teacherType === '0'"
                 >
-                  男
-                </el-radio>
-                <el-radio
+                  <el-radio label="0">
+                    女
+                  </el-radio>
+                  <el-radio label="1">
+                    男
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item
+                v-else-if="ruleForm.teacherType !== '0'"
+                prop="sex"
+                label="性别"
+              >
+                <el-radio-group
                   v-model="ruleForm.sex"
-                  :label="0"
-                  disabled
+                  :disabled="ruleForm.teacherType === '0'"
                 >
-                  女
-                </el-radio>
+                  <el-radio label="0">
+                    女
+                  </el-radio>
+                  <el-radio label="1">
+                    男
+                  </el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
           </el-row>
-
           <!-- 第三行 -->
+          <el-row v-if="ruleForm.teacherType === '0'">
+            <el-col :span="10">
+              <el-form-item label="所在部门">
+                <el-input
+                  v-model="ruleForm.orgName"
+                  disabled
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="2"></el-col>
+            <el-col :span="10">
+              <el-form-item label="岗位">
+                <el-input
+                  v-model="ruleForm.positionName"
+                  disabled
+                ></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <!-- 第四行 -->
           <el-row>
             <el-col :span="10">
               <el-form-item
-                label="讲师类型"
+                v-show="ruleForm.teacherType === '0'"
+                label="联系方式"
+              >
+                <el-input
+                  v-model="ruleForm.phoneNo"
+                  maxlength="11"
+                  :disabled="ruleForm.teacherType === '0'"
+                  placeholder="请输入"
+                ></el-input>
+              </el-form-item>
+              <el-form-item
+                v-show="ruleForm.teacherType !== '0'"
+                label="联系方式"
+                prop="phoneNo"
+              >
+                <el-input
+                  v-model="ruleForm.phoneNo"
+                  maxlength="11"
+                  :disabled="ruleForm.teacherType === '0'"
+                  placeholder="请输入"
+                ></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="2"></el-col>
+            <el-col :span="10">
+              <el-form-item
+                label="聘用类型"
                 prop="type"
               >
-                <el-select
-                  v-model="ruleForm.type"
-                  placeholder="请选择"
-                >
+                <el-select v-model="ruleForm.type">
                   <el-option
-                    label="内训"
-                    :value="1"
-                  ></el-option>
-                  <el-option
-                    label="外聘"
-                    :value="2"
+                    v-for="(item, index) in type"
+                    :key="index"
+                    :value="index + 1"
+                    :label="item"
                   ></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+          </el-row>
+          <!-- 第五行 -->
+          <el-row>
             <el-col :span="10">
-              <!-- data -->
-
-              <!-- <el-form-item
-                label="所属分类"
-                prop="categoryId"
+              <el-form-item
+                label="讲师聘期"
+                prop="date"
               >
-                <el-cascader
-                  v-model="ruleForm.categoryId"
-                  :props="{ value: 'id' }"
-                  :options="data"
-                  @change="treeClickNode"
-                ></el-cascader>
-              </el-form-item> -->
-
-              <!-- 移过来的tree -->
-
+                <el-date-picker
+                  v-model="ruleForm.date"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  value-format="yyyy-MM-dd"
+                >
+                </el-date-picker>
+              </el-form-item>
+            </el-col>
+            <el-col :span="2"></el-col>
+            <el-col :span="10">
+              <el-form-item
+                label="专业分类"
+                prop="professionalCata"
+              >
+                <el-select v-model="ruleForm.professionalCata">
+                  <el-option
+                    v-for="(item, index) in professionalCata"
+                    :key="index"
+                    :value="`0${index + 1}`"
+                    :label="item"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <!-- 第六行 -->
+          <el-row>
+            <el-col :span="10">
+              <el-form-item
+                label="讲师等级"
+                prop="teacherLevel"
+              >
+                <el-select v-model="ruleForm.teacherLevel">
+                  <el-option
+                    v-for="(item, index) in teacherLevelOption"
+                    :key="index"
+                    :value="`0${index}`"
+                    :label="item"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="2"></el-col>
+            <el-col :span="10">
+              <el-form-item label="授课课时费">
+                <el-input-number
+                  v-model="ruleForm.courseCost"
+                  :min="0"
+                  :precision="2"
+                  controls-position="right"
+                  placeholder="请输入金额"
+                  :max="999999"
+                />
+                <span class="yen">&yen;</span>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <!-- 第七行 -->
+          <el-row>
+            <el-col :span="10">
+              <el-form-item label="讲师职称">
+                <el-select v-model="ruleForm.teacherTitle">
+                  <el-option
+                    v-for="(item, index) in teacherTitleOption"
+                    :key="index"
+                    :label="item"
+                    :value="`0${index + 1}`"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="2"></el-col>
+            <el-col :span="10">
               <el-form-item
                 label="所属分类"
                 prop="categoryId"
               >
+                <span
+                  class="categoryId"
+                  @click="toClass"
+                >分类管理</span>
                 <el-select
-                  v-model="ruleForm.categoryId"
+                  :value="parentOrgIdLabel"
                   :multiple-limit="10"
                   placeholder="请选择"
                 >
                   <el-option
-                    style="height: auto;padding:0"
-                    :value="ruleForm.categoryId"
-                    :label="parentOrgIdLabel"
+                    style="height: auto; padding: 0"
+                    :value="parentOrgIdLabel"
                   >
                     <el-tree
                       ref="orgTree"
-                      :data="data"
-                      node-key="categoryId"
-                      :props="props"
-                      lazy
-                      :load="loadNode"
+                      :data="listData"
+                      node-key="id"
+                      :props="{
+                        children: 'children',
+                        label: 'name'
+                      }"
                       @node-click="handleOrgNodeClick"
                     />
                   </el-option>
@@ -158,152 +280,113 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <!-- 第四行 -->
+          <!-- 第八行 -->
           <el-row>
             <el-col :span="10">
-              <!-- 目前这个不做 -->
-              <!-- <el-form-item label="擅长领域" prop="taglds">
-                <el-select v-model="ruleForm.taglds" placeholder="请选择所在目录">
-                  <el-option label="区域一" value="1"></el-option>
-                  <el-option label="区域二" value="2"></el-option>
+              <el-form-item label="聘书编号">
+                <el-select
+                  v-model="ruleForm.certNo"
+                  filterable
+                  @input.native="inputCard"
+                >
+                  <el-option
+                    v-for="(item, index) in certNo"
+                    :key="index"
+                    :label="item"
+                    :value="item"
+                  ></el-option>
                 </el-select>
-              </el-form-item> -->
-
-              <el-form-item
-                label="讲师级别"
-                prop="teacherLevel"
-              >
-                <el-input
-                  v-model="ruleForm.teacherLevel"
-                  maxlength="32"
-                  placeholder="请输入"
-                ></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
+            <el-col :span="2"></el-col>
             <el-col :span="10">
-              <el-form-item
-                label="讲师职称"
-                prop="teacherTitle"
-              >
-                <el-input
-                  v-model="ruleForm.teacherTitle"
-                  maxlength="32"
-                  placeholder="请输入"
-                ></el-input>
+              <el-form-item label="擅长领域">
+                <div class="skilledField">
+                  <el-tag
+                    v-for="(tag, index) in ruleForm.skilledField"
+                    :key="index"
+                    closable
+                    :disable-transitions="false"
+                    @close="removeTabs(tag)"
+                  >
+                    {{ tag }}
+                  </el-tag>
+                  <div class="add">
+                    <el-input
+                      v-if="inputVisible"
+                      ref="saveTagInput"
+                      v-model="inputValue"
+                      class="input-new-tag"
+                      size="small"
+                      autofocus
+                      maxlength="10"
+                      @keyup.enter.native="handleInputConfirm"
+                      @blur="handleInputConfirm"
+                    >
+                    </el-input>
+                    <el-button
+                      :disabled="ruleForm.skilledField.length >= 5"
+                      size="medium"
+                      @click="addSkilledField"
+                    >
+                      +&nbsp;&nbsp;&nbsp;添加
+                    </el-button>
+                  </div>
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
-
-          <!-- 第五行 -->
-          <el-row class="switch_box">
+          <el-row>
             <el-col :span="10">
-              <el-form-item
-                prop="isRecommend"
-                label="是否推荐 "
-              >
-                <!-- <span style="color:#333;">是否推荐 &nbsp; &nbsp; &nbsp;</span> -->
+              <el-form-item label="是否推荐">
                 <el-switch
                   v-model="ruleForm.isRecommend"
-                  active-color="#198cff"
-                  inactive-color="#ccc"
+                  :active-value="1"
+                  :inactive-value="0"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
                 >
                 </el-switch>
               </el-form-item>
             </el-col>
-            <el-col :span="2">
-            </el-col>
-            <el-col :span="10">
-              <el-form-item
-                label="是否最新讲师"
-                prop="isLatestTeacher"
-              >
-                <el-radio
-                  v-model="ruleForm.isLatestTeacher"
-                  :label="1"
-                >
-                  是
-                </el-radio>
-                <el-radio
-                  v-model="ruleForm.isLatestTeacher"
-                  :label="0"
-                >
-                  否
-                </el-radio>
-              </el-form-item>
-            </el-col>
           </el-row>
-
-          <!-- 两个单选框 -->
+          <!-- 第九行 -->
           <el-row>
             <el-col :span="10">
-              <el-form-item
-                label="是否热门讲师"
-                prop="isPopularTeacher"
-              >
-                <el-radio
-                  v-model="ruleForm.isPopularTeacher"
-                  :label="1"
-                >
-                  是
-                </el-radio>
-                <el-radio
-                  v-model="ruleForm.isPopularTeacher"
-                  :label="0"
-                >
-                  否
-                </el-radio>
-              </el-form-item>
-            </el-col>
-            <el-col :span="2">
-            </el-col>
-            <el-col :span="10">
-            </el-col>
-          </el-row>
-
-          <!-- 第六行 -->
-          <el-row>
-            <el-col :span="10">
-              <el-form-item
-                label="讲师照片"
-                prop="attachments"
-              >
+              <el-form-item label="讲师照片">
                 <common-upload
-                  v-model="ruleForm.attachments"
                   class="upload-demo"
                   drag
                   :multiple="false"
                   :show-file-list="false"
                   :before-upload="beforeAvatarUpload"
+                  @getValue="onSuccess"
                 >
                   <i class="el-icon-upload"></i>
-                  <div class="el-upload__text">
-                    将文件拖到此处，或<em>点击上传</em><br />
-                    <div
-                      slot="tip"
-                      class="el-upload__tip"
-                    >
-                      只能上传jpg/jpge/png文件，且不超过5M
-                    </div>
-                  </div>
+                  <p class="upload">
+                    <span style="font-size: 16px; padding: 0 40px"> 点击或者拖拽附件到此区域</span>
+                    <span style="font-size:12px;padding;0 30px;">
+                      上传的图片格式要求jpg、jpeg、bmp、png， 大小不超过5M</span>
+                  </p>
                   <img
-                    v-if="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl !== ''"
-                    :src="ruleForm.attachments[ruleForm.attachments.length - 1].fileUrl"
+                    v-if="ruleForm.attachments[0].fileUrl"
+                    :src="ruleForm.attachments[0].fileUrl"
                     class="avatar"
                   />
                 </common-upload>
               </el-form-item>
             </el-col>
           </el-row>
-
-          <!-- 第七行 -->
           <div class="editorTitle">
             <el-form-item
               label="详细介绍"
               prop="introduction"
             >
               <tinymce v-model="ruleForm.introduction" />
+              <span
+                v-if="!ruleForm.introduction"
+                class="introduction"
+              >可为讲师添加教育经验、获奖情况、专业特长等详细介绍</span>
             </el-form-item>
           </div>
         </el-form>
@@ -313,13 +396,13 @@
       <el-button
         type="primary"
         size="medium"
-        @click="isAddTeacher()"
+        @click="upload"
       >
         确定
       </el-button>
       <el-button
         size="medium"
-        @click="toLecturer()"
+        @click="toLecturer(true)"
       >
         取消
       </el-button>
@@ -328,8 +411,8 @@
 </template>
 
 <script>
-import { queryTeacherlist, listTeacherCategory, getTeacher, update } from '@/api/lecturer/lecturer'
-// import { uploadQiniu } from '@/util/uploadQiniu'
+import { getTeacher, update, cardNum } from '@/api/lecturer/lecturer'
+import { queryCategoryOrgList } from '@/api/resource/classroom'
 export default {
   components: {
     commonUpload: () => import('@/components/common-upload/commonUpload')
@@ -339,233 +422,169 @@ export default {
       parentOrgIdLabel: '',
       props: {
         value: 'id',
+        label: 'name',
         isLeaf: (data, node) => {
           if (node.level === 2 || data.label == '未分类') {
             return true
           }
         }
       },
-      userIdData: '',
-      Teacherlist: [], //讲师的数据
-      data: [], //分类列表
+      timer: null,
+      //更新失败保存讲师介绍
+      text: '',
+      ruleFormClone: null,
+      listData: [], //分类列表
       checkboxVal: [],
       // 添加标签
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        },
-        {
-          value: '选项2',
-          label: '双皮奶'
-        }
+      options: [],
+      // 讲师等级选项
+      teacherLevelOption: [
+        '预备级',
+        '助理级',
+        '初级',
+        '中级',
+        '高级',
+        '资深级',
+        '专家级',
+        '非讲师'
       ],
-      // 填写信息
+      // 讲师职称选项
+      teacherTitleOption: ['助理级', '初级', '中级', '高级', '研究员级', '无'],
+      //聘用形式
+      type: ['内训', '外聘'],
+      //专业类型
+      professionalCata: ['技术类', '管理类', '营销类', '技能类'],
+      //证书编号集
+      certNo: [],
+      // 添加擅长领域input框是否显示
+      inputVisible: false,
+      inputValue: '',
+      // 填写课程信息
       ruleForm: {
-        categoryId: '',
+        date: [],
+        teacherType: '',
         userId: '',
-        userEmail: '',
-        phonenum: '',
+        userName: '',
+        phoneNo: '',
+        orgName: '',
+        positionName: '',
+        teacherTitle: '',
         sex: '',
-        attachments: [],
-        isRecommend: false,
-        isLatestTeacher: 0,
-        isPopularTeacher: 0
+        type: '',
+        professionalCata: '',
+        teacherLevel: '',
+        certNo: '',
+        isRecommend: '',
+        introduction: '',
+        categoryId: '',
+        hireStartTime: '',
+        hireEndTime: '',
+        skilledField: [],
+        courseCost: 0,
+        attachments: [
+          {
+            fileUrl: ''
+          }
+        ]
       },
       rules: {
-        userId: [{ required: true, message: '请选择讲师', trigger: 'blur' }],
-        // categoryId: [{ required: true, message: '请选择所在目录', trigger: 'blur' }],
-        type: [{ required: true, message: '请选择讲师类型', trigger: 'blur' }]
+        teacherType: [{ required: true, message: '请选择讲师类型', trigger: 'change' }],
+        userId: [{ required: true, message: '请选择讲师', trigger: 'change' }],
+        userName: [{ required: true, message: '请输入讲师姓名', trigger: 'blur' }],
+        sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+        phoneNo: [
+          { required: true, message: '请输入联系方式', trigger: 'blur' },
+          {
+            validator: (rule, value, callback) => {
+              if (
+                /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/.test(
+                  value
+                )
+              ) {
+                callback()
+              } else {
+                callback(new Error('手机号格式错误'))
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        orgName: [{ required: true, message: '请输入部门', trigger: 'blur' }],
+        positionName: [{ required: true, message: '请输入岗位', trigger: 'blur' }],
+        type: [{ required: true, message: '请选择聘用类型', trigger: 'change' }],
+        professionalCata: [{ required: true, message: '请选择专业类型', trigger: 'change' }],
+        teacherLevel: [{ required: true, message: '请选择聘用类型', trigger: 'change' }],
+        certNo: [{ type: Number, message: '证书编号只能为数字', trigger: 'blur' }],
+        date: [{ required: true, message: '请选择讲师聘期', trigger: 'change' }],
+        categoryId: [{ required: true, message: '请选择所属分类', trigger: 'change' }]
       }
     }
   },
   watch: {
-    // 'ruleForm.name': {
-    //   handler(n) {
-    //     this.Teacherlist.forEach((item, index) => {
-    //       if (item.userId == n) {
-    //         this.ruleForm.phonenum = this.Teacherlist[index].phonenum
-    //         this.disableDdata.disabledPhonenum = this.Teacherlist[index].phonenum ? true : false
-    //         this.ruleForm.userEmail = this.Teacherlist[index].userEmail
-    //         this.disableDdata.disabledUserEmail = this.Teacherlist[index].userEmail ? true : false
-    //         this.ruleForm.sex = this.Teacherlist[index].sex
-    //         this.disableDdata.disabledSex = this.Teacherlist[index].sex ? true : false
-    //       }
-    //     })
-    //   }
-    // immediate: true,  //刷新加载 立马触发一次handler
-    // deep: true  // 可以深度检测到 person 对象的属性值的变化
-    // }
+    parentOrgIdLabel: {
+      handler(val) {
+        this.parentOrgIdLabel = val ? val : '请选择'
+      },
+      deep: true
+    }
   },
   created() {
-    this.isgetTeacher()
-    this.isqueryTeacherlist()
+    this.ruleFormClone = _.cloneDeep(this.ruleForm)
     this.islistTeacherCategory()
+    this.getTeacher()
   },
   activated() {
-    this.isgetTeacher()
-    this.isqueryTeacherlist()
+    this.$refs.ruleForm.clearValidate()
     this.islistTeacherCategory()
+    this.getTeacher()
+  },
+  deactivated() {
+    this.ruleForm = _.cloneDeep(this.ruleFormClone)
   },
   methods: {
     handleOrgNodeClick(data) {
       if (data !== undefined) {
-        this.ruleForm.catalogId = data.id
-        this.parentOrgIdLabel = data.label
+        this.ruleForm.categoryId = data.id
+        this.parentOrgIdLabel = data.name
       }
     },
-
-    async loadNode(node, resolve) {
-      if (node.level === 0) {
-        return resolve([{ name: 'region' }])
+    onSuccess(file) {
+      this.ruleForm.attachments[0].fileUrl = file[0].fileUrl
+    },
+    // 获取讲师数据
+    async getTeacher() {
+      const res = (await getTeacher({ id: this.$route.query.id })).teacherInfo
+      for (const key in res) {
+        this.$set(this.ruleForm, key, res[key])
       }
-      if (node.level > 1) return resolve([])
-      // console.log(node);
-      let res = await listTeacherCategory({ parentId: node.data.id })
-      let filterArr = res.son.map((item) => {
-        return {
-          id: item.idStr,
-          parent_id: item.parentStr,
-          label: item.name,
-          btnshow: 0
-        }
-      })
-
-      node.data.children = filterArr
-      // console.log(node);
-
-      resolve(filterArr)
-    },
-
-    // 拿到数据
-    async isgetTeacher() {
-      let data = await getTeacher({ id: this.$route.query.id })
-      // 存userId
-      this.userIdData = data.teacherInfo.userId
-      data.teacherInfo.attachments = []
-      data.teacherInfo.attachments.push({ fileUrl: data.teacherInfo.photo })
-      data.teacherInfo.userId = this.$route.query.name
-      data.teacherInfo.userEmail = this.$route.query.userEmail
-      data.teacherInfo.sex = this.$route.query.sex == true ? 1 : 0
-      data.teacherInfo.phonenum = this.$route.query.phonenum
-      data.teacherInfo.isRecommend = data.teacherInfo.isRecommend == 0 ? false : true
-      data.teacherInfo.categoryId = data.teacherInfo.categoryIdStr
-      this.parentOrgIdLabel = data.teacherInfo.categoryName
-      this.ruleForm = data.teacherInfo
-      this.ruleForm.introduction = _.unescape(this.ruleForm.introduction)
-    },
-
-    // 点击节点
-    treeClickNode(data) {
-      if (data) {
-        this.islistTeacherCategory(data[0])
+      this.ruleForm.introduction = _.unescape(res.introduction)
+      this.ruleForm.attachments[0].fileUrl = res.photo
+      this.ruleForm.categoryId = res.categoryIdStr
+      this.ruleForm.skilledField = res.skilledFields
+      this.ruleForm.userName = this.ruleForm.name
+      this.ruleForm.phoneNo = this.ruleForm.phonenum
+      this.parentOrgIdLabel = res.categoryName
+      if (res.hireStartTime && res.hireStartTime) {
+        this.ruleForm.date = [res.hireStartTime, res.hireEndTime]
+      }
+      if (this.ruleForm.teacherType === '0') {
+        cardNum({ userId: this.ruleForm.userId }).then((res) => {
+          this.certNo = res
+        })
       }
     },
-
     // 查询讲师分类列表
-    islistTeacherCategory(id) {
-      let params = {}
-      if (id) {
-        params = {
-          test: '123',
-          parentId: '' // 父ID
-        }
-        params.parentId = id
-      } else {
-        params = {
-          test: '123'
-        }
-      }
-      listTeacherCategory(params).then((res) => {
-        this.data = []
-        for (let key in res) {
-          if (key == 'group') {
-            res[key].forEach((item) => {
-              let i = {
-                id: 1,
-                label: '一级 1',
-                btnshow: 1,
-                children: []
-              }
-              i.id = item.idStr
-              i.label = item.name
-              i.btnshow = 1
-              i.children = ''
-              this.data.push(i)
-            })
-          }
-        }
-
-        for (let key in res) {
-          if (key == 'son') {
-            this.data.forEach((item, index) => {
-              res[key].forEach((istem) => {
-                if (item.id == istem.parentStr) {
-                  let i = {
-                    id: 1,
-                    label: '一级 1',
-                    btnshow: 1
-                  }
-                  i.id = istem.idStr
-                  i.parent_id = istem.parentStr
-                  i.label = istem.name
-                  i.btnshow = 0
-                  this.data[index].children = []
-                  this.data[index].children.push(i)
-                }
-              })
-            })
-          }
-        }
-        this.data.splice(0, 1)
-      })
+    async islistTeacherCategory() {
+      this.listData = await queryCategoryOrgList({ source: 'teacher' })
     },
-
-    // 查询创建讲师的数据
-    isqueryTeacherlist() {
-      let params = {
-        pageNo: 1,
-        pageSize: 999,
-        search: ''
-      }
-
-      queryTeacherlist(params).then((res) => {
-        this.Teacherlist = res.data
-        // console.log(res)
-      })
+    // 跳转到讲师列表
+    toLecturer(cancel) {
+      this.ruleForm = _.cloneDeep(this.ruleFormClone)
+      this.$router.push('/resource/lecturer/lecturer')
+      if (cancel) this.$message.success('取消成功')
     },
-    // 去讲师列表
-    toLecturer() {
-      this.ruleForm = {
-        categoryId: '',
-        userId: '',
-        userEmail: '',
-        phonenum: '',
-        sex: '',
-        attachments: [],
-        isRecommend: false,
-        isLatestTeacher: 0,
-        isPopularTeacher: 0
-      }
-      this.$router.push({ path: '/resource/lecturer/lecturer' })
-    },
-
-    // 创建讲师
-    isAddTeacher() {
-      this.ruleForm.categoryId = this.ruleForm.categoryId
-        ? this.ruleForm.categoryId[this.ruleForm.categoryId.length - 1]
-        : ''
-      let attachments = []
-      if (this.ruleForm.attachments.length !== 0)
-        attachments.push(
-          this.ruleForm.attachments.length !== 0
-            ? this.ruleForm.attachments[this.ruleForm.attachments.length - 1]
-            : ''
-        )
-      this.ruleForm.attachments = attachments
-      this.ruleForm.isRecommend = this.ruleForm.isRecommend === true ? 1 : 0
-      this.ruleForm.categoryId = this.ruleForm.catalogId
-
+    // 更新讲师
+    upload() {
       this.$refs.ruleForm.validate((valid) => {
         if (!valid) {
           this.$message({
@@ -573,45 +592,85 @@ export default {
             type: 'warning'
           })
         } else {
-          this.ruleForm.teacherId = this.$route.query.id
-          this.ruleForm.userId = this.userIdData
+          this.text = this.ruleForm.introduction
           this.ruleForm.introduction = _.escape(this.ruleForm.introduction)
-          update(this.ruleForm).then(() => {
-            this.toLecturer()
-          })
+          this.ruleForm.skilledField = this.ruleForm.skilledField.join(',')
+          this.ruleForm.hireStartTime = this.ruleForm.date[0]
+          this.ruleForm.hireEndTime = this.ruleForm.date[1]
+          this.ruleForm.teacherId = this.$route.query.id
+          console.log(this.ruleForm)
+          update(this.ruleForm)
+            .then(() => {
+              this.toLecturer()
+              this.$message.success('保存成功')
+            })
+            .catch(() => {
+              this.ruleForm.introduction = this.text
+              this.ruleForm.skilledField = this.ruleForm.skilledField.split(',')
+            })
         }
       })
     },
-
-    // 清除数据跳转
-
+    toClass() {
+      this.$router.push('/resource/lecturer/classify')
+    },
+    inputCard(e) {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.ruleForm.certNo = e.target.value
+      }, 500)
+    },
     // 图片校验
     beforeAvatarUpload(file) {
-      const regx = /^.*\.(jpg|jpge|png)$/
-      const isLt10M = file.size / 1024 / 1024 < 5
+      const regx = /^.*\.(jpg|jpeg|bmp|png)$/
+      const isLt10M = file.size / 1024 / 1024 <= 5
 
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {
-        this.$message.error('上传图片只支持jpg|jpge|png文件')
+        this.$message.error('上传图片只支持jpg、jpeg、bmp、png文件')
         return false
       }
       return true
+    },
+    // 移除擅长领域
+    removeTabs(tag) {
+      this.ruleForm.skilledField.splice(this.ruleForm.skilledField.indexOf(tag), 1)
+      this.ruleForm.skilledField.sort((a, b) => (a.length > b.length ? 1 : -1))
+    },
+    // 添加擅长领域
+    addSkilledField() {
+      this.inputVisible = true
+    },
+    handleInputConfirm() {
+      if (this.inputValue.trim().length === 0) {
+        this.inputValue = ''
+        this.inputVisible = false
+        return
+      }
+      this.ruleForm.skilledField.push(this.inputValue)
+      this.inputValue = ''
+      this.inputVisible = false
+      this.ruleForm.skilledField.sort((a, b) => (a.length > b.length ? 1 : -1))
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.introduction {
+  position: absolute;
+  top: 158px;
+  left: 18px;
+  z-index: 99999999;
+  color: #dcdcdc;
+}
+.editorTitle {
+  position: relative;
+}
 .upload-demo {
-  // width: 20vw;
-  // height: 20vh;
-  // border: 1px solid #ccc;
-  // border-radius: 4px;
-  // padding: 3vh 0 0 4vw;
-  // overflow: hidden;
   padding-right: 10px;
   position: relative;
 
@@ -627,10 +686,9 @@ export default {
   .addLecturer_head {
     height: 60px;
     line-height: 60px;
-    font-size: 16px;
-    color: #333;
     font-size: 18px;
     font-weight: bold;
+    color: #333;
   }
   .addLecturer_content {
     background-color: #fff;
@@ -656,6 +714,40 @@ export default {
     padding: 15px 35%;
     z-index: 999999;
   }
+  .skilledField {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 5px;
+    ::v-deep span.el-tag.el-tag--light {
+      flex-shrink: 0;
+      margin-right: 5px;
+    }
+    .add {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      ::v-deep .input-new-tag.el-input.el-input--small {
+        width: 100px;
+        margin-right: 5px;
+      }
+      ::v-deep button.el-button.el-button--default.el-button--medium {
+        height: 32px;
+      }
+    }
+  }
+  .upload {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .categoryId {
+    position: absolute;
+    top: -42px;
+    right: 0;
+    color: #207efa;
+    cursor: pointer;
+  }
 }
 /deep/.el-input-number {
   width: 350px;
@@ -677,6 +769,31 @@ export default {
   width: 350px;
 }
 /deep/.el-input {
-  width: 20vw !important;
+  width: 20vw;
+}
+::v-deep .el-upload-dragger {
+  height: 100%;
+  border: 1px solid #d9d9d9;
+}
+::v-deep .el-range-editor.el-input__inner {
+  padding: 0 10px;
+  width: 380px;
+  span.el-range-separator {
+    padding: 0;
+  }
+}
+.yen {
+  position: absolute;
+  top: 0px;
+  left: 5px;
+}
+::v-deep span.el-input-number__decrease.is-disabled {
+  bottom: 0px;
+}
+::v-deep span.el-input-number__increase {
+  top: 0px;
+}
+::v-deep .el-input-number.is-controls-right {
+  width: 20vw;
 }
 </style>

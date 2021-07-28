@@ -261,7 +261,7 @@ import { getOrgUserChild, getOuterUser, getPostionUserChild, getGroup } from '@/
 import { getUserList } from '@/api/examManage/schedule'
 import Pagination from '@/components/common-pagination'
 export default {
-  name: 'UserPicker2',
+  name: 'UserPicker3',
   components: {
     Pagination
   },
@@ -686,7 +686,6 @@ export default {
       })
     },
     groupRightToLeft(del) {
-      console.log(del)
       if (del.isGroup) {
         this.groupcheckedOuter = this.groupcheckedOuter.filter((item) => item != del.userId)
         this.groupCheckChange()

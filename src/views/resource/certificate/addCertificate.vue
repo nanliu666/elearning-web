@@ -9,108 +9,170 @@
         <div class="form_left">
           <!-- 左侧表单 -->
           <div class="form_left_in">
-            <common-form
+            <el-form
               ref="form"
               :model="form"
-              :columns="columns"
+              :rules="rules"
             >
-              <!-- 背景 -->
-              <template slot="back">
-                <common-upload
-                  v-model="form.back"
-                  :multiple="false"
-                  :before-upload="beforeResumeUpload"
-                >
-                  <div
-                    v-if="!form.back[0]"
-                    class="mycommon-upload"
+              <el-form-item
+                prop="name"
+                label="证书名称"
+              >
+                <el-input
+                  v-model="form.name"
+                  placeholder="请输入标题，建议2～25个字符"
+                  :minlength="2"
+                  :maxlength="25"
+                />
+              </el-form-item>
+              <el-form-item
+                prop="backUrl"
+                label="背景图片"
+              >
+                <template>
+                  <common-upload
+                    :multiple="false"
+                    :before-upload="beforeResumeUpload"
+                    @input="backUpLoad"
                   >
-                    <i class="el-icon-plus"></i>
-                    <div class="mycommon-upload-title">
-                      添加背景图片
+                    <div
+                      v-if="!form.backUrl"
+                      class="mycommon-upload"
+                    >
+                      <i class="el-icon-plus"></i>
+                      <div class="mycommon-upload-title">
+                        添加背景图片
+                      </div>
                     </div>
+                    <img
+                      v-else
+                      class="mycommon-upload"
+                      :src="form.backUrl"
+                    />
+                  </common-upload>
+                  <div class="common-upload-bg-title">
+                    <div>建议背景图片色彩单调简约，画面中心留白居多；</div>
+                    <div>支持PNG、JPG格式，建议尺寸1169*826px，大小不超过5M</div>
                   </div>
-                  <img
-                    v-else
-                    class="mycommon-upload"
-                    :src="form.back[form.back.length - 1].url"
-                    alt=""
-                  />
-                </common-upload>
-                <div class="common-upload-bg-title">
-                  <div>建议背景图片色彩单调简约，画面中心留白居多；</div>
-                  <div>支持PNG、JPG格式，建议尺寸1169*826px，大小不超过1M</div>
-                </div>
-              </template>
-              <!-- logo -->
-
-              <template slot="logo">
-                <common-upload
-                  v-model="form.logo"
-                  :before-upload="beforeResumeUpload"
-                >
-                  <div
-                    v-if="!form.logo[0]"
-                    class="mycommon-upload"
+                </template>
+              </el-form-item>
+              <el-form-item
+                prop="text"
+                label="证书正文"
+              >
+                <el-input
+                  v-model="form.text"
+                  :rows="6"
+                  type="textarea"
+                  placeholder="请输入文案，建议20～100个字符"
+                  :minlength="20"
+                  :maxlength="100"
+                />
+              </el-form-item>
+              <el-form-item
+                prop="awardAgency"
+                label="颁发机构名称"
+              >
+                <el-input
+                  v-model="form.awardAgency"
+                  placeholder="请输入机构名称，建议2～25个字符"
+                  :minlength="2"
+                  :maxlength="25"
+                />
+              </el-form-item>
+              <el-form-item
+                prop="logoUrl"
+                label="颁发机构logo"
+              >
+                <template>
+                  <common-upload
+                    :before-upload="beforeResumeUpload"
+                    @input="logoUpLoad"
                   >
-                    <i class="el-icon-plus"></i>
-                    <div class="mycommon-upload-title">
-                      添加机构logo
+                    <div
+                      v-if="!form.logoUrl"
+                      class="mycommon-upload"
+                    >
+                      <i class="el-icon-plus"></i>
+                      <div class="mycommon-upload-title">
+                        添加机构logo
+                      </div>
                     </div>
+                    <img
+                      v-else
+                      class="mycommon-upload"
+                      :src="form.logoUrl"
+                    />
+                  </common-upload>
+                  <div class="common-upload-bg-title">
+                    <div>建议透明背景的机构logo；</div>
+                    <div>支持PNG、JPG格式，建议尺寸240*120px，大小不超过1M</div>
                   </div>
-                  <img
-                    v-else
-                    class="mycommon-upload"
-                    :src="form.logo[form.logo.length - 1].url"
-                    alt=""
-                  />
-                </common-upload>
-                <div class="common-upload-bg-title">
-                  <div>建议透明背景的机构logo；</div>
-                  <div>支持PNG、JPG格式，建议尺寸240*120px，大小不超过1M</div>
-                </div>
-              </template>
-            </common-form>
+                </template>
+              </el-form-item>
+              <el-form-item
+                prop="activeTime"
+                label="生效日期"
+              >
+                <el-date-picker
+                  v-model="form.activeTime"
+                  type="date"
+                  placeholder="请选择"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                />
+              </el-form-item>
+              <el-form-item
+                prop="date"
+                label="有效期"
+              >
+                <el-date-picker
+                  v-model="form.date"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  placeholder="请选择"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                />
+              </el-form-item>
+              <el-form-item
+                prop="category"
+                label="证书类型"
+              >
+                <el-radio-group v-model="form.category">
+                  <el-radio label="0">
+                    培训合格证书
+                  </el-radio>
+                  <el-radio label="1">
+                    聘书
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item
+                prop="way"
+                label="获取方式"
+              >
+                <el-input
+                  v-model="form.way"
+                  type="textarea"
+                  placeholder="请输入"
+                  maxlength="200"
+                />
+              </el-form-item>
+            </el-form>
           </div>
         </div>
 
         <div class="preview_right">
-          <div class="preview_right_in">
-            <div class="preview_right_title">
-              预览
-            </div>
-            <div
-              v-show="form.name"
-              class="preview_right_box"
-            >
-              <img
-                v-if="form.back[0]"
-                :src="form.back[form.back.length - 1].url"
-                alt=""
-                class="bgimg"
-              />
-              <div class="name">
-                {{ form.name }}
-              </div>
-              <div class="text">
-                {{ form.text }}
-              </div>
-              <img
-                v-if="form.logo[0]"
-                :src="form.logo[form.logo.length - 1].url"
-                alt=""
-                class="logo"
-              />
-              <div class="studentName">
-                张三
-              </div>
-              <div class="serial">
-                <div>证书编号:</div>
-                <div>YB-20201130-0001</div>
-                <div>2020年12月11日</div>
-              </div>
-            </div>
+          <div class="preview_right_title">
+            预览
           </div>
+          <CertificateTemplate
+            class="preview"
+            :certificate-data="form"
+          />
         </div>
       </div>
       <div class="btn">
@@ -133,149 +195,115 @@
 </template>
 <script>
 import { addCertificate } from '@/api/certificate/certificate'
+import CertificateTemplate from './components/CertificateTemplate.vue'
 export default {
   name: 'DemoForm',
   components: {
-    commonUpload: () => import('@/components/common-upload/commonUpload')
+    commonUpload: () => import('@/components/common-upload/commonUpload'),
+    CertificateTemplate
   },
   data() {
     return {
+      formClone: null,
       form: {
+        date: [],
         awardAgency: '',
         name: '',
         text: '',
-        logo: [],
-        back: []
+        backName: '',
+        backUrl: '',
+        logoName: '',
+        logoUrl: '',
+        activeTime: '',
+        bornTime: '',
+        deadTime: '',
+        category: '',
+        way: '',
+        certificateNo: 'XCMG-20210615-0001',
+        createTime: '2021-06-15'
       },
-      columns: [
-        {
-          placeholder: '请输入标题，建议2～10个字符',
-          prop: 'name',
-          itemType: 'input',
-          label: '模版名称',
-          maxLength: 10,
-          offset: 5,
-          required: true,
-          rules: [{ min: 2, max: 10, message: '建议2～10个字符', trigger: 'blur' }]
-        },
-
-        {
-          prop: 'back',
-          itemType: 'slot',
-          label: '背景图片',
-          offset: 5,
-          required: true
-        },
-        {
-          placeholder: '请输入标题，建议20～50个字符',
-          prop: 'text',
-          itemType: 'input',
-          label: '证书正文',
-          maxLength: 50,
-          props: {},
-          offset: 5,
-          required: true,
-          rules: [{ min: 20, max: 50, message: '建议20～50个字符', trigger: 'blur' }]
-        },
-        {
-          placeholder: '请输入标题，建议2～10个字符',
-          prop: 'awardAgency',
-          itemType: 'input',
-          label: '颁发机构',
-          maxLength: 10,
-          props: {},
-          offset: 5,
-          required: true,
-          rules: [{ min: 2, max: 10, message: '建议2～10个字符', trigger: 'blur' }]
-        },
-        {
-          prop: 'logo',
-          itemType: 'slot',
-          label: '颁发机构logo',
-          offset: 5,
-          required: true
-        }
-      ]
+      rules: {
+        name: [
+          { required: true, message: '证书名称不能为空', trigger: 'blur' },
+          { min: 2, max: 25, message: '证书名称仅支持2-25个字符', trigger: 'blur' }
+        ],
+        text: [
+          { required: true, message: '证书正文名称不能为空', trigger: 'blur' },
+          { min: 20, max: 100, message: '证书正文仅支持20-100个字符', trigger: 'blur' }
+        ],
+        awardAgency: [
+          { required: true, message: '颁发机构名称不能为空', trigger: 'blur' },
+          { min: 2, max: 25, message: '颁发机构名称仅支持2-25个字符', trigger: 'blur' }
+        ],
+        activeTime: [{ required: true, message: '生效日期不能为空', trigger: 'change' }],
+        date: [
+          { required: true, message: '有效期不能为空', trigger: 'change' },
+          {
+            validator: (rule, value, callback) => {
+              if (this.form.activeTime && this.form.date.length !== 0) {
+                this.checkDate(callback)
+              } else {
+                callback()
+              }
+            },
+            trigger: 'change'
+          }
+        ],
+        category: [{ required: true, message: '证书类型', trigger: 'change' }],
+        logoUrl: [{ required: true, message: 'logo不能为空', trigger: 'blur' }],
+        backUrl: [{ required: true, message: '背景不能为空', trigger: 'blur' }]
+      }
     }
   },
   watch: {
-    'form.back': {
-      handler() {
-        this.$nextTick(() => {
-          this.$refs.form.validateField('back', () => {})
-        })
-      },
-      immediate: false
+    'form.activeTime'() {
+      if (this.form.activeTime && this.form.date.length !== 0) {
+        this.$refs.form.validateField('date')
+      }
     },
-    'form.logo': {
-      handler() {
-        this.$nextTick(() => {
-          this.$refs.form.validateField('logo', () => {})
-        })
-      },
-      immediate: false
+    'form.date'() {
+      if (this.form.activeTime && this.form.date.length !== 0) {
+        this.$refs.form.validateField('date')
+      }
     }
   },
-  created() {},
+  created() {
+    this.formClone = _.cloneDeep(this.form)
+  },
   methods: {
     isAddCertificate(i) {
       if (i) {
-        this.$refs.form
-          .validate()
-          .then(() => {
-            let params = {
-              backName: '',
-              backUrl: '',
-              logoName: '',
-              logoUrl: '',
-              name: '',
-              text: '',
-              awardAgency: ''
-            }
-            params.backName = this.form.back[this.form.back.length - 1].fileName
-            params.backUrl = this.form.back[this.form.back.length - 1].url
-            if (this.form.logo.length) {
-              params.logoName = this.form.logo[this.form.logo.length - 1].fileName
-              params.logoUrl = this.form.logo[this.form.logo.length - 1].url
-            }
-
-            params.name = this.form.name
-            params.text = this.form.text
-            params.awardAgency = this.form.awardAgency
-
-            addCertificate(params).then(() => {
-              this.$message.success('保存成功')
-              this.$router.push({ path: '/resource/certificate/certificateManage' })
-              this.form = {
-                awardAgency: '',
-                name: '',
-                text: '',
-                logo: [],
-                back: []
-              }
-            })
+        this.$refs.form.validate().then(() => {
+          this.form.bornTime = this.form.date[0]
+          this.form.deadTime = this.form.date[1]
+          addCertificate(this.form).then(() => {
+            this.$message.success('保存成功')
+            this.$router.push({ path: '/resource/certificate/certificateManage' })
+            this.form = _.cloneDeep(this.formClone)
           })
-          .catch(() => {
-            this.$message.error('请补充信息！！！')
-          })
+        })
       } else {
         this.$router.push({ path: '/resource/certificate/certificateManage' })
-        this.form = {
-          awardAgency: '',
-          name: '',
-          text: '',
-          logo: [],
-          back: []
-        }
+        this.$message.success('取消成功')
+        this.form = _.cloneDeep(this.formClone)
       }
     },
-
+    backUpLoad(file) {
+      this.form.backUrl = file[0].fileUrl
+      this.form.backName = file[0].fileName
+      this.$refs.form.validateField('backUrl')
+    },
+    logoUpLoad(file) {
+      this.form.logoUrl = file[0].fileUrl
+      this.form.logoName = file[0].fileName
+      this.$refs.form.validateField('logoUrl')
+    },
     beforeResumeUpload(file) {
       const regx = /^.*\.(PNG|JPG|png|jpg)$/
-      const isLt2M = file.size / 1024 / 1024 < 1
+      const isLt5M = file.size / 1024 / 1024 < 5
 
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 1MB!')
+      if (!isLt5M) {
+        this.$message.error('上传图片大小不能超过 5MB!')
         return false
       }
       if (!regx.test(file.name)) {
@@ -284,6 +312,17 @@ export default {
       }
 
       return true
+    },
+    // 校验有效期与生效期
+    checkDate(callback) {
+      const activeTime = new Date(this.form.activeTime).getTime()
+      const date = new Date(this.form.date[0]).getTime()
+
+      if (date < activeTime) {
+        callback(new Error('生效日期不能大于有效期开始日期'))
+      } else {
+        callback()
+      }
     }
   }
 }
@@ -336,75 +375,13 @@ export default {
   .preview_right {
     flex: 1;
     height: 100%;
-    .preview_right_in {
-      padding-left: 50px;
-      padding-top: 20px;
-      .preview_right_title {
-        font-family: PingFangSC-Medium;
-        font-size: 16px;
-        color: rgba(0, 11, 21, 0.85);
-        letter-spacing: 0;
-        line-height: 24px;
-      }
-      .preview_right_box {
-        position: relative;
-        border: 1px solid #d9dbdc;
-        margin-top: 15px;
-        width: 408px;
-        height: 288px;
-        .bgimg {
-          width: 100%;
-          height: 100%;
-          z-index: -1;
-        }
-        .name {
-          position: absolute;
-          top: 22%;
-          left: 50%;
-          font-size: 30px;
-          font-weight: 700;
-          transform: translateX(-50%);
-          text-align: center;
-          width: 80%;
-        }
-        .text {
-          position: absolute;
-          top: 58%;
-          left: 50%;
-          font-size: 12px;
-          font-weight: 700;
-          transform: translateX(-50%);
-          color: #8b8a8a;
-          width: 50%;
-          height: 28%;
-          text-align: center;
-          word-wrap: break-word;
-        }
-        .logo {
-          position: absolute;
-          top: 75.6%;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 40px;
-          height: 40px;
-        }
-        .studentName {
-          position: absolute;
-          top: 46%;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 22px;
-          font-weight: 500;
-        }
-        .serial {
-          position: absolute;
-          right: 9%;
-          bottom: 9%;
-          color: #8b8a8a;
-          font-size: 8px;
-        }
-      }
-    }
+    position: relative;
+  }
+  .preview {
+    transform: scale(0.65);
+    position: absolute;
+    top: -55px;
+    left: -116px;
   }
 }
 .btn {
@@ -419,7 +396,21 @@ export default {
   margin-left: -25px;
   background-color: #fff;
 }
-/deep/ .el-input {
-  width: 20vw !important;
+/deep/ .el-input,
+.el-date-editor--daterange.el-input,
+.el-date-editor--daterange.el-input__inner,
+.el-date-editor--timerange.el-input,
+.el-date-editor--timerange.el-input__inner {
+  width: 28vw !important;
+}
+::v-deep label.el-form-item__label {
+  float: none;
+  text-align: left;
+}
+.preview_right_title {
+  font-size: 18px;
+  color: rgba(0, 11, 21, 0.85);
+  letter-spacing: 0;
+  padding-left: 24px;
 }
 </style>
