@@ -121,7 +121,6 @@
 
 <script>
 import styles from '@/styles/variables.scss'
-import myMixins from '@/mixins'
 import { TEACH_EDIT, TEACH_DEL, TEACH_CREATE } from '@/const/privileges'
 import { selectTutorList, deleteTutor } from '@/api/resource/teach'
 import SearchPopover from '@/components/searchPopOver/index'
@@ -274,7 +273,6 @@ export default {
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
-  mixins: [myMixins],
   data() {
     return {
       loading: false,
@@ -350,9 +348,6 @@ export default {
         }
       }
     }
-
-    this.loadTree() //部门
-    this.loadPosition() //岗位
     this.loadTableData()
     this.loadOrgData()
   },
