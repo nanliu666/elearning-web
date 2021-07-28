@@ -322,7 +322,7 @@ export default {
       //  { parentId: this.rowData.parentId, isInitData: true } stationForm组件返回数据
 
       if (value && value.isInitData) {
-        params.parentId = value.parentId
+        // params.parentId = value.parentId
         params.name = ''
       }
       this.tableLoading = true

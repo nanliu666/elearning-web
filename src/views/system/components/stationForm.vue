@@ -186,8 +186,12 @@ export default {
       })
       this.visible = true
       this.$nextTick(() => {
+        this.$refs.myPos.isEditPos = false
         if (this.type == 'edit') {
           this.$refs.myPos.editPosition()
+        } else if (this.type == 'create') {
+          this.$refs.myPos.isEditPos = true
+          this.$refs.myPos.createPosition()
         } else {
           this.$refs.myPos.pName = ''
         }
