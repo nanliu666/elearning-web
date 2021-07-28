@@ -50,10 +50,10 @@ export const categoryOptions = [
     label: '课程审批',
     value: '1'
   },
-  {
-    label: '外训报名申请',
-    value: '2'
-  },
+  // {
+  //   label: '外训报名申请',
+  //   value: '2'
+  // },
   {
     label: '培训需求申请',
     value: '3'
@@ -62,14 +62,14 @@ export const categoryOptions = [
     label: '培训请假申请',
     value: '4'
   },
-  {
-    label: '外派培训申请',
-    value: '5'
-  },
-  {
-    label: '在职读博申请',
-    value: '6'
-  },
+  // {
+  //   label: '外派培训申请',
+  //   value: '5'
+  // },
+  // {
+  //   label: '在职读博申请',
+  //   value: '6'
+  // },
   {
     label: '讲师认证申请',
     value: '7'
@@ -82,10 +82,10 @@ export const categoryOptions = [
     label: '课程开发申请',
     value: '9'
   },
-  {
-    label: '外购培训申请',
-    value: '10'
-  },
+  // {
+  //   label: '外购培训申请',
+  //   value: '10'
+  // },
   {
     label: '一点分享申请',
     value: '11'
