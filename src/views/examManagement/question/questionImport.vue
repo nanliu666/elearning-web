@@ -30,7 +30,7 @@
               ></i>下载导入模板</el-button>
             </a>
           </div>
-          <div class="right item">
+          <!-- <div class="right item">
             <div style="text-align:center">
               注意事项
             </div>
@@ -70,7 +70,7 @@
             <div>
               每个试题类型样式可参考导入模板的示例。
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="section">

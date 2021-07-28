@@ -213,6 +213,7 @@ export default {
   },
   data() {
     return {
+      maps:new Map(),
       tableLoading: false,
       tableData: [],
       tableConfig: {
@@ -375,8 +376,12 @@ export default {
       this.$router.push('/orgs/importOrg')
     },
 
-    refresh() {
-      this.loadTableData()
+    refresh(obj) {
+      const {parentOrgId} = obj  //取出当前行的pid
+      const { tree, treeNode, resolve } = this.maps.get(parentOrgId) //根据pid取出对应的节点数据
+      let table = this.$refs.table
+      this.$set(table.$refs.table.store.states.lazyTreeNodeMap, parentOrgId, []); //将对应节点下的数据清空，从而实现数据的重新加载
+      this.loadFn( tree, treeNode, resolve )
     },
     async loadSelectTreeFn(node, resolve){ //  懒加载下拉树数据
       let params={parentId:node.data&&node.data.id?node.data.id:'0'}
@@ -385,8 +390,9 @@ export default {
         resolve(res)
       })      
     },
-    async loadFn(tree, treeNode, resolve){ // 懒加载表格数据      
+    async loadFn(tree, treeNode, resolve){ // 懒加载表格数据    
       let params={parentId:tree.id}
+      this.maps.set(tree.id,{ tree, treeNode, resolve })  //将当前选中节点数据存储到maps中
       getorganizationNew(params).then((res) => {
         res.map(val=>val.hasChildren=true)        
         resolve(res)
@@ -460,7 +466,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
-              this.loadTableData()
+              this.refresh(row)
             })
           })
           .catch(() => {
