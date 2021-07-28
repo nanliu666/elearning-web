@@ -217,9 +217,20 @@ export default {
       noData: false
     }
   },
-  // activated () {
-  //   this.getAdminList()
-  // },
+  watch: {
+    'form.managerList': {
+      handler(val){
+         console.log(val)
+          val.forEach((item) => {
+            this.managerOptions.push({
+              name: item.bizName,
+              userId: item.bizId
+            })
+          })
+      },
+      deep:true
+    }
+  },
   methods: {
     visibleChange(show) {
       if (show) {
@@ -236,6 +247,7 @@ export default {
     async getAdminList() {
       const res = await getOrgTreeSearch(this.queryParams)
       this.managerOptions.push(...res.data)
+      this.managerOptions = _.unionBy(this.managerOptions, 'userId')
       this.valve = false
       if (res.data.length === 0) return (this.noData = true)
       else this.noData = false

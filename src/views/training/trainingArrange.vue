@@ -357,18 +357,18 @@ const TABLE_COLUMNS = [
     minWidth: 200,
     prop: 'trainNo'
   },
-  {
-    label: '类别',
-    minWidth: 200,
-    prop: 'trainScope',
-    formatter: (row) => {
-      const END_STATUS = {
-        inside: '内训',
-        outer: '外训'
-      }
-      return END_STATUS[row.trainScope]
-    }
-  },
+  // {
+  //   label: '类别',
+  //   minWidth: 200,
+  //   prop: 'trainScope',
+  //   formatter: (row) => {
+  //     const END_STATUS = {
+  //       inside: '内训',
+  //       outer: '外训'
+  //     }
+  //     return END_STATUS[row.trainScope]
+  //   }
+  // },
   {
     label: '分类',
     minWidth: 200,

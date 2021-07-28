@@ -431,12 +431,6 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'startTime,endTime',
     config: { type: 'daterange', 'value-format': 'yyyy-MM-dd HH:mm:ss' }
   },
-  {
-    type: 'input',
-    field: 'sponsor',
-    label: '主办单位',
-    data: ''
-  }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
