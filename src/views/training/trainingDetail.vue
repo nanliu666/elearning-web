@@ -167,6 +167,28 @@
         <el-row>
           <el-col :span="2">
             <div class="col_title">
+              {{ '主办单位：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.sponsor || '--' }}
+            </div>
+          </el-col>
+          <el-col :span="2">
+            <div class="col_title">
+              {{ '承办单位：' }}
+            </div>
+          </el-col>
+          <el-col :span="5">
+            <div class="col_content">
+              {{ showTrainDetail.organizer  || '--'  }}
+            </div>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="2">
+            <div class="col_title">
               {{ '通过条件：' }}
             </div>
           </el-col>
