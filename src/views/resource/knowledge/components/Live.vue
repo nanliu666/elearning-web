@@ -133,12 +133,7 @@
           label="直播名称"
         >
           <template slot-scope="scope">
-            <el-button
-              type="text"
-              @click="$router.push({ path: '/live/Detail', query: { liveId: scope.row.liveId } })"
-            >
-              {{ scope.row.channelName }}
-            </el-button>
+           {{ scope.row.channelName }}
           </template>
         </el-table-column>
 
