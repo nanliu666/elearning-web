@@ -119,6 +119,7 @@ export default {
           this.form[key] = res[key]
         }
       }
+      this.form.managerList = res.managerList
     }
   },
 

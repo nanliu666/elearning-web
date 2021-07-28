@@ -52,31 +52,31 @@
           :span="8"
           class="experienceList"
         >
-          <span class="name">课程名称：</span><span class="wContent">{{ formData.courseName }}</span>
+          <span class="name">课程名称：</span><span class="wContent">{{ formData.courseName || formDetaill.courseName }}</span>
         </el-col>
         <el-col
           :span="8"
           class="experienceList"
         >
-          <span class="name">开发方式：</span><span class="wContent">{{ formData.devType }}</span>
+          <span class="name">开发方式：</span><span class="wContent">{{ formData.devType || formDetaill.devType  }}</span>
         </el-col>
         <el-col
           :span="8"
           class="experienceList"
         >
-          <span class="name">开发周期：</span><span class="wContent">{{ formData.devStartTime }} 至 {{ formData.devEndTime }}</span>
+          <span class="name">开发周期：</span><span class="wContent">{{ formData.devStartTime || formDetaill.devStartTime  }} 至 {{ formData.devEndTime || formDetaill.devEndTime  }}</span>
         </el-col>
         <el-col
           :span="8"
           class="experienceList"
         >
-          <span class="name">培训对象：</span><span class="wContent">{{ formData.trainObject }}</span>
+          <span class="name">培训对象：</span><span class="wContent">{{ formData.trainObject || formDetaill.trainObject  }}</span>
         </el-col>
         <el-col
           :span="24"
           class="experienceList"
         >
-          <span class="name">主要内容：</span><span class="wContent">{{ formData.conent }}</span>
+          <span class="name">主要内容：</span><span class="wContent">{{ formData.conent || formDetaill.conent  }}</span>
         </el-col>
       </el-row>
     </div>
@@ -143,8 +143,8 @@ export default {
   },
   watch: {
     formData: {
-      handler() {
-        this.applyAddCourseDetailFn()
+      handler(val) {
+       this.applyAddCourseDetailFn()
       },
       deep: true
     }
