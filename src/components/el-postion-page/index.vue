@@ -4,6 +4,7 @@
       v-model="pName"
       style="width:100%;"
       readonly
+      :disabled="isEditPos"
       :placeholder="placeholder"
       @focus="showPosTree"
     />
@@ -44,7 +45,7 @@
                 >
                   <span @click="backPos(`${index}-${idx}`)">{{ val.name }}</span>
                   <i
-                    v-if="val.hasChildren"
+                    v-if="val.hasChildren && index < 4"
                     class="el-icon-arrow-right right-arrow"
                     @click="getNextData(val.id, index)"
                   />
@@ -129,6 +130,7 @@ export default {
   },
   data() {
     return {
+      isEditPos: false,
       pName: '',
       loading: false,
       visible: false,
@@ -168,6 +170,9 @@ export default {
       } else {
         this.pName = ''
       }
+    },
+    createPosition() {
+      this.pName = this.posName.name
     },
     showPosTree() {
       this.visible = true
