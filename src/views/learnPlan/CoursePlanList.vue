@@ -297,14 +297,6 @@ const TABLE_COLUMNS = [
     align: 'center'
   },
   {
-    label: '主办单位',
-    prop: 'sponsor',
-    slot: false,
-    minWidth: 120,
-    headerAlign: 'center',
-    align: 'center'
-  },
-  {
     label: '分类',
     prop: 'categoryName',
     minWidth: 180
