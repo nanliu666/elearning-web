@@ -762,12 +762,7 @@ export default {
               type: 'warning'
             })
               .then(async () => {
-                await delCourseInfo([row.id])
-                this.refreshTableData()
-                this.$message({
-                  type: 'success',
-                  message: '删除成功!'
-                })
+                this.delCourse([row.id])
               })
               .catch(() => {
                 this.$message({
@@ -856,14 +851,7 @@ export default {
                 else if (res.resultCode === 292 || res.resultCode === 291)
                   return this.$message.success('删除成功!')
                 else params = params.filter((item) => !noDel.includes(item))
-                if (!params.length) return this.$message.success('删除成功!')
-                await delCourseInfo(params)
-                this.$message.success('删除成功!')
-                this.$refs.table.clearSelection()
-                if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
-                  --this.page.currentPage
-                }
-                this.getInfo()
+                this.delCourse(params)
               })
               .catch(() => {
                 this.$message({
@@ -872,13 +860,7 @@ export default {
                 })
               })
           } else {
-            await delCourseInfo(params)
-            this.$message.success('删除成功!')
-            this.$refs.table.clearSelection()
-            if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
-              --this.page.currentPage
-            }
-            this.getInfo()
+            this.delCourse(params)
           }
         })
         .catch(() => {
@@ -973,6 +955,19 @@ export default {
     cancel() {
       this.stopVisible = false
       this.relatedContent = []
+    },
+    // 删除
+    async delCourse(params) {
+      if (!params.length) {
+        this.$message.success('删除成功!')
+        this.$refs.table.clearSelection()
+        return
+      }
+      await delCourseInfo(params)
+      this.$message.success('删除成功!')
+      this.$refs.table.clearSelection()
+      this.page.currentPage = 1
+      this.refreshTableData()
     }
   }
 }
