@@ -133,7 +133,7 @@
           label="直播名称"
         >
           <template slot-scope="scope">
-           {{ scope.row.channelName }}
+            {{ scope.row.channelName }}
           </template>
         </el-table-column>
 
@@ -244,7 +244,8 @@ export default {
       total: 0,
       statusOptions: [
         { value: 0, label: '停用' },
-        { value: 1, label: '正常' }
+        { value: 1, label: '正常' },
+        { value: 2, label: '草稿' }
       ]
     }
   },

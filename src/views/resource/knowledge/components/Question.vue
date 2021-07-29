@@ -40,7 +40,7 @@
 
           <el-form-item label="类型">
             <el-select
-              v-model="filterForm.courseType"
+              v-model="filterForm.type"
               clearable
               placeholder="请选择"
             >
