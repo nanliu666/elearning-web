@@ -428,7 +428,7 @@ export default {
     },
     beforeUpload(file) {
       const isJPG = /^image\/(jpeg|png|jpg)$/.test(file.type)
-      const isLt5M = file.size / 1024 / 1024 < 5
+      const isLt5M = file.size / 1024 / 1024 <= 5
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpg、jpeg、png 格式!')
