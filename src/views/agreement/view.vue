@@ -500,7 +500,7 @@ export default {
   },
   data() {
     return {
-      positionConfig:{
+      positionConfig: {
         data: '',
         field: 'positionId',
         label: '岗位',
@@ -508,18 +508,18 @@ export default {
         optionList: [],
         placeholder: '请选择岗位',
         optionProps: {
-          formatter: (item) => `${item.name}(${item.fullOrg?item.fullOrg:'暂无'})`,
+          formatter: (item) => `${item.name}(${item.fullOrg ? item.fullOrg : '暂无'})`,
           key: 'name',
           value: 'id'
         },
-        load: (p)=>{
+        load: (p) => {
           p.name = p.search
           return getStationParent(p)
         },
-        remote:true,
+        remote: true,
         searchable: true,
         config: { optionLabel: 'name', optionValue: 'id' }
-    },
+      },
       multipleSelection: [],
       editLoading: false,
       statusLoading: false,
@@ -595,17 +595,24 @@ export default {
   },
   activated() {
     //清空岗位数据
-    this.positionConfig.data= ""
+    this.positionConfig.data = ''
     this.queryForm.id = this.data.id
     this.getData()
   },
   methods: {
+    validateForm() {
+      return new Promise((resolve) => {
+        this.$refs.statusForm.validateField('breakAmount', (valid) => {
+          resolve(valid)
+        })
+      })
+    },
     //选择了岗位回调
-    async positionChange(val){
-        this.queryForm.position = val.id
-        if (this.$refs.deptCascade) {
-          this.$refs.deptCascade.dropDownVisible = false
-        }
+    async positionChange(val) {
+      this.queryForm.position = val.id
+      if (this.$refs.deptCascade) {
+        this.$refs.deptCascade.dropDownVisible = false
+      }
     },
     handleOrgChange(data) {
       this.queryForm.orgId = data[data.length - 1]
@@ -686,6 +693,10 @@ export default {
         })
     },
     async handleStatusConfirm() {
+      if (typeof this.statusForm.breakAmount != 'number') {
+        this.$message.error('请输入违约金额')
+        return
+      }
       const { id, signTime, breakTime, breakAmount, signDate } = this.statusForm
       let request,
         params = {
@@ -744,6 +755,9 @@ export default {
           time = date
         }
         this.statusForm.breakTime = time
+        if (!this.statusForm.breakAmount) {
+          this.statusForm.breakAmount = 0
+        }
       } else {
         if (signTime) {
           signTime = new Date(signTime)
