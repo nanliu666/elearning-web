@@ -16,7 +16,7 @@
             label="方案名称："
           >
             <el-input
-              v-model="formData.name"
+              v-model.trim="formData.name"
               type="text"
               size="small"
               placeholder="请输方案名称"
@@ -193,7 +193,10 @@ export default {
         left: 0
       },
       formRules: {
-        name: [{ required: true, message: '请输入名称', trigger: 'blur' }]
+        name: [
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          { pattern: /^[\u4E00-\u9FA5a-zA-Z0-9_]+$/, message: '不允许输入空格等特殊符号' }
+        ]
       },
       contetArrL: [
         // { id: 'diyPcL1', name: '我的任务' },
