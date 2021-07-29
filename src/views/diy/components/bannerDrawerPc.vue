@@ -193,7 +193,7 @@ export default {
       //   }
       const isJPG = /^image\/(jpeg|png|jpg)$/.test(file.type)
       console.log(file.size)
-      const isLt2M = file.size / 1024 / 1024 < 50
+      const isLt2M = file.size / 1024 / 1024 <= 50
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpg、jpeg、png 格式!')
