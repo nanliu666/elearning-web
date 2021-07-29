@@ -488,7 +488,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
       { value: '01', label: '技术类' },
       { value: '02', label: '管理类' },
       { value: '03', label: '营销类' },
-      { value: '04', label: '技能' }
+      { value: '04', label: '技能类' }
     ]
   },
   {
