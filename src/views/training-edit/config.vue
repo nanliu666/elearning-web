@@ -623,7 +623,7 @@ export default {
   },
   watch: {
     'form.categoryId'() {
-      this.$refs.form.validateField('categoryId')
+      this.validateCategoryId()
     },
     'form.evaluationType'(types) {
       if (!types.includes(2)) {
@@ -698,6 +698,9 @@ export default {
     this.getData()
   },
   methods: {
+    validateCategoryId() {
+      this.$refs.form.validateField('categoryId')
+    },
     getStationParent(query, resolve) {
       if (query && typeof query === 'object') {
         if (!query.pageSize) {

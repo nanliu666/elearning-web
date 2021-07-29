@@ -561,6 +561,16 @@ export default {
       this.$forceUpdate()
     },
     publish(publishType) {
+      if (publishType === 1 && !this.form.categoryId) {
+        this.activeStep = 1
+        this.$refs.activePage.validateCategoryId()
+        this.$notify({
+          title: '提示',
+          message: '请选择分类',
+          type: 'warning'
+        })
+        return
+      }
       const data = {}
       const form = JSON.parse(JSON.stringify(this.form))
       const introduction = form.introduction

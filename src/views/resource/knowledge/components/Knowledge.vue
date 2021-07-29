@@ -278,8 +278,8 @@ export default {
         { value: '5', label: '已撤回' }
       ],
       uploadTypeOptions: [
-        { value: '1', label: '本地文件' },
-        { value: '2', label: '链接文件' }
+        { value: 0, label: '本地文件' },
+        { value: 1, label: '链接文件' }
       ]
     }
   },

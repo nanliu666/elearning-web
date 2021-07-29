@@ -45,7 +45,7 @@
           <el-form-item label="所在分类">
             <el-cascader
               ref="cascader"
-              v-model="filterForm.catalogId"
+              v-model="filterForm.categoryId"
               :options="categoryData"
               clearable
               filterable
@@ -224,7 +224,7 @@ export default {
       initialFilterForm: {
         coursePlanName: '',
         status: '',
-        catalogId: '',
+        categoryId: '',
         knowledgeSystemId: this.knowledgeSystemId,
         pageNo: 1,
         pageSize: 10
@@ -232,7 +232,7 @@ export default {
       filterForm: {
         coursePlanName: '',
         status: '',
-        catalogId: '',
+        categoryId: '',
         knowledgeSystemId: this.knowledgeSystemId,
         pageNo: 1,
         pageSize: 10
@@ -241,8 +241,7 @@ export default {
       statusOptions: [
         { value: 1, label: '未开始' },
         { value: 2, label: '进行中' },
-        { value: 3, label: '已结束' },
-        { value: 4, label: '草稿' }
+        { value: 3, label: '已结束' }
       ]
     }
   },
@@ -267,7 +266,7 @@ export default {
     },
     handleCategoryChange(data) {
       if (!data) return
-      this.filterForm.catalogId = data[data.length - 1]
+      this.filterForm.categoryId = data[data.length - 1]
       if (this.$refs.cascader) {
         this.$refs.cascader.dropDownVisible = false
       }
@@ -285,8 +284,6 @@ export default {
           return '进行中'
         case 3:
           return '已结束'
-        case 4:
-          return '草稿'
       }
     },
     cancel(target) {

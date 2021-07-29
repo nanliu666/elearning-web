@@ -43,7 +43,8 @@
             <lazy-select
               v-model="filterForm.teacherId"
               :remote-method="getUserList"
-              :props="{ value: 'userId', label: 'name' }"
+              :props="{ value: 'idStr', label: 'name' }"
+              :query-props="{ search: 'likeQuery', size: 'pageSize', page: 'pageNo' }"
             />
           </el-form-item>
           <el-form-item label="所在分类">
@@ -261,7 +262,9 @@
 import Pagination from '@/components/common-pagination'
 import lazySelect from '@/components/el-lazy-select'
 import { commonCancelRelation, getCourseList, getCourseCatalogList } from '@/api/knowledge'
-import { getOrgUserList } from '@/api/system/user'
+
+import { listTeacher } from '@/api/course/course'
+
 export default {
   name: 'KnowledgeCourse',
   components: {
@@ -335,7 +338,7 @@ export default {
   },
   methods: {
     getUserList(params) {
-      return getOrgUserList(Object.assign(params, { orgId: '0' }))
+      return listTeacher(params)
     },
     getCategoryData() {
       getCourseCatalogList({ status: 0 }).then((res) => {
