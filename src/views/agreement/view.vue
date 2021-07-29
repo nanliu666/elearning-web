@@ -693,7 +693,7 @@ export default {
         })
     },
     async handleStatusConfirm() {
-      if (typeof this.statusForm.breakAmount != 'number') {
+      if (typeof this.statusForm.breakAmount != 'number' && this.statusForm.signDate) {
         this.$message.error('请输入违约金额')
         return
       }
