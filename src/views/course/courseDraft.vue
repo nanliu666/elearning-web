@@ -2,6 +2,16 @@
   <div class="course">
     <!-- 头部 -->
     <page-header title="课程管理">
+      <!-- v-p="EXPORT_COURSE" -->
+      <el-button
+        slot="rightMenu"
+        size="medium"
+        :disabled="_.isEmpty(tableData)"
+        type="primary"
+        @click="exportData"
+      >
+        导出
+      </el-button>
       <el-button
         slot="rightMenu"
         v-p="ADD_COURSE"
@@ -262,6 +272,12 @@
         </el-button>
       </div>
     </el-dialog>
+    <export-dialog
+      :visible.sync="isShowExportDialog"
+      :total-num="page.total"
+      :export-api="exportCourseList"
+      :export-params="queryListParams"
+    />
   </div>
 </template>
 
@@ -274,8 +290,10 @@ import {
   putawayOperate,
   classList,
   syncCourses,
-  verifyCourseCanDelete
+  verifyCourseCanDelete,
+  exportCourseList
 } from '@/api/course/course'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 // 表格属性
 const type = ['在线', '面授', '直播']
 const electiveType = ['开放选修', '通过审批', '禁止选修']
@@ -491,18 +509,31 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     type: 'select',
     options: [],
     config: { placeholder: '请选择', filterable: true }
+  },
+  {
+    label: '知识体系',
+    type: 'treeSelect',
+    field: 'knowledgeSystemId',
+    config: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
   }
-  // {
-  //   data: '',
-  //   field: 'knowledgeSystemFullName',
-  //   label: '知识体系',
-  //   type: 'treeSelect',
-  //   config: {
-  //     selectParams: {
-  //       placeholder: '请选择'
-  //     }
-  //   }
-  // }
 ]
 const searchConfig = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -512,6 +543,7 @@ const searchConfig = {
 import { mapGetters } from 'vuex'
 import {
   ADD_COURSE,
+  EXPORT_COURSE,
   TOP_COURSE,
   EDIT_COURSE,
   DELETE_COURSE,
@@ -524,7 +556,8 @@ import {
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    exportDialog: () => import('@/components/common-export/exportDialog.vue')
   },
   filters: {
     // 过滤不可见的列
@@ -533,6 +566,8 @@ export default {
   },
   data() {
     return {
+      queryListParams: {}, // 剥离请求题库列表的入参，因为导出弹窗亦需要此入参
+      isShowExportDialog: false, // 是否展示导出弹窗
       stopId: '',
       throttle: false, // 节流阀
       loading: false,
@@ -565,7 +600,9 @@ export default {
     }
   },
   computed: {
+    exportCourseList: () => exportCourseList,
     ADD_COURSE: () => ADD_COURSE,
+    EXPORT_COURSE: () => EXPORT_COURSE,
     TOP_COURSE: () => TOP_COURSE,
     EDIT_COURSE: () => EDIT_COURSE,
     DELETE_COURSE: () => DELETE_COURSE,
@@ -625,6 +662,7 @@ export default {
   activated() {
     this.getInfo()
     this.getScreenInfo()
+    this.initRelatedKnowledgeList()
   },
   mounted() {
     this.$nextTick().then(() => {
@@ -632,6 +670,17 @@ export default {
     })
   },
   methods: {
+    exportData() {
+      this.isShowExportDialog = true
+    },
+    //   初始化知识体系列表
+    async initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(SEARCH_POPOVER_POPOVER_OPTIONS, { field: 'knowledgeSystemId' })
+      await relatedKnowledgeList({ name: '' }).then((res) => {
+        res.unshift({ id: '', name: '全部' })
+        knowledgeSystemId.config.treeParams.data = res
+      })
+    },
     //导入课程
     importCourse() {
       this.$router.push('/course/importCourse')
@@ -641,7 +690,12 @@ export default {
       this.$router.push({ path: '/course/detail?id=' + id })
     },
     toEstablishCourse() {
-      this.$router.push({ path: '/course/establishCourse' })
+      this.$router.push({
+        path: '/course/establishCourse',
+        meta: {
+          $keepAlive: false
+        }
+      })
     },
     // 递归过滤数据
     ListData(arr) {
@@ -683,7 +737,16 @@ export default {
       } else if (e === 2) {
         // 去编辑
         this.$router.push({
-          path: '/course/compileCourse?id=' + row.id + '&catalogName=' + row.catalogName
+          path:
+            '/course/compileCourse?id=' +
+            row.id +
+            '&catalogName=' +
+            row.catalogName +
+            '&type=' +
+            row.status,
+          meta: {
+            $keepAlive: false
+          }
         })
       } else if (e === 3) {
         verifyCourseCanDelete([row.id]).then((res) => {
@@ -699,12 +762,7 @@ export default {
               type: 'warning'
             })
               .then(async () => {
-                await delCourseInfo([row.id])
-                this.refreshTableData()
-                this.$message({
-                  type: 'success',
-                  message: '删除成功!'
-                })
+                this.delCourse([row.id])
               })
               .catch(() => {
                 this.$message({
@@ -793,14 +851,7 @@ export default {
                 else if (res.resultCode === 292 || res.resultCode === 291)
                   return this.$message.success('删除成功!')
                 else params = params.filter((item) => !noDel.includes(item))
-                if (!params.length) return this.$message.success('删除成功!')
-                await delCourseInfo(params)
-                this.$message.success('删除成功!')
-                this.$refs.table.clearSelection()
-                if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
-                  --this.page.currentPage
-                }
-                this.getInfo()
+                this.delCourse(params)
               })
               .catch(() => {
                 this.$message({
@@ -809,13 +860,7 @@ export default {
                 })
               })
           } else {
-            await delCourseInfo(params)
-            this.$message.success('删除成功!')
-            this.$refs.table.clearSelection()
-            if (this.tableData.length <= selection.length && this.page.currentPage !== 1) {
-              --this.page.currentPage
-            }
-            this.getInfo()
+            this.delCourse(params)
           }
         })
         .catch(() => {
@@ -899,6 +944,7 @@ export default {
       if (params.isPutaway == 2) {
         delete params.isPutaway
       }
+      this.queryListParams = params
       getCourseListData(params).then((res) => {
         this.tableData = res.data
         this.page.total = res.totalNum
@@ -909,6 +955,19 @@ export default {
     cancel() {
       this.stopVisible = false
       this.relatedContent = []
+    },
+    // 删除
+    async delCourse(params) {
+      if (!params.length) {
+        this.$message.success('删除成功!')
+        this.$refs.table.clearSelection()
+        return
+      }
+      await delCourseInfo(params)
+      this.$message.success('删除成功!')
+      this.$refs.table.clearSelection()
+      this.page.currentPage = 1
+      this.refreshTableData()
     }
   }
 }
