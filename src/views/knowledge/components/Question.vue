@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="input-wrapper">
         <el-input
-          v-model="filterForm.courseName"
+          v-model="filterForm.search"
           clearable
           size="medium"
           placeholder="输入题干内容搜索"
@@ -45,7 +45,7 @@
               placeholder="请选择"
             >
               <el-option
-                v-for="option in uploadTypeOptions"
+                v-for="option in typeOptions"
                 :key="option.value"
                 :label="option.label"
                 :value="option.value"
@@ -95,14 +95,15 @@
         <span>{{ `已选中${multipleSelection.length}项` }}</span><el-button
           type="text"
           size="small"
+          @click="() => cancel()"
         >
-          全部删除
+          取消关联
         </el-button>
       </div>
       <el-table
-        :loading="tableLoading"
+        v-loading="tableLoading"
         :data="data"
-        height="35vh"
+        height="55vh"
         @selection-change="handleSelectionChange"
       >
         <el-table-column
@@ -112,18 +113,16 @@
         </el-table-column>
 
         <el-table-column
-          type="index"
-          fixed="left"
-          width="55"
-        >
-        </el-table-column>
-
-        <el-table-column
           label="题目列表"
-          prop="topic"
           min-width="320"
           show-overflow-tooltip
         >
+          <template slot-scope="scope">
+            {{ scope.row.content }}
+            <div class="question-info">
+              <span>{{ getType(scope.row.type) }}</span><span>状态: {{ getStatus(scope.row.status) }}</span><span>关联试卷数: {{ scope.row.examNum }}</span>
+            </div>
+          </template>
         </el-table-column>
 
         <el-table-column
@@ -154,35 +153,13 @@
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
 import Pagination from '@/components/common-pagination'
-import TreeSelector from '@/components/tree-selector'
-
+import { cancelKnowledgeRel } from '@/api/knowledge'
+import { getQuestionList } from '@/api/examManage/question'
 export default {
-  name: 'KnowledgeCourse',
+  name: 'KnowledgeQuestion',
   components: {
-    Pagination,
-    TreeSelector
-  },
-  filters: {
-    getCourseType(type) {
-      switch (type) {
-        case 1:
-          return '在线课程'
-        case 2:
-          return '面授课程'
-        case 3:
-          return '直播课程'
-      }
-    },
-    getUpdateType(type) {
-      switch (type) {
-        case 1:
-          return '开放选修'
-        case 3:
-          return '禁止选修'
-      }
-    }
+    Pagination
   },
   props: {
     relevanceBtn: {
@@ -197,57 +174,128 @@ export default {
       multipleSelection: [],
       tableLoading: false,
       filterFormVisible: false,
-      initialFilterForm: {},
+      initialFilterForm: {
+        search: '',
+        status: '',
+        type: '',
+        pageNo: 1,
+        pageSize: 10
+      },
       filterForm: {
-        courseName: '',
-        status: '1',
-        teacherId: '',
-        catalogId: '',
-        courseType: '',
-        electiveType: '',
+        search: '',
+        status: '',
+        type: '',
         pageNo: 1,
         pageSize: 10
       },
       total: 0,
+
       statusOptions: [
-        { value: 0, label: '已发布' },
-        { value: 1, label: '已停用' },
-        { value: 2, label: '审批中' },
-        { value: 3, label: '审批结束' }
+        { value: 'normal', label: '正常' },
+        { value: 'expired', label: '已过期' }
       ],
-      uploadTypeOptions: [
-        { value: '1', label: '本地文件' },
-        { value: '2', label: '链接文件' }
+      typeOptions: [
+        { value: 'single_choice', label: '单选题' },
+        { value: 'multi_choice', label: '多选题' },
+        { value: 'judgment', label: '判断题' },
+        { value: 'short_answer', label: '简答题' },
+        { value: 'blank', label: '填空题' },
+        { value: 'question_group', label: '试题组(阅读题)' }
       ]
     }
   },
+  created() {
+    this.getData()
+  },
   methods: {
-    cancel() {},
+    getStatus(status) {
+      return (this.statusOptions.find((s) => s.value == status) || { label: '--' }).label
+    },
+    getType(type) {
+      return (this.typeOptions.find((s) => s.value == type) || { label: '--' }).label
+    },
+    cancel(target) {
+      let params = [],
+        message
+      if (target) {
+        message = '确定要对该题目取消关联吗？'
+        params = [target.id]
+      } else {
+        message = '确定要对所选题目取消关联吗？'
+        params = this.multipleSelection.map((item) => item.id)
+      }
+
+      this.$confirm(message, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          cancelKnowledgeRel({ questionIds: params.join(',') }).then(() => {
+            this.$message.success('操作成功')
+            this.getData()
+          })
+        })
+        .catch(() => {})
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    pagination({ page: pageNo, limit: pageSize }) {
-      Object.assign(this.filterForm, { pageNo, pageSize })
+    pagination({ page, limit }) {
+      if (limit !== this.filterForm.pageSize) {
+        this.filterForm.pageNo = 1
+      } else {
+        this.filterForm.pageNo = page
+      }
+      this.filterForm.pageSize = limit
       this.getData()
     },
     getData() {
       if (this.tableLoading) return
       this.tableLoading = true
-      getCourseListData(this.filterForm).then((res = {}) => {
-        const { data = [], totalNum = 0 } = res
-        this.data = data
-        this.total = totalNum
-      })
+      getQuestionList(this.filterForm)
+        .then((res = {}) => {
+          const { data = [], totalNum = 0 } = res
+          this.data = data
+          this.total = totalNum
+        })
+        .finally(() => (this.tableLoading = false))
     },
     resetPageAndGetList() {
       Object.assign(this.filterForm, { pageNo: 1, pageSize: 10 })
       this.getData()
     }
+  },
+  watch: {
+    knowledgeSystemId() {
+      this.getData()
+    },
+    'filterForm.search': _.debounce(function() {
+      this.resetPageAndGetList()
+    }, 1000)
   }
 }
 </script>
 <style lang="scss">
 .knowledge-question {
+  .question-info {
+    display: flex;
+    align-items: center;
+    color: #6d6d6d;
+    font-size: 0;
+    span {
+      padding-right: 12px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 12px;
+      &:not(:last-child) {
+        border-right: 1px solid #e4e4e4;
+      }
+      &:not(:first-child) {
+        padding-left: 12px;
+      }
+    }
+  }
   .filter-wrapper {
     display: flex;
     align-items: center;

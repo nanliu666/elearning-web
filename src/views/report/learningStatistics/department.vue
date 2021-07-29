@@ -74,7 +74,6 @@ import {
 import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
-import { cancel } from '@/router/axios'
 // 个人积分统计配置
 const onlineAll = [
   {
@@ -367,9 +366,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       ;(this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)),
         (this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)),

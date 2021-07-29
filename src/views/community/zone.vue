@@ -283,7 +283,6 @@ export default {
         this.tableLoading = false
       }
     },
-
     handleCurrentPageChange(params) {
       this.page.currentPage = params
       this.getData()
@@ -304,6 +303,9 @@ export default {
         path: '/community/addOrEdit',
         query: {
           tagName: '创建专区'
+        },
+        meta: {
+          $keepAlive: false
         }
       })
     },
@@ -360,6 +362,7 @@ export default {
       params.slice(0, -1)
       await batchDel(params)
       this.refresh()
+      this.$refs.table.clearSelection()
     }
   }
 }

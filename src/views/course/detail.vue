@@ -69,21 +69,25 @@
               >--</span>
             </div>
             <div class="colbox">
-              <span class="text_title">标准课时（分钟）：</span>
-              <span class="text">{{ userData.period ? userData.period : '--' }}</span>
+              <span class="text_title">知识体系：</span>
+              <span class="know">{{ userData.knowledgeSystemName || '--' }}</span>
             </div>
           </li>
           <li>
+            <div class="colbox">
+              <span class="text_title">标准课时（分钟）：</span>
+              <span class="text">{{ userData.period ? userData.period : '--' }}</span>
+            </div>
             <div class="colbox">
               <span class="text_title">积分：</span>
               <span class="text">{{ userData.credit ? userData.credit : '--' }}</span>
             </div>
+          </li>
+          <li>
             <div class="colbox">
               <span class="text_title">通过条件：</span>
               <span> {{ userData.passCondition === 'c' ? '达到课程学时' : '--' }} </span>
             </div>
-          </li>
-          <li>
             <div class="colbox">
               <span class="text_title">选修类型：</span>
               <span
@@ -743,5 +747,10 @@ export default {
 }
 /deep/ .el-tabs__header.is-top {
   margin-bottom: 25px;
+}
+.know {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

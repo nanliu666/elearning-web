@@ -129,7 +129,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'idStr',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   treeProps: { hasChildren: 'hasChildren', children: 'children' },

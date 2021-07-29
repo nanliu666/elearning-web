@@ -57,8 +57,8 @@
           </div>
         </el-col>
       </el-form-item>
-      <!-- 可见范围 -->
-      <el-form-item
+      <!-- 可见范围 bug3230-->
+      <!-- <el-form-item
         v-show="type === 'create' || (type === 'edit' && parentOrgIdLabel === '顶级')"
         label="可见范围"
       >
@@ -68,8 +68,7 @@
             @selectedValue="getOrgList"
           ></OrgTree>
         </div>
-        <!-- {{ userList }} -->
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
     <span
       v-if="type === 'create'"

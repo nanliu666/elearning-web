@@ -778,7 +778,7 @@ export const getReviewUrl = async (params = {}) => {
     str += `${key}=${params[key]}&`
   }
   str = str.substr(0, str.length - 1)
-  return await instance.post(`${previewUrl}/composite/httpfile?${str}`)
+  return await instance.post(`${previewUrl}?${str}`)
 }
 //获取指定日期的下一天
 export const dateAdd = (startDate) => {
@@ -795,4 +795,38 @@ export const dateAdd = (startDate) => {
     '-' +
     (startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`)
   return nextStartDate
+}
+/**
+ * @todo 获取文件类型
+ * @param {Object} file 文件对象
+ * @return {Object}
+ * flag : video: 0,word: 1,image: 2,compress:3,auido: 4,no suffix: -1
+ * err: 文件大小超出
+ */
+export const fileType = (name, size = 0) => {
+  let obj = {
+    flag: null,
+    err: null
+  }
+  const fileName = name.toLowerCase()
+  const fileSize = size / 1024 / 1024
+  const word = /\.(ppt|pptx|doc|docx|xlsx|xls|pdf|wps|rtf)$/
+  const video = /\.(avi|wmv|mp4|3gp|rm|rmvb|mov|flv)$/
+  const image = /\.(jpg|jpeg|png|gif|bmp)$/
+  const compress = /\.(rar|zip)$/
+  const audio = /\.(mp3|wma|wav)$/
+  const regxArr = [video, word, image, compress, audio]
+  obj.flag = regxArr.findIndex((item) => item.test(fileName))
+  switch (obj.flag) {
+    case 0:
+      obj.err = fileSize / 1024 > 2 ? '视频大小不能超过2G' : null
+      break
+    case 4:
+      obj.err = fileSize / 1024 > 2 ? '音频大小不能超过2G' : null
+      break
+    default:
+      obj.err = fileSize > 50 ? '文件大小不能超过50M' : null
+      break
+  }
+  return obj
 }

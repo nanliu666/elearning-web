@@ -458,24 +458,42 @@ export default {
   },
   methods: {
     initData() {
-      let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
-        return item.field === 'creatorId'
-      })[0]
-      const loadMoreFun = (item) => {
-        if (item.loading || item.noMore) return
-        item.loading = true
-        getCreatUsers({ pageNo: item.pageNo, pageSize: 10 }).then((res) => {
-          if (res.data.length > 0) {
-            item.options.push(...res.data)
-            item.pageNo += 1
-            item.loading = false
-          } else {
-            item.noMore = true
-            item.loading = false
-          }
-        })
-      }
-      creatorId.loadMoreFun = loadMoreFun
+      // let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
+      //   return item.field === 'creatorId'
+      // })[0]
+      // const loadMoreFun = (item) => {
+      //   if (item.loading || item.noMore) return
+      //   item.loading = true
+      //   getCreatUsers({ pageNo: item.pageNo, pageSize: 10 }).then((res) => {
+      //     if (res.data.length > 0) {
+      //       item.options.push(...res.data)
+      //       item.pageNo += 1
+      //       item.loading = false
+      //     } else {
+      //       item.noMore = true
+      //       item.loading = false
+      //     }
+      //   })
+      // }
+      // creatorId.loadMoreFun = loadMoreFun
+
+      let creatorIdType = _.find(this.searchConfig.popoverOptions, { field: 'creatorId' })
+      getCreatUsers({ pageNo: 1, pageSize: 999 }).then((res) => {
+        creatorIdType.options = _.concat(
+          [
+            {
+              name: '全部',
+              id: ''
+            }
+            // {
+            //   name: '未分类',
+            //   id: '-1'
+            // }
+          ],
+          res.data
+        )
+      })
+
       let categoryIdType = _.find(this.searchConfig.popoverOptions, { field: 'categoryId' })
       getCategoryList({ type: 1, status: 1 }).then((res) => {
         categoryIdType.config.treeParams.data = _.concat(
@@ -483,11 +501,11 @@ export default {
             {
               name: '全部',
               id: ''
-            },
-            {
-              name: '未分类',
-              id: '-1'
             }
+            // {
+            //   name: '未分类',
+            //   id: '-1'
+            // }
           ],
           res
         )

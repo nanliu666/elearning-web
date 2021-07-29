@@ -62,9 +62,11 @@
               >
                 <el-input
                   v-model="form.text"
-                  placeholder="请输入文案，建议20～50个字符"
+                  :rows="6"
+                  type="textarea"
+                  placeholder="请输入文案，建议20～100个字符"
                   :minlength="20"
-                  :maxlength="50"
+                  :maxlength="100"
                 />
               </el-form-item>
               <el-form-item
@@ -227,7 +229,7 @@ export default {
         ],
         text: [
           { required: true, message: '证书正文名称不能为空', trigger: 'blur' },
-          { min: 20, max: 50, message: '证书正文仅支持20-50个字符', trigger: 'blur' }
+          { min: 20, max: 100, message: '证书正文仅支持20-100个字符', trigger: 'blur' }
         ],
         awardAgency: [
           { required: true, message: '颁发机构名称不能为空', trigger: 'blur' },
@@ -376,10 +378,10 @@ export default {
     position: relative;
   }
   .preview {
-    transform: scale(0.7);
+    transform: scale(0.65);
     position: absolute;
-    top: -50px;
-    left: -110px;
+    top: -55px;
+    left: -116px;
   }
 }
 .btn {

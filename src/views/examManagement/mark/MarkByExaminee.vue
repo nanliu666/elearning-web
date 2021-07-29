@@ -138,7 +138,7 @@
           <el-button
             type="primary"
             size="medium"
-            @click="submit"
+            @click="submit('1')"
           >
             提交评分
           </el-button>
@@ -150,7 +150,7 @@
           </el-button>
           <el-button
             size="medium"
-            @click="save"
+            @click="save('0')"
           >
             保存
           </el-button>
@@ -222,7 +222,8 @@ export default {
       },
       isView: false,
       impersonalityList: [], //客观题
-      subjectivityList: [] // 主观题
+      subjectivityList: [], // 主观题
+      flag: true // TODO: 区分保存和新增
     }
   },
   computed: {
@@ -257,8 +258,8 @@ export default {
       })
     },
     // 保存
-    save() {
-      this.submit()
+    save(flag) {
+      this.submit(flag)
     },
     // 提交且评下一个
     submitAndNext() {
@@ -279,7 +280,8 @@ export default {
         })
     },
     // 提交
-    submit() {
+    submit(flag) {
+      this.flag = flag
       this.checkRequired()
     },
     checkEmpty() {
@@ -308,7 +310,8 @@ export default {
       if (_.isEmpty(list)) return
       const params = {
         id: this.examineeAchievementDO.id,
-        list
+        list,
+        isSubmit: this.flag
       }
       postSubmitByOne(params)
         .then(() => {

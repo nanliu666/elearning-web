@@ -42,11 +42,11 @@
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin-left:10px"
+                  style="margin-left: 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
+                    style="display: flex; flex-direction: column"
                   >
                     <el-checkbox
                       v-for="item in tableColumns"
@@ -61,29 +61,17 @@
                   <i
                     slot="reference"
                     class="el-icon-setting"
-                    style="cursor: pointer;"
+                    style="cursor: pointer"
                   />
                 </el-popover>
               </div>
             </div>
           </div>
         </template>
-        <!-- <template
-          slot="multiSelectMenu"
-          slot-scope="{ selection }"
-        >
-          <el-button
-            type="text"
-            icon="el-icon-delete"
-            @click="deleteSelected(selection)"
-          >
-            批量删除
-          </el-button>
-        </template> -->
-        <template #status="{row}">
+        <template #status="{ row }">
           {{ row.status == '0' ? '已启用' : '已停用' }}
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               v-p="STOP_COURSE_CATALOG"
@@ -184,7 +172,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   // enableMultiSelect: true, // TODO：树无法做批量选择   //先不做批量删除
@@ -343,7 +331,7 @@ export default {
     },
     // 单个删除
     handleDelete(row) {
-      this.$confirm('您确定要删除选中的分类吗？?', '提醒', {
+      this.$confirm('您确定要删除选中的分类吗？', '提醒', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

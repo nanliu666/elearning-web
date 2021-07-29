@@ -49,7 +49,7 @@
               slot="tip"
               style="color: #ff0000; font-size: 12px"
             >
-              说明：图片只能是 jpg、jpeg、png 格式，且不能超过5MB!
+              说明：图片只能是 jpg、jpeg、png 格式，且不能超过50MB!
             </div>
           </common-upload>
         </el-form-item>
@@ -191,13 +191,13 @@ export default {
       //     return false
       //   }
       const isJPG = /^image\/(jpeg|png|jpg)$/.test(file.type)
-      const isLt2M = file.size / 1024 / 1024 < 5
+      const isLt2M = file.size / 1024 / 1024 < 50
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpg、jpeg、png 格式!')
       }
       if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!')
+        this.$message.error('上传图片大小不能超过 50MB!')
       }
       return isJPG && isLt2M
     },

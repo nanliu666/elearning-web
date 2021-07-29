@@ -57,7 +57,7 @@
             <el-button
               type="text"
               size="small"
-              :disabled="!table.vos.length"
+              :disabled="!table.trainAttachmentVOS.length"
               @click="downloadZip(table)"
             >
               打包下载

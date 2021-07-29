@@ -5,14 +5,24 @@
         培训项目安排
       </div>
       <div>
-        <el-button
-          v-p="ADD_TRAIN"
-          type="primary"
-          size="medium"
-          @click.native="goAdd('inside')"
-        >
-          创建培训
-        </el-button>
+        <el-dropdown>
+          <el-button
+            v-p="ADD_TRAIN"
+            type="primary"
+            size="medium"
+            @click.native="goAdd('inside')"
+          >
+            创建培训
+          </el-button>
+          <!-- <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item @click.native="goAdd('inside')">
+              内训
+            </el-dropdown-item>
+            <el-dropdown-item @click.native="goAdd('outer')">
+              外训
+            </el-dropdown-item>
+          </el-dropdown-menu> -->
+        </el-dropdown>
       </div>
     </div>
 
@@ -320,7 +330,8 @@ import {
   updateCatalogs,
   getScheduleList,
   delTrain,
-  stopSchedule
+  stopSchedule,
+  relatedKnowledgeList
 } from '@/api/training/training'
 import {
   ADD_TRAIN,
@@ -332,8 +343,6 @@ import {
   VIEW_TRAIN
 } from '@/const/privileges'
 import { getCategoryTree } from '@/api/train/train'
-import { getCreatorList } from '@/api/live'
-
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -348,18 +357,18 @@ const TABLE_COLUMNS = [
     minWidth: 200,
     prop: 'trainNo'
   },
-  {
-    label: '类别',
-    minWidth: 200,
-    prop: 'trainScope',
-    formatter: (row) => {
-      const END_STATUS = {
-        inside: '内训',
-        outer: '外训'
-      }
-      return END_STATUS[row.trainScope]
-    }
-  },
+  // {
+  //   label: '类别',
+  //   minWidth: 200,
+  //   prop: 'trainScope',
+  //   formatter: (row) => {
+  //     const END_STATUS = {
+  //       inside: '内训',
+  //       outer: '外训'
+  //     }
+  //     return END_STATUS[row.trainScope]
+  //   }
+  // },
   {
     label: '分类',
     minWidth: 200,
@@ -435,17 +444,17 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
   }
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
-  {
-    config: { placeholder: '请选择' },
-    data: '',
-    field: 'trainScope',
-    label: '类别',
-    type: 'select',
-    options: [
-      { value: 'inside', label: '内训' },
-      { value: 'outer', label: '外训' }
-    ]
-  },
+  // {
+  //   config: { placeholder: '请选择' },
+  //   data: '',
+  //   field: 'trainScope',
+  //   label: '类别',
+  //   type: 'select',
+  //   options: [
+  //     { value: 'inside', label: '内训' },
+  //     { value: 'outer', label: '外训' }
+  //   ]
+  // },
   {
     type: 'treeSelect',
     field: 'categoryId',
@@ -663,7 +672,7 @@ export default {
       let knowledgeSystemId = _.find(this.searchPopoverConfig.popoverOptions, {
         field: 'knowledgeSystemId'
       })
-      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+      relatedKnowledgeList({ name: '' }).then((res) => {
         _.set(knowledgeSystemId, 'config.treeParams.data', res)
       })
     },
@@ -715,6 +724,7 @@ export default {
     },
     isstopSchedule(id) {
       stopSchedule(id).then(() => {
+        this.$message.success('操作成功')
         this.isgetScheduleList()
       })
     },
@@ -958,6 +968,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
+              this.isgetScheduleList()
             })
           })
           .catch(() => {

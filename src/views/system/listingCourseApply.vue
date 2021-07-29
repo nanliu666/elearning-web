@@ -73,6 +73,7 @@
                   v-model="formData.pm"
                   :remote-method="getOrgUserList"
                   :props="{ label: 'name', value: 'userId' }"
+                  @getSelected="changePM"
                 ></lazy-select>
               </el-form-item>
             </div>
@@ -186,12 +187,12 @@ const FORM_TABLE = [
   {
     prop: 'period',
     itemType: 'inputNumber',
-    label: '标准课时（小时）',
+    label: '标准课时（分钟）',
     offset: 4,
     min: 0,
     max: 10000,
-    precision: 1,
-    step: 0.1,
+    // precision: 1,
+    step: 1,
     disabled: true
   },
   {
@@ -303,6 +304,9 @@ export default {
         this.formData.teacherId = res.teacherId
         this.formData.period = Number(res.period) //总课时
       })
+    },
+    changePM(val) {
+      this.formData.contactInfo = val.phonenum
     },
     //讲师
     getTeacher() {

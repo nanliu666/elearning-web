@@ -95,3 +95,7 @@ export const exportScopeList = (params) =>
 // 获取知识详情
 export const getDetailsById = (params) => get('/api/manage/v1/knowledge/manage/details', params)
 export const queryCategoryOrgList = (params) => get('/manage/v1/knowledge/catalog/list', params)
+
+// 各资源下的知识体系下拉框列表
+export const relatedKnowledgeList = (params) =>
+  post('api/blade-resource/v1/category/relatedKnowledgeList', params)

@@ -73,11 +73,11 @@ const onlineStudy = [
     minWidth: 150,
     prop: 'catalogueName'
   },
-  {
-    label: '培训人员类别',
-    minWidth: 150,
-    prop: 'trainObject'
-  },
+  // {
+  //   label: '培训人员类别',
+  //   minWidth: 150,
+  //   prop: 'trainObject'
+  // },
   {
     label: '实际人数',
     prop: 'actualCount'

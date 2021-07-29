@@ -1,6 +1,6 @@
 // 配置编译环境和线上环境之间的切换
 let systemName = '易宝教育管理后台' // 系统名称
-var isQiNiu = false // 判断是用七牛(true)还是用内部(false)上传
+var isQiNiu = true // 判断是用七牛(true)还是用内部(false)上传
 let baseUploadUrl = {
   // 内部上传服务，各环境上传地址
   dev: 'https://file-test.epro-edu.com',
@@ -26,7 +26,7 @@ let uploadUrl = env.VUE_APP_ENV ? baseUploadUrl[env.VUE_APP_ENV] : baseUploadUrl
 if (env.VUE_APP_ENV == 'dev') {
   backBaseUrl = 'http://172.16.4.55:8081' // 深圳本地开发环境地址(后台管理)
 } else if (env.VUE_APP_ENV == 'sit') {
-  backBaseUrl = 'https://admin-test.epro-edu.com/' // 深圳本地开发环境地址(后台管理)
+  backBaseUrl = 'http://10.134.5.72:8081' // 深圳本地开发环境地址(后台管理)
   systemName = '徐工管理后台' //临时修改
 } else if (env.VUE_APP_ENV == 'pro') {
   backBaseUrl = 'http://172.16.0.16:8081' //生产环境地址(后台管理)
@@ -41,7 +41,7 @@ if (env.VUE_APP_ENV == 'dev') {
 if (env.VUE_APP_ENV == 'dev') {
   frontBaseUrl = 'http://172.16.4.55:7071' // 深圳本地开发环境地址（用户前台）
 } else if (env.VUE_APP_ENV == 'sit') {
-  frontBaseUrl = 'https://user-test.epro-edu.com' // 线上sit环境地址（用户前台）
+  frontBaseUrl = 'http://10.134.5.72:7071' // 线上sit环境地址（用户前台）
 } else if (env.VUE_APP_ENV == 'pro') {
   frontBaseUrl = 'http://172.16.0.16:7071' //生产环境地址（用户前台）
 } else if (env.VUE_APP_ENV == 'zehui') {
@@ -51,7 +51,7 @@ if (env.VUE_APP_ENV == 'dev') {
 }
 
 // 预览地址
-const previewUrl = 'https://convert.zexueyuan.com.cn/fcscloud'
+const previewUrl = 'https://convert.zexueyuan.com.cn/fcscloud/composite/httpfile'
 export {
   backBaseUrl,
   frontBaseUrl,

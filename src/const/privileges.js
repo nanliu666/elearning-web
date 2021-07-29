@@ -1,5 +1,6 @@
 // 课程管理页面的鉴权
 export const ADD_COURSE = '/course/courseDraft/add' //新增
+export const EXPORT_COURSE = '/course/courseDraft/export' //导出
 export const TOP_COURSE = '/course/courseDraft/top' //置顶/取消置顶
 export const EDIT_COURSE = '/course/courseDraft/edit' //编辑
 export const DELETE_COURSE = '/course/courseDraft/delete' //删除
@@ -51,6 +52,7 @@ export const ADD_GROUNP_EXAM_CATALOG = '/examManagement/category/management/addN
 export const DELETE_QUSTION = '/examManagement/question/questionList/delete' // 删除
 export const EDIT_QUSTION = '/examManagement/question/questionList/edit' // 编辑
 export const ADD_QUSTION = '/examManagement/question/questionList/add' // 新增
+export const EXPORT_QUSTION = '/examManagement/question/questionList/export' // 新增
 // 考评管理的试卷管理的鉴权
 export const COPY_TESTPAPER = '/examManagement/testPaper/testPaper/copy' // 复制
 export const ADD_TESTPAPER = '/examManagement/testPaper/testPaper/add' // 创建试卷
@@ -102,6 +104,7 @@ export const DELETE_LECTURER_CLASSIFY = '/lecturer/classify/delete' // 删除
 export const ADD_LECTURER_GROUNP_CLASSIFY = '/lecturer/classify/addNewGroup' // 新建子分类
 // 讲师管理的鉴权
 export const ADD_LECTURER = '/lecturer/lecturer/add' // 添加讲师
+export const EXPORT_LECTURER = '/lecturer/lecturer/export' // 导出讲师
 export const STOP_LECTURER = '/lecturer/lecturer/stop' // 停用
 export const EDIT_LECTURER = '/lecturer/lecturer/edit' // 编辑
 export const DELETE_LECTURER = '/lecturer/lecturer/delete' // 删除
@@ -131,6 +134,7 @@ export const EDIT_ORGDETAIL = '/orgs/orgDetail/edit' // 编辑
 export const DELETE_ORGDELETE = '/orgs/orgDetail/delete' // 删除
 // 用户管理的鉴权
 export const ADD_USER = '/system/user/add' // 新建用户
+export const EXPORT_USER = '/system/user/export' // 新建用户
 export const IMPORT_USER = '/system/user/import' // 导入用户
 export const SETTING_USER = '/system/user/setting' // 角色设置
 export const RESET_USER = '/system/user/resetPassword' // 密码重置
@@ -305,3 +309,6 @@ export const ADD_GROUNP = '/system/groupManage/add' // 添加
 export const DEL_GROUNP = '/system/groupManage/del' // 删除
 export const EDIT_GROUNP = '/system/groupManage/edit' //编辑
 export const VIEW_GROUNP = '/system/groupManage/view' //查看用户
+export const ADD_GROUNPUSER = '/system/viewUsers/add' //添加用户
+export const IMPORT_GROUNPUSER = '/system/viewUsers/import' //导入用户
+export const DEL_GROUNPUSER = '/system/viewUsers/del' //删除用户

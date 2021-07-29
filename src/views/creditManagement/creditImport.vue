@@ -20,7 +20,7 @@
             <a
               target="_blank"
               download="积分导入模板.xsl"
-              :href="'https://file-test.zexueyuan.com.cn/c35148be80764601a476669889b0d735.xls'"
+              :href="templateLink"
             >
               <el-button
                 size="medium"
@@ -65,7 +65,6 @@
           <el-button
             type="primary"
             size="medium"
-            :loading="importLoading"
             :disabled="importDisabled"
             @click="handleSubmit"
           >
@@ -144,6 +143,7 @@
 
 <script>
 import { userScoreImport, errorScoreExcelImport } from '@/api/credit/credit'
+import {getTemplate} from '@/api/system/template'
 import { exportToExcel } from '@/util/util'
 const TABLE_CONFIG = {}
 const TABLE_COLUMNS = [
@@ -156,7 +156,7 @@ export default {
   name: 'CreditImport',
   data() {
     return {
-      importLoading: false,
+      templateLink:'',
       importDisabled: true,
       uploadList: [],
       successCount: 0,
@@ -171,8 +171,14 @@ export default {
   },
   activated() {
     this.reset()
+    this.downTemplate()
   },
   methods: {
+    downTemplate(){
+      getTemplate({code:'t8'}).then(res=>{
+        this.templateLink = res.fileUrl
+      })
+    },
     reset() {
       this.successCount = 0
       this.failedCount = 0
@@ -208,9 +214,14 @@ export default {
       this.importDisabled = true
     },
     httpRequest(file) {
+      const loading = this.$loading({
+          lock: true,
+          text: '正在导入，请稍等！',
+          spinner: 'el-icon-loading',
+          background: 'rgba(255, 255, 255, 0.7)'
+        });
       const parmas = new FormData()
       parmas.append('file', file.file)
-      this.importLoading = true
       userScoreImport(parmas)
         .then((res) => {
           this.successCount += res.successNum
@@ -225,7 +236,7 @@ export default {
         })
         .catch()
         .finally(() => {
-          this.importLoading = false
+          loading.close()
         })
     },
     downloadFile() {

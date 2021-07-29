@@ -63,7 +63,9 @@
               <i class="iconfont iconimage_icon_export"></i>
               <p class="upload">
                 <span> 点击或者拖拽附件到此区域</span>
-                <span> 上传的图片格式要求jpg、jpeg、bmp、png， 大小不超过10M，推荐比例1：1 </span>
+                <span>
+                  上传的图片格式要求jpg、jpeg、bmp、png， 大小不超过10M，推荐比例150*150
+                </span>
               </p>
               <img
                 v-if="form.headImg"
@@ -91,7 +93,7 @@
               <p class="upload">
                 <span style="font-size: 16px; padding: 0 40px"> 点击或者拖拽附件到此区域</span>
                 <span style="font-size:12px;padding;0 30px;">
-                  上传的图片格式要求jpg、jpeg、bmp、png， 大小不超过10M，推荐比例比例4：1
+                  上传的图片格式要求jpg、jpeg、bmp、png， 大小不超过10M，推荐比例比例1200*160
                 </span>
               </p>
               <img
@@ -145,10 +147,14 @@
 
             <el-select
               v-model="form.managerId"
+              v-loadmore="loadMore"
               popper-class="zone_el_select"
               multiple
               placeholder="请选择"
               filterable
+              remote
+              :remote-method="remoteMethod"
+              @visible-change="visibleChange"
             >
               <el-option
                 v-for="item in managerOptions"
@@ -156,6 +162,21 @@
                 :label="item.name"
                 :value="item.userId"
               >
+              </el-option>
+
+              <el-option
+                v-show="valve"
+                value="1"
+                class="loading"
+              >
+                <i class="el-icon-loading"></i>加载中
+              </el-option>
+              <el-option
+                v-show="noData"
+                value="1"
+                class="ending"
+              >
+                {{ managerOptions.length === 0 ? '无数据' : '到底了' }}
               </el-option>
             </el-select>
           </el-form-item>
@@ -185,18 +206,60 @@ export default {
   },
   data() {
     return {
-      managerOptions: []
+      managerOptions: [],
+      queryParams: {
+        pageNo: 1,
+        pageSize: 20,
+        orgId: 0,
+        search: ''
+      },
+      valve: false,
+      noData: false
     }
   },
-  async activated() {
-    const res = await getOrgTreeSearch({
-      pageNo: 1,
-      pageSize: 999999,
-      orgId: 0
-    })
-    this.managerOptions = res.data
+  watch: {
+    'form.managerList': {
+      handler(val){
+         console.log(val)
+          val.forEach((item) => {
+            this.managerOptions.push({
+              name: item.bizName,
+              userId: item.bizId
+            })
+          })
+      },
+      deep:true,
+      immediate:true
+    }
   },
   methods: {
+    visibleChange(show) {
+      if (show) {
+        this.queryParams.search = ''
+        this.getAdminList()
+      }
+    },
+    loadMore() {
+      if (this.valve || this.noData) return
+      this.valve = true
+      this.queryParams.pageNo += 20
+      this.getAdminList()
+    },
+    async getAdminList() {
+      const res = await getOrgTreeSearch(this.queryParams)
+      this.managerOptions.push(...res.data)
+      this.managerOptions = _.unionBy(this.managerOptions, 'userId')
+      this.valve = false
+      if (res.data.length === 0) return (this.noData = true)
+      else this.noData = false
+    },
+    remoteMethod(v) {
+      this.queryParams.search = v.trim()
+      this.queryParams.pageSize = 20
+      this.queryParams.pageNo = 1
+      this.managerOptions = []
+      this.getAdminList()
+    },
     // 图片上传前格式校验
     beforeAvatarUpload(file) {
       const regx = /^.*\.(jpg|jpeg|bmp|png)$/
@@ -312,6 +375,19 @@ export default {
     border-radius: 5px;
     height: 50px;
     background-color: #ccc;
+  }
+  .loading {
+    text-align: center;
+    color: #ccc;
+    pointer-events: none;
+    i {
+      margin-right: 10px;
+    }
+  }
+  .ending {
+    text-align: center;
+    color: #ccc;
+    pointer-events: none;
   }
 }
 </style>

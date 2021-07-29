@@ -184,6 +184,7 @@ import {
   modifyQuestion,
   getQuestionCategory
 } from '@/api/examManage/question'
+import { relatedKnowledgeList } from '@/api/knowledge/knowledge'
 import moment from 'moment'
 
 const BASIC_COLUMNS = [
@@ -219,7 +220,8 @@ const BASIC_COLUMNS = [
           value: 'id'
         }
       }
-    }
+    },
+    required: true
   },
   {
     prop: 'score',
@@ -253,6 +255,31 @@ const BASIC_COLUMNS = [
     valueFormat: 'yyyy-MM-dd HH:mm:ss',
     offset: 4,
     itemType: 'datePicker'
+  },
+  {
+    label: '知识体系',
+    itemType: 'treeSelect',
+    prop: 'knowledgeSystemId',
+    required: false,
+    props: {
+      selectParams: {
+        placeholder: '请选择知识体系',
+        multiple: false
+      },
+      treeParams: {
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        data: [],
+        filterable: true,
+        props: {
+          children: 'children',
+          label: 'name',
+          value: 'id'
+        }
+      }
+    }
   },
   { span: 24, prop: 'title2', itemType: 'slotout' }
 ]
@@ -369,6 +396,7 @@ export default {
         score: 0,
         difficulty: null,
         expiredTime: null,
+        knowledgeSystemId: null,
         content: null,
         analysis: null,
         answer: null,
@@ -477,6 +505,7 @@ export default {
       this.loadData()
     }
     this.loadCategoryData()
+    this.initRelatedKnowledgeList()
   },
   beforeDestroy() {
     this.scoreWatcher && this.scoreWatcher()
@@ -572,7 +601,8 @@ export default {
           'analysis',
           'options',
           'expiredTime',
-          'attachments'
+          'attachments',
+          'knowledgeSystemId'
         ])
         if (data.score) {
           data.score = parseInt(data.score)
@@ -695,6 +725,14 @@ export default {
           }
         })
       })
+    },
+    // 初始化知识体系列表
+    initRelatedKnowledgeList() {
+      let knowledgeSystemId = _.find(BASIC_COLUMNS, { prop: 'knowledgeSystemId' })
+      //   各资源下的知识体系下拉框列表
+      relatedKnowledgeList({ name: '' }).then(
+        (res) => (knowledgeSystemId.props.treeParams.data = res)
+      )
     }
   }
 }

@@ -87,14 +87,14 @@
             <el-button
               type="text"
               :disabled="$index === 0"
-              @click="handleUp(row)"
+              @click="moveUp($index)"
             >
               上移
             </el-button>
             <el-button
               type="text"
               :disabled="$index === tableData.length - 1"
-              @click="handleDown(row)"
+              @click="moveDown($index)"
             >
               下移
             </el-button>
@@ -430,29 +430,30 @@ export default {
       }
       this.$emit('update', _.cloneDeep(block))
     },
+    moveFun(sourceIndex, targetIndex) {
+      this.tableData[sourceIndex] = this.tableData.splice(
+        targetIndex,
+        1,
+        this.tableData[sourceIndex]
+      )[0]
+    },
     /***
      * @author guanfenda
      * @desc 下移
      * */
-    handleDown(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      if (index !== this.tableData.length - 1) {
-        this.tableData[index] = this.tableData.splice(index + 1, 1, this.tableData[index])[0]
-      }
+    moveDown(index) {
+      const sourceIndex = index
+      const targetIndex = index + 1
+      this.moveFun(sourceIndex, targetIndex)
     },
     /***
      * @author guanfenda
      * @desc 上移
      * */
-    handleUp(row) {
-      let index = _.findIndex(this.tableData, (item) => {
-        return item.id === row.id
-      })
-      if (index !== 0) {
-        this.tableData[index] = this.tableData.splice(index - 1, 1, this.tableData[index])[0]
-      }
+    moveUp(index) {
+      const sourceIndex = index
+      const targetIndex = index - 1
+      this.moveFun(sourceIndex, targetIndex)
     },
     /**
      * @author guanfenda

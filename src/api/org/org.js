@@ -102,3 +102,10 @@ export const exportErrOrgs = (params) =>
 //下载导入模板
 export const exportTemplateOrgs = (params) =>
   get('/api/blade-system/v1/organization/exportTemplate', params, { responseType: 'blob' })
+
+// 组织管理-列表
+// export const getOrganization = (params) => get('/api/blade-resource/v1/organization', params)
+
+export const getorganizationNew = (params) => get('/api/blade-system/v1/organization/new', params)
+
+  

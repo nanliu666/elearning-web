@@ -1,6 +1,16 @@
 <template>
   <div class="trainingArrange">
     <page-header title="讲师管理">
+      <!-- v-p="EXPORT_LECTURER" -->
+      <el-button
+        slot="rightMenu"
+        :disabled="_.isEmpty(tableData)"
+        type="primary"
+        size="medium"
+        @click="exportData"
+      >
+        导出
+      </el-button>
       <el-button
         slot="rightMenu"
         v-p="ADD_LECTURER"
@@ -237,11 +247,17 @@
         </el-button>
       </div>
     </el-dialog>
+    <export-dialog
+      :visible.sync="isShowExportDialog"
+      :total-num="page.total"
+      :export-api="exportCourseListData"
+      :export-params="queryListParams"
+    />
   </div>
 </template>
 
 <script>
-import { getCourseListData } from '@/api/course/course'
+import { getCourseListData, exportCourseListData } from '@/api/course/course'
 import {
   listTeacher,
   editSysRulus,
@@ -252,7 +268,7 @@ import {
 // 侧栏数据
 const teacherLevel = ['预备级', '助理级', '初级', '中级', '高级', '资深级', '专家级', '非讲师']
 const teacherTitle = ['', '助理级', '初级', '中级', '高级', '研究员级', '无']
-const cata = ['', '技术类', '管理类', '营销服务类', '技能类']
+const cata = ['', '技术类', '管理类', '营销类', '技能类']
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -471,7 +487,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     options: [
       { value: '01', label: '技术类' },
       { value: '02', label: '管理类' },
-      { value: '03', label: '营销服务类' },
+      { value: '03', label: '营销类' },
       { value: '04', label: '技能' }
     ]
   },
@@ -492,6 +508,7 @@ const SEARCH_POPOVER_CONFIG = {
 }
 
 import {
+  EXPORT_LECTURER,
   ADD_LECTURER,
   STOP_LECTURER,
   EDIT_LECTURER,
@@ -502,7 +519,8 @@ import { mapGetters } from 'vuex'
 export default {
   // 搜索组件
   components: {
-    SeachPopover: () => import('@/components/searchPopOver')
+    SeachPopover: () => import('@/components/searchPopOver'),
+    exportDialog: () => import('@/components/common-export/exportDialog.vue')
   },
   filters: {
     // 过滤不可见的列
@@ -511,6 +529,8 @@ export default {
   },
   data() {
     return {
+      queryListParams: {}, // 剥离请求题库列表的入参，因为导出弹窗亦需要此入参
+      isShowExportDialog: false, // 是否展示导出弹窗
       searchParamsData: '',
       CourseList: '',
       blockDialogVisible: false,
@@ -569,6 +589,8 @@ export default {
     }
   },
   computed: {
+    exportCourseListData: () => exportCourseListData,
+    EXPORT_LECTURER: () => EXPORT_LECTURER,
     ADD_LECTURER: () => ADD_LECTURER,
     STOP_LECTURER: () => STOP_LECTURER,
     EDIT_LECTURER: () => EDIT_LECTURER,
@@ -597,6 +619,9 @@ export default {
     this.getTeacherList()
   },
   methods: {
+    exportData() {
+      this.isShowExportDialog = true
+    },
     // 获取讲师分类列表
     getTeacherList() {
       queryTeacherCataList({ source: 'teacher' }).then((res) => {
@@ -609,7 +634,12 @@ export default {
     },
     // 去添加
     toAddLecturer() {
-      this.$router.push({ path: '/resource/lecturer/addLecturer' })
+      this.$router.push({
+        path: '/resource/lecturer/addLecturer',
+        meta: {
+          $keepAlive: false
+        }
+      })
     },
     // 去详情
     toParticularsLecturer(row) {
@@ -770,6 +800,7 @@ export default {
       if (!params.categoryId) {
         delete params.categoryId
       }
+      this.queryListParams = params
       listTeacher(params).then((res) => {
         this.tableData = res.teacherInfos
         this.page.total = res.totalNum || 0

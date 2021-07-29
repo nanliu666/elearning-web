@@ -26,7 +26,6 @@
           />
         </div>
       </div>
-    
     </div>
     <el-dialog
       :title="cateForm.categoryId ? '重命名' : '创建分类'"
@@ -231,7 +230,7 @@ export default {
         .then(() => {
           this.initCatform()
           this.loading = false
-          this.$message.success('创建分组成功')
+          this.$message.success('创建分类成功')
           this.onClickVisible(str)
           this.$emit('reload')
         })

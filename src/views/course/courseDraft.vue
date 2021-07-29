@@ -798,11 +798,11 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          let courseIds = selection.reduce((pre, cur) => {
+          let arr = selection.reduce((pre, cur) => {
             pre.push(cur.id)
             return pre
           }, [])
-          syncCourses({ courseIds }).then((r) => {
+          syncCourses({ courseIds:arr }).then((r) => {
             this.$message({
               type: 'info',
               message: r.resMsg

@@ -2,7 +2,7 @@
   <div class="knowledge-detail">
     <div
       class="header"
-      @click="$router.back()"
+      @click="$router.push('/resource/knowledge/index')"
     >
       <i class="el-icon-arrow-left"> </i>
       <span class="title">查看详情</span>
@@ -13,39 +13,16 @@
         <div class="main-content">
           <div class="left">
             <div class="title">
-              数据库安全
+              {{ data.name }}
             </div>
             <div class="aside">
-              <span>更新时间：2021-02-19 12:00:00</span>
-              <span>级别路径：安全>数据安全安全</span>
+              <span>更新时间：{{ data.updateTime }}</span>
+              <span>级别路径：{{ data.fullName || '--' }}</span>
             </div>
           </div>
-          <el-row class="button-wrapper">
-            <el-button
-              v-p="EDIT_KNOWLEDGE"
-              type="primary"
-              size="medium"
-            >
-              编辑
-            </el-button>
-            <el-button
-              v-p="DELETE_KNOWLEDGE"
-              type="default"
-              size="medium"
-            >
-              删除
-            </el-button>
-            <el-button
-              v-p="CHILD_KNOWLEDGE"
-              type="default"
-              size="medium"
-            >
-              新增子级
-            </el-button>
-          </el-row>
         </div>
         <div class="desc-content">
-          描述：常规软件工具进行捕捉、管理和处理的数据集合，是需要新处理模式才能具有更强的决策力、洞察发现力和流程优化能力的海量、高增长率和多样化的信息资产。常规软件工具进行捕捉、管理和处理的数据集合，是需要新处理模式才能具有更强的决策力、洞察发现力和流程优化能力的海量、高增长率和多样化的信息资产。
+          描述：{{ data.description || '--' }}
         </div>
       </div>
       <div class="container bottom">
@@ -58,6 +35,8 @@
           >
             <component
               :is="tab.component"
+              v-if="activeComponent === tab.component"
+              :knowledge-system-id="id"
               :relevance-btn="RELEVANCE_KNOWLEDGE"
             />
           </el-tab-pane>
@@ -68,13 +47,10 @@
 </template>
 
 <script>
-import {
-  RELEVANCE_KNOWLEDGE,
-  EDIT_KNOWLEDGE,
-  DELETE_KNOWLEDGE,
-  CHILD_KNOWLEDGE
-} from '@/const/knowledge'
+import { RELEVANCE_KNOWLEDGE } from '@/const/knowledge'
 import { Course, Knowledge, Live, Question, RequiredCourse, Training } from './components'
+import { queryCategoryDetail } from '@/api/knowledge'
+
 export default {
   name: 'KnowledgeDetail',
   components: {
@@ -87,6 +63,7 @@ export default {
   },
   data() {
     return {
+      data: {},
       activeComponent: 'Course',
       tabs: [
         {
@@ -117,10 +94,24 @@ export default {
     }
   },
   computed: {
-    RELEVANCE_KNOWLEDGE: () => RELEVANCE_KNOWLEDGE,
-    EDIT_KNOWLEDGE: () => EDIT_KNOWLEDGE,
-    DELETE_KNOWLEDGE: () => DELETE_KNOWLEDGE,
-    CHILD_KNOWLEDGE: () => CHILD_KNOWLEDGE
+    RELEVANCE_KNOWLEDGE: () => RELEVANCE_KNOWLEDGE
+  },
+  activated() {
+    this.activeComponent = 'Course'
+    this.queryCategoryDetail()
+  },
+  deactivated() {
+    this.activeComponent = ''
+  },
+  id() {
+    return this.data.id
+  },
+  methods: {
+    queryCategoryDetail() {
+      queryCategoryDetail({ id: this.$route.query.id }).then((res) => {
+        this.data = res
+      })
+    }
   }
 }
 </script>
@@ -142,7 +133,7 @@ export default {
       font-family: PingFangSC-Medium;
       font-size: 22px;
       color: rgba(0, 11, 21, 0.85);
-      margin-left: 8px;
+      margin-left: 12px;
     }
   }
 
@@ -162,10 +153,11 @@ export default {
             margin-right: 15px;
             .title {
               font-size: 19px;
-              margin-bottom: 5px;
+              margin-bottom: 15px;
             }
             .aside {
               display: flex;
+              align-items: center;
               font-size: 0;
               span {
                 display: inline-block;
@@ -174,20 +166,18 @@ export default {
                 &:first-child {
                   flex: 0 0 200px;
                   width: 200px;
-                  margin-right: 15px;
+                  margin-right: 50px;
                 }
               }
             }
           }
-          .button-wrapper {
-          }
         }
         .desc-content {
-          margin-top: 20px;
+          margin-top: 15px;
           font-size: 14px;
           color: #6b6b6b;
         }
-        margin-bottom: 20px;
+        margin-bottom: 12px;
       }
       &.bottom {
         background-color: #fff;

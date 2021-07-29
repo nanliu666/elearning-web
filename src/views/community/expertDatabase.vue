@@ -128,7 +128,6 @@
     <updateExpert
       :dialog-visible="dialogVisible"
       :title="title"
-      :zone-options="searchPopoverConfig.popoverOptions[0].options"
       :expert-id="expertId"
       @cancle="closeDialog"
     />
@@ -228,27 +227,7 @@ export default {
     }
   },
   created() {
-    this.getExpertList()
-    queryZone({ page: 1, pageSize: 99999 }).then((res) => {
-      this.searchPopoverConfig.popoverOptions[0].options = res.data.map(
-        (item) =>
-          (item = {
-            value: item.id,
-            label: item.name
-          })
-      )
-    })
-  },
-  activated() {
-    queryZone({ page: 1, pageSize: 99999 }).then((res) => {
-      this.searchPopoverConfig.popoverOptions[0].options = res.data.map(
-        (item) =>
-          (item = {
-            value: item.id,
-            label: item.name
-          })
-      )
-    })
+    this.refresh()
   },
   methods: {
     handleCurrentPageChange(params) {
@@ -262,6 +241,18 @@ export default {
     },
     refresh() {
       this.getExpertList()
+      this.selectZone()
+    },
+    selectZone() {
+      queryZone({ page: 1, pageSize: 99999, name: '' }).then((res) => {
+        this.searchPopoverConfig.popoverOptions[0].options = res.data.map(
+          (item) =>
+            (item = {
+              value: item.id,
+              label: item.name
+            })
+        )
+      })
     },
     async batchDel(data) {
       await this.$confirm('删除后，专家将会删除，但是帖子需要在前台删除，是否继续。', '提醒', {
@@ -275,7 +266,9 @@ export default {
       })
       params.slice(0, -1)
       await batchDel(params)
-      this.getExpertList()
+      this.page.currentPage = 1
+      this.refresh()
+      this.$refs.table.clearSelection()
     },
     edit(id) {
       this.expertId = id
@@ -289,7 +282,8 @@ export default {
         type: 'warning'
       })
       await delExpert(id)
-      this.getExpertList()
+      this.page.currentPage = 1
+      this.refresh()
     },
     look(id) {
       this.expertId = id
@@ -317,7 +311,7 @@ export default {
     },
     closeDialog() {
       this.dialogVisible = false
-      this.getExpertList()
+      this.refresh()
     }
   },
   computed: {

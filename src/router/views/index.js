@@ -87,6 +87,14 @@ export default [
         meta: {}
       },
       {
+        path: '/flatTreeDemo',
+        name: '扁平树下拉组件Demo',
+        component: () => import('@/views/demo/flatTreDemo'),
+        meta: {
+         
+        }
+      },
+      {
         path: '/learnPlan/edit',
         name: '编辑学习计划',
         component: EditPlan,

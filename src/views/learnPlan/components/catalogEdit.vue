@@ -170,8 +170,8 @@ export default {
           if (this.type !== 'edit') {
             this.loading = true
             addCatalog(_.assign(this.form, { addFlag: '1' }))
-              .then(() => {
-                this.$message.success('创建成功')
+              .then((res) => {
+                this.$message.success(res.resMsg)
                 this.loading = false
                 this.$emit('changevisible', false)
                 if (type === 'add') {

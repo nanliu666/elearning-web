@@ -38,7 +38,7 @@
             placeholder="组织名称"
             style="margin-bottom:10px;"
           />
-          <el-tree
+          <!-- <el-tree
             ref="categoryTree"
             v-loading="treeLoading"
             :filter-node-method="filterNode"
@@ -57,7 +57,18 @@
                 data.orgId ? data.userNum : outerUserCount
               }})</span>
             </span>
-          </el-tree>
+          </el-tree> -->
+          <el-tree
+            ref="orgTree"
+            :load="lazyLoadOrgTree"
+            node-key="id"
+            lazy
+            :data="treeData"
+            :props="treeProps"
+            :check-on-click-node="true"
+            :expand-on-click-node="false"
+            @node-click="nodeClick"
+          />
         </basic-container>
       </el-col>
       <el-col
@@ -128,6 +139,7 @@
 import { getListScoreDetails } from '@/api/credit/credit'
 import { deleteHTMLTag } from '@/util/util'
 import { getOrganization } from '@/api/system/user'
+import { getorganizationNew } from '@/api/org/org'
 const COLUMNS = [
   {
     prop: 'name',
@@ -174,6 +186,25 @@ const COLUMNS = [
 ]
 import { VIEW_CREDIT, ADD_CREDIT_DETAIL } from '@/const/privileges'
 import { mapGetters } from 'vuex'
+const loadOrgTree = async ({ parentId, parentPath }) => {
+  // 只能传入一个参数 当传入search的时候不使用parentId
+  const data = await getorganizationNew({ parentId })
+  // 在这里处理两个数组为树形组件需要的结构
+  const orgs = data || []
+  const target = _.concat(
+    _.map(orgs, (item) =>
+      _.assign(
+        {
+          path: `${parentPath || '0'}_${item.id}`,
+          orgId: item.id,
+          orgName: item.name
+        },
+        item
+      )
+    )
+  )
+  return target
+}
 export default {
   name: 'Credit',
   components: {
@@ -256,19 +287,61 @@ export default {
       },
       deep: true
     },
+    // treeSearch(val) {
+    //   this.$refs.categoryTree.filter(val)
+    // }
     treeSearch(val) {
-      this.$refs.categoryTree.filter(val)
+      this.searchLoadData(val)
     }
   },
-  activated() {
-    this.loadData()
-  },
   mounted() {
-    this.loadTree()
-    this.loadData()
     this.getOuterNum()
   },
   methods: {
+    searchLoadData: _.debounce(function(orgName) {
+      let params
+      if (orgName) {
+        params = { orgName }
+      } else {
+        params = { parentId: '0' }
+      }
+      this.loading = true
+      getorganizationNew(params)
+        .then((res) => {
+          const orgs = res || []
+          const target = _.concat(
+            _.map(orgs, (item) =>
+              _.assign(
+                {
+                  orgId: item.id,
+                  orgName: item.name
+                },
+                item
+              )
+            )
+          )
+          this.treeData = target
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    }, 400),
+
+    async lazyLoadOrgTree(node, resolve) {
+      const parentId = node.level > 0 ? node.data.orgId : '0'
+      const target = await loadOrgTree({
+        parentId
+      })
+      if (!_.isEmpty(target) && parentId === '0') {
+        this.activeCategory = _.get(target, '[0].orgId')
+        this.loadData()
+        this.$nextTick(() => {
+          this.$refs.orgTree.setCurrentKey(this.$route.query.orgId || this.activeCategory)
+        })
+      }
+      resolve(target)
+    },
+
     createCredit($event) {
       switch ($event) {
         case 'once':
@@ -324,8 +397,7 @@ export default {
       return data.orgName.indexOf(value) !== -1
     },
     nodeClick(data) {
-      console.log('data:', data)
-      this.activeCategory = data
+      this.activeCategory = data.orgId
       this.page.currentPage = 1
       this.loadData()
     },
@@ -364,7 +436,7 @@ export default {
       getListScoreDetails({
         currentPage: this.page.currentPage,
         size: this.page.size,
-        orgId: this.activeCategory ? this.activeCategory.orgId : null,
+        orgId: this.activeCategory,
         operType: '1',
         ...this.query
       })

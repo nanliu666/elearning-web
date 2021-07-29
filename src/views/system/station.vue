@@ -121,7 +121,7 @@
             <el-button
               size="medium"
               type="text"
-              :disabled="row.fullName.split('|').length >= 5"
+              :disabled="positionBreadcrumb.length >= 5"
               @click.stop="() => handleCreateSubordinate(row, 'create')"
             >
               创建下级岗位
@@ -318,6 +318,12 @@ export default {
         pageSize: this.page.size,
         parentId: this.positionBreadcrumb[this.positionBreadcrumb.length - 1].value,
         name: value || ''
+      }
+      //  { parentId: this.rowData.parentId, isInitData: true } stationForm组件返回数据
+
+      if (value && value.isInitData) {
+        // params.parentId = value.parentId
+        params.name = ''
       }
       this.tableLoading = true
       await getStationParent(params)

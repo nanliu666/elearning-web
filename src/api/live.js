@@ -4,10 +4,13 @@ export const addCategory = (data) => post('/common/v1/category/addCategory', dat
 
 export const getCategoryTree = (params) => get('/common/v1/category/getCategoryTree', params)
 
+export const checkCategory = (data) => post('/common/v1/category/checkCategory', data)
+
 export const deleteCategory = (params) => get('/common/v1/category/deleteCategory', params)
 // 查询创建人列表
 export const getCreatorList = (params) => get('/common/v1/category/getCreatorList', params)
-export const getCreatorList2 = (params) => get('/manage/v1/study/plan/catalog/getCreatorList', params)
+export const getCreatorList2 = (params) =>
+  get('/manage/v1/study/plan/catalog/getCreatorList', params)
 
 export const updateCategorySort = (data) => post('/common/v1/category/updateCategorySort', data)
 

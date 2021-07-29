@@ -199,11 +199,11 @@ export default {
       const p1 = getCmpData('basicSetting')
       const p3 = getCmpData('processDesign')
       Promise.all([p1, p3])
-        .then((res) => {          
+        .then((res) => {
           const param = {
             basicSetting: this.mockData.basicSetting,
             processData: res[1].formData
-          }          
+          }
           // 处理发布
           this.sendToServer(param)
         })
@@ -510,7 +510,8 @@ export default {
         } else if (data.properties.assigneeType === 'user') {
           //指定成员人，
           item.assignee = 'taskUser_' + data.properties.attribute
-          let length = data.content.split(',').length
+          let length = data.properties.attribute.split(',').length
+          //   let length = data.content.split(',').length
           if (length > 1) {
             origin.variable = 'optional_' + data.nodeId //这个前端发起用的变量
             item.assignee = '${taskUser_' + data.nodeId + '}'

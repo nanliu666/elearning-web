@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { getActionLog } from '@/api/system/user'
 import searchPopOver from '@/components/searchPopOver'
 import { tableOptions } from '../../util/constant'
@@ -106,8 +107,8 @@ export default {
         pageSize: 10, //每页数据
         model: '', //模糊搜索
         userName: '', //用户名
-        beginTime: '', //查询开始时间
-        endTime: '', //查询结束时间
+        beginTime: `${moment().format('YYYY-MM-DD')} 00:00:00`, //查询开始时间
+        endTime: `${moment().format('YYYY-MM-DD')} 23:59:59`, //查询结束时间
         status: '' //状态
       },
       page: {
@@ -119,7 +120,10 @@ export default {
         {
           type: 'dataPicker',
           field: 'beginTime,endTime',
-          data: '',
+          data: [
+            `${moment().format('YYYY-MM-DD')} 00:00:00`,
+            `${moment().format('YYYY-MM-DD')} 23:59:59`
+          ],
           label: '操作时间',
           config: {
             type: 'datetimerange',
@@ -222,5 +226,8 @@ export default {
 .basic-container--block {
   height: calc(100% - 92px);
   min-height: calc(100% - 92px);
+}
+/deep/.el-date-editor {
+  width: 400px !important;
 }
 </style>

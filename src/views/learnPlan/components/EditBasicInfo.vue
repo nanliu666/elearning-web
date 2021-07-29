@@ -77,11 +77,11 @@
               style="width: 100%;"
               type="daterange"
               format="yyyy-MM-dd"
-              @change="timeRangeChange"
               value-format="yyyy-MM-dd"
               start-placeholder="开始日期"
               end-placeholder="截止日期"
               :picker-options="pickerOptions"
+              @change="timeRangeChange"
             />
           </el-form-item>
         </el-col>
@@ -91,18 +91,22 @@
             prop="knowledgeSystemId"
             class="half-form-item"
           >
-            <tree-selector
+            <lazy-load-cascader
+              ref="lazycascader"
               v-model="model.knowledgeSystemId"
-              style="width: 100%;"
-              class="selector"
-              :options="knowledgeData"
+              style="width: 100%"
+              filterable
               placeholder="请选择"
-              :props="{
-                value: 'id',
-                label: 'name',
-                children: 'children'
-              }"
-              @focus="getKnowledgeData"
+              :filter-method="(name) => getKnowledgeData(name)"
+              :options="knowledgeData"
+              :props="{ checkStrictly: true, label: 'name', value: 'id' }"
+              clearable
+              @change="
+                (data) =>
+                  Array.isArray(data)
+                    ? (model.knowledgeSystemId = data[data.length - 1])
+                    : (model.knowledgeSystemId = data)
+              "
             />
           </el-form-item>
         </el-col>
@@ -121,7 +125,7 @@
               v-model="model.projectManagerId"
               :remote-method="getUserList"
               :props="{ value: 'userId', label: 'name' }"
-              :init-options="headTeacherOptions"
+              :initial-options="headTeacherOptions"
             />
           </el-form-item>
         </el-col>
@@ -197,12 +201,14 @@ import { getCategoryTree } from '@/api/learnPlan'
 import { getOrgUserList } from '@/api/system/user'
 import LazySelect from '@/components/el-lazy-select'
 import TreeSelector from '@/components/tree-selector'
-import { getCreatorList } from '@/api/live'
+import { getKnowledgeList } from '@/api/live/editLive'
+import lazyLoadCascader from '@/components/lazy-load-cascader'
 
 export default {
   components: {
-    TreeSelector,
     LazySelect,
+    TreeSelector,
+    lazyLoadCascader,
     commonUpload: () => import('@/components/common-upload/commonUpload')
   },
   props: {
@@ -258,7 +264,7 @@ export default {
     this.getKnowledgeData()
   },
   methods: {
-    timeRangeChange(val){
+    timeRangeChange(val) {
       val[0] = `${val[0]} 00:00:00`
       val[1] = `${val[1]} 23:59:59`
     },
@@ -303,12 +309,14 @@ export default {
       })
     },
     getCategoryData() {
-      getCategoryTree({status:1}).then((res) => {
+      getCategoryTree({ status: 1 }).then((res) => {
         this.categoryData = res
       })
     },
-    getKnowledgeData() {
-      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+    getKnowledgeData(name) {
+      const data = { name: '' }
+      if (name) data.name = name
+      getKnowledgeList(data).then((res) => {
         this.knowledgeData = res
       })
     }

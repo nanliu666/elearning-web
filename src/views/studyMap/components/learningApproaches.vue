@@ -209,12 +209,15 @@
           ref="multipleTable"
           v-loading="loading"
           :data="tableData"
+          :row-key="commonForm.learningApproachesType === 4 ? 'liveId' : 'id'"
           @select="handleSelectionChange"
           @select-all="allSelectionChange"
         >
           <el-table-column
             type="selection"
             width="55"
+            :selectable="checkStatus"
+            :reserve-selection="true"
           ></el-table-column>
           <!-- 关联课程 -->
           <template v-if="commonForm.learningApproachesType === 1">
@@ -570,6 +573,20 @@ export default {
         }
       }
     },
+    //判断是否禁用
+    checkStatus(row) {
+      console.log(row)
+      console.log(this.fatherData)
+      if (
+        this.fatherData.some((el) => {
+          return el.bizId === row[this.commonForm.learningApproachesType === 4 ? 'liveId' : 'id']
+        })
+      ) {
+        return false
+      } else {
+        return true
+      }
+    },
     // 选择学习途径类型
     async changeType(val) {
       this.commonForm.learningApproachesType = val
@@ -620,7 +637,7 @@ export default {
             this.treeSeleteConfig.treeParams.data = res
           })
       }
-      this.filterExitData()
+      //   this.filterExitData()
     },
     // 获取课程列表
     async getCourseData() {
@@ -727,25 +744,25 @@ export default {
     async catalogTreeSearch(data) {
       this.associatedForm.courseClassificationName = data ? data.id : ''
       await this.getCourseData()
-      this.filterExitData()
+      //   this.filterExitData()
     },
     // 直播分类搜索
     async liveTreeSearch(data) {
       this.associatedForm.liveCategoryId = data ? data.id : ''
       await this.getLiveList()
-      this.filterExitData()
+      //   this.filterExitData()
     },
     // 考试分类搜索
     async examTreeSearch(data) {
       this.associatedForm.examCategoryId = data ? data.id : ''
       await this.getArrangeList()
-      this.filterExitData()
+      //   this.filterExitData()
     },
     // 培训分类搜索
     async trainTreeSearch(data) {
       this.associatedForm.trainCategoryId = data ? data.id : ''
       await this.getScheduleList()
-      this.filterExitData()
+      //   this.filterExitData()
     },
     // 多选表格数据
     handleSelectionChange(selection, row) {

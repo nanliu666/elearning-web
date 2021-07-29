@@ -264,7 +264,7 @@
 
 <script>
 import SearchPopover from '@/components/searchPopOver/index'
-import { getCreatorList } from '@/api/live'
+import { relatedKnowledgeList } from '@/api/training/training'
 
 // import leftColumn from '@/components/leftColumn'
 import {
@@ -293,14 +293,6 @@ const TABLE_COLUMNS = [
     prop: 'coursePlanNo',
     slot: false,
     minWidth: 180,
-    headerAlign: 'center',
-    align: 'center'
-  },
-  {
-    label: '主办单位',
-    prop: 'sponsor',
-    slot: false,
-    minWidth: 120,
     headerAlign: 'center',
     align: 'center'
   },
@@ -431,12 +423,6 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     field: 'startTime,endTime',
     config: { type: 'daterange', 'value-format': 'yyyy-MM-dd HH:mm:ss' }
   },
-  {
-    type: 'input',
-    field: 'sponsor',
-    label: '主办单位',
-    data: ''
-  }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -558,7 +544,7 @@ export default {
 
   methods: {
     getCreatorList() {
-      getCreatorList({ source: 'knowledgeSystem' }).then((res) => {
+      relatedKnowledgeList({ name: '' }).then((res) => {
         this.published.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(res)
       })
     },

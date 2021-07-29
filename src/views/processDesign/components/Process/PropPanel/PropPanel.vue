@@ -69,14 +69,30 @@
           :is-range="true"
           :tab-list="['user']"
         />
-        <el-tree-select
+        <!-- <el-tree-select
           v-if="apprType == 'position'"
           :select-params="positionSelectParams"
           :tree-params="positionTreeParams"
           @searchFun="searchFun"
           @node-click="nodeClickFn"
         >
-        </el-tree-select>
+        </el-tree-select> -->
+        <!-- 下拉搜索 岗位-->
+        <lazy-select
+           v-if="apprType == 'position'"
+          :ref="positionConfig.field"
+          v-model="positionConfig.data"
+          :load="positionConfig.load"
+          :option-list.sync="positionConfig.optionList"
+          :placeholder="positionConfig.placeholder"
+          :option-props="positionConfig.optionProps"
+          :searchable="positionConfig.searchable"
+          @select="positionChange"
+        >
+        
+        </lazy-select>
+
+
         <br />
         <p>多人审批时采用的审批方式</p>
         <el-radio
@@ -133,6 +149,7 @@
   </div>
 </template>
 <script>
+import { getStationParent } from '@/api/system/station'
 import { mapGetters } from 'vuex'
 import { NodeUtils } from '../FlowCard/util.js'
 import Clickoutside from 'element-ui/src/utils/clickoutside'
@@ -148,7 +165,26 @@ const ASSIGNEE_TYPE = {
   // tag: 'tag', // 指定标签
   user: 'user' // 指定成员
 }
-
+const positionConfig = {
+      data: '',
+      field: 'positionId',
+      label: '岗位',
+      type: 'lazySelect',
+      optionList: [],
+      placeholder: '请选择岗位',
+      optionProps: {
+        formatter: (item) => `${item.name}(${item.fullOrg?item.fullOrg:'暂无'})`,
+        key: 'name',
+        value: 'id'
+      },
+      load: (p)=>{
+        p.name = p.search
+        return getStationParent(p)
+      },
+      remote:true,
+      searchable: true,
+      config: { optionLabel: 'name', optionValue: 'id' }
+  }
 // 默认表单模版
 const defaultApproverForm = {
   approvers: [], // 审批人集合
@@ -172,7 +208,8 @@ export default {
     Clickoutside
   },
   components: {
-    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect') //
+    elTreeSelect: () => import('@/components/elTreeSelect/elTreeSelect'), //
+    lazySelect: () => import('@/components/lazy-select/lazySelect')
   },
   props: {
     /*当前节点数据*/
@@ -188,6 +225,7 @@ export default {
   },
   data() {
     return {
+      positionConfig:positionConfig,
       positionSelectParams: {
         // 岗位下拉配置
         placeholder: '请选择岗位',
@@ -275,10 +313,14 @@ export default {
       }
       this.isApproverNode() && this.initApproverNodeData()
       this.isCopyNode() && this.initCopyNodeData()
+      //岗位替换为下拉加载    --------    如果面板显示，初始化岗位数据,不回显
+      if(val){
+        this.positionConfig.data = ''
+      }
     }
   },
-  mounted() {
-    this.getStationFn()
+   mounted() {
+    // this.getStationFn()
   },
   methods: {
     copyNodeConfirm() {
@@ -296,6 +338,10 @@ export default {
     getOrgSelectLabel(type) {
       return this.$refs[type + '-org'] ? this.$refs[type + '-org']['selectedLabels'] : ''
     },
+    //选择了岗位回调
+    async positionChange(val){
+        this.positionData = val
+    },
     searchFun(val) {
       //岗位搜索
       this.getStationFn(val)
@@ -307,7 +353,7 @@ export default {
     async getStationFn(name) {
       //获取岗位
       let sendData = { name: name }
-      queryStation(sendData).then((res) => {
+      await queryStation(sendData).then((res) => {
         this.positionTreeParams.data = res
       })
     },
@@ -317,9 +363,14 @@ export default {
     async approverNodeComfirm() {
       let positionDatas = this.positionData
       const assigneeType = this.approverForm.assigneeType
+      // let content =
+      //   positionDatas && this.apprType == 'position'
+      //     ? positionDatas.data.name
+      //     : this.getOrgSelectLabel('approver')
+      //岗位替换为下拉加载岗位----单层（徐工没有tree）
       let content =
         positionDatas && this.apprType == 'position'
-          ? positionDatas.data.name
+          ? positionDatas.name
           : this.getOrgSelectLabel('approver')
       this.approverForm.apprType = this.apprType
 
@@ -342,7 +393,15 @@ export default {
     async confirm() {
       let positionDatas = this.positionData
       if (this.positionData && this.apprType == 'position') {
-        var resData = await positionUserList({ positionId: positionDatas.data.id })
+        
+        // var resData = await positionUserList({ positionId: positionDatas.data.id })
+        //选择岗位替换为下拉选择
+        var resData = await positionUserList({ positionId: positionDatas.id })
+        //如果该岗位下没有用户  终止
+        if(resData.length<=0){
+          this.$message({type:'info',message:'该岗位下暂无数据'})
+          return false
+        }
         resData.forEach((item, i) => {
           let backData = {
             isLeaf: true,
@@ -354,6 +413,7 @@ export default {
           }
           resData[i] = { ...item, ...backData }
         })
+        
         this.orgCollection.user = resData
       }
       this.isCopyNode() && this.copyNodeConfirm()

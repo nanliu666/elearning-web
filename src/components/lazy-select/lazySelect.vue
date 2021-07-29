@@ -14,8 +14,9 @@
     @visible-change="visibleChange"
   >
     <el-option
-      v-for="item in _.uniqBy(_.compact([...firstOption, ...optionList]), optionProps.key)"
-      :key="optionProps.key ? item[optionProps.key] : item[optionProps.value]"
+      class="options"
+      v-for="item in _.uniqBy(_.compact([...firstOption, ...optionList]), optionProps.value)"
+      :key="optionProps.key ? `${item[optionProps.key]}${item[optionProps.value]}` : item[optionProps.value]"
       :label="optionProps.formatter ? optionProps.formatter(item) : item[optionProps.label]"
       :value="item[optionProps.value]"
     />
@@ -177,6 +178,7 @@ export default {
           } else {
             this.noMore = false
           }
+          
           this.$emit('update:optionList', this.optionList)
         })
         .finally(() => {
@@ -195,5 +197,11 @@ export default {
 .loading {
   padding: 12px 0;
   text-align: center;
+}
+.options{
+  overflow: hidden;
+  text-overflow:ellipsis;
+  white-space: nowrap;
+  max-width: 330px;
 }
 </style>

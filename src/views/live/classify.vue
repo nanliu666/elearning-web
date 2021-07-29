@@ -192,7 +192,7 @@ const TABLE_COLUMNS = [
 const TABLE_CONFIG = {
   rowKey: 'id',
   showHandler: true,
-  defaultExpandAll: true,
+  defaultExpandAll: false,
   showIndexColumn: false,
   enablePagination: true,
   // enableMultiSelect: true, // TODO：树无法做批量选择   //先不做批量删除

@@ -312,14 +312,13 @@ import CommonPicker from '@/components/common-picker'
 import { userImportCheck, getOrgChild } from '@/api/train/train'
 import { getPostionUserChild2, getGroup, getOrgUserChild, getOuterUser } from '@/api/system/user'
 import { getUsergroupList, getPositionUserList1, getUserList } from '@/api/examManage/schedule'
-
+import { getTemplate } from '@/api/system/template'
 import XLSX from 'xlsx'
+import { getStationParent } from '@/api/system/station'
 
 const requiredTHeader = [
-  { name: '用户编号', key: 'workNo' },
-  { name: '姓名', key: 'userName' },
-  { name: '所在部门', key: 'orgName' },
-  { name: '用户岗位', key: 'positionName' }
+  { name: '用户手机号', key: 'phonenum' },
+  { name: '姓名', key: 'userName' }
 ]
 export default {
   name: 'TrainingEditPerson',
@@ -472,20 +471,62 @@ export default {
         },
         {
           name: '岗位',
+          request: getStationParent,
+          type: 'scroll-tree',
+          placeholder: '搜索岗位名称',
           response: {
             props: {
-              data: ['positions', 'users']
+              data: 'data',
+              total: 'totalNum'
             }
           },
-          request: getPostionUserChild2,
-          type: 'tree',
-          placeholder: '搜索岗位名称',
-          checkRequest: {
-            condition: function($data) {
-              return !$data.userId
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
             },
+            'check-strictly': false,
+            nodeKey: 'userId'
+          },
+          props: {
+            value: 'userId',
+            select: [
+              'userId',
+              'name',
+              'orgName',
+              'positionName',
+              'workNo',
+              'phoneNum',
+              'orgId',
+              'positionId'
+            ]
+          },
+          label: function(data) {
+            const { name } = data
+            return name
+          },
+          query: {
+            search: {
+              key: 'name',
+              value: ''
+            },
+            page: {
+              key: 'pageNo',
+              value: 1
+            },
+            pageSize: {
+              key: 'pageSize',
+              value: 50
+            }
+          },
+          resolveRequest: {
+            handler() {
+              return false
+            }
+          },
+          checkRequest: {
             handler: function($data, resolve) {
-              getPositionUserList1({ parentId: $data.positionId }).then((res = {}) => {
+              getPositionUserList1({ parentId: $data.id }).then((res = {}) => {
                 if (Array.isArray(res)) {
                   resolve(res)
                 } else {
@@ -497,35 +538,6 @@ export default {
                 }
               })
             }
-          },
-          treeOption: {
-            props: {
-              label: function(node) {
-                if (node.positionId) {
-                  return node.positionName
-                }
-                return node.name
-              },
-              children: 'children',
-              selectLabel: 'name'
-            },
-            nodeKey: 'userId'
-          },
-          query: {
-            search: {
-              key: 'search',
-              value: ''
-            },
-            id: {
-              key: 'parentId',
-              value: '0',
-              initialValue: '0',
-              from: 'positionId'
-            }
-          },
-          props: {
-            value: 'userId',
-            select: ['userId', 'name', 'orgName', 'positionName', 'workNo', 'phoneNum', 'orgId']
           }
         },
         {
@@ -639,52 +651,49 @@ export default {
       positionPickerOptions: [
         {
           name: '岗位',
-          request: getPostionUserChild2,
-          resolveRequest: {
-            handler: function(node, resolve) {
-              const {
-                data: { positionId, parentIds }
-              } = node
-              getPostionUserChild2({ parentId: positionId }).then((res) => {
-                const { positions = [] } = res
-                positions.forEach((org) => {
-                  org.parentIds = parentIds ? [positionId].concat(parentIds) : [positionId]
-                })
-                resolve(positions)
-              })
-            }
-          },
-          type: 'tree',
+          request: getStationParent,
+          type: 'scroll-tree',
           placeholder: '搜索岗位名称',
-          treeOption: {
-            'check-strictly': true,
-            props: {
-              label: 'positionName',
-              children: 'children'
-            },
-            nodeKey: 'positionId'
-          },
           response: {
             props: {
-              data: 'positions'
+              data: 'data',
+              total: 'totalNum'
             }
+          },
+          treeOption: {
+            props: {
+              label: 'name',
+              children: 'children'
+            },
+            'check-strictly': false,
+            nodeKey: 'id'
+          },
+          props: {
+            value: 'id',
+            select: ['id', 'name', 'workNum']
+          },
+          label: function(data) {
+            const { name } = data
+            return name
           },
           query: {
             search: {
-              key: 'search',
+              key: 'name',
               value: ''
             },
-            id: {
-              key: 'parentId',
-              value: '0',
-              initialValue: '0',
-              from: 'positionId'
+            page: {
+              key: 'pageNo',
+              value: 1
+            },
+            pageSize: {
+              key: 'pageSize',
+              value: 50
             }
           },
-          props: {
-            label: 'positionName',
-            value: 'positionId',
-            select: ['positionId', 'positionName', 'workNum', 'parentIds']
+          resolveRequest: {
+            handler() {
+              return false
+            }
           }
         }
       ],
@@ -906,42 +915,18 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    checkSheets(sheets) {
-      const sheetsKeys = Object.keys(sheets)
-      for (let index = 0; index < sheetsKeys.length; index++) {
-        const key = sheetsKeys[index]
-        const sheet = sheets[key]
-        const headers = []
-        Object.keys(sheet).forEach((key) => {
-          if (key[key.length - 1] == 1) {
-            const cur = sheet[key]
-            headers.push(cur.v)
-          }
-        })
-        const missHeaders = requiredTHeader.filter((h) => !headers.includes(h.name))
-        if (missHeaders.length) {
-          const requestTips =
-            key +
-            '缺少表头：[' +
-            missHeaders.map((header) => header.name).join(',') +
-            ']请检查重新上传'
-          this.$alert(requestTips, '导入错误', { confirmButtonText: '确定', type: 'warning' })
-          return false
-        }
-        return true
-      }
-    },
     handleImportExcel(file) {
       var reader = new FileReader()
       reader.onload = (e) => {
         var data = e.target.result
-        const { SheetNames, Sheets } = XLSX.read(data, { type: 'binary' })
+        let { SheetNames, Sheets } = XLSX.read(data, { type: 'binary' })
         const valid = this.checkSheets(Sheets)
+
         if (!valid) return
+        SheetNames = SheetNames.filter((name) => name.indexOf('用户导入数据') > -1)
         var rowData = SheetNames.map((name) => {
           return XLSX.utils.sheet_to_json(Sheets[name])
         })
-
         const promises = []
         rowData.forEach((data) => {
           promises.push(this.validateExcelData(data))
@@ -975,13 +960,12 @@ export default {
         let params = data.map((item) => {
           let newItem = {}
           for (const key in item) {
-            let header = requiredTHeader.find((header) => header.name == key)
+            let header = requiredTHeader.find((header) => key.indexOf(header.name) > -1)
             if (!header) continue
             newItem[header.key] = item[key]
           }
           return newItem
         })
-
         userImportCheck(params)
           .then((res = {}) => {
             const { failUserInfo = [], successUserInfo = [] } = res
@@ -1000,17 +984,8 @@ export default {
                 }
               )
               const data = failUserInfo.map((info) => {
-                const { workNo, userName, orgName, positionName, failDesc } = info
-                return [
-                  workNo,
-                  userName,
-                  orgName,
-                  positionName,
-                  failDesc
-                    .split(';')
-                    .map((desc) => this._getFailDesc(desc))
-                    .join(';')
-                ]
+                const { phonenum, userName, failDesc } = info
+                return [phonenum, userName, failDesc]
               })
               this.handleExportExcel({
                 header: requiredTHeader.map((header) => header.name).concat('错误信息'),
@@ -1023,6 +998,49 @@ export default {
             reject(err)
           })
       })
+    },
+    checkSheets(sheets) {
+      const sheetsKeys = Object.keys(sheets)
+      for (let index = 0; index < sheetsKeys.length; index++) {
+        const key = sheetsKeys[index]
+        const sheet = sheets[key]
+        const headers = []
+        Object.keys(sheet).forEach((key) => {
+          if (key[key.length - 1] == 1) {
+            const cur = sheet[key]
+            headers.push(cur.v)
+          }
+        })
+        const missHeaders = requiredTHeader
+          .map((header) => header.name)
+          .filter((name) => {
+            for (let i = 0; i < headers.length; i++) {
+              const header = headers[i]
+              let left, right
+              if (name.length > header.length) {
+                left = name
+                right = header
+              } else {
+                left = header
+                right = name
+              }
+              if (!left || !right) continue
+              left += ''
+              right += ''
+              if (left.indexOf(right) > -1) {
+                return false
+              }
+            }
+            return true
+          })
+        if (missHeaders.length) {
+          const requestTips =
+            key + '缺少表头：[' + missHeaders.map((name) => name).join(',') + ']请检查重新上传'
+          this.$alert(requestTips, '导入错误', { confirmButtonText: '确定', type: 'warning' })
+          return false
+        }
+        return true
+      }
     },
     handleExportExcel({
       header,
@@ -1041,10 +1059,22 @@ export default {
         })
       })
     },
-    handleDownloadTemplate() {
-      const header = ['用户编号', '姓名', '所在部门', '用户岗位']
-      const data = [['01920192', '张三', '事业部/设计中心', '初级设计师']]
-      this.handleExportExcel({ header, data })
+    async handleDownloadTemplate() {
+      const { fileUrl, fileName } = await getTemplate({ code: 't3' })
+      axios
+        .get(fileUrl, {
+          responseType: 'blob'
+        })
+        .then((res) => {
+          console.log(res)
+          let a = document.createElement('a')
+          a.style.display = 'none'
+          a.href = window.URL.createObjectURL(res.data)
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        })
     },
     _getFailDesc(desc) {
       switch (desc) {

@@ -15,7 +15,15 @@
         slot="rightMenu"
       >
         <el-button
-          v-if="annualDetails.status == '1'"
+          v-if="[4, 5].includes(this.annualDetails.status)"
+          type="primary"
+          size="medium"
+          @click="editPlan"
+        >
+          编辑
+        </el-button>
+        <el-button
+          v-if="this.annualDetails.status === 1"
           type="primary"
           size="medium"
           @click="changePlan"
@@ -23,12 +31,7 @@
           变更
         </el-button>
         <el-button
-          v-if="
-            annualDetails.status == '4' ||
-              annualDetails.status == '5' ||
-              annualDetails.status == '1' ||
-              annualDetails.status == '3'
-          "
+          v-if="[1, 3, 4, 5].includes(this.annualDetails.status)"
           size="medium"
           @click="deletePlan"
         >
@@ -199,13 +202,30 @@
         </el-table-column>
       </el-table>
     </basic-container>
+    <!-- 审批发起组件 -->
+    <appr-submit
+      ref="apprSubmit"
+      category-id="13"
+      @submit="handleSubmit"
+    />
   </div>
 </template>
 
 <script>
-import { getTrainPlan, getTrainPlanPre, deleteTrainPlan } from '@/api/trainingPlan/trainingPlan'
+import { categoryMap } from '@/const/approve'
+import {
+  getTrainPlan,
+  getTrainPlanPre,
+  deleteTrainPlan,
+  changeStatusToDelete,
+  getTrainPlanAppr
+} from '@/api/trainingPlan/trainingPlan'
+import ApprSubmit from '@/components/appr-submit/ApprSubmit'
 export default {
   name: 'AnnualDetails',
+  components: {
+    ApprSubmit
+  },
   props: {
     applyDetail: {
       type: Object
@@ -233,7 +253,9 @@ export default {
         1: '计划中',
         2: '已取消'
       },
-      development: false // 判断是培训上报还是培训制定
+      development: false, // 判断是培训上报还是培训制定
+      formKey: 'trainPlan',
+      auditData: {} // 审核当前数据
     }
   },
   watch: {
@@ -255,7 +277,7 @@ export default {
           this.getTrainPlanPre()
         } else {
           this.development = false
-          this.getTrainPlan()
+          route.query.formId ? this.getTrainPlanApprFn() : this.getTrainPlan()
         }
       }
     },
@@ -267,10 +289,21 @@ export default {
       let total = 0
       if (budgets.length) {
         budgets.map((v) => {
-          total += parseInt(v.budget)
+          total += v.budget
         })
       }
       return total
+    },
+    // 获取审批流培训计划查看详情
+    async getTrainPlanApprFn() {
+      this.loading = true
+      await getTrainPlanAppr({ planId: this.applyDetail.formData, apprNo: this.applyDetail.apprNo })
+        .then((res) => {
+          this.annualDetails = res
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     // 获取培训计划查看详情
     async getTrainPlan() {
@@ -301,6 +334,13 @@ export default {
         query: { id: row.id, year: this.annualDetails.year, development: this.development || '' }
       })
     },
+    // 编辑计划
+    editPlan() {
+      this.$router.push({
+        path: '/trainingPlan/components/createPlan',
+        query: { planId: this.annualDetails.id, tagName: '编辑计划' }
+      })
+    },
     // 变更计划
     changePlan() {
       this.$router.push({
@@ -308,36 +348,73 @@ export default {
         query: { planId: this.annualDetails.id, isTranslate: true }
       })
     },
+    // 审批发起组件的弹窗确认回调
+    handleSubmit() {
+      this.submitAudit(this.auditData)
+    },
+    // 提交审批
+    submitApprApply(res) {
+      this.$refs.apprSubmit.submit({
+        formId: res.planId,
+        formData: res.apprPlanId,
+        processName: categoryMap['13'],
+        formKey: this.formKey
+      })
+    },
+    // 提交审核
+    submitAudit() {
+      this.$refs.apprSubmit.validate().then(async () => {
+        // 7-执行中待删除 8-已完成待删除
+        await changeStatusToDelete({
+          planId: this.annualDetails.id,
+          status: { 1: '7', 3: '8' }[this.annualDetails.status]
+        }).then(async (res) => {
+          await this.submitApprApply(res)
+          this.auditData = {}
+          this.$message.success('提交成功!')
+          this.getTrainPlan()
+        })
+      })
+    },
     // 删除计划
     deletePlan() {
+      console.log(this.annualDetails)
       // 计划状态,0-审核中 1-执行中 2-变更中 3-已完成 4-未提交 5-已拒绝 6-待审核
-      let tip = ''
       switch (this.annualDetails.status) {
+        //   1、3状态要进入审批流,4、5直接删除
+        case 1:
         case 3:
+          this.$confirm(
+            '删除后，将会进行审批流程，通过后所有计划内容将会消失，是否继续删除?',
+            '提醒',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          ).then(async () => {
+            //   调用审批流接口
+            this.submitAudit(this.annualDetails)
+            this.auditData = this.annualDetails
+          })
+          break
+        //   直接删除
         case 4:
         case 5:
-          tip = '确认删除培训计划。'
-          break
-        case 1:
-          tip = '删除后，将会进行审批流程，通过后所有计划内容将会消失，是否继续删除?'
-          break
-      }
-      this.$confirm(tip, '提醒', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        await deleteTrainPlan({ planId: this.annualDetails.id })
-          .then(() => {
-            this.$message.success('删除成功!')
-            this.$router.push({
-              path: '/trainingPlan/submission'
+          this.$confirm('确认删除培训计划。', '提醒', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(async () => {
+            await deleteTrainPlan({ planId: this.annualDetails.id }).then(() => {
+              this.$message.success('删除成功!')
+              this.$router.push({
+                path: '/trainingPlan/submission'
+              })
             })
           })
-          .catch((err) => {
-            this.$message.error('删除失败，请联系管理员，失败原因：' + err)
-          })
-      })
+          break
+      }
     }
   }
 }

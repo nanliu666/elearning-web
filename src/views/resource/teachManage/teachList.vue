@@ -121,10 +121,11 @@
 
 <script>
 import styles from '@/styles/variables.scss'
-import myMixins from '@/mixins'
 import { TEACH_EDIT, TEACH_DEL, TEACH_CREATE } from '@/const/privileges'
 import { selectTutorList, deleteTutor } from '@/api/resource/teach'
 import SearchPopover from '@/components/searchPopOver/index'
+import { getorganizationNew } from '@/api/org/org'
+import { getStationParent } from '@/api/system/station'
 const TABLE_COLUMNS = [
   {
     label: '导师姓名',
@@ -202,55 +203,63 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'treeSelect',
-    field: 'orgId',
     label: '部门',
+    disabled: false,
+    field: 'orgId',
     data: '',
-    config: {
-      selectParams: {
-        placeholder: '请选择部门',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'orgName',
-          value: 'orgId'
-        }
-      }
-    }
+    placeholder: '请选择部门',
+    type: 'lazycascader',
+    filterMethod: () => {},
+    filterProps: {},
+    options: [],
+    change: () => {},
+    props: {}
   },
   {
-    type: 'treeSelect',
+    data: '',
     field: 'positionId',
     label: '岗位',
-    data: '',
-    config: {
-      selectParams: {
-        placeholder: '请选择岗位',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        }
-      }
-    }
+    type: 'lazySelect',
+    optionList: [],
+    placeholder: '请选择岗位',
+    optionProps: {
+      formatter: (item) => `${item.name}`,
+      key: 'name',
+      value: 'id'
+    },
+    load: (p) => {
+      p.name = p.search
+      return getStationParent(p)
+    },
+    remote: true,
+    searchable: true,
+    config: { optionLabel: 'name', optionValue: 'id' }
   }
+  // {
+  //   type: 'treeSelect',
+  //   field: 'positionId',
+  //   label: '岗位',
+  //   data: '',
+  //   config: {
+  //     selectParams: {
+  //       placeholder: '请选择岗位',
+  //       multiple: false
+  //     },
+  //     treeParams: {
+  //       data: [],
+  //       'check-strictly': true,
+  //       'default-expand-all': false,
+  //       'expand-on-click-node': false,
+  //       clickParent: true,
+  //       filterable: false,
+  //       props: {
+  //         children: 'children',
+  //         label: 'name',
+  //         value: 'id'
+  //       }
+  //     }
+  //   }
+  // }
 ]
 const searchConfig = {
   requireOptions: SEARCH_POPOVER_REQUIRE_OPTIONS,
@@ -264,7 +273,6 @@ export default {
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
-  mixins: [myMixins],
   data() {
     return {
       loading: false,
@@ -302,15 +310,83 @@ export default {
     }
   },
   mounted() {
-    this.loadTree() //部门
-    this.loadPosition() //岗位
+    const org = (this.orgOption = this.searchConfig.popoverOptions[0])
+    org.filterMethod = this.loadOrgData
+    org.filterProps = {
+      size: {
+        key: 'pageSize',
+        value: 1000
+      },
+      page: {
+        key: 'pageNo',
+        value: 0
+      },
+      search: {
+        key: 'orgName',
+        value: ''
+      }
+    }
+    org.props = {
+      checkStrictly: true,
+      multiple: false,
+      label: 'orgName',
+      value: 'orgId',
+      lazy: true,
+      lazyLoad: this.orgLazyLoad,
+      loadProps: {
+        size: {
+          key: 'pageSize',
+          value: 10
+        },
+        page: {
+          key: 'pageNo',
+          value: 1
+        },
+        value: {
+          key: 'parentId',
+          value: ''
+        }
+      }
+    }
     this.loadTableData()
+    this.loadOrgData()
   },
   beforeRouteLeave(to, from, next) {
     from.meta.$keepAlive = false // 禁用页面缓存
     next()
   },
   methods: {
+    orgLazyLoad(node, resolve) {
+      if (!node.data) return []
+      this.loadOrgData({ parentId: node.data.id }, resolve)
+    },
+    loadOrgData(query, resolve) {
+      if (query && typeof query === 'object') {
+        if (!query.pageSize) {
+          Object.assign(query, { pageSize: 10, pageNo: 1 })
+        } else {
+          if (query.name) {
+            delete query.parentId
+          } else {
+            delete query.name
+          }
+        }
+      } else {
+        query = { name: query }
+      }
+      if (!query.name) {
+        query.parentId = query.parentId || '0'
+      }
+
+      // 接口
+      getorganizationNew(query).then((res) => {
+        if (resolve) {
+          resolve(res)
+        } else {
+          this.orgOption.options = res
+        }
+      })
+    },
     //处理页码改变
     handleCurrentPageChange(val) {
       this.page.currentPage = val

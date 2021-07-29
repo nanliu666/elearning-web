@@ -126,7 +126,7 @@
           class="experienceList"
         >
           <span class="name">内化形式：</span>
-          <span class="wContent">{{ formDetaill.internalization }}</span>
+          <span class="wContent">{{ getTrainResultStr(formDetaill) }}</span>
         </el-col>
         <el-col
           :span="24"
@@ -184,6 +184,15 @@ export default {
   },
   mounted() {},
   methods: {
+    getTrainResultStr(obj){
+      let type = {
+        1:'课程开发',
+        2:'经验交流',
+        3:'其他形式'
+      }
+      let content = obj.internalization === '3' ? `${obj.internalizationContent?'('+obj.internalizationContent+')':''}` : ''
+      return `${type[obj.internalization]} ${content}`
+    },
     async trainingOuterBuyDetailsFn() {
       this.formDetaill = await trainingOuterBuyDetails({ id: this.applyDetail.formId })
     }

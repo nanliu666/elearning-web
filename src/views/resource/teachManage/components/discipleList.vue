@@ -315,16 +315,16 @@
 import { studentList, evaluateStudent, updateStatus } from '@/api/resource/teach'
 import SearchPopover from '@/components/searchPopOver/index'
 import styles from '@/styles/variables.scss'
-import myMixins from '@/mixins'
-// import {
-//   ADD_EXAM_CATALOG,
-//   STOP_EXAM_CATALOG,
-//   AUTH_EXAM_CATALOG,
-//   EDIT_EXAM_CATALOG,
-//   DELETE_EXAM_CATALOG,
-//   ADD_GROUNP_EXAM_CATALOG
-// } from '@/const/privileges'
-// import { mapGetters } from 'vuex'
+// import myMixins from '@/mixins'
+import { getStationParent } from '@/api/system/station'
+import { getorganizationNew } from '@/api/org/org'
+function loadSelectTreeFn(node, resolve) {
+  //  懒加载下拉树数据
+  let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+  getorganizationNew(params).then((res) => {
+    resolve(res)
+  })
+}
 const TABLE_COLUMNS = [
   {
     label: '姓名',
@@ -413,7 +413,7 @@ const SEARCH_POPOVER_REQUIRE_OPTIONS = [
 ]
 const SEARCH_POPOVER_POPOVER_OPTIONS = [
   {
-    type: 'treeSelect',
+    type: 'treeSelectNew',
     field: 'orgId',
     label: '部门',
     data: '',
@@ -428,40 +428,91 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
         'default-expand-all': false,
         'expand-on-click-node': false,
         clickParent: true,
+        load: loadSelectTreeFn,
+        lazy: true,
         filterable: false,
         props: {
+          isLeaf: (data) => {
+            return !data.hasChildren
+          },
           children: 'children',
           label: 'orgName',
+          disabled: 'disabled',
           value: 'orgId'
         }
       }
     }
   },
+  // {
+  //   type: 'treeSelect',
+  //   field: 'orgId',
+  //   label: '部门',
+  //   data: '',
+  //   config: {
+  //     selectParams: {
+  //       placeholder: '请选择部门',
+  //       multiple: false
+  //     },
+  //     treeParams: {
+  //       data: [],
+  //       'check-strictly': true,
+  //       'default-expand-all': false,
+  //       'expand-on-click-node': false,
+  //       clickParent: true,
+  //       filterable: false,
+  //       props: {
+  //         children: 'children',
+  //         label: 'orgName',
+  //         value: 'orgId'
+  //       }
+  //     }
+  //   }
+  // },
   {
-    type: 'treeSelect',
+    data: '',
     field: 'positionId',
     label: '岗位',
-    data: '',
-    config: {
-      selectParams: {
-        placeholder: '请选择岗位',
-        multiple: false
-      },
-      treeParams: {
-        data: [],
-        'check-strictly': true,
-        'default-expand-all': false,
-        'expand-on-click-node': false,
-        clickParent: true,
-        filterable: false,
-        props: {
-          children: 'children',
-          label: 'name',
-          value: 'id'
-        }
-      }
-    }
+    type: 'lazySelect',
+    optionList: [],
+    placeholder: '请选择岗位',
+    optionProps: {
+      formatter: (item) => `${item.name}`,
+      key: 'name',
+      value: 'id'
+    },
+    load: (p) => {
+      p.name = p.search
+      return getStationParent(p)
+    },
+    remote: true,
+    searchable: true,
+    config: { optionLabel: 'name', optionValue: 'id' }
   },
+  // {
+  //   type: 'treeSelect',
+  //   field: 'positionId',
+  //   label: '岗位',
+  //   data: '',
+  //   config: {
+  //     selectParams: {
+  //       placeholder: '请选择岗位',
+  //       multiple: false
+  //     },
+  //     treeParams: {
+  //       data: [],
+  //       'check-strictly': true,
+  //       'default-expand-all': false,
+  //       'expand-on-click-node': false,
+  //       clickParent: true,
+  //       filterable: false,
+  //       props: {
+  //         children: 'children',
+  //         label: 'name',
+  //         value: 'id'
+  //       }
+  //     }
+  //   }
+  // },
   {
     field: 'level',
     label: '等级',
@@ -500,7 +551,7 @@ export default {
     columnsFilter: (visibleColProps) =>
       _.filter(TABLE_COLUMNS, ({ prop }) => _.includes(visibleColProps, prop))
   },
-  mixins: [myMixins],
+  // mixins: [myMixins],
   props: {
     teachId: {
       type: String,
@@ -540,30 +591,8 @@ export default {
       searchConfig
     }
   },
-  // computed: {
-  //   ADD_EXAM_CATALOG: () => ADD_EXAM_CATALOG,
-  //   STOP_EXAM_CATALOG: () => STOP_EXAM_CATALOG,
-  //   AUTH_EXAM_CATALOG: () => AUTH_EXAM_CATALOG,
-  //   EDIT_EXAM_CATALOG: () => EDIT_EXAM_CATALOG,
-  //   DELETE_EXAM_CATALOG: () => DELETE_EXAM_CATALOG,
-  //   ADD_GROUNP_EXAM_CATALOG: () => ADD_GROUNP_EXAM_CATALOG,
-  //   ...mapGetters(['privileges'])
-  // },
-  watch: {
-    // 鉴权注释：当前用户无所有的操作权限，操作列表关闭
-    // privileges: {
-    //   handler() {
-    //     this.tableConfig.showHandler = this.$p([
-    //       STOP_EXAM_CATALOG,
-    //       AUTH_EXAM_CATALOG,
-    //       EDIT_EXAM_CATALOG,
-    //       DELETE_EXAM_CATALOG,
-    //       ADD_GROUNP_EXAM_CATALOG
-    //     ])
-    //   },
-    //   deep: true
-    // }
-  },
+
+  watch: {},
 
   mounted() {
     this.handleReset()
@@ -571,8 +600,8 @@ export default {
       this.queryInfo.id = this.teachId
       this.loadTableData()
     })
-    this.loadTree() //部门
-    this.loadPosition() //岗位
+    // this.loadTree() //部门
+    // this.loadPosition() //岗位
   },
   methods: {
     //处理页码改变

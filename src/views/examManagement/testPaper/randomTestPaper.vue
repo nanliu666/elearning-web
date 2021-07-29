@@ -52,7 +52,7 @@
               :length="testPaper.length"
               @delete="handleDeleteBlock"
               @update="update"
-            ></themeBlock>
+            />
           </div>
         </div>
         <div class="flex flexcenter footer">
@@ -115,7 +115,7 @@ const BASE_COLUMNS = [
         required: true
       }
     },
-    required: false,
+    required: true,
     span: 11,
     offset: 2
   },
@@ -431,8 +431,7 @@ export default {
           this.$message.success(`已成功${this.isEdit ? '修改' : '创建'}试卷`)
           this.handleBack()
         })
-        .catch((err) => {
-          this.$message.error(`创建失败，${err}`)
+        .catch(() => {
           window.console.error(JSON.stringify(params))
         })
         .finally(() => {

@@ -97,7 +97,6 @@ import {
   TRAIN_TYPE,
   TRAIN_STATUS
 } from '@/const/configData'
-import { cancel } from '@/router/axios'
 // 培训总览统计
 const onlineAll = [
   {
@@ -417,10 +416,7 @@ const trainPerson = [
   },
   {
     label: '是否通过',
-    prop: 'isPass',
-    formatter: (row) => {
-      return row.isPass == '1' ? '是' : '否'
-    }
+    prop: 'isPass'
   },
   {
     label: '通过时间',
@@ -430,10 +426,7 @@ const trainPerson = [
   {
     label: '是否获得证书',
     minWidth: 150,
-    prop: 'getCert',
-    formatter: (row) => {
-      return row.getCert == '1' ? '已获得' : '未获得'
-    }
+    prop: 'getCert'
   },
   {
     label: '证书获得时间',
@@ -700,9 +693,6 @@ export default {
       if (this.nowTab == this.activeName) {
         return
       }
-      setTimeout(() => {
-        cancel()
-      })
       this.nowTab = this.activeName
       ;(this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)),
         (this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)),

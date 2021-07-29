@@ -67,6 +67,13 @@ export const reCallTrainPlan = (params) => post(`${baseUrl}reCallTrainPlan`, par
 export const getTrainPlan = (params) => get(`${baseUrl}getTrainPlan`, params)
 
 /**
+ * @description: 获取审批流培训计划详情
+ * @param {*} planId
+ * @return {*}
+ */
+export const getTrainPlanAppr = (params) => get(`${baseUrl}getTrainPlanAppr`, params)
+
+/**
  * @description: 删除培训子计划
  * @param {*} detailId
  * @return {*}

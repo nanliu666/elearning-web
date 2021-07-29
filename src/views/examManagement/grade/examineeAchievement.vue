@@ -56,7 +56,7 @@
                   @submit="handleSearch"
                 >
                   <template>
-                    <div style="display: inline-block;margin-left: 20px">
+                    <div style="display: inline-block; margin-left: 20px">
                       <span>考试通过条件：</span>
                       <span>{{
                         `${passType == 1 ? `${passScope}分` : `${passPercentage}分`}以上`
@@ -64,7 +64,7 @@
                     </div>
                     <div
                       v-if="!isOnline"
-                      style="display: inline-block;margin-left: 20px"
+                      style="display: inline-block; margin-left: 20px"
                     >
                       <span>试卷总分：</span>
                       <span>{{ `${totalScope ? `${totalScope}分` : '改卷未设置总分'}` }}</span>
@@ -75,18 +75,18 @@
                   class="refresh-container"
                   @click="loadTableData"
                 >
-                  <span class="icon  el-icon-refresh-right" />
+                  <span class="icon el-icon-refresh-right" />
                   <span class="refresh-text">刷新</span>
                 </div>
                 <el-popover
                   placement="bottom"
                   width="40"
                   trigger="click"
-                  style="margin-left:10px"
+                  style="margin-left: 10px"
                 >
                   <el-checkbox-group
                     v-model="columnsVisible"
-                    style="display: flex;flex-direction: column;"
+                    style="display: flex; flex-direction: column"
                   >
                     <el-checkbox
                       v-for="item in tableColumns"
@@ -101,7 +101,7 @@
                   <i
                     slot="reference"
                     class="el-icon-setting"
-                    style="cursor: pointer;"
+                    style="cursor: pointer"
                   />
                 </el-popover>
               </div>
@@ -110,7 +110,7 @@
         </template>
         <template slot="multiSelectMenu">
         </template>
-        <template #name="{row}">
+        <template #name="{ row }">
           <el-link
             type="primary"
             style="line-height: 22px"
@@ -118,7 +118,7 @@
             {{ row.name }}
           </el-link>
         </template>
-        <template #handler="{row}">
+        <template #handler="{ row }">
           <div class="menuClass">
             <el-button
               type="text"
@@ -150,7 +150,7 @@ import {
   importOffline
 } from '@/api/examManagement/achievement'
 import SearchPopover from '@/components/searchPopOver/index'
-import { getOrgTreeSimple } from '@/api/org/org'
+import { getorganizationNew } from '@/api/org/org'
 import examineeDialog from './compoments/examineeDialog'
 import moment from 'moment'
 // 离线配置
@@ -185,8 +185,8 @@ const OFFLINE_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '是',
-          '0': '否'
+          1: '是',
+          0: '否'
         }[row.isPass] || ''
       )
     }
@@ -250,8 +250,8 @@ const TATOL_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '是',
-          '0': '否'
+          1: '是',
+          0: '否'
         }[row.isPass] || ''
       )
     }
@@ -263,11 +263,11 @@ const TATOL_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '已发布',
-          '2': '已提交',
-          '3': '已阅卷',
-          '4': '考试中',
-          '5': '阅卷中'
+          1: '已发布',
+          2: '已提交',
+          3: '已阅卷',
+          4: '考试中',
+          5: '阅卷中'
         }[row.status] || ''
       )
     }
@@ -320,8 +320,8 @@ const ONLINE_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '是',
-          '0': '否'
+          1: '是',
+          0: '否'
         }[row.isPass] || ''
       )
     }
@@ -333,11 +333,11 @@ const ONLINE_COLUMNS = [
     formatter: (row) => {
       return (
         {
-          '1': '已发布',
-          '2': '考试中',
-          '3': '已提交',
-          '4': '阅卷中',
-          '5': '已阅卷'
+          1: '已发布',
+          2: '考试中',
+          3: '已提交',
+          4: '阅卷中',
+          5: '已阅卷'
         }[row.status] || ''
       )
     }
@@ -362,77 +362,7 @@ const status = [
   { label: '阅卷中', value: '4' },
   { label: '已阅卷', value: '5' }
 ]
-const SEARCH_CONFIG = {
-  requireOptions: [
-    {
-      type: 'input',
-      field: 'search',
-      label: '',
-      data: '',
-      options: [],
-      config: { placeholder: '输入考生姓名或手机搜索', 'suffix-icon': 'el-icon-search' }
-    }
-  ],
-  popoverOptions: [
-    {
-      type: 'treeSelect',
-      // data多选是数组单选是字符串
-      data: [],
-      label: '所在部门',
-      field: 'orgId',
-      arrField: 'orgId',
-      config: {
-        multiple: true,
-        selectParams: {
-          placeholder: '请输入内容',
-          multiple: true
-        },
-        treeParams: {
-          data: [],
-          'check-strictly': true,
-          'default-expand-all': false,
-          'expand-on-click-node': false,
-          clickParent: true,
-          filterable: false,
-          props: {
-            children: 'children',
-            label: 'orgName',
-            disabled: 'disabled',
-            value: 'orgId'
-          }
-        }
-      }
-    },
-    {
-      type: 'numInterval',
-      field: 'minAchievement,maxAchievement',
-      data: {},
-      label: '成绩',
-      options: [],
-      config: { optionLabel: 'name', optionValue: 'userId' },
-      loading: false,
-      noMore: false
-    },
-    {
-      type: 'select',
-      field: 'status',
-      label: '答卷状态',
-      data: '',
-      options: status
-    },
-    {
-      type: 'select',
-      field: 'isPass',
-      label: '是否通过',
-      data: '',
-      options: [
-        { value: '1', label: '是' },
-        { value: '0', label: '否' }
-      ]
-    }
-  ],
-  hasSlotRight: true
-}
+// const SEARCH_CONFIG =
 export default {
   name: 'ExamineeAchievement',
   components: { SearchPopover, examineeDialog },
@@ -465,7 +395,79 @@ export default {
       tableColumns: TATOL_COLUMNS,
       columnsVisible: _.map(TATOL_COLUMNS, ({ prop }) => prop),
       checkColumn: ['name', 'status', 'creatorName', 'updateTime'],
-      searchConfig: SEARCH_CONFIG,
+      searchConfig: {
+        requireOptions: [
+          {
+            type: 'input',
+            field: 'search',
+            label: '',
+            data: '',
+            options: [],
+            config: { placeholder: '输入考生姓名或手机搜索', 'suffix-icon': 'el-icon-search' }
+          }
+        ],
+        popoverOptions: [
+          {
+            type: 'treeSelectNew',
+            field: 'orgId',
+            label: '所属部门',
+            data: '',
+            config: {
+              selectParams: {
+                placeholder: '请输入内容',
+                multiple: false
+              },
+              treeParams: {
+                data: [],
+                'check-strictly': true,
+                'default-expand-all': false,
+                'expand-on-click-node': false,
+                clickParent: true,
+                load: this.loadSelectTreeFn,
+                lazy: true,
+                filterable: false,
+                props: {
+                  isLeaf: (data) => {
+                    return !data.hasChildren
+                  },
+                  children: 'children',
+                  label: 'orgName',
+                  disabled: 'disabled',
+                  value: 'orgId'
+                }
+              }
+            }
+          },
+          {
+            type: 'numInterval',
+            field: 'minAchievement,maxAchievement',
+            data: {},
+            label: '成绩',
+            options: [],
+            config: { optionLabel: 'name', optionValue: 'userId' },
+            loading: false,
+            noMore: false
+          },
+          {
+            type: 'select',
+            field: 'status',
+            label: '答卷状态',
+            data: '',
+            options: status
+          },
+          {
+            type: 'select',
+            field: 'isPass',
+            label: '是否通过',
+            data: '',
+            options: [
+              { value: '1', label: '是' },
+              { value: '0', label: '否' }
+            ]
+          }
+        ],
+        hasSlotRight: true
+      },
       data: [],
       createOrgDailog: false,
       searchParams: {}
@@ -507,6 +509,17 @@ export default {
     })
   },
   methods: {
+    async loadSelectTreeFn(node, resolve) {
+      //  懒加载下拉树数据
+      if (this.$refs.tree != undefined) this.checkedKeys = this.$refs.tree.getCheckedKeys()
+      let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
+      getorganizationNew(params).then((res) => {
+        // res.map(val=>val.hasChildren=true)
+        resolve(res)
+      })
+      if (this.$refs.tree != undefined) this.$refs.tree.setCheckedKeys(this.checkedKeys)
+    },
+
     downloadModel() {
       exportModel({ examId: this.$route.query.id }).then((res) => {
         exportToExcel(res)
@@ -530,9 +543,9 @@ export default {
      * 获取用人部门
      */
     getOrgTree() {
-      getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
-        this.searchConfig.popoverOptions[0].config.treeParams.data = res
-      })
+      // getOrgTreeSimple({ parentOrgId: 0 }).then((res) => {
+      //   this.searchConfig.popoverOptions[0].config.treeParams.data = res
+      // })
     },
     handleEdit(row) {
       this.row = _.cloneDeep(row)
@@ -575,7 +588,8 @@ export default {
     },
     // 搜索
     handleSearch(params) {
-      const orgNameIds = _.join(params.orgId, ',')
+      // const orgNameIds = _.join(params.orgId, ',')
+      const orgNameIds = params.orgId
       let tempParams = _.cloneDeep(params)
       tempParams.orgId = orgNameIds
       this.searchParams = tempParams

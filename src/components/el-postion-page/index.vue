@@ -4,6 +4,7 @@
       v-model="pName"
       style="width:100%;"
       readonly
+      :disabled="isEditPos"
       :placeholder="placeholder"
       @focus="showPosTree"
     />
@@ -40,12 +41,13 @@
                   v-for="(val, idx) in item.data"
                   :key="idx"
                   class="myDrop-item"
+                  :class="{ active: ativeArray.includes(`${index}-${idx}`) }"
                 >
-                  <span @click="backPos(val)">{{ val.name }}</span>
+                  <span @click="backPos(`${index}-${idx}`)">{{ val.name }}</span>
                   <i
-                    v-if="val.hasChildren"
+                    v-if="val.hasChildren && index < 4"
                     class="el-icon-arrow-right right-arrow"
-                    @click="getNextData(val.id, `${index}-${idx}`)"
+                    @click="getNextData(val.id, index)"
                   />
                 </li>
                 <div
@@ -83,6 +85,7 @@
         <el-button
           type="primary"
           size="medium"
+          @click="submit"
         >
           确定
         </el-button>
@@ -127,6 +130,7 @@ export default {
   },
   data() {
     return {
+      isEditPos: false,
       pName: '',
       loading: false,
       visible: false,
@@ -136,7 +140,7 @@ export default {
         size: 20
       },
       name: '',
-      ativeArray: []
+      ativeArray: ''
     }
   },
   watch: {
@@ -167,6 +171,9 @@ export default {
         this.pName = ''
       }
     },
+    createPosition() {
+      this.pName = this.posName.name
+    },
     showPosTree() {
       this.visible = true
     },
@@ -178,20 +185,36 @@ export default {
         this.loadData(0, 0)
       }, 500)
     },
-    backPos(item) {
+    backPos(key) {
+      // const allIdx = key.split('-')
+      // const idx0 = allIdx[0]
+      // this.ativeArray=this.ativeArray.filter((val)=>{
+      //   return !val.includes(idx0+'-')
+      // })
+      // this.ativeArray.push(key)
+      this.ativeArray = key
+    },
+    //确定
+    submit() {
+      if (!this.ativeArray) {
+        this.$message.error('请选择岗位')
+        return
+      }
+      // const key=this.ativeArray[this.ativeArray.length-1].split('-')
+      const key = this.ativeArray.split('-')
+      const item = this.treeData[key[0]].data[key[1]]
       this.pName = item.name
       this.handleClose()
       this.$emit('getPosData', { label: item.name, value: item.id })
     },
     //点击获取下一级
     getNextData(id, key) {
+      this.ativeArray = ''
       if (timeOut2 !== null) {
         clearInterval(timeOut2)
       }
       timeOut2 = setTimeout(() => {
-        const all = key.split('-')
-        const parentIdx = all[0]
-        this.loadData(id, parseInt(parentIdx) + 1)
+        this.loadData(id, parseInt(key) + 1)
       }, 300)
     },
     getMore(idx) {
@@ -221,7 +244,7 @@ export default {
         pageNo,
         pageSize: this.page.size,
         parentId,
-        name: this.name
+        name: parentIdx == '0' ? this.name : ''
       }
       getStationParent(param)
         .then((res) => {
@@ -252,6 +275,7 @@ export default {
     },
     //关闭弹出层
     handleClose() {
+      this.ativeArray = ''
       this.name = ''
       this.visible = false
     }

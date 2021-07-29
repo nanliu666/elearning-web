@@ -65,9 +65,9 @@
             </div>
           </div>
         </template>
-          <template #stu_name="{ row }">
-            {{row.stu_name || row.source_name}}
-          </template>
+        <template #stu_name="{ row }">
+          {{ row.stu_name || row.source_name }}
+        </template>
         <template #multiSelectMenu="{ selection }">
           <el-button
             type="text"
@@ -149,7 +149,7 @@ const TABLE_COLUMNS = [
   }
 ]
 const TABLE_CONFIG = {
-  rowKey: 'id',
+  rowKey: 'id_str',
   showHandler: true,
   defaultExpandAll: false,
   showIndexColumn: false,
@@ -265,7 +265,7 @@ export default {
       // 批量删除
       let params = []
       selection.forEach((item) => {
-        params.push(item.id)
+        params.push(item.id_str)
       })
       params = params.join(',')
       this.$confirm('此操作将删选中, 是否继续?', '提示', {
@@ -302,7 +302,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let params = {
-          ids: row.id
+          ids: row.id_str
         }
         deleteScoreDetails(params).then(() => {
           this.$message.success('删除成功')
@@ -370,9 +370,8 @@ export default {
         likeQuery: params.search,
         startTime: params.startTime,
         endTime: params.endTime,
-        sysRule:params.sysRule
+        sysRule: params.sysRule
       }
-      debugger
       // this.searchParams = params
       this.searchParams = { ...currentParam }
       this.page.currentPage = 1
