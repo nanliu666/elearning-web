@@ -45,7 +45,7 @@
                 >
                   <span @click="backPos(`${index}-${idx}`)">{{ val.name }}</span>
                   <i
-                    v-if="val.hasChildren && index < 4"
+                    v-if="val.hasChildren && index < 3"
                     class="el-icon-arrow-right right-arrow"
                     @click="getNextData(val.id, index)"
                   />
