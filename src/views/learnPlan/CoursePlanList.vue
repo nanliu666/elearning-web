@@ -275,10 +275,9 @@ import {
   delCatalogs,
   updateCatalogs,
   moveCatalogs,
-  updateStatus
+  updateStatus,
+  getCategoryTree
 } from '@/api/learnPlan'
-import { getCategoryTree } from '@/api/train/train'
-
 // 表格属性
 const TABLE_COLUMNS = [
   {
