@@ -211,6 +211,13 @@
         >确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 审批发起组件 -->
+    <appr-submit
+      ref="apprSubmit"
+      category-id="14"
+      @submit="handleSubmit"
+      @apprCancel="apprCancel"
+    />
   </basic-container>
 </template>
 
@@ -230,6 +237,7 @@ import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getRankTree } from '@/api/system/rank'
 import { getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
+import { categoryMap } from '@/const/approve'
 import {
   SETTING_USER,
   RESET_USER,
@@ -252,6 +260,14 @@ const COLUMNS = [
     label: '用户编号',
     align: 'center',
     prop: 'workNo'
+  },
+  {
+    label: '审核状态',
+    prop: 'auditStatus',
+    align: 'center',
+    formatter(record) {
+      return { '0': '未审核', '1': '审核通过', '3':'审核驳回' }[record.auditStatus] || ''
+    }
   },
   //状态，1-在职，2-离职
   {
@@ -335,7 +351,8 @@ export default {
   components: {
     // 员工角色编辑
     userRoleEdit: () => import('./userRoleEdit'),
-    SearchPopover: () => import('@/components/searchPopOver/index')
+    SearchPopover: () => import('@/components/searchPopOver/index'),
+    ApprSubmit:() => import('@/components/appr-submit/ApprSubmit')
   },
   filters: {
     // 过滤不可见的列
@@ -493,7 +510,8 @@ export default {
       form: {
         orgId: ''
       },
-      orgData: []
+      orgData: [],
+      currentRowData:{}
     }
   },
   computed: {
@@ -561,6 +579,23 @@ export default {
     this.loadData()
   },
   methods: {
+    submitApprApply(obj){
+      this.$refs.apprSubmit.submit({
+        formId: obj.id,
+        formData: '',
+        processName: categoryMap[this.id?'15':'14'],
+        formKey: obj.applyType,
+        formTitle: '删除用户'
+      })
+    },
+    // 审批发起组件的弹窗确认回调
+    handleSubmit() {
+      this.handleDeleteUser(this.currentRowData)
+    },
+    // 审批组件取消事件
+    apprCancel() {
+      this.isLoading = false
+    },
     loadOrgData() {
       getOrgTree({ parentOrgId: '0' }).then((res) => {
         this.formColumns.find((item) => item.prop === 'orgId').props.treeParams.data = res
@@ -645,6 +680,7 @@ export default {
           this.$router.push({ path: '/system/editUser', query: { userId: row.userId } })
           break
         case 'delete':
+          this.currentRowData = row
           this.handleDeleteUser(row)
           break
       }
@@ -676,14 +712,19 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => delUser({ userId: row.userId }))
         .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
+          this.$refs.apprSubmit.validate().then((process) => {
+              delUser({ userId: row.userId }).then(res=>{
+                this.$message({
+                  type: 'success',
+                  message: '操作成功!'
+                })
+                this.loadOrgData()
+                this.loadData()
+                this.submitApprApply(res)
+              })
           })
-          this.loadOrgData()
-          this.loadData()
+          
         })
     },
     loadData() {
