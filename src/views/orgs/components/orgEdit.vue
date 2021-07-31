@@ -59,14 +59,14 @@
             label="Enterprise"
             disabled
           >
-            公司
+            企业
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
             label="Company"
             :disabled="radioDisabled('Company')"
           >
-            单位
+            公司
           </el-radio>
           <el-radio
             v-if="type !== 'edit' || form.orgType !== 'Enterprise'"
@@ -339,7 +339,7 @@ export default {
             createOrg(form).then(() => {
               this.isLoding = false
               this.$message.success('创建成功')
-              this.$emit('refresh',form)
+              this.$emit('refresh', form)
               this.$emit('changevisible', false)
             })
           } else {
@@ -356,7 +356,7 @@ export default {
       editOrg(form).then(() => {
         this.isLoding = false
         this.$message.success('修改成功')
-        this.$emit('refresh',form)
+        this.$emit('refresh', form)
         this.$emit('changevisible', false)
       })
     },

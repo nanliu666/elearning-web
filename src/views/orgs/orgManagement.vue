@@ -162,7 +162,13 @@
 </template>
 
 <script>
-import { getOrgTree, getOrgTreeSimple, deleteOrg, getOrgLeader, getorganizationNew } from '@/api/org/org'
+import {
+  // getOrgTree,
+  // getOrgTreeSimple,
+  deleteOrg,
+  getOrgLeader,
+  getorganizationNew
+} from '@/api/org/org'
 import SearchPopover from '@/components/searchPopOver/index'
 import OrgEdit from './components/orgEdit'
 
@@ -200,7 +206,7 @@ const TABLE_COLUMNS = [
     minWidth: 120
   }
 ]
-// const TABLE_CONFIG = 
+// const TABLE_CONFIG =
 import { ADD_ORG, ADD_ORG_CHILD, EDIT_ORG, DELETE_ORG, IMPORT_ORGS } from '@/const/privileges'
 import { mapGetters } from 'vuex'
 export default {
@@ -213,7 +219,7 @@ export default {
   },
   data() {
     return {
-      maps:new Map(),
+      maps: new Map(),
       tableLoading: false,
       tableData: [],
       tableConfig: {
@@ -222,8 +228,8 @@ export default {
         defaultExpandAll: false,
         showIndexColumn: false,
         enablePagination: true,
-        load:this.loadFn,
-        lazy:true,
+        load: this.loadFn,
+        lazy: true,
         handlerColumn: {
           width: 160,
           fixed: false
@@ -248,11 +254,11 @@ export default {
             type: 'treeSelectNew',
             field: 'parentId',
             label: '',
-            data: '',            
+            data: '',
             config: {
               selectParams: {
-                placeholder: '请输入内容',               
-                multiple: false,
+                placeholder: '请输入内容',
+                multiple: false
               },
               treeParams: {
                 data: [],
@@ -260,11 +266,11 @@ export default {
                 'default-expand-all': false,
                 'expand-on-click-node': false,
                 clickParent: true,
-                load:this.loadSelectTreeFn,
-                lazy:true,
-                filterable: false,                           
-                props: {                  
-                  isLeaf:'hasChildren',
+                load: this.loadSelectTreeFn,
+                lazy: true,
+                filterable: false,
+                props: {
+                  isLeaf: 'hasChildren',
                   children: 'children',
                   label: 'orgName',
                   disabled: 'disabled',
@@ -288,8 +294,8 @@ export default {
             label: '组织类型',
             data: '',
             options: [
-              { value: 'Enterprise', label: '公司' },
-              { value: 'Company', label: '单位' },
+              { value: 'Enterprise', label: '企业' },
+              { value: 'Company', label: '公司' },
               { value: 'Department', label: '部门' },
               { value: 'Group', label: '小组' }
             ]
@@ -336,7 +342,7 @@ export default {
         orgType: [{ required: true, message: '请选择组织类型', trigger: 'change' }]
       },
       createOrgDailog: false,
-      orgTypeObj: { Enterprise: '公司', Company: '单位', Department: '部门', Group: '小组' },
+      orgTypeObj: { Enterprise: '企业', Company: '公司', Department: '部门', Group: '小组' },
       searchParams: { parentId: '0' }
     }
   },
@@ -362,7 +368,7 @@ export default {
       this.searchConfig.popoverOptions[2].options.push(...res.data)
     })
     // getorganizationNew({ parentId: 0 }).then((res) => {
-    //   res.map(val=>val.hasChildren=true)     
+    //   res.map(val=>val.hasChildren=true)
     //   this.searchConfig.requireOptions[0].config.treeParams.data = res
     //   // this.$refs['searchPopover'].treeDataUpdateFun(res, 'parentId')
     //   // this.searchConfig.requireOptions[0].data = res[0].orgId
@@ -377,24 +383,26 @@ export default {
     },
 
     refresh(obj) {
-      const {parentOrgId} = obj  //取出当前行的pid
+      const { parentOrgId } = obj //取出当前行的pid
       const { tree, treeNode, resolve } = this.maps.get(parentOrgId) //根据pid取出对应的节点数据
       let table = this.$refs.table
-      this.$set(table.$refs.table.store.states.lazyTreeNodeMap, parentOrgId, []); //将对应节点下的数据清空，从而实现数据的重新加载
-      this.loadFn( tree, treeNode, resolve )
+      this.$set(table.$refs.table.store.states.lazyTreeNodeMap, parentOrgId, []) //将对应节点下的数据清空，从而实现数据的重新加载
+      this.loadFn(tree, treeNode, resolve)
     },
-    async loadSelectTreeFn(node, resolve){ //  懒加载下拉树数据
-      let params={parentId:node.data&&node.data.id?node.data.id:'0'}
+    async loadSelectTreeFn(node, resolve) {
+      //  懒加载下拉树数据
+      let params = { parentId: node.data && node.data.id ? node.data.id : '0' }
       getorganizationNew(params).then((res) => {
-        // res.map(val=>val.hasChildren=true)        
+        // res.map(val=>val.hasChildren=true)
         resolve(res)
-      })      
+      })
     },
-    async loadFn(tree, treeNode, resolve){ // 懒加载表格数据    
-      let params={parentId:tree.id}
-      this.maps.set(tree.id,{ tree, treeNode, resolve })  //将当前选中节点数据存储到maps中
+    async loadFn(tree, treeNode, resolve) {
+      // 懒加载表格数据
+      let params = { parentId: tree.id }
+      this.maps.set(tree.id, { tree, treeNode, resolve }) //将当前选中节点数据存储到maps中
       getorganizationNew(params).then((res) => {
-        res.map(val=>val.hasChildren=true)        
+        res.map((val) => (val.hasChildren = true))
         resolve(res)
       })
     },
@@ -408,7 +416,7 @@ export default {
         if (Array.isArray(params.parentId)) params.parentId = params.parentId[0]['']
         getorganizationNew(params).then((res) => {
           this.tableData = res
-          this.tableData.map(val=>val.hasChildren=true)          
+          this.tableData.map((val) => (val.hasChildren = true))
           this.multipleSelection = []
           this.tableLoading = false
 
