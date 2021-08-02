@@ -275,9 +275,9 @@ import {
   delCatalogs,
   updateCatalogs,
   moveCatalogs,
-  updateStatus
+  updateStatus,
+  getCategoryTree
 } from '@/api/learnPlan'
-
 // 表格属性
 const TABLE_COLUMNS = [
   {
@@ -293,6 +293,14 @@ const TABLE_COLUMNS = [
     prop: 'coursePlanNo',
     slot: false,
     minWidth: 180,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  {
+    label: '主办单位',
+    prop: 'sponsor',
+    slot: false,
+    minWidth: 120,
     headerAlign: 'center',
     align: 'center'
   },
@@ -387,12 +395,6 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
       }
     }
   },
-  {
-    type: 'input',
-    field: 'coursePlanNo',
-    label: '课程编号',
-    data: ''
-  },
   // {
   //   type: 'input',
   //   field: 'coursePlanName',
@@ -413,16 +415,36 @@ let SEARCH_POPOVER_POPOVER_OPTIONS = [
     options: [
       { value: 1, label: '未开始' },
       { value: 2, label: '进行中' },
-      { value: 3, label: '已结束' }
+      { value: 3, label: '已结束' },
+      { value: 4, label: '草稿' }
     ]
   },
   {
+    type: 'treeSelect',
+    field: 'categoryId',
+    label: '所在分类',
     data: '',
-    label: '时间选择',
-    type: 'dataPicker',
-    field: 'startTime,endTime',
-    config: { type: 'daterange', 'value-format': 'yyyy-MM-dd HH:mm:ss' }
-  },
+    config: {
+      selectParams: {
+        placeholder: '请选择',
+        multiple: false
+      },
+      treeParams: {
+        data: [],
+        'check-strictly': true,
+        'default-expand-all': false,
+        'expand-on-click-node': false,
+        clickParent: true,
+        filterable: false,
+        props: {
+          children: 'children',
+          label: 'name',
+          disabled: 'disabled',
+          value: 'id'
+        }
+      }
+    }
+  }
 ]
 let SEARCH_POPOVER_CONFIG = {
   popoverOptions: SEARCH_POPOVER_POPOVER_OPTIONS,
@@ -540,9 +562,18 @@ export default {
     this.refreshPublished()
     this.loadDraftData()
     this.getCreatorList()
+    this.getCategoryTree()
   },
 
   methods: {
+    getCategoryTree() {
+      let categoryIdType = _.find(this.published.searchPopoverConfig.popoverOptions, {
+        field: 'categoryId'
+      })
+      getCategoryTree({ parentOrgId: 0 }).then((res) => {
+        _.set(categoryIdType, 'config.treeParams.data', res)
+      })
+    },
     getCreatorList() {
       relatedKnowledgeList({ name: '' }).then((res) => {
         this.published.searchPopoverConfig.popoverOptions[0].config.treeParams.data = _.concat(res)
@@ -946,8 +977,8 @@ export default {
 <style lang="sass" scoped>
 $color_icon: #A0A8AE
 .status-span
-    padding: 4px;
-    border-radius: 2px;
+  padding: 4px;
+  border-radius: 2px;
 /deep/.basic-container--block
   height: calc(100% - 92px)
   min-height: calc(100% - 92px)
@@ -981,8 +1012,8 @@ $color_icon: #A0A8AE
     line-height: 24px
     &:last-child
       margin: 0
-    // margin-bottom: 8px
-    // margin-right: 8px
+  // margin-bottom: 8px
+  // margin-right: 8px
   .iconfont
     color: $color_icon
     font-weight: bold

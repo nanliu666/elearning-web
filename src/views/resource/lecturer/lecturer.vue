@@ -413,7 +413,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     options: [
       { value: '', label: '全部' },
       { value: '0', label: '冻结' },
-      { value: '1', label: '解冻' }
+      { value: '1', label: '正常' }
     ]
   },
   {

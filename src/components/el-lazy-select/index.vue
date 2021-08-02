@@ -41,7 +41,7 @@
       <span
         :style="emptyStyle"
         class="empty-tips"
-      >无数据</span>
+      >{{emptyText}}</span>
     </el-option>
   </el-select>
 </template>
@@ -67,6 +67,10 @@ export default {
     event: 'change'
   },
   props: {
+    emptyText: {
+      type: String,
+      default: '无数据'
+    },
     dataFilter: null,
     props: {
       type: Object,
@@ -126,6 +130,10 @@ export default {
       default() {
         return []
       }
+    },
+    visibleChangeDisabled: {
+      type: Boolean,
+      default:false
     }
   },
   data() {
@@ -185,6 +193,9 @@ export default {
     this.query[this.queryProps.size] = this.querySize
   },
   methods: {
+    $updateData() {
+      this._remoteMethod('')
+    },
     mergeConfig(config, defaultConfig) {
       Object.keys(defaultConfig).forEach((key) => {
         if (!config[key]) {
@@ -193,7 +204,7 @@ export default {
       })
     },
     handleVisible(visible) {
-      if (visible) {
+      if (visible && !this.visibleChangeDisabled) {
         this._remoteMethod('')
       }
     },
@@ -212,7 +223,6 @@ export default {
         query[pageKey]++
         loading = 'loadLoading'
       }
-
       this[loading] = true
       if (!this.hasInitData) {
         query[sizeKey] = 200
@@ -231,6 +241,9 @@ export default {
             const { data: dataKey, total: totalKey } = this.responseProps
             data = res[dataKey]
             total = res[totalKey]
+          }
+          if (search || search === '' && !data.length) {
+            this.$emit('no-data')
           }
           this.optionData = uniqueObjArray(this.optionData.concat(data), this.props.value)
           if (this.dataFilter && typeof this.dataFilter === 'function') {
@@ -258,7 +271,7 @@ export default {
       this.$emit('getLabel', label)
       this.$emit('getSelected', data)
     }
-  }
+  },
 }
 </script>
 <style lang="scss">

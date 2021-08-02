@@ -447,9 +447,9 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     label: '课程分类',
     type: 'treeSelect',
     config: {
-      multiple: true,
       selectParams: {
-        placeholder: '请选择'
+        placeholder: '请选择',
+        multiple: false
       },
       treeParams: {
         data: [],
@@ -511,6 +511,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
     config: { placeholder: '请选择', filterable: true }
   },
   {
+    data: '',
     label: '知识体系',
     type: 'treeSelect',
     field: 'knowledgeSystemId',
@@ -529,6 +530,7 @@ const SEARCH_POPOVER_POPOVER_OPTIONS = [
         props: {
           children: 'children',
           label: 'name',
+          disabled: 'disabled',
           value: 'id'
         }
       }
@@ -677,7 +679,7 @@ export default {
     async initRelatedKnowledgeList() {
       let knowledgeSystemId = _.find(SEARCH_POPOVER_POPOVER_OPTIONS, { field: 'knowledgeSystemId' })
       await relatedKnowledgeList({ name: '' }).then((res) => {
-        res.unshift({ id: '', name: '全部' })
+        // res.unshift({ id: '', name: '全部' })
         knowledgeSystemId.config.treeParams.data = res
       })
     },
@@ -798,11 +800,11 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          let arr = selection.reduce((pre, cur) => {
+          let courseIds = selection.reduce((pre, cur) => {
             pre.push(cur.id)
             return pre
           }, [])
-          syncCourses({ courseIds:arr }).then((r) => {
+          syncCourses({ courseIds }).then((r) => {
             this.$message({
               type: 'info',
               message: r.resMsg

@@ -547,12 +547,12 @@ export default {
   /deep/ .inside-table tr td .cell {
     padding-left: 10px;
   }
-  //   .el-form {
-  //     /deep/ .el-col:nth-child(2) .el-form-item .el-form-item__content,
-  //     /deep/ .el-col:nth-child(5) .el-form-item .el-form-item__content {
-  //       margin-top: -35px;
-  //     }
-  //   }
+  .el-form {
+    /deep/ .el-col:nth-child(2) .el-form-item .el-form-item__content,
+    /deep/ .el-col:nth-child(5) .el-form-item .el-form-item__content {
+      margin-top: -35px;
+    }
+  }
   .abilityGrade {
     width: 250px;
     height: 110px;
@@ -572,10 +572,10 @@ export default {
       width: 100px;
     }
   }
-  .form-label::before {
-    content: '*';
-    color: #f56c6c;
-    margin-right: 4px;
-  }
+  //   .form-label::before {
+  //     content: '*';
+  //     color: #f56c6c;
+  //     margin-right: 4px;
+  //   }
 }
 </style>
