@@ -1682,8 +1682,8 @@ export default {
           processName: categoryMap['1'],
           formKey: 'CourseApplyInfo',
           // 课程标题
-          formTitle: this.ruleForm.name,
-          formData: JSON.stringify(this.ruleForm)
+          formTitle: this.ruleForm.name
+          //formData: JSON.stringify(this.ruleForm)
         })
         .then(() => {
           this.$message({
