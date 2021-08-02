@@ -29,7 +29,9 @@ export const baseDictionaries = {
   applyTrainingOuterBuy: 'applyTrainingOuterBuyDet', //外购培训申请
   CourseApplication: 'courseDetail', //-制度清单-课程清单-课程使用申请
   applyKnowledgeShare: 'applyKnowledgeShare', //一点分享
-  trainPlan: 'trainPlanDet' // 培训计划
+  trainPlan: 'trainPlanDet', // 培训计划
+  updateUserAudit: 'userAudit', //用户审批  更新
+  addUserAudit: 'userAudit' //创建用户审批
 }
 export const baseFormKey = {
   // formKey 对应的类型字典
@@ -45,7 +47,9 @@ export const baseFormKey = {
   applyTrainingOuterBuy: '外购培训申请', //外购培训申请
   CourseApplication: '课程使用申请', //-制度清单-课程清单-课程使用申请
   applyKnowledgeShare: '一点分享申请', //一点分享
-  trainPlan: '培训计划' // 培训计划
+  trainPlan: '培训计划', // 培训计划
+  updateUserAudit: '编辑用户', //编辑用户审批
+  addUserAudit: '创建用户'  // 创建用户审批
 }
 export const categoryOptions = [
   {

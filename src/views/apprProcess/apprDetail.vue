@@ -250,6 +250,7 @@ import applyTeacherIdentificationDet from '@/views/approvalDetail/applyTeacherId
 import applyOutsideTrainBookbuildingDet from '@/views/approvalDetail/applyOutsideTrainBookbuildingDet'
 import trainPlanDet from '@/views/trainingPlan/components/annualDetails'
 import applyKnowledgeShare from '@/views/approvalDetail/applyKnowledgeShare'
+import userAudit from '@/views/approvalDetail/userAudit'
 
 import TextOverTooltip from '../course/components/TextOverTooltip'
 import { mapGetters } from 'vuex'
@@ -296,7 +297,8 @@ export default {
     applyTeacherIdentificationDet,
     applyOutsideTrainBookbuildingDet,
     trainPlanDet,
-    applyKnowledgeShare
+    applyKnowledgeShare,
+    userAudit
   },
   data() {
     return {
