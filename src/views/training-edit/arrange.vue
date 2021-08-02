@@ -105,7 +105,7 @@
                 <el-button
                   size="medium"
                   type="text"
-                  :disabled="shouldBeDisabled(scope.row)"
+                  :disabled="shouldBeDisabled(scope.row, 'offline')"
                   @click="handleOfflineEdit(scope.row.$id)"
                 >
                   修改
@@ -113,7 +113,7 @@
                 <el-button
                   size="medium"
                   type="text"
-                  :disabled="shouldBeDisabled(scope.row)"
+                  :disabled="shouldBeDisabled(scope.row, 'offline')"
                   @click="handleOfflineDelete(table.todoDate, scope.row.todoTime)"
                 >
                   删除
@@ -198,7 +198,7 @@
             <el-button
               type="text"
               size="medium"
-              :disabled="shouldBeDisabled(scope.row)"
+              :disabled="shouldBeDisabled(scope.row, 'online')"
               @click="handleOnlineEdit(scope.row)"
             >
               修改
@@ -206,7 +206,7 @@
             <el-button
               type="text"
               size="medium"
-              :disabled="shouldBeDisabled(scope.row)"
+              :disabled="shouldBeDisabled(scope.row, 'online')"
               @click="handleOnlineDelete(scope.$index)"
             >
               删除
@@ -263,7 +263,7 @@
             <el-button
               type="text"
               size="medium"
-              :disabled="shouldBeDisabled(scope.row)"
+              :disabled="shouldBeDisabled(scope.row, 'exam')"
               @click="handleExamEdit(scope.row)"
             >
               修改
@@ -271,7 +271,7 @@
             <el-button
               type="text"
               size="medium"
-              :disabled="shouldBeDisabled(scope.row)"
+              :disabled="shouldBeDisabled(scope.row, 'exam')"
               @click="handleExamDelete(scope.$index)"
             >
               删除
@@ -336,6 +336,7 @@
                   start-placeholder="开始时间"
                   end-placeholder="结束时间"
                   placeholder="选择时间范围"
+                  @change="offlineFormTimeChange"
                 >
                 </el-time-picker>
               </el-form-item>
@@ -348,8 +349,8 @@
                   class="slot-item-header"
                 >
                   <span class="label-name">{{
-                    offlineForm.type == 1 ? '授课教室' : '活动教室'
-                  }}</span>
+                      offlineForm.type == 1 ? '授课教室' : '活动教室'
+                    }}</span>
                   <el-button
                     style="padding: 0;"
                     type="text"
@@ -360,11 +361,15 @@
                   </el-button>
                 </div>
                 <lazy-select
+                  ref="classroomSelector"
                   v-model="offlineForm.classroomId"
                   :remote-method="getBookList"
                   :query-props="{ search: 'roomName' }"
                   :props="{ value: 'id', label: 'roomName' }"
                   :initial-options="offlineForm.classRoomOptions"
+                  empty-text="暂无可用教室"
+                  @no-data="$message.warning('无可用教室')"
+                  visibleChangeDisabled
                   @getSelected="
                     (data) => {
                       offlineForm.classroomName = data.roomName
@@ -408,7 +413,6 @@
                   placeholder="请选择"
                 ></el-input>
               </el-form-item>
-
               <el-form-item
                 v-else
                 label="主持人"
@@ -701,13 +705,13 @@
                   class="switch-hidden-wrapper"
                 >
                   迟到<el-input
-                    v-model.number="examForm.lateBanExamValue"
-                    :maxlength="32"
-                    type="text"
-                    style="width: 75px !important; margin: 0 5px;"
-                    placeholder="请输入"
-                    onkeyup="value=value.replace(/[^\d]/g,'')"
-                  ></el-input>分钟禁止参见考试
+                  v-model.number="examForm.lateBanExamValue"
+                  :maxlength="32"
+                  type="text"
+                  style="width: 75px !important; margin: 0 5px;"
+                  placeholder="请输入"
+                  onkeyup="value=value.replace(/[^\d]/g,'')"
+                ></el-input>分钟禁止参见考试
                 </div>
                 <div class="switch-wrapper">
                   <div class="switch-label">
@@ -738,12 +742,12 @@
                   class="switch-hidden-wrapper"
                 >
                   考生<el-input
-                    v-model.number="examForm.openResultsValue"
-                    :maxlength="32"
-                    onkeyup="value=value.replace(/[^\d]/g,'')"
-                    style="width: 75px !important; margin: 0 5px;"
-                    placeholder="请输入"
-                  ></el-input>天内可以查看成绩（0代表永久）
+                  v-model.number="examForm.openResultsValue"
+                  :maxlength="32"
+                  onkeyup="value=value.replace(/[^\d]/g,'')"
+                  style="width: 75px !important; margin: 0 5px;"
+                  placeholder="请输入"
+                ></el-input>天内可以查看成绩（0代表永久）
                 </div>
                 <div class="switch-wrapper">
                   <div class="switch-label">
@@ -772,12 +776,12 @@
                   class="switch-hidden-wrapper"
                 >
                   最高得分为<el-input
-                    v-model.number="examForm.scopeLimitValue"
-                    :maxlength="32"
-                    onkeyup="value=value.replace(/[^\d]/g,'')"
-                    style="width: 75px !important; margin: 0 5px;"
-                    placeholder="请输入"
-                  ></el-input>分
+                  v-model.number="examForm.scopeLimitValue"
+                  :maxlength="32"
+                  onkeyup="value=value.replace(/[^\d]/g,'')"
+                  style="width: 75px !important; margin: 0 5px;"
+                  placeholder="请输入"
+                ></el-input>分
                 </div>
                 <div class="switch-wrapper">
                   <div class="switch-label">
@@ -835,27 +839,27 @@
                   <el-radio-group v-model="examForm.passType">
                     <el-radio :label="1">
                       按成绩<span
-                        v-show="examForm.passType === 1"
-                        style="margin-left: 15px;"
-                      >成绩不低于<el-input
-                        v-model="examForm.passScope"
-                        :maxlength="32"
-                        onkeyup="value=value.replace(/[^\d]/g,'')"
-                        style="width: 75px !important; margin: 0 5px;"
-                        placeholder="请输入"
-                      ></el-input>分</span>
+                      v-show="examForm.passType === 1"
+                      style="margin-left: 15px;"
+                    >成绩不低于<el-input
+                      v-model="examForm.passScope"
+                      :maxlength="32"
+                      onkeyup="value=value.replace(/[^\d]/g,'')"
+                      style="width: 75px !important; margin: 0 5px;"
+                      placeholder="请输入"
+                    ></el-input>分</span>
                     </el-radio>
                     <el-radio :label="2">
                       按得分率<span
-                        v-show="examForm.passType === 2"
-                        style="margin-left: 15px;"
-                      >得分率不低于<el-input
-                        v-model="examForm.passPercentage"
-                        :maxlength="32"
-                        onkeyup="value=value.replace(/[^\d]/g,'')"
-                        style="width: 75px !important; margin: 0 5px;"
-                        placeholder="请输入"
-                      ></el-input>%</span>
+                      v-show="examForm.passType === 2"
+                      style="margin-left: 15px;"
+                    >得分率不低于<el-input
+                      v-model="examForm.passPercentage"
+                      :maxlength="32"
+                      onkeyup="value=value.replace(/[^\d]/g,'')"
+                      style="width: 75px !important; margin: 0 5px;"
+                      placeholder="请输入"
+                    ></el-input>%</span>
                     </el-radio>
                   </el-radio-group>
                 </el-form-item>
@@ -1051,7 +1055,7 @@ import Pagination from '@/components/common-pagination'
 import lazySelect from '@/components/el-lazy-select'
 import { getCourseListData } from '@/api/course/course'
 import { getOrgUserList } from '@/api/system/user'
-
+let $startTime, $endTime
 export default {
   name: 'TrainingEditArrange',
   components: {
@@ -1301,7 +1305,7 @@ export default {
         const start = new Date(startTime)
         const end = new Date(endTime)
 
-        const condition = date < start || date > end
+        const condition = (date < start || date > end) && date.toDateString() !== start.toDateString()
 
         if (that.isUnderwayEdit) {
           let now = new Date()
@@ -1319,9 +1323,31 @@ export default {
     }
   },
   methods: {
-    shouldBeDisabled(data) {
-      if (!this.isUnderwayEdit) return false
-      return !data.$additional
+    offlineFormTimeChange() {
+      this.$nextTick(() => {
+        this.$refs.classroomSelector.$updateData()
+      })
+    },
+    shouldBeDisabled(data, type) {
+      let start, end
+      const { todoDate, todoTime, examTime, classTime, $additional } = data
+      switch (type) {
+        case 'offline':
+          start = new Date(todoDate + ' ' + todoTime[0])
+          end = new Date(todoDate + ' ' + todoTime[1])
+          break
+        case 'online':
+          start = new Date(classTime[0] + '')
+          end = new Date(classTime[1] + '')
+          break
+        case 'exam':
+          start = new Date(examTime[0] + '')
+          end = new Date(examTime[1] + '')
+          break
+      }
+
+      const now = new Date()
+      return ((now >= start && now <= end) || now >= end) && !$additional
     },
     validate() {
       return new Promise((resolve) => {
@@ -1401,6 +1427,12 @@ export default {
           .slice(0, 2)
           .join(':')
       delete params.undefined
+      if ($startTime !== startTime || $endTime !== endTime) {
+        $startTime = startTime
+        $endTime = endTime
+        params.pageNo = 1
+      }
+
       return getBookList(
         Object.assign(params, { startTime, endTime, todoDate: this.offlineForm.todoDate })
       )
@@ -1484,7 +1516,6 @@ export default {
       const valid = await this.formValidate('examForm')
       if (!valid) return
       const form = this.examForm
-
       if (this.isUnderwayEdit) {
         form.$additional = true
       }

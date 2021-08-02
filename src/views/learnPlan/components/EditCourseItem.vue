@@ -5,17 +5,6 @@
       :model="course"
       :columns="columns"
     >
-      <template slot="passRule-label">
-        通过条件
-        <el-tooltip
-          class="item"
-          effect="dark"
-          content="修改通过条件仅应用于本次培训"
-          placement="top-start"
-        >
-          <i class="el-icon-question" />
-        </el-tooltip>
-      </template>
 
       <div
         slot="courseName"
@@ -37,13 +26,6 @@
           >设置前置条件</span>
         </el-tooltip>
       </div>
-      <template slot="studyFrequency">
-        <el-input-number
-          v-model="course.studyFrequency"
-          controls-position="right"
-          :min="0"
-        ></el-input-number>
-      </template>
       <template slot="timeList">
         <el-button
           icon="el-icon-plus"
@@ -191,34 +173,6 @@ export default {
           offset: 4,
           required: true
         },
-        {
-          prop: 'timeRange',
-          itemType: 'datePicker',
-          type: 'daterange',
-          valueFormat: 'yyyy-MM-dd HH:mm:ss',
-          label: '开课时间',
-          required: false,
-          rules: [
-            {
-              validator: this.validateDateRange,
-              trigger: 'change'
-            }
-          ]
-        },
-        {
-          prop: 'studyFrequency',
-          itemType: 'slot',
-          label: '允许学习次数',
-          offset: 4,
-          desc: '0：表示无限制'
-        },
-        {
-          prop: 'timeList',
-          label: '允许时间段',
-          itemType: 'slot',
-          rules: [{ validator: validateTimeList }],
-          required: false
-        }
       ]
     }
   },
@@ -230,9 +184,9 @@ export default {
     }
     getCourseListData(params).then((res) => {
       if(res.data.length>0){
-         this.course.passRule = res.data[0].passCondition.split(',')
+        this.course.passRule = res.data[0].passCondition.split(',')
       }
-     
+
     })
     console.log(this.course)
     // this.course.timeList = [{ list: ['', ''] }]
@@ -256,7 +210,7 @@ export default {
       } else if (moment(value[1]).isAfter(this.planTimeRange[1])) {
         callback(new Error('课程结束时间需要小于等于计划结束时间'))
       } else {
-          value[1] = value[1].split(' ')[0] + ' 23:59:59'
+        value[1] = value[1].split(' ')[0] + ' 23:59:59'
         callback()
       }
     },
