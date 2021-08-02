@@ -11,7 +11,9 @@ export const categoryMap = {
   '10': '外购培训',
   '11': '一点分享',
   '12': '课程使用',
-  '13': '培训计划'
+  '13': '培训计划',
+  '14': '新建用户',
+  '15': '编辑用户'
 }
 export const baseDictionaries = {
   // formKey 对应的类型字典
@@ -97,6 +99,14 @@ export const categoryOptions = [
   {
     label: '培训计划',
     value: '13'
+  },
+  {
+    label: '添加用户',
+    value: '14'
+  },
+  {
+    label: '编辑用户',
+    value: '15'
   }
 ]
 export const formKeyMap = {

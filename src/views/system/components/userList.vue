@@ -150,6 +150,13 @@
             slot="dropdown"
           >
             <el-dropdown-item
+              v-if="row.needAppr==='1'"
+              v-p="EDIT_USER"
+              command="audit"
+            >
+              审批
+            </el-dropdown-item>
+            <el-dropdown-item
               v-p="EDIT_USER"
               command="edit"
             >
@@ -211,6 +218,13 @@
         >确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 审批发起组件 -->
+    <appr-submit
+      ref="apprSubmit"
+      :category-id="categoryId"
+      @submit="handleSubmit"
+      @apprCancel="apprCancel"
+    />
   </basic-container>
 </template>
 
@@ -230,6 +244,8 @@ import { getRoleList, getPositionAll } from '@/api/system/role'
 import { getRankTree } from '@/api/system/rank'
 import { getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
+import { categoryMap } from '@/const/approve'
+import { userRegisterAppr } from '@/api/user'
 import {
   SETTING_USER,
   RESET_USER,
@@ -252,6 +268,14 @@ const COLUMNS = [
     label: '用户编号',
     align: 'center',
     prop: 'workNo'
+  },
+  {
+    label: '审核状态',
+    prop: 'auditStatus',
+    align: 'center',
+    formatter(record) {
+      return { '0': '待审核', '1': '审核通过', '2':'审核驳回' }[record.auditStatus] || ''
+    }
   },
   //状态，1-在职，2-离职
   {
@@ -335,7 +359,8 @@ export default {
   components: {
     // 员工角色编辑
     userRoleEdit: () => import('./userRoleEdit'),
-    SearchPopover: () => import('@/components/searchPopOver/index')
+    SearchPopover: () => import('@/components/searchPopOver/index'),
+    ApprSubmit:() => import('@/components/appr-submit/ApprSubmit')
   },
   filters: {
     // 过滤不可见的列
@@ -443,6 +468,7 @@ export default {
           { type: 'dataPicker', field: 'entryDate', label: '入职日期' }
         ]
       },
+      categoryId:'',
       tableConfig: {
         showHandler: true,
         enableMultiSelect: true,
@@ -493,7 +519,8 @@ export default {
       form: {
         orgId: ''
       },
-      orgData: []
+      orgData: [],
+      currentRowData:{}
     }
   },
   computed: {
@@ -561,6 +588,39 @@ export default {
     this.loadData()
   },
   methods: {
+    //注册用户拉起审批流
+    async handleAuditUser(){
+      this.$refs.apprSubmit.categoryId = '15'
+      await this.$refs.apprSubmit.getProcessList()
+      this.$refs.apprSubmit.validate().then((process) => {
+        userRegisterAppr({userId:this.currentRowData.userId}).then(res=>{
+         this.submitApprApply(res,'用户注册审批')
+        })
+      })
+    },
+    submitApprApply(obj,formTitle){
+      this.$refs.apprSubmit.submit({
+        formId: `${obj.id}`,
+        formData: '',
+        processName: categoryMap[this.id?'15':'14'],
+        formKey: obj.applyType,
+        formTitle: formTitle
+      })
+    },
+    // 审批发起组件的弹窗确认回调
+    handleSubmit() {
+      if(this.batchVisible){
+        this.batchDetermine()
+      }else{
+        let {operateType} = this.currentRowData
+        operateType==='del'?this.handleDeleteUser(this.currentRowData):this.handleAuditUser(this.currentRowData)
+      }
+      
+    },
+    // 审批组件取消事件
+    apprCancel() {
+      this.isLoading = false
+    },
     loadOrgData() {
       getOrgTree({ parentOrgId: '0' }).then((res) => {
         this.formColumns.find((item) => item.prop === 'orgId').props.treeParams.data = res
@@ -645,7 +705,14 @@ export default {
           this.$router.push({ path: '/system/editUser', query: { userId: row.userId } })
           break
         case 'delete':
+          row.operateType = "del"  //删除操作
+          this.currentRowData = row
           this.handleDeleteUser(row)
+          break
+        case 'audit':
+          row.operateType = "audit"  //审核操作
+          this.currentRowData = row
+          this.handleAuditUser(row)
           break
       }
     },
@@ -671,19 +738,26 @@ export default {
         })
     },
     handleDeleteUser(row) {
+      this.categoryId = '14'
       this.$confirm('您确定要删除该用户吗？\n删除后将不能恢复', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => delUser({ userId: row.userId }))
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
+        .then(async () => {
+          await this.$refs.apprSubmit.getProcessList()
+          this.$refs.apprSubmit.validate().then((process) => {
+              delUser({ userId: row.userId }).then(res=>{
+                this.$message({
+                  type: 'success',
+                  message: '操作成功!'
+                })
+                this.loadOrgData()
+                this.loadData()
+                this.submitApprApply(res,'删除用户')
+              })
           })
-          this.loadOrgData()
-          this.loadData()
+          
         })
     },
     loadData() {
@@ -806,6 +880,7 @@ export default {
     batchDepartment(selection) {
       this.batchVisible = true
       this.orgData = selection
+      this.categoryId = '15'
     },
     // 批量修改部门-确定按钮
     batchDetermine() {
@@ -817,22 +892,23 @@ export default {
           userId: userStr.join(','),
           id: this.form.orgId
         }
-        await updateUserIdBatchOrg(params)
-          .then(() => {
-            this.batchClose()
-            this.$message({
-              type: 'success',
-              message: '批量修改部门成功!'
+        await this.$refs.apprSubmit.getProcessList()
+        this.$refs.apprSubmit.validate().then(async (process) => {
+          await updateUserIdBatchOrg(params)
+            .then((res) => {
+              this.batchClose()
+              this.submitApprApply(res,'批量修改部门')
+              this.loadData()
+              this.$refs.crud.clearSelection()
             })
-            this.loadData()
-            this.$refs.crud.clearSelection()
-          })
-          .catch(() => {
-            this.$message({
-              type: 'error',
-              message: '保存失败,请联系管理员!'
+            .catch(() => {
+              this.$message({
+                type: 'error',
+                message: '保存失败,请联系管理员!'
+              })
             })
           })
+        
       })
     },
     batchClose() {
