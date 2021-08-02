@@ -118,4 +118,14 @@ export const userRegisterAppr = (params) => {
     params: params
   })
 }
+//  获取审批用户详情
+export const getuserApprDetail = (params) => {
+  return request({
+    url: '/blade-user/v1/user/getUserApprDetail',
+    method: 'get',
+    params: params
+  })
+}
+
+
 
