@@ -155,7 +155,6 @@
     >
       <el-input
         v-model="form.address"
-        :readonly="isUnderwayEdit"
         :maxlength="32"
         placeholder="请输入"
         clearable=""
