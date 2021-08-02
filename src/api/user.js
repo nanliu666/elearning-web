@@ -110,3 +110,12 @@ export const userDetailByToken = (params) => {
     params: params
   })
 }
+// 用户注册  发起审批流
+export const userRegisterAppr = (params) => {
+  return request({
+    url: '/blade-user/v1/user/satrtRegisterAppr',
+    method: 'post',
+    params: params
+  })
+}
+
