@@ -414,7 +414,6 @@ export default {
         getCategoryTree(params).then((res) => {
           this.tableData = this.setDisableStatus(res)
           this.getTableData(this.tableData)
-          // this.tableData = res;
           this.tableLoading = false
         })
         this.$refs.orgEdit.loadOrgTree()
@@ -507,7 +506,7 @@ export default {
       this.$router.push({ path: '/live/classifySort', query: { type: 'catalog' } })
     },
     resetList() {
-      this.searchParams = {}
+      // this.searchParams = {}
       this.loadTableData()
     }
   }
