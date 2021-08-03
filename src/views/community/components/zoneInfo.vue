@@ -211,7 +211,8 @@ export default {
         pageNo: 1,
         pageSize: 20,
         orgId: 0,
-        search: ''
+        search: '',
+        userStatus: '1'
       },
       valve: false,
       noData: false
