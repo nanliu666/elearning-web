@@ -127,11 +127,15 @@
 
         <!-- 暂时重新申请只支持课程审批 -->
         <el-button
-          v-if="isApplyUser && applyDetail.status === 'Cancel' && applyDetail.formKey =='CourseApplyInfo'"
+          v-if="
+            isApplyUser &&
+              applyDetail.status === 'Cancel' &&
+              applyDetail.formKey == 'CourseApplyInfo'
+          "
           type="primary"
           size="medium"
           @click="handleReapplyClick"
-        >        
+        >
           重新申请
         </el-button>
 
@@ -246,6 +250,7 @@ import applyTeacherIdentificationDet from '@/views/approvalDetail/applyTeacherId
 import applyOutsideTrainBookbuildingDet from '@/views/approvalDetail/applyOutsideTrainBookbuildingDet'
 import trainPlanDet from '@/views/trainingPlan/components/annualDetails'
 import applyKnowledgeShare from '@/views/approvalDetail/applyKnowledgeShare'
+import userAudit from '@/views/approvalDetail/userAudit'
 
 import TextOverTooltip from '../course/components/TextOverTooltip'
 import { mapGetters } from 'vuex'
@@ -292,7 +297,8 @@ export default {
     applyTeacherIdentificationDet,
     applyOutsideTrainBookbuildingDet,
     trainPlanDet,
-    applyKnowledgeShare
+    applyKnowledgeShare,
+    userAudit
   },
   data() {
     return {
@@ -492,7 +498,8 @@ export default {
       })
         .then(() => {
           this.$nextTick(() => {
-            let { id, catalogName } = JSON.parse(this.applyDetail.formData)
+            // let { id, catalogName } = JSON.parse(this.applyDetail.formData)
+            let { id, catalogName } = this.courseData
             this.$nextTick(() => {
               console.log(catalogName)
               console.log(id)
@@ -562,7 +569,7 @@ export default {
           }
         })
         // 获取课程详情
-        // this.getCourseData()
+        this.getCourseData()
         // 获取审批流程详情
         this.getProcessDetail()
         // 处理流程数据

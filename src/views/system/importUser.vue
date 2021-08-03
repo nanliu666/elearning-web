@@ -134,10 +134,18 @@
         </el-button>
       </div>
     </basic-container>
+    <!-- 审批发起组件 -->
+    <appr-submit
+      ref="apprSubmit"
+      category-id="14"
+      @submit="handleSubmit"
+      @apprCancel="apprCancel"
+    />
   </div>
 </template>
 
 <script>
+import { categoryMap } from '@/const/approve'
 import { exportToExcel } from '@/util/util'
 import { QUESTION_IMPORT_URL } from './config'
 import { importUser, importUserErrorFile } from '@/api/system/user'
@@ -184,6 +192,9 @@ export default {
       TABLE_COLUMNS
     }
   },
+  components:{
+    ApprSubmit:() => import('@/components/appr-submit/ApprSubmit')
+  },
   computed: {
     QUESTION_IMPORT_URL: () => QUESTION_IMPORT_URL
   },
@@ -192,6 +203,20 @@ export default {
     this.downTemplate()
   },
   methods: {
+    // 审批组件取消事件
+    apprCancel() {
+      this.isLoading = false
+    },
+    // 提交审批
+    submitApprApply(res) {
+      this.$refs.apprSubmit.submit({
+        formId: res.id,
+        formData: '',
+        processName: categoryMap[this.id?'15':'14'],
+        formKey: res.applyType,
+        formTitle:this.id?'编辑用户':'新建用户'
+      })
+    },
     reset() {
       this.successCount = 0
       this.failedCount = 0
@@ -235,12 +260,16 @@ export default {
       })
       const parmas = new FormData()
       parmas.append('file', file.file)
-      importUser(parmas)
+      this.$refs.apprSubmit.validate().then((process) => {
+        importUser(parmas)
         .then((res) => {
           this.successCount += res.successNum
           this.failedCount = res.failedNum
           this.failedList = res.failedList
           this.importRes = res
+          if(res.successNum>0){
+            this.submitApprApply(res)
+          }
           this.$refs.uploader1 && this.$refs.uploader1.clearFiles()
           if (this.failedCount == 0) {
             this.step = '2'
@@ -252,6 +281,8 @@ export default {
         .finally(() => {
           loading.close()
         })
+      })
+      
     },
     downTemplate() {
       getTemplate({ code: 't1' }).then((res) => {

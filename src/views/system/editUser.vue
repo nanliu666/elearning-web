@@ -84,6 +84,14 @@
         </el-col>
       </el-row>
     </basic-container>
+    <!-- 审批发起组件 -->
+    <appr-submit
+      ref="apprSubmit"
+      :category-id="id?'15':'14'"
+      @submit="handleSubmit"
+      @apprCancel="apprCancel"
+    />
+    
   </div>
 </template>
 
@@ -95,10 +103,14 @@ import { getUserWorkList, getOrgTree } from '@/api/org/org'
 import { mapGetters } from 'vuex'
 import commonUpload from '@/components/common-upload/commonUpload'
 import { getRankTree } from '@/api/system/rank'
+import ApprSubmit from '@/components/appr-submit/ApprSubmit'
+import { categoryMap } from '@/const/approve'
+import { set } from 'nprogress'
 export default {
   name: 'EditUser',
   components: {
-    commonUpload
+    commonUpload,
+    ApprSubmit
   },
   data() {
     var checkPhonenum = (rule, value, callback) => {
@@ -407,7 +419,8 @@ export default {
         }
       ],
       orgTreeData: [],
-      loading: false
+      loading: false,
+      userProcessList:[]
     }
   },
   computed: {
@@ -451,6 +464,27 @@ export default {
     })
   },
   methods: {
+    // 审批发起组件的弹窗确认回调
+    handleProcessSubmit() {
+      this.handleSubmit()
+    },
+    // 审批组件取消事件
+    apprCancel() {
+      // this.isLoading = false
+    },
+    // 提交审批
+    submitApprApply(res) {
+      this.$refs.apprSubmit.submit({
+        formId: res.id,
+        formData: '',
+        processName: categoryMap[this.id?'15':'14'],
+        formKey: res.applyType,
+        formTitle:this.id?'编辑用户':'新建用户'
+      })
+    },
+    async handleSubmit() {
+      await this.onSubmit()
+    },
     _nodeClickFun(val,node) {
 
       // this.form.position = val.name
@@ -543,10 +577,6 @@ export default {
       Object.assign(this.$data.form, this.$options.data().form)
       this.$refs.form.clearValidate()
     },
-    async handleSubmit() {
-      await this.onSubmit()
-      this.goBack()
-    },
     createWorkNo() {
       return new Promise((resolve, reject) => {
         createNewWorkNo()
@@ -574,6 +604,7 @@ export default {
           delete params.password
         }
       }
+      
       this.loading = true
       let func
       if (this.id) {
@@ -584,10 +615,17 @@ export default {
         params.workNo = workNo
       }
       try {
-        await func(params)
-        this.$message.success('保存成功')
-        this.loading = false
-        Object.assign(this.$data.form, this.$options.data().form)
+        this.$refs.apprSubmit.validate().then(async (process) => {
+          console.log(process,'resolve ')
+          await func(params).then(async res=>{
+            this.$message.success('保存成功')
+            this.loading = false
+            Object.assign(this.$data.form, this.$options.data().form)
+            await this.submitApprApply(res)
+            this.goBack()
+          })
+         
+        })
       } catch (error) {
         this.loading = false
         throw error

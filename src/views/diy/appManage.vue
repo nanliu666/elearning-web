@@ -153,7 +153,8 @@ export default {
           serverName:'',
           versionNo:''
       },
-      tableData:[]
+      tableData:[], 
+      comeIn: 0 // 进入页面是次数
     }
   },
   computed: {
@@ -163,6 +164,13 @@ export default {
   },
   mounted() {
     this.getList()
+  },
+  activated() {
+    this.comeIn = this.comeIn + 1
+    if (this.comeIn > 1) {
+      // 进来的次数 > 1
+      this.getList()
+    }
   },
   methods: {
       getList(){
@@ -179,11 +187,11 @@ export default {
       },
       pageChange(val) {
         this.page.currentPage = val
-        this.getAppList()
+        this.getList()
       },
       sizeChange(val) {
         this.page.size = val
-        this.getAppList(true)
+        this.getList()
       },
       handleDel(obj,type){
         updateStatus({
