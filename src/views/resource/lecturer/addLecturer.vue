@@ -592,13 +592,14 @@ export default {
   async created() {
     this.ruleFormClone = _.cloneDeep(this.ruleForm)
     await this.islistTeacherCategory()
+    this.isqueryTeacherlist()
     if (this.$route.query.id) {
       this.getTeacher()
     }
   },
   methods: {
     visibleChange(show) {
-      if (show) {
+      if (show && this.queryParams.search) {
         this.queryParams.search = ''
         this.isqueryTeacherlist()
       }
