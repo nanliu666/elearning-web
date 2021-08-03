@@ -25,7 +25,7 @@
         suffix-icon="el-icon-search"
         clearable
         :value="inputValue"
-        @input="search"
+        @input="searchPeople"
       ></el-input>
     </div>
 
@@ -337,7 +337,7 @@ export default {
   },
   data() {
     return {
-      valve: true,
+      valve: false,
       inputValue: '',
       usersArr: [],
       timer: null,
@@ -659,20 +659,11 @@ export default {
             data = data.filter((item) => item.bizName.indexOf(this.searchName) !== -1)
           } else {
             if (!this.usersArr.length) return
-            const staff = this.personList.filter(
-              (item) => item.bizName.indexOf(this.searchName) !== -1
-            )
             data = data.filter((item) => {
               if (flag === 1) {
-                return this.usersArr.some(
-                  (org) => org.orgId === item.id && staff.some((item) => item.bizId === org.userId)
-                )
+                return this.usersArr.some((org) => org.orgId === item.id)
               } else if (flag === 2) {
-                return this.usersArr.some(
-                  (position) =>
-                    position.positionId === item.positionId &&
-                    staff.some((item) => item.bizId === position.userId)
-                )
+                return this.usersArr.some((position) => position.positionId === item.positionId)
               }
             })
           }
@@ -886,23 +877,23 @@ export default {
         })
       })
     },
-    search(e) {
-      if (!this.valve) return
-      clearTimeout(this.timer)
+    searchPeople(e) {
       if (!e.trim()) {
         this.inputValue = e.trim()
         this.searchName = e.trim()
         return
       }
       this.inputValue = e.trim()
-      this.valve = false
-      this.timer = setTimeout(() => {
-        this.searchName = this.inputValue
+      if (this.valve) return
+      clearTimeout(this.timer)
+      this.timer = window.setTimeout(() => {
+        this.valve = true
         getOrgChild({ search: e.trim() }).then((res) => {
+          this.searchName = e.trim()
           this.usersArr = res.users
-          this.valve = true
+          this.valve = false
         })
-      }, 500)
+      }, 300)
 
       this.personPage = {
         pageNo: 1,
