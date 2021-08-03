@@ -605,6 +605,9 @@ export default {
         processName: categoryMap[this.id?'15':'14'],
         formKey: obj.applyType,
         formTitle: formTitle
+      }).then(res=>{
+        this.loadOrgData()
+        this.loadData()
       })
     },
     // 审批发起组件的弹窗确认回调
@@ -748,12 +751,6 @@ export default {
           await this.$refs.apprSubmit.getProcessList()
           this.$refs.apprSubmit.validate().then((process) => {
               delUser({ userId: row.userId }).then(res=>{
-                this.$message({
-                  type: 'success',
-                  message: '操作成功!'
-                })
-                this.loadOrgData()
-                this.loadData()
                 this.submitApprApply(res,'删除用户')
               })
           })
@@ -898,7 +895,6 @@ export default {
             .then((res) => {
               this.batchClose()
               this.submitApprApply(res,'批量修改部门')
-              this.loadData()
               this.$refs.crud.clearSelection()
             })
             .catch(() => {

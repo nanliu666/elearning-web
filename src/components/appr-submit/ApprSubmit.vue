@@ -103,8 +103,8 @@ export default {
       this.processId = ''
       this.process = null
     },
-    getProcessList() {
-      getCourseProcessList({ categoryId: this.categoryId }).then((res) => {
+    async getProcessList() {
+      await getCourseProcessList({ categoryId: this.categoryId }).then((res) => {
         this.processList = res
         _.forEach(this.processList, this.resolveData)
         if (res.length === 1) {

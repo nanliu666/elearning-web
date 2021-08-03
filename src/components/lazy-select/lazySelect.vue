@@ -202,6 +202,5 @@ export default {
   overflow: hidden;
   text-overflow:ellipsis;
   white-space: nowrap;
-  max-width: 330px;
 }
 </style>
