@@ -207,6 +207,7 @@ export default {
       this.defaultExpandedKey = []
       this.clearSelected()
       this.$emit('getValue', null)
+      this.$emit('clearHandle')
     },
     /* 清空选中样式 */
     clearSelected() {
