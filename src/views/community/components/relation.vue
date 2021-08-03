@@ -648,7 +648,6 @@ export default {
           )
         )
       }, 0)
-      console.log(totalNum)
       return this.peopleNum(data) + totalNum
     },
     // 显示的列表
@@ -676,7 +675,7 @@ export default {
       }
     }
   },
-  activated() {
+  created() {
     this.departmentList = this.form.orgIds
     this.positionList = this.form.positionIds
     this.personList = this.form.userIds
@@ -712,7 +711,6 @@ export default {
           responseType: 'blob'
         })
         .then((res) => {
-          console.log(res)
           let a = document.createElement('a')
           a.style.display = 'none'
           a.href = window.URL.createObjectURL(res.data)
@@ -909,7 +907,7 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .training-edit-person {
   .sub-header {
     .sub-header-title {
