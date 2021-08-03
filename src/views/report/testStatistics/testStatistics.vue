@@ -381,20 +381,15 @@ export default {
       this.params.startTime = val[0] || ''
       this.params.endTime = dateAdd(val[1]) || ''
     },
-    orgChange({ orgId, examName, recodeResource, projectName, userName }) {
-      if (this.activeName === '0') {
-        this.params.examName = examName || ''
-      }
+    orgChange({ orgId, recodeResource, projectName, userName }) {
       this.params.orgId = orgId || ''
       this.params.recodeResource = recodeResource || ''
       this.params.projectName = projectName || ''
       this.params.userName = userName || ''
     },
     resetQuery() {
-      if (this.activeName === '1') {
-        this.params.examName = ''
-        this.params.batchNumber = ''
-      }
+      this.params.examName = ''
+      this.params.batchNumber = ''
     },
     getQuery(isPage, key) {
       if (key === 'clickQuery') {
