@@ -196,7 +196,7 @@ export default {
         if (val) {
           this.classroomDefault = [
             {
-              roomName: this.batchData.roomName,
+              roomName: this.batchData.classroomName,
               id: val
             }
           ]
@@ -315,7 +315,8 @@ export default {
     },
     // 加载教室
     loadClassroom(params) {
-      if (_.size(_.get(params, 'search')) > 32) {
+      _.set(params, 'roomName', params.search)
+      if (_.size(_.get(params, 'roomName')) > 32) {
         this.$message.error('您输入的教室名称过长，无法搜索！')
       } else {
         return getBookList(params)
