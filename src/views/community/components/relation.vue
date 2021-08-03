@@ -59,7 +59,11 @@
           >
             <div class="tag-table-item">
               <div class="name">
-                （{{ org.workNum }}人）{{ org.name }}
+                <topTip
+                  ref-name="testName1"
+                  class-name="fs20"
+                  :content="`(${org.workNum}人)  ${org.name}`"
+                />
               </div>
               <i
                 class="el-icon-close"
@@ -115,7 +119,11 @@
           >
             <div class="tag-table-item">
               <div class="name">
-                （{{ position.workNum }}人）{{ position.positionName }}
+                <topTip
+                  ref-name="testName1"
+                  class-name="fs20"
+                  :content="`(${position.workNum}人)  ${position.positionName}`"
+                />
               </div>
               <i
                 class="el-icon-close"
@@ -317,6 +325,7 @@ import { getUsergroupList, getPositionUserList1 } from '@/api/examManage/schedul
 import { getStationParent } from '@/api/system/station'
 import { getTemplate } from '@/api/system/template'
 import axios from 'axios'
+import topTip from '@/views/course/components/TextOverTooltip.vue'
 const requiredTHeader = [
   { name: '用户手机号', key: 'phonenum' },
   { name: '姓名', key: 'userName' }
@@ -325,7 +334,8 @@ export default {
   name: 'Relation',
   components: {
     Pagination,
-    CommonPicker
+    CommonPicker,
+    topTip
   },
   props: {
     form: {
@@ -975,6 +985,9 @@ export default {
         background-color: #f4f4f5;
         border: 1px solid #e9e9eb;
         color: #909399;
+        .name {
+          width: 97%;
+        }
         i {
           cursor: pointer;
           font-size: 16px;
