@@ -203,6 +203,11 @@ const onlineAll = [
     label: '创建时间',
     minWidth: 160,
     prop: 'createTime'
+  },
+  {
+    label: '培训天数',
+    minWidth: 100,
+    prop: 'trainDays'
   }
 ]
 // 培训课程统计
@@ -282,6 +287,16 @@ const onlineExam = [
     label: '课程评分',
     minWidth: 150,
     prop: 'scope'
+  },
+  {
+    label: '课程进度',
+    minWidth: 150,
+    prop: 'studyPercent'
+  },
+  {
+    label: '学习时长（h）',
+    minWidth: 150,
+    prop: 'studyPeriod'
   }
 ]
 // 培训考试统计
@@ -346,6 +361,21 @@ const onlineStudy = [
     minWidth: 150,
     prop: 'isPass',
     slot: true
+  },
+  {
+    label: '试卷总分',
+    minWidth: 150,
+    prop: 'totalScore'
+  },
+  {
+    label: '及格分',
+    minWidth: 150,
+    prop: 'passScope'
+  },
+  {
+    label: '未考人员',
+    minWidth: 150,
+    prop: 'noJoinNum'
   }
 ]
 // 参培人员明细
@@ -437,6 +467,16 @@ const trainPerson = [
     label: '培训评分',
     minWidth: 150,
     prop: 'scope'
+  },
+  {
+    label: '培训项进度',
+    minWidth: 150,
+    prop: 'studyProgress'
+  },
+  {
+    label: '培训进度百分比',
+    minWidth: 150,
+    prop: 'studyPercent'
   }
 ]
 
