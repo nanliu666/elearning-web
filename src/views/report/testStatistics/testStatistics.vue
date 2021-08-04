@@ -62,7 +62,9 @@
                   @resetQuery="resetQuery"
                 >
                   <template slot="frist">
-                    <span class="labelscreen">{{ activeName === '1' ? '考试' : '考试名称' }}</span>
+                    <span class="labelscreen">{{
+                      activeName === '1' || activeName === '2' ? '考试' : '考试名称'
+                    }}</span>
                     <lazy-select
                       v-model="params.examName"
                       :options-width="250"
@@ -111,7 +113,11 @@ import {
   exportExamoverview,
   exportExamdetail,
   getExamBatch,
-  getExamList
+  getExamList,
+  getNotJoinDetail,
+  exportNotJoinDetail,
+  getQuestionList,
+  exportQuestionList
 } from '@/api/statistics/census'
 import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
@@ -189,6 +195,41 @@ const onlineAll = [
     formatter: (row) => {
       return row.passRate === '' ? '' : `${row.passRate}%`
     }
+  },
+  {
+    label: '总分',
+    minWidth: 150,
+    prop: 'totalScore'
+  },
+  {
+    label: '提交次数',
+    minWidth: 150,
+    prop: 'submitTime'
+  },
+  {
+    label: '考试状态',
+    minWidth: 150,
+    prop: 'status'
+  },
+  {
+    label: '正确率',
+    minWidth: 150,
+    prop: 'rightRateStr'
+  },
+  {
+    label: '试题数量',
+    minWidth: 150,
+    prop: 'quesNum'
+  },
+  {
+    label: '客观题数量',
+    minWidth: 150,
+    prop: 'objectiveQuesNum'
+  },
+  {
+    label: '主观题数量',
+    minWidth: 150,
+    prop: 'subjectiveQuesNum'
   }
 ]
 // 积分明细配置
@@ -267,6 +308,113 @@ const onlineStudy = [
     }
   }
 ]
+// 未参加考试明细配置
+const notJoinColumn = [
+  {
+    label: '姓名',
+    minWidth: 150,
+    prop: 'userName'
+  },
+  {
+    label: '用户编码',
+    minWidth: 150,
+    prop: 'workNo'
+  },
+  {
+    label: '部门',
+    minWidth: 150,
+    prop: 'orgName'
+  },
+  {
+    label: '岗位',
+    minWidth: 150,
+    prop: 'position'
+  },
+  {
+    label: '考试名称',
+    minWidth: 150,
+    prop: 'examName'
+  },
+  {
+    label: '考试方式',
+    minWidth: 150,
+    prop: 'examPattern',
+    formatter: (record) => {
+      return { general: '线上考试', offline: '线下考试' }[record.examPattern]
+    }
+  },
+  {
+    label: '考试来源',
+    minWidth: 150,
+    prop: 'examSource',
+    formatter: (record) => {
+      return {
+        StudyExam: '课程考试',
+        TrainExam: '培训考试',
+        LiveExam: '直播考试',
+        CurrencyExam: '通用考试'
+      }[record.examSource]
+    }
+  },
+  {
+    label: '项目名称',
+    minWidth: 150,
+    prop: 'projectName'
+  }
+]
+// 考试活动题目统计
+const questionColumn = [
+  {
+    label: '考试名称',
+    minWidth: 150,
+    prop: 'examName'
+  },
+  {
+    label: '试题分类',
+    minWidth: 150,
+    prop: 'category'
+  },
+  {
+    label: '试题类型',
+    minWidth: 150,
+    prop: 'type'
+  },
+  {
+    label: '试题',
+    minWidth: 150,
+    prop: 'content'
+  },
+  {
+    label: '正确答案',
+    minWidth: 150,
+    prop: 'correctOption'
+  },
+  {
+    label: '选项',
+    minWidth: 150,
+    prop: 'options'
+  },
+  {
+    label: '正确数',
+    minWidth: 150,
+    prop: 'rightTimes'
+  },
+  {
+    label: '正确率',
+    minWidth: 150,
+    prop: 'rightRate'
+  },
+  {
+    label: '错误数',
+    minWidth: 150,
+    prop: 'errorTimes'
+  },
+  {
+    label: '错误率',
+    minWidth: 150,
+    prop: 'errorRate'
+  }
+]
 const perScoreParams = [
   // {
   //   type: 'input',
@@ -295,13 +443,13 @@ const scoreDetailParams = [
     config: { placeholder: '请输入姓名' }
   }
 ]
-const tableColunms = [onlineAll, onlineStudy]
+const tableColunms = [onlineAll, onlineStudy, notJoinColumn, questionColumn]
 const tableConfig = {
   enableMultiSelect: false,
   highlightSelect: true
 }
 let that
-let myTableData = [[], []]
+let myTableData = [[], [], [], []]
 export default {
   filters: {
     // 过滤不可见的列
@@ -323,7 +471,7 @@ export default {
       tableData: myTableData, //部门统计table数据
       tableColunms, //table列配置
       tableConfig, // table 配置
-      tabs: ['考试总览统计', '考试参加明细'],
+      tabs: ['考试总览统计', '考试参加明细', '未参加考试明细', '考试活动题目统计'],
       params: {
         examName: '',
         userName: '',
@@ -335,7 +483,7 @@ export default {
         recodeResource: ''
       },
       page: [],
-      searchConfig: [perScoreParams, scoreDetailParams],
+      searchConfig: [perScoreParams, scoreDetailParams, scoreDetailParams],
       batchNum: [],
       newExamName: '',
       reqParam: {}
@@ -401,8 +549,12 @@ export default {
       }
       if (this.activeName === '0') {
         this.getTabelData(isPage)
-      } else {
+      } else if (this.activeName === '1') {
         this.getScordDetail(isPage)
+      } else if (this.activeName === '2') {
+        this.initNotJoinDetail(isPage)
+      } else {
+        this.initQuestionList(isPage)
       }
     },
     exportDetail({ size, start }) {
@@ -431,12 +583,42 @@ export default {
           this.exportLoading = false
         })
     },
+    exportNotJoinDetail({ size, start }) {
+      exportNotJoinDetail({
+        ...this.reqParam,
+        size: `${size}`,
+        start: `${start}`
+      })
+        .then((res) => {
+          exportToExcel(res)
+        })
+        .finally(() => {
+          this.exportLoading = false
+        })
+    },
+    exportQuestionList({ size, start }) {
+      exportQuestionList({
+        ...this.reqParam,
+        size: `${size}`,
+        start: `${start}`
+      })
+        .then((res) => {
+          exportToExcel(res)
+        })
+        .finally(() => {
+          this.exportLoading = false
+        })
+    },
     exportData(obj) {
       this.exportLoading = true
       if (this.activeName === '0') {
         this.exportPer(obj)
-      } else {
+      } else if (this.activeName === '1') {
         this.exportDetail(obj)
+      } else if (this.activeName === '2') {
+        this.exportNotJoinDetail(obj)
+      } else {
+        this.exportQuestionList(obj)
       }
     },
     pageChange() {
@@ -503,6 +685,42 @@ export default {
         .then(({ data, totalNum }) => {
           this.tableData[0] = data
           this.page[0].total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    initNotJoinDetail(isLoad) {
+      if (isLoad) {
+        this.$set(this.page[2], 'currentPage', 1)
+      }
+      this.loading = true
+      getNotJoinDetail({
+        pageSize: this.page[2].size,
+        pageNo: this.page[2].currentPage,
+        ...this.reqParam
+      })
+        .then(({ data, totalNum }) => {
+          this.tableData[2] = data
+          this.page[2].total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    initQuestionList(isLoad) {
+      if (isLoad) {
+        this.$set(this.page[3], 'currentPage', 1)
+      }
+      this.loading = true
+      getQuestionList({
+        pageSize: this.page[3].size,
+        pageNo: this.page[3].currentPage,
+        ...this.reqParam
+      })
+        .then(({ data, totalNum }) => {
+          this.tableData[3] = data
+          this.page[3].total = totalNum
         })
         .finally(() => {
           this.loading = false

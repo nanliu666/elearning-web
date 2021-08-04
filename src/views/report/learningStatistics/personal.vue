@@ -4,49 +4,71 @@
       title="个人学习统计"
       :need-export-btn="true"
       :export-loading="exportLoading"
-      :total="page.total"
+      :total="page[activeName].total"
       @expoerdata="exportData"
     ></header-title>
     <basic-container block>
-      <div class="table">
-        <common-table
-          :loading="loading"
-          :data="tableData"
-          :columns="columnsVisible | columnsFilter"
-          :config="tableConfig"
-          :page="page"
-          @current-page-change="pageChange"
-          @page-size-change="sizeChange"
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick"
+      >
+        <el-tab-pane
+          v-for="(item, index) in tabs"
+          :key="index"
+          :label="item"
+          lazy
         >
-          <template #userName="{ row }">
-            <div
-              class="ellipsis title"
-              @click="handleView(row)"
-            >
-              {{ row.userName }}
+          <div
+            v-if="activeName == index"
+            class="table"
+          >
+            <div class="table">
+              <common-table
+                :loading="loading"
+                :data="tableData[activeName]"
+                :columns="columnsVisible | columnsFilter"
+                :config="tableConfig"
+                :page="page[activeName]"
+                @current-page-change="pageChange"
+                @page-size-change="sizeChange"
+              >
+                <template #userName="{ row }">
+                  <div
+                    class="ellipsis title"
+                    @click="handleView(row)"
+                  >
+                    {{ row.userName }}
+                  </div>
+                </template>
+                <template #topMenu>
+                  <screen
+                    ref="screen"
+                    :columns-visible="columnsVisible"
+                    :columns-visible-filter="columnsVisibleFilter"
+                    :params="searchConfig"
+                    @dateChange="dateChange"
+                    @paramsChange="orgChange"
+                    @changeQuery="getQuery"
+                    @showColunmsChange="showColunmsChange"
+                  >
+                  </screen>
+                </template>
+              </common-table>
             </div>
-          </template>
-          <template #topMenu>
-            <screen
-              ref="screen"
-              :columns-visible="columnsVisible"
-              :columns-visible-filter="columnsVisibleFilter"
-              :params="searchConfig"
-              @dateChange="dateChange"
-              @paramsChange="orgChange"
-              @changeQuery="getQuery"
-              @showColunmsChange="showColunmsChange"
-            >
-            </screen>
-          </template>
-        </common-table>
-      </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </basic-container>
   </div>
 </template>
 
 <script>
-import { getStudyUser, exportStudyUser } from '@/api/statistics/census'
+import {
+  getStudyUser,
+  exportStudyUser,
+  getCourseDetails,
+  exportCourseDetails
+} from '@/api/statistics/census'
 import headerTitle from '../components/topTitle'
 import screen from '../components/screen'
 import { dateAdd, exportToExcel } from '@/util/util'
@@ -132,32 +154,86 @@ const onlineStudy = [
     label: '填写问卷数',
     minWidth: 150,
     prop: 'countAsq'
+  },
+  {
+    label: '消费积分',
+    minWidth: 150,
+    prop: 'countScoreUsed'
   }
 ]
-
-const tableColunms = onlineStudy
+const courseColumn = [
+  {
+    label: '姓名',
+    minWidth: 150,
+    prop: 'userName'
+  },
+  {
+    label: '账号',
+    minWidth: 150,
+    prop: 'workNo'
+  },
+  {
+    label: '部门',
+    minWidth: 150,
+    prop: 'orgName'
+  },
+  {
+    label: '角色',
+    minWidth: 150,
+    prop: 'roles'
+  },
+  {
+    label: '岗位',
+    minWidth: 150,
+    prop: 'position'
+  },
+  {
+    label: '课程名称',
+    minWidth: 150,
+    prop: 'courseName'
+  },
+  {
+    label: '课程分类',
+    minWidth: 150,
+    prop: 'catalogName'
+  },
+  {
+    label: '开始时间',
+    minWidth: 150,
+    prop: 'createTime'
+  },
+  {
+    label: '获得课时',
+    minWidth: 150,
+    prop: 'period'
+  }
+]
+const tableColunms = [onlineStudy, courseColumn]
 const tableConfig = {
   enableMultiSelect: false,
   highlightSelect: true
 }
+let that
+let myTableData = [[], []]
 export default {
   filters: {
     // 过滤不可见的列
     columnsFilter: (visibleColProps) =>
-      _.filter(tableColunms, ({ prop }) => _.includes(visibleColProps, prop))
+      _.filter(tableColunms[that.activeName], ({ prop }) => _.includes(visibleColProps, prop))
   },
   components: { headerTitle, screen },
   data() {
     return {
       exportLoading: false,
-      columnsVisibleFilter: tableColunms.filter((item) => item.label),
-      columnsVisible: _.map(tableColunms, ({ prop }) => prop),
+      columnsVisibleFilter: tableColunms['0'].filter((item) => item.label),
+      columnsVisible: _.map(tableColunms['0'], ({ prop }) => prop),
       loading: false,
       activeName: '0',
-      tableData: [], //部门统计table数据
+      tableData: myTableData, //部门统计table数据
       tableColunms, //table列配置
       tableConfig, // table 配置
-      page: { size: 10, total: 0, currentPage: 1 },
+      page: [],
+      tabs: ['个人统计', '个人课程明细'],
       params: {
         orgId: '0',
         startTime: '',
@@ -177,13 +253,30 @@ export default {
       reqParam: {}
     }
   },
+  created() {
+    this.pageReset()
+  },
   activated() {
-    this.$refs.screen.reset()
+    this.$nextTick(() => {
+      this.$refs.screen[0].reset()
+      // if (this.activeName == '0') {
+      //   this.getQuery(true, 'clickQuery')
+      // }
+    })
+  },
+  beforeCreate() {
+    that = this
   },
   mounted() {
     this.getQuery(true, 'clickQuery')
   },
   methods: {
+    pageReset() {
+      this.page = []
+      this.tabs.forEach(() => {
+        this.page.push({ size: 10, total: 0, currentPage: 1 })
+      })
+    },
     showColunmsChange(data) {
       this.columnsVisible = data
     },
@@ -199,11 +292,14 @@ export default {
       if (key === 'clickQuery') {
         this.reqParam = JSON.parse(JSON.stringify(this.params))
       }
-      this.getTabelData(isPage)
+      if (this.activeName === '0') {
+        this.getTabelData(isPage)
+      } else {
+        this.getCourseDetails(isPage)
+      }
     },
     exportData({ size, start }) {
-      this.exportLoading = true
-      exportStudyUser({
+      this.exportLoading = true(this.activeName === '0' ? exportStudyUser : exportCourseDetails)({
         size: `${size}`,
         start: `${start}`,
         ...this.params
@@ -229,23 +325,63 @@ export default {
         query: { userId: row.id }
       })
     },
-    getTabelData(isLoad) {
+    getCourseDetails(isLoad) {
       if (isLoad) {
-        this.$set(this.page, 'currentPage', 1)
+        this.$set(this.page[1], 'currentPage', 1)
       }
       this.loading = true
-      getStudyUser({
-        pageSize: this.page.size,
-        pageNo: this.page.currentPage,
-        ...this.params
+      getCourseDetails({
+        pageSize: this.page[1].size,
+        pageNo: this.page[1].currentPage,
+        ...this.reqParam
       })
         .then(({ data, totalNum }) => {
-          this.tableData = data
-          this.page.total = totalNum
+          this.tableData[1] = data
+          this.page[1].total = totalNum
         })
         .finally(() => {
           this.loading = false
         })
+    },
+    getTabelData(isLoad) {
+      if (isLoad) {
+        this.$set(this.page[0], 'currentPage', 1)
+      }
+      this.loading = true
+      getStudyUser({
+        pageSize: this.page[0].size,
+        pageNo: this.page[0].currentPage,
+        ...this.params
+      })
+        .then(({ data, totalNum }) => {
+          this.tableData[0] = data
+          this.page[0].total = totalNum
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    clearParams() {
+      this.tableData = []
+      this.params = {
+        orgId: '',
+        startTime: '',
+        endTime: '',
+        userName: ''
+      }
+    },
+    handleClick() {
+      if (this.nowTab == this.activeName) {
+        return
+      }
+      this.nowTab = this.activeName
+      ;(this.columnsVisibleFilter = tableColunms[this.activeName].filter((item) => item.label)),
+        (this.columnsVisible = _.map(tableColunms[this.activeName], ({ prop }) => prop)),
+        this.clearParams()
+      this.pageReset()
+      // if (this.activeName == '0') {
+      //   this.getQuery(true, 'clickQuery')
+      // }
     }
   }
 }
