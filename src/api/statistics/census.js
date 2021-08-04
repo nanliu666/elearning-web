@@ -293,7 +293,7 @@ export const getNotJoinDetail = (params) => get('/manage/v1/count/exam/notJoin/d
  * 未参加考试明细-导出
  * */
 export const exportNotJoinDetail = (params) =>
-  get('/manage/v1/count/exam/notJoin/export', params, { responseType: 'blob' })
+  get('/manage/v1/count/exam/notJoin/detail/export', params, { responseType: 'blob' })
 
 /**
  * 考试活动题目统计
