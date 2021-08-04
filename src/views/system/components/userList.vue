@@ -274,7 +274,7 @@ const COLUMNS = [
     prop: 'auditStatus',
     align: 'center',
     formatter(record) {
-      return { '0': '待审核', '1': '审核通过', '2':'审核驳回' }[record.auditStatus] || ''
+      return { '0': '待审核', '1': '审核通过', '2':'审核驳回', '4':'审核中'  }[record.auditStatus] || ''
     }
   },
   //状态，1-在职，2-离职
@@ -590,7 +590,7 @@ export default {
   methods: {
     //注册用户拉起审批流
     async handleAuditUser(){
-      this.$refs.apprSubmit.categoryId = '15'
+      this.$refs.apprSubmit.categoryId = '14'
       await this.$refs.apprSubmit.getProcessList()
       this.$refs.apprSubmit.validate().then((process) => {
         userRegisterAppr({userId:this.currentRowData.userId}).then(res=>{
@@ -851,18 +851,16 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
+        this.$refs.apprSubmit.categoryId = '14'
         let userStr = selection.map((v) => v.userId)
         let params = {
           userIds: userStr.join(',')
         }
-        batchDeleteUserByIds(params)
-          .then(() => {
-            this.$message({
-              type: 'success',
-              message: '刪除成功!'
-            })
-            this.loadOrgData()
-            this.loadData()
+        await this.$refs.apprSubmit.getProcessList()
+        this.$refs.apprSubmit.validate().then((process) => {
+          batchDeleteUserByIds(params)
+          .then((res) => {
+            this.submitApprApply(res,'删除用户')
             this.$refs.crud.clearSelection()
           })
           .catch(() => {
@@ -871,6 +869,8 @@ export default {
               message: '刪除失败,请联系管理员!'
             })
           })
+        })
+        
       })
     },
     // 批量修改部门
