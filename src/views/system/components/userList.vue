@@ -527,7 +527,8 @@ export default {
         orgId: ''
       },
       orgData: [],
-      currentRowData:{}
+      currentRowData:{},
+      operateType: '' //操作类型  是删除/批量删除/批量修改部门/审核
     }
   },
   computed: {
@@ -615,6 +616,7 @@ export default {
       }).then(res=>{
         this.loadOrgData()
         this.loadData()
+        this.currentRowData = {}
       })
     },
     // 审批发起组件的弹窗确认回调
@@ -622,8 +624,12 @@ export default {
       if(this.batchVisible){
         this.batchDetermine()
       }else{
-        let {operateType} = this.currentRowData
-        operateType==='del'?this.handleDeleteUser(this.currentRowData):this.handleAuditUser(this.currentRowData)
+        let {operateType} = this
+        if(operateType==='handleDeleteUser' || operateType==='handleAuditUser'){
+          this[`${operateType}`](this.currentRowData)
+        }else{
+          this[`${operateType}`](this.selection)
+        }
       }
       
     },
@@ -715,12 +721,12 @@ export default {
           this.$router.push({ path: '/system/editUser', query: { userId: row.userId } })
           break
         case 'delete':
-          row.operateType = "del"  //删除操作
+          this.operateType = "handleDeleteUser"  //删除操作
           this.currentRowData = row
           this.handleDeleteUser(row)
           break
         case 'audit':
-          row.operateType = "audit"  //审核操作
+          this.operateType = "handleAuditUser"  //审核操作
           this.currentRowData = row
           this.handleAuditUser(row)
           break
@@ -858,6 +864,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
+        this.operateType = 'batchDelete'
         this.categoryId = '14'
         this.$refs.apprSubmit.categoryId = '14'
         let userStr = selection.map((v) => v.userId)
@@ -887,6 +894,7 @@ export default {
       this.orgData = selection
       this.categoryId = '15'
       this.$refs.apprSubmit.categoryId = '15'
+      this.operateType = 'batchDetermine'
     },
     // 批量修改部门-确定按钮
     batchDetermine() {
