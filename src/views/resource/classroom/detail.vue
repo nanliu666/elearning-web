@@ -110,39 +110,39 @@
             >
               <template #creatorId>
                 <el-select
-                    v-model="queryInfo.creatorId"
-                    v-el-select-loadmore="loadmoreSubject"
-                    clearable
-                    filterable
-                    remote
-                    reserve-keyword
-                    :loading="remoteLoading"
-                    placeholder="请输入"
-                    @change="applicantChange"
-                    :remote-method="(query) => remoteMethod(query)"
-                    @focus="() => remoteMethod('')"
+                  v-model="queryInfo.creatorId"
+                  v-el-select-loadmore="loadmoreSubject"
+                  clearable
+                  filterable
+                  remote
+                  reserve-keyword
+                  :loading="remoteLoading"
+                  placeholder="请输入"
+                  :remote-method="(query) => remoteMethod(query)"
+                  @change="applicantChange"
+                  @focus="() => remoteMethod('')"
+                >
+                  <el-option
+                    v-for="item in subjectOptions"
+                    :key="item.creatorId"
+                    :label="item.creatorName"
+                    :value="item.creatorId"
                   >
-                    <el-option
-                      v-for="item in subjectOptions"
-                      :key="item.creatorId"
-                      :label="item.creatorName"
-                      :value="item.creatorId"
-                    >
-                    </el-option>
+                  </el-option>
 
-                    <div
-                      v-if="subjectLoading"
-                      style="color: #9c9c9c; line-height: 34px;text-align: center;"
-                    >
-                      加载中...
-                    </div>
-                    <div
-                      v-if="noMoreSubject && !subjectLoading"
-                      style="color: #9c9c9c;line-height: 34px;text-align: center;"
-                    >
-                      没有更多了
-                    </div>
-                  </el-select>
+                  <div
+                    v-if="subjectLoading"
+                    style="color: #9c9c9c; line-height: 34px;text-align: center;"
+                  >
+                    加载中...
+                  </div>
+                  <div
+                    v-if="noMoreSubject && !subjectLoading"
+                    style="color: #9c9c9c;line-height: 34px;text-align: center;"
+                  >
+                    没有更多了
+                  </div>
+                </el-select>
               </template>
             </search-popover>
           </template>
@@ -207,8 +207,8 @@ const SEARCH_CONFIG = {
       field: 'creatorId',
       label: '申请人',
       data: '',
-      config:{
-        filterable:true
+      config: {
+        filterable: true
       },
       options: []
     },
@@ -218,6 +218,7 @@ const SEARCH_CONFIG = {
       data: '',
       field: 'startTime,endTime',
       config: {
+        'default-time': ['00:00:00', '23:59:59'],
         type: 'datetimerange',
         'range-separator': '至',
         'value-format': 'yyyy-MM-dd HH:mm:ss'
@@ -226,7 +227,11 @@ const SEARCH_CONFIG = {
   ]
 }
 import SearchPopover from '@/components/searchPopOver/index'
-import { queryClassroomInfo, getBookList, getClassroomApplicantList } from '@/api/resource/classroom'
+import {
+  queryClassroomInfo,
+  getBookList,
+  getClassroomApplicantList
+} from '@/api/resource/classroom'
 import CommonImageView from '@/components/common-image-viewer/viewer'
 import styles from '@/styles/variables.scss'
 export default {
@@ -268,13 +273,14 @@ export default {
   },
   data() {
     return {
-      subjectLoading:false,
+      subjectLoading: false,
       remoteLoading: false,
       noMoreSubject: false,
       subjectQuery: {
         pageNo: 1,
         pageSize: 20,
-        creatorName: ''
+        creatorName: '',
+        id: ''
       },
       activeColor: styles.primaryColor,
       activeIndex: '0',
@@ -310,8 +316,8 @@ export default {
     this.loadTableData()
   },
   methods: {
-    applicantChange(val){
-      let v = _.filter(this.subjectOptions,{'creatorId':val})
+    applicantChange(val) {
+      let v = _.filter(this.subjectOptions, { creatorId: val })
       this.queryInfo.creatorId = v[0].creatorId
     },
     loadmoreSubject() {
@@ -319,7 +325,7 @@ export default {
       this.subjectQuery.pageNo++
       this.remoteMethod(true)
     },
-    remoteMethod(query){
+    remoteMethod(query) {
       this.subjectLoading = true
       if (typeof query != 'boolean') {
         this.subjectQuery.creatorName = query
@@ -327,6 +333,7 @@ export default {
         this.subjectOptions = []
         this.remoteLoading = true
       }
+      this.subjectQuery.id = this.id
       getClassroomApplicantList(this.subjectQuery)
         .then((res) => {
           const { records = [] } = res
@@ -356,7 +363,7 @@ export default {
       this.queryInfo.pageSize = param
       this.loadTableData()
     },
-    handelReset(){
+    handelReset() {
       this.queryInfo.creatorId = ''
     },
     // 搜索

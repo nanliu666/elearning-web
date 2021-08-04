@@ -9,17 +9,12 @@
     />
     <basic-container>
       <keep-alive>
-        <zoneInfo
-          v-if="component === 'zoneInfo'"
-          ref="zoneInfo"
+        <component
+          :is="component"
+          :ref="component"
+          :form="form"
           :rules="formRule"
-          :form="form"
-        />
-        <relation
-          v-else
-          ref="relation"
-          :form="form"
-        />
+        ></component>
       </keep-alive>
       <el-row
         type="flex"
@@ -80,10 +75,10 @@ export default {
         headImg: '',
         coverPic: '',
         managerId: [],
-        managerList:[],
         orgIds: [],
         positionIds: [],
-        userIds: []
+        userIds: [],
+        managerList: []
       },
       formRule: {
         name: [{ required: true, message: '请输入专区名称', trigger: 'blur' }],
@@ -94,8 +89,7 @@ export default {
         managerId: [{ required: true, message: '请选择专区管理员', trigger: 'change' }]
       },
       component: 'zoneInfo',
-      loading: false,
-      formClone: null
+      loading: false
     }
   },
   computed: {
@@ -104,7 +98,6 @@ export default {
     }
   },
   async created() {
-    this.formClone = _.cloneDeep(this.form)
     if (this.$route.query.id) {
       const res = await quertZone({ id: this.$route.query.id })
       for (const key in this.form) {
@@ -116,10 +109,7 @@ export default {
           this.form.positionIds = res.positionList
         } else if (key === 'userIds') {
           this.form.userIds = res.userList
-        } else if(key === 'managerList'){
-          this.form[key] = res[key]
-        }
-        else {
+        } else {
           this.form[key] = res[key]
         }
       }
@@ -156,12 +146,8 @@ export default {
     },
     goOut() {
       this.loading = false
-      this.form = _.cloneDeep(this.formClone)
       this.component = 'zoneInfo'
       this.$router.push('/community/zone')
-      this.$nextTick(() => {
-        this.$refs.zoneInfo.clearValidate()
-      })
     }
   },
   beforeRouteEnter(to, form, next) {

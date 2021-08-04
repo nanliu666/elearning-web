@@ -129,6 +129,7 @@
           :select-params="item.config.selectParams"
           :tree-params="item.config.treeParams"
           @change="change"
+          @clearHandle="clearHandle"
         />
         <slot
           v-if="item.type === 'slot'"
@@ -321,6 +322,7 @@
                       :styles="item.styles"
                       :select-params="item.config.selectParams"
                       :tree-params="item.config.treeParams"
+                      @clearHandle="clearHandle"
                     />
                     <lazy-select
                       v-if="item.type === 'lazySelect'"
@@ -456,6 +458,9 @@ export default {
     },
     dataChange() {
       this.submitSearch()
+    },
+    clearHandle() {
+      this.$emit('submit', this.produceSearchParams())
     },
     // 筛选已有值的options
     screenValueArr(arr) {

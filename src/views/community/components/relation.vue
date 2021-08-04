@@ -25,7 +25,7 @@
         suffix-icon="el-icon-search"
         clearable
         :value="inputValue"
-        @input="search"
+        @input="searchPeople"
       ></el-input>
     </div>
 
@@ -59,7 +59,11 @@
           >
             <div class="tag-table-item">
               <div class="name">
-                （{{ org.workNum }}人）{{ org.name }}
+                <topTip
+                  ref-name="testName1"
+                  class-name="fs20"
+                  :content="`(${org.workNum}人)  ${org.name}`"
+                />
               </div>
               <i
                 class="el-icon-close"
@@ -115,7 +119,11 @@
           >
             <div class="tag-table-item">
               <div class="name">
-                （{{ position.workNum }}人）{{ position.positionName }}
+                <topTip
+                  ref-name="testName1"
+                  class-name="fs20"
+                  :content="`(${position.workNum}人)  ${position.positionName}`"
+                />
               </div>
               <i
                 class="el-icon-close"
@@ -317,6 +325,7 @@ import { getUsergroupList, getPositionUserList1 } from '@/api/examManage/schedul
 import { getStationParent } from '@/api/system/station'
 import { getTemplate } from '@/api/system/template'
 import axios from 'axios'
+import topTip from '@/views/course/components/TextOverTooltip.vue'
 const requiredTHeader = [
   { name: '用户手机号', key: 'phonenum' },
   { name: '姓名', key: 'userName' }
@@ -325,7 +334,8 @@ export default {
   name: 'Relation',
   components: {
     Pagination,
-    CommonPicker
+    CommonPicker,
+    topTip
   },
   props: {
     form: {
@@ -337,7 +347,7 @@ export default {
   },
   data() {
     return {
-      valve: true,
+      valve: false,
       inputValue: '',
       usersArr: [],
       timer: null,
@@ -648,7 +658,6 @@ export default {
           )
         )
       }, 0)
-      console.log(totalNum)
       return this.peopleNum(data) + totalNum
     },
     // 显示的列表
@@ -659,20 +668,11 @@ export default {
             data = data.filter((item) => item.bizName.indexOf(this.searchName) !== -1)
           } else {
             if (!this.usersArr.length) return
-            const staff = this.personList.filter(
-              (item) => item.bizName.indexOf(this.searchName) !== -1
-            )
             data = data.filter((item) => {
               if (flag === 1) {
-                return this.usersArr.some(
-                  (org) => org.orgId === item.id && staff.some((item) => item.bizId === org.userId)
-                )
+                return this.usersArr.some((org) => org.orgId === item.id)
               } else if (flag === 2) {
-                return this.usersArr.some(
-                  (position) =>
-                    position.positionId === item.positionId &&
-                    staff.some((item) => item.bizId === position.userId)
-                )
+                return this.usersArr.some((position) => position.positionId === item.positionId)
               }
             })
           }
@@ -685,7 +685,7 @@ export default {
       }
     }
   },
-  activated() {
+  created() {
     this.departmentList = this.form.orgIds
     this.positionList = this.form.positionIds
     this.personList = this.form.userIds
@@ -721,7 +721,6 @@ export default {
           responseType: 'blob'
         })
         .then((res) => {
-          console.log(res)
           let a = document.createElement('a')
           a.style.display = 'none'
           a.href = window.URL.createObjectURL(res.data)
@@ -886,23 +885,23 @@ export default {
         })
       })
     },
-    search(e) {
-      if (!this.valve) return
-      clearTimeout(this.timer)
+    searchPeople(e) {
       if (!e.trim()) {
         this.inputValue = e.trim()
         this.searchName = e.trim()
         return
       }
       this.inputValue = e.trim()
-      this.valve = false
-      this.timer = setTimeout(() => {
-        this.searchName = this.inputValue
+      if (this.valve) return
+      clearTimeout(this.timer)
+      this.timer = window.setTimeout(() => {
+        this.valve = true
         getOrgChild({ search: e.trim() }).then((res) => {
+          this.searchName = e.trim()
           this.usersArr = res.users
-          this.valve = true
+          this.valve = false
         })
-      }, 500)
+      }, 300)
 
       this.personPage = {
         pageNo: 1,
@@ -918,7 +917,7 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .training-edit-person {
   .sub-header {
     .sub-header-title {
@@ -986,6 +985,9 @@ export default {
         background-color: #f4f4f5;
         border: 1px solid #e9e9eb;
         color: #909399;
+        .name {
+          width: 97%;
+        }
         i {
           cursor: pointer;
           font-size: 16px;

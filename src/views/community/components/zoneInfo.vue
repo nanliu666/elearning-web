@@ -211,30 +211,29 @@ export default {
         pageNo: 1,
         pageSize: 20,
         orgId: 0,
-        search: ''
+        search: '',
+        userStatus: '1'
       },
       valve: false,
       noData: false
     }
   },
   watch: {
-    'form.managerList': {
-      handler(val){
-         console.log(val)
-          val.forEach((item) => {
-            this.managerOptions.push({
-              name: item.bizName,
-              userId: item.bizId
-            })
-          })
-      },
-      deep:true,
-      immediate:true
+    'form.managerList'(val) {
+      val.forEach((item) => {
+        this.managerOptions.push({
+          name: item.bizName,
+          userId: item.bizId
+        })
+      })
     }
+  },
+  created() {
+    this.getAdminList()
   },
   methods: {
     visibleChange(show) {
-      if (show) {
+      if (show && this.queryParams.search) {
         this.queryParams.search = ''
         this.getAdminList()
       }
@@ -285,10 +284,6 @@ export default {
     // 表单验证
     validateForm() {
       return this.$refs.form.validate()
-    },
-    // 清楚表单验证
-    clearValidate() {
-      this.$refs.form.resetFields()
     }
   }
 }
