@@ -298,8 +298,9 @@ export default {
         this.getCourseDetails(isPage)
       }
     },
-    exportData({ size, start }) {
-      this.exportLoading = true(this.activeName === '0' ? exportStudyUser : exportCourseDetails)({
+    async exportData({ size, start }) {
+      this.exportLoading = true
+      await (this.activeName === '0' ? exportStudyUser : exportCourseDetails)({
         size: `${size}`,
         start: `${start}`,
         ...this.params
