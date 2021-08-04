@@ -377,7 +377,16 @@ const questionColumn = [
   {
     label: '试题类型',
     minWidth: 150,
-    prop: 'type'
+    prop: 'type',
+    formatter: (record) => {
+      return {
+        single_choice: '单选题',
+        multi_choice: '多选题',
+        judgment: '判断题',
+        short_answer: '简答题',
+        blank: '填空题'
+      }[record.type]
+    }
   },
   {
     label: '试题',
