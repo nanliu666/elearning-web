@@ -272,3 +272,36 @@ export const exportTrainTrainersdetail = (params) =>
  * 查询培训计划
  * */
 export const getTrainPlan = (params) => get('/margin/v1/count/train/getTrainPlan', params)
+
+/**
+ * 个人课程明细
+ * */
+export const getCourseDetails = (params) => get('/manage/v1/count/course/user/record', params)
+
+/**
+ * 个人课程明细-导出
+ * */
+export const exportCourseDetails = (params) =>
+  get('/manage/v1/count/course/user/export', params, { responseType: 'blob' })
+
+/**
+ * 未参加考试明细
+ * */
+export const getNotJoinDetail = (params) => get('/manage/v1/count/exam/notJoin/detail', params)
+
+/**
+ * 未参加考试明细-导出
+ * */
+export const exportNotJoinDetail = (params) =>
+  get('/manage/v1/count/exam/notJoin/detail/export', params, { responseType: 'blob' })
+
+/**
+ * 考试活动题目统计
+ * */
+export const getQuestionList = (params) => get('/manage/v1/count/exam/question/list', params)
+
+/**
+ * 考试活动题目统计-导出
+ * */
+export const exportQuestionList = (params) =>
+  get('/manage/v1/count/exam/question/export', params, { responseType: 'blob' })
