@@ -122,6 +122,7 @@
           v-p="SETTING_USER"
           size="medium"
           type="text"
+          :disabled="row.auditStatus==='4'"
           @click="handleEditRole(row)"
         >
           角色设置
@@ -130,6 +131,7 @@
           v-p="RESET_USER"
           size="medium"
           type="text"
+          :disabled="row.auditStatus==='4'"
           @click="handleReset(row)"
         >
           密码重置
@@ -152,24 +154,28 @@
             <el-dropdown-item
               v-if="row.needAppr==='1'"
               v-p="EDIT_USER"
+              :disabled="row.auditStatus==='4'"
               command="audit"
             >
               审批
             </el-dropdown-item>
             <el-dropdown-item
               v-p="EDIT_USER"
+              :disabled="row.auditStatus==='4'"
               command="edit"
             >
               编辑
             </el-dropdown-item>
             <el-dropdown-item
               v-if="row.userStatus === '1'"
+              :disabled="row.auditStatus==='4'"
               v-p="END_USER"
               command="suspend"
             >
               离职
             </el-dropdown-item>
             <el-dropdown-item
+              :disabled="row.auditStatus==='4'"
               v-if="row.userStatus === '2'"
               v-p="END_USER"
               command="unsuspend"
@@ -177,6 +183,7 @@
               在职
             </el-dropdown-item>
             <el-dropdown-item
+              :disabled="row.auditStatus==='4'"
               v-p="DELETE_USER"
               command="delete"
             >
@@ -602,7 +609,7 @@ export default {
       this.$refs.apprSubmit.submit({
         formId: `${obj.id}`,
         formData: '',
-        processName: categoryMap[this.id?'15':'14'],
+        processName: categoryMap[this.$refs.apprSubmit.categoryId],
         formKey: obj.applyType,
         formTitle: formTitle
       }).then(res=>{
@@ -851,6 +858,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
+        this.categoryId = '14'
         this.$refs.apprSubmit.categoryId = '14'
         let userStr = selection.map((v) => v.userId)
         let params = {
@@ -878,6 +886,7 @@ export default {
       this.batchVisible = true
       this.orgData = selection
       this.categoryId = '15'
+      this.$refs.apprSubmit.categoryId = '15'
     },
     // 批量修改部门-确定按钮
     batchDetermine() {

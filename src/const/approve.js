@@ -12,7 +12,7 @@ export const categoryMap = {
   '11': '一点分享',
   '12': '课程使用',
   '13': '培训计划',
-  '14': '新建用户',
+  '14': '创建用户',
   '15': '编辑用户'
 }
 export const baseDictionaries = {
@@ -105,7 +105,7 @@ export const categoryOptions = [
     value: '13'
   },
   {
-    label: '添加用户',
+    label: '创建用户',
     value: '14'
   },
   {
