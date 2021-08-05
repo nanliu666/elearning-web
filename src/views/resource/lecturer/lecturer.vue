@@ -329,7 +329,7 @@ const TABLE_COLUMNS = [
   {
     label: '讲师等级',
     prop: 'teacher_level',
-    formatter: (row) => teacherLevel[+row.teacher_level],
+    formatter: (row) => (row.teacher_level === ' ' ? '--' : teacherLevel[+row.teacher_level]),
     minWidth: '120'
   },
   {

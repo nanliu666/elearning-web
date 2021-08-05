@@ -94,7 +94,7 @@
             讲师等级:
           </el-col>
           <el-col :span="7">
-            {{ teacherData.teacherLevel ? teacherLevel[+teacherData.teacherLevel] : '--' }}
+            {{ teacherData.teacherLevel === ' ' ? '--' : teacherLevel[+teacherData.teacherLevel] }}
           </el-col>
           <el-col
             :span="5"
