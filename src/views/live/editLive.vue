@@ -1751,7 +1751,12 @@ export default {
         pageSize: 99999
       },
       treeLoading: false,
-      isEdit: false
+      isEdit: false,
+      liveClassifySearchParams: {
+        parentId: 0,
+        type: '0',
+        name: ''
+      }
     }
   },
   computed: {
@@ -1823,7 +1828,8 @@ export default {
     this.$store.commit('SET_TAG_LABEL', `${this.$route.query.id ? '编辑直播' : '创建直播'}`)
     //   获取直播分类
     getcategoryTree({
-      source: 'live'
+      source: 'live',
+      ...this.liveClassifySearchParams
     }).then((res) => {
       res.forEach((item) => {
         if (item.status === 1) {
