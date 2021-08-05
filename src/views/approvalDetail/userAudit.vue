@@ -36,7 +36,7 @@
                 label="手机号">
               </el-table-column>
               <el-table-column
-                prop="userEmail"
+                prop="email"
                 label="邮箱">
               </el-table-column>
               <el-table-column
