@@ -528,6 +528,7 @@ export default {
       },
       orgData: [],
       currentRowData:{},
+      selection:[],
       operateType: '' //操作类型  是删除/批量删除/批量修改部门/审核
     }
   },
@@ -617,6 +618,7 @@ export default {
         this.loadOrgData()
         this.loadData()
         this.currentRowData = {}
+        this.selection = []
       })
     },
     // 审批发起组件的弹窗确认回调
@@ -859,6 +861,7 @@ export default {
     },
     //批量删除用户
     batchDelete(selection) {
+      this.selection = selection
       this.$confirm('确定要把选中的用户批量删除吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
