@@ -126,6 +126,14 @@ export const getuserApprDetail = (params) => {
     params: params
   })
 }
+//  获取用户未修改之前数据
+export const getUserOldInfo = (params) => {
+  return request({
+    url: '/blade-user/v1/user/getUserOldInfo',
+    method: 'get',
+    params: params
+  })
+}
 
 
 

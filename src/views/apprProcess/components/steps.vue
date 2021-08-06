@@ -18,6 +18,7 @@
             <div>
               <div class="img-box">
                 <el-avatar
+                  :size="48"
                   :src="item.avatarUrl || _.get(item, 'userList[0].avatarUrl') || circleUrl"
                 />
               </div>
@@ -379,9 +380,13 @@ export default {
     padding-bottom: 20px;
   }
 
-  .el-avatar {
+  /deep/.el-avatar {
     height: 48px !important;
     width: 48px !important;
+    img{
+      height: 48px !important;
+      width: 48px !important;
+    }
   }
 }
 
