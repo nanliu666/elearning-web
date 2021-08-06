@@ -317,7 +317,7 @@ export default {
       this.getQuery()
     },
     sizeChange(val) {
-      this.page.size = val
+      this.page[this.activeName].size = val
       this.getQuery(true)
     },
     //跳转用户
