@@ -115,7 +115,8 @@ export default {
         'positionTitle': "职称",
         'postLevel': "职级",
         'leaderName': "直接领导",
-        'userRemark':'备注'
+        'userRemark':'备注',
+        'password':'密码'
       }
     }
   },
