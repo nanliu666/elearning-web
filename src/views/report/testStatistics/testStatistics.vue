@@ -195,42 +195,42 @@ const onlineAll = [
     formatter: (row) => {
       return row.passRate === '' ? '' : `${row.passRate}%`
     }
+  },
+  {
+    label: '总分',
+    minWidth: 150,
+    prop: 'totalScore'
+  },
+  {
+    label: '提交次数',
+    minWidth: 150,
+    prop: 'submitTime'
+  },
+  {
+    label: '考试状态',
+    minWidth: 150,
+    prop: 'status'
+  },
+  {
+    label: '正确率',
+    minWidth: 150,
+    prop: 'rightRateStr'
+  },
+  {
+    label: '试题数量',
+    minWidth: 150,
+    prop: 'quesNum'
+  },
+  {
+    label: '客观题数量',
+    minWidth: 150,
+    prop: 'objectiveQuesNum'
+  },
+  {
+    label: '主观题数量',
+    minWidth: 150,
+    prop: 'subjectiveQuesNum'
   }
-  //   {
-  //     label: '总分',
-  //     minWidth: 150,
-  //     prop: 'totalScore'
-  //   },
-  //   {
-  //     label: '提交次数',
-  //     minWidth: 150,
-  //     prop: 'submitTime'
-  //   },
-  //   {
-  //     label: '考试状态',
-  //     minWidth: 150,
-  //     prop: 'status'
-  //   },
-  //   {
-  //     label: '正确率',
-  //     minWidth: 150,
-  //     prop: 'rightRateStr'
-  //   },
-  //   {
-  //     label: '试题数量',
-  //     minWidth: 150,
-  //     prop: 'quesNum'
-  //   },
-  //   {
-  //     label: '客观题数量',
-  //     minWidth: 150,
-  //     prop: 'objectiveQuesNum'
-  //   },
-  //   {
-  //     label: '主观题数量',
-  //     minWidth: 150,
-  //     prop: 'subjectiveQuesNum'
-  //   }
 ]
 // 积分明细配置
 const onlineStudy = [
@@ -480,8 +480,7 @@ export default {
       tableData: myTableData, //部门统计table数据
       tableColunms, //table列配置
       tableConfig, // table 配置
-      //   tabs: ['考试总览统计', '考试参加明细', '未参加考试明细', '考试活动题目统计'],
-      tabs: ['考试总览统计', '考试参加明细'],
+      tabs: ['考试总览统计', '考试参加明细', '未参加考试明细', '考试活动题目统计'],
       params: {
         examName: '',
         userName: '',

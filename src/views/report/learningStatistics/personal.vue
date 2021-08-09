@@ -154,12 +154,12 @@ const onlineStudy = [
     label: '填写问卷数',
     minWidth: 150,
     prop: 'countAsq'
+  },
+  {
+    label: '消费积分',
+    minWidth: 150,
+    prop: 'countScoreUsed'
   }
-  //   {
-  //     label: '消费积分',
-  //     minWidth: 150,
-  //     prop: 'countScoreUsed'
-  //   }
 ]
 const courseColumn = [
   {
@@ -233,8 +233,7 @@ export default {
       tableColunms, //table列配置
       tableConfig, // table 配置
       page: [],
-      //   tabs: ['个人统计', '个人课程明细'],
-      tabs: ['个人统计'],
+      tabs: ['个人统计', '个人课程明细'],
       params: {
         orgId: '0',
         startTime: '',
