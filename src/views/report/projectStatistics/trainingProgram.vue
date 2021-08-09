@@ -388,6 +388,10 @@ const trainPerson = [
     isDisabled: true
   },
   {
+    label: '账号',
+    prop: 'account'
+  },
+  {
     label: '用户编码',
     minWidth: 150,
     prop: 'workNo'

@@ -97,6 +97,10 @@ const onlineStudy = [
     isDisabled: true
   },
   {
+    label: '账号',
+    prop: 'account'
+  },
+  {
     label: '用户编号',
     prop: 'workNo'
   },
