@@ -59,7 +59,11 @@
                     <div style="display: inline-block; margin-left: 20px">
                       <span>考试通过条件：</span>
                       <span>{{
-                        `${passType == 1 ? `${passScope}分` : `${passPercentage}分`}以上`
+                        `${
+                          passType == 1
+                            ? `${passScope}分`
+                            : `${((totalScope * passPercentage) / 100).toFixed(2)}分`
+                        }以上`
                       }}</span>
                     </div>
                     <div

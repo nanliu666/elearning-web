@@ -85,12 +85,15 @@
             <span class="li-label">总分：</span>
             <span class="li-value">{{ examDetail.totalScore }}</span>
           </li>
-          <li
-            v-if="examDetail.passScope"
-            class="details-li"
-          >
+          <li class="details-li">
             <span class="li-label">及格分：</span>
-            <span class="li-value">{{ examDetail.passScope }}</span>
+            <span class="li-value">{{
+              examDetail.passType === 1
+                ? examDetail.passScope
+                : ((_.get(examDetail, 'totalScore', 0) * examDetail.passPercentage) / 100).toFixed(
+                  2
+                )
+            }}</span>
           </li>
           <li
             v-if="examDetail.maxUserScore"
