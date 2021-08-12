@@ -95,7 +95,7 @@ export default {
         const range = `${start} ~ ${end}`
         if (!(!lastNumNotInteger && i === times)) {
           target.push({
-            key: start,
+            key: start - 1,
             value: range
           })
         }
