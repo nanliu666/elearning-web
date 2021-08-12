@@ -196,7 +196,7 @@ export default {
         if (val) {
           this.classroomDefault = [
             {
-              roomName: this.batchData.classroomName,
+              roomName: this.batchData.classroomName || this.batchData.roomName,
               id: val
             }
           ]
