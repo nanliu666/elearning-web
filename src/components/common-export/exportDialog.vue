@@ -89,26 +89,18 @@ export default {
       const times = _.floor(temp)
       const lastNumNotInteger = !_.isInteger(totalNum / MAX_NUMBER) // 总数不能被5000整除
       let target = []
-      for (let i = 0; i < times; i++) {
-        const TIMES_NODE = (i + 1) * MAX_NUMBER
-        const start = i === 0 ? 1 : TIMES_NODE + 1
-        const end = TIMES_NODE
+      for (let i = 0; i <= times; i++) {
+        const start = MAX_NUMBER * i + 1
+        const end = lastNumNotInteger && i === times ? totalNum : MAX_NUMBER * (i + 1)
         const range = `${start} ~ ${end}`
-        target.push({
-          key: i,
-          value: range
-        })
+        if (!(!lastNumNotInteger && i === times)) {
+          target.push({
+            key: start,
+            value: range
+          })
+        }
       }
-      if (lastNumNotInteger) {
-        const TIMES_NODE = times * MAX_NUMBER
-        const start = TIMES_NODE + 1
-        const end = this.totalNum
-        const range = `${start} ~ ${end}`
-        target.push({
-          key: times,
-          value: range
-        })
-      }
+      // ['1~5000', '5001~10000']
       return target
     },
     innerVisible: {
