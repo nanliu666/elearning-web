@@ -44,10 +44,7 @@
         </el-radio-group>
       </template>
       <template #questionTimeLimitType>
-        <el-radio-group
-          v-model="model.questionTimeLimitType"
-          :disabled="modelDisabled"
-        >
+        <el-radio-group v-model="model.questionTimeLimitType">
           <el-radio :label="0">
             不计时
           </el-radio>
@@ -61,7 +58,7 @@
             text-after="分钟"
             :input-props="{
               maxLength: 4,
-              disabled: modelDisabled || model.questionTimeLimitType !== 2
+              disabled: model.questionTimeLimitType !== 2
             }"
           />
         </el-radio-group>
@@ -217,15 +214,15 @@ export default {
       columns: BASIC_COLUMNS,
       model: {
         id: '',
-        reviewerNames:'',
-        reviewer:'',
+        reviewerNames: '',
+        reviewer: '',
         questionTimeLimitType: 0, // 0-不计时,1-按原试题设置,2-重新设置
         questionTimeLimit: 1, //每题限时默认为1
         examTime: [],
         examName: '',
         testPaper: '',
-        testPaperName:'',
-        reviewer: null,
+        testPaperName: '',
+        // reviewer: null,
         answerMode: 1,
         reckonTime: false,
         reckonTimeValue: 60, // 限制时长60分钟
@@ -275,7 +272,6 @@ export default {
           'testPaperType',
           _.get(_.find(this.testPaperList, { id: val }), 'type')
         )
-        
       }
     }
   },
@@ -318,30 +314,30 @@ export default {
     async loadCoordinator(params) {
       let res = await getWorkList(_.assign(params, { orgId: 0 }))
       //如果萍评卷人列表没有当前用户  自己添加一个
-      if(this.model.reviewer && this.model.reviewer.length>0){
-        this.model.reviewer.forEach((item,index)=>{
-          if(!_.find(res.data, { id: item })){
+      if (this.model.reviewer && this.model.reviewer.length > 0) {
+        this.model.reviewer.forEach((item, index) => {
+          if (!_.find(res.data, { id: item })) {
             // let nameArr =  this.model.reviewerNames.split(',')
             res.data.push({
-                name:this.model.reviewerNames[index],
-                userId:item
+              name: this.model.reviewerNames[index],
+              userId: item
             })
           }
         })
       }
-        
+
       return res
     },
     async loadTestPaper(params) {
       let res = await getExamList(_.assign(params, { status: 'normal' }))
       //如果试卷列表没有当前试卷  自己添加一个
-        if(!_.find(res.data, { id: this.model.testPaper })){
-          res.data.push({
-              name:this.model.testPaperName,
-              id:this.model.testPaper
-          })
-        }
-        return res
+      if (!_.find(res.data, { id: this.model.testPaper })) {
+        res.data.push({
+          name: this.model.testPaperName,
+          id: this.model.testPaper
+        })
+      }
+      return res
     }
   }
 }
