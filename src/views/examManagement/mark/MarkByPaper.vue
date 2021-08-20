@@ -447,7 +447,6 @@ export default {
       this.$refs.form.resetFields()
     },
     search() {
-      this.totalList = []
       this.qustionList = []
       this.loadData()
     },
