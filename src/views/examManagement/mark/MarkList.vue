@@ -330,6 +330,7 @@ export default {
       let creatorId = _.filter(this.searchConfig.popoverOptions, (item) => {
         return item.field === 'creatorId'
       })[0]
+      creatorId.options = []
       getCreatUsers({ pageNo: 1, pageSize: 10, examType: 0 }).then((res) => {
         creatorId.options.push(...res.data)
       })
