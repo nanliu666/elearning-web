@@ -12,8 +12,14 @@
           finish-status="success"
           align-center
         >
-          <el-step title="信息配置" @click.native="changeTab(0)"></el-step>
-          <el-step title="考生批次" @click.native="changeTab(1)"></el-step>
+          <el-step
+            title="信息配置"
+            @click.native="changeTab(0)"
+          ></el-step>
+          <el-step
+            title="考生批次"
+            @click.native="changeTab(1)"
+          ></el-step>
         </el-steps>
       </div>
     </div>
@@ -45,7 +51,7 @@
         完成
       </el-button>
       <el-button
-        v-if="!id"
+        v-if="!id || isDraft"
         v-loading="submitLoading && publishType === 'draft'"
         @click="publishFun('draft')"
       >
@@ -100,6 +106,9 @@ export default {
       return this.$route.query.tagName
     },
     ...mapGetters(['userId']),
+    isDraft() {
+      return _.get(this.$route.query, 'isDraft', 0) == 1
+    },
     id() {
       return _.get(this.$route.query, 'id', null)
     }
@@ -110,7 +119,7 @@ export default {
     next()
   },
   methods: {
-    changeTab(i){
+    changeTab(i) {
       this.activeStep = i
     },
     jumpStepByBatch() {
