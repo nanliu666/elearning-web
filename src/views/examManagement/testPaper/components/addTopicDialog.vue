@@ -101,7 +101,7 @@ export default {
           clearable: true,
           props: {
             multiple: true,
-            checkStrictly: true,
+            // checkStrictly: true,
             value: 'id',
             label: 'name'
           }
@@ -236,18 +236,17 @@ export default {
       }
       loop(this.categoryIdsOptions)
       let targetIdList = []
-
       _.each(hasDeepIdList, (tempItem) => {
         let flag = false
-        let compareKey = tempItem.parentId
-        let middleIdlist = [tempItem.id, compareKey]
+        let compareKey = tempItem.id
+        let middleIdlist = [tempItem.id]
         while (!flag) {
           const targetId = keyToValueMap.get(compareKey)
-          // 结束条件是父id为0
-          if (targetId != '0') {
+          if (targetId) {
             middleIdlist.push(targetId)
             compareKey = targetId
           } else {
+            middleIdlist.pop()
             flag = true
           }
         }
@@ -313,7 +312,7 @@ export default {
         expireStatus: '1'
       }
       const treeData = await getcategoryTree(params)
-      let categoryObject = await this.category(this.formData.type)
+      // let categoryObject = await this.category(this.formData.type)
       this.categoryIdsOptions = [
         // { id: '0', name: '未分类', relatedNum: categoryObject.totalNum, parentId: '0' },
         ...treeData
