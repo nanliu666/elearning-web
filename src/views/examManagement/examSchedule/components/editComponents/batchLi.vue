@@ -130,13 +130,17 @@ export default {
     }
   },
   computed: {
+    isDraft() {
+      return _.get(this.$route, 'query.isDraft', 0) == 1
+    },
     // 新增批次（id为空）或者编辑且今天在开始日期之前的批次均可以删除或者是草稿
     hasDelete() {
       const isAddBatch = _.get(this.batchData, 'id', '') == ''
-      const isDraft = _.get(this.$route, 'query.isDraft', 0) == 1 // // 0-已发布，1-草稿箱
       const editAndLegalTime =
-        !isAddBatch && moment().isBefore(moment(_.get(this.batchData, 'examTime[0]')))
-      const target = isAddBatch || editAndLegalTime || isDraft
+        !isAddBatch &&
+        !isAddBatch &&
+        moment().isBefore(moment(_.get(this.batchData, 'examTime[0]')))
+      const target = isAddBatch || editAndLegalTime || this.isDraft
       return target
     },
     totalNum() {
@@ -204,6 +208,12 @@ export default {
       },
       deep: true,
       immediate: true
+    }
+  },
+  mounted() {
+    // 是否是草稿
+    if (this.isDraft) {
+      this.batchData.examTime = []
     }
   },
   methods: {
