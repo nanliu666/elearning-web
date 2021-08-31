@@ -137,9 +137,7 @@ export default {
     hasDelete() {
       const isAddBatch = _.get(this.batchData, 'id', '') == ''
       const editAndLegalTime =
-        !isAddBatch &&
-        !isAddBatch &&
-        moment().isBefore(moment(_.get(this.batchData, 'examTime[0]')))
+        !isAddBatch && moment().isBefore(moment(_.get(this.batchData, 'examTime[0]')))
       const target = isAddBatch || editAndLegalTime || this.isDraft
       return target
     },
